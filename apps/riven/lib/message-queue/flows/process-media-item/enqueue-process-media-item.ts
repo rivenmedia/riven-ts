@@ -2,7 +2,6 @@ import { toMerged } from "es-toolkit";
 
 import { services } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
-import { createQueue } from "../../utilities/create-queue.ts";
 import { flow } from "../producer.ts";
 import { createProcessMediaItemJob } from "./process-media-item.schema.ts";
 
@@ -15,16 +14,10 @@ export interface EnqueueProcessMediaItemInput extends Partial<
   Pick<ProcessMediaItemFlow["input"], "step" | "isRootItem">
 > {
   id: UUID;
-  overwriteExistingJob?: boolean;
 }
 
 export async function enqueueProcessMediaItem(
-  {
-    id,
-    step = "scrape",
-    isRootItem = true,
-    overwriteExistingJob = false,
-  }: EnqueueProcessMediaItemInput,
+  { id, step = "scrape", isRootItem = true }: EnqueueProcessMediaItemInput,
   opts: FlowJob["opts"] = {},
 ) {
   const mediaItemsToProcess =
@@ -38,27 +31,9 @@ export async function enqueueProcessMediaItem(
     return;
   }
 
-  const queue = createQueue("process-media-item");
-
   const rootNodes: FlowJob[] = [];
 
   for (const mediaItem of mediaItemsToProcess) {
-    const deduplicationKey = `process-${mediaItem.type}-${mediaItem.id}`;
-    const deduplicationId = await queue.getDeduplicationJobId(deduplicationKey);
-
-    if (overwriteExistingJob && deduplicationId) {
-      logger.verbose(
-        `Removing existing media item processing job for ${mediaItem.fullTitle}`,
-      );
-
-      const deduplicationFlow = await flow.getFlow({
-        id: deduplicationId,
-        queueName: "process-media-item",
-      });
-
-      await deduplicationFlow.job.remove();
-    }
-
     rootNodes.push(
       createProcessMediaItemJob(
         mediaItem.fullTitle,
@@ -73,7 +48,7 @@ export async function enqueueProcessMediaItem(
             PartialDeep<NonNullable<FlowJob["opts"]>>
           >(opts, {
             deduplication: {
-              id: deduplicationKey,
+              id: `process-${mediaItem.type}-${mediaItem.id}`,
             },
           }),
         },

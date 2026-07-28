@@ -11,8 +11,10 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
+import { queueRegistry } from "../../utilities/queue-registry.ts";
 import { flow } from "../producer.ts";
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
@@ -102,6 +104,31 @@ export const processItemRequestProcessor =
 
           try {
             const updatedItem = await indexerService.indexItem(item);
+
+            const queue = queueRegistry.get("process-media-item");
+
+            if (!queue) {
+              throw new Error(
+                "Unable to find process-media-item queue in registry",
+              );
+            }
+
+            const deduplicationId = await queue.getDeduplicationJobId(
+              `process-${updatedItem.type}-${updatedItem.id}`,
+            );
+
+            if (deduplicationId) {
+              logger.verbose(
+                `Removing existing media item processing job for ${updatedItem.fullTitle}`,
+              );
+
+              const deduplicationFlow = await flow.getFlow({
+                id: deduplicationId,
+                queueName: "process-media-item",
+              });
+
+              await deduplicationFlow.job.remove();
+            }
 
             sendEvent({
               type: "riven.media-item.index.success",
