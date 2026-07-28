@@ -77,3 +77,38 @@ it("does not return items with a different active stream info hash, plugin, or p
     expect.objectContaining({ id: completedMovie.id }),
   ]);
 });
+
+it("does not return sibling show-like items with a different active stream info hash, plugin, or provider", async ({
+  em,
+  completedShowContext: { completedShow, episodes },
+  factories: { streamFactory },
+}) => {
+  expect.assert(completedShow.activeStream);
+
+  for (const episode of episodes) {
+    em.persist(episode).assign(episode, {
+      activeStream: await streamFactory.createOne(),
+    });
+  }
+
+  await em.flush();
+
+  const [episode] = episodes;
+
+  expect.assert(episode?.activeStream);
+
+  const [mediaEntry] = await episode.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const items = await findCommonBlacklistItems(
+    em,
+    episode.id,
+    episode.activeStream.infoHash,
+    mediaEntry.plugin,
+    mediaEntry.provider,
+  );
+
+  expect(items).toHaveLength(1);
+  expect(items).toStrictEqual([expect.objectContaining({ id: episode.id })]);
+});

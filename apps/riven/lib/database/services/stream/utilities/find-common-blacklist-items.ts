@@ -34,12 +34,14 @@ export async function findCommonBlacklistItems(
       $or: [
         { id: mediaItemId },
         {
+          id: { $ne: mediaItemId },
           activeStream: infoHash,
           filesystemEntries: { $some: mediaItemFilter },
         },
       ],
     }),
     em.find(Episode, {
+      id: { $ne: mediaItemId },
       activeStream: infoHash,
       filesystemEntries: {
         $some: mediaItemFilter,
