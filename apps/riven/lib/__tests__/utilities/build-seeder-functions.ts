@@ -7,6 +7,7 @@ import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-language-show.seeder.ts";
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
+import { OngoingShowSeeder } from "../../database/seeders/shows/ongoing-show.seeder.ts";
 import { PartiallyCompletedShowSeeder } from "../../database/seeders/shows/partially-completed-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
 
@@ -69,4 +70,5 @@ export const buildSeederFunctions = (em: EntityManager) => ({
   ),
   seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
   seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
+  seedOngoingShow: buildSeederFunction(em, OngoingShowSeeder),
 });

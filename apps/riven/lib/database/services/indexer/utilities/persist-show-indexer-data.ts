@@ -174,8 +174,6 @@ export async function persistShowIndexerData(
           episodeEntry.releaseDate &&
           !show.nextAirDate
         ) {
-          show.nextAirDate = episodeEntry.releaseDate;
-
           await em.upsert(Show, show, {
             onConflictExcludeFields: ["indexedAt", "state"],
           });

@@ -12,7 +12,6 @@ import chalk from "chalk";
 
 import type {
   ChangeSet,
-  EntityData,
   EventArgs,
   EventSubscriber,
   FlushEventArgs,
@@ -23,8 +22,8 @@ import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
-export class MediaItemStateSubscriber implements EventSubscriber {
-  public afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
+  public afterUpsert({ entity }: EventArgs<MediaItem>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
     } else if (

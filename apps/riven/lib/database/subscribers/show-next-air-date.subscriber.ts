@@ -1,0 +1,74 @@
+import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+
+import type {
+  ChangeSet,
+  EventSubscriber,
+  FlushEventArgs,
+} from "@mikro-orm/core";
+
+/**
+ * Subscriber that updates the `nextAirDate` of a `Show` when an `Episode` transitions from "unreleased" to "indexed".
+ */
+export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
+  public getSubscribedEntities() {
+    return [Show];
+  }
+
+  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
+    const trackedEpisodes = new Map<
+      Episode,
+      ChangeSet<Partial<Episode>> | null
+    >();
+
+    let hasShowChangeSet = false;
+
+    for (const changeSet of uow.getChangeSets()) {
+      if (changeSet.entity instanceof Episode) {
+        trackedEpisodes.set(changeSet.entity, changeSet);
+      }
+
+      if (changeSet.entity instanceof Show) {
+        hasShowChangeSet = true;
+      }
+    }
+
+    for (const collectionUpdate of uow.getCollectionUpdates()) {
+      if (collectionUpdate.owner instanceof Season) {
+        const collectionEpisodes = collectionUpdate.filter(
+          (episode): episode is Episode =>
+            episode instanceof Episode && episode.releaseDate != null,
+        );
+
+        for (const episode of collectionEpisodes) {
+          trackedEpisodes.set(episode, trackedEpisodes.get(episode) ?? null);
+        }
+      }
+    }
+
+    for (const [episode, changeSet] of trackedEpisodes) {
+      if (
+        changeSet?.payload.state === "unreleased" ||
+        (changeSet?.originalEntity?.state === "unreleased" &&
+          changeSet.payload.state === "indexed")
+      ) {
+        const show = await episode.getShow();
+        const episodes = await show.getEpisodes();
+
+        const nextAiringEpisode = episodes.find(
+          ({ state, releaseDate }) =>
+            state === "unreleased" && releaseDate != null,
+        );
+
+        show.nextAirDate = nextAiringEpisode?.releaseDate ?? null;
+
+        if (hasShowChangeSet) {
+          uow.recomputeSingleChangeSet(show);
+        } else {
+          uow.computeChangeSet(show);
+        }
+
+        break;
+      }
+    }
+  }
+}
