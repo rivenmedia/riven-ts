@@ -124,20 +124,24 @@ it('enqueues a media item processor job in the "scrape" step for each partially 
   await waitFor(actor, (state) => state.matches("Running"));
 
   for (const { show } of partiallyCompletedShows) {
+    const incompleteItems = await show.getIncompleteItems();
+
     await vi.waitFor(() => {
-      expect(flowAddBulkSpy).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            queueName: "process-media-item",
-            data: expect.objectContaining({
-              mediaItem: expect.objectContaining({
-                id: show.id,
+      for (const incompleteItem of incompleteItems) {
+        expect(flowAddBulkSpy).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              queueName: "process-media-item",
+              data: expect.objectContaining({
+                mediaItem: expect.objectContaining({
+                  id: incompleteItem.id,
+                }),
+                step: "scrape",
               }),
-              step: "scrape",
             }),
-          }),
-        ]),
-      );
+          ]),
+        );
+      }
     });
   }
 });

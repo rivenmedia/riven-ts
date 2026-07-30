@@ -1,4 +1,9 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -14,6 +19,12 @@ import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
   async #shouldFanOut(item: MediaItem) {
+    if (item instanceof Movie || item instanceof Episode) {
+      // No fan-out necessary for movies or individual episodes,
+      // as they are the leaf nodes in the media item hierarchy
+      return false;
+    }
+
     const { settings } = await import("../../../utilities/settings.ts");
 
     const isPartialRequest = item.itemRequest.getProperty("isPartialRequest");
