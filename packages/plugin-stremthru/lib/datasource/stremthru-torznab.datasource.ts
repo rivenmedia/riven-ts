@@ -57,6 +57,7 @@ export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
 
       if (item instanceof Season) {
         params.set("season", item.number.toString());
+        params.set("ep", "1");
       }
 
       if (item instanceof Episode) {
