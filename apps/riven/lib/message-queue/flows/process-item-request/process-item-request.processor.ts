@@ -11,6 +11,8 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
+import { clearDeduplicationJob } from "../../utilities/clear-deduplication-job.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { flow } from "../producer.ts";
@@ -25,7 +27,11 @@ export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
     async (
       { job, token },
-      { sendEvent, services: { itemRequestService, indexerService }, plugins },
+      {
+        sendEvent,
+        services: { mediaItemService, itemRequestService, indexerService },
+        plugins,
+      },
     ) => {
       switch (job.data.step) {
         case "request": {
@@ -102,6 +108,23 @@ export const processItemRequestProcessor =
 
           try {
             const updatedItem = await indexerService.indexItem(item);
+
+            const itemsToProcess = await mediaItemService.getItemsToProcess(
+              updatedItem.id,
+            );
+
+            for (const itemToProcess of itemsToProcess) {
+              if (
+                await clearDeduplicationJob(
+                  "process-media-item",
+                  `process-${itemToProcess.type}-${itemToProcess.id}`,
+                )
+              ) {
+                logger.verbose(
+                  `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
+                );
+              }
+            }
 
             sendEvent({
               type: "riven.media-item.index.success",

@@ -14,6 +14,7 @@ import {
 } from "vitest";
 import z from "zod";
 
+import { queueRegistry } from "./lib/message-queue/utilities/queue-registry.ts";
 import { withLogContext } from "./lib/utilities/logger/log-context.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -190,8 +191,14 @@ beforeAll(() => {
 beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
+  for (const queue of queueRegistry.values()) {
+    await queue.disconnect();
+  }
+
   await database.orm.schema.clear();
   await redisClient?.flushdb();
+
+  queueRegistry.clear();
 });
 
 afterAll(async () => {

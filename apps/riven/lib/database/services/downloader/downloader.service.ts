@@ -62,7 +62,7 @@ export class DownloaderService extends BaseService {
     if (item instanceof Season) {
       return item.episodes.matching({
         orderBy: { number: "asc" },
-        where: { state: { $in: ["ongoing", "indexed", "scraped"] } },
+        where: { state: { $in: ["indexed", "scraped"] } },
       });
     }
 
