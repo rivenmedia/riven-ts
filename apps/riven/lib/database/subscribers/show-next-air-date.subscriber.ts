@@ -2,6 +2,7 @@ import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import type {
   ChangeSet,
+  EventArgs,
   EventSubscriber,
   FlushEventArgs,
 } from "@mikro-orm/core";
@@ -12,6 +13,17 @@ import type {
 export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
   public getSubscribedEntities() {
     return [Show];
+  }
+
+  public beforeUpsert({ entity }: EventArgs<Show>) {
+    const nextAiringSeason = entity.seasons.find(
+      ({ state }) => state === "unreleased",
+    );
+    const nextAiringEpisode = nextAiringSeason?.episodes.find(
+      ({ state }) => state === "unreleased",
+    );
+
+    entity.nextAirDate = nextAiringEpisode?.releaseDate ?? null;
   }
 
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
