@@ -1,11 +1,14 @@
 import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
+import { DateTime } from "luxon";
+
 import type {
   ChangeSet,
   EventArgs,
   EventSubscriber,
   FlushEventArgs,
 } from "@mikro-orm/core";
+import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 /**
  * Subscriber that updates the `nextAirDate` of a `Show` when an `Episode` transitions from "unreleased" to "indexed".
@@ -16,9 +19,19 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
   }
 
   public beforeUpsert({ entity }: EventArgs<Show>) {
-    const nextAiringSeason = entity.seasons.find(
-      ({ state }) => state === "unreleased",
+    if (
+      entity.nextAirDate &&
+      DateTime.fromJSDate(entity.nextAirDate) > DateTime.now()
+    ) {
+      return;
+    }
+
+    const upcomingStates = new Set<MediaItemState>(["ongoing", "unreleased"]);
+
+    const nextAiringSeason = entity.seasons.find(({ state }) =>
+      upcomingStates.has(state),
     );
+
     const nextAiringEpisode = nextAiringSeason?.episodes.find(
       ({ state }) => state === "unreleased",
     );
