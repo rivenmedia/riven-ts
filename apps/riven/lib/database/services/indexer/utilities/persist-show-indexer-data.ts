@@ -98,7 +98,14 @@ export async function persistShowIndexerData(
     }
 
     await em.upsert(Show, show, {
-      onConflictExcludeFields: ["indexedAt", "createdAt", "scrapedAt", "state"],
+      onConflictExcludeFields: [
+        "createdAt",
+        "indexedAt",
+        "failedScrapeAttempts",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
     });
 
     for (const season of Object.values(item.seasons)) {
@@ -140,9 +147,11 @@ export async function persistShowIndexerData(
 
       await em.upsert(Season, seasonEntry, {
         onConflictExcludeFields: [
-          "indexedAt",
           "createdAt",
+          "failedScrapeAttempts",
+          "indexedAt",
           "scrapedAt",
+          "scrapedTimes",
           "state",
         ],
       });
@@ -181,9 +190,11 @@ export async function persistShowIndexerData(
         ) {
           await em.upsert(Show, show, {
             onConflictExcludeFields: [
-              "indexedAt",
               "createdAt",
+              "failedScrapeAttempts",
+              "indexedAt",
               "scrapedAt",
+              "scrapedTimes",
               "state",
             ],
           });
@@ -192,7 +203,14 @@ export async function persistShowIndexerData(
         seasonEntry.episodes.add(episodeEntry);
 
         await em.upsert(Episode, episodeEntry, {
-          onConflictExcludeFields: ["indexedAt", "state"],
+          onConflictExcludeFields: [
+            "createdAt",
+            "failedScrapeAttempts",
+            "indexedAt",
+            "scrapedAt",
+            "scrapedTimes",
+            "state",
+          ],
         });
       }
     }
