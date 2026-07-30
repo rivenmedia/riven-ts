@@ -174,12 +174,12 @@ beforeAll(() => {
 beforeEach(async () => {
   const { database } = await import("./lib/database/database.ts");
 
+  for (const queue of queueRegistry.values()) {
+    await queue.close();
+  }
+
   await database.orm.schema.clear();
   await redisClient?.flushdb();
-
-  for (const queue of queueRegistry.values()) {
-    await queue.disconnect();
-  }
 
   queueRegistry.clear();
 });
