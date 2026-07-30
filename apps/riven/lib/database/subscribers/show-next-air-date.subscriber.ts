@@ -32,6 +32,8 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
       ChangeSet<Partial<Episode>> | null
     >();
 
+    const processedShows = new Set<Show>();
+
     let hasShowChangeSet = false;
 
     for (const changeSet of uow.getChangeSets()) {
@@ -64,6 +66,13 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
           changeSet.payload.state === "indexed")
       ) {
         const show = await episode.getShow();
+
+        if (processedShows.has(show)) {
+          continue;
+        }
+
+        processedShows.add(show);
+
         const episodes = await show.getEpisodes();
 
         const nextAiringEpisode = episodes.find(
@@ -78,8 +87,6 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
         } else {
           uow.computeChangeSet(show);
         }
-
-        break;
       }
     }
   }

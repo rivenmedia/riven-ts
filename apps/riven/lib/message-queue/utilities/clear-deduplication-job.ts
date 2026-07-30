@@ -1,3 +1,4 @@
+import { logger } from "../../utilities/logger/logger.ts";
 import { flow } from "../flows/producer.ts";
 import { queueRegistry } from "./queue-registry.ts";
 
@@ -8,6 +9,8 @@ import { queueRegistry } from "./queue-registry.ts";
  *
  * @param queueName The queue name in which the job is stored
  * @param deduplicationId The deduplication identifier given to the job that is to be removed
+ *
+ * @returns A boolean indicating whether the job was successfully removed or not
  */
 export async function clearDeduplicationJob(
   queueName: string,
@@ -30,7 +33,16 @@ export async function clearDeduplicationJob(
     queueName,
   });
 
-  await deduplicationFlow.job.remove();
+  try {
+    await deduplicationFlow.job.remove();
 
-  return true;
+    return true;
+  } catch (error) {
+    logger.warn(
+      `Failed to remove job with deduplication ID ${deduplicationId} from queue ${queueName}`,
+      { err: error },
+    );
+
+    return false;
+  }
 }

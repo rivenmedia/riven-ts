@@ -177,6 +177,10 @@ beforeEach(async () => {
   await database.orm.schema.clear();
   await redisClient?.flushdb();
 
+  for (const queue of queueRegistry.values()) {
+    await queue.disconnect();
+  }
+
   queueRegistry.clear();
 });
 
