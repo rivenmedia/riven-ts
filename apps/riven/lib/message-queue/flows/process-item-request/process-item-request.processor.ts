@@ -5,6 +5,7 @@ import {
   MediaItemIndexRequestedShowEvent,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
+import { NotFoundError } from "@mikro-orm/core";
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
@@ -33,6 +34,19 @@ export const processItemRequestProcessor =
         plugins,
       },
     ) => {
+      try {
+        // Ensure the item request exists before proceeding
+        await itemRequestService.getItemRequestById(job.data.itemRequestId);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          throw new UnrecoverableError(
+            `Item request with ID ${job.data.itemRequestId} not found`,
+          );
+        }
+
+        throw error;
+      }
+
       switch (job.data.step) {
         case "request": {
           assert.ok(token, "Token is required to create child jobs");

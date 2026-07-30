@@ -1,5 +1,3 @@
-import { logger } from "../../utilities/logger/logger.ts";
-import { flow } from "../flows/producer.ts";
 import { queueRegistry } from "./queue-registry.ts";
 
 /**
@@ -16,6 +14,9 @@ export async function clearDeduplicationJob(
   queueName: string,
   deduplicationId: string,
 ) {
+  const { flow } = await import("../flows/producer.ts");
+  const { logger } = await import("../../utilities/logger/logger.ts");
+
   const queue = queueRegistry.get(queueName);
 
   if (!queue) {

@@ -34,9 +34,7 @@ describe(`when the media item is a movie`, () => {
     );
 
     await expect(
-      services.itemRequestService.getItemRequestById(
-        completedMovie.itemRequest.id,
-      ),
+      services.mediaItemService.getMediaItemById(completedMovie.id),
     ).rejects.toThrow(NotFoundError);
   });
 
