@@ -5,6 +5,7 @@ import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/
 import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
+import { settings } from "../../../../../utilities/settings.ts";
 import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
@@ -28,6 +29,12 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
         job.data.id,
         parsedResults,
       );
+
+      if (item.state === "failed") {
+        throw new UnrecoverableError(
+          `Scraping failed for ${item.fullTitle} after ${item.failedScrapeAttempts.toString()}/${settings.maximumScrapeAttempts.toString()} attempts`,
+        );
+      }
 
       if (error) {
         throw error;

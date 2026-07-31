@@ -88,22 +88,24 @@ export class ScraperService extends BaseService {
         results,
       );
 
-      if (newStreamsCount === 0) {
-        throw new MediaItemScrapeErrorNoNewStreams({
-          item: existingItem,
-          error: new Error(
-            `No new streams added for ${chalk.bold(existingItem.fullTitle)}`,
-          ),
-        });
-      }
-
       const { logger } = await import("../../../utilities/logger/logger.ts");
 
-      logger.info(
-        `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
-      );
+      if (newStreamsCount > 0) {
+        logger.info(
+          `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
+        );
 
-      this.#updateScrapeMetadata(existingItem, 0);
+        this.#updateScrapeMetadata(existingItem, 0);
+      } else {
+        logger.info(
+          `No new streams added to ${chalk.bold(existingItem.fullTitle)}`,
+        );
+
+        this.#updateScrapeMetadata(
+          existingItem,
+          existingItem.failedScrapeAttempts + 1,
+        );
+      }
 
       return {
         item: existingItem,

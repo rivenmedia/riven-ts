@@ -129,7 +129,9 @@ export const RivenSettings = z.object({
     .number()
     .int()
     .nonnegative()
-    .default(Number.MAX_SAFE_INTEGER)
+    .max(10)
+    .default(0)
+    .transform((val) => (val === 0 ? Number.MAX_SAFE_INTEGER : val))
     .describe(
       "The maximum number of scrape attempts before giving up on an item.",
     )
