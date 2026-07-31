@@ -23,7 +23,7 @@ export class ItemRequestResolver {
           `reindex-item-${itemRequest.id}`,
         )
       ) {
-        logger.info(
+        logger.silly(
           `Removed jobs for item request ${itemRequest.id} from the process-item-request queue`,
         );
       }
@@ -35,7 +35,7 @@ export class ItemRequestResolver {
             `process-${item.type}-${item.id}`,
           )
         ) {
-          logger.info(
+          logger.silly(
             `Removed jobs for ${item.fullTitle} from the process-media-item queue`,
           );
         }

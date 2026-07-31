@@ -134,7 +134,7 @@ export const processItemRequestProcessor =
                   `process-${itemToProcess.type}-${itemToProcess.id}`,
                 )
               ) {
-                logger.verbose(
+                logger.silly(
                   `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
                 );
               }
