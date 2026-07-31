@@ -14,7 +14,7 @@ export class StreamFactory extends Factory<Stream> {
   ): EntityData<Stream> {
     return {
       infoHash: faker.git.commitSha(),
-      parsedData: parse("Example.Movie.2024.1080p.BluRay.x264-GROUP"),
+      parsedData: parse("Example.Item.2024.1080p.BluRay.x264-GROUP"),
       ...input,
     };
   }

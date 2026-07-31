@@ -31,11 +31,7 @@ export const oxlintPluginEslintConfig = defineConfig({
         "no-inline-comments": "off",
         "new-cap": "off", // Incompatible with class decorators styling
         "no-ternary": "off",
-        "capitalized-comments": [
-          "warn",
-          "always",
-          { ignoreConsecutiveComments: true, ignorePattern: "empty" },
-        ],
+        "capitalized-comments": "off", // Just annoying in practice, constantly breaks code when temporarily commented out
         "no-eq-null": "allow", // Allows null checks to also check undefined
         "no-continue": "off",
         "no-void": ["warn", { allowAsStatement: true }],

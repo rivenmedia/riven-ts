@@ -12,11 +12,11 @@ type BaseErrorSchema = ZodObject<{
 
 function buildErrorMessage(type: string, error: unknown) {
   if (error instanceof Error) {
-    return error.message;
+    return `${error.message} [${type}]`;
   }
 
   if (typeof error === "string") {
-    return error;
+    return `${error} [${type}]`;
   }
 
   return `Error of type ${type}`;

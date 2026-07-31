@@ -81,7 +81,9 @@ export abstract class FileSystemEntry {
   public updatedAt?: Opt<Date>;
 
   @Field(() => MediaItem)
-  @ManyToOne(() => MediaItem)
+  @ManyToOne(() => MediaItem, {
+    deleteRule: "cascade",
+  })
   public mediaItem!: Opt<Ref<Movie | Episode>>;
 
   @Field(() => String)
