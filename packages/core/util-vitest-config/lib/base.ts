@@ -1,32 +1,20 @@
-import path from "node:path";
-import { loadEnvFile } from "node:process";
 import { fileURLToPath } from "node:url";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
-export const baseVitestConfig = defineConfig(({ mode }) => {
-  try {
-    loadEnvFile(path.join(process.cwd(), `.env.${mode}`));
-  } catch {
-    /* empty */
-  }
-
-  try {
-    loadEnvFile(path.join(process.cwd(), ".env"));
-  } catch {
-    /* empty */
-  }
-
+export const baseVitestConfig = defineConfig(() => {
   const isWatch = process.argv.includes("--watch");
+  const ignorePatterns = ["**/{__generated__,docker-data,.next,.turbo}/**"];
 
   return mergeConfig(
     { test: configDefaults },
     defineConfig({
       test: {
+        exclude: ignorePatterns,
         restoreMocks: true,
         coverage: {
           enabled: !isWatch,
-          exclude: ["**/{__generated__,__tests__,docker-data,.next,.turbo}/**"],
+          exclude: [...ignorePatterns, "**/__tests__/**"],
         },
         setupFiles: [
           fileURLToPath(
@@ -37,6 +25,11 @@ export const baseVitestConfig = defineConfig(({ mode }) => {
         hookTimeout: 30_000,
       },
       plugins: [swc.vite()],
+      server: {
+        watch: {
+          ignored: ignorePatterns,
+        },
+      },
     }),
   );
 });

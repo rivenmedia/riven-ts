@@ -3,6 +3,8 @@ import { RivenEventHandler } from "@repo/util-plugin-sdk/events";
 
 import { RedisConnection } from "bullmq";
 import { randomUUID } from "node:crypto";
+import path from "node:path";
+import { loadEnvFile } from "node:process";
 import { setEnvironmentData } from "node:worker_threads";
 import {
   afterAll,
@@ -21,6 +23,21 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RedisClient } from "bullmq";
 import type { RedisMemoryServer } from "redis-memory-server";
 import type { Mock } from "vitest";
+
+try {
+  loadEnvFile(path.join(import.meta.dirname, ".env.test"));
+} catch {
+  /* empty */
+}
+
+try {
+  loadEnvFile(path.join(import.meta.dirname, ".env"));
+} catch {
+  /* empty */
+}
+
+process.env["RIVEN_SETTING__rankingConfigPath"] =
+  `${import.meta.dirname}/riven-ranking-config.json`;
 
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
@@ -199,6 +216,8 @@ beforeEach(async () => {
   await redisClient?.flushdb();
 
   queueRegistry.clear();
+
+  vi.spyOn(process, "cwd").mockReturnValue(import.meta.dirname);
 });
 
 afterAll(async () => {

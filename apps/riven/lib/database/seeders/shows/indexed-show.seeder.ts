@@ -77,10 +77,13 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       context.episodes.push(...season.episodes);
     }
 
+    assert.ok(context.seasons?.length);
+    assert.ok(context.episodes?.length);
+
     itemRequest.mediaItems.add(
       context.show,
-      ...(context.seasons ?? []),
-      ...(context.episodes ?? []),
+      ...context.seasons,
+      ...context.episodes,
     );
 
     await em.flush();
