@@ -92,7 +92,7 @@ describe("removeItemRequest", () => {
       ).resolves.toBeUndefined();
     });
 
-    it('removes all processing jobs from the "process-media-item" queue for the item request\'s media items', async ({
+    it('removes all processing jobs from the "process-media-item" queue for the item request\'s media items when the item request is for a show', async ({
       completedShowContext: { completedShow, episodes, seasons },
       gqlContext,
       gqlServer,
@@ -144,6 +144,58 @@ describe("removeItemRequest", () => {
       const totalMediaItems = 1 + seasons.length + episodes.length;
 
       expect.assertions(totalMediaItems);
+    });
+
+    it('removes all processing jobs from the "process-media-item" queue for the item request\'s media items when the item request is for a movie', async ({
+      completedMovieContext: { completedMovie },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const processMediaItemQueue = createQueue("process-media-item");
+
+      const mediaItems =
+        await completedMovie.itemRequest.loadProperty("mediaItems");
+
+      const jobIds = new Set<string>();
+
+      for (const item of await mediaItems.loadItems()) {
+        const job = await processMediaItemQueue.add(
+          "Process media item",
+          {},
+          {
+            deduplication: {
+              id: `process-${item.type}-${item.id}`,
+            },
+          },
+        );
+
+        expect.assert(job.id);
+
+        jobIds.add(job.id);
+      }
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            id: completedMovie.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      for (const jobId of jobIds) {
+        await expect(
+          processMediaItemQueue.getJob(jobId),
+        ).resolves.toBeUndefined();
+      }
+
+      expect.assertions(1);
     });
 
     it("fires a riven.item-request.removed event", async ({
