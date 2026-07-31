@@ -53,6 +53,99 @@ describe("removeItemRequest", () => {
   });
 
   describe("when the item is removed successfully", () => {
+    it('removes the item\'s reindex job from the "process-item-request" queue', async ({
+      completedMovieContext: { completedMovie },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const processItemRequestQueue = createQueue("process-item-request");
+
+      const reindexJob = await processItemRequestQueue.add(
+        "Process item request",
+        {},
+        {
+          deduplication: {
+            id: `reindex-item-${completedMovie.itemRequest.id}`,
+          },
+        },
+      );
+
+      expect.assert(reindexJob.id);
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            id: completedMovie.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      await expect(
+        processItemRequestQueue.getJob(reindexJob.id),
+      ).resolves.toBeUndefined();
+    });
+
+    it('removes all processing jobs from the "process-media-item" queue for the item request\'s media items', async ({
+      completedShowContext: { completedShow, episodes, seasons },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const processMediaItemQueue = createQueue("process-media-item");
+
+      const mediaItems =
+        await completedShow.itemRequest.loadProperty("mediaItems");
+
+      const jobIds = new Set<string>();
+
+      for (const item of await mediaItems.loadItems()) {
+        const job = await processMediaItemQueue.add(
+          "Process media item",
+          {},
+          {
+            deduplication: {
+              id: `process-${item.type}-${item.id}`,
+            },
+          },
+        );
+
+        expect.assert(job.id);
+
+        jobIds.add(job.id);
+      }
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            id: completedShow.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      for (const jobId of jobIds) {
+        await expect(
+          processMediaItemQueue.getJob(jobId),
+        ).resolves.toBeUndefined();
+      }
+
+      const totalMediaItems = 1 + seasons.length + episodes.length;
+
+      expect.assertions(totalMediaItems);
+    });
+
     it("fires a riven.item-request.removed event", async ({
       completedMovieContext: { completedMovie },
       gqlContext,

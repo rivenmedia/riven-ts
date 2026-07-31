@@ -3,6 +3,7 @@ import assert from "node:assert";
 
 import { EpisodeFactory } from "../../factories/episode.factory.ts";
 import { SeasonFactory } from "../../factories/season.factory.ts";
+import { ShowItemRequestFactory } from "../../factories/show-item-request.factory.ts";
 import { ShowFactory } from "../../factories/show.factory.ts";
 import { BaseSeeder } from "../base.seeder.ts";
 
@@ -26,9 +27,12 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
     const releaseDate = DateTime.utc().minus({ years: 1 }).toISO();
     const indexedAt = DateTime.utc().toJSDate();
 
+    const itemRequest = await new ShowItemRequestFactory(em).createOne();
+
     context.show = await new ShowFactory(em).createOne({
       releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date
       indexedAt,
+      itemRequest,
     });
 
     let absoluteEpisodeNumber = 1;
@@ -72,6 +76,12 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       context.episodes ??= [];
       context.episodes.push(...season.episodes);
     }
+
+    itemRequest.mediaItems.add(
+      context.show,
+      ...(context.seasons ?? []),
+      ...(context.episodes ?? []),
+    );
 
     await em.flush();
 
