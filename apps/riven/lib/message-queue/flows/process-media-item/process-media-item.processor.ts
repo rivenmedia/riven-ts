@@ -1,6 +1,6 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { ValidationError } from "@mikro-orm/core";
+import { NotFoundError, ValidationError } from "@mikro-orm/core";
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
@@ -31,6 +31,18 @@ export const processMediaItemProcessor =
         plugins,
       },
     ) => {
+      try {
+        await mediaItemService.getMediaItemById(job.data.mediaItem.id);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          throw new UnrecoverableError(
+            `Media item with ID ${job.data.mediaItem.id} not found`,
+          );
+        }
+
+        throw error;
+      }
+
       assert.ok(token, "Job token is required");
 
       const parent = createJobParentConfig(job);

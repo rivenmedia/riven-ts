@@ -9,7 +9,6 @@ import { createProgramEventSchema } from "../utilities/create-program-event-sche
  */
 export const ItemRequestRemovedEvent = createProgramEventSchema(
   "item-request.removed",
-
   z.object({
     item: ItemRequest,
   }),
