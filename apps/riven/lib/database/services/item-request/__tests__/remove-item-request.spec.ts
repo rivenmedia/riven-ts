@@ -235,5 +235,3 @@ describe(`when the media item is a show`, () => {
     }
   });
 });
-
-it.todo("removes all jobs associated with a media item");
