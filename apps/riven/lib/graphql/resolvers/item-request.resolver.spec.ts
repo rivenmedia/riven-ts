@@ -2,6 +2,7 @@ import { gql } from "@apollo/client";
 import { describe, expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
+import { createQueue } from "../../message-queue/utilities/create-queue.ts";
 import { CoreKey } from "../context.ts";
 
 import type {
@@ -19,6 +20,11 @@ describe("removeItemRequest", () => {
       removeItemRequest(id: $id)
     }
   `;
+
+  it.beforeEach(() => {
+    createQueue("process-item-request");
+    createQueue("process-media-item");
+  });
 
   it("removes the item request", async ({
     completedMovieContext: { completedMovie },
@@ -151,7 +157,6 @@ describe("removeItemRequest", () => {
 
       expect.assert(body.kind === "single");
 
-      // Expect(body.singleResult.errors).toBeDefined();
       expect(body.singleResult.data?.removeItemRequest).toBe(false);
     });
   });

@@ -7,6 +7,7 @@ import { test as testBase, vi } from "vitest";
 
 import { CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
+import { logger } from "../utilities/logger/logger.ts";
 
 import type { Services } from "../database/database.ts";
 import type { ApolloServerContext } from "../graphql/context.ts";
@@ -275,7 +276,7 @@ export const it = testBase
       services,
       sendEvent: vi.fn<MainRunnerMachineIntake>(),
     },
-    logger: {} as never,
+    logger,
     sendEvent: vi.fn<MainRunnerMachineIntake>(),
     plugins: {},
   }))
