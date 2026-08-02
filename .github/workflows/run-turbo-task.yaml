@@ -37,8 +37,16 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
-      os-matrix: ${{ steps.build-os-matrix.outputs.os }}
     steps:
+      - name: Output inputs
+        run: |
+          echo "Inputs:"
+          echo "  runners: ${{ inputs.runners }}"
+          echo "  task: ${{ inputs.task }}"
+          echo "  concurrency: ${{ inputs.concurrency }}"
+          echo "  runner-requirements: ${{ inputs.runner-requirements }}"
+          echo "  env: ${{ inputs.env }}"
+
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
@@ -75,17 +83,6 @@ jobs:
         run: |
           echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
 
-      - name: Build OS matrix
-        id: build-os-matrix
-        run: |
-          if [ "${{ inputs.runners }}" != '[]' ]; then
-            echo "OS matrix: ${{ inputs.runners }}"
-            echo "os=${{ inputs.runners }}" >> $GITHUB_OUTPUT
-          else
-            echo 'OS matrix: [ { "name": "linux-x64", "runner": "ubuntu-latest" } ]'
-            echo 'os=[ { "name": "linux-x64", "runner": "ubuntu-latest" } ]' >> $GITHUB_OUTPUT
-          fi
-
   run-turbo-task:
     name: |-
       ${{
@@ -99,7 +96,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: ${{ fromJson(needs.get-required-tasks.outputs.os-matrix) }}
+        os: |-
+          ${{
+            case(
+              inputs.runners == '[]', fromJson('[ { "name": "linux-x64", "runner": "ubuntu-latest" } ]'),
+              fromJson(inputs.runners)
+            )
+          }}
     runs-on: ${{ matrix.os.runner }}
     permissions:
       contents: read
