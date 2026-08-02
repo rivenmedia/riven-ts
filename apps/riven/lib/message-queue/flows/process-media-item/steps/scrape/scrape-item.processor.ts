@@ -32,7 +32,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
 
       if (item.state === "failed") {
         throw new UnrecoverableError(
-          `Scraping failed for ${item.fullTitle} after ${item.failedScrapeAttempts.toString()}/${settings.maximumScrapeAttempts.toString()} attempts`,
+          `Scraping failed for ${item.fullTitle} after ${item.failedScrapeAttempts.toString()}/${settings.maximumFailedAttempts.toString()} attempts`,
         );
       }
 
