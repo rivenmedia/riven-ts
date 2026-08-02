@@ -46,7 +46,12 @@ runs:
       shell: bash
       if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
-        sudo service postgresql start
+        if [ "$(uname)" == "Darwin" ]; then
+          brew services start postgresql
+        else
+          sudo service postgresql start
+        fi
+
         until pg_isready; do sleep 1; done
         sudo -u postgres createuser -s -d -r -w runner
         sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"
