@@ -6,7 +6,7 @@ on:
       runner:
         description: The runner to use for the turbo task
         type: string
-        default: ubuntu-latest
+        required: true
       task:
         description: The name of the turbo task to run
         type: string

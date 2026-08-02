@@ -85,7 +85,7 @@ jobs:
               - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
-      runner: ${{ matrix.task.runner }}
+      runner: ${{ matrix.task.runner || 'ubuntu-latest' }}
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ matrix.task.runner-requirements &&
