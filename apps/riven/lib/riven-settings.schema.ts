@@ -125,13 +125,15 @@ export const RivenSettings = z.object({
     .default(false)
     .describe("Only scrape dubbed anime.")
     .meta({ "wiki.section": "scraping" }),
-  maximumScrapeAttempts: z.coerce
+  maximumFailedAttempts: z.coerce
     .number()
     .int()
     .nonnegative()
-    .default(Number.MAX_SAFE_INTEGER)
+    .max(10)
+    .default(10)
+    .transform((val) => (val === 0 ? Number.MAX_SAFE_INTEGER : val))
     .describe(
-      "The maximum number of scrape attempts before giving up on an item.",
+      "The maximum number of scrape attempts before giving up on an item. Set to 0 to allow unlimited attempts (not recommended).",
     )
     .meta({ "wiki.section": "scraping" }),
   minimumAverageBitrateMovies: z.coerce
