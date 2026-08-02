@@ -371,7 +371,7 @@ packageExtensionsChecksum: sha256-lmqPczCHsZjEudlMldfSNaZq7e+eaddMNumuy/0Y5Ys=
 
 patchedDependencies:
   '@zkochan/fuse-shared-library': b6a19defa99b08e4de2d398291f5111ace9e53104c781a595bbc5904c691019c
-  '@zkochan/fuse-shared-library-darwin': 15e4aed2ee34c2635a156cff02eb1fe8e897262e43099a448ac3d91192b36fbd
+  '@zkochan/fuse-shared-library-darwin': b152e691160d442356dcb3d3cfe80504786d638dcd4520ee1066cfae5ff8a3d0
 
 importers:
 
@@ -13515,11 +13515,11 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@zkochan/fuse-shared-library-darwin@0.0.0(patch_hash=15e4aed2ee34c2635a156cff02eb1fe8e897262e43099a448ac3d91192b36fbd)': {}
+  '@zkochan/fuse-shared-library-darwin@0.0.0(patch_hash=b152e691160d442356dcb3d3cfe80504786d638dcd4520ee1066cfae5ff8a3d0)': {}
 
   '@zkochan/fuse-shared-library@0.0.0(patch_hash=b6a19defa99b08e4de2d398291f5111ace9e53104c781a595bbc5904c691019c)':
     dependencies:
-      fuse-shared-library-darwin: '@zkochan/fuse-shared-library-darwin@0.0.0(patch_hash=15e4aed2ee34c2635a156cff02eb1fe8e897262e43099a448ac3d91192b36fbd)'
+      fuse-shared-library-darwin: '@zkochan/fuse-shared-library-darwin@0.0.0(patch_hash=b152e691160d442356dcb3d3cfe80504786d638dcd4520ee1066cfae5ff8a3d0)'
       fuse-shared-library-linux: 1.0.1
       fuse-shared-library-linux-arm: 1.0.0
       fuse-shared-library-linux-arm64: https://codeload.github.com/runkit-forks/fuse-shared-library-linux-arm64/tar.gz/11e96e0745fd800ea3e0a4c8cc3b57fceba461cb
