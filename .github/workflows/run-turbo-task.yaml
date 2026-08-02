@@ -75,7 +75,7 @@ jobs:
           echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
 
   run-turbo-task:
-    name: Run ${{ inputs.task }} on ${{ matrix.os.name }}
+    name: ${{ format('Run {0}{1}', inputs.task, inputs.runners != '[]' && format(' on {0}', matrix.os.name) || '') }}
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     strategy:
@@ -83,7 +83,7 @@ jobs:
       matrix:
         os: |-
           ${{ case(
-            inputs.runners == '[]', '[ { "name": "linux-x64", "runner": "ubuntu-latest" } ]',
+            inputs.runners == '[]', fromJson('[ { "name": "linux-x64", "runner": "ubuntu-latest" } ]'),
             fromJson(inputs.runners)
           ) }}
     runs-on: ${{ matrix.os.runner }}
