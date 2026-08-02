@@ -23,6 +23,8 @@ runs:
       shell: bash
       id: filter-cached-tasks
       env:
+        RUNNER_ARCH: ${{ runner.arch }}
+        RUNNER_OS: ${{ runner.os }}
         TASKS: ${{ inputs.tasks }}
         TURBO_VERSION: ${{ inputs.turbo-version }}
       run: |
