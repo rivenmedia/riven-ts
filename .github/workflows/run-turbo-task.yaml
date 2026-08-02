@@ -69,6 +69,9 @@ jobs:
         with:
           tasks: '[ "${{ inputs.task }}" ]'
           turbo-version: ${{ steps.get-turbo-version.outputs.result }}
+        env:
+          RUNNER_ARCH: ${{ runner.arch }}
+          RUNNER_OS: ${{ runner.os }}
 
       - name: Output required tasks
         run: |
