@@ -38,15 +38,6 @@ jobs:
     outputs:
       required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
     steps:
-      - name: Output inputs
-        run: |
-          echo "Inputs:"
-          echo "  runners: ${{ inputs.runners }}"
-          echo "  task: ${{ inputs.task }}"
-          echo "  concurrency: ${{ inputs.concurrency }}"
-          echo "  runner-requirements: ${{ inputs.runner-requirements }}"
-          echo "  env: ${{ inputs.env }}"
-
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
