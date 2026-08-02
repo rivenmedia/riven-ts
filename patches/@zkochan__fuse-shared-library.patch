@@ -1,8 +1,8 @@
 diff --git a/include.js b/include.js
-index 78486a7..e092c9c 100644
+index 78486a71fb428228cf9e9273cc84c90d9c2a42b1..6d2589919e0a2077912c411b0653921f0b4fa897 100644
 --- a/include.js
 +++ b/include.js
-@@ -1,18 +1,22 @@
+@@ -1,18 +1,23 @@
  const os = require('os')
  
  const arch = os.arch()
@@ -15,6 +15,7 @@ index 78486a7..e092c9c 100644
      break
    case 'darwin':
 +  case 'darwin-arm':
++  case 'darwin-arm64':
      require('fuse-shared-library-darwin/include')
      break
    case 'linux-arm':
@@ -27,10 +28,10 @@ index 78486a7..e092c9c 100644
      require('fuse-shared-library-win32/include')
      break
 diff --git a/index.js b/index.js
-index e110d39..a921700 100644
+index e110d398cd6d0b4705bf1c7e08373d255b012c35..23fd03c7b3896efdcccce92ac46f8388f1563f00 100644
 --- a/index.js
 +++ b/index.js
-@@ -1,10 +1,11 @@
+@@ -1,10 +1,12 @@
  const os = require('os')
  
  const arch = os.arch()
@@ -40,10 +41,11 @@ index e110d39..a921700 100644
  switch (platform) {
    case 'darwin':
 +  case 'darwin-arm':
++  case 'darwin-arm64':
      module.exports = require('fuse-shared-library-darwin')
      break
    case 'linux':
-@@ -13,6 +14,9 @@ switch (platform) {
+@@ -13,6 +15,9 @@ switch (platform) {
    case 'linux-arm':
      module.exports = require('fuse-shared-library-linux-arm')
      break
@@ -54,10 +56,10 @@ index e110d39..a921700 100644
      module.exports = require('fuse-shared-library-win32')
      break
 diff --git a/lib.js b/lib.js
-index e2e343d..9c3bba1 100644
+index e2e343dd10e0e7a9f922d3bf98bdbb12955dd77d..36ae0fbf6699bdb63439852edc6eb493facf2597 100644
 --- a/lib.js
 +++ b/lib.js
-@@ -1,18 +1,22 @@
+@@ -1,18 +1,23 @@
  const os = require('os')
  
  const arch = os.arch()
@@ -70,6 +72,7 @@ index e2e343d..9c3bba1 100644
      break
    case 'darwin':
 +  case 'darwin-arm':
++  case 'darwin-arm64':
      require('fuse-shared-library-darwin/lib')
      break
    case 'linux-arm':

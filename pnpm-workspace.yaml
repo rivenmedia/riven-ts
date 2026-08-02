@@ -153,6 +153,7 @@ packageExtensions:
 
 patchedDependencies:
   "@zkochan/fuse-shared-library": patches/@zkochan__fuse-shared-library.patch
+  "@zkochan/fuse-shared-library-darwin": patches/@zkochan__fuse-shared-library-darwin.patch
 
 publicHoistPattern:
   - "*vitest*"
