@@ -58,6 +58,9 @@ runs:
         fi
 
         DRY_RUN_OUTPUT=$($TURBO_COMMAND --dry=json --affected "${TASK_LIST[@]}")
+
+        echo "Dry run output: $DRY_RUN_OUTPUT"
+
         REQUIRED_TASKS=$(jq -c --argjson tasks "$TASKS" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and (.task as $task | ($tasks | index($task)) or (.taskId as $taskId | ($tasks | index($taskId))))) | .taskId]' <<< "$DRY_RUN_OUTPUT")
 
         echo "required-tasks=$REQUIRED_TASKS" >> "$GITHUB_OUTPUT"

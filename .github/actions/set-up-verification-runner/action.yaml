@@ -35,7 +35,7 @@ runs:
       shell: bash
       if: ${{ inputs.install-fuse == 'true' }}
       run: |
-        if [ "$RUNNER_OS" == "macOS" ]; then
+        if [ "${{ runner.os }}" == "macOS" ]; then
           brew install --cask macfuse
         else
           sudo apt-get update
@@ -46,7 +46,7 @@ runs:
       shell: bash
       if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
-        if [ "$RUNNER_OS" == "macOS" ]; then
+        if [ "${{ runner.os }}" == "macOS" ]; then
           brew services start postgresql
         else
           sudo service postgresql start
