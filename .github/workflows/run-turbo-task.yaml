@@ -75,11 +75,7 @@ jobs:
           echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
 
   run-turbo-task:
-    name: |-
-      ${{ case(
-        inputs.runners == '[]', 'Run ${{ inputs.task }}',
-        'Run ${{ inputs.task }} on ${{ matrix.os.name }}'
-      ) }}
+    name: Run ${{ inputs.task }}${{ inputs.runners != '[]' && ' on ${{ matrix.os.name }}' || '' }}
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     strategy:
