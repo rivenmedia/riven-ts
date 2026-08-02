@@ -34,11 +34,6 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os:
-          - name: linux-x64
-            runner: ubuntu-latest
-          - name: darwin-arm64
-            runner: macos-latest
         task:
           - name: Linting
             command: lint
@@ -52,6 +47,15 @@ jobs:
             runner-requirements:
               - redis-server
               - fuse
+            runners:
+              - name: linux-x64
+                runner: ubuntu-latest
+              - name: linux-arm64
+                runner: ubuntu-24.04-arm
+              - name: macos-arm64
+                runner: macos-latest
+              - name: macos-intel
+                runner: macos-15-intel
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:
@@ -72,7 +76,7 @@ jobs:
               - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
-      runner: ${{ matrix.os.runner }}
+      runners: ${{ toJson(matrix.task.runners) || '[]' }}
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ matrix.task.runner-requirements &&
