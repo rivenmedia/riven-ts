@@ -78,7 +78,7 @@ jobs:
     name: |-
       ${{
         case(
-          inputs.runners != '[]', format('Run {0} on {1}', inputs.task, matrix.os.name),
+          inputs.runners != '[]', format('Run {0} ({1})', inputs.task, matrix.os.name),
           format('Run {0}', inputs.task)
         )
       }}
