@@ -26,7 +26,7 @@ concurrency:
 
 jobs:
   verify:
-    name: Verify - ${{ matrix.task.name }}
+    name: Verify - ${{ matrix.task.name }}:${{ matrix.os.name }}
     permissions:
       contents: read
       pull-requests: write
@@ -34,6 +34,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        os:
+          - name: Linux
+            runner: ubuntu-latest
+          - name: OSX
+            runner: macos-latest
         task:
           - name: Linting
             command: lint
@@ -67,6 +72,7 @@ jobs:
               - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
+      runner: ${{ matrix.os.runner }}
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ matrix.task.runner-requirements &&
