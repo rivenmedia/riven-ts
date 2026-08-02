@@ -70,8 +70,8 @@ jobs:
           tasks: '[ "${{ inputs.task }}" ]'
           turbo-version: ${{ steps.get-turbo-version.outputs.result }}
         env:
-          RUNNER_ARCH: ${{ runner.arch }}
-          RUNNER_OS: ${{ runner.os }}
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - name: Output required tasks
         run: |
