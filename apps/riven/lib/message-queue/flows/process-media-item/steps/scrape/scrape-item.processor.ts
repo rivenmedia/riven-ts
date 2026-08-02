@@ -1,6 +1,6 @@
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
-import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
+import { MediaItemScrapeErrorNoStreamsFound } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-streams-found.event";
 
 import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
@@ -54,7 +54,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
         throw new UnrecoverableError(error.message);
       }
 
-      if (error instanceof MediaItemScrapeErrorNoNewStreams) {
+      if (error instanceof MediaItemScrapeErrorNoStreamsFound) {
         sendEvent(error.payload);
       }
 
