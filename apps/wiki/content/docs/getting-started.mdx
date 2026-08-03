@@ -157,6 +157,8 @@ RIVEN_SETTING__vfsMountPath="/mount"
 # container. It defaults to localhost, which is only useful for local runs.
 RIVEN_SETTING__gqlHost="0.0.0.0"
 
+# If you want to bind mount this file from the host, create it first;
+# otherwise Docker will mount a directory named riven-ranking-config.json.
 RIVEN_SETTING__rankingConfigPath="/app/data/riven-ranking-config.json"
 RIVEN_SETTING__logLevel="info"
 
