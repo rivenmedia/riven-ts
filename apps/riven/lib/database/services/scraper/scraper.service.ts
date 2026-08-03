@@ -1,7 +1,7 @@
 import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
-import { MediaItemScrapeErrorNoNewStreams } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-new-streams.event";
+import { MediaItemScrapeErrorNoStreamsFound } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.no-streams-found.event";
 
 import { ValidationError } from "@mikro-orm/core";
 import {
@@ -60,7 +60,7 @@ export class ScraperService extends BaseService {
 
     try {
       if (Object.keys(results).length === 0) {
-        throw new MediaItemScrapeErrorNoNewStreams({
+        throw new MediaItemScrapeErrorNoStreamsFound({
           item: existingItem,
           error: new Error(
             `No streams returned from scrapers for ${chalk.bold(existingItem.fullTitle)}`,
@@ -88,29 +88,31 @@ export class ScraperService extends BaseService {
         results,
       );
 
-      if (newStreamsCount === 0) {
-        throw new MediaItemScrapeErrorNoNewStreams({
-          item: existingItem,
-          error: new Error(
-            `No new streams added for ${chalk.bold(existingItem.fullTitle)}`,
-          ),
-        });
-      }
-
       const { logger } = await import("../../../utilities/logger/logger.ts");
 
-      logger.info(
-        `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
-      );
+      if (newStreamsCount > 0) {
+        logger.info(
+          `Added ${newStreamsCount.toString()} new streams to ${chalk.bold(existingItem.fullTitle)}`,
+        );
 
-      this.#updateScrapeMetadata(existingItem, 0);
+        this.#updateScrapeMetadata(existingItem, 0);
+      } else {
+        logger.info(
+          `No new streams added to ${chalk.bold(existingItem.fullTitle)}`,
+        );
+
+        this.#updateScrapeMetadata(
+          existingItem,
+          existingItem.failedScrapeAttempts + 1,
+        );
+      }
 
       return {
         item: existingItem,
         newStreamsCount,
       };
     } catch (error) {
-      if (error instanceof MediaItemScrapeErrorNoNewStreams) {
+      if (error instanceof MediaItemScrapeErrorNoStreamsFound) {
         // We only want to consider an attempt as failed if scraping succeeded and no new streams were added
         // instead of on *any* error (e.g. a database error) that occurs during the persist process.
         this.#updateScrapeMetadata(
@@ -118,6 +120,8 @@ export class ScraperService extends BaseService {
           error.payload.item.failedScrapeAttempts + 1,
         );
 
+        // Don't throw the error here to allow the transaction to commit the updated failedScrapeAttempts count.
+        // Just pass it through so it can be handled upstream.
         return {
           item: error.payload.item,
           newStreamsCount: 0,

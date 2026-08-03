@@ -1,3 +1,5 @@
+import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
+
 import { fromPromise } from "xstate";
 
 import { services } from "../../../database/database.ts";
@@ -64,12 +66,17 @@ export const retryLibrary = fromPromise(async () => {
     }
 
     for (const item of pendingItems) {
-      const step = getMediaItemStep(item);
+      const itemsToProcess =
+        item instanceof Movie || item instanceof Episode
+          ? [item]
+          : await item.getIncompleteItems();
 
-      await enqueueProcessMediaItem({
-        id: item.id,
-        step,
-      });
+      for (const itemToProcess of itemsToProcess) {
+        await enqueueProcessMediaItem({
+          id: itemToProcess.id,
+          step: getMediaItemStep(itemToProcess),
+        });
+      }
     }
   } catch (error) {
     logger.error("Error retrying library", { err: error });

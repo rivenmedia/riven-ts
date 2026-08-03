@@ -160,7 +160,7 @@ export const it = baseIt
     }),
   );
 
-it.afterEach(async ({ httpCache, redisClient }) => {
+it.beforeEach(async ({ httpCache, redisClient }) => {
   httpCache.clear();
 
   await redisClient.flushdb();

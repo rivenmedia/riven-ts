@@ -25,6 +25,10 @@ import {
   ItemRequestCreateSuccessEventHandler,
 } from "./item-request.create.success.event.ts";
 import {
+  ItemRequestRemovedEvent,
+  ItemRequestRemovedEventHandler,
+} from "./item-request.removed.event.ts";
+import {
   ItemRequestUpdateSuccessEvent,
   ItemRequestUpdateSuccessEventHandler,
 } from "./item-request.update.success.event.ts";
@@ -91,9 +95,9 @@ import {
   MediaItemScrapeErrorIncorrectStateEventHandler,
 } from "./media-item.scrape.error.incorrect-state.event.ts";
 import {
-  MediaItemScrapeErrorNoNewStreamsEvent,
-  MediaItemScrapeErrorNoNewStreamsEventHandler,
-} from "./media-item.scrape.error.no-new-streams.event.ts";
+  MediaItemScrapeErrorNoStreamsFoundEvent,
+  MediaItemScrapeErrorNoStreamsFoundEventHandler,
+} from "./media-item.scrape.error.no-streams-found.event.ts";
 import {
   MediaItemScrapeSuccessEvent,
   MediaItemScrapeSuccessEventHandler,
@@ -118,6 +122,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   ItemRequestCreateSuccessEvent,
   ItemRequestCreateErrorEvent,
   ItemRequestCreateErrorConflictEvent,
+  ItemRequestRemovedEvent,
   ItemRequestUpdateSuccessEvent,
   MediaItemIndexRequestedMovieEvent,
   MediaItemIndexRequestedShowEvent,
@@ -128,7 +133,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   CoreShutdownEvent,
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeSuccessEvent,
-  MediaItemScrapeErrorNoNewStreamsEvent,
+  MediaItemScrapeErrorNoStreamsFoundEvent,
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
   MediaItemDownloadRequestedEvent,
@@ -171,6 +176,7 @@ export const RivenEventHandler = {
   "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
   "riven.item-request.create.error.conflict":
     ItemRequestCreateErrorConflictEventHandler,
+  "riven.item-request.removed": ItemRequestRemovedEventHandler,
   "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
@@ -188,8 +194,8 @@ export const RivenEventHandler = {
   "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
   "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
-  "riven.media-item.scrape.error.no-new-streams":
-    MediaItemScrapeErrorNoNewStreamsEventHandler,
+  "riven.media-item.scrape.error.no-streams-found":
+    MediaItemScrapeErrorNoStreamsFoundEventHandler,
   "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 
   // Item downloading

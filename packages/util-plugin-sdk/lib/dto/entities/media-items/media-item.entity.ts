@@ -148,7 +148,11 @@ export abstract class MediaItem {
   public filesystemEntries = new Collection<FileSystemEntry>(this);
 
   @Field(() => [SubtitleEntry])
-  @ManyToMany()
+  @OneToMany({
+    entity: () => SubtitleEntry,
+    mappedBy: "mediaItem",
+    where: { type: "subtitle" },
+  })
   public subtitles = new Collection<SubtitleEntry>(this);
 
   @Field(() => Stream, { nullable: true })
@@ -156,7 +160,10 @@ export abstract class MediaItem {
   public activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany(() => Stream)
+  @ManyToMany({
+    entity: () => Stream,
+    inversedBy: "parents",
+  })
   public streams = new Collection<Stream>(this);
 
   @Field(() => [BlacklistedStream])
@@ -167,7 +174,9 @@ export abstract class MediaItem {
   @Enum(() => MediaItemType.enum)
   public type!: MediaItemType;
 
-  @ManyToOne(() => ItemRequest)
+  @ManyToOne(() => ItemRequest, {
+    deleteRule: "cascade",
+  })
   public itemRequest!: Ref<ItemRequest>;
 
   @Property()
@@ -195,9 +204,8 @@ export abstract class MediaItem {
     this.failedScrapeAttempts = 0;
     this.scrapedTimes = 0;
     this.scrapedAt = null;
-    this.filesystemEntries.removeAll();
     this.streams.removeAll();
-    this.subtitles.removeAll();
+    this.filesystemEntries.removeAll();
   }
 
   /**

@@ -10,7 +10,6 @@ import type { ValidPlugin } from "../../../../types/plugins.ts";
 import type { MainRunnerMachineInput } from "../../../main-runner/index.ts";
 
 export const it = baseIt
-
   .extend(
     "input",
     (): MainRunnerMachineInput => ({

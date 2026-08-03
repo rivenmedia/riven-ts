@@ -11,7 +11,7 @@ it("enqueues an item processor job for each incomplete item request in the datab
   em,
   factories: { showItemRequestFactory, movieItemRequestFactory },
 }) => {
-  const flowSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
+  const flowAddSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
 
   const completeItems = [
     showItemRequestFactory.makeEntity({
@@ -23,15 +23,27 @@ it("enqueues an item processor job for each incomplete item request in the datab
   const incompleteItems = [
     movieItemRequestFactory.makeEntity({
       imdbId: "tt1234561",
-      state: "requested",
+      state: "unreleased",
     }),
-    showItemRequestFactory.makeEntity({
+    movieItemRequestFactory.makeEntity({
       imdbId: "tt1234562",
       state: "requested",
     }),
     showItemRequestFactory.makeEntity({
       imdbId: "tt1234563",
+      state: "requested",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234564",
       state: "failed",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234565",
+      state: "failed",
+    }),
+    showItemRequestFactory.makeEntity({
+      imdbId: "tt1234566",
+      state: "ongoing",
     }),
   ];
 
@@ -45,7 +57,7 @@ it("enqueues an item processor job for each incomplete item request in the datab
 
   for (const item of incompleteItems) {
     await vi.waitFor(() => {
-      expect(flowSpy).toHaveBeenCalledWith(
+      expect(flowAddSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           queueName: "process-item-request",
           data: expect.objectContaining({
@@ -57,7 +69,7 @@ it("enqueues an item processor job for each incomplete item request in the datab
   }
 
   for (const item of completeItems) {
-    expect(flowSpy).not.toHaveBeenCalledWith(
+    expect(flowAddSpy).not.toHaveBeenCalledWith(
       expect.objectContaining({
         queueName: "process-item-request",
         data: expect.objectContaining({
@@ -72,7 +84,7 @@ it('enqueues a media item processor job in the "scrape" step for each incomplete
   actor,
   seeders: { seedIndexedMovie },
 }) => {
-  const flowSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
 
   const indexedMovies = await seedIndexedMovie(3);
 
@@ -82,7 +94,7 @@ it('enqueues a media item processor job in the "scrape" step for each incomplete
 
   for (const { movie } of indexedMovies) {
     await vi.waitFor(() => {
-      expect(flowSpy).toHaveBeenCalledWith(
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             queueName: "process-media-item",
@@ -103,7 +115,7 @@ it('enqueues a media item processor job in the "scrape" step for each partially 
   actor,
   seeders: { seedPartiallyCompletedShow },
 }) => {
-  const flowSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
 
   const partiallyCompletedShows = await seedPartiallyCompletedShow(3);
 
@@ -112,20 +124,24 @@ it('enqueues a media item processor job in the "scrape" step for each partially 
   await waitFor(actor, (state) => state.matches("Running"));
 
   for (const { show } of partiallyCompletedShows) {
+    const incompleteItems = await show.getIncompleteItems();
+
     await vi.waitFor(() => {
-      expect(flowSpy).toHaveBeenCalledWith(
-        expect.arrayContaining([
-          expect.objectContaining({
-            queueName: "process-media-item",
-            data: expect.objectContaining({
-              mediaItem: expect.objectContaining({
-                id: show.id,
+      for (const incompleteItem of incompleteItems) {
+        expect(flowAddBulkSpy).toHaveBeenCalledWith(
+          expect.arrayContaining([
+            expect.objectContaining({
+              queueName: "process-media-item",
+              data: expect.objectContaining({
+                mediaItem: expect.objectContaining({
+                  id: incompleteItem.id,
+                }),
+                step: "scrape",
               }),
-              step: "scrape",
             }),
-          }),
-        ]),
-      );
+          ]),
+        );
+      }
     });
   }
 });
@@ -134,7 +150,7 @@ it('enqueues a media item processor job in the "download" step for each incomple
   actor,
   seeders: { seedScrapedMovie },
 }) => {
-  const flowSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
 
   const scrapedMovies = await seedScrapedMovie(3);
 
@@ -144,7 +160,7 @@ it('enqueues a media item processor job in the "download" step for each incomple
 
   for (const { movie } of scrapedMovies) {
     await vi.waitFor(() => {
-      expect(flowSpy).toHaveBeenCalledWith(
+      expect(flowAddBulkSpy).toHaveBeenCalledWith(
         expect.arrayContaining([
           expect.objectContaining({
             queueName: "process-media-item",

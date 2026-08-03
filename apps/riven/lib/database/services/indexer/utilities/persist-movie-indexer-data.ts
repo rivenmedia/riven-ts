@@ -1,4 +1,5 @@
 import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
@@ -21,8 +22,13 @@ export async function persistMovieIndexerData(
     id: item.id,
   });
 
+  const processableStates = ItemRequestState.extract([
+    "requested",
+    "unreleased",
+  ]);
+
   assert.ok(
-    itemRequest.state === "requested",
+    processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
     }),
@@ -38,6 +44,10 @@ export async function persistMovieIndexerData(
     });
   }
 
+  const existingMovie = await em.findOne(Movie, {
+    tmdbId,
+  });
+
   try {
     const releaseDate = item.releaseDate
       ? DateTime.fromISO(item.releaseDate)
@@ -45,6 +55,7 @@ export async function persistMovieIndexerData(
 
     const mediaItem = em.create(Movie, {
       title: item.title,
+      fullTitle: item.title,
       imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
       tmdbId,
       contentRating: item.contentRating,
@@ -62,7 +73,15 @@ export async function persistMovieIndexerData(
       indexedAt: DateTime.utc().toJSDate(),
     });
 
+    if (existingMovie) {
+      mediaItem.id = existingMovie.id;
+    }
+
     await validateOrReject(mediaItem);
+
+    await em.upsert(Movie, mediaItem, {
+      onConflictExcludeFields: ["createdAt", "indexedAt", "scrapedAt", "state"],
+    });
 
     em.assign(itemRequest, {
       state: mediaItem.isReleased ? "completed" : "unreleased",

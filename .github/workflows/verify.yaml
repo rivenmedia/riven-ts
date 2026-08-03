@@ -41,12 +41,30 @@ jobs:
               - fuse
           - name: Formatting
             command: //#format:check:ci
-          - name: Tests
+
+          # Separate test jobs per-platform ensures that the project can build natively
+          - name: Tests (linux-x64)
             command: test
             concurrency: "100%"
-            runner-requirements:
+            runner-requirements: &test-runner-requirements
               - redis-server
               - fuse
+            runner: ubuntu-latest
+          - name: Tests (linux-arm64)
+            command: test
+            concurrency: "100%"
+            runner-requirements: *test-runner-requirements
+            runner: ubuntu-24.04-arm
+          - name: Tests (macos-arm64)
+            command: test
+            concurrency: "100%"
+            runner-requirements: *test-runner-requirements
+            runner: macos-latest
+          - name: Tests (macos-intel)
+            command: test
+            concurrency: "100%"
+            runner-requirements: *test-runner-requirements
+            runner: macos-15-intel
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:
@@ -67,6 +85,7 @@ jobs:
               - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
+      runner: ${{ matrix.task.runner || 'ubuntu-latest' }}
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ matrix.task.runner-requirements &&

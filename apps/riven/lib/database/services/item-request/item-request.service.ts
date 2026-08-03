@@ -9,6 +9,7 @@ import { BaseService } from "../core/base-service.ts";
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
+import type { Ref } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import type { UUID } from "node:crypto";
 
@@ -64,5 +65,13 @@ export class ItemRequestService extends BaseService {
     await this.em.flush();
 
     return itemRequest;
+  }
+
+  @CreateRequestContext()
+  @Transactional()
+  public async removeItemRequest(target: ItemRequest | Ref<ItemRequest>) {
+    this.em.remove(target);
+
+    return Promise.resolve();
   }
 }

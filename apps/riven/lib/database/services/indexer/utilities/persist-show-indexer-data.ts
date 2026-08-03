@@ -45,7 +45,7 @@ export async function persistShowIndexerData(
     {
       itemRequest: { id: itemRequest.id },
     },
-    { populate: ["$infer"] },
+    { populate: ["$infer", "seasons:ref", "seasons.episodes:ref"] },
   );
 
   if (itemRequest.state === "requested_additional_seasons") {
@@ -93,11 +93,26 @@ export async function persistShowIndexerData(
       seasons: [],
     });
 
+    if (existingShow) {
+      show.id = existingShow.id;
+    }
+
     await em.upsert(Show, show, {
-      onConflictExcludeFields: ["indexedAt"],
+      onConflictExcludeFields: [
+        "createdAt",
+        "indexedAt",
+        "failedScrapeAttempts",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
     });
 
     for (const season of Object.values(item.seasons)) {
+      const existingSeason = existingShow?.seasons.find(
+        ({ number }) => number === season.number,
+      );
+
       const seasonTitle = [
         `Season ${season.number.toString().padStart(2, "0")}`,
         season.title,
@@ -124,13 +139,28 @@ export async function persistShowIndexerData(
         episodes: [],
       });
 
+      if (existingSeason) {
+        seasonEntry.id = existingSeason.id;
+      }
+
       show.seasons.add(seasonEntry);
 
       await em.upsert(Season, seasonEntry, {
-        onConflictExcludeFields: ["indexedAt"],
+        onConflictExcludeFields: [
+          "createdAt",
+          "failedScrapeAttempts",
+          "indexedAt",
+          "scrapedAt",
+          "scrapedTimes",
+          "state",
+        ],
       });
 
       for (const episode of season.episodes) {
+        const existingEpisode = existingSeason?.episodes.find(
+          ({ number }) => number === episode.number,
+        );
+
         const episodeEntry = em.create(Episode, {
           title: episode.title,
           fullTitle: `${seasonEntry.fullTitle}E${episode.number.toString().padStart(2, "0")} - ${episode.title}`,
@@ -148,23 +178,39 @@ export async function persistShowIndexerData(
           indexedAt,
         });
 
+        if (existingEpisode) {
+          episodeEntry.id = existingEpisode.id;
+        }
+
         if (
           !seasonEntry.isSpecial &&
           !episodeEntry.isReleased &&
           episodeEntry.releaseDate &&
           !show.nextAirDate
         ) {
-          show.nextAirDate = episodeEntry.releaseDate;
-
           await em.upsert(Show, show, {
-            onConflictExcludeFields: ["indexedAt"],
+            onConflictExcludeFields: [
+              "createdAt",
+              "failedScrapeAttempts",
+              "indexedAt",
+              "scrapedAt",
+              "scrapedTimes",
+              "state",
+            ],
           });
         }
 
         seasonEntry.episodes.add(episodeEntry);
 
         await em.upsert(Episode, episodeEntry, {
-          onConflictExcludeFields: ["indexedAt"],
+          onConflictExcludeFields: [
+            "createdAt",
+            "failedScrapeAttempts",
+            "indexedAt",
+            "scrapedAt",
+            "scrapedTimes",
+            "state",
+          ],
         });
       }
     }

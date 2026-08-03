@@ -639,17 +639,10 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          "riven.media-item.scrape.error.no-new-streams": {
+          "riven.media-item.scrape.error.no-streams-found": {
             description:
-              "Indicates that a media item scrape completed successfully, but no new streams were found.",
+              "Indicates that no streams were found when attempting to scrape a media item.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `No new streams found for ${chalk.bold(item.fullTitle)}.`,
-                  level: "verbose",
-                }),
-              },
               {
                 type: "fanOutDownload",
                 params: ({ event: { item } }) => ({ item }),

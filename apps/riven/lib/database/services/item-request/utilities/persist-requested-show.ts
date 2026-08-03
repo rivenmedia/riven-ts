@@ -53,7 +53,12 @@ export async function persistRequestedShow(
           .toSorted((a, b) => a - b)
       : (item.seasons ?? existingItem?.seasons ?? null);
 
-  if (existingItem && itemRequest.seasons) {
+  if (
+    (existingItem && !existingItem.seasons && itemRequest.seasons?.length) ||
+    (existingItem?.seasons &&
+      itemRequest.seasons &&
+      itemRequest.seasons.length > existingItem.seasons.length)
+  ) {
     existingItem.state = "requested_additional_seasons";
 
     const linkedItemsToProcess = await existingItem.seasonItems.matching({

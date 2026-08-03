@@ -8,6 +8,7 @@ import {
   ManyToMany,
   PrimaryKey,
   Property,
+  OneToMany,
 } from "@mikro-orm/decorators/legacy";
 import { Field, ID, ObjectType } from "type-graphql";
 
@@ -31,6 +32,16 @@ export class Stream {
   public parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
-  @ManyToMany(() => MediaItem, "streams")
+  @ManyToMany({
+    entity: () => MediaItem,
+    mappedBy: "streams",
+  })
   public parents = new Collection<MediaItem>(this);
+
+  @Field(() => [MediaItem])
+  @OneToMany({
+    entity: () => MediaItem,
+    mappedBy: "activeStream",
+  })
+  public activeParents = new Collection<MediaItem>(this);
 }

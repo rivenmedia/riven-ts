@@ -1,4 +1,9 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -13,6 +18,30 @@ import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
+  async #shouldFanOut(item: MediaItem) {
+    if (item instanceof Movie || item instanceof Episode) {
+      // No fan-out necessary for movies or individual episodes,
+      // as they are the leaf nodes in the media item hierarchy
+      return false;
+    }
+
+    const { settings } = await import("../../../utilities/settings.ts");
+
+    const isPartialRequest = item.itemRequest.getProperty("isPartialRequest");
+
+    if (isPartialRequest) {
+      return true;
+    }
+
+    const isOngoingShow = item instanceof Show && item.state === "ongoing";
+
+    if (isOngoingShow) {
+      return true;
+    }
+
+    return settings.preferSeasonPacks;
+  }
+
   @CreateRequestContext()
   public async getMediaItemById<
     Hint extends string = never,
@@ -38,13 +67,7 @@ export class MediaItemService extends BaseService {
         { populate: ["itemRequest"] },
       );
 
-      const { settings } = await import("../../../utilities/settings.ts");
-
-      if (
-        item.itemRequest.getProperty("isPartialRequest") ||
-        (item instanceof Show &&
-          (item.status === "continuing" || settings.preferSeasonPacks))
-      ) {
+      if (await this.#shouldFanOut(item)) {
         return await services.downloaderService.getFanOutDownloadItems(id);
       }
 
