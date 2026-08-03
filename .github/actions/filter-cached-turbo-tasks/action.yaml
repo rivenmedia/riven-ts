@@ -55,9 +55,6 @@ runs:
           exit 0
         fi
 
-        echo $RUNNER_ARCH
-        echo $RUNNER_OS
-
         DRY_RUN_OUTPUT=$($TURBO_COMMAND --dry=json --affected "${TASK_LIST[@]}")
         REQUIRED_TASKS=$(jq -c --argjson tasks "$TASKS" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and (.task as $task | ($tasks | index($task)) or (.taskId as $taskId | ($tasks | index($taskId))))) | .taskId]' <<< "$DRY_RUN_OUTPUT")
 

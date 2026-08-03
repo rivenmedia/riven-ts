@@ -120,9 +120,6 @@ jobs:
       - name: Run ${{ inputs.task }}
         id: run-task
         run: |
-          echo $RUNNER_ARCH
-          echo $RUNNER_OS
-
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
             echo "::error::Invalid concurrency: $CONCURRENCY"
             exit 1
