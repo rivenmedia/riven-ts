@@ -13,20 +13,14 @@ export async function persistScrapeResults(
   item: MediaItem,
   results: Record<string, ParsedData>,
 ) {
-  await em.upsertMany(
+  const streams = await em.upsertMany(
     Stream,
-    Object.entries(results).map(([infoHash, parsedData]) =>
-      em.create(Stream, {
-        infoHash,
-        parsedData,
-      }),
-    ),
+    Object.entries(results).map(([infoHash, parsedData]) => ({
+      infoHash,
+      parsedData,
+    })),
     { onConflictAction: "ignore" },
   );
-
-  const streams = await em.find(Stream, {
-    infoHash: { $in: Object.keys(results) },
-  });
 
   const newStreamsCount = item.streams.add(streams);
 

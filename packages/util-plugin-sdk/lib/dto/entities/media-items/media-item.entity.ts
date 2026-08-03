@@ -160,10 +160,7 @@ export abstract class MediaItem {
   public activeStream?: Ref<Stream> | null;
 
   @Field(() => [Stream])
-  @ManyToMany({
-    entity: () => Stream,
-    inversedBy: "parents",
-  })
+  @ManyToMany(() => Stream)
   public streams = new Collection<Stream>(this);
 
   @Field(() => [BlacklistedStream])

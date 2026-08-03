@@ -111,12 +111,12 @@ export const processMediaItemProcessor =
               break;
             }
             case "download": {
-              const item = await downloaderService.getItemToDownload(
+              const itemToDownload = await downloaderService.getItemToDownload(
                 job.data.mediaItem.id,
               );
 
               await enqueueDownloadItem({
-                item,
+                item: itemToDownload,
                 opts: { parent },
               });
 
