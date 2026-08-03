@@ -24,5 +24,11 @@
     }
   ],
   "printWidth": 80,
-  "ignorePatterns": ["pnpm-lock.yaml", "*.hbs", "**/docker-data", "**/.source"]
+  "ignorePatterns": [
+    "pnpm-lock.yaml",
+    "*.hbs",
+    "**/docker-data",
+    "**/.source",
+    "**/.pnpm_patches"
+  ]
 }

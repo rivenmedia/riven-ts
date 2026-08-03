@@ -1,6 +1,7 @@
 import { toMerged } from "es-toolkit";
 
 import { services } from "../../../database/database.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
 import { flow } from "../producer.ts";
 import { createProcessMediaItemJob } from "./process-media-item.schema.ts";
 
@@ -22,26 +23,38 @@ export async function enqueueProcessMediaItem(
   const mediaItemsToProcess =
     await services.mediaItemService.getItemsToProcess(id);
 
-  const rootNodes = mediaItemsToProcess.map((mediaItem) =>
-    createProcessMediaItemJob(
-      mediaItem.fullTitle,
-      {
-        step,
-        mediaItem,
-        isRootItem,
-      },
-      {
-        opts: toMerged<typeof opts, PartialDeep<NonNullable<FlowJob["opts"]>>>(
-          opts,
-          {
+  if (mediaItemsToProcess.length === 0) {
+    const { fullTitle } = await services.mediaItemService.getMediaItemById(id);
+
+    logger.verbose(`No media items require processing for ${fullTitle}.`);
+
+    return;
+  }
+
+  const rootNodes: FlowJob[] = [];
+
+  for (const mediaItem of mediaItemsToProcess) {
+    rootNodes.push(
+      createProcessMediaItemJob(
+        mediaItem.fullTitle,
+        {
+          step,
+          mediaItem,
+          isRootItem,
+        },
+        {
+          opts: toMerged<
+            typeof opts,
+            PartialDeep<NonNullable<FlowJob["opts"]>>
+          >(opts, {
             deduplication: {
               id: `process-${mediaItem.type}-${mediaItem.id}`,
             },
-          },
-        ),
-      },
-    ),
-  );
+          }),
+        },
+      ),
+    );
+  }
 
   return flow.addBulk(rootNodes);
 }

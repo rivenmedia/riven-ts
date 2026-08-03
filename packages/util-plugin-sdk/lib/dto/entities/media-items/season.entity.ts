@@ -29,7 +29,9 @@ export class Season extends ShowLikeMediaItem {
   public show!: Opt<Ref<Show>>;
 
   @Field(() => [Episode])
-  @OneToMany(() => Episode, (episode) => episode.season)
+  @OneToMany(() => Episode, (episode) => episode.season, {
+    orphanRemoval: true,
+  })
   public episodes = new Collection<Episode>(this);
 
   public getPrettyName(): string {

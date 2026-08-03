@@ -7,26 +7,24 @@ Riven is a self-hosted media automation system. It discovers content you want, f
 
 ## How It Works
 
-1. **Content Discovery** - Plugins like Seerr, MDBList, or Listrr tell Riven what media you want
-2. **Indexing** - TMDB/TVDB plugins fetch metadata for requested items
-3. **Scraping** - Torrentio, Comet, or StremThru plugins find available torrents
-4. **Downloading** - StremThru caches torrents on your debrid service ([Real-Debrid](https://real-debrid.com), [AllDebrid](https://alldebrid.com), [TorBox](https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858), etc.)
-5. **VFS** - A FUSE virtual file system mounts the debrid content as local files
-6. **Library Update** - Your media server (Plex or Jellyfin) picks up the new files
+1. **Content Discovery** — Plugins like Seerr, MDBList, or Listrr tell Riven what media you want
+2. **Indexing** — TMDB and TVDB fetch metadata for requested items
+3. **Scraping** — Torrentio or Comet find available torrents
+4. **Downloading** — StremThru caches those torrents on your debrid store ([Real-Debrid](https://real-debrid.com), [AllDebrid](https://alldebrid.com), [TorBox](https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858), and others)
+5. **VFS** — A FUSE virtual file system mounts the debrid content as local files
+6. **Library Update** — Your media server picks up the new files
 
-All of this happens automatically. You request a movie or show, and it appears in your media server.
+You request a movie or show, and it appears in your media server.
 
 ## Key Features
 
-- **Plugin Architecture** - Modular and extensible. Every integration is a plugin.
-- **Virtual File System** - No symlinks or file copies. Clean FUSE mount.
-- **GraphQL API** - Powerful API for querying and managing your library.
-- **State Machines** - XState-powered workflows for reliable media processing.
-- **Job Queue** - BullMQ with Redis for async, resilient processing.
+- **Plugin Architecture** — Modular and extensible. Every integration is a plugin.
+- **Virtual File System** — No symlinks or file copies. Clean FUSE mount.
+- **GraphQL API** — Powerful API for querying and managing your library.
+- **State Machines** — XState-powered workflows for reliable media processing.
+- **Job Queue** — BullMQ with Redis for async, resilient processing.
 
 ## Quick Links
-
-import { Card, Cards } from "fumadocs-ui/components/card";
 
 <Cards>
   <Card
@@ -37,7 +35,12 @@ import { Card, Cards } from "fumadocs-ui/components/card";
   <Card
     title="Getting Started"
     href="/docs/getting-started"
-    description="Install and configure Riven"
+    description="Install and configure Riven with Docker"
+  />
+  <Card
+    title="Running from Source"
+    href="/docs/from-source"
+    description="Run Riven directly on the host instead"
   />
   <Card
     title="Architecture"

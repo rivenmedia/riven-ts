@@ -1,0 +1,138 @@
+---
+title: Running from Source
+description: Run Riven TS directly on the host instead of in Docker.
+---
+
+import { Callout } from "fumadocs-ui/components/callout";
+import { Step, Steps } from "fumadocs-ui/components/steps";
+
+Docker is the recommended way to run Riven. Running from source is worth it if
+you need to run on a host where FUSE-in-Docker is awkward, or you want to track
+`main` closely.
+
+<Callout>
+  Looking to contribute rather than deploy? See
+  [CONTRIBUTING.md](https://github.com/rivenmedia/riven-ts/blob/main/CONTRIBUTING.md)
+  instead — it covers codegen, tests, and the local service stack.
+</Callout>
+
+## Prerequisites
+
+- **Node.js 24.15+** and **pnpm 11.5+**
+- **PostgreSQL 17** and **Redis 8**, reachable from the host
+- **FUSE** libraries — Riven needs `libfuse.so.2` present
+
+<Steps>
+<Step>
+
+### Install FUSE and allow non-root mounts
+
+```bash
+# Debian / Ubuntu
+sudo apt install fuse3
+
+# Arch
+sudo pacman -S fuse fuse3
+```
+
+Then uncomment `user_allow_other` in `/etc/fuse.conf`. Without it the VFS mounts
+but nothing else on the system can read it:
+
+```bash
+sudo sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf
+```
+
+</Step>
+<Step>
+
+### Create the mount point
+
+```bash
+sudo mkdir -p /mnt/riven
+sudo chown -R "$(id -u):$(id -g)" /mnt/riven
+```
+
+</Step>
+<Step>
+
+### Build
+
+```bash
+git clone https://github.com/rivenmedia/riven-ts.git
+cd riven-ts
+pnpm install
+pnpm turbo build --filter=@repo/riven
+```
+
+</Step>
+<Step>
+
+### Configure
+
+Riven reads `apps/riven/.env.riven`. Start from the bundled example:
+
+```bash
+cp apps/riven/.env.riven.example apps/riven/.env.riven
+```
+
+At minimum, set your database, Redis, mount path, and TMDB key:
+
+```bash title="apps/riven/.env.riven"
+RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:CHANGEME@localhost:5432/riven"
+RIVEN_SETTING__redisUrl="redis://127.0.0.1:6379"
+RIVEN_SETTING__vfsMountPath="/mnt/riven"
+RIVEN_SETTING__enabledPlugins=["seerr","stremthru","torrentio","plex"]
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-tmdb-api-key"
+```
+
+Unlike the Docker setup you do **not** need `gqlHost` — the default of
+`localhost` is correct when nothing has to reach Riven across a network
+boundary. Set it to `0.0.0.0` only if other machines need the API.
+
+The full list of settings is on the [Configuration](/docs/core/settings) page.
+
+</Step>
+<Step>
+
+### Run
+
+```bash
+pnpm --filter @repo/riven start
+```
+
+Logs are written to `apps/riven/logs` and the GraphQL API listens on port 3000.
+
+</Step>
+</Steps>
+
+## Running as a service
+
+To keep Riven running across reboots, wrap the start command in a systemd unit.
+Note the `--make-rshared` mount, which is what lets other processes see the VFS:
+
+```ini title="/etc/systemd/system/riven.service"
+[Unit]
+Description=Riven
+After=network-online.target postgresql.service redis.service
+
+[Service]
+Type=simple
+User=riven
+WorkingDirectory=/opt/riven-ts
+ExecStartPre=/usr/bin/mount --make-rshared /mnt/riven
+ExecStart=/usr/bin/pnpm --filter @repo/riven start
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+```
+
+## Updating
+
+```bash
+git pull
+pnpm install
+pnpm turbo build --filter=@repo/riven
+```
+
+Database migrations run automatically on the next start.

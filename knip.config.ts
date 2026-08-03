@@ -33,18 +33,16 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   ignoreDependencies: [
+    "@typescript/native",
     "@kubb/cli",
     "@graphql-codegen/*",
     "@graphql-typed-document-node/*",
-    "@swc-node/register",
-    "@vitest/coverage-v8",
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
-      ignoreDependencies: ["@commitlint/cli"],
       ignoreBinaries: ["tail", "jq"],
     },
     "apps/wiki": {

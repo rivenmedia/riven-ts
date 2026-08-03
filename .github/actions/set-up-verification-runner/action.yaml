@@ -35,14 +35,23 @@ runs:
       shell: bash
       if: ${{ inputs.install-fuse == 'true' }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y fuse libfuse-dev
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          brew install --cask macfuse
+        else
+          sudo apt-get update
+          sudo apt-get install -y fuse libfuse-dev
+        fi
 
     - name: Set up Postgres service
       shell: bash
       if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
-        sudo service postgresql start
+        if [ "${{ runner.os }}" == "macOS" ]; then
+          brew services start postgresql
+        else
+          sudo service postgresql start
+        fi
+
         until pg_isready; do sleep 1; done
         sudo -u postgres createuser -s -d -r -w runner
         sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"

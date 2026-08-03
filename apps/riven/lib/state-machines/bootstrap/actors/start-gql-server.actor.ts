@@ -19,7 +19,10 @@ import { settings } from "../../../utilities/settings.ts";
 
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
-import type { mainRunnerMachine } from "../../main-runner/index.js";
+import type {
+  mainRunnerMachine,
+  MainRunnerMachineIntake,
+} from "../../main-runner/index.js";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { ActorRefFromLogic } from "xstate";
@@ -79,7 +82,7 @@ export const startGqlServer = fromPromise<
 
   await server.start();
 
-  const sendEvent: GraphQLContext["sendEvent"] = (event) => {
+  const sendExternalEvent: GraphQLContext["sendEvent"] = (event) => {
     if (!event.type.startsWith("riven-external.")) {
       throw new Error(
         "Only `riven-external.` events can be sent from the GraphQL server",
@@ -89,12 +92,16 @@ export const startGqlServer = fromPromise<
     mainRunnerRef.send(event);
   };
 
+  const sendEvent: MainRunnerMachineIntake = (event) => {
+    mainRunnerRef.send(event);
+  };
+
   app.use(
     "/",
     cors(),
     express.json(),
     expressMiddleware(server, {
-      context: buildContextFunction(sendEvent),
+      context: buildContextFunction(sendEvent, sendExternalEvent),
     }),
   );
 

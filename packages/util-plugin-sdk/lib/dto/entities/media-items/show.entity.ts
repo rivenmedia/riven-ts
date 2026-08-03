@@ -17,6 +17,7 @@ import { Season, ShowLikeMediaItem } from "./index.ts";
 import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/index.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
+import type { Episode } from "./index.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
@@ -38,7 +39,9 @@ export class Show extends ShowLikeMediaItem {
   public status!: ShowStatus;
 
   @Field(() => [Season])
-  @OneToMany(() => Season, (season) => season.show)
+  @OneToMany(() => Season, (season) => season.show, {
+    orphanRemoval: true,
+  })
   public seasons = new Collection<Season>(this);
 
   @Field(() => [Season])
@@ -136,7 +139,9 @@ export class Show extends ShowLikeMediaItem {
   }
 
   public async getIncompleteItems() {
-    return this.seasons.matching({
+    const incompleteItems = new Set<Season | Episode>();
+
+    const incompleteSeasons = await this.seasons.matching({
       where: {
         isRequested: true,
         isSpecial: false,
@@ -145,6 +150,22 @@ export class Show extends ShowLikeMediaItem {
         },
       },
     });
+
+    for (const season of incompleteSeasons) {
+      if (season.state === "ongoing") {
+        // For ongoing seasons, there's no point trying to download a season pack as it won't be available yet.
+        // Jump directly to episode-level processing instead.
+        const incompleteEpisodes = await season.getIncompleteItems();
+
+        for (const episode of incompleteEpisodes) {
+          incompleteItems.add(episode);
+        }
+      } else {
+        incompleteItems.add(season);
+      }
+    }
+
+    return [...incompleteItems];
   }
 
   public async getUnrequestedItems() {

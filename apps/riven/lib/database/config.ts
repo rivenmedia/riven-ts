@@ -21,6 +21,7 @@ import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.sub
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
+import { ShowNextAirDateSubscriber } from "./subscribers/show-next-air-date.subscriber.ts";
 
 import type { Platform } from "@mikro-orm/core";
 import type { Options } from "@mikro-orm/postgresql";
@@ -92,6 +93,7 @@ export async function createDatabaseConfig({
       new MediaItemFullTitleSubscriber(),
       new ShowLikeMediaItemReleaseDateSubscriber(),
       new MediaItemStateSubscriber(),
+      new ShowNextAirDateSubscriber(),
       new ItemRequestStateSubscriber(),
     ],
     ...metadataCacheConfig,

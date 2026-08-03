@@ -2,21 +2,24 @@ import { database, services } from "../database/database.ts";
 import { logger } from "../utilities/logger/logger.ts";
 import { CoreKey } from "./context.ts";
 
+import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
 import type { ApolloServerContext } from "./context.ts";
 import type { ContextFunction } from "@apollo/server";
 import type { ExpressContextFunctionArgument } from "@as-integrations/express5";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 export const buildContextFunction: (
-  sendEvent: GraphQLContext["sendEvent"],
+  sendEvent: MainRunnerMachineIntake,
+  sendExternalEvent: GraphQLContext["sendEvent"],
 ) => ContextFunction<[ExpressContextFunctionArgument], ApolloServerContext> =
-  (sendEvent) => async () =>
+  (sendEvent, sendExternalEvent) => async () =>
     Promise.resolve({
       [CoreKey]: {
         em: database.em.fork(),
         services,
+        sendEvent,
       },
       logger,
-      sendEvent,
+      sendEvent: sendExternalEvent,
       plugins: {},
     });
