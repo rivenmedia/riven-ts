@@ -2,6 +2,7 @@ import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import chalk from "chalk";
+import assert from "node:assert";
 import {
   Arg,
   Ctx,
@@ -67,17 +68,14 @@ export class MediaItemResolver {
   ) {
     const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
 
-    if (!(mediaItem instanceof Movie || mediaItem instanceof Episode)) {
-      throw new Error(
-        "blacklistActiveStream can only be called on Movie or Episode media items",
-      );
-    }
+    assert.ok(
+      mediaItem instanceof Movie || mediaItem instanceof Episode,
+      "blacklistActiveStream can only be called on Movie or Episode media items",
+    );
 
     const [mediaEntry] = await mediaItem.getMediaEntries();
 
-    if (!mediaEntry) {
-      return false;
-    }
+    assert.ok(mediaEntry, `No media entries found for ${mediaItem.fullTitle}`);
 
     const { blacklistedItems, infoHash: blacklistedInfoHash } =
       await streamService.blacklistActiveStream({
