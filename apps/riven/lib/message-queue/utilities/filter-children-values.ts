@@ -1,4 +1,4 @@
-import { queueNameFor } from "./queue-name-for.ts";
+import { childJobKey } from "./child-job-key.ts";
 
 import type { Flow } from "../flows/index.ts";
 import type { SandboxedJobDefinition } from "../sandboxed-jobs/index.ts";
@@ -58,13 +58,17 @@ export function filterChildrenValues<T extends string | undefined>(
   id?: T,
 ) {
   type ExpectedValue = T extends undefined ? Record<string, unknown> : unknown;
-  const keyPattern = `bull:${queueNameFor(queueName, pluginName)}:${id ? `${id}` : String.raw`[\w\-$]+`}`;
 
   if (id) {
-    return childrenValues[keyPattern] as ExpectedValue;
+    return childrenValues[
+      childJobKey(queueName, pluginName, id)
+    ] as ExpectedValue;
   }
 
-  const pattern = new RegExp(keyPattern, "u");
+  const pattern = new RegExp(
+    `${childJobKey(queueName, pluginName)}${String.raw`[\w\-$]+`}`,
+    "u",
+  );
   const entries = Object.fromEntries(
     Object.entries(childrenValues).filter(([key]) => pattern.test(key)),
   );

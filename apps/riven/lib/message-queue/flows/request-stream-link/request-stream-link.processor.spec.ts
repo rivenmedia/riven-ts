@@ -426,6 +426,96 @@ it("attempts to refresh the link if the health check response indicates an expir
   expect(streamPermalink).toBe("https://example.com/refreshed-link");
 });
 
+it("surfaces the child failure reason when the health check job throws", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        link: "https://example.com/stream-link",
+        isPermalink: true,
+      },
+    }),
+  );
+
+  createPluginWorker(
+    "riven.media-item.stream-link.health-check.requested",
+    mediaEntry.plugin,
+    vi.fn().mockRejectedValue(new Error("simulated health check failure")),
+  );
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  const runPromise = runSingleJob(job);
+
+  await expect(runPromise).rejects.toThrow(/simulated health check failure/iu);
+  await expect(runPromise).rejects.not.toThrow(
+    /expected object, received undefined/iu,
+  );
+});
+
+it("blacklists the stream if the link fails to refresh after repeated expirations", async ({
+  em,
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    vi.fn().mockResolvedValue({
+      success: true,
+      data: {
+        link: "https://example.com/stream-link",
+        isPermalink: true,
+      },
+    }),
+  );
+
+  createPluginWorker(
+    "riven.media-item.stream-link.health-check.requested",
+    mediaEntry.plugin,
+    vi.fn().mockResolvedValue({
+      state: "expired",
+      statusCode: StatusCodes.FORBIDDEN,
+    }),
+  );
+
+  const { activeStream } = completedMovie;
+
+  expect.assert(activeStream);
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await expect(runSingleJob(job)).rejects.toThrow(/dead torrent detected/iu);
+
+  await expect(
+    em.findOneOrFail(BlacklistedStream, {
+      stream: activeStream.infoHash,
+      mediaItem: completedMovie,
+      provider: mediaEntry.provider,
+      plugin: mediaEntry.plugin,
+    }),
+  ).resolves.toBeInstanceOf(BlacklistedStream);
+});
+
 it("deletes the media entry if the stream link response indicates a dead link", async ({
   completedMovieContext: { completedMovie },
   createPluginWorker,

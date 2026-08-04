@@ -7,6 +7,7 @@ import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
+import { GetTorrentResponse } from "../schemas/get-torrent-response.schema.ts";
 import { ItemStatus } from "../schemas/item-status.schema.ts";
 import { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
 import { Store } from "../schemas/store.schema.ts";
@@ -218,6 +219,25 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
       throw new StremThruTorzAPIError(
         `${infoHash} was in the ${data.status} state on ${store}; the torrent will not be downloaded.`,
+      );
+    }
+
+    return data;
+  }
+
+  public async getTorrent(id: string, store: Store) {
+    const response = await this.get<unknown>(
+      `v0/store/torz/${encodeURIComponent(id)}`,
+      {
+        headers: this.#buildCommonHeaders(store),
+      },
+    );
+
+    const { data } = GetTorrentResponse.parse(response);
+
+    if (!data) {
+      throw new StremThruTorzAPIError(
+        `No data returned from ${store} for torrent ${id}`,
       );
     }
 
