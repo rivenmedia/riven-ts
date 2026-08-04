@@ -14,7 +14,6 @@ import {
   Resolver,
 } from "type-graphql";
 
-import { enqueueProcessMediaItem } from "../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { ApolloServerContext } from "../context.ts";
@@ -91,6 +90,9 @@ export class MediaItemResolver {
     const itemsToReprocess = await streamService.calculateItemsToReprocess(
       new Set(blacklistedItems),
     );
+
+    const { enqueueProcessMediaItem } =
+      await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
     for (const { id } of itemsToReprocess) {
       await enqueueProcessMediaItem({ id });
