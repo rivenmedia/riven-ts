@@ -1,8 +1,11 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
+import chalk from "chalk";
+import assert from "node:assert";
 import {
   Arg,
+  Ctx,
   FieldResolver,
   ID,
   Int,
@@ -13,6 +16,7 @@ import {
 
 import { CoreContext } from "../decorators/core-context.ts";
 
+import type { ApolloServerContext } from "../context.ts";
 import type { UUID } from "node:crypto";
 
 @Resolver(() => MediaItem)
@@ -51,6 +55,50 @@ export class MediaItemResolver {
     const resetItems = await mediaItemService.resetMediaItem(item);
 
     return [...resetItems];
+  }
+
+  @Mutation(() => Boolean)
+  public async blacklistActiveStream(
+    @Arg("mediaItemId", () => ID) mediaItemId: UUID,
+    @CoreContext() {
+      services: { mediaItemService, streamService },
+    }: CoreContext,
+    @Ctx() { logger }: ApolloServerContext,
+  ) {
+    const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
+
+    assert.ok(
+      mediaItem instanceof Movie || mediaItem instanceof Episode,
+      "blacklistActiveStream can only be called on Movie or Episode media items",
+    );
+
+    const [mediaEntry] = await mediaItem.getMediaEntries();
+
+    assert.ok(mediaEntry, `No media entries found for ${mediaItem.fullTitle}`);
+
+    const { blacklistedItems, infoHash: blacklistedInfoHash } =
+      await streamService.blacklistActiveStream({
+        mediaItem,
+        provider: mediaEntry.provider,
+        plugin: mediaEntry.plugin,
+      });
+
+    logger.info(
+      `Stream ${blacklistedInfoHash} for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
+    );
+
+    const itemsToReprocess = await streamService.calculateItemsToReprocess(
+      new Set(blacklistedItems),
+    );
+
+    const { enqueueProcessMediaItem } =
+      await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
+
+    for (const { id } of itemsToReprocess) {
+      await enqueueProcessMediaItem({ id });
+    }
+
+    return true;
   }
 
   @FieldResolver(() => Int)
