@@ -33,7 +33,7 @@ export class MediaItemService extends BaseService {
       return true;
     }
 
-    const isOngoingShow = item instanceof Show && item.state === "ongoing";
+    const isOngoingShow = item instanceof Show && item.status === "continuing";
 
     if (isOngoingShow) {
       return true;

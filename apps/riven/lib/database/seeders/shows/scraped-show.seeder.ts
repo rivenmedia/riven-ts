@@ -24,6 +24,13 @@ export class ScrapedShowSeeder extends BaseSeeder<ScrapedShowSeederContext> {
 
     await em.flush();
 
+    const itemRequest = context.show.itemRequest.unwrap();
+
+    assert.ok(
+      itemRequest.state === "processing",
+      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+    );
+
     assert.ok(
       context.show.state === "scraped",
       `Expected show state to be "scraped", got "${context.show.state}"`,

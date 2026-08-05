@@ -32,6 +32,13 @@ export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedS
 
     await em.flush();
 
+    const itemRequest = context.show.itemRequest.unwrap();
+
+    assert.ok(
+      itemRequest.state === "processing",
+      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+    );
+
     assert.ok(
       context.show.state === "partially_completed",
       `Expected show state to be "partially_completed", got "${context.show.state}"`,

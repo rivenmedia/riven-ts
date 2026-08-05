@@ -13,7 +13,7 @@ import type { UUID } from "node:crypto";
 /**
  * Asserts that the counts of child items (episodes, seasons, and shows) for a given show match the expected values.
  *
- * As the show indexer upserts, this is important to verify so that duplicates are not created.
+ * As the show indexer upserts, it's important to verify that duplicates aren't created.
  *
  * @param em The entity manager instance.
  * @param showId The ID of the show.
@@ -96,7 +96,7 @@ it("returns the show if processed successfully", async ({
   });
 });
 
-it("sets the item request's state to 'completed' if processed successfully", async ({
+it("sets the item request's state to 'processing' if processed successfully", async ({
   factories: { showItemRequestFactory },
   services: { indexerService },
 }) => {
@@ -157,7 +157,7 @@ it("sets the item request's state to 'completed' if processed successfully", asy
   });
 
   await expect(result.itemRequest.loadProperty("state")).resolves.toBe(
-    "completed",
+    "processing",
   );
 });
 
@@ -422,7 +422,7 @@ it("updates the show and its children with the latest data if it has already bee
 
   expect(wrap(updatedOngoingShow).toJSON()).toStrictEqual(
     expect.objectContaining({
-      state: "ongoing",
+      state: "indexed",
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 1 }).toJSDate(),
     }),
   );
@@ -522,10 +522,77 @@ it("updates the show and its children with the latest data if it has already bee
 
   expect(wrap(updatedOngoingShowWeekTwo).toJSON()).toStrictEqual(
     expect.objectContaining({
-      state: "ongoing",
+      state: "indexed",
       nextAirDate: firstEpisodeAirDate.plus({ weeks: 2 }).toJSDate(),
     }),
   );
+
+  await expect(
+    initialShow.itemRequest.loadProperty("state", { refresh: true }),
+  ).resolves.toBe("ongoing");
+
+  await assertChildItemCounts(em, initialShow.id, {
+    showCount: 1,
+    seasonCount: 1,
+    episodeCount: 3,
+  });
+
+  vi.setSystemTime(DateTime.utc().plus({ weeks: 2 }).toJSDate());
+
+  const updatedOngoingShowWeekThree = await indexerService.indexItem({
+    id: itemRequest.id,
+    title: "Test Show",
+    imdbId: requestedId,
+    contentRating: "tv-14",
+    genres: [],
+    type: "show",
+    network: "Test Network",
+    seasons: {
+      1: {
+        number: 1,
+        title: "Season 1",
+        episodes: [
+          {
+            absoluteNumber: 1,
+            contentRating: "tv-14",
+            number: 1,
+            airedAt: firstEpisodeAirDate.toISO(),
+            title: "Episode 1",
+            runtime: 60,
+          },
+          {
+            absoluteNumber: 2,
+            contentRating: "tv-14",
+            number: 2,
+            airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+            title: "Episode 2",
+            runtime: 60,
+          },
+          {
+            absoluteNumber: 3,
+            contentRating: "tv-14",
+            number: 3,
+            airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+            title: "Episode 3",
+            runtime: 60,
+          },
+        ],
+      },
+    },
+    status: "ended",
+  });
+
+  expect(wrap(updatedOngoingShowWeekThree).toJSON()).toStrictEqual(
+    expect.objectContaining({
+      state: "indexed",
+      status: "ended",
+      nextAirDate: null,
+    }),
+  );
+
+  await expect(
+    initialShow.itemRequest.loadProperty("state", { refresh: true }),
+  ).resolves.toBe("processing");
 
   await assertChildItemCounts(em, initialShow.id, {
     showCount: 1,

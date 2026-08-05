@@ -174,13 +174,12 @@ export const processMediaItemProcessor =
           job.data.mediaItem.id,
         );
 
-        const successfulStates: MediaItemState[] = [
+        const successfulStates = new Set<MediaItemState>([
           "completed",
-          "ongoing",
           "partially_completed",
-        ];
+        ]);
 
-        if (!successfulStates.includes(item.state)) {
+        if (!successfulStates.has(item.state)) {
           throw new UnrecoverableError(
             `Processing of ${chalk.bold(item.fullTitle)} did not complete successfully. Final state: ${item.state}`,
           );
@@ -214,7 +213,7 @@ export const processMediaItemProcessor =
             const showUnrequestedItems = await show.getUnrequestedItems();
             const hasUnrequestedItems = showUnrequestedItems.length > 0;
 
-            if (show.state === "ongoing") {
+            if (show.status === "continuing") {
               const { reindexTime } =
                 await indexerService.calculateReindexTime(show);
 

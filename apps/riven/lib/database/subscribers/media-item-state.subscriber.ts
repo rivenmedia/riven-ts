@@ -243,6 +243,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       "failed",
       "downloaded",
       "unreleased",
+      "completed",
     ]);
 
     for (const propagableState of propagableStates.options) {
@@ -255,20 +256,6 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       if (childrenStateCount === children.length) {
         return propagableState;
       }
-    }
-
-    if (childrenStateCountMap.completed === children.length) {
-      return parent instanceof Show && parent.status === "continuing"
-        ? "ongoing"
-        : "completed";
-    }
-
-    if (
-      childrenStateCountMap.ongoing ||
-      childrenStateCountMap.unreleased ||
-      (parent instanceof Show && parent.status === "continuing")
-    ) {
-      return "ongoing";
     }
 
     if (

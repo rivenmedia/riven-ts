@@ -127,9 +127,16 @@ export class OngoingShowSeeder extends BaseSeeder<OngoingShowSeederContext> {
       }
     }
 
+    const itemRequest = context.show.itemRequest.unwrap();
+
     assert.ok(
-      context.show.state === "ongoing",
-      `Expected show state to be "ongoing", got "${context.show.state}"`,
+      itemRequest.state === "ongoing",
+      `Expected item request state to be "ongoing", got "${itemRequest.state}"`,
+    );
+
+    assert.ok(
+      context.show.state === "partially_completed",
+      `Expected show state to be "partially_completed", got "${context.show.state}"`,
     );
   }
 }

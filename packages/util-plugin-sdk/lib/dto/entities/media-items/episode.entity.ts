@@ -9,6 +9,7 @@ import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
+import type { Show } from "./index.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
@@ -28,6 +29,10 @@ export class Episode extends ShowLikeMediaItem {
   @Field(() => Season)
   @ManyToOne()
   public season!: Opt<Ref<Season>>;
+
+  @Field(() => Season)
+  @ManyToOne()
+  public show!: Opt<Ref<Show>>;
 
   @Field(() => Int, { nullable: true })
   @Property()

@@ -84,4 +84,24 @@ export class Season extends ShowLikeMediaItem {
       },
     });
   }
+
+  public async getIncompleteEpisodes() {
+    return this.episodes.matching({
+      where: {
+        state: {
+          $nin: ["completed", "unreleased"],
+        },
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
+  }
+
+  public async getUnreleasedEpisodes() {
+    return this.episodes.matching({
+      where: {
+        state: "unreleased",
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
+  }
 }

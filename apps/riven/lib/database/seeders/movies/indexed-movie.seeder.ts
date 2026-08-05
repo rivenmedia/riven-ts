@@ -28,6 +28,11 @@ export class IndexedMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
     itemRequest.mediaItems.add(context.movie);
 
     assert.ok(
+      itemRequest.state === "processing",
+      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+    );
+
+    assert.ok(
       context.movie.state === "indexed",
       `Expected movie state to be "indexed", got "${context.movie.state}"`,
     );

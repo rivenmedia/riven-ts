@@ -46,7 +46,6 @@ export async function persistDownloadResults(
 
   const processableMediaItemStates = MediaItemState.extract([
     "scraped",
-    "ongoing",
     "partially_completed",
   ]);
 

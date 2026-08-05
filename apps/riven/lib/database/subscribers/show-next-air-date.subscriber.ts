@@ -8,7 +8,6 @@ import type {
   EventSubscriber,
   FlushEventArgs,
 } from "@mikro-orm/core";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 /**
  * Subscriber that updates the `nextAirDate` of a `Show` when an `Episode` transitions from "unreleased" to "indexed".
@@ -18,7 +17,7 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
     return [Show];
   }
 
-  public beforeUpsert({ entity }: EventArgs<Show>) {
+  public async beforeUpsert({ entity }: EventArgs<Show>) {
     if (
       entity.nextAirDate &&
       DateTime.fromJSDate(entity.nextAirDate) > DateTime.now()
@@ -26,15 +25,11 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
       return;
     }
 
-    const upcomingStates = new Set<MediaItemState>(["ongoing", "unreleased"]);
+    if (entity.episodes.length === 0) {
+      return;
+    }
 
-    const nextAiringSeason = entity.seasons.find(({ state }) =>
-      upcomingStates.has(state),
-    );
-
-    const nextAiringEpisode = nextAiringSeason?.episodes.find(
-      ({ state }) => state === "unreleased",
-    );
+    const [nextAiringEpisode] = await entity.getUnreleasedEpisodes();
 
     entity.nextAirDate = nextAiringEpisode?.releaseDate ?? null;
   }

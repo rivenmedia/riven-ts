@@ -1,36 +1,65 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import type { EventSubscriber, FlushEventArgs } from "@mikro-orm/core";
+import type {
+  EntityName,
+  EventArgs,
+  EventSubscriber,
+  FlushEventArgs,
+} from "@mikro-orm/core";
 
-export class ItemRequestStateSubscriber implements EventSubscriber {
+export class ItemRequestStateSubscriber implements EventSubscriber<
+  Movie | Show
+> {
+  #calculateItemRequestState(entity: Movie | Show) {
+    if (entity instanceof Show && entity.status === "continuing") {
+      return "ongoing";
+    }
+
+    switch (entity.state) {
+      case "indexed":
+      case "scraped":
+      case "partially_completed":
+      case "downloaded": {
+        return "processing";
+      }
+      case "completed":
+      case "paused":
+      case "failed":
+      case "unreleased": {
+        return entity.state;
+      }
+    }
+  }
+
+  public getSubscribedEntities(): EntityName<Movie | Show>[] {
+    return [Movie, Show];
+  }
+
+  public async beforeUpsert({ entity }: EventArgs<Movie | Show>) {
+    const itemRequest = await entity.itemRequest.loadOrFail();
+
+    if (
+      entity instanceof Show &&
+      entity.status === "ended" &&
+      itemRequest.state === "ongoing"
+    ) {
+      itemRequest.state =
+        entity.state === "completed" ? "completed" : "processing";
+    } else {
+      itemRequest.state = this.#calculateItemRequestState(entity);
+    }
+  }
+
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    for (const changeSet of uow.getChangeSets()) {
-      if (
-        changeSet.entity instanceof Movie ||
-        changeSet.entity instanceof Show
-      ) {
-        const itemRequest = await changeSet.entity.itemRequest.loadOrFail();
+    for (const { entity, payload } of uow.getChangeSets()) {
+      if (!payload["state"]) {
+        continue;
+      }
 
-        switch (changeSet.entity.state) {
-          case "completed":
-          case "downloaded":
-          case "indexed":
-          case "partially_completed":
-          case "paused":
-          case "unknown":
-          case "scraped": {
-            itemRequest.state = "completed";
+      if (entity instanceof Movie || entity instanceof Show) {
+        const itemRequest = await entity.itemRequest.loadOrFail();
 
-            break;
-          }
-          case "failed":
-          case "ongoing":
-          case "unreleased": {
-            itemRequest.state = changeSet.entity.state;
-
-            break;
-          }
-        }
+        itemRequest.state = this.#calculateItemRequestState(entity);
 
         uow.computeChangeSet(itemRequest);
       }

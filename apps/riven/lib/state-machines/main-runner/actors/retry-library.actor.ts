@@ -24,9 +24,7 @@ function getMediaItemStep(
     case "downloaded":
     case "failed":
     case "completed":
-    case "ongoing":
     case "paused":
-    case "unknown":
     case "unreleased": {
       throw new Error(`Unexpected media item state: ${item.state}`);
     }

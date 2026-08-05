@@ -30,7 +30,6 @@ export class ScraperService extends BaseService {
 
     const processableStates: MediaItemState[] = [
       "indexed",
-      "ongoing",
       "scraped",
       "partially_completed",
     ];
@@ -70,7 +69,6 @@ export class ScraperService extends BaseService {
 
       const processableStates = MediaItemState.extract([
         "indexed",
-        "ongoing",
         "scraped",
         "partially_completed",
       ]);

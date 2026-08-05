@@ -59,16 +59,17 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
         episodeNumber <= this.#episodesPerSeason;
         episodeNumber += 1
       ) {
-        season.episodes.add(
-          new EpisodeFactory(em).makeEntity({
-            tvdbId: context.show.tvdbId,
-            number: episodeNumber,
-            absoluteNumber: absoluteEpisodeNumber,
-            releaseDate,
-            itemRequest: context.show.itemRequest,
-            indexedAt,
-          }),
-        );
+        const episode = new EpisodeFactory(em).makeEntity({
+          tvdbId: context.show.tvdbId,
+          number: episodeNumber,
+          absoluteNumber: absoluteEpisodeNumber,
+          releaseDate,
+          itemRequest: context.show.itemRequest,
+          indexedAt,
+        });
+
+        season.episodes.add(episode);
+        context.show.episodes.add(episode);
 
         absoluteEpisodeNumber += 1;
       }
@@ -87,6 +88,11 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
     );
 
     await em.flush();
+
+    assert.ok(
+      itemRequest.state === "processing",
+      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+    );
 
     assert.ok(
       context.show.state === "indexed",

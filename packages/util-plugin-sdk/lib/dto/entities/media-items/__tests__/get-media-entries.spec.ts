@@ -102,6 +102,8 @@ it("getMediaEntries() returns the associated media entries for a Show media item
     indexedAt,
   });
 
+  show.episodes.add(episode1, episode2);
+
   const mediaEntry1 = em.create(MediaEntry, {
     fileSize: 123_456,
     originalFilename: "test-show-s01e01.mkv",
@@ -224,6 +226,8 @@ it("getMediaEntries() returns the associated media entries for a Season media it
   season1Episode1.filesystemEntries.add(season1Episode1MediaEntry);
   season2Episode1.filesystemEntries.add(season2Episode1MediaEntry);
 
+  show.episodes.add(season1Episode1, season2Episode1);
+
   await em.flush();
 
   await expect(season1.getMediaEntries()).resolves.toStrictEqual([
@@ -294,6 +298,7 @@ it("getMediaEntries() returns the associated media entry for an Episode media it
   });
 
   season.episodes.add(episode);
+  show.episodes.add(episode);
 
   episode.filesystemEntries.add(mediaEntry);
 

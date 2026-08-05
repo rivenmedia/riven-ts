@@ -235,7 +235,7 @@ export const mainRunnerMachine = setup({
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
     isOngoingItem: (_, item: Movie | Show) => {
       if (item instanceof Show) {
-        return item.state === "ongoing";
+        return item.status === "continuing";
       }
 
       return !item.isReleased;

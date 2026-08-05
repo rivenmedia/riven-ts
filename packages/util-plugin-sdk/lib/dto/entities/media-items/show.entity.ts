@@ -12,12 +12,12 @@ import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { MediaItemState } from "../../enums/media-item-state.enum.ts";
 import { ShowStatus } from "../../enums/show-status.enum.ts";
 import { ShowRepository } from "../../repositories/show.repository.ts";
+import { Episode } from "./index.js";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/index.ts";
 import type { ItemRequest } from "../requests/item-request.entity.ts";
-import type { Episode } from "./index.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })
@@ -50,6 +50,12 @@ export class Show extends ShowLikeMediaItem {
   })
   public requestedSeasons = new Collection<Season>(this);
 
+  @Field(() => [Episode])
+  @OneToMany(() => Episode, (episode) => episode.show, {
+    orphanRemoval: true,
+  })
+  public episodes = new Collection<Episode>(this);
+
   /**
    * The date when the next episode of this show is expected to air.
    *
@@ -76,6 +82,36 @@ export class Show extends ShowLikeMediaItem {
     });
 
     return seasons.flatMap((season) => season.episodes.getItems());
+  }
+
+  public async getUnreleasedEpisodes() {
+    return this.episodes.matching({
+      where: {
+        isRequested: true,
+        state: "unreleased",
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
+  }
+
+  public async getIncompleteEpisodes() {
+    return this.episodes.matching({
+      where: {
+        isRequested: true,
+        state: { $nin: ["completed", "unreleased"] },
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
+  }
+
+  public async getIncompleteSeasons() {
+    return this.seasons.matching({
+      where: {
+        isRequested: true,
+        state: { $nin: ["completed", "unreleased"] },
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
   }
 
   public async getStandardSeasons(stateFilter?: MediaItemState[]) {
@@ -152,11 +188,11 @@ export class Show extends ShowLikeMediaItem {
     });
 
     for (const season of incompleteSeasons) {
-      if (season.state === "ongoing") {
+      const incompleteEpisodes = await season.getIncompleteEpisodes();
+
+      if (incompleteEpisodes.length < (await season.episodes.loadCount())) {
         // For ongoing seasons, there's no point trying to download a season pack as it won't be available yet.
         // Jump directly to episode-level processing instead.
-        const incompleteEpisodes = await season.getIncompleteItems();
-
         for (const episode of incompleteEpisodes) {
           incompleteItems.add(episode);
         }

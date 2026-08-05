@@ -59,8 +59,6 @@ export async function persistRequestedShow(
       itemRequest.seasons &&
       itemRequest.seasons.length > existingItem.seasons.length)
   ) {
-    existingItem.state = "requested_additional_seasons";
-
     const linkedItemsToProcess = await existingItem.seasonItems.matching({
       where: {
         isRequested: false,
@@ -71,15 +69,13 @@ export async function persistRequestedShow(
     });
 
     for (const linkedItem of linkedItemsToProcess) {
-      linkedItem.isRequested = true;
+      em.assign(linkedItem, { isRequested: true });
 
       const episodes = await linkedItem.episodes.loadItems();
 
       for (const episode of episodes) {
-        episode.isRequested = true;
+        em.assign(episode, { isRequested: true });
       }
-
-      em.persist(linkedItem);
     }
   }
 

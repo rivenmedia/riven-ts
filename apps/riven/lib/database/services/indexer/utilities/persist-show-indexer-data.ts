@@ -29,7 +29,7 @@ export async function persistShowIndexerData(
 
   const processableStates = ItemRequestState.extract([
     "requested",
-    "requested_additional_seasons",
+    "processing",
     "ongoing",
     "unreleased",
   ]);
@@ -47,12 +47,6 @@ export async function persistShowIndexerData(
     },
     { populate: ["$infer", "seasons:ref", "seasons.episodes:ref"] },
   );
-
-  if (itemRequest.state === "requested_additional_seasons") {
-    itemRequest.state = "completed";
-
-    return existingShow;
-  }
 
   if (existingShow?.status === "ended" && itemRequest.state === "completed") {
     throw new MediaItemIndexError({
@@ -91,6 +85,7 @@ export async function persistShowIndexerData(
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
       indexedAt,
       seasons: [],
+      episodes: [],
     });
 
     if (existingShow) {
@@ -182,25 +177,8 @@ export async function persistShowIndexerData(
           episodeEntry.id = existingEpisode.id;
         }
 
-        if (
-          !seasonEntry.isSpecial &&
-          !episodeEntry.isReleased &&
-          episodeEntry.releaseDate &&
-          !show.nextAirDate
-        ) {
-          await em.upsert(Show, show, {
-            onConflictExcludeFields: [
-              "createdAt",
-              "failedScrapeAttempts",
-              "indexedAt",
-              "scrapedAt",
-              "scrapedTimes",
-              "state",
-            ],
-          });
-        }
-
         seasonEntry.episodes.add(episodeEntry);
+        show.episodes.add(episodeEntry);
 
         await em.upsert(Episode, episodeEntry, {
           onConflictExcludeFields: [
@@ -214,6 +192,18 @@ export async function persistShowIndexerData(
         });
       }
     }
+
+    // Re-upsert to compute dynamic properties (e.g. nextAirDate) on the show
+    await em.upsert(Show, show, {
+      onConflictExcludeFields: [
+        "createdAt",
+        "failedScrapeAttempts",
+        "indexedAt",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
+    });
 
     await validateOrReject(show);
 
