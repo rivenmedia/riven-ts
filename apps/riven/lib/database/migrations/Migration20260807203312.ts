@@ -19,6 +19,9 @@ export class Migration20260807203312 extends Migration {
     this.addSql(
       `update "media_item" set "state" = 'failed' where "state" = 'unknown';`,
     );
+    this.addSql(
+      `update "media_item" episode set "show_id" = season."show_id" from "media_item" season where episode."type" = 'episode' and episode."season_id" = season."id";`,
+    );
 
     this.addSql(
       `alter table "media_item" drop constraint "media_item_state_check";`,
