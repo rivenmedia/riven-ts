@@ -569,7 +569,7 @@ export const mainRunnerMachine = setup({
                 {
                   type: "log",
                   params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Future episodes will be re-indexed after their air date.`,
                     level: "info",
                   }),
                 },

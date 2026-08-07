@@ -29,14 +29,16 @@ export async function persistRequestedShow(
   );
 
   if (existingItem) {
-    if (existingItem.seasons && item.seasons) {
-      if (requestedSeasonsDifference.size === 0) {
-        // If the existing item is a partial request,
-        // throw if the new request has no new requested seasons
-        throw new ItemRequestCreateErrorConflict({
-          item: existingItem,
-        });
-      }
+    if (
+      existingItem.seasons &&
+      item.seasons &&
+      requestedSeasonsDifference.size === 0
+    ) {
+      // If the existing item is a partial request,
+      // throw if the new request has no new requested seasons
+      throw new ItemRequestCreateErrorConflict({
+        item: existingItem,
+      });
     } else if (!existingItem.seasons && !item.seasons) {
       // If the existing item is a complete request,
       // throw if the new request is also a complete request
