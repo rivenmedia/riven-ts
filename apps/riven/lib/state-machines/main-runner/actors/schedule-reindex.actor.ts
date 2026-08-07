@@ -15,12 +15,18 @@ export interface ScheduleReindexInput {
 
 export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
   async ({ input: { item } }) => {
-    const { isFallback, reindexTime } =
+    const { isReleaseDateKnown, isReleaseDateInPast, reindexTime } =
       await services.indexerService.calculateReindexTime(item);
 
-    if (isFallback) {
+    if (!isReleaseDateKnown) {
       logger.verbose(
-        `No known release date for ${item.type} "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
+        `No known release date for "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
+      );
+    }
+
+    if (isReleaseDateInPast) {
+      logger.verbose(
+        `Release date for "${chalk(item.fullTitle)}" is in the past but updated episode information has not yet been found. Will attempt to reindex in ${settings.scheduleOffsetMinutes.toString()} minutes.`,
       );
     }
 
@@ -39,7 +45,7 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
     );
 
     logger.info(
-      `Scheduled re-index at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY))} for ${item.type} ${chalk.bold(item.fullTitle)}.`,
+      `Scheduled re-index at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY))} for ${chalk.bold(item.fullTitle)}.`,
     );
   },
 );

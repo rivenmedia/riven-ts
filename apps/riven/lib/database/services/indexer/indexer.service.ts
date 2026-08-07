@@ -45,9 +45,11 @@ export class IndexerService extends BaseService {
     }
   }
 
-  public async calculateReindexTime(
-    item: Movie | Show,
-  ): Promise<{ reindexTime: DateTime; isFallback: boolean }> {
+  public async calculateReindexTime(item: Movie | Show): Promise<{
+    reindexTime: DateTime;
+    isReleaseDateKnown: boolean;
+    isReleaseDateInPast?: boolean;
+  }> {
     const { settings } = await import("../../../utilities/settings.ts");
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
@@ -55,7 +57,7 @@ export class IndexerService extends BaseService {
     // If no known release date is available, schedule the reindex for a fallback time in the future.
     if (!baseDate) {
       return {
-        isFallback: true,
+        isReleaseDateKnown: false,
         reindexTime: DateTime.utc()
           .startOf("minute")
           .plus({ days: settings.unknownAirDateOffsetDays }),
@@ -70,17 +72,19 @@ export class IndexerService extends BaseService {
     // to attempt to receive updated information.
     if (releaseDateIsPast) {
       return {
-        isFallback: true,
+        isReleaseDateKnown: true,
+        isReleaseDateInPast: true,
         reindexTime: now.plus({ minutes: settings.scheduleOffsetMinutes }),
       };
     }
 
     // If the item has a known release date, schedule the reindex shortly after the expected release.
     return {
+      isReleaseDateKnown: true,
+      isReleaseDateInPast: false,
       reindexTime: DateTime.fromJSDate(baseDate)
         .startOf("minute")
         .plus({ minutes: settings.scheduleOffsetMinutes }),
-      isFallback: false,
     };
   }
 }
