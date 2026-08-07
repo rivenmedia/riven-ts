@@ -45,11 +45,14 @@ export class IndexerService extends BaseService {
     }
   }
 
-  public async calculateReindexTime(item: Movie | Show): Promise<{
-    reindexTime: DateTime;
-    isReleaseDateKnown: boolean;
-    isReleaseDateInPast?: boolean;
-  }> {
+  public async calculateReindexTime(item: Movie | Show): Promise<
+    {
+      reindexTime: DateTime;
+    } & (
+      | { isReleaseDateInPast?: never; isReleaseDateKnown: false }
+      | { isReleaseDateInPast: boolean; isReleaseDateKnown: true }
+    )
+  > {
     const { settings } = await import("../../../utilities/settings.ts");
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;

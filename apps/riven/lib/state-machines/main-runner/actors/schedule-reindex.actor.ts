@@ -22,11 +22,9 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
       logger.verbose(
         `No known release date for "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
       );
-    }
-
-    if (isReleaseDateInPast) {
+    } else if (isReleaseDateInPast) {
       logger.verbose(
-        `Release date for "${chalk(item.fullTitle)}" is in the past but updated episode information has not yet been found. Will attempt to reindex in ${settings.scheduleOffsetMinutes.toString()} minutes.`,
+        `Release date for "${chalk(item.fullTitle)}" is in the past. Will attempt to reindex in ${settings.scheduleOffsetMinutes.toString()} minutes.`,
       );
     }
 
