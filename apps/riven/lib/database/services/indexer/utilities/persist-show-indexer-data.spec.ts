@@ -69,7 +69,7 @@ it("returns the show if processed successfully", async ({
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const { item: result } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -107,7 +107,7 @@ it("sets the item request's state to 'processing' if processed successfully", as
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const { item: result } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -203,52 +203,54 @@ it("updates the show and its children with the latest data if it has already bee
     state: "requested",
   });
 
-  const initialShow = await indexerService.indexItem({
-    id: itemRequest.id,
-    title: "Test Show",
-    imdbId: requestedId,
-    contentRating: "tv-14",
-    aliases: {
-      en: ["en-alias"],
-    },
-    genres: ["animation"],
-    type: "show",
-    network: "Test Network",
-    seasons: {
-      1: {
-        number: 1,
-        title: "Season 1",
-        episodes: [
-          {
-            absoluteNumber: 0,
-            contentRating: "unknown",
-            number: 1,
-            airedAt: null,
-            title: "TBA",
-            runtime: null,
-          },
-          {
-            absoluteNumber: 0,
-            contentRating: "unknown",
-            number: 2,
-            airedAt: null,
-            title: "TBA",
-            runtime: null,
-          },
-          {
-            absoluteNumber: 0,
-            contentRating: "unknown",
-            number: 3,
-            airedAt: null,
-            title: "TBA",
-            runtime: null,
-          },
-        ],
+  const { item: initialShow, isReindex: initialIsReindex } =
+    await indexerService.indexItem({
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      aliases: {
+        en: ["en-alias"],
       },
-    },
-    status: "upcoming",
-  });
+      genres: ["animation"],
+      type: "show",
+      network: "Test Network",
+      seasons: {
+        1: {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 1,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 2,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+            {
+              absoluteNumber: 0,
+              contentRating: "unknown",
+              number: 3,
+              airedAt: null,
+              title: "TBA",
+              runtime: null,
+            },
+          ],
+        },
+      },
+      status: "upcoming",
+    });
 
+  expect(initialIsReindex).toBe(false);
   expect(wrap(initialShow).toJSON()).toStrictEqual(
     expect.objectContaining<Partial<Show>>({
       aliases: {
@@ -285,52 +287,54 @@ it("updates the show and its children with the latest data if it has already bee
 
   const firstEpisodeAirDate = DateTime.utc().plus({ months: 1 });
 
-  const updatedUpcomingShow = await indexerService.indexItem({
-    id: itemRequest.id,
-    title: "Test Show",
-    imdbId: requestedId,
-    contentRating: "tv-14",
-    aliases: {
-      fr: ["fr-alias"],
-    },
-    genres: ["sci-fi"],
-    type: "show",
-    network: "Test Network",
-    seasons: {
-      1: {
-        number: 1,
-        title: "Season 1",
-        episodes: [
-          {
-            absoluteNumber: 1,
-            contentRating: "tv-14",
-            number: 1,
-            airedAt: firstEpisodeAirDate.toISO(),
-            title: "Episode 1",
-            runtime: 60,
-          },
-          {
-            absoluteNumber: 2,
-            contentRating: "tv-14",
-            number: 2,
-            airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
-            title: "Episode 2",
-            runtime: 60,
-          },
-          {
-            absoluteNumber: 3,
-            contentRating: "tv-14",
-            number: 3,
-            airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
-            title: "Episode 3",
-            runtime: 60,
-          },
-        ],
+  const { item: updatedUpcomingShow, isReindex: updatedIsReindex } =
+    await indexerService.indexItem({
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      aliases: {
+        fr: ["fr-alias"],
       },
-    },
-    status: "upcoming",
-  });
+      genres: ["sci-fi"],
+      type: "show",
+      network: "Test Network",
+      seasons: {
+        1: {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 1,
+              contentRating: "tv-14",
+              number: 1,
+              airedAt: firstEpisodeAirDate.toISO(),
+              title: "Episode 1",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 2,
+              contentRating: "tv-14",
+              number: 2,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+              title: "Episode 2",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 3,
+              contentRating: "tv-14",
+              number: 3,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+              title: "Episode 3",
+              runtime: 60,
+            },
+          ],
+        },
+      },
+      status: "upcoming",
+    });
 
+  expect(updatedIsReindex).toBe(true);
   expect(wrap(updatedUpcomingShow).toJSON()).toStrictEqual(
     expect.objectContaining({
       aliases: {
@@ -377,49 +381,51 @@ it("updates the show and its children with the latest data if it has already bee
 
   vi.setSystemTime(firstEpisodeAirDate.plus({ days: 1 }).toJSDate());
 
-  const updatedOngoingShow = await indexerService.indexItem({
-    id: itemRequest.id,
-    title: "Test Show",
-    imdbId: requestedId,
-    contentRating: "tv-14",
-    genres: [],
-    type: "show",
-    network: "Test Network",
-    seasons: {
-      1: {
-        number: 1,
-        title: "Season 1",
-        episodes: [
-          {
-            absoluteNumber: 1,
-            contentRating: "tv-14",
-            number: 1,
-            airedAt: firstEpisodeAirDate.toISO(),
-            title: "Episode 1",
-            runtime: 60,
-          },
-          {
-            absoluteNumber: 2,
-            contentRating: "tv-14",
-            number: 2,
-            airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
-            title: "Episode 2",
-            runtime: 60,
-          },
-          {
-            absoluteNumber: 3,
-            contentRating: "tv-14",
-            number: 3,
-            airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
-            title: "Episode 3",
-            runtime: 60,
-          },
-        ],
+  const { item: updatedOngoingShow, isReindex: updatedOngoingIsReindex } =
+    await indexerService.indexItem({
+      id: itemRequest.id,
+      title: "Test Show",
+      imdbId: requestedId,
+      contentRating: "tv-14",
+      genres: [],
+      type: "show",
+      network: "Test Network",
+      seasons: {
+        1: {
+          number: 1,
+          title: "Season 1",
+          episodes: [
+            {
+              absoluteNumber: 1,
+              contentRating: "tv-14",
+              number: 1,
+              airedAt: firstEpisodeAirDate.toISO(),
+              title: "Episode 1",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 2,
+              contentRating: "tv-14",
+              number: 2,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 1 }).toISO(),
+              title: "Episode 2",
+              runtime: 60,
+            },
+            {
+              absoluteNumber: 3,
+              contentRating: "tv-14",
+              number: 3,
+              airedAt: firstEpisodeAirDate.plus({ weeks: 2 }).toISO(),
+              title: "Episode 3",
+              runtime: 60,
+            },
+          ],
+        },
       },
-    },
-    status: "continuing",
-  });
+      status: "continuing",
+    });
 
+  expect(updatedOngoingIsReindex).toBe(true);
   expect(wrap(updatedOngoingShow).toJSON()).toStrictEqual(
     expect.objectContaining({
       state: "indexed",
@@ -477,7 +483,10 @@ it("updates the show and its children with the latest data if it has already bee
 
   vi.setSystemTime(DateTime.utc().plus({ weeks: 1 }).toJSDate());
 
-  const updatedOngoingShowWeekTwo = await indexerService.indexItem({
+  const {
+    item: updatedOngoingShowWeekTwo,
+    isReindex: updatedOngoingIsReindexWeekTwo,
+  } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -520,6 +529,7 @@ it("updates the show and its children with the latest data if it has already bee
     status: "continuing",
   });
 
+  expect(updatedOngoingIsReindexWeekTwo).toBe(true);
   expect(wrap(updatedOngoingShowWeekTwo).toJSON()).toStrictEqual(
     expect.objectContaining({
       state: "indexed",
@@ -539,7 +549,10 @@ it("updates the show and its children with the latest data if it has already bee
 
   vi.setSystemTime(DateTime.utc().plus({ weeks: 2 }).toJSDate());
 
-  const updatedOngoingShowWeekThree = await indexerService.indexItem({
+  const {
+    item: updatedOngoingShowWeekThree,
+    isReindex: updatedOngoingIsReindexWeekThree,
+  } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Show",
     imdbId: requestedId,
@@ -582,6 +595,7 @@ it("updates the show and its children with the latest data if it has already bee
     status: "ended",
   });
 
+  expect(updatedOngoingIsReindexWeekThree).toBe(true);
   expect(wrap(updatedOngoingShowWeekThree).toJSON()).toStrictEqual(
     expect.objectContaining({
       state: "indexed",

@@ -15,24 +15,36 @@ import type { MovieIndexData } from "./utilities/persist-movie-indexer-data.ts";
 import type { ShowIndexData } from "./utilities/persist-show-indexer-data.ts";
 import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
+interface IndexItemResponse<T extends Movie | Show> {
+  item: T;
+  isReindex: boolean;
+  isAdditionalSeasonRequest?: boolean;
+}
+
 export class IndexerService extends BaseService {
   @EnsureRequestContext()
   @Transactional()
-  private async indexMovie(item: MovieIndexData) {
+  private async indexMovie(
+    item: MovieIndexData,
+  ): Promise<IndexItemResponse<Movie>> {
     return persistMovieIndexerData(this.em, item);
   }
 
   @EnsureRequestContext()
   @Transactional()
-  private async indexShow(item: ShowIndexData) {
+  private async indexShow(
+    item: ShowIndexData,
+  ): Promise<IndexItemResponse<Show>> {
     return persistShowIndexerData(this.em, item);
   }
 
-  public async indexItem(item: MovieIndexData): Promise<Movie>;
-  public async indexItem(item: ShowIndexData): Promise<Show>;
+  public async indexItem(
+    item: MovieIndexData,
+  ): Promise<IndexItemResponse<Movie>>;
+  public async indexItem(item: ShowIndexData): Promise<IndexItemResponse<Show>>;
   public async indexItem(
     item: MovieIndexData | ShowIndexData,
-  ): Promise<Movie | Show>;
+  ): Promise<IndexItemResponse<Movie> | IndexItemResponse<Show>>;
   @CreateRequestContext()
   public async indexItem(item: MovieIndexData | ShowIndexData) {
     switch (item.type) {

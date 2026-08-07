@@ -48,6 +48,21 @@ export async function persistShowIndexerData(
     { populate: ["$infer", "seasons:ref", "seasons.episodes:ref"] },
   );
 
+  const isAdditionalSeasonRequest = Boolean(
+    await existingShow?.seasons.loadCount({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        scrapedTimes: 0,
+        episodes: {
+          $every: {
+            scrapedTimes: 0,
+          },
+        },
+      },
+    }),
+  );
+
   if (existingShow?.status === "ended" && itemRequest.state === "completed") {
     throw new MediaItemIndexError({
       item: itemRequest,
@@ -57,12 +72,13 @@ export async function persistShowIndexerData(
 
   const { tvdbId } = itemRequest;
 
-  if (!tvdbId) {
-    throw new MediaItemIndexError({
+  assert.ok(
+    tvdbId,
+    new MediaItemIndexError({
       item: itemRequest,
       error: "Item request is missing tvdbId",
-    });
-  }
+    }),
+  );
 
   try {
     const indexedAt = DateTime.utc().toJSDate();
@@ -226,7 +242,11 @@ export async function persistShowIndexerData(
       ...(!itemRequest.tvdbId && show.tvdbId && { tvdbId: show.tvdbId }),
     });
 
-    return show;
+    return {
+      item: show,
+      isReindex: Boolean(existingShow),
+      isAdditionalSeasonRequest,
+    };
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

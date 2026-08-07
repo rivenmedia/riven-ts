@@ -2,6 +2,7 @@ import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
 import { flow } from "../../../message-queue/flows/producer.ts";
+import { clearDeduplicationJob } from "../../../message-queue/utilities/clear-deduplication-job.ts";
 import * as settingsModule from "../../../utilities/settings.ts";
 import { it } from "./helpers/test-context.ts";
 
@@ -34,6 +35,11 @@ it("enqueues a job to reindex the item after the next episode air date if the it
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
@@ -94,9 +100,20 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 
   await em.flush();
 
+  // Clear the existing job to ensure the new job is scheduled
+  await clearDeduplicationJob(
+    "process-item-request",
+    `reindex-item-${show.id}`,
+  );
+
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: true,
+    },
   });
 
   expect.assert(show.nextAirDate, "No next air date found for the seeded show");
@@ -153,6 +170,11 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
@@ -212,6 +234,11 @@ it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item i
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
@@ -261,6 +288,11 @@ it("enqueues a job to process the latest released episodes if the item is a show
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
@@ -310,6 +342,11 @@ it("enqueues a job to process the latest released episodes if the item is a show
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   await vi.waitFor(() => {

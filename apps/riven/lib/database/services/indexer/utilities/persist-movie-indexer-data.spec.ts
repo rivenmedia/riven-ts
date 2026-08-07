@@ -18,7 +18,7 @@ it("returns the movie if processed successfully", async ({
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const { item: result } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Movie",
     imdbId: requestedId,
@@ -50,7 +50,7 @@ it("sets the item request's state to 'completed' if processed successfully", asy
     state: "requested",
   });
 
-  const result = await indexerService.indexItem({
+  const { item: result } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Movie",
     imdbId: requestedId,
@@ -108,7 +108,7 @@ it("updates the movie with the latest data if it already exists", async ({
 
   const releaseDate = DateTime.utc().plus({ months: 1 });
 
-  const initialMovie = await indexerService.indexItem({
+  const { item: initialMovie } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Movie",
     imdbId: requestedId,
@@ -129,7 +129,7 @@ it("updates the movie with the latest data if it already exists", async ({
 
   vi.setSystemTime(DateTime.utc().plus({ months: 2 }).toJSDate());
 
-  const updatedReleasedMovie = await indexerService.indexItem({
+  const { item: updatedReleasedMovie } = await indexerService.indexItem({
     id: itemRequest.id,
     title: "Test Movie",
     imdbId: requestedId,
