@@ -17,7 +17,6 @@ import type {
   FlushEventArgs,
   UnitOfWork,
 } from "@mikro-orm/core";
-import type { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<MediaItem, MediaItemState>;
@@ -225,7 +224,6 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   }
 
   #determineParentStateFromChildren(
-    parent: ShowLikeMediaItem,
     children: MediaItem[],
     nextStatesMap: NextStatesMap,
   ): MediaItemState | null {
@@ -300,7 +298,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   ): Promisable<MediaItemState> {
     return (
       this.#determineFixedState(item) ??
-      this.#determineParentStateFromChildren(item, children, nextStatesMap) ??
+      this.#determineParentStateFromChildren(children, nextStatesMap) ??
       this.#computeState(item)
     );
   }
