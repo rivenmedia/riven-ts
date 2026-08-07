@@ -29,15 +29,15 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
       return;
     }
 
-    const [nextAiringEpisode] = await entity.getUnreleasedEpisodes();
+    const nextAiringEpisode = await entity.getNextAiringEpisode();
 
     entity.nextAirDate = nextAiringEpisode?.releaseDate ?? null;
   }
 
-  public async onFlush({ uow }: FlushEventArgs): Promise<void> {
+  public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedEpisodes = new Map<
       Episode,
-      ChangeSet<Partial<Episode>> | null
+      ChangeSet<Partial<Episode>> | undefined
     >();
 
     const processedShows = new Set<Show>();
@@ -62,7 +62,7 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
         );
 
         for (const episode of collectionEpisodes) {
-          trackedEpisodes.set(episode, trackedEpisodes.get(episode) ?? null);
+          trackedEpisodes.set(episode, trackedEpisodes.get(episode));
         }
       }
     }
@@ -81,12 +81,7 @@ export class ShowNextAirDateSubscriber implements EventSubscriber<Show> {
 
         processedShows.add(show);
 
-        const episodes = await show.getEpisodes();
-
-        const nextAiringEpisode = episodes.find(
-          ({ state, releaseDate }) =>
-            state === "unreleased" && releaseDate != null,
-        );
+        const nextAiringEpisode = await show.getNextAiringEpisode();
 
         show.nextAirDate = nextAiringEpisode?.releaseDate ?? null;
 

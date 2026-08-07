@@ -38,15 +38,15 @@ export class Episode extends ShowLikeMediaItem {
   @Property()
   public runtime!: number | null;
 
+  @Field(() => Boolean)
+  @Property()
+  public readonly isSpecial!: boolean;
+
   @Field(() => ShowContentRatingEnum)
   declare public contentRating: ShowContentRating;
 
   public async getShow() {
-    const season = await this.season.loadOrFail({
-      populate: ["show"],
-    });
-
-    return season.show.loadOrFail();
+    return this.show.loadOrFail();
   }
 
   public async getPrettyName(): Promise<string> {

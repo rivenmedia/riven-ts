@@ -50,7 +50,7 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
 
     await em.flush();
 
-    const itemRequest = context.show.itemRequest.unwrap();
+    const itemRequest = await context.show.itemRequest.loadOrFail();
 
     assert.ok(
       itemRequest.state === "completed",

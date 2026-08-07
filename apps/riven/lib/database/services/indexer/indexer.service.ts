@@ -52,15 +52,35 @@ export class IndexerService extends BaseService {
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 
-    const reindexTime = baseDate
-      ? DateTime.fromJSDate(baseDate).plus({
-          minutes: settings.scheduleOffsetMinutes,
-        })
-      : DateTime.utc().plus({ days: settings.unknownAirDateOffsetDays });
+    // If no known release date is available, schedule the reindex for a fallback time in the future.
+    if (!baseDate) {
+      return {
+        isFallback: true,
+        reindexTime: DateTime.utc()
+          .startOf("minute")
+          .plus({ days: settings.unknownAirDateOffsetDays }),
+      };
+    }
 
+    const now = DateTime.utc().startOf("minute");
+    const releaseDateIsPast =
+      DateTime.fromJSDate(baseDate).startOf("minute") < now;
+
+    // If the release date is in the past, reindex on a shorter interval
+    // to attempt to receive updated information.
+    if (releaseDateIsPast) {
+      return {
+        isFallback: true,
+        reindexTime: now.plus({ minutes: settings.scheduleOffsetMinutes }),
+      };
+    }
+
+    // If the item has a known release date, schedule the reindex shortly after the expected release.
     return {
-      reindexTime,
-      isFallback: !baseDate,
+      reindexTime: DateTime.fromJSDate(baseDate)
+        .startOf("minute")
+        .plus({ minutes: settings.scheduleOffsetMinutes }),
+      isFallback: false,
     };
   }
 }

@@ -60,7 +60,6 @@ export class OngoingShowSeeder extends BaseSeeder<OngoingShowSeederContext> {
 
     const [activeStream] = context.streams;
 
-    context.show.releaseDate = null; // Allow the subscriber to set the release date based on the first episode's release date
     context.show.status = "continuing";
     context.show.activeStream = ref(activeStream);
 
@@ -80,9 +79,6 @@ export class OngoingShowSeeder extends BaseSeeder<OngoingShowSeederContext> {
     const totalShowSeasons = context.show.seasons.length;
 
     for (const season of context.show.seasons) {
-      season.year = null;
-      season.releaseDate = null; // Allow the subscriber to set the release date based on the first episode's release date
-
       season.activeStream = ref(activeStream);
 
       const totalSeasonEpisodes = season.episodes.length;
@@ -127,7 +123,7 @@ export class OngoingShowSeeder extends BaseSeeder<OngoingShowSeederContext> {
       }
     }
 
-    const itemRequest = context.show.itemRequest.unwrap();
+    const itemRequest = await context.show.itemRequest.loadOrFail();
 
     assert.ok(
       itemRequest.state === "ongoing",

@@ -29,9 +29,12 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
 
     const itemRequest = await new ShowItemRequestFactory(em).createOne();
 
+    assert.ok(itemRequest.tvdbId, "Expected item request to have a tvdbId");
+
     context.show = await new ShowFactory(em).createOne({
       releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date
       indexedAt,
+      tvdbId: itemRequest.tvdbId,
       itemRequest,
     });
 
@@ -43,11 +46,11 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       seasonNumber += 1
     ) {
       const season = await new SeasonFactory(em).createOne({
-        tvdbId: context.show.tvdbId,
+        tvdbId: itemRequest.tvdbId,
         number: seasonNumber,
         releaseDate: null, // Allow the subscriber to set the release date based on the first episode's release date
         show: context.show,
-        itemRequest: context.show.itemRequest,
+        itemRequest,
         indexedAt,
       });
 
@@ -60,11 +63,11 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
         episodeNumber += 1
       ) {
         const episode = new EpisodeFactory(em).makeEntity({
-          tvdbId: context.show.tvdbId,
+          tvdbId: itemRequest.tvdbId,
           number: episodeNumber,
           absoluteNumber: absoluteEpisodeNumber,
           releaseDate,
-          itemRequest: context.show.itemRequest,
+          itemRequest,
           indexedAt,
         });
 

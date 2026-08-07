@@ -22,11 +22,24 @@ export async function persistRequestedShow(
     ],
   });
 
-  if (existingItem?.seasons && item.seasons) {
-    const existingItemSeasonsSet = new Set(existingItem.seasons);
-    const requestedItemSeasonsSet = new Set(item.seasons);
+  const existingItemSeasonsSet = new Set(existingItem?.seasons);
+  const requestedItemSeasonsSet = new Set(item.seasons);
+  const requestedSeasonsDifference = requestedItemSeasonsSet.difference(
+    existingItemSeasonsSet,
+  );
 
-    if (requestedItemSeasonsSet.difference(existingItemSeasonsSet).size === 0) {
+  if (existingItem) {
+    if (existingItem.seasons && item.seasons) {
+      if (requestedSeasonsDifference.size === 0) {
+        // If the existing item is a partial request,
+        // throw if the new request has no new requested seasons
+        throw new ItemRequestCreateErrorConflict({
+          item: existingItem,
+        });
+      }
+    } else if (!existingItem.seasons && !item.seasons) {
+      // If the existing item is a complete request,
+      // throw if the new request is also a complete request
       throw new ItemRequestCreateErrorConflict({
         item: existingItem,
       });
@@ -54,10 +67,9 @@ export async function persistRequestedShow(
       : (item.seasons ?? existingItem?.seasons ?? null);
 
   if (
-    (existingItem && !existingItem.seasons && itemRequest.seasons?.length) ||
-    (existingItem?.seasons &&
-      itemRequest.seasons &&
-      itemRequest.seasons.length > existingItem.seasons.length)
+    existingItem &&
+    itemRequest.seasons &&
+    requestedSeasonsDifference.size > 0
   ) {
     const linkedItemsToProcess = await existingItem.seasonItems.matching({
       where: {

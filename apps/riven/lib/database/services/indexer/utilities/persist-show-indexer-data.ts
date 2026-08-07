@@ -171,6 +171,7 @@ export async function persistShowIndexerData(
           isRequested: seasonEntry.isRequested,
           itemRequest,
           indexedAt,
+          isSpecial: seasonEntry.isSpecial,
         });
 
         if (existingEpisode) {

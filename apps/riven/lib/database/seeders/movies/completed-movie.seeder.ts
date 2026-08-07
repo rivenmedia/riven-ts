@@ -41,7 +41,7 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
 
     await em.flush();
 
-    const itemRequest = context.movie.itemRequest.unwrap();
+    const itemRequest = await context.movie.itemRequest.loadOrFail();
 
     assert.ok(
       itemRequest.state === "completed",

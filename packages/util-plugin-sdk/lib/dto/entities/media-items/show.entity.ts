@@ -73,31 +73,56 @@ export class Show extends ShowLikeMediaItem {
   }
 
   public async getEpisodes(includeSpecials = false) {
-    const seasons = await this.seasons.matching({
-      orderBy: { number: "asc" },
-      populate: ["episodes"],
+    return this.episodes.matching({
+      orderBy: [
+        {
+          season: {
+            number: "asc",
+          },
+        },
+        { number: "asc" },
+      ],
       where: {
         ...(!includeSpecials && { isSpecial: false }),
       },
     });
-
-    return seasons.flatMap((season) => season.episodes.getItems());
   }
 
   public async getUnreleasedEpisodes() {
     return this.episodes.matching({
       where: {
         isRequested: true,
+        isSpecial: false,
         state: "unreleased",
+        releaseDate: {
+          $ne: null,
+        },
       },
       orderBy: { releaseDate: "asc nulls last" },
     });
+  }
+
+  public async getNextAiringEpisode() {
+    const [nextAiringEpisode] = await this.episodes.matching({
+      where: {
+        isSpecial: false,
+        state: "unreleased",
+        releaseDate: {
+          $ne: null,
+        },
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+      limit: 1,
+    });
+
+    return nextAiringEpisode ?? null;
   }
 
   public async getIncompleteEpisodes() {
     return this.episodes.matching({
       where: {
         isRequested: true,
+        isSpecial: false,
         state: { $nin: ["completed", "unreleased"] },
       },
       orderBy: { releaseDate: "asc nulls last" },
@@ -108,6 +133,7 @@ export class Show extends ShowLikeMediaItem {
     return this.seasons.matching({
       where: {
         isRequested: true,
+        isSpecial: false,
         state: { $nin: ["completed", "unreleased"] },
       },
       orderBy: { releaseDate: "asc nulls last" },
@@ -122,15 +148,6 @@ export class Show extends ShowLikeMediaItem {
         isSpecial: false,
       },
     });
-  }
-
-  public async getSpecialSeason() {
-    const [season] = await this.seasons.matching({
-      limit: 1,
-      where: { isSpecial: true },
-    });
-
-    return season;
   }
 
   public async getMediaEntries() {
@@ -188,11 +205,14 @@ export class Show extends ShowLikeMediaItem {
     });
 
     for (const season of incompleteSeasons) {
-      const incompleteEpisodes = await season.getIncompleteEpisodes();
+      const unreleasedEpisodes = await season.getUnreleasedEpisodes();
 
-      if (incompleteEpisodes.length < (await season.episodes.loadCount())) {
+      if (unreleasedEpisodes.length > 0) {
         // For ongoing seasons, there's no point trying to download a season pack as it won't be available yet.
         // Jump directly to episode-level processing instead.
+
+        const incompleteEpisodes = await season.getIncompleteEpisodes();
+
         for (const episode of incompleteEpisodes) {
           incompleteItems.add(episode);
         }

@@ -88,6 +88,7 @@ it("getMediaEntries() returns the associated media entries for a Show media item
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const episode2 = em.create(Episode, {
@@ -100,6 +101,7 @@ it("getMediaEntries() returns the associated media entries for a Show media item
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   show.episodes.add(episode1, episode2);
@@ -192,6 +194,7 @@ it("getMediaEntries() returns the associated media entries for a Season media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -204,6 +207,7 @@ it("getMediaEntries() returns the associated media entries for a Season media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
@@ -288,6 +292,7 @@ it("getMediaEntries() returns the associated media entry for an Episode media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const mediaEntry = em.create(MediaEntry, {
