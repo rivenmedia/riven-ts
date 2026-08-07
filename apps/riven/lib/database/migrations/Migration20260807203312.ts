@@ -20,7 +20,7 @@ export class Migration20260807203312 extends Migration {
       `update "media_item" set "state" = 'failed' where "state" = 'unknown';`,
     );
     this.addSql(
-      `update "media_item" episode set "show_id" = season."show_id" from "media_item" season where episode."type" = 'episode' and episode."season_id" = season."id";`,
+      `update "media_item" episode set "show_id" = season."show_id", "is_special" = season."is_special" from "media_item" season where episode."type" = 'episode' and episode."season_id" = season."id";`,
     );
 
     this.addSql(
