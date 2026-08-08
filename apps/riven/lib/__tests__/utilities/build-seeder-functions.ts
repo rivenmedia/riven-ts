@@ -9,6 +9,7 @@ import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
 import { OngoingShowSeeder } from "../../database/seeders/shows/ongoing-show.seeder.ts";
 import { PartiallyCompletedShowSeeder } from "../../database/seeders/shows/partially-completed-show.seeder.ts";
+import { PartiallyRequestedShowSeeder } from "../../database/seeders/shows/partially-requested-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
@@ -67,6 +68,10 @@ export const buildSeederFunctions = (em: EntityManager) => ({
   seedPartiallyCompletedShow: buildSeederFunction(
     em,
     PartiallyCompletedShowSeeder,
+  ),
+  seedPartiallyRequestedShow: buildSeederFunction(
+    em,
+    PartiallyRequestedShowSeeder,
   ),
   seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
   seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),

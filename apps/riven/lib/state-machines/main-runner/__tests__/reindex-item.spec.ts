@@ -2,6 +2,8 @@ import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
 import { flow } from "../../../message-queue/flows/producer.ts";
+import { clearDeduplicationJob } from "../../../message-queue/utilities/clear-deduplication-job.ts";
+import * as settingsModule from "../../../utilities/settings.ts";
 import { it } from "./helpers/test-context.ts";
 
 it("enqueues a job to reindex the item after the next episode air date if the item is a show", async ({
@@ -11,7 +13,14 @@ it("enqueues a job to reindex the item after the next episode air date if the it
   factories: { mediaEntryFactory },
 }) => {
   vi.useFakeTimers({
-    now: DateTime.utc().toJSDate(),
+    now: DateTime.utc().startOf("minute").toJSDate(),
+  });
+
+  const scheduleOffsetMinutes = 30;
+
+  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+    ...settingsModule.settings,
+    scheduleOffsetMinutes,
   });
 
   const { show, episodes } = await seedOngoingShow();
@@ -26,29 +35,42 @@ it("enqueues a job to reindex the item after the next episode air date if the it
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
 
-  const expectedReindexDelay = 606_599_950;
+  expect.assert(show.nextAirDate, "No next air date found for the seeded show");
 
-  await vi.waitFor(() => {
-    expect(addSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          itemRequestId: show.itemRequest.id,
+  const expectedDelay = DateTime.fromJSDate(show.nextAirDate)
+    .plus({ minutes: scheduleOffsetMinutes })
+    .diffNow()
+    .toMillis();
+
+  await vi.waitFor(
+    () => {
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            itemRequestId: show.itemRequest.id,
+          }),
+          opts: expect.objectContaining({
+            delay: expectedDelay,
+          }),
+          queueName: "process-item-request",
         }),
-        opts: expect.objectContaining({
-          delay: expectedReindexDelay,
-        }),
-        queueName: "process-item-request",
-      }),
-    );
-  });
+      );
+    },
+    {
+      interval: 0, // Set interval to 0 to prevent fake timers from advancing
+    },
+  );
 
   addSpy.mockClear();
-
-  expect(addSpy).not.toHaveBeenCalled();
 
   indexedEpisode.filesystemEntries.add(
     mediaEntryFactory.makeOne({
@@ -78,24 +100,172 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 
   await em.flush();
 
+  // Clear the existing job to ensure the new job is scheduled
+  await clearDeduplicationJob(
+    "process-item-request",
+    `reindex-item-${show.id}`,
+  );
+
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: true,
+    },
   });
 
-  await vi.waitFor(() => {
-    expect(addSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        data: expect.objectContaining({
-          itemRequestId: show.itemRequest.id,
+  expect.assert(show.nextAirDate, "No next air date found for the seeded show");
+
+  const expectedDelayAfterSecondIndexing = DateTime.fromJSDate(show.nextAirDate)
+    .plus({ minutes: scheduleOffsetMinutes })
+    .diffNow()
+    .toMillis();
+
+  await vi.waitFor(
+    () => {
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            itemRequestId: show.itemRequest.id,
+          }),
+          opts: expect.objectContaining({
+            delay: expectedDelayAfterSecondIndexing,
+          }),
+          queueName: "process-item-request",
         }),
-        opts: expect.objectContaining({
-          delay: expectedReindexDelay,
-        }),
-        queueName: "process-item-request",
-      }),
-    );
+      );
+    },
+    {
+      interval: 0, // Set interval to 0 to prevent fake timers from advancing
+    },
+  );
+});
+
+it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the item is a show and has no next episode air date", async ({
+  em,
+  actor,
+  seeders: { seedOngoingShow },
+}) => {
+  vi.useFakeTimers({
+    now: DateTime.utc().startOf("minute").toJSDate(),
   });
+
+  const unknownAirDateOffsetDays = 7;
+
+  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+    ...settingsModule.settings,
+    unknownAirDateOffsetDays,
+  });
+
+  const { show } = await seedOngoingShow();
+
+  show.nextAirDate = null; // Remove the next air date to trigger the fallback delay
+
+  await em.flush();
+
+  const addSpy = vi.spyOn(flow, "add");
+
+  actor.send({
+    type: "riven.media-item.index.success",
+    item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
+  });
+
+  actor.start();
+
+  const expectedDelay = DateTime.utc()
+    .plus({ days: unknownAirDateOffsetDays })
+    .diffNow()
+    .toMillis();
+
+  await vi.waitFor(
+    () => {
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            itemRequestId: show.itemRequest.id,
+          }),
+          opts: expect.objectContaining({
+            delay: expectedDelay,
+          }),
+          queueName: "process-item-request",
+        }),
+      );
+    },
+    {
+      interval: 0, // Set interval to 0 to prevent fake timers from advancing
+    },
+  );
+});
+
+it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item is a show and the next air date is in the past", async ({
+  em,
+  actor,
+  seeders: { seedOngoingShow },
+}) => {
+  vi.useFakeTimers({
+    now: DateTime.utc().startOf("minute").toJSDate(),
+  });
+
+  const scheduleOffsetMinutes = 30;
+
+  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+    ...settingsModule.settings,
+    scheduleOffsetMinutes,
+  });
+
+  const { show } = await seedOngoingShow();
+
+  show.nextAirDate = DateTime.utc()
+    .minus({ days: 1 })
+    .startOf("minute")
+    .toJSDate(); // Set the next air date in the past to trigger the scheduleOffsetMinutes delay
+
+  await em.flush();
+
+  const addSpy = vi.spyOn(flow, "add");
+
+  actor.send({
+    type: "riven.media-item.index.success",
+    item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
+  });
+
+  actor.start();
+
+  const expectedDelay = DateTime.utc()
+    .plus({ minutes: scheduleOffsetMinutes })
+    .diffNow()
+    .toMillis();
+
+  await vi.waitFor(
+    () => {
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            itemRequestId: show.itemRequest.id,
+          }),
+          opts: expect.objectContaining({
+            delay: expectedDelay,
+          }),
+          queueName: "process-item-request",
+        }),
+      );
+    },
+    {
+      interval: 0, // Set interval to 0 to prevent fake timers from advancing
+    },
+  );
 });
 
 it("enqueues a job to process the latest released episodes if the item is a show", async ({
@@ -118,6 +288,11 @@ it("enqueues a job to process the latest released episodes if the item is a show
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   actor.start();
@@ -167,6 +342,11 @@ it("enqueues a job to process the latest released episodes if the item is a show
   actor.send({
     type: "riven.media-item.index.success",
     item: show,
+    meta: {
+      type: "show",
+      isAdditionalSeasonRequest: false,
+      isReindex: false,
+    },
   });
 
   await vi.waitFor(() => {

@@ -13,8 +13,17 @@ export const sentryMetaFormat = format((info) => {
     info["span.id"] = spanId;
   }
 
-  return {
-    ...info,
-    ...getLogContext(),
-  };
+  try {
+    return {
+      ...info,
+      ...getLogContext(),
+    };
+  } catch (error) {
+    // oxlint-disable-next-line no-console
+    console.error(
+      `Unexpected error whilst logging "${info.message as string}": ${error instanceof Error ? error.message : String(error)}`,
+    );
+
+    throw error;
+  }
 });

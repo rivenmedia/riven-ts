@@ -24,9 +24,7 @@ function getMediaItemStep(
     case "downloaded":
     case "failed":
     case "completed":
-    case "ongoing":
     case "paused":
-    case "unknown":
     case "unreleased": {
       throw new Error(`Unexpected media item state: ${item.state}`);
     }
@@ -37,11 +35,11 @@ export const retryLibrary = fromPromise(async () => {
   try {
     logger.verbose("Retrying library items");
 
-    const pendingItems =
-      await services.retryLibraryService.getMediaItemsToRetry();
-
     const pendingRequests =
       await services.retryLibraryService.getItemRequestsToRetry();
+
+    const pendingItems =
+      await services.retryLibraryService.getMediaItemsToRetry();
 
     if (pendingItems.length === 0 && pendingRequests.length === 0) {
       logger.verbose("No pending library items to retry");
@@ -49,15 +47,15 @@ export const retryLibrary = fromPromise(async () => {
       return;
     }
 
-    if (pendingItems.length > 0) {
+    if (pendingRequests.length > 0) {
       logger.verbose(
-        `Found ${pendingItems.length.toString()} pending library items to retry`,
+        `Found ${pendingRequests.length.toString()} pending item request(s) to retry`,
       );
     }
 
-    if (pendingRequests.length > 0) {
+    if (pendingItems.length > 0) {
       logger.verbose(
-        `Found ${pendingRequests.length.toString()} pending item requests to retry`,
+        `Found ${pendingItems.length.toString()} pending library item(s) to retry`,
       );
     }
 

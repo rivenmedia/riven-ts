@@ -1,9 +1,4 @@
-import {
-  Episode,
-  MediaItem,
-  Movie,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -33,7 +28,7 @@ export class MediaItemService extends BaseService {
       return true;
     }
 
-    const isOngoingShow = item instanceof Show && item.state === "ongoing";
+    const isOngoingShow = item.itemRequest.getProperty("state") === "ongoing";
 
     if (isOngoingShow) {
       return true;

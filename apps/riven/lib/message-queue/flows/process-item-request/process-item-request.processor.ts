@@ -1,3 +1,4 @@
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 import {
@@ -121,7 +122,11 @@ export const processItemRequestProcessor =
           }
 
           try {
-            const updatedItem = await indexerService.indexItem(item);
+            const {
+              item: updatedItem,
+              isReindex,
+              isAdditionalSeasonRequest,
+            } = await indexerService.indexItem(item);
 
             const itemsToProcess = await mediaItemService.getItemsToProcess(
               updatedItem.id,
@@ -143,6 +148,18 @@ export const processItemRequestProcessor =
             sendEvent({
               type: "riven.media-item.index.success",
               item: updatedItem,
+              meta:
+                updatedItem instanceof Movie
+                  ? {
+                      type: "movie",
+                      isReindex,
+                    }
+                  : {
+                      type: "show",
+                      isAdditionalSeasonRequest:
+                        isAdditionalSeasonRequest ?? false,
+                      isReindex,
+                    },
             });
           } catch (error) {
             if (

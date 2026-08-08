@@ -90,7 +90,10 @@ export async function persistMovieIndexerData(
       tmdbId: itemRequest.tmdbId ?? mediaItem.tmdbId,
     });
 
-    return mediaItem;
+    return {
+      item: mediaItem,
+      isReindex: Boolean(existingMovie),
+    };
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
