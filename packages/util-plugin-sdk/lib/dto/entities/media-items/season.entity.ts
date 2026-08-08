@@ -88,6 +88,8 @@ export class Season extends ShowLikeMediaItem {
   public async getIncompleteEpisodes() {
     return this.episodes.matching({
       where: {
+        isRequested: true,
+        isSpecial: false,
         state: {
           $nin: ["completed", "unreleased"],
         },
@@ -99,6 +101,8 @@ export class Season extends ShowLikeMediaItem {
   public async getUnreleasedEpisodes() {
     return this.episodes.matching({
       where: {
+        isRequested: true,
+        isSpecial: false,
         state: "unreleased",
       },
       orderBy: { releaseDate: "asc nulls last" },
