@@ -28,7 +28,7 @@ export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedS
       ]);
     }
 
-    episodes[0]?.filesystemEntries.removeAll();
+    episodes[0]?.reset();
 
     await em.flush();
 

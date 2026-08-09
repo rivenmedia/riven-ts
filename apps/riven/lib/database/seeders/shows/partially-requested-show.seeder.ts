@@ -1,3 +1,4 @@
+import { ref } from "@mikro-orm/core";
 import assert from "node:assert";
 
 import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
@@ -18,7 +19,7 @@ export class PartiallyRequestedShowSeeder extends BaseSeeder<PartiallyRequestedS
 
     const itemRequest = await context.show.itemRequest.loadOrFail();
 
-    itemRequest.seasons = [1];
+    itemRequest.seasons = [1, 2, 3];
     itemRequest.isPartialRequest = true;
 
     const unrequestedSeasons = await context.show.seasons.matching({
@@ -45,26 +46,31 @@ export class PartiallyRequestedShowSeeder extends BaseSeeder<PartiallyRequestedS
       },
     });
 
+    assert.ok(
+      requestedEpisodes.length === 30,
+      `Expected 30 requested episodes, got ${requestedEpisodes.length.toString()}`,
+    );
+
     for (const episode of requestedEpisodes) {
       em.persist(episode);
 
-      episode.filesystemEntries.set([
-        new MediaEntryFactory(em).makeEntity({
-          mediaItem: episode,
+      episode.filesystemEntries.add(
+        new MediaEntryFactory(em).makeOne({
+          mediaItem: ref(episode),
         }),
-      ]);
+      );
     }
 
     await em.flush();
 
     assert.ok(
-      itemRequest.state === "processing",
-      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+      itemRequest.state === "completed",
+      `Expected item request state to be "completed", got "${itemRequest.state}"`,
     );
 
     assert.ok(
-      context.show.state === "partially_completed",
-      `Expected show state to be "partially_completed", got "${context.show.state}"`,
+      context.show.state === "completed",
+      `Expected show state to be "completed", got "${context.show.state}"`,
     );
   }
 }

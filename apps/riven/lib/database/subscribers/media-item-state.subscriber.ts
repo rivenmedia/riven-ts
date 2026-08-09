@@ -90,14 +90,6 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
             continue;
           }
 
-          if (episode.state === "unreleased" && !episode.isReleased) {
-            continue;
-          }
-
-          if (episode.state !== "unreleased" && episode.isReleased) {
-            continue;
-          }
-
           episodesToUpdate.add(episode);
         }
 
@@ -113,6 +105,29 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
 
     // Process direct updates from the unit of work
     for (const [item, changeSet] of trackedItems) {
+      const isNewlyRequestedSeason =
+        item instanceof Season &&
+        changeSet?.entity.isRequested === true &&
+        changeSet.originalEntity?.isRequested === false;
+
+      if (isNewlyRequestedSeason) {
+        const updatedShow = await item.show.loadOrFail({
+          populate: ["requestedSeasons"],
+        });
+
+        updatedShow.requestedSeasons.add(item);
+
+        updatedShow.state = await this.#computeStateWithChildren(
+          updatedShow,
+          updatedShow.requestedSeasons.getItems(),
+          nextStatesMap,
+        );
+
+        uow.computeChangeSet(updatedShow);
+
+        continue;
+      }
+
       const stateChanged = await this.#maybeUpdateState(
         item,
         changeSet,
@@ -125,7 +140,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       }
 
       if (item instanceof Season) {
-        showsAwaitingUpdate.add(await item.getShow());
+        showsAwaitingUpdate.add(await item.show.loadOrFail());
       }
 
       if (item instanceof Episode) {
@@ -156,7 +171,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       );
 
       if (stateChanged) {
-        showsAwaitingUpdate.add(await season.getShow());
+        showsAwaitingUpdate.add(await season.show.loadOrFail());
       }
     }
 
@@ -207,6 +222,10 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
     const acc: Partial<Record<MediaItemState, number>> = {};
 
     for (const child of children) {
+      if (!child.isRequested) {
+        continue;
+      }
+
       const childState = nextStatesMap.get(child) ?? child.state;
 
       acc[childState] = (acc[childState] ?? 0) + 1;
@@ -216,7 +235,9 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   }
 
   #determineFixedState(item: MediaItem) {
-    if (item.state === "paused" || item.state === "failed") {
+    const fixedStates = new Set<MediaItemState>(["paused", "failed"]);
+
+    if (fixedStates.has(item.state)) {
       return item.state;
     }
 
@@ -251,7 +272,10 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
         continue;
       }
 
-      if (childrenStateCount === children.length) {
+      if (
+        childrenStateCount ===
+        children.filter(({ isRequested }) => isRequested).length
+      ) {
         return propagableState;
       }
     }

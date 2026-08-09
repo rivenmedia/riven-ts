@@ -1,4 +1,6 @@
-import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
+import { Movie, Show, Season } from "@repo/util-plugin-sdk/dto/entities";
+
+import { wrap } from "@mikro-orm/core";
 
 import type {
   EntityName,
@@ -6,19 +8,36 @@ import type {
   EventSubscriber,
   FlushEventArgs,
 } from "@mikro-orm/core";
+import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import type { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 
 export class ItemRequestStateSubscriber implements EventSubscriber<
   Movie | Show
 > {
-  #calculateItemRequestState(entity: Movie | Show) {
+  async #calculateItemRequestState(
+    entity: Movie | Show | Season,
+  ): Promise<ItemRequestState> {
     if (entity instanceof Show && entity.status === "continuing") {
       return "ongoing";
     }
 
     switch (entity.state) {
+      case "partially_completed": {
+        if (entity instanceof Show) {
+          const wrappedEntity = wrap(entity);
+          const { seasons } = await wrappedEntity.populate(["seasons"]);
+
+          const incompleteSeasons = seasons.filter(
+            (season) => season.isRequested && season.state !== "completed",
+          );
+
+          return incompleteSeasons.length > 0 ? "processing" : "completed";
+        }
+
+        return "processing";
+      }
       case "indexed":
       case "scraped":
-      case "partially_completed":
       case "downloaded": {
         return "processing";
       }
@@ -46,22 +65,53 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
       itemRequest.state =
         entity.state === "completed" ? "completed" : "processing";
     } else {
-      itemRequest.state = this.#calculateItemRequestState(entity);
+      itemRequest.state = await this.#calculateItemRequestState(entity);
     }
   }
 
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    for (const { entity, payload } of uow.getChangeSets()) {
-      if (!payload["state"]) {
+    const trackedItemRequests = new Set<ItemRequest>();
+
+    for (const { entity, originalEntity, payload } of uow.getChangeSets()) {
+      const isStateChange = payload["state"] !== undefined;
+
+      if (
+        isStateChange &&
+        (entity instanceof Movie || entity instanceof Show)
+      ) {
+        const itemRequest = await entity.itemRequest.loadOrFail();
+
+        itemRequest.state = await this.#calculateItemRequestState(entity);
+
+        if (trackedItemRequests.has(itemRequest)) {
+          uow.recomputeSingleChangeSet(itemRequest);
+        } else {
+          trackedItemRequests.add(itemRequest);
+
+          uow.computeChangeSet(itemRequest);
+        }
+
         continue;
       }
 
-      if (entity instanceof Movie || entity instanceof Show) {
+      const isNewlyRequestedSeason =
+        entity instanceof Season &&
+        entity.isRequested &&
+        entity.state === "indexed" &&
+        originalEntity?.["isRequested"] === false;
+
+      if (isNewlyRequestedSeason) {
         const itemRequest = await entity.itemRequest.loadOrFail();
 
-        itemRequest.state = this.#calculateItemRequestState(entity);
+        itemRequest.state = "processing";
 
-        uow.computeChangeSet(itemRequest);
+        if (trackedItemRequests.has(itemRequest)) {
+          uow.recomputeSingleChangeSet(itemRequest);
+        } else {
+          trackedItemRequests.add(itemRequest);
+
+          uow.computeChangeSet(itemRequest);
+        }
       }
     }
   }

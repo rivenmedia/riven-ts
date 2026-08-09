@@ -47,7 +47,7 @@ const buildSeederFunction =
     }
 
     if (count === 1) {
-      assert(results.length === 1, "Expected exactly one result");
+      assert.ok(results.length === 1, "Expected exactly one result");
 
       return results[0] as SeederResult<S, C>;
     }

@@ -119,6 +119,7 @@ describe("when additional seasons are requested for an existing item request", (
   });
 
   it("marks the newly requested items as requested", async ({
+    em,
     seeders: { seedPartiallyRequestedShow },
     services: { itemRequestService },
   }) => {
@@ -128,7 +129,7 @@ describe("when additional seasons are requested for an existing item request", (
 
     const { item: updatedRequest } = await itemRequestService.requestShow({
       tvdbId: show.tvdbId,
-      seasons: [1, 2],
+      seasons: [1, 2, 3, 4],
     });
 
     const newlyRequestedItems = await updatedRequest.mediaItems.loadItems({
@@ -145,10 +146,10 @@ describe("when additional seasons are requested for an existing item request", (
       expect.arrayContaining([
         expect.objectContaining({
           type: "season",
-          number: 2,
+          number: 4,
         }),
         ...episodes
-          .filter((episode) => episode.season.getProperty("number") === 2)
+          .filter((episode) => episode.season.getProperty("number") === 4)
           .map((episode) =>
             expect.objectContaining({
               type: "episode",
@@ -157,5 +158,11 @@ describe("when additional seasons are requested for an existing item request", (
           ),
       ]),
     );
+
+    expect(updatedRequest.state).toBe("processing");
+
+    await em.refreshOrFail(show);
+
+    expect(show.state).toBe("partially_completed");
   });
 });
