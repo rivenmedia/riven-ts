@@ -15,7 +15,7 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
   Movie | Show
 > {
   async #calculateItemRequestState(
-    entity: Movie | Show | Season,
+    entity: Movie | Show,
   ): Promise<ItemRequestState> {
     if (entity instanceof Show && entity.status === "continuing") {
       return "ongoing";
@@ -34,7 +34,9 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
           return incompleteSeasons.length > 0 ? "processing" : "completed";
         }
 
-        return "processing";
+        throw new Error(
+          "Movie entity should not be in a partially completed state",
+        );
       }
       case "indexed":
       case "scraped":
