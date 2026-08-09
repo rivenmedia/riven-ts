@@ -125,6 +125,10 @@ catalog:
   zod-validation-error: ^5.0.0
   zod2md: ^0.2.5
 
+catalogs:
+  typescript7-native:
+    typescript: ^7.0.2
+
 catalogMode: strict
 
 cleanupUnusedCatalogs: true
