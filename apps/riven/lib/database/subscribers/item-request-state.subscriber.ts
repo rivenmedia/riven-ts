@@ -7,6 +7,7 @@ import type {
   EventArgs,
   EventSubscriber,
   FlushEventArgs,
+  UnitOfWork,
 } from "@mikro-orm/core";
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import type { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
@@ -71,6 +72,20 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
     }
   }
 
+  #trackAndComputeChangeSet(
+    itemRequest: ItemRequest,
+    trackedItemRequests: Set<ItemRequest>,
+    uow: UnitOfWork,
+  ) {
+    if (trackedItemRequests.has(itemRequest)) {
+      uow.recomputeSingleChangeSet(itemRequest);
+    } else {
+      trackedItemRequests.add(itemRequest);
+
+      uow.computeChangeSet(itemRequest);
+    }
+  }
+
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItemRequests = new Set<ItemRequest>();
 
@@ -85,13 +100,7 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
 
         itemRequest.state = await this.#calculateItemRequestState(entity);
 
-        if (trackedItemRequests.has(itemRequest)) {
-          uow.recomputeSingleChangeSet(itemRequest);
-        } else {
-          trackedItemRequests.add(itemRequest);
-
-          uow.computeChangeSet(itemRequest);
-        }
+        this.#trackAndComputeChangeSet(itemRequest, trackedItemRequests, uow);
 
         continue;
       }
@@ -107,13 +116,7 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
 
         itemRequest.state = "processing";
 
-        if (trackedItemRequests.has(itemRequest)) {
-          uow.recomputeSingleChangeSet(itemRequest);
-        } else {
-          trackedItemRequests.add(itemRequest);
-
-          uow.computeChangeSet(itemRequest);
-        }
+        this.#trackAndComputeChangeSet(itemRequest, trackedItemRequests, uow);
       }
     }
   }
