@@ -1,4 +1,4 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import {
@@ -9,6 +9,7 @@ import {
   Mutation,
   Query,
   Resolver,
+  Root,
 } from "type-graphql";
 
 import { CoreContext } from "../decorators/core-context.ts";
@@ -28,7 +29,7 @@ export class MediaItemResolver {
     return services.mediaItemService.getMediaItemById(id);
   }
 
-  @Query(() => [MediaItem])
+  @Query(() => [MediaItemUnion])
   public async mediaItems(
     @CoreContext() { em }: CoreContext,
   ): Promise<MediaItem[]> {
@@ -36,7 +37,8 @@ export class MediaItemResolver {
       MediaItem,
       {},
       {
-        limit: 25,
+        orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
+        // limit: 25,
         overfetch: true,
       },
     );
@@ -58,5 +60,25 @@ export class MediaItemResolver {
     throw new Error(
       "expectedFileCount field resolver must be implemented in child resolvers",
     );
+  }
+
+  @FieldResolver(() => Stream)
+  public async streams(@Root() mediaItem: MediaItem) {
+    return mediaItem.streams.loadItems();
+  }
+
+  @FieldResolver(() => Stream)
+  public async blacklistedStreams(@Root() mediaItem: MediaItem) {
+    return mediaItem.blacklistedStreams.loadItems();
+  }
+
+  @FieldResolver(() => Stream)
+  public async filesystemEntries(@Root() mediaItem: MediaItem) {
+    return mediaItem.filesystemEntries.loadItems();
+  }
+
+  @FieldResolver(() => Stream)
+  public async subtitles(@Root() mediaItem: MediaItem) {
+    return mediaItem.subtitles.loadItems();
   }
 }
