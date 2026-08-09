@@ -216,6 +216,8 @@ export const it = testBase
 
     const queue = createQueue(`mock-queue-${task.id}`);
 
+    await queue.waitUntilReady();
+
     onCleanup(async () => queue.close());
 
     return queue;
