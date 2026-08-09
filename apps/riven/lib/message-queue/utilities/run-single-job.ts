@@ -53,10 +53,8 @@ export const runSingleJob = async <
 ) => {
   const queueEvents = createQueueEvents(job.queueName);
 
-  const result = await Promise.race([
+  return Promise.race([
     pollUntilSettled(job),
     job.waitUntilFinished(queueEvents, timeout),
   ]);
-
-  return result;
 };
