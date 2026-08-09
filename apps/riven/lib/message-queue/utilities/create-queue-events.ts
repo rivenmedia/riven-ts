@@ -8,7 +8,7 @@ import type { QueueOptions } from "bullmq";
 
 QueueEvents.setMaxListeners(200);
 
-export async function createQueueEvents(
+export function createQueueEvents(
   name: string,
   options?: Omit<QueueOptions, "connection" | "telemetry">,
 ) {
@@ -30,8 +30,6 @@ export async function createQueueEvents(
   queueEvents.on("error", (error) => {
     logger.error(`${name} queue events error`, { err: error });
   });
-
-  await queueEvents.waitUntilReady();
 
   return queueEvents;
 }
