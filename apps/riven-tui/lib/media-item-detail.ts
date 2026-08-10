@@ -50,10 +50,13 @@ export function getContentRating(item: MediaItemDetail): string | null {
       return item.movieContentRating;
     }
 
-    case "Episode":
-    case "Season":
     case "Show": {
       return item.showContentRating;
+    }
+
+    case "Episode":
+    case "Season": {
+      return null;
     }
   }
 }
