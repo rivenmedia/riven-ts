@@ -43,12 +43,11 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@typescript/native": "catalog:",
     "fumadocs-mdx": "catalog:",
     "oxlint": "catalog:",
     "postcss": "catalog:",
     "schema-dts": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:typescript7-native"
   }
 }
