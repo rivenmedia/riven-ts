@@ -60,11 +60,6 @@ jobs:
             concurrency: "100%"
             runner-requirements: *test-runner-requirements
             runner: macos-latest
-          - name: Tests (macos-intel)
-            command: test
-            concurrency: "100%"
-            runner-requirements: *test-runner-requirements
-            runner: macos-15-intel
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:
