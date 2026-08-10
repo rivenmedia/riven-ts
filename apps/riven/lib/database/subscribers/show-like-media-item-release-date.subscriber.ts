@@ -1,6 +1,7 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
+import assert from "node:assert";
 
 import type {
   ChangeSet,
@@ -39,7 +40,7 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         continue;
       }
 
-      episode.year ??= DateTime.fromJSDate(episode.releaseDate).year;
+      episode.year = DateTime.fromJSDate(episode.releaseDate).year;
 
       if (changeSet) {
         uow.recomputeSingleChangeSet(episode);
@@ -51,9 +52,10 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber {
         continue;
       }
 
-      if (!episode.season) {
-        continue;
-      }
+      assert.ok(
+        episode.season,
+        "Episode must have a season to cascade release date",
+      );
 
       const season = await episode.season.loadOrFail();
 
