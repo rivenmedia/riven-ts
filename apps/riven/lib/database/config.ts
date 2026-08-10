@@ -92,8 +92,8 @@ export async function createDatabaseConfig({
     subscribers: [
       new MediaItemFullTitleSubscriber(),
       new ShowLikeMediaItemReleaseDateSubscriber(),
-      new MediaItemStateSubscriber(),
       new ShowNextAirDateSubscriber(),
+      new MediaItemStateSubscriber(),
       new ItemRequestStateSubscriber(),
     ],
     ...metadataCacheConfig,

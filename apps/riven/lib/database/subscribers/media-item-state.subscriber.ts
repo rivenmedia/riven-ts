@@ -22,14 +22,14 @@ import type { Promisable } from "type-fest";
 type NextStatesMap = Map<MediaItem, MediaItemState>;
 
 export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
-  public afterUpsert({ entity }: EventArgs<MediaItem>): void {
+  public getSubscribedEntities() {
+    return [Movie, Show, Season, Episode];
+  }
+
+  public beforeUpsert({ entity }: EventArgs<MediaItem>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
-    } else if (
-      entity.state !== "unreleased" &&
-      entity.releaseDate &&
-      !entity.isReleased
-    ) {
+    } else if (entity.state !== "unreleased" && !entity.isReleased) {
       entity.state = "unreleased";
     }
   }

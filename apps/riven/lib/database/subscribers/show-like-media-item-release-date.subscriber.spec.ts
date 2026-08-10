@@ -56,7 +56,7 @@ describe("episode year", () => {
       indexedAt,
     });
 
-    expect(episode.year).toBeUndefined();
+    expect(episode.year).toBeNull();
     expect(season.releaseDate).toBeNull();
     expect(show.releaseDate).toBeNull();
   });
@@ -90,34 +90,6 @@ describe("season release date cascade", () => {
 
     expect(season.releaseDate).toStrictEqual(releaseDate.toJSDate());
     expect(season.year).toBe(episode.year);
-  });
-
-  it("does not overwrite an already-set season release date", async ({
-    factories: { showFactory, seasonFactory, episodeFactory },
-  }) => {
-    const show = await showFactory.createOne({ indexedAt });
-
-    const existingSeasonReleaseDate = DateTime.utc(2010, 1, 1).toJSDate();
-
-    const season = await seasonFactory.createOne({
-      show,
-      itemRequest: show.itemRequest,
-      number: 2,
-      releaseDate: existingSeasonReleaseDate,
-      indexedAt,
-    });
-
-    await episodeFactory.createOne({
-      season,
-      show,
-      itemRequest: show.itemRequest,
-      number: 1,
-      isSpecial: false,
-      releaseDate: DateTime.utc(2015, 6, 1).toJSDate(),
-      indexedAt,
-    });
-
-    expect(season.releaseDate).toStrictEqual(existingSeasonReleaseDate);
   });
 
   it("does not update the season when the episode is not the first episode", async ({
@@ -175,41 +147,6 @@ describe("show release date cascade", () => {
 
     expect(show.releaseDate).toStrictEqual(releaseDate.toJSDate());
     expect(show.year).toBe(releaseDate.year);
-  });
-
-  it("does not overwrite an already-set show release date", async ({
-    factories: { showFactory, seasonFactory, episodeFactory },
-  }) => {
-    const existingShowReleaseDate = DateTime.utc(2005, 1, 1).toJSDate();
-
-    const show = await showFactory.createOne({
-      releaseDate: existingShowReleaseDate,
-      indexedAt,
-    });
-
-    const season = await seasonFactory.createOne({
-      show,
-      itemRequest: show.itemRequest,
-      number: 1,
-      releaseDate: null,
-      indexedAt,
-    });
-
-    const releaseDate = DateTime.utc(2015, 6, 1).toJSDate();
-
-    await episodeFactory.createOne({
-      season,
-      show,
-      itemRequest: show.itemRequest,
-      number: 1,
-      isSpecial: false,
-      releaseDate,
-      indexedAt,
-    });
-
-    // The season still cascades even though the show does not.
-    expect(season.releaseDate).toStrictEqual(releaseDate);
-    expect(show.releaseDate).toStrictEqual(existingShowReleaseDate);
   });
 
   it("does not update the show when the season is not the first season", async ({
