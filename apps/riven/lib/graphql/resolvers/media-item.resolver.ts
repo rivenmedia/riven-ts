@@ -1,8 +1,13 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  MediaItem,
+  ShowLikeMediaItem,
+} from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
+import chalk from "chalk";
 import {
   Arg,
+  Ctx,
   FieldResolver,
   ID,
   Int,
@@ -11,8 +16,10 @@ import {
   Resolver,
 } from "type-graphql";
 
+import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
+import type { ApolloServerContext } from "../context.ts";
 import type { UUID } from "node:crypto";
 
 @Resolver(() => MediaItem)
@@ -46,9 +53,27 @@ export class MediaItemResolver {
   public async resetMediaItem(
     @Arg("id", () => ID) id: UUID,
     @CoreContext() { services: { mediaItemService } }: CoreContext,
+    @Ctx() { logger }: ApolloServerContext,
   ): Promise<MediaItem[]> {
     const item = await mediaItemService.getMediaItemById(id);
     const resetItems = await mediaItemService.resetMediaItem(item);
+
+    const { enqueueProcessMediaItem } =
+      await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
+
+    await clearDeduplicationJob(
+      "process-media-item",
+      `process-${item.type}-${item.id}`,
+    );
+
+    await enqueueProcessMediaItem({
+      id: item.id,
+      isRootItem: mediaItemService.rootItemTypes.has(item.type),
+    });
+
+    logger.info(
+      `Reset ${chalk.bold(item.fullTitle)} and enqueued for processing.`,
+    );
 
     return [...resetItems];
   }

@@ -454,6 +454,23 @@ describe("onFlush", () => {
       expect(season.state).toBe("completed");
       expect(show.state).toBe("completed");
     });
+
+    it("cascades a reset episode's state up through the season to the show in a single flush", async ({
+      em,
+      completedShowContext: { episodes },
+    }) => {
+      const [episode] = episodes;
+
+      expect.assert(episode);
+
+      episode.reset();
+
+      await em.persist(episode).flush();
+
+      expect(episode.state).toBe("indexed");
+      expect(episode.season.getProperty("state")).toBe("partially_completed");
+      expect(episode.show.getProperty("state")).toBe("partially_completed");
+    });
   });
 
   describe("newly requested seasons", () => {
