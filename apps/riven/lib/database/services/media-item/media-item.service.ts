@@ -1,4 +1,9 @@
-import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  Season,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
@@ -29,6 +34,10 @@ export class MediaItemService extends BaseService {
       // No fan-out necessary for movies or individual episodes,
       // as they are the leaf nodes in the media item hierarchy
       return false;
+    }
+
+    if (item instanceof Season) {
+      return item.state === "partially_completed";
     }
 
     const isPartialRequest = item.itemRequest.getProperty("isPartialRequest");

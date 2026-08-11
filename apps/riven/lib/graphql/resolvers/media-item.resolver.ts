@@ -1,7 +1,4 @@
-import {
-  MediaItem,
-  ShowLikeMediaItem,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import chalk from "chalk";
@@ -69,6 +66,7 @@ export class MediaItemResolver {
     await enqueueProcessMediaItem({
       id: item.id,
       isRootItem: mediaItemService.rootItemTypes.has(item.type),
+      fanOut: false,
     });
 
     logger.info(
