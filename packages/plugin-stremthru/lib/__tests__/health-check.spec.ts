@@ -4,40 +4,46 @@ import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
+import { Store } from "../schemas/store.schema.ts";
+import { storeExpiredLinkStatusCodes } from "../utilities/store-expired-link-status-codes.ts";
 import { it } from "./stremthru.test-context.ts";
 
 const link = "https://example.com/stream-link";
 
-it("classifies a 403 response as an expired link for premiumize", async ({
-  dataSourceMap,
-  server,
-  plugin,
-  settings,
-}) => {
-  server.use(http.head(link, () => new HttpResponse(null, { status: 403 })));
+it.describe.for(Store.options)("store: %s", (store) => {
+  const expiredLinkStatusCodes = storeExpiredLinkStatusCodes(store);
 
-  expect.assert(
-    plugin.hooks["riven.media-item.stream-link.health-check.requested"],
+  it.for<StatusCodes>([...expiredLinkStatusCodes])(
+    "classifies a %s response as an expired link",
+    async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
+      server.use(
+        http.head(link, () => new HttpResponse(null, { status: statusCode })),
+      );
+
+      expect.assert(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
+      );
+
+      const item = new MediaEntry();
+
+      item.provider = store;
+
+      await expect(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+          dataSources: dataSourceMap,
+          event: {
+            item,
+            link,
+          },
+          logger,
+          settings,
+        }),
+      ).resolves.toStrictEqual({
+        state: "expired",
+        statusCode,
+      });
+    },
   );
-
-  const item = new MediaEntry();
-
-  item.provider = "premiumize";
-
-  await expect(
-    plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
-      dataSources: dataSourceMap,
-      event: {
-        item,
-        link,
-      },
-      logger: {} as never,
-      settings,
-    }),
-  ).resolves.toStrictEqual({
-    state: "expired",
-    statusCode: StatusCodes.FORBIDDEN,
-  });
 });
 
 it("does not classify a 403 response as expired for non-premiumize stores", async ({
@@ -45,6 +51,7 @@ it("does not classify a 403 response as expired for non-premiumize stores", asyn
   server,
   plugin,
   settings,
+  logger,
 }) => {
   server.use(http.head(link, () => new HttpResponse(null, { status: 403 })));
 
@@ -63,7 +70,7 @@ it("does not classify a 403 response as expired for non-premiumize stores", asyn
         item,
         link,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).rejects.toThrow(/status code 403/iu);
@@ -75,7 +82,7 @@ it.for([
   StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
 ])(
   "classifies a %s response as a dead link",
-  async (statusCode, { dataSourceMap, server, plugin, settings }) => {
+  async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
     server.use(
       http.head(link, () => new HttpResponse(null, { status: statusCode })),
     );
@@ -95,7 +102,7 @@ it.for([
           item,
           link,
         },
-        logger: {} as never,
+        logger,
         settings,
       }),
     ).resolves.toStrictEqual({
@@ -107,7 +114,7 @@ it.for([
 
 it.for([StatusCodes.OK, StatusCodes.PARTIAL_CONTENT])(
   "classifies a %s response as a healthy link",
-  async (statusCode, { dataSourceMap, server, plugin, settings }) => {
+  async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
     server.use(
       http.head(link, () => new HttpResponse(null, { status: statusCode })),
     );
@@ -127,7 +134,7 @@ it.for([StatusCodes.OK, StatusCodes.PARTIAL_CONTENT])(
           item,
           link,
         },
-        logger: {} as never,
+        logger,
         settings,
       }),
     ).resolves.toStrictEqual({

@@ -10,6 +10,7 @@ import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
+import { storeExpiredLinkStatusCodes } from "./utilities/store-expired-link-status-codes.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -165,15 +166,9 @@ export const plugin: RivenPlugin = {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      const expiredStatusCodes = new Set<StatusCodes>();
-
-      if (item.provider === "premiumize") {
-        expiredStatusCodes.add(StatusCodes.FORBIDDEN);
-      }
-
-      if (item.provider === "torbox") {
-        expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
-      }
+      const expiredStatusCodes = storeExpiredLinkStatusCodes(
+        item.provider as Store,
+      );
 
       const state =
         (deadStatusCodes.has(response.status) ? "dead" : null) ??
