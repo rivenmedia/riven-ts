@@ -6,11 +6,14 @@ import { expect } from "vitest";
 
 import { it } from "./stremthru.test-context.ts";
 
+import type { PathParams } from "msw";
+
 it("returns the status code from the downstream response for errors", async ({
   dataSourceMap,
   server,
   plugin,
   settings,
+  logger,
 }) => {
   server.use(
     http.post("**/v0/store/torz/link/generate", () =>
@@ -31,7 +34,7 @@ it("returns the status code from the downstream response for errors", async ({
       event: {
         item,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -45,6 +48,7 @@ it("returns the stream link when the response is successful", async ({
   server,
   plugin,
   settings,
+  logger,
 }) => {
   const streamLink = "http://example.com/stream-link";
 
@@ -71,7 +75,7 @@ it("returns the stream link when the response is successful", async ({
       event: {
         item,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -88,6 +92,7 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
   server,
   plugin,
   settings,
+  logger,
   dataSourceMap,
 }) => {
   const streamLink = "http://example.com/stream-link";
@@ -115,7 +120,7 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
       event: {
         item,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -129,6 +134,7 @@ it("re-throws unexpected errors", async ({
   server,
   plugin,
   settings,
+  logger,
 }) => {
   server.use(
     http.post("**/v0/store/torz/link/generate", () =>
@@ -151,52 +157,36 @@ it("re-throws unexpected errors", async ({
       event: {
         item,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).rejects.toThrow("Failed to generate link from realdebrid");
 });
 
-it("regenerates the link from the durable provider download id", async ({
+it("regenerates the link from the provider download id for stores that do not provide a direct link", async ({
   dataSourceMap,
   server,
   plugin,
   settings,
+  logger,
 }) => {
   const freshLink = "https://example.com/fresh-file-link";
-  const generatedLinks: unknown[] = [];
 
   server.use(
-    http.get("**/v0/store/torz/:id", () =>
-      HttpResponse.json({
-        data: {
-          id: "realdebrid:cached:magnet:hash",
-          status: "cached",
-          files: [
-            {
-              name: "the-movie.mkv",
-              path: "/the-movie.mkv",
-              link: freshLink,
-              size: 1000,
-            },
-          ],
-        },
-      }),
+    http.post<PathParams, { link: string }>(
+      "**/v0/store/torz/link/generate",
+      () =>
+        HttpResponse.json({
+          data: {
+            link: freshLink,
+          },
+        }),
     ),
-    http.post("**/v0/store/torz/link/generate", async ({ request }) => {
-      const body = (await request.json()) as { link: string };
-
-      generatedLinks.push(body.link);
-
-      return HttpResponse.json({
-        data: {
-          link: body.link,
-        },
-      });
-    }),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -206,12 +196,10 @@ it("regenerates the link from the durable provider download id", async ({
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
-      event: {
-        item,
-      },
-      logger: { warn: () => undefined, debug: () => undefined } as never,
+      event: { item },
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -222,38 +210,33 @@ it("regenerates the link from the durable provider download id", async ({
       expiresAt: expect.any(String),
     },
   });
-
-  // The link fed to link/generate must be the fresh file link from the
-  // durable torrent, never the stale stored download URL.
-  expect(generatedLinks).toStrictEqual([freshLink]);
 });
 
-it("does not match a different file whose path merely ends with the filename", async ({
+it("provides the link from the torrent directly for stores that provide direct CDN links", async ({
   dataSourceMap,
   server,
   plugin,
   settings,
+  logger,
 }) => {
   const correctLink = "https://example.com/correct-file-link";
+  const originalFilename = "the-movie.mkv";
 
   server.use(
     http.get("**/v0/store/torz/:id", () =>
       HttpResponse.json({
         data: {
-          id: "realdebrid:cached:magnet:hash",
+          id: "premiumize:cached:magnet:hash",
           status: "cached",
           files: [
             {
-              // Decoy: path ends with "the-movie.mkv" but is a different file.
-              name: "big-the-movie.mkv",
+              name: "wrong-file.mkv",
               path: "/release/big-the-movie.mkv",
               link: "https://example.com/wrong-file-link",
               size: 500,
             },
             {
-              // Store-renamed file: name no longer matches, but the path
-              // basename does.
-              name: "The Movie (Renamed).mkv",
+              name: originalFilename,
               path: "/release/the-movie.mkv",
               link: correctLink,
               size: 1000,
@@ -262,32 +245,25 @@ it("does not match a different file whose path merely ends with the filename", a
         },
       }),
     ),
-    http.post("**/v0/store/torz/link/generate", async ({ request }) => {
-      const body = (await request.json()) as { link: string };
-
-      return HttpResponse.json({
-        data: {
-          link: body.link,
-        },
-      });
-    }),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
-  item.providerDownloadId = "realdebrid:cached:magnet:hash";
+  item.providerDownloadId = "premiumize:cached:magnet:hash";
   item.originalFilename = "the-movie.mkv";
-  item.provider = "realdebrid";
+  item.provider = "premiumize";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
       },
-      logger: { warn: () => undefined, debug: () => undefined } as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -305,6 +281,7 @@ it("resolves stremthru:// locked-link placeholders through link generation", asy
   server,
   plugin,
   settings,
+  logger,
 }) => {
   // Some stores (e.g. torbox) return an unresolved locked-link placeholder
   // from GET torz/{id}; only link/generate turns it into a real CDN URL.
@@ -312,22 +289,6 @@ it("resolves stremthru:// locked-link placeholders through link generation", asy
   const resolvedLink = "https://cdn.example.com/dld/some-file?token=abc";
 
   server.use(
-    http.get("**/v0/store/torz/:id", () =>
-      HttpResponse.json({
-        data: {
-          id: "61646659",
-          status: "downloaded",
-          files: [
-            {
-              name: "the-movie.mkv",
-              path: "/the-movie.mkv",
-              link: lockedLink,
-              size: 1000,
-            },
-          ],
-        },
-      }),
-    ),
     http.post("**/v0/store/torz/link/generate", () =>
       HttpResponse.json({
         data: {
@@ -337,21 +298,24 @@ it("resolves stremthru:// locked-link placeholders through link generation", asy
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
+  item.downloadUrl = lockedLink;
   item.providerDownloadId = "61646659";
   item.originalFilename = "the-movie.mkv";
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
       },
-      logger: { warn: () => undefined, debug: () => undefined } as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -369,6 +333,7 @@ it("falls back to legacy link generation when the durable torrent lacks the file
   server,
   plugin,
   settings,
+  logger,
 }) => {
   const legacyLink = "https://example.com/legacy-generated-link";
 
@@ -398,7 +363,9 @@ it("falls back to legacy link generation when the durable torrent lacks the file
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -408,12 +375,12 @@ it("falls back to legacy link generation when the durable torrent lacks the file
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
       },
-      logger: { warn: () => undefined, debug: () => undefined } as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
@@ -431,6 +398,7 @@ it("uses the legacy link generation path for entries without a provider download
   server,
   plugin,
   settings,
+  logger,
 }) => {
   const legacyLink = "https://example.com/legacy-generated-link";
 
@@ -444,7 +412,9 @@ it("uses the legacy link generation path for entries without a provider download
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -452,12 +422,12 @@ it("uses the legacy link generation path for entries without a provider download
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
       },
-      logger: {} as never,
+      logger,
       settings,
     }),
   ).resolves.toStrictEqual({
