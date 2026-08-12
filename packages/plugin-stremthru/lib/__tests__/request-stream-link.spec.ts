@@ -21,7 +21,9 @@ it("returns the status code from the downstream response for errors", async ({
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -29,7 +31,7 @@ it("returns the status code from the downstream response for errors", async ({
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
@@ -62,7 +64,9 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -70,7 +74,7 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
   item.provider = "torbox";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
@@ -99,7 +103,9 @@ it("re-throws unexpected errors", async ({
     ),
   );
 
-  expect.assert(plugin.hooks["riven.media-item.stream-link.requested"]);
+  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+
+  expect.assert(hook);
 
   const item = new MediaEntry();
 
@@ -107,7 +113,7 @@ it("re-throws unexpected errors", async ({
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.requested"]({
+    hook({
       dataSources: dataSourceMap,
       event: {
         item,
