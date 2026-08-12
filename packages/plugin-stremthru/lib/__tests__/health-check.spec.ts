@@ -44,6 +44,74 @@ it.describe.for(Store.options)("store: %s", (store) => {
       });
     },
   );
+
+  it.for([
+    StatusCodes.NOT_FOUND,
+    StatusCodes.GONE,
+    StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
+  ])(
+    "classifies a %s response as a dead link",
+    async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
+      server.use(
+        http.head(link, () => new HttpResponse(null, { status: statusCode })),
+      );
+
+      expect.assert(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
+      );
+
+      const item = new MediaEntry();
+
+      item.provider = store;
+
+      await expect(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+          dataSources: dataSourceMap,
+          event: {
+            item,
+            link,
+          },
+          logger,
+          settings,
+        }),
+      ).resolves.toStrictEqual({
+        state: "dead",
+        statusCode,
+      });
+    },
+  );
+
+  it.for([StatusCodes.OK, StatusCodes.PARTIAL_CONTENT])(
+    "classifies a %s response as a healthy link",
+    async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
+      server.use(
+        http.head(link, () => new HttpResponse(null, { status: statusCode })),
+      );
+
+      expect.assert(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
+      );
+
+      const item = new MediaEntry();
+
+      item.provider = store;
+
+      await expect(
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+          dataSources: dataSourceMap,
+          event: {
+            item,
+            link,
+          },
+          logger,
+          settings,
+        }),
+      ).resolves.toStrictEqual({
+        state: "healthy",
+        statusCode,
+      });
+    },
+  );
 });
 
 it("does not classify a 403 response as expired for non-premiumize stores", async ({
@@ -75,71 +143,3 @@ it("does not classify a 403 response as expired for non-premiumize stores", asyn
     }),
   ).rejects.toThrow(/status code 403/iu);
 });
-
-it.for([
-  StatusCodes.NOT_FOUND,
-  StatusCodes.GONE,
-  StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
-])(
-  "classifies a %s response as a dead link",
-  async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
-    server.use(
-      http.head(link, () => new HttpResponse(null, { status: statusCode })),
-    );
-
-    expect.assert(
-      plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-    );
-
-    const item = new MediaEntry();
-
-    item.provider = "realdebrid";
-
-    await expect(
-      plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
-        dataSources: dataSourceMap,
-        event: {
-          item,
-          link,
-        },
-        logger,
-        settings,
-      }),
-    ).resolves.toStrictEqual({
-      state: "dead",
-      statusCode,
-    });
-  },
-);
-
-it.for([StatusCodes.OK, StatusCodes.PARTIAL_CONTENT])(
-  "classifies a %s response as a healthy link",
-  async (statusCode, { dataSourceMap, server, plugin, settings, logger }) => {
-    server.use(
-      http.head(link, () => new HttpResponse(null, { status: statusCode })),
-    );
-
-    expect.assert(
-      plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-    );
-
-    const item = new MediaEntry();
-
-    item.provider = "realdebrid";
-
-    await expect(
-      plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
-        dataSources: dataSourceMap,
-        event: {
-          item,
-          link,
-        },
-        logger,
-        settings,
-      }),
-    ).resolves.toStrictEqual({
-      state: "healthy",
-      statusCode,
-    });
-  },
-);
