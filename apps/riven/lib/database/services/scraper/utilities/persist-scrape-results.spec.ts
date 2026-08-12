@@ -1,4 +1,4 @@
-import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.incorrect-state.event";
 import { parse } from "@repo/util-rank-torrent-name";
 
@@ -109,4 +109,46 @@ it("resets the failed attempts count when new streams are added", async ({
 
   expect(newStreamsCount).toBe(1);
   expect(item.failedScrapeAttempts).toBe(0);
+});
+
+it("allows identical streams to be assigned to multiple media items", async ({
+  em,
+  factories: { streamFactory },
+  seeders: { seedIndexedShow },
+  services: { scraperService },
+}) => {
+  const { show, seasons, episodes } = await seedIndexedShow();
+  const streams = await streamFactory.create(10);
+
+  expect.assert(seasons?.[0]);
+  expect.assert(episodes?.[0]);
+
+  const scrapeData = Object.fromEntries(
+    streams.map((stream) => [stream.infoHash, stream.parsedData]),
+  );
+
+  const { item: scrapedShow } = await scraperService.scrapeItem(
+    show.id,
+    scrapeData,
+  );
+
+  await expect(scrapedShow.streams.loadCount()).resolves.toBe(streams.length);
+
+  const { item: scrapedSeason } = await scraperService.scrapeItem(
+    seasons[0].id,
+    scrapeData,
+  );
+
+  await expect(scrapedSeason.streams.loadCount()).resolves.toBe(streams.length);
+
+  const { item: scrapedEpisode } = await scraperService.scrapeItem(
+    episodes[0].id,
+    scrapeData,
+  );
+
+  await expect(scrapedEpisode.streams.loadCount()).resolves.toBe(
+    streams.length,
+  );
+
+  await expect(em.count(Stream)).resolves.toBe(streams.length);
 });

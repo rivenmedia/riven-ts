@@ -7,6 +7,9 @@ const withMDX = createMDX();
 const config = {
   output: "export",
   images: { unoptimized: true },
+  experimental: {
+    useTypeScriptCli: true,
+  },
 } satisfies NextConfig;
 
 export default withMDX(config);

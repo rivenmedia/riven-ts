@@ -32,10 +32,7 @@ export class Stream {
   public parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
-  @ManyToMany({
-    entity: () => MediaItem,
-    mappedBy: "streams",
-  })
+  @ManyToMany(() => MediaItem, "streams")
   public parents = new Collection<MediaItem>(this);
 
   @Field(() => [MediaItem])

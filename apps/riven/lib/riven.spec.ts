@@ -16,7 +16,7 @@ import { SessionID } from "./utilities/logger/session-id.ts";
 import * as settingsModule from "./utilities/settings.ts";
 
 import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
-import type { SnapshotFrom } from "xstate";
+import type { AnyActor, SnapshotFrom } from "xstate";
 
 const it = baseIt
   .extend("mockRivenMachine", () =>
@@ -41,25 +41,36 @@ const it = baseIt
       },
     }),
   )
-  .extend(
-    "createRivenMachineActor",
-    ({ mockRivenMachine }) =>
-      (machineLogic: typeof mockRivenMachine = mockRivenMachine) => {
-        const actor = createActor(machineLogic, {
-          input: {
-            sessionId: SessionID.parse(randomUUID()),
-            mockScenario: undefined,
-          },
-        });
+  .extend("createRivenMachineActor", ({ mockRivenMachine }, { onCleanup }) => {
+    const actors = new Set<AnyActor>();
 
-        vi.spyOn(actor, "send");
-        vi.spyOn(rivenMachineModule, "createRivenMachine").mockReturnValue(
-          actor,
-        );
+    onCleanup(() => {
+      for (const actor of actors) {
+        actor.stop();
+      }
+    });
 
-        return actor;
-      },
-  );
+    return (machineLogic: typeof mockRivenMachine = mockRivenMachine) => {
+      const actor = createActor(machineLogic, {
+        input: {
+          sessionId: SessionID.parse(randomUUID()),
+          mockScenario: undefined,
+        },
+      });
+
+      vi.spyOn(actor, "send");
+      vi.spyOn(rivenMachineModule, "createRivenMachine").mockReturnValue(actor);
+
+      actors.add(actor);
+
+      return actor;
+    };
+  });
+
+it.beforeEach(() => {
+  // oxlint-disable-next-line vitest/prefer-mock-return-shorthand - we need to genuinely overwrite the implementation here to avoid actually calling the real process.exit()
+  vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+});
 
 it.afterEach(() => {
   process.exitCode = undefined;
@@ -96,7 +107,9 @@ it("exits with code 1 on uncaught exceptions", async ({
 }) => {
   vi.useFakeTimers();
 
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
+  const onSpy = vi.spyOn(process, "on");
 
   const rivenMachineActor = createRivenMachineActor();
 
@@ -106,7 +119,18 @@ it("exits with code 1 on uncaught exceptions", async ({
     expect(rivenMachineActor.getSnapshot().value).toBe("Running");
   });
 
-  process.emit("uncaughtException", new Error("Test uncaught exception"));
+  // Invoke the handler riven() registered directly, rather than emitting
+  // "uncaughtException" on `process` itself: Wallaby & Vitest also listen for that event
+  // to detect genuinely uncaught errors, so emitting it manually gets misattributed as a
+  // real crash instead of exercising the handler under test.
+  const [, uncaughtExceptionHandler] = onSpy.mock.calls.find(
+    ([event]) => event === "uncaughtException",
+  ) as [string, NodeJS.UncaughtExceptionListener];
+
+  uncaughtExceptionHandler(
+    new Error("Test uncaught exception"),
+    "uncaughtException",
+  );
 
   expect(rivenMachineActor).toHaveReceivedEvent({
     type: "riven.core.shutdown",
@@ -125,7 +149,8 @@ it("exits with code 1 on uncaught exceptions", async ({
 it("does not force quit the process if shutdown succeeds within the configured timeout", async ({
   createRivenMachineActor,
 }) => {
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
 
   const rivenMachineActor = createRivenMachineActor();
 
@@ -157,7 +182,8 @@ it("force quits the process if shutdown takes longer than the configured timeout
     shutdownTimeoutSeconds: 1,
   } as never);
 
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
 
   const rivenMachineActor = createRivenMachineActor(
     mockRivenMachine.provide({

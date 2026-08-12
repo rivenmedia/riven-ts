@@ -23,7 +23,7 @@ it("returns the item request if processed successfully", async ({
   );
 });
 
-it("sends an error event if the item processing fails", async ({
+it("throws an error event if the item processing fails", async ({
   services: { itemRequestService },
 }) => {
   const requestedId = "1234";

@@ -3,8 +3,6 @@ name: Verify
 description: |
   This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
 
-  It also tests that the Docker images are buildable, optionally pushing to the container registry if the "build-docker" label is present.
-
 run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 
@@ -41,12 +39,25 @@ jobs:
               - fuse
           - name: Formatting
             command: //#format:check:ci
-          - name: Tests
+
+          # Separate test jobs per-platform ensures that the project can build natively
+          - name: Tests (linux-x64)
             command: test
             concurrency: "100%"
-            runner-requirements:
+            runner-requirements: &test-runner-requirements
               - redis-server
               - fuse
+            runner: ubuntu-latest
+          - name: Tests (linux-arm64)
+            command: test
+            concurrency: "100%"
+            runner-requirements: *test-runner-requirements
+            runner: ubuntu-24.04-arm
+          - name: Tests (macos-arm64)
+            command: test
+            concurrency: "100%"
+            runner-requirements: *test-runner-requirements
+            runner: macos-latest
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:
@@ -57,16 +68,15 @@ jobs:
             command: //#knip:ci:development
           - name: Knip (production)
             command: //#knip:ci:production
-          - name: Build Wiki
-            command: "@repo/wiki#build"
-            runner-requirements:
-              - fuse
+          - name: Build
+            command: build
           - name: Validate generators
             command: //#validate-generators
             runner-requirements:
               - redis-server
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
+      runner: ${{ matrix.task.runner || 'ubuntu-latest' }}
       task: ${{ matrix.task.command }}
       concurrency: ${{ matrix.task.concurrency || '10' }}
       runner-requirements: ${{ matrix.task.runner-requirements &&

@@ -28,7 +28,7 @@ export class RetryLibraryService extends BaseService {
   public async getItemRequestsToRetry() {
     return this.em.getRepository(ItemRequest).find({
       state: {
-        $nin: ["completed"],
+        $ne: "completed",
       },
     });
   }

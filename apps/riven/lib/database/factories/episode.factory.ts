@@ -26,10 +26,11 @@ export class EpisodeFactory extends Factory<Episode> {
       tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       contentRating: "tv-14",
       releaseDate: faker.date.between({
-        from: DateTime.utc().minus({ years: 1 }).toISO(),
-        to: DateTime.utc().plus({ years: 1 }).toISO(),
+        from: DateTime.utc().minus({ years: 1 }).startOf("minute").toISO(),
+        to: DateTime.utc().plus({ years: 1 }).startOf("minute").toISO(),
       }),
       season,
+      isSpecial: false,
       ...input,
     };
   }

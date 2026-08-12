@@ -13,7 +13,7 @@ export class ShowItemRequestFactory extends Factory<ItemRequest> {
   ): EntityData<ItemRequest> {
     return {
       requestedBy: faker.internet.email(),
-      state: "completed",
+      state: "requested",
       type: "show",
       tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
       ...input,

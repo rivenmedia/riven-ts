@@ -7264,7 +7264,11 @@
                       "example": "http://www.foxmovies.com/movies/fight-club"
                     },
                     "id": { "type": "integer", "example": 550, "default": 0 },
-                    "imdb_id": { "type": "string", "example": "tt0137523" },
+                    "imdb_id": {
+                      "type": "string",
+                      "example": "tt0137523",
+                      "nullable": true
+                    },
                     "original_language": { "type": "string", "example": "en" },
                     "original_title": {
                       "type": "string",
@@ -7789,7 +7793,11 @@
                   "type": "object",
                   "properties": {
                     "id": { "type": "integer", "example": 550, "default": 0 },
-                    "imdb_id": { "type": "string", "example": "tt0137523" },
+                    "imdb_id": {
+                      "type": "string",
+                      "example": "tt0137523",
+                      "nullable": true
+                    },
                     "wikidata_id": {},
                     "facebook_id": { "type": "string", "example": "FightClub" },
                     "instagram_id": {},

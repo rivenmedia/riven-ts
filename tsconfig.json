@@ -9,7 +9,8 @@
     ".husky/install.mjs",
     "oxlint.config.ts",
     "knip.config.ts",
-    "commitlint.config.ts"
+    "commitlint.config.ts",
+    "vitest.config.ts"
   ],
   "include": ["turbo/**/*.ts"],
   "exclude": []

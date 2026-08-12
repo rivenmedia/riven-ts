@@ -4,12 +4,16 @@ import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-mo
 import { ForeignLanguageMovieSeeder } from "../../database/seeders/movies/foreign-language-movie.seeder.ts";
 import { IndexedMovieSeeder } from "../../database/seeders/movies/indexed-movie.seeder.ts";
 import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
+import { UnreleasedMovieSeeder } from "../../database/seeders/movies/unreleased-movie.seeder.ts";
+import { CompletedOngoingShowSeeder } from "../../database/seeders/shows/completed-ongoing-show.seeder.ts";
 import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
 import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-language-show.seeder.ts";
 import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
 import { OngoingShowSeeder } from "../../database/seeders/shows/ongoing-show.seeder.ts";
 import { PartiallyCompletedShowSeeder } from "../../database/seeders/shows/partially-completed-show.seeder.ts";
+import { PartiallyRequestedShowSeeder } from "../../database/seeders/shows/partially-requested-show.seeder.ts";
 import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
+import { UnreleasedShowSeeder } from "../../database/seeders/shows/unreleased-show.seeder.ts";
 
 import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
 import type { Constructor, Dictionary, EntityManager } from "@mikro-orm/core";
@@ -46,7 +50,7 @@ const buildSeederFunction =
     }
 
     if (count === 1) {
-      assert(results.length === 1, "Expected exactly one result");
+      assert.ok(results.length === 1, "Expected exactly one result");
 
       return results[0] as SeederResult<S, C>;
     }
@@ -60,6 +64,7 @@ export const buildSeederFunctions = (em: EntityManager) => ({
   seedScrapedMovie: buildSeederFunction(em, ScrapedMovieSeeder),
   seedCompletedMovie: buildSeederFunction(em, CompletedMovieSeeder),
   seedForeignLanguageMovie: buildSeederFunction(em, ForeignLanguageMovieSeeder),
+  seedUnreleasedMovie: buildSeederFunction(em, UnreleasedMovieSeeder),
 
   // Shows
   seedIndexedShow: buildSeederFunction(em, IndexedShowSeeder),
@@ -68,7 +73,13 @@ export const buildSeederFunctions = (em: EntityManager) => ({
     em,
     PartiallyCompletedShowSeeder,
   ),
+  seedPartiallyRequestedShow: buildSeederFunction(
+    em,
+    PartiallyRequestedShowSeeder,
+  ),
   seedCompletedShow: buildSeederFunction(em, CompletedShowSeeder),
+  seedCompletedOngoingShow: buildSeederFunction(em, CompletedOngoingShowSeeder),
   seedForeignLanguageShow: buildSeederFunction(em, ForeignLanguageShowSeeder),
   seedOngoingShow: buildSeederFunction(em, OngoingShowSeeder),
+  seedUnreleasedShow: buildSeederFunction(em, UnreleasedShowSeeder),
 });

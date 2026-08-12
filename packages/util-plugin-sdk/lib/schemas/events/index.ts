@@ -95,9 +95,9 @@ import {
   MediaItemScrapeErrorIncorrectStateEventHandler,
 } from "./media-item.scrape.error.incorrect-state.event.ts";
 import {
-  MediaItemScrapeErrorNoNewStreamsEvent,
-  MediaItemScrapeErrorNoNewStreamsEventHandler,
-} from "./media-item.scrape.error.no-new-streams.event.ts";
+  MediaItemScrapeErrorNoStreamsFoundEvent,
+  MediaItemScrapeErrorNoStreamsFoundEventHandler,
+} from "./media-item.scrape.error.no-streams-found.event.ts";
 import {
   MediaItemScrapeSuccessEvent,
   MediaItemScrapeSuccessEventHandler,
@@ -133,7 +133,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   CoreShutdownEvent,
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeSuccessEvent,
-  MediaItemScrapeErrorNoNewStreamsEvent,
+  MediaItemScrapeErrorNoStreamsFoundEvent,
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
   MediaItemDownloadRequestedEvent,
@@ -194,8 +194,8 @@ export const RivenEventHandler = {
   "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
   "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
-  "riven.media-item.scrape.error.no-new-streams":
-    MediaItemScrapeErrorNoNewStreamsEventHandler,
+  "riven.media-item.scrape.error.no-streams-found":
+    MediaItemScrapeErrorNoStreamsFoundEventHandler,
   "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 
   // Item downloading

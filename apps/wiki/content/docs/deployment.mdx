@@ -1,118 +1,24 @@
 ---
 title: Deployment
-description: Production deployment guide for Riven TS.
+description: Running Riven TS in production.
 ---
 
 import { Callout } from "fumadocs-ui/components/callout";
 
-## Docker Compose (Recommended)
+This page covers what changes once Riven is more than a test install. For the
+initial setup, see [Getting Started](/docs/getting-started).
 
-The recommended way to run Riven is with Docker Compose. Use the [Compose Generator](/generator) for an interactive setup, or follow the manual guide below.
-
-### Minimum Requirements
+## Requirements
 
 - Linux host with FUSE support
 - Docker Engine 24+ with Compose V2
-- 1GB RAM minimum (2GB+ recommended)
-- PostgreSQL 15+ (included in compose)
-- Redis 7+ (included in compose)
+- PostgreSQL 17 and Redis 8
 
-### Mount Propagation
+## Media Server Integration
 
-<Callout type="warn">
-  This step is critical. Without shared mount propagation, the VFS will not be
-  visible outside the container.
-</Callout>
-
-Create a systemd service to make the mount point shared:
-
-```ini title="/etc/systemd/system/riven-mount.service"
-[Unit]
-Description=Make Riven data bind mount shared
-After=local-fs.target
-Before=docker.service
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/mount --bind /mnt/riven /mnt/riven
-ExecStart=/usr/bin/mount --make-rshared /mnt/riven
-RemainAfterExit=yes
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-sudo mkdir -p /mnt/riven
-sudo systemctl daemon-reload
-sudo systemctl enable --now riven-mount.service
-```
-
-Verify it's working:
-
-```bash
-findmnt -o TARGET,PROPAGATION /mnt/riven
-# Should show "shared"
-```
-
-### Docker Compose File
-
-```yaml title="docker-compose.yml"
-services:
-  riven:
-    image: ghcr.io/rivenmedia/riven-ts:latest
-    container_name: riven
-    restart: unless-stopped
-    tty: true
-    cap_add:
-      - SYS_ADMIN
-    security_opt:
-      - apparmor:unconfined
-    devices:
-      - /dev/fuse
-    env_file: .env
-    volumes:
-      - riven_data:/riven/data
-      - /mnt/riven:/mnt/riven:rshared,z
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  postgres:
-    image: postgres:17-alpine
-    environment:
-      POSTGRES_USER: riven
-      POSTGRES_PASSWORD: CHANGEME
-      POSTGRES_DB: riven
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U riven"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-  redis:
-    image: redis:8-alpine
-    volumes:
-      - redis_data:/data
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
-
-volumes:
-  riven_data:
-  postgres_data:
-  redis_data:
-```
-
-### Media Server Integration
-
-Add your media server to the same compose file. The key is mounting the VFS path with `rslave` propagation:
+Add your media server to the same compose file. Riven's container uses
+`rshared` propagation to publish its FUSE mount; consumers use `rslave` to
+receive it:
 
 ```yaml title="Jellyfin example"
 jellyfin:
@@ -121,23 +27,24 @@ jellyfin:
     - 8096:8096
   volumes:
     - jellyfin_config:/config
-    - /mnt/riven:/mnt/riven:rslave,z
+    - /mnt/riven:/mount:rslave,z
   depends_on:
     riven:
       condition: service_started
 ```
 
-<Callout>
-  The Riven container uses `rshared` (read-shared) propagation so it can share
-  its FUSE mount. Media servers use `rslave` (read-slave) to receive mount
-  events from the host.
+<Callout type="warn">
+  The media server must start *after* Riven has mounted the VFS. If it scans an
+  empty mount it will mark the library as unavailable.
 </Callout>
 
 ## Reverse Proxy
 
-### Traefik
+Riven serves GraphQL on port 3000. Make sure
+`RIVEN_SETTING__gqlHost="0.0.0.0"` is set, or the proxy will get connection
+refused.
 
-```yaml
+```yaml title="Traefik"
 labels:
   - traefik.enable=true
   - traefik.http.routers.riven.rule=Host(`riven.example.com`)
@@ -147,9 +54,7 @@ labels:
   - traefik.http.services.riven.loadbalancer.server.port=3000
 ```
 
-### Nginx
-
-```nginx
+```nginx title="Nginx"
 server {
     server_name riven.example.com;
 
@@ -163,6 +68,24 @@ server {
 }
 ```
 
+<Callout type="warn">
+  The GraphQL API currently has no authentication. Do not expose it to the
+  internet without putting auth in front of it.
+</Callout>
+
+## Pinning a Version
+
+`:main` tracks the latest build of the default branch and can change under you.
+For production, pin a release instead:
+
+```yaml
+image: ghcr.io/rivenmedia/riven-ts:1.2.3
+```
+
+Available tags are on the
+[package page](https://github.com/rivenmedia/riven-ts/pkgs/container/riven-ts).
+There is no `latest` tag.
+
 ## Updating
 
 ```bash
@@ -170,4 +93,16 @@ docker compose pull
 docker compose up -d
 ```
 
-Riven TS handles database migrations automatically on startup.
+Database migrations run automatically on startup.
+
+## Backups
+
+PostgreSQL holds your library — media items, requests, streams, and the VFS
+file entries. Back it up:
+
+```bash
+docker compose exec postgres pg_dump -U riven riven | gzip > riven-backup.sql.gz
+```
+
+Keep your `.env` and the generated ranking config (`./data`) too. Logs are
+disposable, and Redis only holds in-flight queue state.

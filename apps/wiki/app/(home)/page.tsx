@@ -1,4 +1,5 @@
 import { StarCounter } from "@/components/star-counter";
+import { getPlugins } from "@/lib/plugins";
 
 import {
   ArrowRight,
@@ -13,8 +14,6 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
-
-import packageJson from "../../package.json" with { type: "json" };
 
 import type { LucideIcon } from "lucide-react";
 
@@ -57,40 +56,19 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
   },
 ];
 
-const integrations = [
-  { name: "Plex", url: "https://plex.tv" },
-  { name: "Jellyfin", url: "https://jellyfin.org" },
+const debridStores = [
   { name: "Real-Debrid", url: "https://real-debrid.com" },
   {
-    name: "Torbox",
+    name: "TorBox",
     url: "https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858",
   },
-  { name: "All-Debrid", url: "https://alldebrid.com" },
-  { name: "Torrentio", url: "https://torrentio.strem.fun" },
-  { name: "Comet", url: "https://github.com/g0ldyy/comet" },
-  { name: "StremThru", url: "https://github.com/MunifTanjim/stremthru" },
-  { name: "Listrr", url: "https://listrr.pro" },
-  { name: "MDBList", url: "https://mdblist.com" },
-  { name: "Seerr", url: "https://github.com/seerr-team/seerr" },
-  { name: "TMDB", url: "https://www.themoviedb.org" },
-  { name: "TVDB", url: "https://thetvdb.com" },
-  { name: "Subdl", url: "https://subdl.com" },
+  { name: "AllDebrid", url: "https://alldebrid.com" },
 ];
 
 const statusIndicators = [
   { label: "Open Source", color: "bg-green-500" },
   { label: "Self-Hosted", color: "bg-blue-500" },
   { label: "Docker Ready", color: "bg-purple-500" },
-];
-
-const pluginCount = Object.keys(packageJson.devDependencies).filter((dep) =>
-  dep.startsWith("@repo/plugin-"),
-).length;
-
-const stats = [
-  { value: `${String(pluginCount)}+`, label: "Plugins" },
-  { value: "100%", label: "Open Source" },
-  { value: "24/7", label: "Automated" },
 ];
 
 async function getGitHubStars() {
@@ -114,6 +92,13 @@ async function getGitHubStars() {
 
 export default async function HomePage() {
   const stars = await getGitHubStars();
+  const plugins = getPlugins();
+  const stats = [
+    { value: String(plugins.length), label: "Plugins" },
+    { value: "100%", label: "Open Source" },
+    { value: "24/7", label: "Automated" },
+  ];
+
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero */}
@@ -221,18 +206,34 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {integrations.map((integration) => (
-              <a
-                key={integration.name}
-                href={integration.url}
-                target="_blank"
-                rel="noopener noreferrer"
+            {plugins.map((plugin) => (
+              <Link
+                key={plugin.name}
+                href={plugin.url}
                 className="flex items-center justify-center rounded-lg border border-fd-border bg-fd-card px-4 py-3 text-sm font-medium transition-all hover:border-purple-500/30 hover:bg-fd-muted/50"
               >
-                {integration.name}
-              </a>
+                {plugin.title}
+              </Link>
             ))}
           </div>
+
+          <p className="mt-6 text-center text-sm text-fd-muted-foreground">
+            StremThru connects Riven to your debrid store, including{" "}
+            {debridStores.map((store, i) => (
+              <span key={store.name}>
+                {i > 0 && (i === debridStores.length - 1 ? " and " : ", ")}
+                <a
+                  href={store.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-400 underline underline-offset-2"
+                >
+                  {store.name}
+                </a>
+              </span>
+            ))}
+            .
+          </p>
         </div>
       </section>
 

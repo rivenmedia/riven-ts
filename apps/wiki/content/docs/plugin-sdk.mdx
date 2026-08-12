@@ -20,16 +20,28 @@ Every plugin must implement the `RivenPlugin` interface:
 
 ```typescript
 interface RivenPlugin {
-  name: Symbol; // Unique identifier
+  name: symbol; // Unique identifier
   version: string; // Semver version
-  dataSources?: BaseDataSource[]; // HTTP API clients (optional)
-  resolvers: Function[]; // GraphQL resolvers (required, min 1)
-  hooks?: EventHandlers; // Event handlers (optional)
-  context?: Function; // Custom context (optional)
-  settingsSchema: ZodObject; // Settings validation schema
-  validator: Function; // Check if plugin can start
+  resolvers: Function[]; // GraphQL resolvers (at least one)
+  hooks: EventHandlers; // Event handlers (may be empty)
+  settingsSchema: ZodObject; // Zod schema for the plugin's settings
+  validator: (ctx: PluginContext) => Promise<boolean>;
+  dataSources?: DataSourceConstructor[]; // HTTP API clients
+  context?: (ctx: PluginContext) => Promise<Record<string, unknown>>;
+}
+
+interface PluginContext {
+  dataSources: DataSourceMap;
+  settings: PluginSettings;
 }
 ```
+
+<Callout type="warn">
+  Plugins read their configuration through `settings.get(YourSettingsSchema)`,
+  never from `process.env` directly — the registrar strips plugin variables out
+  of the environment before importing any plugin, so one plugin can't read
+  another's secrets.
+</Callout>
 
 ## Creating a Plugin
 
@@ -62,15 +74,52 @@ The Symbol is used for plugin identification, queue naming, and dependency injec
 </Step>
 <Step>
 
+### Define the Settings Schema
+
+A Zod schema describes everything the plugin can be configured with. It drives
+validation, the generated settings documentation, and the `settings.get()` call
+below — so `.describe()` every field.
+
+```typescript title="lib/my-service-settings.schema.ts"
+import z from "zod";
+
+export const MyServiceSettings = z.object({
+  apiKey: z
+    .string()
+    .min(1, "MyService API key is required")
+    .describe("Your MyService API key"),
+  url: z
+    .url()
+    .default("http://localhost:8080")
+    .describe("Your MyService instance URL"),
+  updateIntervalSeconds: z.coerce
+    .number()
+    .int()
+    .nonnegative()
+    .default(60)
+    .describe("How often to re-check for new content"),
+});
+
+export type MyServiceSettings = z.infer<typeof MyServiceSettings>;
+```
+
+Users set these as
+`RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MY_SERVICE__apiKey="..."`.
+
+</Step>
+<Step>
+
 ### Implement the DataSource
 
-DataSources are HTTP API clients that extend `BaseDataSource`. They include built-in rate limiting, caching, retry logic, and telemetry.
+DataSources are HTTP API clients that extend `BaseDataSource`. They include built-in rate limiting, caching, retry logic, and telemetry. `this.settings` is your parsed settings object.
 
 ```typescript title="lib/datasource/my-service.datasource.ts"
 import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
 
+import type { MyServiceSettings } from "../my-service-settings.schema.ts";
+
 export class MyServiceAPI extends BaseDataSource<MyServiceSettings> {
-  override baseURL = "https://api.myservice.com/v1/";
+  override baseURL = new URL("/api/v1/", this.settings.url).toString();
   override serviceName = "MyService";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
@@ -78,20 +127,14 @@ export class MyServiceAPI extends BaseDataSource<MyServiceSettings> {
     duration: 1000,
   };
 
-  // Authentication
-  static override getApiToken() {
-    return process.env["MY_SERVICE_API_KEY"];
-  }
-
   protected override willSendRequest(
     _path: string,
     requestOpts: AugmentedRequest,
   ) {
-    if (!this.token) throw new Error("API token is not set");
-    requestOpts.headers["x-api-key"] = this.token;
+    requestOpts.headers["x-api-key"] = this.settings.apiKey;
   }
 
-  // Validation (called on startup)
+  // Called on startup — use the cheapest endpoint available
   override async validate() {
     try {
       await this.get("health");
@@ -138,18 +181,21 @@ export class MyServiceResolver {
 }
 ```
 
-Also create a settings resolver to expose plugin config via GraphQL:
+Also create a settings resolver, which extends the global `Settings` type so
+clients can discover the plugin's setting keys:
 
 ```typescript title="lib/schema/my-service-settings.resolver.ts"
 import { Settings } from "@repo/util-plugin-sdk";
 
 import { FieldResolver, Resolver } from "type-graphql";
 
-@Resolver((_of) => Settings)
+import { MyServiceSettings } from "./types/my-service-settings.type.ts";
+
+@Resolver(() => Settings)
 export class MyServiceSettingsResolver {
-  @FieldResolver((_returns) => MyServiceSettings)
-  myService(): MyServiceSettings {
-    return { apiKey: "my-service-api-key" };
+  @FieldResolver(() => MyServiceSettings)
+  public myService(): MyServiceSettings {
+    return { apiKey: "my-service-api-key", url: "my-service-url" };
   }
 }
 ```
@@ -159,38 +205,43 @@ export class MyServiceSettingsResolver {
 
 ### Export the Plugin
 
-```typescript title="lib/index.ts"
-import { type RivenPlugin } from "@repo/util-plugin-sdk";
+The entry point exports a **named** `plugin` binding:
 
-import packageJson from "../package.json";
+```typescript title="lib/index.ts"
+import packageJson from "../package.json" with { type: "json" };
 import { MyServiceAPI } from "./datasource/my-service.datasource.ts";
 import { pluginConfig } from "./my-service-plugin.config.ts";
+import { MyServiceSettings } from "./my-service-settings.schema.ts";
 import { MyServiceSettingsResolver } from "./schema/my-service-settings.resolver.ts";
 import { MyServiceResolver } from "./schema/my-service.resolver.ts";
 
-export default {
+import type { RivenPlugin } from "@repo/util-plugin-sdk";
+
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [MyServiceAPI],
   resolvers: [MyServiceResolver, MyServiceSettingsResolver],
+  settingsSchema: MyServiceSettings,
 
   hooks: {
-    "riven.content-service.requested": async ({ dataSources }) => {
+    "riven.content-service.requested": async ({ dataSources, settings }) => {
+      const { updateIntervalSeconds } = settings.get(MyServiceSettings);
       const api = dataSources.get(MyServiceAPI);
-      if (!api) return { movies: [], shows: [] };
-
       const items = await api.getItems("default-list");
+
       return {
-        movies: items.filter((i) => i.type === "movie"),
-        shows: items.filter((i) => i.type === "show"),
+        movies: items.filter((item) => item.type === "movie"),
+        shows: items.filter((item) => item.type === "show"),
+        updateIntervalSeconds,
       };
     },
   },
 
-  validator() {
-    return Promise.resolve(Boolean(process.env["MY_SERVICE_API_KEY"]));
+  async validator({ dataSources }) {
+    return dataSources.get(MyServiceAPI).validate();
   },
-} satisfies RivenPlugin as RivenPlugin;
+};
 ```
 
 </Step>
@@ -263,8 +314,9 @@ Plugins can subscribe to system events through hooks:
 ```
 packages/plugin-my-service/
 ├── lib/
-│   ├── index.ts                    # Plugin export
-│   ├── my-service-plugin.config.ts # Plugin identifier
+│   ├── index.ts                        # Plugin export
+│   ├── my-service-plugin.config.ts     # Plugin identifier
+│   ├── my-service-settings.schema.ts   # Zod settings schema
 │   ├── datasource/
 │   │   ├── my-service.datasource.ts
 │   │   └── __tests__/
@@ -277,10 +329,17 @@ packages/plugin-my-service/
 │       └── arguments/
 │           └── list-id.arguments.ts
 ├── docs/
-│   └── settings.mdx                 # Auto-generated settings doc
+│   ├── __generated__/                  # Generated from the settings schema
+│   └── plugins/my-service/
+│       ├── meta.json                   # Display name + description
+│       └── settings.mdx
 ├── package.json
 └── tsconfig.json
 ```
+
+Anything you add under `docs/plugins/my-service/` shows up on this wiki
+automatically — no registration needed. `meta.json` is what names the plugin in
+the sidebar and on the [Plugins](/docs/plugins) page.
 
 ## OpenAPI Code Generation (Optional)
 
