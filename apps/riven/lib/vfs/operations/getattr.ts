@@ -7,7 +7,7 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { attrCache } from "../utilities/attr-cache.ts";
 import { isHiddenPath } from "../utilities/is-hidden-path.ts";
-import { isIgnoredPath } from "../utilities/is-ignored-path.ts";
+import { isSupportedExtension } from "../utilities/is-supported-extension.ts";
 import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
 import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 
@@ -26,8 +26,16 @@ export const getattrSync = function getattrSync(path, callback) {
         return;
       }
 
-      if (isHiddenPath(path) || isIgnoredPath(path)) {
-        logger.silly(`VFS getattr: Skipping hidden/ignored path ${path}`);
+      if (isHiddenPath(path)) {
+        logger.silly(`VFS getattr: Skipping hidden path ${path}`);
+
+        process.nextTick(callback, Fuse.ENOENT);
+
+        return;
+      }
+
+      if (!isSupportedExtension(path)) {
+        logger.silly(`VFS getattr: Unsupported extension for path ${path}`);
 
         process.nextTick(callback, Fuse.ENOENT);
 
