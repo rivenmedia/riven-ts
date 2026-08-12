@@ -13,17 +13,6 @@ import { StremThruSettings } from "./stremthru-settings.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-/**
- * Stores whose `getTorrent` file link is already a directly-streamable CDN URL.
- * Every other store returns a `stremthru://` locked-link placeholder that only
- * link/generate can resolve, so those must be piped through generateLink; for
- * these two that call is a no-op echo, so skipping it avoids a wasted request.
- * A denylist (not an allowlist) is used deliberately: a missing entry only
- * costs one redundant request, whereas a wrongly-listed store would serve an
- * unresolved placeholder and break playback.
- */
-const DIRECT_LINK_STORES = new Set<Store>(["premiumize", "debridlink"]);
-
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -110,13 +99,8 @@ export const plugin: RivenPlugin = {
     "riven.media-item.stream-link.requested": async ({
       dataSources,
       event,
-      logger,
       settings,
     }) => {
-      if (!event.item.downloadUrl && !event.item.providerDownloadId) {
-        throw new Error("No download URL available for this media item.");
-      }
-
       const parsedStore = Store.safeParse(event.item.provider);
 
       if (!parsedStore.success) {
@@ -137,68 +121,8 @@ export const plugin: RivenPlugin = {
         };
       }
 
-      // link/generate echoes an expired signed URL back unchanged, so only the
-      // durable providerDownloadId can mint a fresh link once downloadUrl ages out.
-      if (event.item.providerDownloadId) {
-        try {
-          const torrent = await api.getTorrent(
-            event.item.providerDownloadId,
-            store,
-          );
-
-          const file =
-            torrent.files.find(
-              (candidate) => candidate.name === event.item.originalFilename,
-            ) ??
-            torrent.files.find(
-              (candidate) =>
-                candidate.path === event.item.originalFilename ||
-                candidate.path.endsWith(`/${event.item.originalFilename}`),
-            );
-
-          if (file?.link) {
-            // Stores like torbox return an unresolved `stremthru://`
-            // locked-link placeholder here; link/generate resolves it into a
-            // signed CDN URL. Direct-link stores already return a usable URL,
-            // so the generate call is skipped for them (see DIRECT_LINK_STORES).
-            const link = DIRECT_LINK_STORES.has(store)
-              ? file.link
-              : await api.generateLink(file.link, store);
-
-            return {
-              success: true,
-              data: {
-                link,
-                isPermalink: false,
-                // 3h is a heuristic: StremThru does not expose the real
-                // signature lifetime, so we re-check health periodically.
-                expiresAt: DateTime.utc().plus({ hours: 3 }).toISO(),
-              },
-            };
-          }
-
-          logger.warn(
-            `No usable file link found on ${store} for torrent ${event.item.providerDownloadId} (file: ${event.item.originalFilename}); falling back to legacy link generation.`,
-          );
-        } catch (error) {
-          logger.warn(
-            `Failed to regenerate link from ${store} torrent ${event.item.providerDownloadId}; falling back to legacy link generation: ${
-              error instanceof Error ? error.message : String(error)
-            }`,
-          );
-        }
-      }
-
-      const { downloadUrl } = event.item;
-
-      if (!downloadUrl) {
-        throw new Error(
-          `Unable to regenerate stream link from ${store} for torrent ${event.item.providerDownloadId ?? "unknown"} and no legacy download URL is available.`,
-        );
-      }
-
       try {
-        const link = await api.generateLink(downloadUrl, store);
+        const link = await api.getStreamLink(event.item, store);
 
         return {
           success: true,

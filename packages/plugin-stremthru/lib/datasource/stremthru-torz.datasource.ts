@@ -19,6 +19,7 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { URL } from "node:url";
 
@@ -53,6 +54,12 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
         .toArray(),
     );
   }
+
+  /**
+   * Stores that provide stream links directly from the torrent file,
+   * rather than requiring a separate link generation step.
+   */
+  readonly #directLinkStores = new Set<Store>(["premiumize", "debridlink"]);
 
   #buildCommonHeaders(store: Store) {
     return {
@@ -308,14 +315,60 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return combined;
   }
 
-  public async generateLink(link: string, store: Store) {
+  async #getStreamLinkFromTorrentFile(mediaEntry: MediaEntry, store: Store) {
+    if (!mediaEntry.providerDownloadId) {
+      throw new Error(
+        `Media entry ${mediaEntry.id} does not have a provider download ID`,
+      );
+    }
+
+    const { files } = await this.getTorrent(
+      mediaEntry.providerDownloadId,
+      store,
+    );
+
+    const file = files.find(({ name }) => name === mediaEntry.originalFilename);
+
+    if (!file) {
+      throw new Error(
+        `File ${mediaEntry.originalFilename} not found in torrent ${mediaEntry.providerDownloadId} on store ${store}`,
+      );
+    }
+
+    if (!file.link) {
+      throw new Error(
+        `File ${mediaEntry.originalFilename} in torrent ${mediaEntry.providerDownloadId} on store ${store} does not have a download link`,
+      );
+    }
+
+    return file.link;
+  }
+
+  async #generateStreamLinkFromDownloadUrl(
+    mediaEntry: MediaEntry,
+    store: Store,
+  ) {
+    if (!mediaEntry.downloadUrl) {
+      throw new Error(
+        `Media entry ${mediaEntry.id} does not have a download URL`,
+      );
+    }
+
     const response = await this.post<unknown>("v0/store/torz/link/generate", {
-      body: JSON.stringify({ link }),
+      body: JSON.stringify({ link: mediaEntry.downloadUrl }),
       headers: this.#buildCommonHeaders(store),
     });
 
     const { data } = GenerateLinkResponse.parse(response);
 
     return data.link;
+  }
+
+  public async getStreamLink(mediaEntry: MediaEntry, store: Store) {
+    const storeProvidesDownloadLink = this.#directLinkStores.has(store);
+
+    return storeProvidesDownloadLink
+      ? this.#getStreamLinkFromTorrentFile(mediaEntry, store)
+      : this.#generateStreamLinkFromDownloadUrl(mediaEntry, store);
   }
 }
