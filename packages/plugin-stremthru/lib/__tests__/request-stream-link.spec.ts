@@ -21,9 +21,10 @@ it("returns the status code from the downstream response for errors", async ({
     ),
   );
 
-  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+  const requestStreamLinkHook =
+    plugin.hooks["riven.media-item.stream-link.requested"];
 
-  expect.assert(hook);
+  expect.assert(requestStreamLinkHook);
 
   const item = new MediaEntry();
 
@@ -31,7 +32,7 @@ it("returns the status code from the downstream response for errors", async ({
   item.provider = "realdebrid";
 
   await expect(
-    hook({
+    requestStreamLinkHook({
       dataSources: dataSourceMap,
       event: {
         item,
@@ -64,9 +65,10 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
     ),
   );
 
-  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+  const requestStreamLinkHook =
+    plugin.hooks["riven.media-item.stream-link.requested"];
 
-  expect.assert(hook);
+  expect.assert(requestStreamLinkHook);
 
   const item = new MediaEntry();
 
@@ -74,7 +76,7 @@ it(`returns a ${StatusCodes.GONE.toString()} status code when the entry's provid
   item.provider = "torbox";
 
   await expect(
-    hook({
+    requestStreamLinkHook({
       dataSources: dataSourceMap,
       event: {
         item,
@@ -103,9 +105,10 @@ it("re-throws unexpected errors", async ({
     ),
   );
 
-  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+  const requestStreamLinkHook =
+    plugin.hooks["riven.media-item.stream-link.requested"];
 
-  expect.assert(hook);
+  expect.assert(requestStreamLinkHook);
 
   const item = new MediaEntry();
 
@@ -113,7 +116,7 @@ it("re-throws unexpected errors", async ({
   item.provider = "realdebrid";
 
   await expect(
-    hook({
+    requestStreamLinkHook({
       dataSources: dataSourceMap,
       event: {
         item,
@@ -145,9 +148,10 @@ it("generates the link from the provider download id for stores that do not prov
     ),
   );
 
-  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+  const requestStreamLinkHook =
+    plugin.hooks["riven.media-item.stream-link.requested"];
 
-  expect.assert(hook);
+  expect.assert(requestStreamLinkHook);
 
   const item = new MediaEntry();
 
@@ -157,7 +161,7 @@ it("generates the link from the provider download id for stores that do not prov
   item.provider = "realdebrid";
 
   await expect(
-    hook({
+    requestStreamLinkHook({
       dataSources: dataSourceMap,
       event: { item },
       logger,
@@ -208,9 +212,10 @@ it("provides the link from the torrent files for stores that provide direct CDN 
     ),
   );
 
-  const hook = plugin.hooks["riven.media-item.stream-link.requested"];
+  const requestStreamLinkHook =
+    plugin.hooks["riven.media-item.stream-link.requested"];
 
-  expect.assert(hook);
+  expect.assert(requestStreamLinkHook);
 
   const item = new MediaEntry();
 
@@ -219,7 +224,7 @@ it("provides the link from the torrent files for stores that provide direct CDN 
   item.provider = "premiumize";
 
   await expect(
-    hook({
+    requestStreamLinkHook({
       dataSources: dataSourceMap,
       event: {
         item,

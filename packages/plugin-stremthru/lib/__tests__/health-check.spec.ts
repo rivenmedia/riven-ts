@@ -20,16 +20,17 @@ it.describe.for(Store.options)("store: %s", (store) => {
         http.head(link, () => new HttpResponse(null, { status: statusCode })),
       );
 
-      expect.assert(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-      );
+      const streamLinkHealthCheckRequestedHook =
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"];
+
+      expect.assert(streamLinkHealthCheckRequestedHook);
 
       const item = new MediaEntry();
 
       item.provider = store;
 
       await expect(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+        streamLinkHealthCheckRequestedHook({
           dataSources: dataSourceMap,
           event: {
             item,
@@ -56,16 +57,17 @@ it.describe.for(Store.options)("store: %s", (store) => {
         http.head(link, () => new HttpResponse(null, { status: statusCode })),
       );
 
-      expect.assert(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-      );
+      const streamLinkHealthCheckRequestedHook =
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"];
+
+      expect.assert(streamLinkHealthCheckRequestedHook);
 
       const item = new MediaEntry();
 
       item.provider = store;
 
       await expect(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+        streamLinkHealthCheckRequestedHook({
           dataSources: dataSourceMap,
           event: {
             item,
@@ -88,16 +90,17 @@ it.describe.for(Store.options)("store: %s", (store) => {
         http.head(link, () => new HttpResponse(null, { status: statusCode })),
       );
 
-      expect.assert(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-      );
+      const streamLinkHealthCheckRequestedHook =
+        plugin.hooks["riven.media-item.stream-link.health-check.requested"];
+
+      expect.assert(streamLinkHealthCheckRequestedHook);
 
       const item = new MediaEntry();
 
       item.provider = store;
 
       await expect(
-        plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+        streamLinkHealthCheckRequestedHook({
           dataSources: dataSourceMap,
           event: {
             item,
@@ -123,16 +126,17 @@ it("does not classify a 403 response as expired for non-premiumize stores", asyn
 }) => {
   server.use(http.head(link, () => new HttpResponse(null, { status: 403 })));
 
-  expect.assert(
-    plugin.hooks["riven.media-item.stream-link.health-check.requested"],
-  );
+  const streamLinkHealthCheckRequestedHook =
+    plugin.hooks["riven.media-item.stream-link.health-check.requested"];
+
+  expect.assert(streamLinkHealthCheckRequestedHook);
 
   const item = new MediaEntry();
 
   item.provider = "realdebrid";
 
   await expect(
-    plugin.hooks["riven.media-item.stream-link.health-check.requested"]({
+    streamLinkHealthCheckRequestedHook({
       dataSources: dataSourceMap,
       event: {
         item,
