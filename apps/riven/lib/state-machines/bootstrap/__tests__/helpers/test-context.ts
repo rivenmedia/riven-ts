@@ -31,11 +31,14 @@ export const it = baseIt
       /* empty */
     }),
   )
-  .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
-    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
-      server: apolloServerInstance,
-      url: "http://localhost:3000",
-    })),
+  .extend(
+    "startGqlServerActorLogic",
+    ({ apolloServerInstance, applicationContext }) =>
+      fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
+        applicationContext,
+        server: apolloServerInstance,
+        url: "http://localhost:3000",
+      })),
   )
   .extend(
     "initialiseVfsActorLogic",

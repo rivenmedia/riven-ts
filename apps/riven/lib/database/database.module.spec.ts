@@ -1,5 +1,6 @@
-import { EntityManager, MikroORM } from "@mikro-orm/core";
+import { EntityManager, MikroORM, NotFoundError } from "@mikro-orm/core";
 import { Test } from "@nestjs/testing";
+import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import { DatabaseModule } from "./database.module.ts";
@@ -60,10 +61,11 @@ describe("the database module", () => {
     const module = await createTestingModule();
     const mediaItemService = module.get(MediaItemService);
 
-    // Exercises the inherited `em` getter against the real schema.
+    // Reaching a "not found" result proves the inherited `em` getter resolved
+    // and queried the schema, rather than failing to construct.
     await expect(
-      mediaItemService.getMediaItemById(crypto.randomUUID()),
-    ).rejects.toThrow();
+      mediaItemService.getMediaItemById(randomUUID()),
+    ).rejects.toThrow(NotFoundError);
 
     await module.close();
   });

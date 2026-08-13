@@ -4,14 +4,17 @@ import { ApolloServer } from "@apollo/server";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { expressMiddleware } from "@as-integrations/express5";
+import { NestFactory } from "@nestjs/core";
 import cors from "cors";
 import express from "express";
 import { createServer } from "node:http";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
+import { AppModule } from "../../../app.module.ts";
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
+import { createNestContainer } from "../../../graphql/nest-container.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
@@ -23,6 +26,7 @@ import type {
   mainRunnerMachine,
   MainRunnerMachineIntake,
 } from "../../main-runner/index.js";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { ActorRefFromLogic } from "xstate";
@@ -34,6 +38,7 @@ export interface StartGQLServerInput {
 }
 
 export interface StartGQLServerOutput {
+  applicationContext: INestApplicationContext;
   server: ApolloServer<ApolloServerContext>;
   url: string;
 }
@@ -47,6 +52,15 @@ export const startGqlServer = fromPromise<
     .flatMap(({ config }) => config.resolvers)
     .toArray();
 
+  // Created here rather than at process start so that the database connection
+  // the container adopts is the one the bootstrap machine has already
+  // established, preserving the existing startup ordering. Ownership moves to
+  // Nest once it drives bootstrap itself.
+  const applicationContext = await NestFactory.createApplicationContext(
+    AppModule,
+    { logger: false },
+  );
+
   const app = express();
   const httpServer = createServer((...args) => {
     app(...args);
@@ -56,6 +70,7 @@ export const startGqlServer = fromPromise<
     cache: redisCache,
     schema: await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
+      container: createNestContainer(applicationContext),
     }),
     introspection: true,
     plugins: [
@@ -122,6 +137,7 @@ export const startGqlServer = fromPromise<
   initApolloClient(url);
 
   return {
+    applicationContext,
     server,
     url: url.toString(),
   };

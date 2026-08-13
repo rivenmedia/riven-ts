@@ -263,13 +263,39 @@ export const it = testBase
 
     return new Sentry.Scope();
   })
-  .extend("apolloServerInstance", { scope: "file" }, async () => {
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-    const { resolvers } = await import("../graphql/resolvers/index.ts");
+  .extend(
+    "applicationContext",
+    { scope: "file" },
+    async ({}, { onCleanup }) => {
+      const { Test } = await import("@nestjs/testing");
+      const { AppModule } = await import("../app.module.ts");
 
-    return buildMockServer<ApolloServerContext>(resolvers);
-  })
+      const module = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+
+      onCleanup(async () => {
+        await module.close();
+      });
+
+      return module;
+    },
+  )
+  .extend(
+    "apolloServerInstance",
+    { scope: "file" },
+    async ({ applicationContext }) => {
+      const { buildMockServer } =
+        await import("@repo/core-util-mock-graphql-server");
+      const { createNestContainer } =
+        await import("../graphql/nest-container.ts");
+      const { resolvers } = await import("../graphql/resolvers/index.ts");
+
+      return buildMockServer<ApolloServerContext>(resolvers, {
+        container: createNestContainer(applicationContext),
+      });
+    },
+  )
   .extend("createGqlContext", { scope: "file" }, ({ services, orm }) => () => ({
     [CoreKey]: {
       em: orm.em.fork(),
