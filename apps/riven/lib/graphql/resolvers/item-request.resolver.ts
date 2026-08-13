@@ -3,7 +3,7 @@ import { Arg, ID, Mutation, Resolver } from "type-graphql";
 
 import { ItemRequestService } from "../../database/services/item-request/item-request.service.ts";
 import { InjectLogger } from "../../logging/logging.module.ts";
-import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
+import { QueueRegistryService } from "../../message-queue/message-queue.module.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { RivenLogger } from "../../logging/logging.module.ts";
@@ -13,13 +13,16 @@ import type { UUID } from "node:crypto";
 @Resolver()
 export class ItemRequestResolver {
   private readonly itemRequestService: ItemRequestService;
+  private readonly queueRegistry: QueueRegistryService;
   private readonly logger: RivenLogger;
 
   public constructor(
     itemRequestService: ItemRequestService,
+    queueRegistry: QueueRegistryService,
     @InjectLogger() logger: RivenLogger,
   ) {
     this.itemRequestService = itemRequestService;
+    this.queueRegistry = queueRegistry;
     this.logger = logger;
   }
 
@@ -34,7 +37,7 @@ export class ItemRequestResolver {
 
     try {
       if (
-        await clearDeduplicationJob(
+        await this.queueRegistry.clearDeduplicationJob(
           "process-item-request",
           `reindex-item-${itemRequest.id}`,
         )
@@ -46,7 +49,7 @@ export class ItemRequestResolver {
 
       for (const item of await itemRequest.mediaItems.loadItems()) {
         if (
-          await clearDeduplicationJob(
+          await this.queueRegistry.clearDeduplicationJob(
             "process-media-item",
             `process-${item.type}-${item.id}`,
           )

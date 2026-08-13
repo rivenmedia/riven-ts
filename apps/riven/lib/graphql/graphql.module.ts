@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 
 import { DatabaseModule } from "../database/database.module.ts";
+import { MessageQueueModule } from "../message-queue/message-queue.module.ts";
 import { resolvers } from "./resolvers/index.ts";
 
 /**
@@ -12,7 +13,7 @@ import { resolvers } from "./resolvers/index.ts";
  * hand them their dependencies.
  */
 @Module({
-  imports: [DatabaseModule],
+  imports: [DatabaseModule, MessageQueueModule],
   providers: [...resolvers],
   exports: [...resolvers],
 })

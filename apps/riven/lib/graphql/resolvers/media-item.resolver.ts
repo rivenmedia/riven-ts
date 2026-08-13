@@ -17,7 +17,7 @@ import {
 import { MediaItemService } from "../../database/services/media-item/media-item.service.ts";
 import { StreamService } from "../../database/services/stream/stream.service.ts";
 import { InjectLogger } from "../../logging/logging.module.ts";
-import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
+import { QueueRegistryService } from "../../message-queue/message-queue.module.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { RivenLogger } from "../../logging/logging.module.ts";
@@ -28,15 +28,18 @@ import type { UUID } from "node:crypto";
 export class MediaItemResolver {
   private readonly mediaItemService: MediaItemService;
   private readonly streamService: StreamService;
+  private readonly queueRegistry: QueueRegistryService;
   private readonly logger: RivenLogger;
 
   public constructor(
     mediaItemService: MediaItemService,
     streamService: StreamService,
+    queueRegistry: QueueRegistryService,
     @InjectLogger() logger: RivenLogger,
   ) {
     this.mediaItemService = mediaItemService;
     this.streamService = streamService;
+    this.queueRegistry = queueRegistry;
     this.logger = logger;
   }
 
@@ -73,7 +76,7 @@ export class MediaItemResolver {
     const { enqueueProcessMediaItem } =
       await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
-    await clearDeduplicationJob(
+    await this.queueRegistry.clearDeduplicationJob(
       "process-media-item",
       `process-${item.type}-${item.id}`,
     );
@@ -125,7 +128,7 @@ export class MediaItemResolver {
       await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
     for (const { id, type } of itemsToReprocess) {
-      await clearDeduplicationJob(
+      await this.queueRegistry.clearDeduplicationJob(
         "process-media-item",
         `process-${type}-${id}`,
       );
