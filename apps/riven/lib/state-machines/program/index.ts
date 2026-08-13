@@ -13,11 +13,13 @@ import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { SessionID } from "../../utilities/logger/session-id.ts";
 import type { BootstrapMachineOutput } from "../bootstrap/index.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface RivenMachineContext {
+  applicationContext?: INestApplicationContext;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
@@ -57,6 +59,7 @@ export const rivenMachine = setup({
       (
         { enqueue, context: { mainRunnerRef } },
         {
+          applicationContext,
           pluginQueues,
           pluginWorkers,
           plugins,
@@ -65,7 +68,7 @@ export const rivenMachine = setup({
           vfs,
         }: BootstrapMachineOutput,
       ) => {
-        enqueue.assign({ vfs, server });
+        enqueue.assign({ applicationContext, vfs, server });
         enqueue.sendTo(mainRunnerRef, {
           type: "START",
           input: {
@@ -220,7 +223,10 @@ export const rivenMachine = setup({
                     invoke: {
                       id: "stopGqlServer",
                       src: "stopGqlServer",
-                      input: ({ context: { server } }) => server,
+                      input: ({ context: { applicationContext, server } }) => ({
+                        applicationContext,
+                        server,
+                      }),
                       onDone: "Stopped",
                       onError: {
                         target: "Stopped",

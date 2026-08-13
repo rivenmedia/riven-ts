@@ -26,6 +26,7 @@ const it = baseIt
           await setTimeout(50);
 
           return Promise.resolve({
+            applicationContext: {} as never,
             pluginQueues: new Map(),
             plugins: new Map(),
             pluginWorkers: new Map(),

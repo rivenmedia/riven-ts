@@ -23,6 +23,7 @@ import type {
 } from "../../types/plugins.ts";
 import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
@@ -35,6 +36,7 @@ export interface BootstrapMachineContext {
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
+  applicationContext?: INestApplicationContext;
   server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
   pluginQueues: PluginQueueMap;
@@ -51,6 +53,7 @@ export interface BootstrapMachineInput {
 }
 
 export interface BootstrapMachineOutput {
+  applicationContext: INestApplicationContext;
   server: ApolloServer<ApolloServerContext>;
   plugins: ValidPluginMap;
   pluginQueues: PluginQueueMap;
@@ -72,9 +75,18 @@ export const bootstrapMachine = setup({
     },
   },
   actions: {
-    assignGqlServer: assign((_, server: ApolloServer<ApolloServerContext>) => ({
-      server,
-    })),
+    assignGqlServer: assign(
+      (
+        _,
+        {
+          applicationContext,
+          server,
+        }: Pick<BootstrapMachineOutput, "applicationContext" | "server">,
+      ) => ({
+        applicationContext,
+        server,
+      }),
+    ),
     assignVfs: assign((_, vfs: Fuse) => ({
       vfs,
     })),
@@ -139,6 +151,7 @@ export const bootstrapMachine = setup({
     }),
     output: ({
       context: {
+        applicationContext,
         server,
         vfs,
         validPlugins,
@@ -153,11 +166,18 @@ export const bootstrapMachine = setup({
         );
       }
 
+      if (!applicationContext) {
+        throw new Error(
+          "Bootstrap machine completed without an application context",
+        );
+      }
+
       if (!vfs) {
         throw new Error("Bootstrap machine completed without a VFS instance");
       }
 
       return {
+        applicationContext,
         plugins: validPlugins,
         server,
         vfs,
@@ -401,9 +421,9 @@ export const bootstrapMachine = setup({
                         type: "assignGqlServer",
                         params: ({
                           event: {
-                            output: { server },
+                            output: { applicationContext, server },
                           },
-                        }) => server,
+                        }) => ({ applicationContext, server }),
                       },
                       {
                         type: "log",

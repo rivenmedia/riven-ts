@@ -27,6 +27,7 @@ export const it = baseIt
       const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
+        applicationContext: {} as never,
         server: {} as never,
         plugins: new Map<symbol, ValidPlugin>([
           [
