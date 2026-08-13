@@ -4,7 +4,7 @@ import { randomUUID } from "node:crypto";
 import { describe, expect, it } from "vitest";
 
 import { DatabaseModule } from "./database.module.ts";
-import { database } from "./database.ts";
+import { database, services } from "./database.ts";
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
@@ -33,26 +33,26 @@ describe("the database module", () => {
     await module.close();
   });
 
-  // No service declares its own constructor, so Nest can only resolve them by
-  // inheriting `design:paramtypes` from the decorated BaseService through the
-  // prototype chain. Resolving each one proves that inheritance holds.
+  // Most of the codebase still reaches services through the `services`
+  // singleton. A second set of instances would mean a stub applied to one was
+  // invisible to the other, so identity is asserted rather than type.
 
   it.for([
-    DownloaderService,
-    IndexerService,
-    ItemRequestService,
-    MediaEntryService,
-    MediaItemService,
-    PostProcessingService,
-    RetryLibraryService,
-    ScraperService,
-    StreamService,
-    SubtitlesService,
-    VfsService,
-  ])("resolves $name with its inherited constructor", async (Service) => {
+    [DownloaderService, "downloaderService"],
+    [IndexerService, "indexerService"],
+    [ItemRequestService, "itemRequestService"],
+    [MediaEntryService, "mediaEntryService"],
+    [MediaItemService, "mediaItemService"],
+    [PostProcessingService, "postProcessingService"],
+    [RetryLibraryService, "retryLibraryService"],
+    [ScraperService, "scraperService"],
+    [StreamService, "streamService"],
+    [SubtitlesService, "subtitlesService"],
+    [VfsService, "vfsService"],
+  ] as const)("provides the existing %s singleton", async ([Service, key]) => {
     const module = await createTestingModule();
 
-    expect(module.get(Service)).toBeInstanceOf(Service);
+    expect(module.get(Service)).toBe(services[key]);
 
     await module.close();
   });

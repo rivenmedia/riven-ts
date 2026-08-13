@@ -1,4 +1,3 @@
-// oxlint-disable-next-line consistent-type-imports -- Must stay a value import: `import type` is erased under verbatimModuleSyntax, which would degrade the emitted decorator metadata to Object and break Nest's resolution of subclasses.
 import { MikroORM } from "@mikro-orm/core";
 import { Injectable } from "@nestjs/common";
 

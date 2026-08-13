@@ -1,11 +1,11 @@
 import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
+import { Injectable } from "@nestjs/common";
 import chalk from "chalk";
 import assert from "node:assert";
 import {
   Arg,
-  Ctx,
   FieldResolver,
   ID,
   Int,
@@ -14,27 +14,43 @@ import {
   Resolver,
 } from "type-graphql";
 
+import { MediaItemService } from "../../database/services/media-item/media-item.service.ts";
+import { StreamService } from "../../database/services/stream/stream.service.ts";
+import { InjectLogger } from "../../logging/logging.module.ts";
 import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
-import type { ApolloServerContext } from "../context.ts";
+import type { RivenLogger } from "../../logging/logging.module.ts";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
+  private readonly mediaItemService: MediaItemService;
+  private readonly streamService: StreamService;
+  private readonly logger: RivenLogger;
+
+  public constructor(
+    mediaItemService: MediaItemService,
+    streamService: StreamService,
+    @InjectLogger() logger: RivenLogger,
+  ) {
+    this.mediaItemService = mediaItemService;
+    this.streamService = streamService;
+    this.logger = logger;
+  }
+
   @Query(() => MediaItemUnion, {
     description:
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
   })
-  public async mediaItemById(
-    @CoreContext() { services }: CoreContext,
-    @Arg("id", () => ID) id: UUID,
-  ) {
-    return services.mediaItemService.getMediaItemById(id);
+  public async mediaItemById(@Arg("id", () => ID) id: UUID) {
+    return this.mediaItemService.getMediaItemById(id);
   }
 
   @Query(() => [MediaItem])
   public async mediaItems(
+    // The entity manager is forked per request, so it stays a context value.
     @CoreContext() { em }: CoreContext,
   ): Promise<MediaItem[]> {
     return em.find(
@@ -50,11 +66,9 @@ export class MediaItemResolver {
   @Mutation(() => [MediaItemUnion])
   public async resetMediaItem(
     @Arg("id", () => ID) id: UUID,
-    @CoreContext() { services: { mediaItemService } }: CoreContext,
-    @Ctx() { logger }: ApolloServerContext,
   ): Promise<MediaItem[]> {
-    const item = await mediaItemService.getMediaItemById(id);
-    const resetItems = await mediaItemService.resetMediaItem(item);
+    const item = await this.mediaItemService.getMediaItemById(id);
+    const resetItems = await this.mediaItemService.resetMediaItem(item);
 
     const { enqueueProcessMediaItem } =
       await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
@@ -66,11 +80,11 @@ export class MediaItemResolver {
 
     await enqueueProcessMediaItem({
       id: item.id,
-      isRootItem: mediaItemService.rootItemTypes.has(item.type),
+      isRootItem: this.mediaItemService.rootItemTypes.has(item.type),
       fanOut: false,
     });
 
-    logger.info(
+    this.logger.info(
       `Reset ${chalk.bold(item.fullTitle)} and enqueued for processing.`,
     );
 
@@ -80,12 +94,8 @@ export class MediaItemResolver {
   @Mutation(() => Boolean)
   public async blacklistActiveStream(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
-    @CoreContext() {
-      services: { mediaItemService, streamService },
-    }: CoreContext,
-    @Ctx() { logger }: ApolloServerContext,
   ) {
-    const mediaItem = await mediaItemService.getMediaItemById(mediaItemId);
+    const mediaItem = await this.mediaItemService.getMediaItemById(mediaItemId);
 
     assert.ok(
       mediaItem instanceof Movie || mediaItem instanceof Episode,
@@ -97,17 +107,17 @@ export class MediaItemResolver {
     assert.ok(mediaEntry, `No media entries found for ${mediaItem.fullTitle}`);
 
     const { blacklistedItems, infoHash: blacklistedInfoHash } =
-      await streamService.blacklistActiveStream({
+      await this.streamService.blacklistActiveStream({
         mediaItem,
         provider: mediaEntry.provider,
         plugin: mediaEntry.plugin,
       });
 
-    logger.info(
+    this.logger.info(
       `Stream ${blacklistedInfoHash} for ${chalk.bold(mediaEntry.originalFilename)} has been blacklisted`,
     );
 
-    const itemsToReprocess = await streamService.calculateItemsToReprocess(
+    const itemsToReprocess = await this.streamService.calculateItemsToReprocess(
       new Set(blacklistedItems),
     );
 
