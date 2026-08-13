@@ -5,6 +5,7 @@ import {
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 import { DateTime } from "luxon";
 
 import { BaseService } from "../core/base-service.ts";
@@ -21,6 +22,7 @@ interface IndexItemResponse<T extends Movie | Show> {
   isAdditionalSeasonRequest?: boolean;
 }
 
+@Injectable()
 export class IndexerService extends BaseService {
   @EnsureRequestContext()
   @Transactional()

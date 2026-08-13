@@ -16,7 +16,8 @@
     "@apollo/server": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
     "graphql": "catalog:",
-    "reflect-metadata": "catalog:"
+    "reflect-metadata": "catalog:",
+    "type-graphql": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-oxlint-config": "workspace:^",

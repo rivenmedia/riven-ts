@@ -12,7 +12,9 @@ import { fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
+import { createNestContainer } from "../../../graphql/nest-container.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
+import { PluginRegistryService } from "../../../plugins/plugins.module.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -23,11 +25,13 @@ import type {
   mainRunnerMachine,
   MainRunnerMachineIntake,
 } from "../../main-runner/index.js";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
+  applicationContext: INestApplicationContext;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   pluginSettings: PluginSettings;
   validPlugins: ValidPluginMap;
@@ -41,88 +45,96 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(async ({ input: { mainRunnerRef, validPlugins } }) => {
-  const pluginResolvers = validPlugins
-    .values()
-    .flatMap(({ config }) => config.resolvers)
-    .toArray();
+>(
+  async ({
+    input: { applicationContext, mainRunnerRef, pluginSettings, validPlugins },
+  }) => {
+    // Plugins are discovered at runtime, so the registrar's result is handed to
+    // the container here rather than declared in the module graph.
+    const pluginRegistry = applicationContext.get(PluginRegistryService);
 
-  const app = express();
-  const httpServer = createServer((...args) => {
-    app(...args);
-  });
+    pluginRegistry.register({ plugins: validPlugins, pluginSettings });
 
-  const server = new ApolloServer<ApolloServerContext>({
-    cache: redisCache,
-    schema: await buildSchema({
-      resolvers: [...resolvers, ...pluginResolvers],
-    }),
-    introspection: true,
-    plugins: [
-      ApolloServerPluginLandingPageLocalDefault(),
-      {
-        async requestDidStart({ request: { operationName } }) {
-          if (operationName) {
-            logger.silly(`Received ${operationName}`, {
-              "riven.gql.operation-name": operationName,
-            });
-          }
+    const pluginResolvers = pluginRegistry.resolvers;
 
-          return Promise.resolve();
+    const app = express();
+    const httpServer = createServer((...args) => {
+      app(...args);
+    });
+
+    const server = new ApolloServer<ApolloServerContext>({
+      cache: redisCache,
+      schema: await buildSchema({
+        resolvers: [...resolvers, ...pluginResolvers],
+        container: createNestContainer(applicationContext),
+      }),
+      introspection: true,
+      plugins: [
+        ApolloServerPluginLandingPageLocalDefault(),
+        {
+          async requestDidStart({ request: { operationName } }) {
+            if (operationName) {
+              logger.silly(`Received ${operationName}`, {
+                "riven.gql.operation-name": operationName,
+              });
+            }
+
+            return Promise.resolve();
+          },
         },
+        ApolloServerPluginDrainHttpServer({ httpServer }),
+      ],
+      formatError(formattedError, error) {
+        logger.error("GraphQL Error:", { err: error });
+
+        return formattedError;
       },
-      ApolloServerPluginDrainHttpServer({ httpServer }),
-    ],
-    formatError(formattedError, error) {
-      logger.error("GraphQL Error:", { err: error });
+    });
 
-      return formattedError;
-    },
-  });
+    await server.start();
 
-  await server.start();
+    const sendExternalEvent: GraphQLContext["sendEvent"] = (event) => {
+      if (!event.type.startsWith("riven-external.")) {
+        throw new Error(
+          "Only `riven-external.` events can be sent from the GraphQL server",
+        );
+      }
 
-  const sendExternalEvent: GraphQLContext["sendEvent"] = (event) => {
-    if (!event.type.startsWith("riven-external.")) {
-      throw new Error(
-        "Only `riven-external.` events can be sent from the GraphQL server",
-      );
-    }
+      mainRunnerRef.send(event);
+    };
 
-    mainRunnerRef.send(event);
-  };
+    const sendEvent: MainRunnerMachineIntake = (event) => {
+      mainRunnerRef.send(event);
+    };
 
-  const sendEvent: MainRunnerMachineIntake = (event) => {
-    mainRunnerRef.send(event);
-  };
-
-  app.use(
-    "/",
-    cors(),
-    express.json(),
-    expressMiddleware(server, {
-      context: buildContextFunction(sendEvent, sendExternalEvent),
-    }),
-  );
-
-  const url = new URL(
-    `http://${settings.gqlHost}:${settings.gqlPort.toString()}/`,
-  );
-
-  await new Promise<void>((resolve) => {
-    httpServer.listen(
-      {
-        host: url.hostname,
-        port: url.port,
-      },
-      resolve,
+    app.use(
+      "/",
+      cors(),
+      express.json(),
+      expressMiddleware(server, {
+        context: buildContextFunction(sendEvent, sendExternalEvent),
+      }),
     );
-  });
 
-  initApolloClient(url);
+    const url = new URL(
+      `http://${settings.gqlHost}:${settings.gqlPort.toString()}/`,
+    );
 
-  return {
-    server,
-    url: url.toString(),
-  };
-});
+    await new Promise<void>((resolve) => {
+      httpServer.listen(
+        {
+          host: url.hostname,
+          port: url.port,
+        },
+        resolve,
+      );
+    });
+
+    initApolloClient(url);
+
+    return {
+      server,
+      url: url.toString(),
+    };
+  },
+);

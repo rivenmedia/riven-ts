@@ -8,6 +8,7 @@ import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
@@ -19,6 +20,7 @@ import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-t
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class ScraperService extends BaseService {
   @CreateRequestContext()
   public async getItemToScrape(id: UUID, type: MediaItemType) {

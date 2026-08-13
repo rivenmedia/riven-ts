@@ -15,7 +15,8 @@ import type { RivenMachineInput } from "../../index.ts";
 export const it = baseIt
   .extend(
     "input",
-    (): RivenMachineInput => ({
+    ({ applicationContext }): RivenMachineInput => ({
+      applicationContext,
       sessionId: SessionID.parse(crypto.randomUUID()),
       mockScenario: undefined,
     }),

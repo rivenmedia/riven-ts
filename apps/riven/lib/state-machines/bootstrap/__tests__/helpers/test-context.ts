@@ -18,7 +18,8 @@ import type { BootstrapMachineInput } from "../../index.ts";
 export const it = baseIt
   .extend(
     "input",
-    (): BootstrapMachineInput => ({
+    ({ applicationContext }): BootstrapMachineInput => ({
+      applicationContext,
       rootRef: createEmptyActor(),
       mainRunnerRef: createEmptyActor(),
       mockScenario: undefined,

@@ -13,11 +13,13 @@ import type { ValidPluginMap } from "../../types/plugins.ts";
 import type { SessionID } from "../../utilities/logger/session-id.ts";
 import type { BootstrapMachineOutput } from "../bootstrap/index.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface RivenMachineContext {
+  applicationContext: INestApplicationContext;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
@@ -26,6 +28,7 @@ export interface RivenMachineContext {
 }
 
 export interface RivenMachineInput {
+  applicationContext: INestApplicationContext;
   sessionId: SessionID;
   mockScenario: MockScenario | undefined;
 }
@@ -90,6 +93,7 @@ export const rivenMachine = setup({
           parentRef: self,
         },
       }),
+      applicationContext: input.applicationContext,
       mockScenario: input.mockScenario,
     }),
     on: {
@@ -105,7 +109,11 @@ export const rivenMachine = setup({
         invoke: {
           id: "bootstrapMachine",
           src: "bootstrapMachine",
-          input: ({ context: { mainRunnerRef, mockScenario }, self }) => ({
+          input: ({
+            context: { applicationContext, mainRunnerRef, mockScenario },
+            self,
+          }) => ({
+            applicationContext,
             mainRunnerRef,
             rootRef: self,
             mockScenario,
@@ -186,7 +194,10 @@ export const rivenMachine = setup({
             invoke: {
               id: "unmountVfs",
               src: "unmountVfs",
-              input: ({ context: { vfs } }) => vfs,
+              input: ({ context: { applicationContext, vfs } }) => ({
+                applicationContext,
+                vfs,
+              }),
               onDone: {
                 target: "Shutting down services",
                 actions: {

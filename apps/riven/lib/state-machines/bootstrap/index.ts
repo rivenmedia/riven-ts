@@ -23,6 +23,7 @@ import type {
 } from "../../types/plugins.ts";
 import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { INestApplicationContext } from "@nestjs/common";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
@@ -35,6 +36,7 @@ export interface BootstrapMachineContext {
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
+  applicationContext: INestApplicationContext;
   server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
   pluginQueues: PluginQueueMap;
@@ -45,6 +47,7 @@ export interface BootstrapMachineContext {
 }
 
 export interface BootstrapMachineInput {
+  applicationContext: INestApplicationContext;
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
   mockScenario: MockScenario | undefined;
@@ -126,6 +129,7 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      applicationContext: input.applicationContext,
       mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -380,7 +384,12 @@ export const bootstrapMachine = setup({
                   id: "startGqlServer",
                   src: "startGqlServer",
                   input: ({
-                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                    context: {
+                      applicationContext,
+                      mainRunnerRef,
+                      validPlugins,
+                      pluginSettings,
+                    },
                   }) => {
                     if (!pluginSettings) {
                       throw new Error(
@@ -389,6 +398,7 @@ export const bootstrapMachine = setup({
                     }
 
                     return {
+                      applicationContext,
                       mainRunnerRef,
                       pluginSettings,
                       validPlugins,
@@ -464,9 +474,10 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              input: {
+              input: ({ context: { applicationContext } }) => ({
+                applicationContext,
                 mountPath: settings.vfsMountPath,
-              },
+              }),
               onDone: {
                 target: "Complete",
                 actions: {

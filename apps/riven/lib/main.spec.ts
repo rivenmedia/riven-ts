@@ -9,11 +9,10 @@ import {
 } from "xstate";
 
 import { it as baseIt } from "./__tests__/test-context.ts";
-import { riven } from "./riven.ts";
+import { main } from "./main.ts";
 import * as rivenMachineModule from "./state-machines/program/index.ts";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
-import * as settingsModule from "./utilities/settings.ts";
 
 import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
 import type { AnyActor, SnapshotFrom } from "xstate";
@@ -53,6 +52,7 @@ const it = baseIt
     return (machineLogic: typeof mockRivenMachine = mockRivenMachine) => {
       const actor = createActor(machineLogic, {
         input: {
+          applicationContext: {} as never,
           sessionId: SessionID.parse(randomUUID()),
           mockScenario: undefined,
         },
@@ -88,7 +88,7 @@ it.for(shutdownPermutations)(
   async ([signal, state], { createRivenMachineActor }) => {
     const rivenMachineActor = createRivenMachineActor();
 
-    void riven();
+    void main();
 
     await vi.waitFor(() => {
       expect(rivenMachineActor.getSnapshot().value).toBe(state);
@@ -113,13 +113,13 @@ it("exits with code 1 on uncaught exceptions", async ({
 
   const rivenMachineActor = createRivenMachineActor();
 
-  void riven();
+  void main();
 
   await vi.waitFor(() => {
     expect(rivenMachineActor.getSnapshot().value).toBe("Running");
   });
 
-  // Invoke the handler riven() registered directly, rather than emitting
+  // Invoke the handler main() registered directly, rather than emitting
   // "uncaughtException" on `process` itself: Wallaby & Vitest also listen for that event
   // to detect genuinely uncaught errors, so emitting it manually gets misattributed as a
   // real crash instead of exercising the handler under test.
@@ -154,7 +154,7 @@ it("does not force quit the process if shutdown succeeds within the configured t
 
   const rivenMachineActor = createRivenMachineActor();
 
-  void riven();
+  void main();
 
   await vi.waitFor(() => {
     expect(rivenMachineActor.getSnapshot().value).toBe("Running");
@@ -172,42 +172,70 @@ it("does not force quit the process if shutdown succeeds within the configured t
   });
 });
 
-it("force quits the process if shutdown takes longer than the configured timeout", async ({
-  mockRivenMachine,
+// Riven removes every process listener it registered once shutdown completes.
+// This matters most under a test runner: each worker that runs this file would
+// otherwise leave a listener behind, accumulating until the process hangs.
+it("removes the process listeners it registered once shutdown completes", async ({
   createRivenMachineActor,
 }) => {
-  vi.useFakeTimers();
+  const signals = [
+    "uncaughtException",
+    "unhandledRejection",
+    "SIGINT",
+    "SIGTERM",
+  ] as const;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    shutdownTimeoutSeconds: 1,
-  } as never);
+  const countListeners = (): Record<(typeof signals)[number], number> => ({
+    uncaughtException: process.listenerCount("uncaughtException"),
+    unhandledRejection: process.listenerCount("unhandledRejection"),
+    SIGINT: process.listenerCount("SIGINT"),
+    SIGTERM: process.listenerCount("SIGTERM"),
+  });
 
-  // oxlint-disable-next-line typescript/unbound-method
-  const exitSpy = vi.mocked(process.exit);
-
-  const rivenMachineActor = createRivenMachineActor(
-    mockRivenMachine.provide({
-      actors: {
-        shutdown: fromPromise(
-          async () =>
-            new Promise(() => {
-              /* Never resolves, simulating a shutdown that hangs indefinitely */
-            }),
-        ) as never,
-      },
-    }),
-  );
-
-  void riven();
+  const listenersBeforeStart = countListeners();
+  const rivenMachineActor = createRivenMachineActor();
+  const rivenPromise = main();
 
   await vi.waitFor(() => {
     expect(rivenMachineActor.getSnapshot().value).toBe("Running");
   });
 
+  for (const signal of signals) {
+    expect(process.listenerCount(signal)).toBe(
+      listenersBeforeStart[signal] + 1,
+    );
+  }
+
   rivenMachineActor.send({ type: "riven.core.shutdown" });
 
-  await vi.runOnlyPendingTimersAsync();
+  await rivenPromise;
 
-  expect(process.exitCode).toBe(1);
-  expect(exitSpy).toHaveBeenCalledWith();
+  expect(countListeners()).toStrictEqual(listenersBeforeStart);
+});
+
+// Unhandled rejections are logged but deliberately do not terminate Riven,
+// unlike uncaught exceptions.
+it("logs unhandled rejections without shutting down", async ({
+  createRivenMachineActor,
+}) => {
+  const onSpy = vi.spyOn(process, "on");
+  const rivenMachineActor = createRivenMachineActor();
+
+  void main();
+
+  await vi.waitFor(() => {
+    expect(rivenMachineActor.getSnapshot().value).toBe("Running");
+  });
+
+  const [, unhandledRejectionHandler] = onSpy.mock.calls.find(
+    ([event]) => event === "unhandledRejection",
+  ) as [string, (reason: unknown) => void];
+
+  unhandledRejectionHandler(new Error("Test unhandled rejection"));
+
+  expect(rivenMachineActor).not.toHaveReceivedEvent({
+    type: "riven.core.shutdown",
+  });
+
+  expect(rivenMachineActor.getSnapshot().value).toBe("Running");
 });

@@ -1,34 +1,24 @@
 #!/usr/bin/env node
 
-import { Duration } from "luxon";
+import "reflect-metadata";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
 import { withLogContext } from "./utilities/logger/log-context.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 
-import type { rivenMachine } from "./state-machines/program/index.ts";
 import type { LogContext } from "./utilities/logger/log-context.ts";
-import type { ActorRefFromLogic } from "xstate";
-
-/**
- * Conditionally sends a shutdown event to the program state machine if it's in a state that can be shutdown.
- *
- * @param actor The program state machine
- */
-function maybeSendShutdownEvent(actor: ActorRefFromLogic<typeof rivenMachine>) {
-  const { value } = actor.getSnapshot();
-  const runningStates: (typeof value)[] = ["Running", "Bootstrapping"];
-
-  if (runningStates.includes(value)) {
-    actor.send({ type: "riven.core.shutdown" });
-  }
-}
 
 /**
  * The main entry point for Riven.
+ *
+ * The order here is deliberate. Any mock scenario must be applied to the
+ * environment before the settings, logger and Sentry modules are evaluated,
+ * since each reads the environment as it is imported - and creating the Nest
+ * container imports all of them. Everything below the container creation is
+ * therefore reached through dynamic imports.
  */
-export async function riven() {
+export async function main() {
   const sessionId = SessionID.parse(randomUUID());
 
   setEnvironmentData("riven.session.id", sessionId);
@@ -59,16 +49,17 @@ export async function riven() {
     await import("./sentry.ts");
     await import("./ranking-config/ranking-config.ts");
 
-    const { waitFor } = await import("xstate");
-
-    const { createRivenMachine } =
-      await import("./state-machines/program/index.ts");
+    const { NestFactory } = await import("@nestjs/core");
+    const { AppModule } = await import("./app.module.ts");
+    const { EngineService } = await import("./engine/engine.module.ts");
     const { logger } = await import("./utilities/logger/logger.ts");
-    const { settings } = await import("./utilities/settings.ts");
 
-    const shutdownTimeoutMs = Duration.fromObject({
-      seconds: settings.shutdownTimeoutSeconds,
-    }).as("milliseconds");
+    const applicationContext = await NestFactory.createApplicationContext(
+      AppModule,
+      { logger: false },
+    );
+
+    const engine = applicationContext.get(EngineService);
 
     if (mockScenario) {
       logger.warn(
@@ -76,31 +67,12 @@ export async function riven() {
       );
     }
 
-    const actor = createRivenMachine({
-      sessionId,
-      mockScenario,
-    });
-
     async function shutdown() {
-      process.exitCode ??= 0;
-
-      try {
-        const { value } = await waitFor(
-          actor,
-          (state) => state.matches("Exited") || state.matches("Errored"),
-          { timeout: shutdownTimeoutMs },
-        );
-
-        process.exitCode ??= Number(value === "Errored");
-      } catch (error) {
-        if (process.exitCode === 0) {
-          process.exitCode = 1;
-        }
-
-        logger.error("Error whilst waiting for shutdown", { err: error });
-      }
+      process.exitCode ??= await engine.drain();
 
       logger.info(`Riven exited with code ${process.exitCode.toString()}`);
+
+      await applicationContext.close();
 
       server?.close();
 
@@ -113,7 +85,7 @@ export async function riven() {
       withLogContext(baseLogContext, () => {
         logger.error("Uncaught exception", { err: error });
 
-        maybeSendShutdownEvent(actor);
+        engine.requestShutdown();
       });
     }
 
@@ -128,7 +100,7 @@ export async function riven() {
       terminationSignals.map((signal) => [
         signal,
         () => {
-          maybeSendShutdownEvent(actor);
+          engine.requestShutdown();
 
           withLogContext(baseLogContext, () => {
             logger.debug(`Received ${signal}`);
@@ -144,10 +116,9 @@ export async function riven() {
       process.on(signal, handler);
     }
 
-    actor.start();
-    actor.send({ type: "BOOTSTRAP" });
+    engine.start({ applicationContext, sessionId, mockScenario });
 
-    await waitFor(actor, (state) => state.matches("Shutdown"));
+    await engine.waitForShutdown();
 
     // Remove any registered process listeners.
     // This is less important in production, but poses a problem in tests:

@@ -1,12 +1,14 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { BaseService } from "../core/base-service.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class MediaEntryService extends BaseService {
   @CreateRequestContext()
   public async getMediaEntryById<

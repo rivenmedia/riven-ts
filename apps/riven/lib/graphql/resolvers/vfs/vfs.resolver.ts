@@ -1,33 +1,36 @@
 import { FileSystemEntryUnion } from "@repo/util-plugin-sdk/dto/unions/filesystem-entry.union";
 
+import { Injectable } from "@nestjs/common";
 import { Arg, Query, Resolver } from "type-graphql";
 
-import { CoreContext } from "../../decorators/core-context.ts";
+import { VfsService } from "../../../database/services/vfs/vfs.service.ts";
 import { VfsEntryStat } from "./types/vfs-entry-stat.type.ts";
 
+@Injectable()
 @Resolver()
 export class VfsResolver {
+  private readonly vfsService: VfsService;
+
+  public constructor(vfsService: VfsService) {
+    this.vfsService = vfsService;
+  }
+
   @Query(() => VfsEntryStat)
-  public async vfsEntryStat(
-    @CoreContext() { services }: CoreContext,
-    @Arg("path") path: string,
-  ): Promise<VfsEntryStat> {
-    return services.vfsService.getEntryStat(path);
+  public async vfsEntryStat(@Arg("path") path: string): Promise<VfsEntryStat> {
+    return this.vfsService.getEntryStat(path);
   }
 
   @Query(() => FileSystemEntryUnion, { nullable: true })
   public async vfsEntry(
-    @CoreContext() { services }: CoreContext,
     @Arg("path") path: string,
   ): Promise<typeof FileSystemEntryUnion | null> {
-    return services.vfsService.getVfsEntry(path);
+    return this.vfsService.getVfsEntry(path);
   }
 
   @Query(() => [String])
   public async vfsDirectoryEntryPaths(
-    @CoreContext() { services }: CoreContext,
     @Arg("path") path: string,
   ): Promise<string[]> {
-    return services.vfsService.getDirectoryEntryPaths(path);
+    return this.vfsService.getDirectoryEntryPaths(path);
   }
 }

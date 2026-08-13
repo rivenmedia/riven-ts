@@ -11,6 +11,7 @@ import {
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 import chalk from "chalk";
 
 import { BaseService } from "../core/base-service.ts";
@@ -20,6 +21,7 @@ import type { ValidTorrent } from "../../../message-queue/flows/process-media-it
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class DownloaderService extends BaseService {
   @CreateRequestContext()
   public async getItemToDownload(id: UUID) {

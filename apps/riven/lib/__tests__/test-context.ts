@@ -24,6 +24,24 @@ import type { ZodObject } from "zod";
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
+  .extend(
+    "applicationContext",
+    { scope: "file" },
+    async ({}, { onCleanup }) => {
+      const { Test } = await import("@nestjs/testing");
+      const { AppModule } = await import("../app.module.ts");
+
+      const module = await Test.createTestingModule({
+        imports: [AppModule],
+      }).compile();
+
+      onCleanup(async () => {
+        await module.close();
+      });
+
+      return module;
+    },
+  )
   .extend("server", { auto: true }, async ({}, { onCleanup }) => {
     const { setupServer } = await import("msw/node");
 
@@ -78,15 +96,51 @@ export const it = testBase
 
     return mockAgent;
   })
-  .extend("orm", { scope: "file" }, async () => {
-    const { database } = await import("../database/database.ts");
+  // Resolved through the container so that fixtures and the code under test
+  // share one instance: stubbing a service here must be visible to the
+  // resolvers that receive it by injection.
+  .extend("orm", { scope: "file" }, async ({ applicationContext }) => {
+    const { MikroORM } = await import("@mikro-orm/core");
 
-    return database.orm;
+    return applicationContext.get(MikroORM);
   })
-  .extend("services", { scope: "file" }, async () => {
-    const { services } = await import("../database/database.ts");
+  .extend("services", { scope: "file" }, async ({ applicationContext }) => {
+    const { DownloaderService } =
+      await import("../database/services/downloader/downloader.service.ts");
+    const { IndexerService } =
+      await import("../database/services/indexer/indexer.service.ts");
+    const { ItemRequestService } =
+      await import("../database/services/item-request/item-request.service.ts");
+    const { MediaEntryService } =
+      await import("../database/services/media-entry/media-entry.service.ts");
+    const { MediaItemService } =
+      await import("../database/services/media-item/media-item.service.ts");
+    const { PostProcessingService } =
+      await import("../database/services/post-processing/post-processing.service.ts");
+    const { RetryLibraryService } =
+      await import("../database/services/retry-library/retry-library.service.ts");
+    const { ScraperService } =
+      await import("../database/services/scraper/scraper.service.ts");
+    const { StreamService } =
+      await import("../database/services/stream/stream.service.ts");
+    const { SubtitlesService } =
+      await import("../database/services/subtitles/subtitles.service.ts");
+    const { VfsService } =
+      await import("../database/services/vfs/vfs.service.ts");
 
-    return services;
+    return {
+      downloaderService: applicationContext.get(DownloaderService),
+      indexerService: applicationContext.get(IndexerService),
+      itemRequestService: applicationContext.get(ItemRequestService),
+      mediaEntryService: applicationContext.get(MediaEntryService),
+      mediaItemService: applicationContext.get(MediaItemService),
+      postProcessingService: applicationContext.get(PostProcessingService),
+      retryLibraryService: applicationContext.get(RetryLibraryService),
+      scraperService: applicationContext.get(ScraperService),
+      streamService: applicationContext.get(StreamService),
+      subtitlesService: applicationContext.get(SubtitlesService),
+      vfsService: applicationContext.get(VfsService),
+    };
   })
   .extend("em", ({ orm }) => orm.em.fork())
   .extend("factories", async ({ em }) => {
@@ -263,13 +317,21 @@ export const it = testBase
 
     return new Sentry.Scope();
   })
-  .extend("apolloServerInstance", { scope: "file" }, async () => {
-    const { buildMockServer } =
-      await import("@repo/core-util-mock-graphql-server");
-    const { resolvers } = await import("../graphql/resolvers/index.ts");
+  .extend(
+    "apolloServerInstance",
+    { scope: "file" },
+    async ({ applicationContext }) => {
+      const { buildMockServer } =
+        await import("@repo/core-util-mock-graphql-server");
+      const { createNestContainer } =
+        await import("../graphql/nest-container.ts");
+      const { resolvers } = await import("../graphql/resolvers/index.ts");
 
-    return buildMockServer<ApolloServerContext>(resolvers);
-  })
+      return buildMockServer<ApolloServerContext>(resolvers, {
+        container: createNestContainer(applicationContext),
+      });
+    },
+  )
   .extend("createGqlContext", { scope: "file" }, ({ services, orm }) => () => ({
     [CoreKey]: {
       em: orm.em.fork(),

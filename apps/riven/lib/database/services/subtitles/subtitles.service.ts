@@ -4,6 +4,7 @@ import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { BaseService } from "../core/base-service.ts";
 import { saveSubtitles } from "./utilities/save-subtitles.ts";
@@ -11,6 +12,7 @@ import { saveSubtitles } from "./utilities/save-subtitles.ts";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class SubtitlesService extends BaseService {
   @CreateRequestContext()
   public async getItemsForSubtitlesProcessing(id: UUID) {

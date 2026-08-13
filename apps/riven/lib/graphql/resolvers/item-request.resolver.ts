@@ -1,47 +1,66 @@
-import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
+import { Injectable } from "@nestjs/common";
+import { Arg, ID, Mutation, Resolver } from "type-graphql";
 
-import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
+import { ItemRequestService } from "../../database/services/item-request/item-request.service.ts";
+import { InjectLogger } from "../../logging/logging.module.ts";
+import { QueueRegistryService } from "../../message-queue/message-queue.module.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
-import type { ApolloServerContext } from "../context.ts";
+import type { RivenLogger } from "../../logging/logging.module.ts";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 @Resolver()
 export class ItemRequestResolver {
+  private readonly itemRequestService: ItemRequestService;
+  private readonly queueRegistry: QueueRegistryService;
+  private readonly logger: RivenLogger;
+
+  public constructor(
+    itemRequestService: ItemRequestService,
+    queueRegistry: QueueRegistryService,
+    @InjectLogger() logger: RivenLogger,
+  ) {
+    this.itemRequestService = itemRequestService;
+    this.queueRegistry = queueRegistry;
+    this.logger = logger;
+  }
+
   @Mutation(() => Boolean)
   public async removeItemRequest(
     @Arg("id", () => ID) id: UUID,
-    @Ctx() { logger }: ApolloServerContext,
-    @CoreContext() { sendEvent, services: { itemRequestService } }: CoreContext,
+    // `sendEvent` is bound to the running state machine and so remains a
+    // per-request context value rather than an injected dependency.
+    @CoreContext() { sendEvent }: CoreContext,
   ): Promise<boolean> {
-    const itemRequest = await itemRequestService.getItemRequestById(id);
+    const itemRequest = await this.itemRequestService.getItemRequestById(id);
 
     try {
       if (
-        await clearDeduplicationJob(
+        await this.queueRegistry.clearDeduplicationJob(
           "process-item-request",
           `reindex-item-${itemRequest.id}`,
         )
       ) {
-        logger.silly(
+        this.logger.silly(
           `Removed jobs for item request ${itemRequest.id} from the process-item-request queue`,
         );
       }
 
       for (const item of await itemRequest.mediaItems.loadItems()) {
         if (
-          await clearDeduplicationJob(
+          await this.queueRegistry.clearDeduplicationJob(
             "process-media-item",
             `process-${item.type}-${item.id}`,
           )
         ) {
-          logger.silly(
+          this.logger.silly(
             `Removed jobs for ${item.fullTitle} from the process-media-item queue`,
           );
         }
       }
 
-      await itemRequestService.removeItemRequest(itemRequest);
+      await this.itemRequestService.removeItemRequest(itemRequest);
 
       sendEvent({
         type: "riven.item-request.removed",
@@ -50,7 +69,7 @@ export class ItemRequestResolver {
 
       return true;
     } catch (error) {
-      logger.error(`Failed to remove item request with ID ${id}`, {
+      this.logger.error(`Failed to remove item request with ID ${id}`, {
         err: error,
       });
 

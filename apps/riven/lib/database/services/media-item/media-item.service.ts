@@ -9,6 +9,7 @@ import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { settings } from "../../../utilities/settings.ts";
 import { services } from "../../database.ts";
@@ -19,6 +20,7 @@ import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class MediaItemService extends BaseService {
   readonly #rootItemTypes = new Set<MediaItemType>([
     "movie",
