@@ -173,6 +173,74 @@ it("does not force quit the process if shutdown succeeds within the configured t
   });
 });
 
+// Riven removes every process listener it registered once shutdown completes.
+// This matters most under a test runner: each worker that runs this file would
+// otherwise leave a listener behind, accumulating until the process hangs.
+it("removes the process listeners it registered once shutdown completes", async ({
+  createRivenMachineActor,
+}) => {
+  const signals = [
+    "uncaughtException",
+    "unhandledRejection",
+    "SIGINT",
+    "SIGTERM",
+  ] as const;
+
+  const countListeners = (): Record<(typeof signals)[number], number> => ({
+    uncaughtException: process.listenerCount("uncaughtException"),
+    unhandledRejection: process.listenerCount("unhandledRejection"),
+    SIGINT: process.listenerCount("SIGINT"),
+    SIGTERM: process.listenerCount("SIGTERM"),
+  });
+
+  const listenersBeforeStart = countListeners();
+  const rivenMachineActor = createRivenMachineActor();
+  const rivenPromise = riven();
+
+  await vi.waitFor(() => {
+    expect(rivenMachineActor.getSnapshot().value).toBe("Running");
+  });
+
+  for (const signal of signals) {
+    expect(process.listenerCount(signal)).toBe(
+      listenersBeforeStart[signal] + 1,
+    );
+  }
+
+  rivenMachineActor.send({ type: "riven.core.shutdown" });
+
+  await rivenPromise;
+
+  expect(countListeners()).toStrictEqual(listenersBeforeStart);
+});
+
+// Unhandled rejections are logged but deliberately do not terminate Riven,
+// unlike uncaught exceptions.
+it("logs unhandled rejections without shutting down", async ({
+  createRivenMachineActor,
+}) => {
+  const onSpy = vi.spyOn(process, "on");
+  const rivenMachineActor = createRivenMachineActor();
+
+  void riven();
+
+  await vi.waitFor(() => {
+    expect(rivenMachineActor.getSnapshot().value).toBe("Running");
+  });
+
+  const [, unhandledRejectionHandler] = onSpy.mock.calls.find(
+    ([event]) => event === "unhandledRejection",
+  ) as [string, (reason: unknown) => void];
+
+  unhandledRejectionHandler(new Error("Test unhandled rejection"));
+
+  expect(rivenMachineActor).not.toHaveReceivedEvent({
+    type: "riven.core.shutdown",
+  });
+
+  expect(rivenMachineActor.getSnapshot().value).toBe("Running");
+});
+
 it("force quits the process if shutdown takes longer than the configured timeout", async ({
   mockRivenMachine,
   createRivenMachineActor,
