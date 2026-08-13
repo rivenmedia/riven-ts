@@ -1,9 +1,10 @@
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 
 import { gql } from "@apollo/client";
-import { describe, expect } from "vitest";
+import { beforeEach, describe, expect } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
+import { createQueue } from "../../message-queue/utilities/create-queue.ts";
 
 import type {
   BlacklistActiveStreamMutation,
@@ -21,11 +22,13 @@ describe("blacklistActiveStream", () => {
     }
   `;
 
-  it("blacklists the active stream for a media item", async ({
+  it("returns true if the request succeeded", async ({
     gqlContext,
     gqlServer,
     completedMovieContext: { completedMovie },
   }) => {
+    createQueue("process-media-item");
+
     const { body } = await gqlServer.executeOperation<
       BlacklistActiveStreamMutation,
       BlacklistActiveStreamMutationVariables
@@ -45,7 +48,7 @@ describe("blacklistActiveStream", () => {
     expect(body.singleResult.data?.blacklistActiveStream).toBe(true);
   });
 
-  it("returns true if the request succeeded", async ({
+  it("blacklists the active stream for a media item", async ({
     em,
     gqlContext,
     gqlServer,
@@ -68,7 +71,7 @@ describe("blacklistActiveStream", () => {
 
     await expect(
       em.findOneOrFail(BlacklistedStream, {
-        stream: completedMovie.activeStream?.infoHash,
+        stream: completedMovie.activeStream.infoHash,
       }),
     ).resolves.toBeInstanceOf(BlacklistedStream);
   });

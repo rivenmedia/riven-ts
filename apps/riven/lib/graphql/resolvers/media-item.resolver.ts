@@ -14,6 +14,7 @@ import {
   Resolver,
 } from "type-graphql";
 
+import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { ApolloServerContext } from "../context.ts";
@@ -94,7 +95,12 @@ export class MediaItemResolver {
     const { enqueueProcessMediaItem } =
       await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
-    for (const { id } of itemsToReprocess) {
+    for (const { id, type } of itemsToReprocess) {
+      await clearDeduplicationJob(
+        "process-media-item",
+        `process-${type}-${id}`,
+      );
+
       await enqueueProcessMediaItem({ id });
     }
 
