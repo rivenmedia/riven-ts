@@ -1,9 +1,11 @@
 import { ItemRequest, MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { BaseService } from "../core/base-service.ts";
 
+@Injectable()
 export class RetryLibraryService extends BaseService {
   @CreateRequestContext()
   public async getMediaItemsToRetry() {

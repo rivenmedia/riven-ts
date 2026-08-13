@@ -2,6 +2,7 @@ import {
   CreateRequestContext,
   EnsureRequestContext,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { BaseService } from "../core/base-service.ts";
 import { PathInfo } from "./schemas/path-info.schema.ts";
@@ -13,6 +14,7 @@ import { getVfsSubtitleEntry } from "./utilities/get-vfs-subtitle-entry.ts";
 import type { FindOneOptions } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
+@Injectable()
 export class VfsService extends BaseService {
   public parsePath(path: string) {
     return PathInfo.parse(path);

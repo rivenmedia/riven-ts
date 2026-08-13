@@ -4,6 +4,7 @@ import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 
 import { BaseService } from "../core/base-service.ts";
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
@@ -13,6 +14,7 @@ import type { Ref } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class ItemRequestService extends BaseService {
   @CreateRequestContext()
   @Transactional()

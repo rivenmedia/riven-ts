@@ -8,6 +8,7 @@ import {
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import { Injectable } from "@nestjs/common";
 import assert from "node:assert";
 
 import { redisCache } from "../../../utilities/redis-cache.ts";
@@ -20,6 +21,7 @@ import type { FilterObject } from "@mikro-orm/core";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { UUID } from "node:crypto";
 
+@Injectable()
 export class StreamService extends BaseService {
   public isFatalStatusCode(statusCode: number) {
     return isFatalStatusCode(statusCode);
