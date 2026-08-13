@@ -17,6 +17,7 @@ import { TextType, Type } from "@mikro-orm/core";
 import { GeneratedCacheAdapter, PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 import { withLogContext } from "../utilities/logger/log-context.ts";
+import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
@@ -91,8 +92,9 @@ export async function createDatabaseConfig({
     subscribers: [
       new MediaItemFullTitleSubscriber(),
       new ShowLikeMediaItemReleaseDateSubscriber(),
-      new MediaItemStateSubscriber(),
       new ShowNextAirDateSubscriber(),
+      new MediaItemStateSubscriber(),
+      new ItemRequestStateSubscriber(),
     ],
     ...metadataCacheConfig,
     ...options,

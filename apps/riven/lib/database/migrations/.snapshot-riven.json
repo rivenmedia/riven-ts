@@ -674,11 +674,12 @@
           "collation": null,
           "enumItems": [
             "requested",
-            "requested_additional_seasons",
             "completed",
             "failed",
             "ongoing",
-            "unreleased"
+            "unreleased",
+            "processing",
+            "paused"
           ],
           "mappedType": "enum"
         },
@@ -771,8 +772,8 @@
       "checks": [
         {
           "name": "item_request_state_check",
-          "expression": "\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased')",
-          "definition": "check (\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased'))",
+          "expression": "\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased', 'processing', 'paused')",
+          "definition": "check (\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased', 'processing', 'paused'))",
           "columnName": "state"
         },
         {
@@ -1277,9 +1278,7 @@
           "comment": null,
           "collation": null,
           "enumItems": [
-            "unknown",
             "unreleased",
-            "ongoing",
             "indexed",
             "scraped",
             "downloaded",
@@ -1461,8 +1460,8 @@
         },
         {
           "name": "media_item_state_check",
-          "expression": "\"state\" in ('unknown', 'unreleased', 'ongoing', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused')",
-          "definition": "check (\"state\" in ('unknown', 'unreleased', 'ongoing', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused'))",
+          "expression": "\"state\" in ('unreleased', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused')",
+          "definition": "check (\"state\" in ('unreleased', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused'))",
           "columnName": "state"
         },
         {

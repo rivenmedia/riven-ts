@@ -27,7 +27,6 @@ export class DownloaderService extends BaseService {
 
     const processableStates: MediaItemState[] = [
       "scraped",
-      "ongoing",
       "partially_completed",
     ];
 

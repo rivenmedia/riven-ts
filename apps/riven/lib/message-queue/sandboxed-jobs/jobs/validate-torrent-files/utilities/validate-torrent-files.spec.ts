@@ -46,7 +46,9 @@ it("considers torrents for continuing shows as valid if missing a maximum of one
   const files: MappedFiles["episodes"] = {};
 
   for (const episode of episodes) {
-    if (episode.season.getProperty("number") === indexedShow.seasons.length) {
+    const seasonNumber = await episode.season.loadProperty("number");
+
+    if (seasonNumber === indexedShow.seasons.length) {
       continue;
     }
 
@@ -77,7 +79,9 @@ it("considers torrents for completed shows as invalid if missing any season", as
   const files: MappedFiles["episodes"] = {};
 
   for (const episode of episodes) {
-    if (episode.season.getProperty("number") === indexedShow.seasons.length) {
+    const seasonNumber = await episode.season.loadProperty("number");
+
+    if (seasonNumber === indexedShow.seasons.length) {
       continue;
     }
 

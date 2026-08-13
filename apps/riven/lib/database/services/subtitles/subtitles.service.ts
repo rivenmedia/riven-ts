@@ -17,7 +17,7 @@ export class SubtitlesService extends BaseService {
     const item = await this.em.getRepository(MediaItem).findOneOrFail({
       id,
       state: {
-        $in: ["downloaded", "completed", "partially_completed", "ongoing"],
+        $in: ["downloaded", "completed", "partially_completed"],
       },
     });
 

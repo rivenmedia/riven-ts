@@ -107,7 +107,7 @@ export async function riven() {
       process.exit();
     }
 
-    process.on("uncaughtException", (error) => {
+    function handleUncaughtException(error: unknown) {
       process.exitCode = 1;
 
       withLogContext(baseLogContext, () => {
@@ -115,30 +115,51 @@ export async function riven() {
 
         maybeSendShutdownEvent(actor);
       });
-    });
+    }
 
-    process.on("unhandledRejection", (error) => {
+    function handleUnhandledRejection(error: unknown) {
       withLogContext(baseLogContext, () => {
         logger.error("Uncaught rejection", { err: error });
       });
-    });
+    }
+
+    const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+    const terminationSignalHandlers = new Map(
+      terminationSignals.map((signal) => [
+        signal,
+        () => {
+          maybeSendShutdownEvent(actor);
+
+          withLogContext(baseLogContext, () => {
+            logger.debug(`Received ${signal}`);
+          });
+        },
+      ]),
+    );
+
+    process.on("uncaughtException", handleUncaughtException);
+    process.on("unhandledRejection", handleUnhandledRejection);
+
+    for (const [signal, handler] of terminationSignalHandlers) {
+      process.on(signal, handler);
+    }
 
     actor.start();
     actor.send({ type: "BOOTSTRAP" });
 
-    const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
-
-    for (const signal of terminationSignals) {
-      process.on(signal, () => {
-        maybeSendShutdownEvent(actor);
-
-        withLogContext(baseLogContext, () => {
-          logger.debug(`Received ${signal}`);
-        });
-      });
-    }
-
     await waitFor(actor, (state) => state.matches("Shutdown"));
+
+    // Remove any registered process listeners.
+    // This is less important in production, but poses a problem in tests:
+    // When a test runner spawns multiple workers, any worker that runs this file
+    // causes a stack of unused handlers to accumulate, eventually causing the process to hang.
+
+    process.off("uncaughtException", handleUncaughtException);
+    process.off("unhandledRejection", handleUnhandledRejection);
+
+    for (const [signal, handler] of terminationSignalHandlers) {
+      process.off(signal, handler);
+    }
 
     await shutdown();
   });

@@ -20,7 +20,7 @@ permissions:
 
 env:
   IS_FORK: ${{ github.event.pull_request != null && github.event.pull_request.head.repo.full_name != github.repository }}
-  SHOULD_PUSH: ${{ github.event_name == 'push' || (github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'build-docker')) }}
+  SHOULD_PUSH: ${{ github.event_name == 'push' || (github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository) }}
 
 jobs:
   # Build each architecture on a native runner. Cross-building under qemu has
@@ -113,7 +113,7 @@ jobs:
   # as `ghcr.io/.../riven-ts:main`, `:sha-<short>`, etc.
   merge:
     name: Merge multi-arch manifest
-    if: github.event_name == 'push' || (github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository && contains(github.event.pull_request.labels.*.name, 'build-docker'))
+    if: github.event_name == 'push' || (github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository)
     needs: build
     runs-on: ubuntu-latest
     permissions:

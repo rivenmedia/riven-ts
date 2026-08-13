@@ -28,9 +28,16 @@ export class PartiallyCompletedShowSeeder extends BaseSeeder<PartiallyCompletedS
       ]);
     }
 
-    episodes[0]?.filesystemEntries.removeAll();
+    episodes[0]?.reset();
 
     await em.flush();
+
+    const itemRequest = await context.show.itemRequest.loadOrFail();
+
+    assert.ok(
+      itemRequest.state === "processing",
+      `Expected item request state to be "processing", got "${itemRequest.state}"`,
+    );
 
     assert.ok(
       context.show.state === "partially_completed",
