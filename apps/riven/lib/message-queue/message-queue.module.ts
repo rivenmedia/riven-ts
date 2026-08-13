@@ -1,38 +1,10 @@
-import { Inject, Injectable, Module } from "@nestjs/common";
+import { Injectable, Module } from "@nestjs/common";
 
-import { telemetry } from "../utilities/telemetry.ts";
-import { flow } from "./flows/producer.ts";
 import { clearDeduplicationJob } from "./utilities/clear-deduplication-job.ts";
 import { createQueue } from "./utilities/create-queue.ts";
 import { queueRegistry } from "./utilities/queue-registry.ts";
 
 import type { Queue, QueueOptions } from "bullmq";
-
-/**
- * The BullMQ OpenTelemetry integration shared by every queue and worker.
- */
-export type RivenTelemetry = typeof telemetry;
-
-export const RIVEN_TELEMETRY = Symbol("RIVEN_TELEMETRY");
-export const RIVEN_FLOW_PRODUCER = Symbol("RIVEN_FLOW_PRODUCER");
-
-/**
- * Injects the BullMQ telemetry integration.
- *
- * @returns The parameter decorator
- */
-export function InjectTelemetry() {
-  return Inject(RIVEN_TELEMETRY);
-}
-
-/**
- * Injects the flow producer used to enqueue jobs.
- *
- * @returns The parameter decorator
- */
-export function InjectFlowProducer() {
-  return Inject(RIVEN_FLOW_PRODUCER);
-}
 
 /**
  * Provides access to the queues Riven has created.
@@ -97,11 +69,7 @@ export class QueueRegistryService {
  * cannot reach the container.
  */
 @Module({
-  providers: [
-    QueueRegistryService,
-    { provide: RIVEN_TELEMETRY, useValue: telemetry },
-    { provide: RIVEN_FLOW_PRODUCER, useValue: flow },
-  ],
-  exports: [QueueRegistryService, RIVEN_TELEMETRY, RIVEN_FLOW_PRODUCER],
+  providers: [QueueRegistryService],
+  exports: [QueueRegistryService],
 })
 export class MessageQueueModule {}

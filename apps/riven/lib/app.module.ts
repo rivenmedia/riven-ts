@@ -2,6 +2,7 @@ import { Module } from "@nestjs/common";
 
 import { CacheModule } from "./cache/cache.module.ts";
 import { DatabaseModule } from "./database/database.module.ts";
+import { EngineModule } from "./engine/engine.module.ts";
 import { GraphQLModule } from "./graphql/graphql.module.ts";
 import { LoggingModule } from "./logging/logging.module.ts";
 import { MessageQueueModule } from "./message-queue/message-queue.module.ts";
@@ -24,6 +25,7 @@ import { VfsModule } from "./vfs/vfs.module.ts";
     PluginsModule,
     VfsModule,
     GraphQLModule,
+    EngineModule,
   ],
 })
 export class AppModule {}

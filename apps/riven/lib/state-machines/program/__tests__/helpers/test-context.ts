@@ -15,7 +15,8 @@ import type { RivenMachineInput } from "../../index.ts";
 export const it = baseIt
   .extend(
     "input",
-    (): RivenMachineInput => ({
+    ({ applicationContext }): RivenMachineInput => ({
+      applicationContext,
       sessionId: SessionID.parse(crypto.randomUUID()),
       mockScenario: undefined,
     }),
@@ -27,7 +28,6 @@ export const it = baseIt
       const { plugin: testPlugin } = await import("@repo/plugin-test");
 
       return {
-        applicationContext: {} as never,
         server: {} as never,
         plugins: new Map<symbol, ValidPlugin>([
           [

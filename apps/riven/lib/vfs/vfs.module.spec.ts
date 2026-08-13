@@ -66,6 +66,22 @@ describe("the mount path preflight checks", () => {
     ).rejects.toThrow(/is not a directory/u);
   });
 
+  // Riven cannot decide whether it owns the mount point without them, which
+  // happens on platforms that do not implement them.
+  it("rejects a process with no resolvable UID or GID", async ({
+    tempDir,
+    vfsMountService,
+  }) => {
+    // @ts-expect-error - Simulating a platform where these are unavailable.
+    vi.spyOn(process, "getuid", "get").mockReturnValue(undefined);
+    // @ts-expect-error - Simulating a platform where these are unavailable.
+    vi.spyOn(process, "getgid", "get").mockReturnValue(undefined);
+
+    await expect(
+      vfsMountService.assertMountPathIsUsable(tempDir),
+    ).rejects.toThrow(/unable to determine process uid or gid/iu);
+  });
+
   it("rejects a directory owned by another user", async ({
     tempDir,
     vfsMountService,

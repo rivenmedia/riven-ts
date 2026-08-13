@@ -18,7 +18,8 @@ import type { BootstrapMachineInput } from "../../index.ts";
 export const it = baseIt
   .extend(
     "input",
-    (): BootstrapMachineInput => ({
+    ({ applicationContext }): BootstrapMachineInput => ({
+      applicationContext,
       rootRef: createEmptyActor(),
       mainRunnerRef: createEmptyActor(),
       mockScenario: undefined,
@@ -31,14 +32,11 @@ export const it = baseIt
       /* empty */
     }),
   )
-  .extend(
-    "startGqlServerActorLogic",
-    ({ apolloServerInstance, applicationContext }) =>
-      fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
-        applicationContext,
-        server: apolloServerInstance,
-        url: "http://localhost:3000",
-      })),
+  .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
+    fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({
+      server: apolloServerInstance,
+      url: "http://localhost:3000",
+    })),
   )
   .extend(
     "initialiseVfsActorLogic",

@@ -19,7 +19,7 @@ import type Fuse from "@zkochan/fuse-native";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface RivenMachineContext {
-  applicationContext?: INestApplicationContext;
+  applicationContext: INestApplicationContext;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
@@ -28,6 +28,7 @@ export interface RivenMachineContext {
 }
 
 export interface RivenMachineInput {
+  applicationContext: INestApplicationContext;
   sessionId: SessionID;
   mockScenario: MockScenario | undefined;
 }
@@ -59,7 +60,6 @@ export const rivenMachine = setup({
       (
         { enqueue, context: { mainRunnerRef } },
         {
-          applicationContext,
           pluginQueues,
           pluginWorkers,
           plugins,
@@ -68,7 +68,7 @@ export const rivenMachine = setup({
           vfs,
         }: BootstrapMachineOutput,
       ) => {
-        enqueue.assign({ applicationContext, vfs, server });
+        enqueue.assign({ vfs, server });
         enqueue.sendTo(mainRunnerRef, {
           type: "START",
           input: {
@@ -93,6 +93,7 @@ export const rivenMachine = setup({
           parentRef: self,
         },
       }),
+      applicationContext: input.applicationContext,
       mockScenario: input.mockScenario,
     }),
     on: {
@@ -108,7 +109,11 @@ export const rivenMachine = setup({
         invoke: {
           id: "bootstrapMachine",
           src: "bootstrapMachine",
-          input: ({ context: { mainRunnerRef, mockScenario }, self }) => ({
+          input: ({
+            context: { applicationContext, mainRunnerRef, mockScenario },
+            self,
+          }) => ({
+            applicationContext,
             mainRunnerRef,
             rootRef: self,
             mockScenario,
@@ -226,10 +231,7 @@ export const rivenMachine = setup({
                     invoke: {
                       id: "stopGqlServer",
                       src: "stopGqlServer",
-                      input: ({ context: { applicationContext, server } }) => ({
-                        applicationContext,
-                        server,
-                      }),
+                      input: ({ context: { server } }) => server,
                       onDone: "Stopped",
                       onError: {
                         target: "Stopped",

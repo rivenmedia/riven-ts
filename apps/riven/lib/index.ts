@@ -1,3 +1,3 @@
-import { riven } from "./riven.ts";
+import { main } from "./main.ts";
 
-await riven();
+await main();

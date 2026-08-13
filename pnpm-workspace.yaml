@@ -40,7 +40,6 @@ catalog:
   "@mikro-orm/reflection": ^7.1.0
   "@mikro-orm/seeder": ^7.1.0
   "@mikro-orm/sqlite": ^7.1.0
-  "@mikro-orm/nestjs": ^7.0.2
   "@nestjs/common": ^11.1.29
   "@nestjs/core": ^11.1.29
   "@nestjs/platform-express": ^11.1.29

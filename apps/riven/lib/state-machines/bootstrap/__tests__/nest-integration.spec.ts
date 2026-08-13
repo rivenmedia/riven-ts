@@ -23,43 +23,46 @@ import type {
  * it needs a real FUSE mount.
  */
 const it = baseIt
-  .extend("actor", async ({ completedMovieContext }, { onCleanup }) => {
-    // Referenced so the fixture seeds the database before the server starts.
-    expect(completedMovieContext.completedMovie).toBeDefined();
+  .extend(
+    "actor",
+    async ({ applicationContext, completedMovieContext }, { onCleanup }) => {
+      // Referenced so the fixture seeds the database before the server starts.
+      expect(completedMovieContext.completedMovie).toBeDefined();
 
-    const machine = bootstrapMachine.provide({
-      actors: {
-        initialiseDatabaseConnection: fromPromise(async () => {
-          /* The suite already provides an initialised in-memory database. */
-        }),
-        initialiseVfs: fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(
-          async () => ({
-            vfs: new Fuse("/mnt/fake-path", {}),
+      const machine = bootstrapMachine.provide({
+        actors: {
+          initialiseDatabaseConnection: fromPromise(async () => {
+            /* The suite already provides an initialised in-memory database. */
           }),
-        ),
-      },
-    });
+          initialiseVfs: fromPromise<InitialiseVfsOutput, InitialiseVfsInput>(
+            async () => ({
+              vfs: new Fuse("/mnt/fake-path", {}),
+            }),
+          ),
+        },
+      });
 
-    const actor = createActor(machine, {
-      input: {
-        rootRef: createEmptyActor(),
-        mainRunnerRef: createEmptyActor(),
-        mockScenario: undefined,
-      },
-    });
+      const actor = createActor(machine, {
+        input: {
+          applicationContext,
+          rootRef: createEmptyActor(),
+          mainRunnerRef: createEmptyActor(),
+          mockScenario: undefined,
+        },
+      });
 
-    onCleanup(async () => {
-      actor.stop();
-    });
+      onCleanup(async () => {
+        actor.stop();
+      });
 
-    return actor;
-  })
+      return actor;
+    },
+  )
   .extend("bootstrapOutput", async ({ actor }, { onCleanup }) => {
     const output = await toPromise(actor.start());
 
     onCleanup(async () => {
       await output.server.stop();
-      await output.applicationContext.close();
     });
 
     return output;

@@ -102,9 +102,6 @@ catalogs:
     '@mikro-orm/migrations':
       specifier: ^7.1.0
       version: 7.1.0
-    '@mikro-orm/nestjs':
-      specifier: ^7.0.2
-      version: 7.0.2
     '@mikro-orm/postgresql':
       specifier: ^7.1.0
       version: 7.1.0
@@ -492,9 +489,6 @@ importers:
       '@mikro-orm/migrations':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
-      '@mikro-orm/nestjs':
-        specifier: 'catalog:'
-        version: 7.0.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(@nestjs/common@11.1.29(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.29)(reflect-metadata@0.2.2)
       '@mikro-orm/postgresql':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
@@ -3766,15 +3760,6 @@ packages:
     engines: {node: '>= 22.17.0'}
     peerDependencies:
       '@mikro-orm/core': 7.1.0
-
-  '@mikro-orm/nestjs@7.0.2':
-    resolution: {integrity: sha512-0iEr+YzhXQ8cZaAKzfJNijHHAL1Fg/PrauaMiwlZpaxOy0aMAPCQEwaSuxsz43X6XShrCv/TlE6kRn/QPIMzZA==}
-    engines: {node: '>= 22.17.0'}
-    peerDependencies:
-      '@mikro-orm/core': ^7.0.0 || ^7.0.0-dev.0
-      '@nestjs/common': ^11.0.5
-      '@nestjs/core': ^11.0.5
-      reflect-metadata: ^0.1.0 || ^0.2.0
 
   '@mikro-orm/postgresql@7.1.0':
     resolution: {integrity: sha512-cLJlbKPIQMxj86wgy3OIInMQyaav+MnCPMuvCcKMhZ+zDekDUTNK2OeThivvWn4WcoaxBAwgXBsQLGEn0qpEmg==}
@@ -12045,13 +12030,6 @@ snapshots:
     dependencies:
       '@mikro-orm/core': 7.1.0(dataloader@2.2.3)
       '@mikro-orm/sql': 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
-
-  '@mikro-orm/nestjs@7.0.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(@nestjs/common@11.1.29(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/core@11.1.29)(reflect-metadata@0.2.2)':
-    dependencies:
-      '@mikro-orm/core': 7.1.0(dataloader@2.2.3)
-      '@nestjs/common': 11.1.29(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      '@nestjs/core': 11.1.29(@nestjs/common@11.1.29(class-validator@0.14.3)(reflect-metadata@0.2.2)(rxjs@7.8.2))(@nestjs/platform-express@11.1.29)(reflect-metadata@0.2.2)(rxjs@7.8.2)
-      reflect-metadata: 0.2.2
 
   '@mikro-orm/postgresql@7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))':
     dependencies:

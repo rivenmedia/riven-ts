@@ -36,7 +36,7 @@ export interface BootstrapMachineContext {
   validatingPlugins: RegisteredPluginMap;
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
-  applicationContext?: INestApplicationContext;
+  applicationContext: INestApplicationContext;
   server?: ApolloServer<ApolloServerContext>;
   vfs?: Fuse;
   pluginQueues: PluginQueueMap;
@@ -47,13 +47,13 @@ export interface BootstrapMachineContext {
 }
 
 export interface BootstrapMachineInput {
+  applicationContext: INestApplicationContext;
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
   mockScenario: MockScenario | undefined;
 }
 
 export interface BootstrapMachineOutput {
-  applicationContext: INestApplicationContext;
   server: ApolloServer<ApolloServerContext>;
   plugins: ValidPluginMap;
   pluginQueues: PluginQueueMap;
@@ -75,18 +75,9 @@ export const bootstrapMachine = setup({
     },
   },
   actions: {
-    assignGqlServer: assign(
-      (
-        _,
-        {
-          applicationContext,
-          server,
-        }: Pick<BootstrapMachineOutput, "applicationContext" | "server">,
-      ) => ({
-        applicationContext,
-        server,
-      }),
-    ),
+    assignGqlServer: assign((_, server: ApolloServer<ApolloServerContext>) => ({
+      server,
+    })),
     assignVfs: assign((_, vfs: Fuse) => ({
       vfs,
     })),
@@ -138,6 +129,7 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      applicationContext: input.applicationContext,
       mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -151,7 +143,6 @@ export const bootstrapMachine = setup({
     }),
     output: ({
       context: {
-        applicationContext,
         server,
         vfs,
         validPlugins,
@@ -166,18 +157,11 @@ export const bootstrapMachine = setup({
         );
       }
 
-      if (!applicationContext) {
-        throw new Error(
-          "Bootstrap machine completed without an application context",
-        );
-      }
-
       if (!vfs) {
         throw new Error("Bootstrap machine completed without a VFS instance");
       }
 
       return {
-        applicationContext,
         plugins: validPlugins,
         server,
         vfs,
@@ -400,7 +384,12 @@ export const bootstrapMachine = setup({
                   id: "startGqlServer",
                   src: "startGqlServer",
                   input: ({
-                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                    context: {
+                      applicationContext,
+                      mainRunnerRef,
+                      validPlugins,
+                      pluginSettings,
+                    },
                   }) => {
                     if (!pluginSettings) {
                       throw new Error(
@@ -409,6 +398,7 @@ export const bootstrapMachine = setup({
                     }
 
                     return {
+                      applicationContext,
                       mainRunnerRef,
                       pluginSettings,
                       validPlugins,
@@ -421,9 +411,9 @@ export const bootstrapMachine = setup({
                         type: "assignGqlServer",
                         params: ({
                           event: {
-                            output: { applicationContext, server },
+                            output: { server },
                           },
-                        }) => ({ applicationContext, server }),
+                        }) => server,
                       },
                       {
                         type: "log",
@@ -484,19 +474,10 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              // The container is created while the GraphQL server starts, which
-              // this state always follows.
-              input: ({ context: { applicationContext } }) => {
-                assert.ok(
-                  applicationContext,
-                  "VFS bootstrap requires the application context",
-                );
-
-                return {
-                  applicationContext,
-                  mountPath: settings.vfsMountPath,
-                };
-              },
+              input: ({ context: { applicationContext } }) => ({
+                applicationContext,
+                mountPath: settings.vfsMountPath,
+              }),
               onDone: {
                 target: "Complete",
                 actions: {
