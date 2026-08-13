@@ -16,6 +16,7 @@ import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
 import { createNestContainer } from "../../../graphql/nest-container.ts";
 import { resolvers } from "../../../graphql/resolvers/index.ts";
+import { PluginRegistryService } from "../../../plugins/plugins.module.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
@@ -46,12 +47,7 @@ export interface StartGQLServerOutput {
 export const startGqlServer = fromPromise<
   StartGQLServerOutput,
   StartGQLServerInput
->(async ({ input: { mainRunnerRef, validPlugins } }) => {
-  const pluginResolvers = validPlugins
-    .values()
-    .flatMap(({ config }) => config.resolvers)
-    .toArray();
-
+>(async ({ input: { mainRunnerRef, pluginSettings, validPlugins } }) => {
   // Created here rather than at process start so that the database connection
   // the container adopts is the one the bootstrap machine has already
   // established, preserving the existing startup ordering. Ownership moves to
@@ -60,6 +56,14 @@ export const startGqlServer = fromPromise<
     AppModule,
     { logger: false },
   );
+
+  // Plugins are discovered at runtime, so the registrar's result is handed to
+  // the container here rather than declared in the module graph.
+  const pluginRegistry = applicationContext.get(PluginRegistryService);
+
+  pluginRegistry.register({ plugins: validPlugins, pluginSettings });
+
+  const pluginResolvers = pluginRegistry.resolvers;
 
   const app = express();
   const httpServer = createServer((...args) => {

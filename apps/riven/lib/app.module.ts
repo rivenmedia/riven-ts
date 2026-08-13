@@ -5,6 +5,7 @@ import { DatabaseModule } from "./database/database.module.ts";
 import { GraphQLModule } from "./graphql/graphql.module.ts";
 import { LoggingModule } from "./logging/logging.module.ts";
 import { MessageQueueModule } from "./message-queue/message-queue.module.ts";
+import { PluginsModule } from "./plugins/plugins.module.ts";
 import { SettingsModule } from "./settings/settings.module.ts";
 import { VfsModule } from "./vfs/vfs.module.ts";
 
@@ -20,6 +21,7 @@ import { VfsModule } from "./vfs/vfs.module.ts";
     CacheModule,
     DatabaseModule,
     MessageQueueModule,
+    PluginsModule,
     VfsModule,
     GraphQLModule,
   ],
