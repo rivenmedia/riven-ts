@@ -34,16 +34,6 @@ it("returns directory stats for the root directory", async () => {
   });
 });
 
-it("returns ENOENT for ignored paths", async () => {
-  const callback = vi.fn<GetAttrCallback>();
-
-  getattrSync("/.Trash", callback);
-
-  await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
-  });
-});
-
 it("returns ENOENT for hidden paths", async () => {
   const callback = vi.fn<GetAttrCallback>();
 

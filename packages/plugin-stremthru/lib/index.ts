@@ -159,7 +159,7 @@ export const plugin: RivenPlugin = {
         method: "HEAD",
         headers: {
           "user-agent": `Riven StremThru/${packageJson.version}`,
-          range: "bytes=0-0",
+          range: "bytes=0-1",
         },
       });
 
@@ -185,6 +185,8 @@ export const plugin: RivenPlugin = {
           `Failed to check stream link health: Received status code ${response.status.toString()} for URL ${link}`,
         );
       }
+
+      await response.body?.cancel();
 
       return {
         state,
