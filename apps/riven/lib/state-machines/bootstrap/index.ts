@@ -484,8 +484,18 @@ export const bootstrapMachine = setup({
             invoke: {
               id: "initialiseVfs",
               src: "initialiseVfs",
-              input: {
-                mountPath: settings.vfsMountPath,
+              // The container is created while the GraphQL server starts, which
+              // this state always follows.
+              input: ({ context: { applicationContext } }) => {
+                assert.ok(
+                  applicationContext,
+                  "VFS bootstrap requires the application context",
+                );
+
+                return {
+                  applicationContext,
+                  mountPath: settings.vfsMountPath,
+                };
               },
               onDone: {
                 target: "Complete",

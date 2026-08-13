@@ -189,7 +189,10 @@ export const rivenMachine = setup({
             invoke: {
               id: "unmountVfs",
               src: "unmountVfs",
-              input: ({ context: { vfs } }) => vfs,
+              input: ({ context: { applicationContext, vfs } }) => ({
+                applicationContext,
+                vfs,
+              }),
               onDone: {
                 target: "Shutting down services",
                 actions: {

@@ -1,30 +1,21 @@
-import { getGlobalDispatcher } from "undici";
 import { fromPromise } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { VfsMountService } from "../../../vfs/vfs.module.ts";
 
+import type { INestApplicationContext } from "@nestjs/common";
 import type Fuse from "@zkochan/fuse-native";
 
-export const unmountVfs = fromPromise<undefined, Fuse | undefined>(
-  async ({ input: vfs }) => {
-    if (!vfs) {
-      logger.warn("No FUSE VFS instance found to unmount");
+export interface UnmountVfsInput {
+  applicationContext: INestApplicationContext | undefined;
+  vfs: Fuse | undefined;
+}
 
+export const unmountVfs = fromPromise<undefined, UnmountVfsInput>(
+  async ({ input: { applicationContext, vfs } }) => {
+    if (!applicationContext) {
       return;
     }
 
-    await new Promise((resolve, reject) => {
-      vfs.unmount((error) => {
-        if (error) {
-          reject(error);
-
-          return;
-        }
-
-        resolve(undefined);
-      });
-    });
-
-    await getGlobalDispatcher().destroy();
+    await applicationContext.get(VfsMountService).unmount(vfs);
   },
 );
