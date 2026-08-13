@@ -73,6 +73,7 @@ export const retryLibrary = fromPromise(async () => {
         await enqueueProcessMediaItem({
           id: itemToProcess.id,
           step: getMediaItemStep(itemToProcess),
+          fanOut: false,
         });
       }
     }

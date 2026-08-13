@@ -137,6 +137,7 @@ it('enqueues a media item processor job in the "scrape" step for each partially 
                   id: incompleteItem.id,
                 }),
                 step: "scrape",
+                isRootItem: true,
               }),
             }),
           ]),
