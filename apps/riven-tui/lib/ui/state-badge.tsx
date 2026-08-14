@@ -2,7 +2,7 @@ import { Text } from "ink";
 
 import type { MediaItemState } from "../types/__generated__/graphql.ts";
 
-const STATE_LABELS: Record<MediaItemState, string> = {
+const STATE_LABELS = {
   completed: "Completed",
   downloaded: "Downloaded",
   failed: "Failed",
@@ -11,9 +11,9 @@ const STATE_LABELS: Record<MediaItemState, string> = {
   paused: "Paused",
   scraped: "Scraped",
   unreleased: "Unreleased",
-};
+} as const satisfies Record<MediaItemState, string>;
 
-const STATE_COLORS: Record<MediaItemState, string> = {
+const STATE_COLORS = {
   completed: "green",
   downloaded: "cyan",
   failed: "red",
@@ -22,7 +22,7 @@ const STATE_COLORS: Record<MediaItemState, string> = {
   paused: "gray",
   scraped: "blue",
   unreleased: "magenta",
-};
+} as const satisfies Record<MediaItemState, string>;
 
 export interface StateBadgeProps {
   state: MediaItemState;

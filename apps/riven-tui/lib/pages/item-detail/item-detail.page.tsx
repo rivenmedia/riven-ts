@@ -1,23 +1,117 @@
+import { gql } from "@apollo/client";
+import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
 import { DateTime } from "luxon";
 import { useState } from "react";
+import { useParams } from "react-router";
+import { z } from "zod";
 
 import { getActionsFor } from "../../actions/registry.ts";
-import { useMediaItem } from "../../hooks/use-media-item.ts";
-import { getChildren, getContentRating } from "../../media-item-detail.ts";
-import { ActionsMenu } from "../actions-menu.tsx";
-import { ErrorMessage } from "../error-message.tsx";
-import { LoadingIndicator } from "../loading-indicator.tsx";
-import { SelectList } from "../select-list.tsx";
-import { SelectableRow } from "../selectable-row.tsx";
-import { StateBadge } from "../state-badge.tsx";
+import { ActionsMenu } from "../../ui/actions-menu.tsx";
+import { SelectList } from "../../ui/select-list.tsx";
+import { SelectableRow } from "../../ui/selectable-row.tsx";
+import { StateBadge } from "../../ui/state-badge.tsx";
+import { getChildren } from "./utilities/get-children.ts";
+import { getContentRating } from "./utilities/get-content-rating.ts";
 
 import type { ActionTarget } from "../../actions/types.ts";
-import type { GraphqlClient } from "../../graphql/graphql-client.ts";
+import type {
+  GetMediaItemQuery,
+  GetMediaItemQueryVariables,
+} from "./item-detail.page.typegen.ts";
+import type { TypedDocumentNode } from "@apollo/client";
+
+const GET_MEDIA_ITEM: TypedDocumentNode<
+  GetMediaItemQuery,
+  GetMediaItemQueryVariables
+> = gql`
+  query GetMediaItem($id: ID!) {
+    mediaItemById(id: $id) {
+      __typename
+      ... on MediaItem {
+        id
+        fullTitle
+        title
+        state
+        year
+        rating
+        releaseDate
+        genres
+        network
+        country
+        language
+        isAnime
+        expectedFileCount
+        scrapedAt
+        scrapedTimes
+        failedScrapeAttempts
+        indexedAt
+        streams {
+          infoHash
+        }
+        blacklistedStreams {
+          plugin
+          provider
+        }
+        filesystemEntries {
+          id
+          type
+        }
+        subtitles {
+          id
+          language
+        }
+      }
+      ... on Movie {
+        tmdbId
+        movieContentRating: contentRating
+        runtime
+      }
+      ... on ShowLikeMediaItem {
+        tvdbId
+      }
+      ... on Show {
+        showContentRating: contentRating
+        status
+        seasons(includeSpecials: true) {
+          id
+          title
+          number
+          state
+          totalEpisodes
+        }
+      }
+      ... on Season {
+        number
+        totalEpisodes
+        show {
+          id
+          title
+        }
+        episodes {
+          id
+          title
+          number
+          state
+        }
+      }
+      ... on Episode {
+        number
+        absoluteNumber
+        show {
+          id
+          title
+        }
+        season {
+          id
+          number
+        }
+      }
+    }
+  }
+`;
 
 export interface ItemDetailScreenProps {
-  client: GraphqlClient;
-  id: string;
   onBack: () => void;
   onSelectChild: (id: string) => void;
 }
@@ -48,23 +142,27 @@ function DetailRow({ label, value }: { label: string; value: string }) {
 }
 
 export function ItemDetailScreen({
-  client,
-  id,
   onBack,
   onSelectChild,
 }: ItemDetailScreenProps) {
-  const { state, refetch } = useMediaItem(client, id);
+  const params = useParams();
+  const id = z.string().parse(params["id"]);
+
+  const { refetch, data } = useSuspenseQuery(GET_MEDIA_ITEM, {
+    variables: { id },
+  });
+
   const [showActions, setShowActions] = useState(false);
 
   useInput(
     (input, key) => {
       if (input === "r") {
-        refetch();
+        void refetch();
 
         return;
       }
 
-      if (input === "a" && state.status === "success") {
+      if (input === "a") {
         setShowActions(true);
 
         return;
@@ -77,15 +175,7 @@ export function ItemDetailScreen({
     { isActive: !showActions },
   );
 
-  if (state.status === "loading") {
-    return <LoadingIndicator label="Loading item" />;
-  }
-
-  if (state.status === "error") {
-    return <ErrorMessage error={state.error} />;
-  }
-
-  const item = state.data;
+  const { mediaItemById: item } = data;
   const children = getChildren(item);
   const contentRating = getContentRating(item);
   const actions = getActionsFor(item.__typename);
@@ -111,15 +201,15 @@ export function ItemDetailScreen({
       <DetailRow label="Content rating" value={contentRating ?? "—"} />
       <DetailRow label="Release date" value={formatDate(item.releaseDate)} />
       <DetailRow label="Genres" value={formatList(item.genres)} />
-      {item.__typename === "Show" && item.status ? (
+      {item.__typename === "Show" && item.status && (
         <DetailRow label="Status" value={item.status} />
-      ) : null}
-      {item.__typename === "Movie" ? (
+      )}
+      {item.__typename === "Movie" && (
         <DetailRow
           label="Runtime"
           value={item.runtime ? `${item.runtime.toString()} min` : "—"}
         />
-      ) : null}
+      )}
       <DetailRow label="Streams" value={item.streams.length.toString()} />
       <DetailRow
         label="Blacklisted"

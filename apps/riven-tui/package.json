@@ -24,7 +24,10 @@
     "graphql": "catalog:",
     "ink": "catalog:",
     "luxon": "catalog:",
-    "react": "catalog:"
+    "react": "catalog:",
+    "react-error-boundary": "catalog:",
+    "react-router": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@graphql-codegen/cli": "catalog:",

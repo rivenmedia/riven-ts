@@ -28,8 +28,7 @@
     },
     "dev": {
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"],
-      "passThroughEnv": ["RIVEN_TUI_GRAPHQL_URL", "RIVEN_TUI_API_KEY"],
-      "with": ["@repo/riven#dev"]
+      "passThroughEnv": ["RIVEN_TUI_GRAPHQL_URL", "RIVEN_TUI_API_KEY"]
     },
     "start": {
       "dependsOn": ["$TURBO_EXTENDS$", "build"],

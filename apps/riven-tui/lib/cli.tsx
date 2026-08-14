@@ -1,12 +1,19 @@
 #!/usr/bin/env node
+
+import { ApolloProvider } from "@apollo/client/react";
 import { render } from "ink";
+import { MemoryRouter } from "react-router";
 
 import { createGraphqlClient } from "./graphql/client.ts";
+import { settings } from "./settings.ts";
 import { App } from "./ui/app.tsx";
 
-const uri = process.env["RIVEN_TUI_GRAPHQL_URL"] ?? "http://localhost:3000/";
-const apiKey = process.env["RIVEN_TUI_API_KEY"];
+const client = createGraphqlClient({ uri: settings.graphqlUrl });
 
-const client = createGraphqlClient({ uri, apiKey });
-
-render(<App client={client} />);
+render(
+  <MemoryRouter>
+    <ApolloProvider client={client}>
+      <App />
+    </ApolloProvider>
+  </MemoryRouter>,
+);

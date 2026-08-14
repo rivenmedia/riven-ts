@@ -105,6 +105,8 @@ catalog:
   postcss: ^8.5.26
   react: ^19.2.6
   react-dom: ^19.2.6
+  react-error-boundary: ^6.1.2
+  react-router: ^8.3.0
   redis-memory-server: ^0.16.1
   reflect-metadata: 0.2.2
   rxjs: ^7.8.2

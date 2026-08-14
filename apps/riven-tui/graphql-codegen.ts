@@ -4,7 +4,7 @@ import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescrip
 
 export default {
   schema: "../riven/schema.graphql",
-  documents: ["lib/**/*.ts", "!lib/**/__generated__/**/*"],
+  documents: ["lib/**/*.ts", "lib/**/*.tsx", "!lib/**/__generated__/**/*"],
   ignoreNoDocuments: true,
   overwrite: true,
   importExtension: ".ts",

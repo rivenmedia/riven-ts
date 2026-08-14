@@ -1,7 +1,7 @@
 import { Text } from "ink";
 import { useEffect, useState } from "react";
 
-const FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+const FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"] as const;
 
 export interface LoadingIndicatorProps {
   label?: string;

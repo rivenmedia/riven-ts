@@ -1,5 +1,5 @@
-import type { MediaItemDetail } from "./hooks/use-media-item.ts";
-import type { MediaItemState } from "./types/__generated__/graphql.ts";
+import type { MediaItemState } from "../../../types/__generated__/graphql.ts";
+import type { GetMediaItemQuery } from "../item-detail.page.typegen.ts";
 
 export interface ChildItem {
   id: string;
@@ -14,7 +14,9 @@ export interface ChildItem {
  * respectively) inline on the same query - this pulls them out into a
  * uniform shape the detail screen can render as a navigable list.
  */
-export function getChildren(item: MediaItemDetail): ChildItem[] {
+export function getChildren(
+  item: GetMediaItemQuery["mediaItemById"],
+): ChildItem[] {
   switch (item.__typename) {
     case "Show": {
       return item.seasons.map((season) => ({
@@ -39,24 +41,6 @@ export function getChildren(item: MediaItemDetail): ChildItem[] {
     case "Episode":
     case "Movie": {
       return [];
-    }
-  }
-}
-
-/** Movies and shows/seasons/episodes use different content rating enums. */
-export function getContentRating(item: MediaItemDetail): string | null {
-  switch (item.__typename) {
-    case "Movie": {
-      return item.movieContentRating;
-    }
-
-    case "Show": {
-      return item.showContentRating;
-    }
-
-    case "Episode":
-    case "Season": {
-      return null;
     }
   }
 }
