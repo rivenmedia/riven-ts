@@ -80,7 +80,7 @@ export async function persistMovieIndexerData(
     await validateOrReject(mediaItem);
 
     await em.upsert(Movie, mediaItem, {
-      onConflictExcludeFields: ["createdAt", "indexedAt", "scrapedAt", "state"],
+      onConflictExcludeFields: ["createdAt", "indexedAt", "scrapedAt"],
     });
 
     em.assign(itemRequest, {

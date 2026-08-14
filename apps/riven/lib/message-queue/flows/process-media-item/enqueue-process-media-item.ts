@@ -14,14 +14,28 @@ export interface EnqueueProcessMediaItemInput extends Partial<
   Pick<ProcessMediaItemFlow["input"], "step" | "isRootItem">
 > {
   id: UUID;
+  /**
+   * If `true`, jobs will be enqueued dynamically depending on the state of the item and its children.
+   *
+   * If `false`, only the specified item will be enqueued for processing.
+   *
+   * @default `true`
+   */
+  fanOut?: boolean;
 }
 
 export async function enqueueProcessMediaItem(
-  { id, step = "scrape", isRootItem = true }: EnqueueProcessMediaItemInput,
+  {
+    id,
+    step = "scrape",
+    isRootItem = true,
+    fanOut = true,
+  }: EnqueueProcessMediaItemInput,
   opts: FlowJob["opts"] = {},
 ) {
-  const mediaItemsToProcess =
-    await services.mediaItemService.getItemsToProcess(id);
+  const mediaItemsToProcess = fanOut
+    ? await services.mediaItemService.getItemsToProcess(id)
+    : [await services.mediaItemService.getMediaItemById(id)];
 
   if (mediaItemsToProcess.length === 0) {
     const { fullTitle } = await services.mediaItemService.getMediaItemById(id);

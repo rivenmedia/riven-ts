@@ -1,26 +1,44 @@
-import { Episode, MediaItem, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  Season,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
+import { settings } from "../../../utilities/settings.ts";
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
-  async #shouldFanOut(item: MediaItem) {
+  readonly #rootItemTypes = new Set<MediaItemType>([
+    "movie",
+    settings.preferSeasonPacks ? "season" : "show",
+  ]);
+
+  public get rootItemTypes() {
+    return new Set(this.#rootItemTypes);
+  }
+
+  #shouldFanOut(item: MediaItem) {
     if (item instanceof Movie || item instanceof Episode) {
       // No fan-out necessary for movies or individual episodes,
       // as they are the leaf nodes in the media item hierarchy
       return false;
     }
 
-    const { settings } = await import("../../../utilities/settings.ts");
+    if (item instanceof Season) {
+      return item.state === "partially_completed";
+    }
 
     const isPartialRequest = item.itemRequest.getProperty("isPartialRequest");
 
@@ -62,7 +80,7 @@ export class MediaItemService extends BaseService {
         { populate: ["itemRequest"] },
       );
 
-      if (await this.#shouldFanOut(item)) {
+      if (this.#shouldFanOut(item)) {
         return await services.downloaderService.getFanOutDownloadItems(id);
       }
 

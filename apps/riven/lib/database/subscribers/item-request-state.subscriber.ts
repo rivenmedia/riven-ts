@@ -90,6 +90,16 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
     const trackedItemRequests = new Set<ItemRequest>();
 
     for (const { entity, originalEntity, payload } of uow.getChangeSets()) {
+      if (
+        !(
+          entity instanceof Movie ||
+          entity instanceof Show ||
+          entity instanceof Season
+        )
+      ) {
+        continue;
+      }
+
       const isStateChange = payload["state"] !== undefined;
 
       if (
