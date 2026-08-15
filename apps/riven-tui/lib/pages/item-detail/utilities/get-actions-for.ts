@@ -1,4 +1,4 @@
-import type { ItemAction, MediaItemType } from "../../types/actions.ts";
+import type { ItemAction, MediaItemType } from "../../../types/actions.ts";
 
 export function getActionsFor(
   actions: readonly ItemAction[],

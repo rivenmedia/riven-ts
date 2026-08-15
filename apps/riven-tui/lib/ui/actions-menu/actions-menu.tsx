@@ -8,6 +8,7 @@ import { LoadingIndicator } from "../loading-indicator.tsx";
 import { SelectList } from "../select-list.tsx";
 import { SelectableRow } from "../selectable-row.tsx";
 import { ActionResult } from "./action-result.tsx";
+import { useActionsMenuContext } from "./actions-menu-context.tsx";
 import { ConfirmAction } from "./confirm-action.tsx";
 
 import type { ActionTarget, ItemAction } from "../../types/actions.ts";
@@ -15,11 +16,10 @@ import type { ApolloClient } from "@apollo/client";
 
 export interface ActionsMenuProps {
   actions: readonly ItemAction[];
-  onClose: () => void;
   target: ActionTarget;
 }
 
-export function ActionsMenu({ actions, onClose, target }: ActionsMenuProps) {
+export function ActionsMenu({ actions, target }: ActionsMenuProps) {
   const client = useApolloClient();
 
   const [selectedAction, setSelectedAction] = useState<ItemAction>();
@@ -28,13 +28,20 @@ export function ActionsMenu({ actions, onClose, target }: ActionsMenuProps) {
     useState<CombinedGraphQLErrors | null>(null);
   const [result, setResult] = useState<ApolloClient.MutateResult | null>(null);
   const [loading, setLoading] = useState(false);
+  const { closeMenu } = useActionsMenuContext();
 
   useInput(
     () => {
-      onClose();
+      closeMenu();
     },
     { isActive: called },
   );
+
+  useInput((_, key) => {
+    if (key.escape) {
+      closeMenu();
+    }
+  });
 
   const runAction = (action: ItemAction) => {
     setSelectedAction(action);
@@ -75,7 +82,7 @@ export function ActionsMenu({ actions, onClose, target }: ActionsMenuProps) {
         <SelectList
           items={actions}
           getKey={(action) => action.id}
-          onCancel={onClose}
+          onCancel={closeMenu}
           onSelect={setSelectedAction}
           isActive={!selectedAction}
           renderItem={(action, isSelected, index) => (

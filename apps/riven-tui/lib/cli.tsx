@@ -1,19 +1,14 @@
 #!/usr/bin/env node
 
-import { ApolloProvider } from "@apollo/client/react";
-import { render } from "ink";
-import { MemoryRouter } from "react-router";
+import { withFullScreen } from "fullscreen-ink";
 
-import { createGraphqlClient } from "./graphql/client.ts";
-import { settings } from "./settings.ts";
+import { Providers } from "./providers.tsx";
 import { App } from "./ui/app.tsx";
 
-const client = createGraphqlClient({ uri: settings.graphqlUrl });
-
-render(
-  <MemoryRouter>
-    <ApolloProvider client={client}>
-      <App />
-    </ApolloProvider>
-  </MemoryRouter>,
+const ink = withFullScreen(
+  <Providers>
+    <App />
+  </Providers>,
 );
+
+await ink.start();

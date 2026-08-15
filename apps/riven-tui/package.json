@@ -21,10 +21,13 @@
   },
   "dependencies": {
     "@apollo/client": "catalog:",
+    "@inkjs/ui": "catalog:",
     "@mishieck/ink-titled-box": "catalog:",
+    "fullscreen-ink": "catalog:",
     "graphql": "catalog:",
     "ink": "catalog:",
     "ink-link": "catalog:",
+    "ink-picture": "catalog:",
     "ink-spinner": "catalog:",
     "ink-tab": "catalog:",
     "luxon": "catalog:",

@@ -49,6 +49,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
           id
         }
         imdbId
+        posterPath
       }
 
       ... on Movie {

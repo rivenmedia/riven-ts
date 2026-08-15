@@ -23,6 +23,7 @@ catalog:
   "@graphql-codegen/typescript": ^5.0.10
   "@graphql-codegen/typescript-operations": ^5.1.0
   "@graphql-typed-document-node/core": ^3.2.0
+  "@inkjs/ui": ^2.0.0
   "@isaacs/ttlcache": ^2.1.5
   "@keyv/redis": ^5.1.6
   "@kubb/cli": 4.20.1
@@ -79,6 +80,7 @@ catalog:
   execa: ^9.6.1
   express: ^5.2.1
   fastest-levenshtein: ^1.0.16
+  fullscreen-ink: ^0.1.0
   fumadocs-core: ^16.8.12
   fumadocs-mdx: ^14.3.2
   fumadocs-ui: ^16.8.12
@@ -90,6 +92,7 @@ catalog:
   husky: ^9.1.7
   ink: ^7.1.1
   ink-link: ^5.0.0
+  ink-picture: ^2.1.0
   ink-spinner: ^5.0.0
   ink-tab: ^5.2.0
   ink-testing-library: ^4.0.0
