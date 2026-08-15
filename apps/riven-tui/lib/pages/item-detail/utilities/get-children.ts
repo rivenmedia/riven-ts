@@ -1,5 +1,5 @@
 import type { MediaItemState } from "../../../types/__generated__/graphql.ts";
-import type { GetMediaItemQuery } from "../item-detail.page.typegen.ts";
+import type { RivenTuiGetMediaItemQuery } from "../queries/get-media-item.query.typegen.ts";
 
 export interface ChildItem {
   id: string;
@@ -15,7 +15,7 @@ export interface ChildItem {
  * uniform shape the detail screen can render as a navigable list.
  */
 export function getChildren(
-  item: GetMediaItemQuery["mediaItemById"],
+  item: RivenTuiGetMediaItemQuery["mediaItemById"],
 ): ChildItem[] {
   switch (item.__typename) {
     case "Show": {

@@ -1,8 +1,8 @@
-import type { GetMediaItemQuery } from "../item-detail.page.typegen.ts";
+import type { RivenTuiGetMediaItemQuery } from "../queries/get-media-item.query.typegen.ts";
 
 /** Movies and shows/seasons/episodes use different content rating enums. */
 export function getContentRating(
-  item: GetMediaItemQuery["mediaItemById"],
+  item: RivenTuiGetMediaItemQuery["mediaItemById"],
 ): string | null {
   switch (item.__typename) {
     case "Movie": {

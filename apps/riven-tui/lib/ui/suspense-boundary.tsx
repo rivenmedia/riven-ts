@@ -1,5 +1,5 @@
 import { Box, Text, useInput } from "ink";
-import React, { Suspense } from "react";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { LoadingIndicator } from "./loading-indicator.tsx";

@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Spacer, Text, useInput } from "ink";
+import { Box, Text, useInput } from "ink";
 
 import { SelectList } from "../../ui/select-list.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
