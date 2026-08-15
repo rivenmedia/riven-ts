@@ -62,6 +62,18 @@ FROM base AS prepare
 
     RUN turbo prune @repo/riven --docker
 
+FROM base AS prepare-tui
+
+    LABEL builder="true"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    COPY . .
+
+    RUN turbo prune @repo/riven-tui --docker
+
 FROM base AS builder
 
     LABEL builder="true"
@@ -92,6 +104,36 @@ FROM base AS builder
 
     RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/riven#build
 
+FROM base AS builder-tui
+
+    LABEL builder="true"
+
+    ARG HOME
+    ARG PNPM_STORE
+
+    ARG CI
+    ENV CI=${CI}
+
+    WORKDIR ${HOME}
+
+    COPY --from=prepare-tui ${HOME}/out/pnpm-lock.yaml ./
+    COPY --from=prepare-tui ${HOME}/out/pnpm-workspace.yaml ./
+    COPY --from=prepare-tui ${HOME}/out/json/patches ./patches
+
+    RUN pnpm fetch
+
+    COPY --from=prepare-tui ${HOME}/out/full/ ./
+
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} pnpm install -r --offline
+
+    # Replace the previous workspace file to avoid `build` from triggering an installation that fails the Docker process
+    COPY --from=prepare-tui ${HOME}/out/pnpm-workspace.yaml ./
+
+    ARG TURBO_TEAM
+    ENV TURBO_TEAM=${TURBO_TEAM}
+
+    RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/riven-tui#build
+
 FROM builder AS production-deploy
 
     LABEL builder="true"
@@ -104,6 +146,19 @@ FROM builder AS production-deploy
     ENV CI=${CI}
 
     RUN pnpm --filter @repo/riven --prod deploy pruned
+
+FROM builder-tui AS production-deploy-tui
+
+    LABEL builder="true"
+
+    ARG HOME
+
+    WORKDIR ${HOME}
+
+    ARG CI
+    ENV CI=${CI}
+
+    RUN pnpm --filter @repo/riven-tui --prod deploy pruned
 
 FROM node:${NODE_VERSION}-alpine AS runner
 
@@ -147,6 +202,7 @@ FROM node:${NODE_VERSION}-alpine AS runner
     USER ${PUID}:${PGID}
 
     COPY --from=production-deploy ${HOME}/pruned .
+    COPY --from=production-deploy-tui ${HOME}/pruned ./tui
 
     ENV NODE_ENV=production
 
