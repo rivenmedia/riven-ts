@@ -16,8 +16,8 @@ describe("removeItemRequest", () => {
     RemoveItemRequestMutation,
     RemoveItemRequestMutationVariables
   > = gql`
-    mutation RemoveItemRequest($id: ID!) {
-      removeItemRequest(id: $id)
+    mutation RemoveItemRequest($itemRequestId: ID!) {
+      removeItemRequest(itemRequestId: $itemRequestId)
     }
   `;
 
@@ -41,7 +41,7 @@ describe("removeItemRequest", () => {
       {
         query: REMOVE_ITEM_REQUEST,
         variables: {
-          id: completedMovie.itemRequest.id,
+          itemRequestId: completedMovie.itemRequest.id,
         },
       },
       { contextValue: gqlContext },
@@ -79,7 +79,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -127,7 +127,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedShow.itemRequest.id,
+            itemRequestId: completedShow.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -181,7 +181,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -210,7 +210,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -236,7 +236,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -271,7 +271,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },
@@ -294,7 +294,7 @@ describe("removeItemRequest", () => {
         {
           query: REMOVE_ITEM_REQUEST,
           variables: {
-            id: completedMovie.itemRequest.id,
+            itemRequestId: completedMovie.itemRequest.id,
           },
         },
         { contextValue: gqlContext },

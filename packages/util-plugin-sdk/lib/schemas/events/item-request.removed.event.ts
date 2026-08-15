@@ -11,6 +11,7 @@ export const ItemRequestRemovedEvent = createProgramEventSchema(
   "item-request.removed",
   z.object({
     item: ItemRequest,
+    title: z.string(),
   }),
 );
 

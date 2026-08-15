@@ -4,6 +4,7 @@ import {
   Movie,
   Stream,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import chalk from "chalk";
@@ -41,14 +42,23 @@ export class MediaItemResolver {
 
   @Query(() => [MediaItemUnion])
   public async mediaItems(
+    @Arg("type", () => [MediaItemType.enum], {
+      defaultValue: MediaItemType.options,
+    })
+    @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
+    includeUnrequestedItems: boolean,
+    filter: MediaItemType[],
     @CoreContext() { em }: CoreContext,
   ): Promise<MediaItem[]> {
     return em.find(
       MediaItem,
-      {},
+      {
+        type: { $in: filter },
+        isRequested: includeUnrequestedItems ? { $in: [true, false] } : true,
+      },
       {
         orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
-        // limit: 25,
+        limit: 25,
         overfetch: true,
       },
     );

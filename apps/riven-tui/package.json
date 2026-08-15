@@ -21,8 +21,12 @@
   },
   "dependencies": {
     "@apollo/client": "catalog:",
+    "@mishieck/ink-titled-box": "catalog:",
     "graphql": "catalog:",
     "ink": "catalog:",
+    "ink-link": "catalog:",
+    "ink-spinner": "catalog:",
+    "ink-tab": "catalog:",
     "luxon": "catalog:",
     "react": "catalog:",
     "react-error-boundary": "catalog:",

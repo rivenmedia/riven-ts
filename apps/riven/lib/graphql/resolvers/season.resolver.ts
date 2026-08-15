@@ -11,7 +11,9 @@ export class SeasonResolver {
 
   @FieldResolver(() => [Episode])
   public async episodes(@Root() season: Season) {
-    return season.episodes.loadItems();
+    return season.episodes.loadItems({
+      orderBy: { number: "asc" },
+    });
   }
 
   @FieldResolver(() => Int)

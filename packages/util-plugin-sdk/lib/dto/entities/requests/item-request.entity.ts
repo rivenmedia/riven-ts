@@ -114,4 +114,19 @@ export class ItemRequest {
    */
   @Property({ default: false })
   public isPartialRequest!: Opt<boolean>;
+
+  @Field(() => String)
+  public async getMediaItemTitle() {
+    const [mediaItem] = await this.mediaItems.matching({
+      where: {
+        type: this.type,
+      },
+    });
+
+    if (!mediaItem) {
+      return "Unknown Title";
+    }
+
+    return mediaItem.fullTitle;
+  }
 }

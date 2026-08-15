@@ -1,155 +1,45 @@
-import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
-import { DateTime } from "luxon";
+import Link from "ink-link";
 import { useState } from "react";
 import { useParams } from "react-router";
 import { z } from "zod";
 
-import { getActionsFor } from "../../actions/registry.ts";
-import { ActionsMenu } from "../../ui/actions-menu.tsx";
+import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
 import { SelectableRow } from "../../ui/selectable-row.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
+import { createAction } from "../../utilities/create-action.ts";
+import { getActionsFor } from "./actions.ts";
+import { DetailRow } from "./components/detail-row.tsx";
+import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
+import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
+import { REMOVE_ITEM_REQUEST } from "./queries/remove-item-request.mutation.ts";
+import { formatDate } from "./utilities/format-date.ts";
+import { formatList } from "./utilities/format-list.ts";
 import { getChildren } from "./utilities/get-children.ts";
 import { getContentRating } from "./utilities/get-content-rating.ts";
 
-import type { ActionTarget } from "../../actions/types.ts";
-import type {
-  GetMediaItemQuery,
-  GetMediaItemQueryVariables,
-} from "./item-detail.page.typegen.ts";
-import type { TypedDocumentNode } from "@apollo/client";
-
-const GET_MEDIA_ITEM: TypedDocumentNode<
-  GetMediaItemQuery,
-  GetMediaItemQueryVariables
-> = gql`
-  query GetMediaItem($id: ID!) {
-    mediaItemById(id: $id) {
-      __typename
-      ... on MediaItem {
-        id
-        fullTitle
-        title
-        state
-        year
-        rating
-        releaseDate
-        genres
-        network
-        country
-        language
-        isAnime
-        expectedFileCount
-        scrapedAt
-        scrapedTimes
-        failedScrapeAttempts
-        indexedAt
-        streams {
-          infoHash
-        }
-        blacklistedStreams {
-          plugin
-          provider
-        }
-        filesystemEntries {
-          id
-          type
-        }
-        subtitles {
-          id
-          language
-        }
-      }
-      ... on Movie {
-        tmdbId
-        movieContentRating: contentRating
-        runtime
-      }
-      ... on ShowLikeMediaItem {
-        tvdbId
-      }
-      ... on Show {
-        showContentRating: contentRating
-        status
-        seasons(includeSpecials: true) {
-          id
-          title
-          number
-          state
-          totalEpisodes
-        }
-      }
-      ... on Season {
-        number
-        totalEpisodes
-        show {
-          id
-          title
-        }
-        episodes {
-          id
-          title
-          number
-          state
-        }
-      }
-      ... on Episode {
-        number
-        absoluteNumber
-        show {
-          id
-          title
-        }
-        season {
-          id
-          number
-        }
-      }
-    }
-  }
-`;
+import type { ActionTarget, ItemAction } from "../../types/actions.ts";
 
 export interface ItemDetailScreenProps {
   onBack: () => void;
   onSelectChild: (id: string) => void;
 }
 
-function formatList(values: readonly string[] | null | undefined): string {
-  return values && values.length > 0 ? values.join(", ") : "—";
-}
-
-function formatDate(value: string | null | undefined): string {
-  if (!value) {
-    return "—";
-  }
-
-  const date = DateTime.fromISO(value);
-
-  return date.isValid ? date.toFormat("yyyy-LL-dd") : "—";
-}
-
-function DetailRow({ label, value }: { label: string; value: string }) {
-  return (
-    <Box>
-      <Box width={18}>
-        <Text dimColor>{label}</Text>
-      </Box>
-      <Text>{value}</Text>
-    </Box>
-  );
-}
-
 export function ItemDetailScreen({
   onBack,
   onSelectChild,
 }: ItemDetailScreenProps) {
-  const params = useParams();
-  const id = z.string().parse(params["id"]);
+  const params = useParams<"id">();
+  const id = z.string().parse(params.id);
 
-  const { refetch, data } = useSuspenseQuery(GET_MEDIA_ITEM, {
-    variables: { id },
+  const {
+    refetch,
+    data: { mediaItemById: item },
+  } = useSuspenseQuery(GET_MEDIA_ITEM, {
+    fetchPolicy: "network-only",
+    variables: { mediaItemId: id },
   });
 
   const [showActions, setShowActions] = useState(false);
@@ -168,17 +58,92 @@ export function ItemDetailScreen({
         return;
       }
 
-      if (key.escape || key.backspace) {
+      if (key.escape) {
         onBack();
       }
     },
     { isActive: !showActions },
   );
 
-  const { mediaItemById: item } = data;
+  const rawActions = [
+    createAction(BLACKLIST_ACTIVE_STREAM, {
+      appliesTo: ["Movie", "Show", "Season", "Episode"],
+      id: "blacklist-active-stream",
+      label: "Blacklist active stream",
+      description:
+        "Blacklist the currently active stream and search for a replacement.",
+      variables: {
+        mediaItemId: item.id,
+      },
+      buildResultMessageData: (target, result, error) => {
+        if (error) {
+          return {
+            type: "error",
+            message: `Error blacklisting active stream for ${target.title}: ${error.message}`,
+          };
+        }
+
+        if (result?.error) {
+          return {
+            type: "error",
+            message: `Error blacklisting active stream for ${target.title}: ${result.error.message}`,
+          };
+        }
+
+        if (result?.data?.blacklistActiveStream) {
+          return {
+            type: "success",
+            message: `Successfully blacklisted active stream for ${target.title}.`,
+          };
+        }
+
+        return {
+          type: "error",
+          message: `Unknown error blacklisting active stream for ${target.title}.`,
+        };
+      },
+    }),
+    createAction(REMOVE_ITEM_REQUEST, {
+      appliesTo: ["Movie", "Show"],
+      id: "remove-request",
+      label: "Remove request",
+      description: "Remove the item request, halting further processing.",
+      variables: {
+        itemRequestId: item.itemRequest.id,
+      },
+      buildResultMessageData: (target, result, error) => {
+        if (error) {
+          return {
+            type: "error",
+            message: `Error removing request for ${target.title}: ${error.message}`,
+          };
+        }
+
+        if (result?.error) {
+          return {
+            type: "error",
+            message: `Error removing request for ${target.title}: ${result.error.message}`,
+          };
+        }
+
+        if (result?.data?.removeItemRequest) {
+          return {
+            type: "success",
+            message: `Successfully removed request for ${target.title}.`,
+          };
+        }
+
+        return {
+          type: "error",
+          message: `Unknown error removing request for ${target.title}.`,
+        };
+      },
+    }),
+  ] satisfies readonly ItemAction[];
+
   const children = getChildren(item);
   const contentRating = getContentRating(item);
-  const actions = getActionsFor(item.__typename);
+  const actions = getActionsFor(rawActions, item.__typename);
   const target: ActionTarget = {
     id: item.id,
     title: item.fullTitle,
@@ -195,7 +160,39 @@ export function ItemDetailScreen({
         <Text> · </Text>
         <StateBadge state={item.state} />
       </Box>
-
+      <Box flexDirection="column" marginBottom={1}>
+        {item.__typename === "Movie" ? (
+          <DetailRow
+            label="TMDb ID"
+            value={
+              <Link url={`https://www.themoviedb.org/movie/${item.tmdbId}`}>
+                <Text color="blue">{item.tmdbId}</Text>
+              </Link>
+            }
+          />
+        ) : (
+          <DetailRow
+            label="TVDB ID"
+            value={
+              <Link
+                url={`https://www.thetvdb.com/dereferrer/series/${item.tvdbId}`}
+              >
+                <Text color="blue">{item.tvdbId}</Text>
+              </Link>
+            }
+          />
+        )}
+        {item.imdbId && (
+          <DetailRow
+            label="IMDb ID"
+            value={
+              <Link url={`https://www.imdb.com/title/${item.imdbId}`}>
+                <Text color="blue">{item.imdbId}</Text>
+              </Link>
+            }
+          />
+        )}
+      </Box>
       <DetailRow label="Year" value={item.year?.toString() ?? "—"} />
       <DetailRow label="Rating" value={item.rating?.toFixed(1) ?? "—"} />
       <DetailRow label="Content rating" value={contentRating ?? "—"} />
@@ -246,12 +243,10 @@ export function ItemDetailScreen({
           />
         </Box>
       )}
-
       <Box marginTop={1}>
         <Text dimColor>a actions · r refresh · esc back · q quit</Text>
       </Box>
-
-      {showActions && (
+      {showActions && actions.length > 0 && (
         <ActionsMenu
           actions={actions}
           target={target}

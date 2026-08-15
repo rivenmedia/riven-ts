@@ -10,13 +10,16 @@ import type { UUID } from "node:crypto";
 export class ItemRequestResolver {
   @Mutation(() => Boolean)
   public async removeItemRequest(
-    @Arg("id", () => ID) id: UUID,
+    @Arg("itemRequestId", () => ID) itemRequestId: UUID,
     @Ctx() { logger }: ApolloServerContext,
     @CoreContext() { sendEvent, services: { itemRequestService } }: CoreContext,
   ): Promise<boolean> {
-    const itemRequest = await itemRequestService.getItemRequestById(id);
-
     try {
+      const itemRequest =
+        await itemRequestService.getItemRequestById(itemRequestId);
+
+      const title = await itemRequest.getMediaItemTitle();
+
       if (
         await clearDeduplicationJob(
           "process-item-request",
@@ -46,15 +49,16 @@ export class ItemRequestResolver {
       sendEvent({
         type: "riven.item-request.removed",
         item: itemRequest,
+        title,
       });
 
       return true;
     } catch (error) {
-      logger.error(`Failed to remove item request with ID ${id}`, {
+      logger.error(`Failed to remove item request with ID ${itemRequestId}`, {
         err: error,
       });
 
-      return false;
+      throw error;
     }
   }
 }

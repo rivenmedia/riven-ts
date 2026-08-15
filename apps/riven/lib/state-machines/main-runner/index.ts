@@ -529,6 +529,20 @@ export const mainRunnerMachine = setup({
             ],
           },
 
+          "riven.item-request.removed": {
+            description:
+              "Indicates that an item request has been successfully removed.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { title } }) => ({
+                  message: `Successfully removed ${chalk.bold(title)} from the library.`,
+                  level: "info",
+                }),
+              },
+            ],
+          },
+
           /**
            * Index lifecycle events
            */

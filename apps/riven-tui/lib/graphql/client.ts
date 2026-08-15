@@ -9,7 +9,18 @@ export function createGraphqlClient({
   uri,
 }: CreateGraphqlClientOptions): ApolloClient {
   return new ApolloClient({
+    defaultOptions: {
+      mutate: {
+        errorPolicy: "all",
+        fetchPolicy: "network-only",
+      },
+      query: {
+        errorPolicy: "all",
+        fetchPolicy: "network-only",
+      },
+    },
     cache: new InMemoryCache({
+      resultCaching: false,
       possibleTypes: {
         MediaItem: ["Movie", "Show", "Season", "Episode"],
         ShowLikeMediaItem: ["Show", "Season", "Episode"],

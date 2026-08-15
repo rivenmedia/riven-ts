@@ -1,9 +1,8 @@
 import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Spacer, Text, useInput } from "ink";
 
 import { SelectList } from "../../ui/select-list.tsx";
-import { SelectableRow } from "../../ui/selectable-row.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
 
 import type {
@@ -16,10 +15,12 @@ const GET_LIBRARY_ITEMS: TypedDocumentNode<
   GetLibraryItemsQuery,
   GetLibraryItemsQueryVariables
 > = gql`
-  query GetLibraryItems {
-    mediaItems {
+  query GetLibraryItems(
+    $type: [MediaItemType!]!
+    $includeUnrequestedItems: Boolean = false
+  ) {
+    mediaItems(type: $type, includeUnrequestedItems: $includeUnrequestedItems) {
       ... on MediaItem {
-        __typename
         id
         fullTitle
         state
@@ -33,7 +34,13 @@ export interface LibraryScreenProps {
 }
 
 export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
-  const { refetch, data } = useSuspenseQuery(GET_LIBRARY_ITEMS);
+  const { refetch, data } = useSuspenseQuery(GET_LIBRARY_ITEMS, {
+    fetchPolicy: "network-only",
+    variables: {
+      type: ["movie", "show"],
+      includeUnrequestedItems: false,
+    },
+  });
 
   useInput((input) => {
     if (input === "r") {
@@ -46,7 +53,7 @@ export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
       <Text bold underline>
         Library
       </Text>
-      <Box flexDirection="column">
+      <Box flexDirection="column" maxWidth={80}>
         <SelectList
           items={data.mediaItems}
           getKey={(item) => item.id}
@@ -55,9 +62,17 @@ export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
           }}
           emptyMessage="Your library is empty."
           renderItem={(item, isSelected) => (
-            <SelectableRow isSelected={isSelected}>
-              {item.fullTitle} <StateBadge state={item.state} />
-            </SelectableRow>
+            <Box width="100%" justifyContent="space-between">
+              <Text color={isSelected ? "cyan" : "white"}>
+                {isSelected ? "❯ " : "  "}
+                {item.fullTitle}
+              </Text>
+              <Box>
+                <Text>{item.__typename}</Text>
+                <Text> · </Text>
+                <StateBadge state={item.state} />
+              </Box>
+            </Box>
           )}
         />
         <Box marginTop={1}>

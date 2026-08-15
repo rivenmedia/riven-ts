@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 export interface SelectListProps<T> {
   items: readonly T[];
   getKey: (item: T) => string;
-  renderItem: (item: T, isSelected: boolean) => ReactNode;
+  renderItem: (item: T, isSelected: boolean, index: number) => ReactNode;
   onSelect: (item: T) => void;
   onCancel?: (() => void) | undefined;
   isActive?: boolean;
@@ -79,7 +79,9 @@ export function SelectList<T>({
   return (
     <Box flexDirection="column">
       {items.map((item, index) => (
-        <Box key={getKey(item)}>{renderItem(item, index === clampedIndex)}</Box>
+        <Box key={getKey(item)}>
+          {renderItem(item, index === clampedIndex, index)}
+        </Box>
       ))}
     </Box>
   );
