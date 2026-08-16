@@ -49,7 +49,7 @@ export function PageWrapper({
                 throw new Error(`Could not find tab with name "${name}"`);
               }
 
-              void navigate(tabs[name]);
+              void navigate(tabs[name], { replace: true });
             }}
           />
         </Box>

@@ -2,6 +2,7 @@ import { useApp, useInput } from "ink";
 import { Route, Routes, useNavigate } from "react-router";
 
 import { ItemDetailPageLayout } from "../pages/item-detail/item-detail.layout.tsx";
+import { ItemDetailChildrenTab } from "../pages/item-detail/tabs/children.tsx";
 import { ItemDetailOverviewTab } from "../pages/item-detail/tabs/overview.tsx";
 import { LibraryScreen } from "../pages/library/library.page.tsx";
 import { Screen } from "./screen.tsx";
@@ -30,6 +31,7 @@ export function App() {
           </Route>
           <Route path="item/:id" element={<ItemDetailPageLayout />}>
             <Route index element={<ItemDetailOverviewTab />} />
+            <Route path="children" element={<ItemDetailChildrenTab />} />
           </Route>
         </Routes>
       </Screen>

@@ -1,5 +1,6 @@
 import { Box, measureElement, useFocus, useInput } from "ink";
 import { useEffect, useReducer, useRef } from "react";
+import { useLocation } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
 import { scrollAreaReducer } from "./scroll-area.reducer.ts";
@@ -10,6 +11,7 @@ import type { PropsWithChildren } from "react";
 export function ScrollArea({ children }: PropsWithChildren) {
   useFocus();
 
+  const { pathname } = useLocation();
   const outerRef = useRef<DOMElement>(null);
   const { height } = outerRef.current
     ? measureElement(outerRef.current)
@@ -34,13 +36,15 @@ export function ScrollArea({ children }: PropsWithChildren) {
       return;
     }
 
+    dispatch({ type: "RESET_SCROLL_POSITION" });
+
     const dimensions = measureElement(innerRef.current);
 
     dispatch({
       type: "SET_INNER_HEIGHT",
       innerHeight: dimensions.height,
     });
-  }, []);
+  }, [pathname]);
 
   useInput(
     (_input, key) => {

@@ -139,6 +139,9 @@ export function ItemDetailPageLayout() {
       }
       tabs={{
         Overview: `/item/${item.id}`,
+        ...(item.__typename === "Show" || item.__typename === "Season"
+          ? { Children: `/item/${item.id}/children` }
+          : {}),
       }}
       actions={<ActionsMenu actions={actions} target={target} />}
     >

@@ -2,7 +2,8 @@ type ScrollAreaAction =
   | { type: "SET_INNER_HEIGHT"; innerHeight: number }
   | { type: "SET_HEIGHT"; height: number }
   | { type: "SCROLL_DOWN" }
-  | { type: "SCROLL_UP" };
+  | { type: "SCROLL_UP" }
+  | { type: "RESET_SCROLL_POSITION" };
 
 interface ScrollAreaState {
   innerHeight: number;
@@ -44,6 +45,13 @@ export const scrollAreaReducer = (
       return {
         ...state,
         scrollTop: Math.max(0, state.scrollTop - 1),
+      };
+    }
+
+    case "RESET_SCROLL_POSITION": {
+      return {
+        ...state,
+        scrollTop: 0,
       };
     }
 
