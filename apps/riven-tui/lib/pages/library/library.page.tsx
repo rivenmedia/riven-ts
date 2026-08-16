@@ -3,7 +3,6 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
 import { useNavigate, useParams } from "react-router";
 
-import { ItemRequestStateBadge } from "../../ui/item-request-state-badge.tsx";
 import { MediaItemStateBadge } from "../../ui/media-item-state-badge.tsx";
 import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
@@ -25,9 +24,6 @@ const GET_LIBRARY_ITEMS: TypedDocumentNode<
         id
         fullTitle
         state
-        itemRequest {
-          state
-        }
       }
     }
   }
@@ -91,8 +87,6 @@ export function LibraryScreen() {
               </Text>
               <Box>
                 <Text>{item.__typename}</Text>
-                <Text> · </Text>
-                <ItemRequestStateBadge state={item.itemRequest.state} />
                 <Text> · </Text>
                 <MediaItemStateBadge state={item.state} />
               </Box>
