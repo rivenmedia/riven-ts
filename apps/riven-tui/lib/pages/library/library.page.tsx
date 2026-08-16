@@ -2,7 +2,7 @@ import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
 
-import { PageWrapper } from "../../ui/page-wrapper.tsx";
+import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
 
@@ -51,20 +51,19 @@ export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
 
   return (
     <PageWrapper
-      header={
-        <Box gap={1}>
-          <Text bold underline>
-            Media Library
-          </Text>
-          <Text dimColor>-</Text>
+      header={{
+        title: "Media Library",
+        content: (
           <Text dimColor>
             {data.mediaItems.length} item
             {data.mediaItems.length === 1 ? "" : "s"}
           </Text>
-        </Box>
-      }
+        ),
+      }}
       footer={
-        <Text dimColor>↑/↓ navigate · enter view · r refresh · q quit</Text>
+        <Text dimColor>
+          [↑/↓] navigate · [enter] view · [r] refresh · [q] quit
+        </Text>
       }
     >
       <Box flexDirection="column" maxWidth={80}>

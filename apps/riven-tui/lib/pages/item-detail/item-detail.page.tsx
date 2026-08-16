@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { useActionsMenuContext } from "../../ui/actions-menu/actions-menu-context.tsx";
 import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
-import { PageWrapper } from "../../ui/page-wrapper.tsx";
+import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
 import { SelectableRow } from "../../ui/selectable-row.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
@@ -148,18 +148,13 @@ export function ItemDetailScreen({
 
   return (
     <PageWrapper
-      header={
-        <Box gap={1}>
-          <Text bold underline>
-            {item.fullTitle}
-          </Text>
-          <Text dimColor>-</Text>
-          <Text dimColor>{item.__typename}</Text>
-          <Text dimColor>-</Text>
-          <StateBadge state={item.state} />
-        </Box>
+      header={{
+        title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
+        content: <StateBadge state={item.state} />,
+      }}
+      footer={
+        <Text dimColor>[a] actions · [r] refresh · [esc] back · [q] quit</Text>
       }
-      footer={<Text dimColor>a actions · r refresh · esc back · q quit</Text>}
       actions={<ActionsMenu actions={actions} target={target} />}
     >
       <Box flexDirection="column" gap={1}>
