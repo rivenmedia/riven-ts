@@ -124,3 +124,21 @@ it("resets an episode item", async ({
     ]),
   );
 });
+
+it("resets a failed media item", async ({
+  em,
+  services,
+  seeders: { seedScrapedMovie },
+}) => {
+  const { movie } = await seedScrapedMovie();
+
+  movie.state = "failed";
+
+  await em.flush();
+
+  await services.mediaItemService.resetMediaItem(movie);
+
+  const resetMovie = await em.refreshOrFail(movie);
+
+  expect(resetMovie.state).toBe("indexed");
+});

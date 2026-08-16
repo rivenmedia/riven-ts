@@ -67,11 +67,11 @@ export class MediaItemResolver {
 
   @Mutation(() => [MediaItemUnion])
   public async resetMediaItem(
-    @Arg("id", () => ID) id: UUID,
+    @Arg("mediaItemId", () => ID) mediaItemId: UUID,
     @CoreContext() { services: { mediaItemService } }: CoreContext,
     @Ctx() { logger }: ApolloServerContext,
   ): Promise<MediaItem[]> {
-    const item = await mediaItemService.getMediaItemById(id);
+    const item = await mediaItemService.getMediaItemById(mediaItemId);
     const resetItems = await mediaItemService.resetMediaItem(item);
 
     const { enqueueProcessMediaItem } =

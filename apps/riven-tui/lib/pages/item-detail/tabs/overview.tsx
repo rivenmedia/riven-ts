@@ -1,10 +1,11 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 import Link from "ink-link";
 import Image from "ink-picture";
 import { useParams } from "react-router";
 import z from "zod";
 
+import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
 import { DetailRow } from "../components/detail-row.tsx";
 import { GET_MEDIA_ITEM_OVERVIEW } from "../queries/get-media-item-overview.query.ts";
 import { formatDate } from "../utilities/format-date.ts";
@@ -14,13 +15,24 @@ import { getContentRating } from "../utilities/get-content-rating.ts";
 export function ItemDetailOverviewTab() {
   const params = useParams<"id">();
   const id = z.string().parse(params.id);
+  const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 
   const {
+    refetch,
     data: { mediaItemById: item },
   } = useSuspenseQuery(GET_MEDIA_ITEM_OVERVIEW, {
     fetchPolicy: "network-only",
     variables: { mediaItemId: id },
   });
+
+  useInput(
+    (input) => {
+      if (input === "r") {
+        void refetch();
+      }
+    },
+    { isActive: !isActionsMenuVisible },
+  );
 
   const contentRating = getContentRating(item);
 

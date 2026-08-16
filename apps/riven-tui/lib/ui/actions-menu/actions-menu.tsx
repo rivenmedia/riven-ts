@@ -78,10 +78,11 @@ export function ActionsMenu({ actions, target }: ActionsMenuProps) {
       flexDirection="column"
       paddingX={1}
       titles={["Actions"]}
-      top={4}
+      top={2}
       right={2}
       bottom={2}
       position="absolute"
+      maxWidth="50%"
     >
       {!called && (
         <SelectList

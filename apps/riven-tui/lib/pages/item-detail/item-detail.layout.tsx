@@ -12,6 +12,7 @@ import { createAction } from "../../utilities/create-action.ts";
 import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
 import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
 import { REMOVE_ITEM_REQUEST } from "./queries/remove-item-request.mutation.ts";
+import { RESET_MEDIA_ITEM } from "./queries/reset-media-item.mutation.ts";
 import { getActionsFor } from "./utilities/get-actions-for.ts";
 
 import type { ActionTarget, ItemAction } from "../../types/actions.ts";
@@ -110,6 +111,43 @@ export function ItemDetailPageLayout() {
         return {
           type: "error",
           message: `Unknown error removing request for ${target.title}.`,
+        };
+      },
+    }),
+    createAction(RESET_MEDIA_ITEM, {
+      appliesTo: ["Movie", "Show", "Season", "Episode"],
+      id: "reset-media-item",
+      label: "Reset media item",
+      description:
+        "Reset the media item to its original state, clearing streams and filesystem entries.",
+      variables: {
+        mediaItemId: item.id,
+      },
+      buildResultMessageData: (target, result, error) => {
+        if (error) {
+          return {
+            type: "error",
+            message: `Error resetting media item for ${target.title}: ${error.message}`,
+          };
+        }
+
+        if (result?.error) {
+          return {
+            type: "error",
+            message: `Error resetting media item for ${target.title}: ${result.error.message}`,
+          };
+        }
+
+        if (result?.data?.resetMediaItem) {
+          return {
+            type: "success",
+            message: `Successfully reset ${result.data.resetMediaItem.length.toString()} media item(s) for ${target.title}.`,
+          };
+        }
+
+        return {
+          type: "error",
+          message: `Unknown error resetting media item for ${target.title}.`,
         };
       },
     }),

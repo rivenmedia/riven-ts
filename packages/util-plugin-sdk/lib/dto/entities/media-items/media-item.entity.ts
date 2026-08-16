@@ -215,6 +215,10 @@ export abstract class MediaItem {
     this.scrapedAt = null;
     this.streams.removeAll();
     this.filesystemEntries.removeAll();
+
+    if (this.state === "failed") {
+      this.state = "indexed";
+    }
   }
 
   /**
