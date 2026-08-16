@@ -19,7 +19,7 @@ export function PageHeader({
     <TitledBox
       titles={[
         title,
-        ...(settings.RIVEN_TUI_SETTING__enableDebug ? [] : [pathname]),
+        ...(settings.RIVEN_TUI_SETTING__enableDebug ? [pathname] : []),
       ]}
       titleJustify="space-between"
       marginTop={-1}

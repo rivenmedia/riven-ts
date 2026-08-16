@@ -33,7 +33,7 @@ export function PageWrapper({
   return (
     <Box flexDirection="column" flexGrow={1}>
       <PageHeader title={header.title}>{header.content}</PageHeader>
-      {tabs && Object.keys(tabs).length > 0 && (
+      {tabs && Object.keys(tabs).length > 1 && (
         <Box
           paddingX={1}
           borderStyle="round"

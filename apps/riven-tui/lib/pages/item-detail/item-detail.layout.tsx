@@ -5,8 +5,9 @@ import { z } from "zod";
 
 import { useActionsMenuContext } from "../../ui/actions-menu/actions-menu-context.tsx";
 import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
+import { MediaItemStateBadge } from "../../ui/media-item-state-badge.tsx";
 import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
-import { StateBadge } from "../../ui/state-badge.tsx";
+import { SuspenseBoundary } from "../../ui/suspense-boundary.tsx";
 import { createAction } from "../../utilities/create-action.ts";
 import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
 import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
@@ -21,7 +22,6 @@ export function ItemDetailPageLayout() {
   const navigate = useNavigate();
 
   const {
-    refetch,
     data: { mediaItemById: item },
   } = useSuspenseQuery(GET_MEDIA_ITEM, {
     fetchPolicy: "network-only",
@@ -31,13 +31,7 @@ export function ItemDetailPageLayout() {
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 
   useInput(
-    (input, key) => {
-      if (input === "r") {
-        void refetch();
-
-        return;
-      }
-
+    (_input, key) => {
       if (key.escape) {
         void navigate(-1);
       }
@@ -132,7 +126,7 @@ export function ItemDetailPageLayout() {
     <PageWrapper
       header={{
         title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
-        content: <StateBadge state={item.state} />,
+        content: <MediaItemStateBadge state={item.state} />,
       }}
       footer={
         <Text dimColor>[a] actions · [r] refresh · [esc] back · [q] quit</Text>
@@ -145,7 +139,9 @@ export function ItemDetailPageLayout() {
       }}
       actions={<ActionsMenu actions={actions} target={target} />}
     >
-      <Outlet />
+      <SuspenseBoundary>
+        <Outlet />
+      </SuspenseBoundary>
     </PageWrapper>
   );
 }

@@ -1,5 +1,6 @@
 import {
   Episode,
+  ItemRequest,
   MediaItem,
   Movie,
   Stream,
@@ -168,5 +169,10 @@ export class MediaItemResolver {
   @FieldResolver(() => Stream)
   public async subtitles(@Root() mediaItem: MediaItem) {
     return mediaItem.subtitles.loadItems();
+  }
+
+  @FieldResolver(() => ItemRequest)
+  public async itemRequest(@Root() mediaItem: MediaItem) {
+    return mediaItem.itemRequest.loadOrFail();
   }
 }

@@ -24,19 +24,19 @@ const STATE_COLORS = {
   unreleased: "magenta",
 } as const satisfies Record<MediaItemState, string>;
 
-export interface StateBadgeProps {
+export interface MediaItemStateBadgeProps {
   state: MediaItemState;
 }
 
-export function stateLabel(state: MediaItemState): string {
+function stateLabel(state: MediaItemState): string {
   return STATE_LABELS[state];
 }
 
-export function stateColor(state: MediaItemState): string {
+function stateColor(state: MediaItemState): string {
   return STATE_COLORS[state];
 }
 
-export function StateBadge({ state }: StateBadgeProps) {
+export function MediaItemStateBadge({ state }: MediaItemStateBadgeProps) {
   return (
     <Text bold color={stateColor(state)}>
       {stateLabel(state)}

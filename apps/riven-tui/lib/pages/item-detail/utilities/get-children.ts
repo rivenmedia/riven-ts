@@ -1,4 +1,7 @@
-import type { MediaItemState } from "../../../types/__generated__/graphql.ts";
+import type {
+  MediaItemState,
+  MediaItemType,
+} from "../../../types/__generated__/graphql.ts";
 import type { RivenTuiGetMediaItemChildrenQuery } from "../queries/get-media-item-children.query.typegen.ts";
 
 export interface ChildItem {
@@ -6,7 +9,7 @@ export interface ChildItem {
   number: number;
   state: MediaItemState;
   title: string;
-  type: "Episode" | "Season";
+  type: MediaItemType;
 }
 
 /**
@@ -19,23 +22,11 @@ export function getChildren(
 ): ChildItem[] {
   switch (item.__typename) {
     case "Show": {
-      return item.seasons.map((season) => ({
-        id: season.id,
-        number: season.number,
-        state: season.state,
-        title: season.title,
-        type: "Season" as const,
-      }));
+      return item.seasons.map(({ __typename, ...season }) => season);
     }
 
     case "Season": {
-      return item.episodes.map((episode) => ({
-        id: episode.id,
-        number: episode.number,
-        state: episode.state,
-        title: episode.title,
-        type: "Episode" as const,
-      }));
+      return item.episodes.map(({ __typename, ...episode }) => episode);
     }
 
     case "Episode":

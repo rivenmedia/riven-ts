@@ -37,7 +37,7 @@ const DefaultErrorComponent = (
 };
 
 export interface SuspenseBoundaryProps {
-  onBack: () => void;
+  onBack?: () => void;
   loadingMessage?: string;
   errorMessage?: NonNullable<ErrorBoundaryProps["fallbackRender"]>;
 }
@@ -45,7 +45,13 @@ export interface SuspenseBoundaryProps {
 export function SuspenseBoundary({
   children,
   onBack,
-  errorMessage = DefaultErrorComponent.bind(null, onBack),
+  errorMessage = DefaultErrorComponent.bind(
+    null,
+    onBack ??
+      (() => {
+        /* empty */
+      }),
+  ),
   loadingMessage = "Loading",
 }: PropsWithChildren<SuspenseBoundaryProps>) {
   return (

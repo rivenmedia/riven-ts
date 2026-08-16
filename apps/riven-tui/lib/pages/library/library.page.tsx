@@ -3,9 +3,10 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
 import { useNavigate, useParams } from "react-router";
 
+import { ItemRequestStateBadge } from "../../ui/item-request-state-badge.tsx";
+import { MediaItemStateBadge } from "../../ui/media-item-state-badge.tsx";
 import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
-import { StateBadge } from "../../ui/state-badge.tsx";
 
 import type { MediaItemType } from "../../types/__generated__/graphql.ts";
 import type {
@@ -18,15 +19,15 @@ const GET_LIBRARY_ITEMS: TypedDocumentNode<
   GetLibraryItemsQuery,
   GetLibraryItemsQueryVariables
 > = gql`
-  query GetLibraryItems(
-    $type: [MediaItemType!]!
-    $includeUnrequestedItems: Boolean = false
-  ) {
-    mediaItems(type: $type, includeUnrequestedItems: $includeUnrequestedItems) {
+  query GetLibraryItems($type: [MediaItemType!]!) {
+    mediaItems(type: $type) {
       ... on MediaItem {
         id
         fullTitle
         state
+        itemRequest {
+          state
+        }
       }
     }
   }
@@ -43,7 +44,6 @@ export function LibraryScreen() {
     fetchPolicy: "network-only",
     variables: {
       type: params.type ? [params.type] : ["movie", "show"],
-      includeUnrequestedItems: false,
     },
   });
 
@@ -92,7 +92,9 @@ export function LibraryScreen() {
               <Box>
                 <Text>{item.__typename}</Text>
                 <Text> · </Text>
-                <StateBadge state={item.state} />
+                <ItemRequestStateBadge state={item.itemRequest.state} />
+                <Text> · </Text>
+                <MediaItemStateBadge state={item.state} />
               </Box>
             </Box>
           )}

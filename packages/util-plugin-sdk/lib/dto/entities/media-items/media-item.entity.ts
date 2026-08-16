@@ -177,7 +177,7 @@ export abstract class MediaItem {
   @OneToMany(() => BlacklistedStream, "mediaItem")
   public blacklistedStreams = new Collection<BlacklistedStream>(this);
 
-  @Field(() => String)
+  @Field(() => MediaItemType.enum)
   @Enum(() => MediaItemType.enum)
   public type!: MediaItemType;
 
@@ -187,6 +187,7 @@ export abstract class MediaItem {
   })
   public itemRequest!: Ref<ItemRequest>;
 
+  @Field(() => Boolean)
   @Property()
   public isRequested!: boolean;
 

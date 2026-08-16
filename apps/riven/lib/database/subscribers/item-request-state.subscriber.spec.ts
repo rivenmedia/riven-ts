@@ -67,13 +67,23 @@ describe("onFlush", () => {
       );
     });
 
-    it("sets the item request state to 'ongoing' for a continuing show, regardless of its media state", async ({
+    it("sets the item request state to 'ongoing' for a continuing show if the state is not 'unreleased'", async ({
       seeders: { seedOngoingShow },
     }) => {
       const { show } = await seedOngoingShow();
 
       await expect(show.itemRequest.loadProperty("state")).resolves.toBe(
         "ongoing",
+      );
+    });
+
+    it("does not set the item request state to 'ongoing' for a continuing show if the state is 'unreleased'", async ({
+      seeders: { seedUnreleasedShow },
+    }) => {
+      const { show } = await seedUnreleasedShow();
+
+      await expect(show.itemRequest.loadProperty("state")).resolves.toBe(
+        "unreleased",
       );
     });
 

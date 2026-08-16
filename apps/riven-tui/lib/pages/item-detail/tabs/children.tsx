@@ -1,12 +1,12 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text } from "ink";
+import { Box, Text, useInput } from "ink";
 import { useNavigate, useParams } from "react-router";
 import z from "zod";
 
 import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
+import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
 import { SelectList } from "../../../ui/select-list.tsx";
 import { SelectableRow } from "../../../ui/selectable-row.tsx";
-import { StateBadge } from "../../../ui/state-badge.tsx";
 import { GET_MEDIA_ITEM_CHILDREN } from "../queries/get-media-item-children.query.ts";
 import { getChildren } from "../utilities/get-children.ts";
 
@@ -17,11 +17,21 @@ export function ItemDetailChildrenTab() {
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 
   const {
+    refetch,
     data: { mediaItemById: item },
   } = useSuspenseQuery(GET_MEDIA_ITEM_CHILDREN, {
     fetchPolicy: "network-only",
     variables: { mediaItemId: id },
   });
+
+  useInput(
+    (input) => {
+      if (input === "r") {
+        void refetch();
+      }
+    },
+    { isActive: !isActionsMenuVisible },
+  );
 
   const childItems = getChildren(item);
 
@@ -42,10 +52,10 @@ export function ItemDetailChildrenTab() {
           isActive={!isActionsMenuVisible}
           renderItem={(child, isSelected) => (
             <SelectableRow isSelected={isSelected}>
-              {child.type === "Season"
+              {child.type === "season"
                 ? `Season ${child.number.toString()}`
                 : `Episode ${child.number.toString()}`}{" "}
-              — {child.title} <StateBadge state={child.state} />
+              — {child.title} <MediaItemStateBadge state={child.state} />
             </SelectableRow>
           )}
         />

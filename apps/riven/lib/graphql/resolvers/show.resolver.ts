@@ -8,8 +8,8 @@ export class ShowResolver {
   public async seasons(
     @Root() show: Show,
     @Arg("includeUnrequestedSeasons", () => Boolean, { defaultValue: false })
-    @Arg("includeSpecials", () => Boolean, { defaultValue: false })
     includeUnrequestedSeasons: boolean,
+    @Arg("includeSpecials", () => Boolean, { defaultValue: false })
     includeSpecials: boolean,
   ) {
     return show.seasons.matching({

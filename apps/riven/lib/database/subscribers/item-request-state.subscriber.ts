@@ -18,7 +18,11 @@ export class ItemRequestStateSubscriber implements EventSubscriber<
   async #calculateItemRequestState(
     entity: Movie | Show,
   ): Promise<ItemRequestState> {
-    if (entity instanceof Show && entity.status === "continuing") {
+    if (
+      entity instanceof Show &&
+      entity.state !== "unreleased" &&
+      entity.status === "continuing"
+    ) {
       return "ongoing";
     }
 
