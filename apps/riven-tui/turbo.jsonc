@@ -6,7 +6,7 @@
     "codegen:gql": {
       "dependsOn": [
         "$TURBO_EXTENDS$",
-        // "^codegen:gql-schema",
+        "@repo/riven#codegen:gql-schema",
         "transit:source-files"
       ],
       "inputs": [
