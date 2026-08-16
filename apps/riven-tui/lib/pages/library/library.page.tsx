@@ -1,11 +1,13 @@
 import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
+import { useNavigate, useParams } from "react-router";
 
 import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SelectList } from "../../ui/select-list.tsx";
 import { StateBadge } from "../../ui/state-badge.tsx";
 
+import type { MediaItemType } from "../../types/__generated__/graphql.ts";
 import type {
   GetLibraryItemsQuery,
   GetLibraryItemsQueryVariables,
@@ -30,15 +32,17 @@ const GET_LIBRARY_ITEMS: TypedDocumentNode<
   }
 `;
 
-export interface LibraryScreenProps {
-  onSelectItem: (id: string) => void;
-}
+export function LibraryScreen() {
+  const params = useParams<{
+    type?: Extract<MediaItemType, "movie" | "show">;
+  }>();
 
-export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
+  const navigate = useNavigate();
+
   const { refetch, data } = useSuspenseQuery(GET_LIBRARY_ITEMS, {
     fetchPolicy: "network-only",
     variables: {
-      type: ["movie", "show"],
+      type: params.type ? [params.type] : ["movie", "show"],
       includeUnrequestedItems: false,
     },
   });
@@ -65,13 +69,18 @@ export function LibraryScreen({ onSelectItem }: LibraryScreenProps) {
           [↑/↓] navigate · [enter] view · [r] refresh · [q] quit
         </Text>
       }
+      tabs={{
+        All: "/library",
+        Movies: "/library/type/movie",
+        Shows: "/library/type/show",
+      }}
     >
-      <Box flexDirection="column" maxWidth={80}>
+      <Box flexDirection="column">
         <SelectList
           items={data.mediaItems}
           getKey={(item) => item.id}
           onSelect={(item) => {
-            onSelectItem(item.id);
+            void navigate(`/item/${item.id}`);
           }}
           emptyMessage="Your library is empty."
           renderItem={(item, isSelected) => (

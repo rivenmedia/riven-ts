@@ -74,6 +74,7 @@ export function ActionsMenu({ actions, target }: ActionsMenuProps) {
   return (
     <TitledBox
       borderStyle="round"
+      borderDimColor
       flexDirection="column"
       paddingX={1}
       titles={["Actions"]}

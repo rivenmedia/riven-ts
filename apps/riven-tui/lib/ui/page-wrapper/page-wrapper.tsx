@@ -1,7 +1,9 @@
 import { Box } from "ink";
+import { useNavigate } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
 import { ScrollArea } from "../scroll-area/scroll-area.tsx";
+import { TabBar } from "../tab-bar/tab-bar.tsx";
 import { PageFooter } from "./components/page-footer.tsx";
 import { PageHeader } from "./components/page-header.tsx";
 
@@ -15,20 +17,44 @@ interface PageWrapperProps {
   };
   footer?: ReactNode;
   actions?: ReactNode;
+  tabs?: Record<string, string>;
 }
 
 export function PageWrapper({
   children,
   header,
   footer,
+  tabs,
   actions,
 }: PropsWithChildren<PageWrapperProps>) {
   const { isVisible: showActions } = useActionsMenuContext();
+  const navigate = useNavigate();
 
   return (
     <Box flexDirection="column" flexGrow={1}>
       <PageHeader title={header.title}>{header.content}</PageHeader>
-      <Box flexDirection="column" flexGrow={1} padding={1}>
+      {tabs && Object.keys(tabs).length > 0 && (
+        <Box
+          paddingX={1}
+          borderStyle="round"
+          borderDimColor
+          borderTop={false}
+          borderLeft={false}
+          borderRight={false}
+        >
+          <TabBar
+            items={tabs}
+            onChange={(name) => {
+              if (!tabs[name]) {
+                throw new Error(`Could not find tab with name "${name}"`);
+              }
+
+              void navigate(tabs[name]);
+            }}
+          />
+        </Box>
+      )}
+      <Box flexDirection="column" flexGrow={1} padding={1} paddingTop={0}>
         <ScrollArea>{children}</ScrollArea>
       </Box>
       {showActions && actions}

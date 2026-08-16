@@ -11,12 +11,12 @@ import type { PropsWithChildren } from "react";
 
 export function Providers({ children }: PropsWithChildren) {
   const client = useMemo(
-    () => createGraphqlClient({ uri: settings.graphqlUrl }),
+    () => createGraphqlClient({ uri: settings.RIVEN_TUI_SETTING__graphqlUrl }),
     [],
   );
 
   return (
-    <MemoryRouter>
+    <MemoryRouter initialEntries={["/library"]}>
       <ApolloProvider client={client}>
         <InkPictureProvider>
           <ActionsMenuProvider>{children}</ActionsMenuProvider>

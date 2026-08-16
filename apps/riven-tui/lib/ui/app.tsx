@@ -1,7 +1,8 @@
 import { useApp, useInput } from "ink";
 import { Route, Routes, useNavigate } from "react-router";
 
-import { ItemDetailScreen } from "../pages/item-detail/item-detail.page.tsx";
+import { ItemDetailPageLayout } from "../pages/item-detail/item-detail.layout.tsx";
+import { ItemDetailOverviewTab } from "../pages/item-detail/tabs/overview.tsx";
 import { LibraryScreen } from "../pages/library/library.page.tsx";
 import { Screen } from "./screen.tsx";
 import { SuspenseBoundary } from "./suspense-boundary.tsx";
@@ -24,29 +25,12 @@ export function App() {
     >
       <Screen>
         <Routes>
-          <Route
-            path="/"
-            element={
-              <LibraryScreen
-                onSelectItem={(id) => {
-                  void navigate(`/item/${id}`);
-                }}
-              />
-            }
-          />
-          <Route
-            path="/item/:id"
-            element={
-              <ItemDetailScreen
-                onBack={() => {
-                  void navigate(-1);
-                }}
-                onSelectChild={(id) => {
-                  void navigate(`/item/${id}`);
-                }}
-              />
-            }
-          />
+          <Route path="library" element={<LibraryScreen />}>
+            <Route path="type/:type" element={<LibraryScreen />} />
+          </Route>
+          <Route path="item/:id" element={<ItemDetailPageLayout />}>
+            <Route index element={<ItemDetailOverviewTab />} />
+          </Route>
         </Routes>
       </Screen>
     </SuspenseBoundary>

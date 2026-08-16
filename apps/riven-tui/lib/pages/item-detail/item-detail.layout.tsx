@@ -1,0 +1,148 @@
+import { useSuspenseQuery } from "@apollo/client/react";
+import { Text, useInput } from "ink";
+import { Outlet, useNavigate, useParams } from "react-router";
+import { z } from "zod";
+
+import { useActionsMenuContext } from "../../ui/actions-menu/actions-menu-context.tsx";
+import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
+import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
+import { StateBadge } from "../../ui/state-badge.tsx";
+import { createAction } from "../../utilities/create-action.ts";
+import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
+import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
+import { REMOVE_ITEM_REQUEST } from "./queries/remove-item-request.mutation.ts";
+import { getActionsFor } from "./utilities/get-actions-for.ts";
+
+import type { ActionTarget, ItemAction } from "../../types/actions.ts";
+
+export function ItemDetailPageLayout() {
+  const params = useParams<"id">();
+  const id = z.string().parse(params.id);
+  const navigate = useNavigate();
+
+  const {
+    refetch,
+    data: { mediaItemById: item },
+  } = useSuspenseQuery(GET_MEDIA_ITEM, {
+    fetchPolicy: "network-only",
+    variables: { mediaItemId: id },
+  });
+
+  const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
+
+  useInput(
+    (input, key) => {
+      if (input === "r") {
+        void refetch();
+
+        return;
+      }
+
+      if (key.escape) {
+        void navigate(-1);
+      }
+    },
+    { isActive: !isActionsMenuVisible },
+  );
+
+  const rawActions = [
+    createAction(BLACKLIST_ACTIVE_STREAM, {
+      appliesTo: ["Movie", "Show", "Season", "Episode"],
+      id: "blacklist-active-stream",
+      label: "Blacklist active stream",
+      description:
+        "Blacklist the currently active stream and search for a replacement.",
+      variables: {
+        mediaItemId: item.id,
+      },
+      buildResultMessageData: (target, result, error) => {
+        if (error) {
+          return {
+            type: "error",
+            message: `Error blacklisting active stream for ${target.title}: ${error.message}`,
+          };
+        }
+
+        if (result?.error) {
+          return {
+            type: "error",
+            message: `Error blacklisting active stream for ${target.title}: ${result.error.message}`,
+          };
+        }
+
+        if (result?.data?.blacklistActiveStream) {
+          return {
+            type: "success",
+            message: `Successfully blacklisted active stream for ${target.title}.`,
+          };
+        }
+
+        return {
+          type: "error",
+          message: `Unknown error blacklisting active stream for ${target.title}.`,
+        };
+      },
+    }),
+    createAction(REMOVE_ITEM_REQUEST, {
+      appliesTo: ["Movie", "Show"],
+      id: "remove-request",
+      label: "Remove request",
+      description: "Remove the item request, halting further processing.",
+      variables: {
+        itemRequestId: item.itemRequest.id,
+      },
+      buildResultMessageData: (target, result, error) => {
+        if (error) {
+          return {
+            type: "error",
+            message: `Error removing request for ${target.title}: ${error.message}`,
+          };
+        }
+
+        if (result?.error) {
+          return {
+            type: "error",
+            message: `Error removing request for ${target.title}: ${result.error.message}`,
+          };
+        }
+
+        if (result?.data?.removeItemRequest) {
+          return {
+            type: "success",
+            message: `Successfully removed request for ${target.title}.`,
+          };
+        }
+
+        return {
+          type: "error",
+          message: `Unknown error removing request for ${target.title}.`,
+        };
+      },
+    }),
+  ] satisfies readonly ItemAction[];
+
+  const actions = getActionsFor(rawActions, item.__typename);
+  const target = {
+    id: item.id,
+    title: item.fullTitle,
+    type: item.__typename,
+  } satisfies ActionTarget;
+
+  return (
+    <PageWrapper
+      header={{
+        title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
+        content: <StateBadge state={item.state} />,
+      }}
+      footer={
+        <Text dimColor>[a] actions · [r] refresh · [esc] back · [q] quit</Text>
+      }
+      tabs={{
+        Overview: `/item/${item.id}`,
+      }}
+      actions={<ActionsMenu actions={actions} target={target} />}
+    >
+      <Outlet />
+    </PageWrapper>
+  );
+}
