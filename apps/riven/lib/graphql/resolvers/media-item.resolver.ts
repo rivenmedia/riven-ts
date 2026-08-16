@@ -59,7 +59,7 @@ export class MediaItemResolver {
       },
       {
         orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
-        limit: 25,
+        // limit: 25,
         overfetch: true,
       },
     );
