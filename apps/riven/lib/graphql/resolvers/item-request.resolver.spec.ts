@@ -221,6 +221,7 @@ describe("removeItemRequest", () => {
       expect(gqlContext[CoreKey].sendEvent).toHaveBeenCalledWith({
         type: "riven.item-request.removed",
         item: expect.objectContaining({ id: completedMovie.itemRequest.id }),
+        title: completedMovie.title,
       });
     });
 
@@ -282,7 +283,7 @@ describe("removeItemRequest", () => {
       expect(sendEventSpy).toHaveBeenCalledTimes(0);
     });
 
-    it("returns false", async ({
+    it("throws the error", async ({
       completedMovieContext: { completedMovie },
       gqlContext,
       gqlServer,
@@ -302,7 +303,9 @@ describe("removeItemRequest", () => {
 
       expect.assert(body.kind === "single");
 
-      expect(body.singleResult.data?.removeItemRequest).toBe(false);
+      expect(body.singleResult.errors?.[0]?.message).toBe(
+        "Failed to remove item request",
+      );
     });
   });
 });
