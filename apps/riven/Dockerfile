@@ -204,6 +204,8 @@ FROM node:${NODE_VERSION}-alpine AS runner
     COPY --from=production-deploy ${HOME}/pruned .
     COPY --from=production-deploy-tui ${HOME}/pruned ./tui
 
+    RUN echo 'alias riven-tui="node $HOME/tui/dist/cli.js"' >> ~/.bashrc
+
     ENV NODE_ENV=production
 
     CMD ["node", "--conditions=production", "--enable-source-maps", "dist/lib/index.js"]
