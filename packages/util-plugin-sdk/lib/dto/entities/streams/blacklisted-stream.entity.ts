@@ -11,11 +11,11 @@ export class BlacklistedStream {
   public [PrimaryKeyProp]?: ["mediaItem", "stream", "plugin", "provider"];
 
   @Field(() => Stream)
-  @ManyToOne({ primary: true })
+  @ManyToOne({ primary: true, deleteRule: "cascade" })
   public stream!: Stream;
 
   @Field(() => MediaItem)
-  @ManyToOne({ primary: true })
+  @ManyToOne({ primary: true, deleteRule: "cascade" })
   public mediaItem!: MediaItem;
 
   @Field(() => String, { nullable: true })

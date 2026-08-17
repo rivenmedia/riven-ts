@@ -2,9 +2,10 @@ import {
   ShowLikeMediaItem,
   FileSystemEntry,
   Stream,
+  BlacklistedStream,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { NotFoundError } from "@mikro-orm/core";
+import { NotFoundError, ref } from "@mikro-orm/core";
 import { describe, expect } from "vitest";
 
 import { it } from "../../../../__tests__/test-context.ts";
@@ -58,6 +59,35 @@ describe(`when the media item is a movie`, () => {
         parents: { id: completedMovie.id },
       }),
     ).resolves.toHaveLength(0);
+  });
+
+  it("removes all blacklisted streams for the movie", async ({
+    em,
+    services,
+    completedMovieContext: { completedMovie },
+  }) => {
+    const [mediaEntry] = await completedMovie.getMediaEntries();
+
+    expect.assert(mediaEntry);
+
+    const { blacklistedItems } =
+      await services.streamService.blacklistActiveStream({
+        mediaItem: completedMovie,
+        plugin: mediaEntry.plugin,
+        provider: mediaEntry.provider,
+      });
+
+    await expect(
+      em.count(BlacklistedStream, { mediaItem: { $in: blacklistedItems } }),
+    ).resolves.toBe(1);
+
+    await services.itemRequestService.removeItemRequest(
+      completedMovie.itemRequest,
+    );
+
+    await expect(
+      em.count(BlacklistedStream, { mediaItem: { $in: blacklistedItems } }),
+    ).resolves.toBe(0);
   });
 
   it("removes all filesystem entries for the movie", async ({
@@ -163,6 +193,62 @@ describe(`when the media item is a show`, () => {
         parents: { id: completedShow.id },
       }),
     ).resolves.toHaveLength(0);
+  });
+
+  it("removes all blacklisted streams for the show", async ({
+    em,
+    services,
+    completedShowContext: {
+      completedShow,
+      streams: [activeStream],
+    },
+  }) => {
+    expect.assert(activeStream);
+
+    const activeStreamRef = ref(activeStream);
+
+    completedShow.activeStream = activeStreamRef;
+
+    for (const season of completedShow.seasons) {
+      season.activeStream = activeStreamRef;
+
+      for (const episode of season.episodes) {
+        episode.activeStream = activeStreamRef;
+      }
+    }
+
+    await em.flush();
+
+    const [mediaEntry] = await completedShow.getMediaEntries();
+
+    expect.assert(mediaEntry);
+
+    const { blacklistedItems } =
+      await services.streamService.blacklistActiveStream({
+        mediaItem: completedShow,
+        plugin: mediaEntry.plugin,
+        provider: mediaEntry.provider,
+      });
+
+    await expect(
+      em.count(BlacklistedStream, {
+        mediaItem: {
+          $in: blacklistedItems,
+        },
+      }),
+    ).resolves.toBe(67);
+
+    await services.itemRequestService.removeItemRequest(
+      completedShow.itemRequest,
+    );
+
+    await expect(
+      em.count(BlacklistedStream, {
+        mediaItem: {
+          $in: blacklistedItems,
+        },
+      }),
+    ).resolves.toBe(0);
   });
 
   it("removes all streams for the show's seasons", async ({
