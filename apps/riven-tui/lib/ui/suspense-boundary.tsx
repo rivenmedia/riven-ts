@@ -79,20 +79,7 @@ export function SuspenseBoundary({
 }: PropsWithChildren<SuspenseBoundaryProps>) {
   return (
     <ErrorBoundary FallbackComponent={errorMessage}>
-      <Suspense
-        fallback={
-          <Box
-            alignContent="center"
-            justifyContent="center"
-            alignSelf="center"
-            flexGrow={1}
-            alignItems="center"
-            height="100%"
-          >
-            <LoadingIndicator label={loadingMessage} />
-          </Box>
-        }
-      >
+      <Suspense fallback={<LoadingIndicator label={loadingMessage} />}>
         {children}
       </Suspense>
     </ErrorBoundary>

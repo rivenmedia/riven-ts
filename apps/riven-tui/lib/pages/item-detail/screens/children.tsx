@@ -54,7 +54,11 @@ export function ItemDetailChildrenTab() {
               {child.type === "season"
                 ? `Season ${child.number.toString()}`
                 : `Episode ${child.number.toString()}`}{" "}
-              — {child.title} <MediaItemStateBadge state={child.state} />
+              — {child.title}{" "}
+              <MediaItemStateBadge
+                isRequested={child.isRequested}
+                state={child.state}
+              />
             </SelectableRow>
           )}
         />

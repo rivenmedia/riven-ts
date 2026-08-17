@@ -29,28 +29,26 @@ export function LibraryScreenIndexScreen() {
   });
 
   return (
-    <Box flexDirection="column">
-      <SelectList
-        items={data.mediaItems}
-        getKey={(item) => item.id}
-        onSelect={(item) => {
-          void navigate(`/item/${item.id}`);
-        }}
-        emptyMessage="Your library is empty."
-        renderItem={(item, isSelected) => (
-          <Box width="100%" justifyContent="space-between">
-            <Text color={isSelected ? "cyan" : "white"}>
-              {isSelected ? "❯ " : "  "}
-              {item.fullTitle}
-            </Text>
-            <Box>
-              <Text>{item.__typename}</Text>
-              <Text> · </Text>
-              <MediaItemStateBadge state={item.state} />
-            </Box>
+    <SelectList
+      items={data.mediaItems}
+      getKey={(item) => item.id}
+      onSelect={(item) => {
+        void navigate(`/item/${item.id}`);
+      }}
+      emptyMessage="Your library is empty."
+      renderItem={(item, isSelected) => (
+        <Box width="100%" justifyContent="space-between">
+          <Text color={isSelected ? "cyan" : "white"}>
+            {isSelected ? "❯ " : "  "}
+            {item.fullTitle}
+          </Text>
+          <Box>
+            <Text>{item.__typename}</Text>
+            <Text> · </Text>
+            <MediaItemStateBadge state={item.state} />
           </Box>
-        )}
-      />
-    </Box>
+        </Box>
+      )}
+    />
   );
 }

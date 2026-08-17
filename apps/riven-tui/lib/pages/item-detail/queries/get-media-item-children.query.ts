@@ -12,13 +12,10 @@ export const GET_MEDIA_ITEM_CHILDREN: TypedDocumentNode<
 > = gql`
   query RivenTuiGetMediaItemChildren($mediaItemId: ID!) {
     mediaItemById(id: $mediaItemId) {
-      ... on MediaItem {
-        isRequested
-      }
-
       ... on Show {
         seasons(includeUnrequestedSeasons: true) {
           id
+          isRequested
           title
           number
           state
@@ -29,6 +26,7 @@ export const GET_MEDIA_ITEM_CHILDREN: TypedDocumentNode<
       ... on Season {
         episodes {
           id
+          isRequested
           number
           state
           title

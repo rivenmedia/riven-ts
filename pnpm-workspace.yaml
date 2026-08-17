@@ -113,6 +113,7 @@ catalog:
   oxlint-tsgolint: ^0.25.0
   postcss: ^8.5.26
   react: ^19.2.6
+  react-devtools-core: ^7.0.1
   react-dom: ^19.2.6
   react-error-boundary: ^6.1.2
   react-router: ^8.3.0

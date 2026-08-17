@@ -333,6 +333,9 @@ catalogs:
     react:
       specifier: ^19.2.6
       version: 19.2.6
+    react-devtools-core:
+      specifier: ^7.0.1
+      version: 7.0.1
     react-dom:
       specifier: ^19.2.6
       version: 19.2.6
@@ -750,34 +753,34 @@ importers:
         version: 4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(rxjs@7.8.2)
       '@inkjs/ui':
         specifier: 'catalog:'
-        version: 2.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))
+        version: 2.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))
       '@mishieck/ink-titled-box':
         specifier: 'catalog:'
-        version: 0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)
+        version: 0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
       fullscreen-ink:
         specifier: 'catalog:'
-        version: 0.1.0(@types/react@19.2.15)(react-devtools-core@6.1.5)
+        version: 0.1.0(@types/react@19.2.15)(react-devtools-core@7.0.1)
       graphql:
         specifier: 'catalog:'
         version: 16.14.0
       ink:
         specifier: 'catalog:'
-        version: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+        version: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       ink-link:
         specifier: 'catalog:'
-        version: 5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))
+        version: 5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))
       ink-picture:
         specifier: 'catalog:'
-        version: 2.1.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)
+        version: 2.1.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
       ink-spinner:
         specifier: 'catalog:'
-        version: 5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)
+        version: 5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
       ink-syntax-highlight:
         specifier: 'catalog:'
-        version: 2.0.2(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)
+        version: 2.0.2(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
       ink-tab:
         specifier: 'catalog:'
-        version: 5.2.0(@types/react@19.2.15)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)
+        version: 5.2.0(@types/react@19.2.15)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
       json-stringify-pretty-compact:
         specifier: 'catalog:'
         version: 4.0.0
@@ -845,6 +848,9 @@ importers:
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
+      react-devtools-core:
+        specifier: 'catalog:'
+        version: 7.0.1
       typescript:
         specifier: 'catalog:'
         version: '@typescript/typescript6@6.0.2'
@@ -9466,6 +9472,9 @@ packages:
   react-devtools-core@6.1.5:
     resolution: {integrity: sha512-ePrwPfxAnB+7hgnEr8vpKxL9cmnp7F322t8oqcPshbIQQhDKgFDW4tjhF2wjVbdXF9O/nyuy3sQWd9JGpiLPvA==}
 
+  react-devtools-core@7.0.1:
+    resolution: {integrity: sha512-C3yNvRHaizlpiASzy7b9vbnBGLrhvdhl1CbdU6EnZgxPNbai60szdLtl+VL76UNOt5bOoVTOz5rNWZxgGt+Gsw==}
+
   react-dom@19.2.6:
     resolution: {integrity: sha512-0prMI+hvBbPjsWnxDLxlCGyM8PN6UuWjEUCYmZhO67xIV9Xasa/r/vDnq+Xyq4Lo27g8QSbO5YzARu0D1Sps3g==}
     peerDependencies:
@@ -12185,13 +12194,13 @@ snapshots:
   '@img/sharp-win32-x64@0.35.3':
     optional: true
 
-  '@inkjs/ui@2.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))':
+  '@inkjs/ui@2.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))':
     dependencies:
       chalk: 5.6.2
       cli-spinners: 3.4.0
       deepmerge: 4.3.1
       figures: 6.1.0
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
 
   '@inquirer/ansi@1.0.2': {}
 
@@ -12831,9 +12840,9 @@ snapshots:
       better-sqlite3: 12.10.0
       kysely: 0.29.2
 
-  '@mishieck/ink-titled-box@0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6)':
+  '@mishieck/ink-titled-box@0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)':
     dependencies:
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       react: 19.2.6
       typescript: '@typescript/typescript6@6.0.2'
 
@@ -15995,9 +16004,9 @@ snapshots:
   fsevents@2.3.3:
     optional: true
 
-  fullscreen-ink@0.1.0(@types/react@19.2.15)(react-devtools-core@6.1.5):
+  fullscreen-ink@0.1.0(@types/react@19.2.15)(react-devtools-core@7.0.1):
     dependencies:
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       react: 19.2.6
     transitivePeerDependencies:
       - '@types/react'
@@ -16570,15 +16579,15 @@ snapshots:
 
   ini@6.0.0: {}
 
-  ink-link@5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)):
+  ink-link@5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)):
     dependencies:
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       terminal-link: 5.0.0
 
-  ink-picture@2.1.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6):
+  ink-picture@2.1.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6):
     dependencies:
       chalk: 5.6.2
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       is-unicode-supported: 2.1.0
       iterm2-version: 6.0.0
       jimp: 1.6.1(supports-color@10.2.2)
@@ -16587,21 +16596,21 @@ snapshots:
       sixel: 0.16.0
       supports-color: 10.2.2
 
-  ink-spinner@5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6):
+  ink-spinner@5.0.0(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6):
     dependencies:
       cli-spinners: 2.9.2
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       react: 19.2.6
 
-  ink-syntax-highlight@2.0.2(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6):
+  ink-syntax-highlight@2.0.2(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6):
     dependencies:
       cli-highlight: 2.1.11
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       react: 19.2.6
 
-  ink-tab@5.2.0(@types/react@19.2.15)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6))(react@19.2.6):
+  ink-tab@5.2.0(@types/react@19.2.15)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6):
     dependencies:
-      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6)
+      ink: 7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6)
       react: 19.2.6
     optionalDependencies:
       '@types/react': 19.2.15
@@ -16610,7 +16619,7 @@ snapshots:
     optionalDependencies:
       '@types/react': 19.2.15
 
-  ink@7.1.1(@types/react@19.2.15)(react-devtools-core@6.1.5)(react@19.2.6):
+  ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6):
     dependencies:
       '@alcalzone/ansi-tokenize': 0.3.0
       ansi-escapes: 7.3.0
@@ -16640,7 +16649,7 @@ snapshots:
       yoga-layout: 3.2.1
     optionalDependencies:
       '@types/react': 19.2.15
-      react-devtools-core: 6.1.5
+      react-devtools-core: 7.0.1
     transitivePeerDependencies:
       - bufferutil
       - utf-8-validate
@@ -18507,6 +18516,14 @@ snapshots:
       strip-json-comments: 2.0.1
 
   react-devtools-core@6.1.5:
+    dependencies:
+      shell-quote: 1.10.0
+      ws: 7.5.13
+    transitivePeerDependencies:
+      - bufferutil
+      - utf-8-validate
+
+  react-devtools-core@7.0.1:
     dependencies:
       shell-quote: 1.10.0
       ws: 7.5.13

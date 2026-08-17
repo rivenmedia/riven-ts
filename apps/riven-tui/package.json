@@ -55,6 +55,7 @@
     "@typescript/native": "catalog:",
     "ink-testing-library": "catalog:",
     "oxlint": "catalog:",
+    "react-devtools-core": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
     "vitest": "catalog:"

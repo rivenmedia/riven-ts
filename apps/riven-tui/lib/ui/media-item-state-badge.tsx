@@ -1,6 +1,7 @@
 import { Text } from "ink";
 
 import type { MediaItemState } from "../types/__generated__/graphql.ts";
+import type { TextProps } from "ink";
 
 const STATE_LABELS = {
   completed: "Completed",
@@ -22,24 +23,42 @@ const STATE_COLORS = {
   paused: "gray",
   scraped: "blue",
   unreleased: "magenta",
-} as const satisfies Record<MediaItemState, string>;
+} as const satisfies Record<MediaItemState, TextProps["color"]>;
 
-export interface MediaItemStateBadgeProps {
-  state: MediaItemState;
-}
+function stateLabel(
+  state: MediaItemState,
+  isRequested: boolean | undefined,
+): string {
+  if (isRequested === false) {
+    return "Unrequested";
+  }
 
-function stateLabel(state: MediaItemState): string {
   return STATE_LABELS[state];
 }
 
-function stateColor(state: MediaItemState): string {
+function stateColor(
+  state: MediaItemState,
+  isRequested: boolean | undefined,
+): NonNullable<TextProps["color"]> {
+  if (isRequested === false) {
+    return "gray";
+  }
+
   return STATE_COLORS[state];
 }
 
-export function MediaItemStateBadge({ state }: MediaItemStateBadgeProps) {
+export interface MediaItemStateBadgeProps {
+  state: MediaItemState;
+  isRequested?: boolean | undefined;
+}
+
+export function MediaItemStateBadge({
+  state,
+  isRequested,
+}: MediaItemStateBadgeProps) {
   return (
-    <Text bold color={stateColor(state)}>
-      {stateLabel(state)}
+    <Text bold color={stateColor(state, isRequested)}>
+      {stateLabel(state, isRequested)}
     </Text>
   );
 }

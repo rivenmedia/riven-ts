@@ -10,6 +10,7 @@ export interface ChildItem {
   state: MediaItemState;
   title: string;
   type: MediaItemType;
+  isRequested: boolean;
 }
 
 /**
