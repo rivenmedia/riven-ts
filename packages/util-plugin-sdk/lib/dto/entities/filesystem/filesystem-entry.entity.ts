@@ -7,11 +7,10 @@ import {
   Property,
 } from "@mikro-orm/decorators/legacy";
 import { IsPositive } from "class-validator";
-import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { Field, Float, ID, InterfaceType } from "type-graphql";
+import { Field, ID, InterfaceType } from "type-graphql";
 import z from "zod";
 
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
