@@ -1,4 +1,4 @@
-import { Box, Text, useInput } from "ink";
+import { Box, Newline, Text, useInput } from "ink";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -12,9 +12,14 @@ const DefaultErrorComponent = (
   { error, resetErrorBoundary }: FallbackProps,
 ) => {
   const message = error instanceof Error ? error.message : String(error);
+  const stack = error instanceof Error ? error.stack : String(error);
+  const cause =
+    error instanceof Error && error.cause instanceof Error
+      ? error.cause
+      : undefined;
 
   useInput((input, key) => {
-    if (input === "r") {
+    if (input.toLowerCase() === "r") {
       resetErrorBoundary();
     }
 
@@ -25,14 +30,32 @@ const DefaultErrorComponent = (
   });
 
   return (
-    <>
+    <Box flexDirection="column" margin={1}>
       <Box>
         <Text color="red">Error: {message}</Text>
       </Box>
+      {cause && (
+        <Box marginTop={1}>
+          <Text dimColor>
+            Cause:
+            <Newline />
+            {cause.message}
+          </Text>
+        </Box>
+      )}
+      {stack && (
+        <Box marginTop={1}>
+          <Text dimColor>
+            Stack:
+            <Newline />
+            {stack}
+          </Text>
+        </Box>
+      )}
       <Box marginTop={1}>
         <Text dimColor>r retry · esc back</Text>
       </Box>
-    </>
+    </Box>
   );
 };
 
@@ -58,7 +81,14 @@ export function SuspenseBoundary({
     <ErrorBoundary FallbackComponent={errorMessage}>
       <Suspense
         fallback={
-          <Box margin={1}>
+          <Box
+            alignContent="center"
+            justifyContent="center"
+            alignSelf="center"
+            flexGrow={1}
+            alignItems="center"
+            height="100%"
+          >
             <LoadingIndicator label={loadingMessage} />
           </Box>
         }

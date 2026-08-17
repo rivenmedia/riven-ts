@@ -7,6 +7,7 @@ import { TabBar } from "../tab-bar/tab-bar.tsx";
 import { PageFooter } from "./components/page-footer.tsx";
 import { PageHeader } from "./components/page-header.tsx";
 
+import type { TabBarProps } from "../tab-bar/tab-bar.tsx";
 import type { PropsWithChildren, ReactNode } from "react";
 
 interface PageWrapperProps {
@@ -17,7 +18,7 @@ interface PageWrapperProps {
   };
   footer?: ReactNode;
   actions?: ReactNode;
-  tabs?: Record<string, string>;
+  tabs?: TabBarProps["items"];
 }
 
 export function PageWrapper({
@@ -30,10 +31,14 @@ export function PageWrapper({
   const { isVisible: showActions } = useActionsMenuContext();
   const navigate = useNavigate();
 
+  const visibleTabs = Object.fromEntries(
+    tabs ? Object.entries(tabs).filter(([, { isHidden }]) => !isHidden) : [],
+  );
+
   return (
     <Box flexDirection="column" flexGrow={1}>
       <PageHeader title={header.title}>{header.content}</PageHeader>
-      {tabs && Object.keys(tabs).length > 1 && (
+      {Object.keys(visibleTabs).length > 1 && (
         <Box
           paddingX={1}
           borderStyle="round"
@@ -43,13 +48,13 @@ export function PageWrapper({
           borderRight={false}
         >
           <TabBar
-            items={tabs}
-            onChange={(name) => {
-              if (!tabs[name]) {
-                throw new Error(`Could not find tab with name "${name}"`);
+            items={visibleTabs}
+            onChange={(href) => {
+              if (!visibleTabs[href]) {
+                throw new Error(`Could not find tab with name "${href}"`);
               }
 
-              void navigate(tabs[name], { replace: true });
+              void navigate(href, { replace: true });
             }}
           />
         </Box>

@@ -1,9 +1,7 @@
-#!/usr/bin/env node
-
 import { withFullScreen } from "fullscreen-ink";
 
+import { App } from "./app.tsx";
 import { Providers } from "./providers.tsx";
-import { App } from "./ui/app.tsx";
 
 const ink = withFullScreen(
   <Providers>

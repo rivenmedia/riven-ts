@@ -170,10 +170,14 @@ export function ItemDetailPageLayout() {
         <Text dimColor>[a] actions · [r] refresh · [esc] back · [q] quit</Text>
       }
       tabs={{
-        Overview: `/item/${item.id}`,
-        ...(item.__typename === "Show" || item.__typename === "Season"
-          ? { Children: `/item/${item.id}/children` }
-          : {}),
+        [`/item/${item.id}`]: {
+          label: "Overview",
+        },
+        [`/item/${item.id}/children`]: {
+          label: "Children",
+          isHidden:
+            item.__typename === "Movie" || item.__typename === "Episode",
+        },
       }}
       actions={<ActionsMenu actions={actions} target={target} />}
     >

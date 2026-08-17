@@ -39,13 +39,13 @@ export function SelectList<T>({
         return;
       }
 
-      if (key.upArrow || input === "k") {
+      if (key.upArrow || input.toLowerCase() === "k") {
         setSelectedIndex((current) => (current <= 0 ? lastIndex : current - 1));
 
         return;
       }
 
-      if (key.downArrow || input === "j") {
+      if (key.downArrow || input.toLowerCase() === "j") {
         setSelectedIndex((current) => (current >= lastIndex ? 0 : current + 1));
 
         return;

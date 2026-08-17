@@ -27,7 +27,7 @@ export function ItemDetailOverviewTab() {
 
   useInput(
     (input) => {
-      if (input === "r") {
+      if (input.toLowerCase() === "r") {
         void refetch();
       }
     },
