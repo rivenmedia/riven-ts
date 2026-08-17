@@ -1,18 +1,17 @@
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
-import { useNavigate, useParams } from "react-router";
-import z from "zod";
+import { useNavigate } from "react-router";
 
 import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
 import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
 import { SelectList } from "../../../ui/select-list.tsx";
 import { SelectableRow } from "../../../ui/selectable-row.tsx";
+import { useItemId } from "../hooks/use-item-id.ts";
 import { GET_MEDIA_ITEM_CHILDREN } from "../queries/get-media-item-children.query.ts";
 import { getChildren } from "../utilities/get-children.ts";
 
 export function ItemDetailChildrenTab() {
-  const params = useParams<"id">();
-  const id = z.string().parse(params.id);
+  const id = useItemId();
   const navigate = useNavigate();
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 

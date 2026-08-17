@@ -10,6 +10,7 @@ import {
   Property,
   OneToMany,
 } from "@mikro-orm/decorators/legacy";
+import { JSONObjectResolver } from "graphql-scalars";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { StreamRepository } from "../../repositories/stream.repository.ts";
@@ -28,6 +29,7 @@ export class Stream {
   @PrimaryKey()
   public infoHash!: string;
 
+  @Field(() => JSONObjectResolver)
   @Property({ type: "json" })
   public parsedData!: ParsedData;
 

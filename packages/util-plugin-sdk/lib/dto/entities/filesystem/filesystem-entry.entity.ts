@@ -11,7 +11,7 @@ import { BigIntResolver } from "graphql-scalars";
 import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import path from "node:path";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, Float, ID, InterfaceType } from "type-graphql";
 import z from "zod";
 
 import { Episode, MediaItem, Movie } from "../media-items/index.ts";
@@ -57,7 +57,7 @@ async function getMediaItemPathParts(mediaItem: MediaItem) {
   throw new TypeError("Unsupported media item type for path generation");
 }
 
-@ObjectType()
+@InterfaceType()
 @Entity({
   abstract: true,
   discriminatorColumn: "type",
@@ -67,7 +67,6 @@ export abstract class FileSystemEntry {
   @PrimaryKey({ type: "uuid" })
   public id = randomUUID();
 
-  @Field(() => BigIntResolver)
   @Property({ type: "bigint" })
   @IsPositive()
   public fileSize!: number;

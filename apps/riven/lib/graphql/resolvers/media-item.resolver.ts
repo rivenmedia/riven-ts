@@ -1,6 +1,7 @@
 import {
   Episode,
   ItemRequest,
+  MediaEntry,
   MediaItem,
   Movie,
   Stream,
@@ -166,6 +167,15 @@ export class MediaItemResolver {
     return mediaItem.filesystemEntries.loadItems();
   }
 
+  @FieldResolver(() => [MediaEntry])
+  public async mediaEntries(@Root() mediaItem: MediaItem) {
+    return mediaItem.filesystemEntries.loadItems({
+      where: {
+        type: "media",
+      },
+    });
+  }
+
   @FieldResolver(() => Stream)
   public async subtitles(@Root() mediaItem: MediaItem) {
     return mediaItem.subtitles.loadItems();
@@ -174,5 +184,10 @@ export class MediaItemResolver {
   @FieldResolver(() => ItemRequest)
   public async itemRequest(@Root() mediaItem: MediaItem) {
     return mediaItem.itemRequest.loadOrFail();
+  }
+
+  @FieldResolver(() => Stream)
+  public async activeStream(@Root() mediaItem: MediaItem) {
+    return mediaItem.activeStream?.loadOrFail();
   }
 }

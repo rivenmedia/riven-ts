@@ -178,11 +178,18 @@ export function ItemDetailPageLayout() {
           isHidden:
             item.__typename === "Movie" || item.__typename === "Episode",
         },
+        [`/item/${item.id}/files`]: {
+          label: "Files",
+          isHidden: item.__typename === "Show" || item.__typename === "Season",
+        },
+        [`/item/${item.id}/active-stream`]: {
+          label: "Active stream",
+        },
       }}
       actions={<ActionsMenu actions={actions} target={target} />}
     >
       <SuspenseBoundary>
-        <Outlet />
+        <Outlet context={{ id }} />
       </SuspenseBoundary>
     </PageWrapper>
   );
