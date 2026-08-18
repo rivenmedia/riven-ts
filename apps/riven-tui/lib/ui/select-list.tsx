@@ -11,6 +11,7 @@ export interface SelectListProps<T> {
   onCancel?: (() => void) | undefined;
   isActive?: boolean;
   emptyMessage?: string;
+  loop?: boolean;
 }
 
 export function SelectList<T>({
@@ -21,6 +22,7 @@ export function SelectList<T>({
   onCancel,
   isActive = true,
   emptyMessage = "Nothing to show.",
+  loop = false,
 }: SelectListProps<T>) {
   const [selectedIndex, setSelectedIndex] = useState(0);
   const lastIndex = items.length - 1;
@@ -40,13 +42,25 @@ export function SelectList<T>({
       }
 
       if (key.upArrow || input.toLowerCase() === "k") {
-        setSelectedIndex((current) => (current <= 0 ? lastIndex : current - 1));
+        setSelectedIndex((current) => {
+          if (current <= 0) {
+            return loop ? lastIndex : 0;
+          }
+
+          return current - 1;
+        });
 
         return;
       }
 
       if (key.downArrow || input.toLowerCase() === "j") {
-        setSelectedIndex((current) => (current >= lastIndex ? 0 : current + 1));
+        setSelectedIndex((current) => {
+          if (current >= lastIndex) {
+            return loop ? 0 : lastIndex;
+          }
+
+          return current + 1;
+        });
 
         return;
       }
