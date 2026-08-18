@@ -5,6 +5,7 @@ import { ItemDetailActiveStreamScreen } from "./pages/item-detail/screens/active
 import { ItemDetailChildrenTab } from "./pages/item-detail/screens/children.tsx";
 import { ItemDetailFilesScreen } from "./pages/item-detail/screens/files.tsx";
 import { ItemDetailOverviewTab } from "./pages/item-detail/screens/overview.tsx";
+import { ItemDetailStreamsScreen } from "./pages/item-detail/screens/streams.tsx";
 import { LibraryScreenLayout } from "./pages/library/library.layout.tsx";
 import { LibraryScreenIndexScreen } from "./pages/library/screens/index.tsx";
 
@@ -19,6 +20,7 @@ export function Routes() {
         <Route index element={<ItemDetailOverviewTab />} />
         <Route path="children" element={<ItemDetailChildrenTab />} />
         <Route path="files" element={<ItemDetailFilesScreen />} />
+        <Route path="streams" element={<ItemDetailStreamsScreen />} />
         <Route
           path="active-stream"
           element={<ItemDetailActiveStreamScreen />}

@@ -23,6 +23,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
         hasActiveStream
         mediaEntryCount
         childItemCount
+        streamCount
       }
     }
   }

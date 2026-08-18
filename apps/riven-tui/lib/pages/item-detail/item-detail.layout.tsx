@@ -181,6 +181,10 @@ export function ItemDetailPageLayout() {
           label: `Files (${item.mediaEntryCount.toString()})`,
           isHidden: item.mediaEntryCount === 0,
         },
+        [`/item/${item.id}/streams`]: {
+          label: `Streams (${item.streamCount.toString()})`,
+          isHidden: item.streamCount === 0,
+        },
         [`/item/${item.id}/active-stream`]: {
           label: "Active stream",
           isHidden: !item.hasActiveStream,

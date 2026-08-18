@@ -172,6 +172,11 @@ export class MediaItemResolver {
     return mediaItem.streams.loadItems();
   }
 
+  @FieldResolver(() => Int)
+  public async streamCount(@Root() mediaItem: MediaItem) {
+    return mediaItem.streams.loadCount();
+  }
+
   @FieldResolver(() => Stream)
   public async blacklistedStreams(@Root() mediaItem: MediaItem) {
     return mediaItem.blacklistedStreams.loadItems();
