@@ -3,6 +3,8 @@ type ScrollAreaAction =
   | { type: "SET_HEIGHT"; height: number }
   | { type: "SCROLL_DOWN" }
   | { type: "SCROLL_UP" }
+  | { type: "PAGE_DOWN" }
+  | { type: "PAGE_UP" }
   | { type: "RESET_SCROLL_POSITION" };
 
 interface ScrollAreaState {
@@ -22,6 +24,7 @@ export const scrollAreaReducer = (
         innerHeight: action.innerHeight,
       };
     }
+
     case "SET_HEIGHT": {
       return {
         ...state,
@@ -45,6 +48,25 @@ export const scrollAreaReducer = (
       return {
         ...state,
         scrollTop: Math.max(0, state.scrollTop - 1),
+      };
+    }
+
+    case "PAGE_DOWN": {
+      return {
+        ...state,
+        scrollTop: Math.min(
+          state.innerHeight <= state.height
+            ? 0
+            : state.innerHeight - state.height,
+          state.scrollTop + state.height,
+        ),
+      };
+    }
+
+    case "PAGE_UP": {
+      return {
+        ...state,
+        scrollTop: Math.max(0, state.scrollTop - state.height),
       };
     }
 

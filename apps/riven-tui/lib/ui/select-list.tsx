@@ -1,6 +1,8 @@
 import { Box, Text, useInput } from "ink";
 import { useState } from "react";
 
+import { useScrollAreaContext } from "./scroll-area/scroll-area-context.tsx";
+
 import type { ReactNode } from "react";
 
 export interface SelectListProps<T> {
@@ -30,6 +32,7 @@ export function SelectList<T>({
     Math.max(selectedIndex, 0),
     Math.max(lastIndex, 0),
   );
+  const scrollAreaContext = useScrollAreaContext();
 
   useInput(
     (input, key) => {
@@ -43,11 +46,11 @@ export function SelectList<T>({
 
       if (key.upArrow || input.toLowerCase() === "k") {
         setSelectedIndex((current) => {
-          if (current <= 0) {
-            return loop ? lastIndex : 0;
-          }
+          const jumpCount = key.shift ? (scrollAreaContext?.height ?? 1) : 1;
+          const nextIndex =
+            current <= 0 ? (loop ? lastIndex : 0) : current - jumpCount;
 
-          return current - 1;
+          return Math.max(0, Math.min(nextIndex, lastIndex));
         });
 
         return;
@@ -55,11 +58,11 @@ export function SelectList<T>({
 
       if (key.downArrow || input.toLowerCase() === "j") {
         setSelectedIndex((current) => {
-          if (current >= lastIndex) {
-            return loop ? 0 : lastIndex;
-          }
+          const jumpCount = key.shift ? (scrollAreaContext?.height ?? 1) : 1;
+          const nextIndex =
+            current >= lastIndex ? (loop ? 0 : lastIndex) : current + jumpCount;
 
-          return current + 1;
+          return Math.max(0, Math.min(nextIndex, lastIndex));
         });
 
         return;

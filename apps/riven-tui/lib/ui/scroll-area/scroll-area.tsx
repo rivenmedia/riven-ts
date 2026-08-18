@@ -3,6 +3,7 @@ import { useEffect, useReducer, useRef } from "react";
 import { useLocation } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
+import { ScrollAreaProvider } from "./scroll-area-context.tsx";
 import { scrollAreaReducer } from "./scroll-area.reducer.ts";
 
 import type { DOMElement } from "ink";
@@ -52,13 +53,13 @@ export function ScrollArea({
     (_input, key) => {
       if (key.downArrow) {
         dispatch({
-          type: "SCROLL_DOWN",
+          type: key.shift ? "PAGE_DOWN" : "SCROLL_DOWN",
         });
       }
 
       if (key.upArrow) {
         dispatch({
-          type: "SCROLL_UP",
+          type: key.shift ? "PAGE_UP" : "SCROLL_UP",
         });
       }
     },
@@ -66,22 +67,24 @@ export function ScrollArea({
   );
 
   return (
-    <Box
-      key={`scroll-area-${id}`}
-      ref={outerRef}
-      height={outerHeight}
-      flexDirection="column"
-      flexGrow={1}
-      overflow="hidden"
-    >
+    <ScrollAreaProvider context={state}>
       <Box
-        ref={innerRef}
-        flexShrink={0}
+        key={`scroll-area-${id}`}
+        ref={outerRef}
+        height={outerHeight}
         flexDirection="column"
-        marginTop={-state.scrollTop}
+        flexGrow={1}
+        overflow="hidden"
       >
-        {children}
+        <Box
+          ref={innerRef}
+          flexShrink={0}
+          flexDirection="column"
+          marginTop={-state.scrollTop}
+        >
+          {children}
+        </Box>
       </Box>
-    </Box>
+    </ScrollAreaProvider>
   );
 }
