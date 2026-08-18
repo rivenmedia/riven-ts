@@ -1,5 +1,5 @@
 import { Box } from "ink";
-import { useNavigate } from "react-router";
+import { useLocation, useNavigate } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
 import { ScrollArea } from "../scroll-area/scroll-area.tsx";
@@ -28,6 +28,7 @@ export function PageWrapper({
   tabs,
   actions,
 }: PropsWithChildren<PageWrapperProps>) {
+  const { pathname } = useLocation();
   const { isVisible: showActions } = useActionsMenuContext();
   const navigate = useNavigate();
 
@@ -60,7 +61,7 @@ export function PageWrapper({
         </Box>
       )}
       <Box flexDirection="column" flexGrow={1} padding={1} paddingTop={0}>
-        <ScrollArea>{children}</ScrollArea>
+        <ScrollArea id={pathname}>{children}</ScrollArea>
       </Box>
       {showActions && actions}
       <PageFooter>{footer}</PageFooter>
