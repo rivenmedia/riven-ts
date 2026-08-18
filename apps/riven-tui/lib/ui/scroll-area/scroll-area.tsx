@@ -1,4 +1,4 @@
-import { Box, measureElement, useFocus, useInput } from "ink";
+import { Box, useFocus, useInput, useBoxMetrics } from "ink";
 import { useEffect, useReducer, useRef } from "react";
 import { useLocation } from "react-router";
 
@@ -8,43 +8,45 @@ import { scrollAreaReducer } from "./scroll-area.reducer.ts";
 import type { DOMElement } from "ink";
 import type { PropsWithChildren } from "react";
 
-export function ScrollArea({ children }: PropsWithChildren) {
+interface ScrollAreaProps {
+  id: string;
+}
+
+export function ScrollArea({
+  id,
+  children,
+}: PropsWithChildren<ScrollAreaProps>) {
   useFocus();
 
   const { pathname } = useLocation();
   const outerRef = useRef<DOMElement>(null);
-  const { height } = outerRef.current
-    ? measureElement(outerRef.current)
-    : { height: 0 };
+  const innerRef = useRef<DOMElement>(null);
+
+  const { height: outerHeight } = useBoxMetrics(outerRef);
+  const { height: innerHeight } = useBoxMetrics(innerRef);
 
   const [state, dispatch] = useReducer(scrollAreaReducer, {
-    height,
+    height: outerHeight,
     scrollTop: 0,
     innerHeight: 0,
   });
 
-  const innerRef = useRef<DOMElement>(null);
-
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 
   useEffect(() => {
-    dispatch({ type: "SET_HEIGHT", height });
-  }, [height]);
+    dispatch({ type: "SET_HEIGHT", height: outerHeight });
+  }, [outerHeight]);
 
   useEffect(() => {
-    if (!innerRef.current) {
-      return;
-    }
-
     dispatch({ type: "RESET_SCROLL_POSITION" });
+  }, [pathname]);
 
-    const dimensions = measureElement(innerRef.current);
-
+  useEffect(() => {
     dispatch({
       type: "SET_INNER_HEIGHT",
-      innerHeight: dimensions.height,
+      innerHeight,
     });
-  }, [pathname]);
+  }, [innerHeight]);
 
   useInput(
     (_input, key) => {
@@ -65,8 +67,9 @@ export function ScrollArea({ children }: PropsWithChildren) {
 
   return (
     <Box
+      key={`scroll-area-${id}`}
       ref={outerRef}
-      height={height}
+      height={outerHeight}
       flexDirection="column"
       flexGrow={1}
       overflow="hidden"
