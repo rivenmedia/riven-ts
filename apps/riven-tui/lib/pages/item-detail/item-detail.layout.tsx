@@ -174,16 +174,16 @@ export function ItemDetailPageLayout() {
           label: "Overview",
         },
         [`/item/${item.id}/children`]: {
-          label: "Children",
-          isHidden:
-            item.__typename === "Movie" || item.__typename === "Episode",
+          label: `Children (${item.childItemCount.toString()})`,
+          isHidden: item.childItemCount === 0,
         },
         [`/item/${item.id}/files`]: {
-          label: "Files",
-          isHidden: item.__typename === "Show" || item.__typename === "Season",
+          label: `Files (${item.mediaEntryCount.toString()})`,
+          isHidden: item.mediaEntryCount === 0,
         },
         [`/item/${item.id}/active-stream`]: {
           label: "Active stream",
+          isHidden: !item.hasActiveStream,
         },
       }}
       actions={<ActionsMenu actions={actions} target={target} />}

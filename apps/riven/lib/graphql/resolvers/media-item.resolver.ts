@@ -4,6 +4,8 @@ import {
   MediaEntry,
   MediaItem,
   Movie,
+  Season,
+  Show,
   Stream,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
@@ -64,6 +66,19 @@ export class MediaItemResolver {
         overfetch: true,
       },
     );
+  }
+
+  @Query(() => Int)
+  public async mediaItemsCount(
+    @Arg("type", () => [MediaItemType.enum], {
+      defaultValue: MediaItemType.options,
+    })
+    filter: MediaItemType[],
+    @CoreContext() { em }: CoreContext,
+  ): Promise<number> {
+    return em.count(MediaItem, {
+      type: { $in: filter },
+    });
   }
 
   @Mutation(() => [MediaItemUnion])
@@ -176,6 +191,15 @@ export class MediaItemResolver {
     });
   }
 
+  @FieldResolver(() => Int)
+  public async mediaEntryCount(@Root() mediaItem: MediaItem) {
+    return mediaItem.filesystemEntries.loadCount({
+      where: {
+        type: "media",
+      },
+    });
+  }
+
   @FieldResolver(() => Stream)
   public async subtitles(@Root() mediaItem: MediaItem) {
     return mediaItem.subtitles.loadItems();
@@ -189,5 +213,31 @@ export class MediaItemResolver {
   @FieldResolver(() => Stream)
   public async activeStream(@Root() mediaItem: MediaItem) {
     return mediaItem.activeStream?.loadOrFail();
+  }
+
+  @FieldResolver(() => Boolean)
+  public hasActiveStream(@Root() mediaItem: MediaItem) {
+    return mediaItem.activeStream != null;
+  }
+
+  @FieldResolver(() => Int)
+  public async childItemCount(
+    @Root() mediaItem: MediaItem,
+    @Arg("includeSpecials", () => Boolean, { defaultValue: false })
+    includeSpecials: boolean,
+  ) {
+    if (mediaItem instanceof Show) {
+      return mediaItem.seasons.loadCount(
+        includeSpecials ? {} : { where: { isSpecial: false } },
+      );
+    }
+
+    if (mediaItem instanceof Season) {
+      return mediaItem.episodes.loadCount(
+        includeSpecials ? {} : { where: { isSpecial: false } },
+      );
+    }
+
+    return 0;
   }
 }

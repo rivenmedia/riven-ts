@@ -20,6 +20,9 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
         itemRequest {
           id
         }
+        hasActiveStream
+        mediaEntryCount
+        childItemCount
       }
     }
   }

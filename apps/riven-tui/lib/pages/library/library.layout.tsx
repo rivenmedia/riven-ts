@@ -1,10 +1,14 @@
+import { useSuspenseQuery } from "@apollo/client/react";
 import { Text } from "ink";
 import { Outlet } from "react-router";
 
 import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
 import { SuspenseBoundary } from "../../ui/suspense-boundary.tsx";
+import { GET_LIBRARY_ITEM_COUNTS } from "./queries/get-library-item-counts.query.ts";
 
 export function LibraryScreenLayout() {
+  const { data } = useSuspenseQuery(GET_LIBRARY_ITEM_COUNTS, {});
+
   return (
     <PageWrapper
       header={{
@@ -23,13 +27,13 @@ export function LibraryScreenLayout() {
       }
       tabs={{
         "/library": {
-          label: "All",
+          label: `All (${(data.totalMovies + data.totalShows).toString()})`,
         },
         "/library/type/movie": {
-          label: "Movies",
+          label: `Movies (${data.totalMovies.toString()})`,
         },
         "/library/type/show": {
-          label: "Shows",
+          label: `Shows (${data.totalShows.toString()})`,
         },
       }}
     >
