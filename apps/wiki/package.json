@@ -37,6 +37,7 @@
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/riven": "workspace:^",
+    "@repo/riven-tui": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",

@@ -9,6 +9,8 @@
     "--- Configuration ---",
     "core",
     "ranking-configuration",
+    "--- Extensions ---",
+    "tui",
     "--- Plugins ---",
     "...plugins"
   ]

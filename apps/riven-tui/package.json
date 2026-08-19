@@ -9,6 +9,9 @@
     "dist"
   ],
   "type": "module",
+  "exports": {
+    "./wiki.config": "./wiki.config.ts"
+  },
   "scripts": {
     "build": "tsc --build tsconfig.app.json",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
@@ -47,6 +50,7 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/riven": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "@swc-node/register": "catalog:",
     "@swc/core": "catalog:",
     "@types/luxon": "catalog:",

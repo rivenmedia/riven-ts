@@ -24,6 +24,7 @@ const workspaceImports = Object.keys({
   (dependency) =>
     dependency.startsWith("@repo/plugin-") ||
     dependency === "@repo/riven" ||
+    dependency === "@repo/riven-tui" ||
     dependency === "@repo/util-rank-torrent-name",
 );
 
