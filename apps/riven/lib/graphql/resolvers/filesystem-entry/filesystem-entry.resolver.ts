@@ -4,7 +4,7 @@ import assert from "node:assert";
 import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
 
 import { FileSizeUnit } from "./enums/file-size-unit.enum.ts";
-import { FileSize } from "./types/file-size.js";
+import { FileSize } from "./types/file-size.ts";
 
 @Resolver(() => FileSystemEntry)
 export class FileSystemEntryResolver {
@@ -15,11 +15,12 @@ export class FileSystemEntryResolver {
     units: FileSizeUnit,
     @Arg("precision", () => Int, {
       defaultValue: 2,
-      validateFn: (value: number) =>
+      validateFn: (value: number) => {
         assert.ok(
           value >= 0 && value <= 5,
           "Precision must be between 0 and 5",
-        ),
+        );
+      },
     })
     precision: number,
   ): FileSize | null {

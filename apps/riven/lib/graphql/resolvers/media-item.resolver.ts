@@ -12,6 +12,7 @@ import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.e
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import chalk from "chalk";
+import { DateTime } from "luxon";
 import assert from "node:assert";
 import {
   Arg,
@@ -26,6 +27,7 @@ import {
 } from "type-graphql";
 
 import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
+import { queueRegistry } from "../../message-queue/utilities/queue-registry.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { ApolloServerContext } from "../context.ts";
@@ -244,5 +246,49 @@ export class MediaItemResolver {
     }
 
     return 0;
+  }
+
+  @FieldResolver(() => ID, { nullable: true })
+  public async processorJobId(@Root() mediaItem: MediaItem) {
+    const queue = queueRegistry.get("process-media-item");
+
+    if (!queue) {
+      return null;
+    }
+
+    const jobId = await queue.getDeduplicationJobId(
+      `process-${mediaItem.type}-${mediaItem.id}`,
+    );
+
+    return jobId ?? null;
+  }
+
+  @FieldResolver(() => Date, { nullable: true })
+  public async nextScrapeAttemptAt(@Root() mediaItem: MediaItem) {
+    const { flow } = await import("../../message-queue/flows/producer.ts");
+    const processorJobId = await this.processorJobId(mediaItem);
+
+    if (!processorJobId) {
+      return null;
+    }
+
+    const processorFlow = await flow.getFlow({
+      id: processorJobId,
+      queueName: "process-media-item",
+    });
+
+    const scrapeJob = processorFlow.children?.find(
+      ({ job }) => job.queueName === "scrape-item",
+    );
+
+    if (!scrapeJob) {
+      return null;
+    }
+
+    const baseTimestamp = DateTime.fromMillis(
+      scrapeJob.job.processedOn ?? scrapeJob.job.timestamp,
+    );
+
+    return baseTimestamp.plus({ milliseconds: scrapeJob.job.delay }).toJSDate();
   }
 }

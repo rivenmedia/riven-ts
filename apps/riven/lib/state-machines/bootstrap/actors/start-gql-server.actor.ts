@@ -22,7 +22,7 @@ import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type {
   mainRunnerMachine,
   MainRunnerMachineIntake,
-} from "../../main-runner/index.js";
+} from "../../main-runner/index.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { ActorRefFromLogic } from "xstate";

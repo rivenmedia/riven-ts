@@ -189,6 +189,10 @@ export function ItemDetailPageLayout() {
           label: "Active stream",
           isHidden: !item.hasActiveStream,
         },
+        [`/item/${item.id}/processing-data`]: {
+          label: "Processing data",
+          isHidden: item.processorJobId === null,
+        },
       }}
       actions={<ActionsMenu actions={actions} target={target} />}
     >

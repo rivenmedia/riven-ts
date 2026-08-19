@@ -13,6 +13,8 @@ export const testFiles = [
 
 export const entityFiles = "**/*.entity.ts";
 
+export const graphqlFiles = "**/*.{type,resolver}.ts";
+
 export const jsonFiles = "**/*.{json,jsonc,json5}";
 
 export const configFiles =
