@@ -7,6 +7,7 @@ import {
   Season,
   Show,
   Stream,
+  SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
@@ -207,7 +208,16 @@ export class MediaItemResolver {
     });
   }
 
-  @FieldResolver(() => Stream)
+  @FieldResolver(() => Int)
+  public async subtitlesCount(@Root() mediaItem: MediaItem) {
+    return mediaItem.filesystemEntries.loadCount({
+      where: {
+        type: "subtitle",
+      },
+    });
+  }
+
+  @FieldResolver(() => [SubtitleEntry])
   public async subtitles(@Root() mediaItem: MediaItem) {
     return mediaItem.subtitles.loadItems();
   }

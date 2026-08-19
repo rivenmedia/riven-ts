@@ -25,6 +25,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
         childItemCount
         streamCount
         processorJobId
+        subtitlesCount
       }
     }
   }
