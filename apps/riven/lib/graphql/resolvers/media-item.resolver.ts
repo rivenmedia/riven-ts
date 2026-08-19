@@ -52,9 +52,9 @@ export class MediaItemResolver {
     @Arg("type", () => [MediaItemType.enum], {
       defaultValue: MediaItemType.options,
     })
+    filter: MediaItemType[],
     @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
     includeUnrequestedItems: boolean,
-    filter: MediaItemType[],
     @CoreContext() { em }: CoreContext,
   ): Promise<MediaItem[]> {
     return em.find(

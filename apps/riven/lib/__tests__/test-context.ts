@@ -278,7 +278,7 @@ export const it = testBase
     },
     logger,
     sendEvent: vi.fn<MainRunnerMachineIntake>(),
-    plugins: {},
+    plugins: new Map(),
   }))
   .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(

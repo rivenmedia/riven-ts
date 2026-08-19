@@ -16,7 +16,7 @@
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven-tui --enable-source-maps dist/cli.js",
-    "test": "vitest run",
+    "test": "vitest run --passWithNoTests",
     "test:watch": "vitest"
   },
   "dependencies": {
@@ -53,7 +53,6 @@
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@typescript/native": "catalog:",
-    "ink-testing-library": "catalog:",
     "oxlint": "catalog:",
     "react-devtools-core": "catalog:",
     "typescript": "catalog:",

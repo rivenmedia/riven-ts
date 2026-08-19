@@ -24,10 +24,6 @@ export class FileSystemEntryResolver {
     })
     precision: number,
   ): FileSize | null {
-    if (entry.fileSize === null) {
-      return null;
-    }
-
     switch (units) {
       case "byte": {
         return {

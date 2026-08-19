@@ -151,11 +151,8 @@ export const it = baseIt
   .extend(
     "gqlContext",
     ({ plugin, dataSourceMap }): GraphQLContext => ({
-      [plugin.name]: {
-        dataSources: dataSourceMap,
-      },
       logger: {} as never,
-      plugins: {},
+      plugins: new Map([[plugin.name, { dataSources: dataSourceMap }]]),
       sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
     }),
   );
