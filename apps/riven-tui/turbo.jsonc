@@ -1,0 +1,38 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tags": ["type:app"],
+  "tasks": {
+    "codegen:gql": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@repo/riven#codegen:gql-schema",
+        "transit:source-files"
+      ],
+      "inputs": [
+        "lib/**/*.ts",
+        "!lib/**/__generated__/**/*",
+        "graphql-codegen.ts",
+        "$TURBO_ROOT$/apps/riven/schema.graphql"
+      ],
+      "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
+    },
+    "build": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+    },
+    "test": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+    },
+    "lint": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+    },
+    "dev": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"],
+      "passThroughEnv": ["RIVEN_TUI_SETTING__graphqlUrl"]
+    },
+    "start": {
+      "dependsOn": ["$TURBO_EXTENDS$", "build"],
+      "passThroughEnv": ["RIVEN_TUI_SETTING__graphqlUrl"]
+    }
+  }
+}

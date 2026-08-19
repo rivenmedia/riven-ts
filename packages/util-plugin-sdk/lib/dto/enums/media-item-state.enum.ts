@@ -1,9 +1,7 @@
 import z from "zod";
 
 export const MediaItemState = z.enum([
-  "unknown",
   "unreleased",
-  "ongoing",
   "indexed",
   "scraped",
   "downloaded",

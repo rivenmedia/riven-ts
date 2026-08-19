@@ -94,7 +94,7 @@ it("does not return entries for a season that does not have any episodes with a 
       type: "episode",
       season: {
         number: {
-          $nin: [1],
+          $ne: 1,
         },
       },
     },
@@ -138,7 +138,7 @@ it("does not return entries for episodes that does not have a media entry when v
     mediaItem: {
       type: "episode",
       number: {
-        $nin: [1],
+        $ne: 1,
       },
     },
   });

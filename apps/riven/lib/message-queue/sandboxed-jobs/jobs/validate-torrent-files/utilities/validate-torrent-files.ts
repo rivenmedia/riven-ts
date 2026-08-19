@@ -279,6 +279,8 @@ export const validateTorrentFiles = async (
 
     return validFiles;
   } catch (error) {
+    logger.verbose(`Torrent files are invalid for ${chalk.bold(infoHash)}`);
+
     if (error instanceof AssertionError) {
       throw new InvalidTorrentError(error.message);
     }

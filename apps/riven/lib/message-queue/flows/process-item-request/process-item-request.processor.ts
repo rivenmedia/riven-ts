@@ -1,3 +1,4 @@
+import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 import {
@@ -5,12 +6,15 @@ import {
   MediaItemIndexRequestedShowEvent,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
+import { NotFoundError } from "@mikro-orm/core";
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "../../../utilities/logger/logger.ts";
+import { clearDeduplicationJob } from "../../utilities/clear-deduplication-job.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { flow } from "../producer.ts";
@@ -25,8 +29,25 @@ export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
     async (
       { job, token },
-      { sendEvent, services: { itemRequestService, indexerService }, plugins },
+      {
+        sendEvent,
+        services: { mediaItemService, itemRequestService, indexerService },
+        plugins,
+      },
     ) => {
+      try {
+        // Ensure the item request exists before proceeding
+        await itemRequestService.getItemRequestById(job.data.itemRequestId);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          throw new UnrecoverableError(
+            `Item request with ID ${job.data.itemRequestId} not found`,
+          );
+        }
+
+        throw error;
+      }
+
       switch (job.data.step) {
         case "request": {
           assert.ok(token, "Token is required to create child jobs");
@@ -101,11 +122,44 @@ export const processItemRequestProcessor =
           }
 
           try {
-            const updatedItem = await indexerService.indexItem(item);
+            const {
+              item: updatedItem,
+              isReindex,
+              isAdditionalSeasonRequest,
+            } = await indexerService.indexItem(item);
+
+            const itemsToProcess = await mediaItemService.getItemsToProcess(
+              updatedItem.id,
+            );
+
+            for (const itemToProcess of itemsToProcess) {
+              if (
+                await clearDeduplicationJob(
+                  "process-media-item",
+                  `process-${itemToProcess.type}-${itemToProcess.id}`,
+                )
+              ) {
+                logger.silly(
+                  `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
+                );
+              }
+            }
 
             sendEvent({
               type: "riven.media-item.index.success",
               item: updatedItem,
+              meta:
+                updatedItem instanceof Movie
+                  ? {
+                      type: "movie",
+                      isReindex,
+                    }
+                  : {
+                      type: "show",
+                      isAdditionalSeasonRequest:
+                        isAdditionalSeasonRequest ?? false,
+                      isReindex,
+                    },
             });
           } catch (error) {
             if (

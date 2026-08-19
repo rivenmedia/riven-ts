@@ -1,4 +1,5 @@
 import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
+import { ProgramEventError } from "@repo/util-plugin-sdk/schemas/utilities/create-program-event-error";
 
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
@@ -24,6 +25,7 @@ type LoggedError = NonNullable<TransformableInfo["error"]>;
 const EXPECTED_ERROR_NAMES = new Set([
   FatalValidationError.name,
   UnrecoverableError.name,
+  ProgramEventError.name,
 ]);
 
 function isUnexpectedError(error: Error | LoggedError) {

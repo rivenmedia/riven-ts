@@ -5,6 +5,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 
 import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
+import { Show } from "./index.js";
 import { Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
@@ -29,19 +30,23 @@ export class Episode extends ShowLikeMediaItem {
   @ManyToOne()
   public season!: Opt<Ref<Season>>;
 
+  @Field(() => Show)
+  @ManyToOne()
+  public show!: Opt<Ref<Show>>;
+
   @Field(() => Int, { nullable: true })
   @Property()
   public runtime!: number | null;
+
+  @Field(() => Boolean)
+  @Property()
+  public readonly isSpecial!: boolean;
 
   @Field(() => ShowContentRatingEnum)
   declare public contentRating: ShowContentRating;
 
   public async getShow() {
-    const season = await this.season.loadOrFail({
-      populate: ["show"],
-    });
-
-    return season.show.loadOrFail();
+    return this.show.loadOrFail();
   }
 
   public async getPrettyName(): Promise<string> {

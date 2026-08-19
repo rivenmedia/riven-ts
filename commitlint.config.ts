@@ -32,13 +32,13 @@ function getScopes() {
 
   // Get scopes from packages directory
   for (const directory of getDirNames("packages")) {
-    scopes.add(stripPrefix(directory));
-
     // Get scopes from packages/core/* subdirectories
     if (directory === "core") {
       for (const subDir of getDirNames(`packages/${directory}`)) {
         scopes.add(stripPrefix(subDir));
       }
+    } else {
+      scopes.add(stripPrefix(directory));
     }
   }
 

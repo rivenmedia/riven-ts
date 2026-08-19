@@ -4,10 +4,13 @@
     "index",
     "versions",
     "getting-started",
+    "from-source",
     "...",
     "--- Configuration ---",
     "core",
     "ranking-configuration",
+    "--- Extensions ---",
+    "tui",
     "--- Plugins ---",
     "...plugins"
   ]

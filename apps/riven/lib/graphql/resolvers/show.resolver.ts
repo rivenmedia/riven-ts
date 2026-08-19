@@ -7,12 +7,18 @@ export class ShowResolver {
   @FieldResolver(() => [Season])
   public async seasons(
     @Root() show: Show,
+    @Arg("includeUnrequestedSeasons", () => Boolean, { defaultValue: false })
+    includeUnrequestedSeasons: boolean,
     @Arg("includeSpecials", () => Boolean, { defaultValue: false })
     includeSpecials: boolean,
   ) {
     return show.seasons.matching({
       where: {
         ...(!includeSpecials && { number: { $ne: 0 } }),
+        ...(!includeUnrequestedSeasons && { isRequested: true }),
+      },
+      orderBy: {
+        number: "asc",
       },
     });
   }

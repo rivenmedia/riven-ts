@@ -37,18 +37,18 @@
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/riven": "workspace:^",
+    "@repo/riven-tui": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
-    "@typescript/native": "catalog:",
     "fumadocs-mdx": "catalog:",
     "oxlint": "catalog:",
     "postcss": "catalog:",
     "schema-dts": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:typescript7-native"
   }
 }

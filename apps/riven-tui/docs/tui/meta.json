@@ -1,0 +1,5 @@
+{
+  "title": "Riven TUI",
+  "description": "Terminal UI for browsing and managing a running Riven instance",
+  "pages": ["getting-started", "configuration", "navigation", "actions"]
+}

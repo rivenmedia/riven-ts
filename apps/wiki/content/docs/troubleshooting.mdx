@@ -30,8 +30,11 @@ findmnt -o TARGET,PROPAGATION /mnt/riven
 
 ```yaml
 volumes:
-  - /mnt/riven:/mnt/riven:rshared,z
+  - /mnt/riven:/mount:rshared,z
 ```
+
+4. Ensure `RIVEN_SETTING__vfsMountPath` matches the **container-side** path
+   (`/mount` above), not the host path.
 
 ### "Transport endpoint is not connected"
 
@@ -78,8 +81,11 @@ depends_on:
 Verify the connection URL matches your PostgreSQL credentials:
 
 ```bash
-RIVEN_SETTING__databaseUrl="postgres+psycopg2://user:password@postgres:5432/riven"
+RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:password@postgres:5432/riven"
 ```
+
+The host is the compose service name, not `localhost` — `localhost` inside the
+Riven container refers to the Riven container.
 
 ### Migration errors
 
@@ -94,6 +100,22 @@ docker compose down -v  # Removes volumes!
 docker compose up -d
 ```
 
+## API Issues
+
+### Connection refused on port 3000
+
+**Symptom**: The container is healthy and the port is published, but requests to
+`http://<host>:3000` are refused. Anything that calls into Riven — the Seerr
+webhook, a reverse proxy — fails.
+
+**Fix**: `gqlHost` defaults to `localhost`, so the API binds to loopback
+_inside_ the container and publishing the port has no effect. Bind it to all
+interfaces:
+
+```bash
+RIVEN_SETTING__gqlHost="0.0.0.0"
+```
+
 ## Plugin Issues
 
 ### Plugin not starting
@@ -106,6 +128,7 @@ docker compose logs riven | grep -i plugin
 
 Common causes:
 
+- The plugin isn't listed in `RIVEN_SETTING__enabledPlugins`
 - Missing API key environment variable
 - Invalid API key (expired or wrong permissions)
 - Target service is unreachable from the container
@@ -150,11 +173,12 @@ RIVEN_SETTING__redisUrl="redis://redis:6379"
 
 ```yaml
 volumes:
-  - /mnt/riven:/mnt/riven:rslave,z
+  - /mnt/riven:/mount:rslave,z
 ```
 
 3. Trigger a library scan in your media server
-4. If using Plex plugin, ensure the `plexLibraryPath` setting matches
+4. Ensure `plexLibraryPath` / `jellyfinLibraryPath` matches the path as the
+   **media server** sees it (`/mount` above)
 
 ## Docker Issues
 
@@ -172,14 +196,7 @@ Common causes:
 - Database not reachable
 - Redis not reachable
 - Invalid VFS mount path
-
-### Out of memory
-
-Riven's memory usage depends on library size. If you're running out of memory:
-
-- Increase Docker's memory limit
-- Reduce the number of concurrent workers
-- Ensure Redis has enough memory for the job queue
+- The bind-mounted `logs` or `data` directory is not writable by UID 1000
 
 ## Getting Help
 

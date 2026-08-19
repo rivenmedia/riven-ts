@@ -1,0 +1,19 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "compilerOptions": {
+    "jsx": "react-jsx"
+  },
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" }
+  ],
+  "files": [
+    "oxlint.config.ts",
+    "graphql-codegen.ts",
+    "vitest.config.ts",
+    "wiki.config.ts"
+  ],
+  "include": [],
+  "exclude": []
+}

@@ -33,6 +33,7 @@
     "**/dist",
     "**/playwright-report",
     "**/storybook-static",
-    "**/test-results"
+    "**/test-results",
+    "**/.pnpm_patches"
   ]
 }

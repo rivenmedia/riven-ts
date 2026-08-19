@@ -33,18 +33,16 @@ const defaultProject = [
 export default {
   tags: ["-lintignore"],
   ignoreDependencies: [
+    "@typescript/native",
     "@kubb/cli",
     "@graphql-codegen/*",
     "@graphql-typed-document-node/*",
-    "@swc-node/register",
-    "@vitest/coverage-v8",
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
-      ignoreDependencies: ["@commitlint/cli"],
       ignoreBinaries: ["tail", "jq"],
     },
     "apps/wiki": {
@@ -68,8 +66,32 @@ export default {
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
+      ignoreDependencies: [
+        /@repo\/plugin(?<pluginName>.*)/u,
+        "@repo/riven-tui",
+      ],
       ignoreFiles: ["**/*.d.ts"],
+    },
+    "apps/riven-tui": {
+      entry: [
+        "lib/cli.tsx!",
+        filePatterns.generatedProdFiles,
+        filePatterns.generatedDevFiles,
+        filePatterns.configFiles,
+        filePatterns.graphqlCodegenConfig,
+      ],
+      project: [
+        "**/*.{ts,tsx}!",
+        "!**/*.{spec,test}.{ts,tsx}!",
+        "!**/__{tests,mocks}__/**!",
+        filePatterns.generatedDevFiles,
+        filePatterns.generatedProdFiles,
+      ],
+      // `@repo/riven` is only used to order `schema.graphql` generation via
+      // Turbo's task graph (see turbo.jsonc) - it's never imported.
+      // `@swc-node/register` is used via `--import=` in the dev/start
+      // scripts, which Knip doesn't resolve from this indirection.
+      ignoreDependencies: ["@repo/riven", "@swc-node/register"],
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

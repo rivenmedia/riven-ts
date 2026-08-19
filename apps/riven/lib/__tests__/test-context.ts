@@ -11,6 +11,7 @@ import { test as testBase, vi } from "vitest";
 import { authConfig } from "../auth/auth.ts";
 import { CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
+import { logger } from "../utilities/logger/logger.ts";
 
 import type { Services } from "../database/database.ts";
 import type { ApolloServerContext } from "../graphql/context.ts";
@@ -95,12 +96,7 @@ export const it = testBase
 
     const fixedTestUtilsPlugin = {
       ...testUtilsPlugin,
-      init: testUtilsPlugin.init.bind(null) as SetReturnType<
-        typeof testUtilsPlugin.init,
-        TestUtilsInitReturn & {
-          options: Exclude<TestUtilsInitReturn["options"], undefined>;
-        }
-      >,
+      init: testUtilsPlugin.init.bind(null),
     };
 
     // Fork the entity manager to avoid global context errors
@@ -302,10 +298,21 @@ export const it = testBase
 
     return buildMockServer<ApolloServerContext>(resolvers);
   })
+  .extend("createGqlContext", { scope: "file" }, ({ services, orm }) => () => ({
+    [CoreKey]: {
+      em: orm.em.fork(),
+      services,
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
+    },
+    logger,
+    sendEvent: vi.fn<MainRunnerMachineIntake>(),
+    plugins: new Map(),
+  }))
+  .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(
     "gqlServer",
     { scope: "file" },
-    async ({ apolloServerInstance, orm, services }, { onCleanup }) => {
+    async ({ apolloServerInstance, createGqlContext }, { onCleanup }) => {
       const { initApolloClient } = await import("../graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
@@ -313,20 +320,8 @@ export const it = testBase
       const { url } = await startStandaloneServer<ApolloServerContext>(
         apolloServerInstance,
         {
-          context: async () =>
-            Promise.resolve({
-              [CoreKey]: {
-                em: orm.em.fork(),
-                services,
-              },
-              logger: {} as never,
-              sendEvent: vi.fn<MainRunnerMachineIntake>(),
-              plugins: {},
-            }),
-          listen: {
-            path: "/graphql",
-            port: 0,
-          },
+          context: async () => Promise.resolve(createGqlContext()),
+          listen: { port: 0 },
         },
       );
 

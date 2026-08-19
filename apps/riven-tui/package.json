@@ -1,0 +1,65 @@
+{
+  "name": "@repo/riven-tui",
+  "version": "0.0.0",
+  "private": true,
+  "bin": {
+    "riven-tui": "./dist/cli.js"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./wiki.config": "./wiki.config.ts"
+  },
+  "scripts": {
+    "build": "tsc --build tsconfig.app.json",
+    "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
+    "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven-tui --import=@swc-node/register/esm-register --enable-source-maps lib/cli.tsx",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint:fix": "pnpm lint --fix",
+    "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven-tui --enable-source-maps dist/cli.js",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@apollo/client": "catalog:",
+    "@inkjs/ui": "catalog:",
+    "@mishieck/ink-titled-box": "catalog:",
+    "@repo/util-wiki-helpers": "workspace:^",
+    "fullscreen-ink": "catalog:",
+    "graphql": "catalog:",
+    "ink": "catalog:",
+    "ink-link": "catalog:",
+    "ink-picture": "catalog:",
+    "ink-spinner": "catalog:",
+    "ink-syntax-highlight": "catalog:",
+    "ink-tab": "catalog:",
+    "json-stringify-pretty-compact": "catalog:",
+    "luxon": "catalog:",
+    "react": "catalog:",
+    "react-error-boundary": "catalog:",
+    "react-router": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/near-operation-file-preset": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
+    "@repo/core-util-oxlint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@swc-node/register": "catalog:",
+    "@swc/core": "catalog:",
+    "@types/luxon": "catalog:",
+    "@types/node": "catalog:",
+    "@types/react": "catalog:",
+    "@typescript/native": "catalog:",
+    "oxlint": "catalog:",
+    "react-devtools-core": "catalog:",
+    "typescript": "catalog:",
+    "unplugin-swc": "catalog:",
+    "vitest": "catalog:"
+  }
+}

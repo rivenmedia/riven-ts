@@ -1,0 +1,12 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": "lib",
+    "outDir": "dist"
+  },
+  "files": ["package.json"],
+  "include": ["lib/**/*.ts", "lib/**/*.tsx"],
+  "exclude": ["lib/**/*.spec.ts", "lib/**/*.spec.tsx", "**/__tests__/**/*.ts"]
+}

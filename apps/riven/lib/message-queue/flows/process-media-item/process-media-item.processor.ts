@@ -1,6 +1,6 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { ValidationError } from "@mikro-orm/core";
+import { NotFoundError, ValidationError } from "@mikro-orm/core";
 import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
@@ -31,6 +31,18 @@ export const processMediaItemProcessor =
         plugins,
       },
     ) => {
+      try {
+        await mediaItemService.getMediaItemById(job.data.mediaItem.id);
+      } catch (error) {
+        if (error instanceof NotFoundError) {
+          throw new UnrecoverableError(
+            `Media item with ID ${job.data.mediaItem.id} not found`,
+          );
+        }
+
+        throw error;
+      }
+
       assert.ok(token, "Job token is required");
 
       const parent = createJobParentConfig(job);
@@ -99,12 +111,12 @@ export const processMediaItemProcessor =
               break;
             }
             case "download": {
-              const item = await downloaderService.getItemToDownload(
+              const itemToDownload = await downloaderService.getItemToDownload(
                 job.data.mediaItem.id,
               );
 
               await enqueueDownloadItem({
-                item,
+                item: itemToDownload,
                 opts: { parent },
               });
 
@@ -162,13 +174,12 @@ export const processMediaItemProcessor =
           job.data.mediaItem.id,
         );
 
-        const successfulStates: MediaItemState[] = [
+        const successfulStates = new Set<MediaItemState>([
           "completed",
-          "ongoing",
           "partially_completed",
-        ];
+        ]);
 
-        if (!successfulStates.includes(item.state)) {
+        if (!successfulStates.has(item.state)) {
           throw new UnrecoverableError(
             `Processing of ${chalk.bold(item.fullTitle)} did not complete successfully. Final state: ${item.state}`,
           );
@@ -202,7 +213,7 @@ export const processMediaItemProcessor =
             const showUnrequestedItems = await show.getUnrequestedItems();
             const hasUnrequestedItems = showUnrequestedItems.length > 0;
 
-            if (show.state === "ongoing") {
+            if (show.status === "continuing") {
               const { reindexTime } =
                 await indexerService.calculateReindexTime(show);
 

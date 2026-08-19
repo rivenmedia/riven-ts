@@ -3,6 +3,7 @@ import { createParameterDecorator } from "type-graphql";
 import { isBasePluginContext } from "../schemas/index.ts";
 
 import type { DataSourceConstructor } from "../schemas/index.ts";
+import type { GraphQLContext } from "../types/graphql-context.ts";
 
 /**
  * Parameter decorator used to inject the plugin context for the current plugin.
@@ -11,8 +12,8 @@ import type { DataSourceConstructor } from "../schemas/index.ts";
  * @returns The context available to the current plugin
  */
 export function PluginContext(pluginSymbol: symbol) {
-  return createParameterDecorator<Record<symbol, unknown>>(
-    ({ context }) => context[pluginSymbol],
+  return createParameterDecorator<GraphQLContext>(({ context }) =>
+    context.plugins.get(pluginSymbol),
   );
 }
 
@@ -27,8 +28,8 @@ export function PluginDataSource(
   pluginSymbol: symbol,
   dataSource: DataSourceConstructor,
 ) {
-  return createParameterDecorator<Record<symbol, unknown>>(({ context }) => {
-    const pluginContext = context[pluginSymbol];
+  return createParameterDecorator<GraphQLContext>(({ context }) => {
+    const pluginContext = context.plugins.get(pluginSymbol);
 
     if (!isBasePluginContext(pluginContext)) {
       throw new Error(

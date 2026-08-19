@@ -310,9 +310,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       const settingsPayload = {
         types: REQUIRED_TYPES,
         options: {
-          jsonPayload: JSON.stringify(
-            JSON.stringify(webhookBodyContent, null, 2),
-          ),
+          jsonPayload: JSON.stringify(webhookBodyContent, null, 2),
         },
       } satisfies WebhookSettings;
 

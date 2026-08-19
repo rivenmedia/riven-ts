@@ -15,12 +15,10 @@ export async function persistScrapeResults(
 ) {
   const streams = await em.upsertMany(
     Stream,
-    Object.entries(results).map(([infoHash, parsedData]) =>
-      em.create(Stream, {
-        infoHash,
-        parsedData,
-      }),
-    ),
+    Object.entries(results).map(([infoHash, parsedData]) => ({
+      infoHash,
+      parsedData,
+    })),
     { onConflictAction: "ignore" },
   );
 

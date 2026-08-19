@@ -2,6 +2,7 @@ import { defineConfig } from "oxlint";
 
 import {
   entityFiles,
+  graphqlFiles,
   jsFiles,
   testFiles,
   tsFiles,
@@ -14,6 +15,7 @@ export const banDateConstructor = defineConfig({
       excludeFiles: [
         ...testFiles,
         entityFiles, // Database entities use the Date constructor to provide runtime type reflect metadata
+        graphqlFiles, // GraphQL type files may use the Date constructor to allow TypeGraphQL to convert to ISO string
       ],
       plugins: ["eslint"],
       rules: {

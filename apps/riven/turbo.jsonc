@@ -76,6 +76,10 @@
       "dependsOn": ["$TURBO_EXTENDS$", "transit:source-files"],
       "inputs": ["lib/database/config.ts", "lib/database/database.ts"],
       "outputs": ["temp/metadata.json"]
+    },
+    "tui": {
+      "dependsOn": ["@repo/riven-tui#build"],
+      "passThroughEnv": ["RIVEN_TUI_SETTING__*"]
     }
   }
 }

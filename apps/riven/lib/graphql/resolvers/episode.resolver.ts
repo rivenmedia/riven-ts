@@ -42,4 +42,9 @@ export class EpisodeResolver {
   public expectedFileCount(@Root() episode: Episode) {
     return episode.getExpectedFileCount();
   }
+
+  @FieldResolver(() => Int)
+  public async show(@Root() episode: Episode) {
+    return episode.show.loadOrFail();
+  }
 }

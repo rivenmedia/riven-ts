@@ -13,7 +13,7 @@ export class MediaEntryFactory extends Factory<MediaEntry> {
   ): EntityData<MediaEntry> {
     return {
       fileSize: faker.number.int({ min: 1024 * 1024 }),
-      originalFilename: faker.system.fileName(),
+      originalFilename: faker.system.fileName().replace(/\.\w+$/u, ".mkv"),
       plugin: faker.lorem.word(),
       ...input,
     };

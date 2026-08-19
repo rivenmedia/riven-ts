@@ -12,21 +12,26 @@ import chalk from "chalk";
 
 import type {
   ChangeSet,
-  EntityData,
   EventArgs,
   EventSubscriber,
   FlushEventArgs,
   UnitOfWork,
 } from "@mikro-orm/core";
-import type { ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";
 
-type NextStatesMap = Map<MediaItem, MediaItemState>;
+type NextStatesMap = Map<UUID, MediaItemState>;
 
-export class MediaItemStateSubscriber implements EventSubscriber {
-  public afterUpsert({ entity }: EventArgs<EntityData<MediaItem>>): void {
+export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
+  public getSubscribedEntities() {
+    return [Movie, Show, Season, Episode];
+  }
+
+  public beforeUpsert({ entity }: EventArgs<MediaItem>): void {
     if (entity.state === "unreleased" && entity.isReleased) {
       entity.state = "indexed";
+    } else if (entity.state !== "unreleased" && !entity.isReleased) {
+      entity.state = "unreleased";
     }
   }
 
@@ -52,7 +57,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
     const trackedItems = new Map<
       MediaItem,
-      ChangeSet<Partial<MediaItem>> | null
+      ChangeSet<Partial<MediaItem>> | undefined
     >();
 
     for (const changeSet of uow.getChangeSets()) {
@@ -75,29 +80,15 @@ export class MediaItemStateSubscriber implements EventSubscriber {
         collection.owner instanceof MediaItem &&
         !trackedItems.has(collection.owner)
       ) {
-        trackedItems.set(collection.owner, null);
+        trackedItems.set(collection.owner, undefined);
       }
 
       if (collection.owner instanceof Season) {
-        const episodesToUpdate = new Set<Episode>();
-
         for (const episode of collection) {
           if (!(episode instanceof Episode)) {
             continue;
           }
 
-          if (episode.state === "unreleased" && !episode.isReleased) {
-            continue;
-          }
-
-          if (episode.state !== "unreleased" && episode.isReleased) {
-            continue;
-          }
-
-          episodesToUpdate.add(episode);
-        }
-
-        for (const episode of episodesToUpdate) {
           episodesAwaitingUpdate.add(episode);
         }
       }
@@ -109,6 +100,29 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     // Process direct updates from the unit of work
     for (const [item, changeSet] of trackedItems) {
+      const isNewlyRequestedSeason =
+        item instanceof Season &&
+        item.isRequested &&
+        changeSet?.originalEntity?.isRequested === false;
+
+      if (isNewlyRequestedSeason) {
+        const updatedShow = await item.show.loadOrFail({
+          populate: ["requestedSeasons"],
+        });
+
+        updatedShow.requestedSeasons.add(item);
+
+        updatedShow.state = await this.#computeStateWithChildren(
+          updatedShow,
+          updatedShow.requestedSeasons.getItems(),
+          nextStatesMap,
+        );
+
+        uow.computeChangeSet(updatedShow);
+
+        continue;
+      }
+
       const stateChanged = await this.#maybeUpdateState(
         item,
         changeSet,
@@ -121,7 +135,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       }
 
       if (item instanceof Season) {
-        showsAwaitingUpdate.add(await item.getShow());
+        showsAwaitingUpdate.add(await item.show.loadOrFail());
       }
 
       if (item instanceof Episode) {
@@ -132,7 +146,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     for (const episode of episodesAwaitingUpdate) {
       const stateChanged = await this.#maybeUpdateState(
         episode,
-        trackedItems.get(episode) ?? null,
+        trackedItems.get(episode) ?? undefined,
         uow,
         nextStatesMap,
       );
@@ -146,13 +160,13 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     for (const season of seasonsAwaitingUpdate) {
       const stateChanged = await this.#maybeUpdateState(
         season,
-        trackedItems.get(season) ?? null,
+        trackedItems.get(season) ?? undefined,
         uow,
         nextStatesMap,
       );
 
       if (stateChanged) {
-        showsAwaitingUpdate.add(await season.getShow());
+        showsAwaitingUpdate.add(await season.show.loadOrFail());
       }
     }
 
@@ -160,7 +174,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     for (const show of showsAwaitingUpdate) {
       await this.#maybeUpdateState(
         show,
-        trackedItems.get(show) ?? null,
+        trackedItems.get(show) ?? undefined,
         uow,
         nextStatesMap,
       );
@@ -188,7 +202,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
     if (entity instanceof Show) {
       return this.#computeStateWithChildren(
         entity,
-        await entity.requestedSeasons.loadItems(),
+        await entity.seasons.loadItems(),
         nextStatesMap,
       );
     }
@@ -197,13 +211,13 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   #buildChildrenStateCountMap(
-    children: MediaItem[],
+    children: (Season | Episode)[],
     nextStatesMap: NextStatesMap,
   ) {
     const acc: Partial<Record<MediaItemState, number>> = {};
 
     for (const child of children) {
-      const childState = nextStatesMap.get(child) ?? child.state;
+      const childState = nextStatesMap.get(child.id) ?? child.state;
 
       acc[childState] = (acc[childState] ?? 0) + 1;
     }
@@ -212,7 +226,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   #determineFixedState(item: MediaItem) {
-    if (item.state === "paused" || item.state === "failed") {
+    const fixedStates = new Set<MediaItemState>(["paused", "failed"]);
+
+    if (fixedStates.has(item.state)) {
       return item.state;
     }
 
@@ -220,16 +236,17 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   }
 
   #determineParentStateFromChildren(
-    parent: ShowLikeMediaItem,
-    children: MediaItem[],
+    children: (Season | Episode)[],
     nextStatesMap: NextStatesMap,
   ): MediaItemState | null {
     if (children.length === 0) {
       return null;
     }
 
+    const requestedChildren = children.filter(({ isRequested }) => isRequested);
+
     const childrenStateCountMap = this.#buildChildrenStateCountMap(
-      children,
+      requestedChildren,
       nextStatesMap,
     );
 
@@ -238,6 +255,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       "failed",
       "downloaded",
       "unreleased",
+      "completed",
     ]);
 
     for (const propagableState of propagableStates.options) {
@@ -247,23 +265,9 @@ export class MediaItemStateSubscriber implements EventSubscriber {
         continue;
       }
 
-      if (childrenStateCount === children.length) {
+      if (childrenStateCount === requestedChildren.length) {
         return propagableState;
       }
-    }
-
-    if (childrenStateCountMap.completed === children.length) {
-      return parent instanceof Show && parent.status === "continuing"
-        ? "ongoing"
-        : "completed";
-    }
-
-    if (
-      childrenStateCountMap.ongoing ||
-      childrenStateCountMap.unreleased ||
-      (parent instanceof Show && parent.status === "continuing")
-    ) {
-      return "ongoing";
     }
 
     if (
@@ -278,7 +282,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
   async #maybeUpdateState(
     entity: MediaItem,
-    changeSet: ChangeSet<Partial<MediaItem>> | null,
+    changeSet: ChangeSet<Partial<MediaItem>> | undefined,
     uow: UnitOfWork,
     nextStatesMap: NextStatesMap,
   ): Promise<boolean> {
@@ -288,13 +292,15 @@ export class MediaItemStateSubscriber implements EventSubscriber {
       return false;
     }
 
-    entity.state = nextState;
-
-    nextStatesMap.set(entity, nextState);
+    nextStatesMap.set(entity.id, nextState);
 
     if (changeSet) {
-      uow.recomputeSingleChangeSet(entity);
+      changeSet.entity.state = nextState;
+
+      uow.recomputeSingleChangeSet(changeSet.entity);
     } else {
+      entity.state = nextState;
+
       uow.computeChangeSet(entity);
     }
 
@@ -308,7 +314,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
   ): Promisable<MediaItemState> {
     return (
       this.#determineFixedState(item) ??
-      this.#determineParentStateFromChildren(item, children, nextStatesMap) ??
+      this.#determineParentStateFromChildren(children, nextStatesMap) ??
       this.#computeState(item)
     );
   }
@@ -324,7 +330,7 @@ export class MediaItemStateSubscriber implements EventSubscriber {
 
     const { settings } = await import("../../utilities/settings.ts");
 
-    if (item.failedScrapeAttempts >= settings.maximumScrapeAttempts) {
+    if (item.failedScrapeAttempts >= settings.maximumFailedAttempts) {
       return "failed";
     }
 

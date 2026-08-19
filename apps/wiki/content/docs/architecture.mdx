@@ -53,7 +53,8 @@ Media processing is handled through BullMQ job flows:
 
 ### GraphQL API (Apollo Server)
 
-Riven exposes a GraphQL API on port 3000 (configurable):
+Riven exposes a GraphQL API on `gqlHost:gqlPort`, defaulting to
+`localhost:3000`:
 
 - **Queries** for media items, episodes, seasons, shows, and plugin status
 - **Mutations** for saving stream URLs and triggering actions
@@ -71,7 +72,7 @@ Entities include:
 
 ### Virtual File System (FUSE)
 
-The VFS uses `fuse-native` to mount a virtual directory:
+The VFS uses `@zkochan/fuse-native` to mount a virtual directory:
 
 - Maps media items to a file/folder structure
 - Streams data on-demand from your debrid service
@@ -100,7 +101,8 @@ Plugins are self-contained packages that integrate with external services. Each 
 
 ### Event System
 
-Plugins communicate through 27+ typed events:
+Plugins communicate through typed events, defined as Zod schemas in the SDK
+under `lib/schemas/events/`:
 
 - **Lifecycle**: `riven.core.started`, `riven.core.shutdown`
 - **Content**: `riven.content-service.requested`
@@ -116,35 +118,13 @@ riven-ts/
 │   ├── riven/          # Main application
 │   └── wiki/           # This documentation site
 ├── packages/
-│   ├── core/           # Shared infrastructure
-│   │   ├── util-database/
-│   │   ├── util-graphql-*/
-│   │   ├── util-logger/
-│   │   └── ...
+│   ├── core/           # Shared infrastructure (database, logging, configs)
 │   ├── plugin-*/       # Plugins
-│   ├── util-plugin-sdk/    # Plugin SDK
-│   ├── util-plugin-testing/# Plugin test utilities
+│   ├── util-plugin-sdk/        # Plugin SDK
+│   ├── util-plugin-testing/    # Plugin test utilities
 │   ├── util-rank-torrent-name/ # Torrent ranking
-│   └── feature-settings/   # Settings management
+│   └── feature-settings/       # Settings management
 ```
 
-## Technology Stack
-
-| Technology        | Purpose                      |
-| ----------------- | ---------------------------- |
-| **TypeScript**    | Language                     |
-| **pnpm**          | Package manager              |
-| **Turborepo**     | Monorepo build orchestration |
-| **XState v5**     | State machines               |
-| **BullMQ**        | Job queues                   |
-| **Redis**         | Queue backend + caching      |
-| **PostgreSQL**    | Primary database             |
-| **MikroORM**      | Database ORM                 |
-| **Apollo Server** | GraphQL server               |
-| **type-graphql**  | Type-safe GraphQL resolvers  |
-| **FUSE**          | Virtual file system          |
-| **Zod**           | Runtime validation           |
-| **Winston**       | Logging                      |
-| **OpenTelemetry** | Tracing and metrics          |
-| **Vitest**        | Testing                      |
-| **MSW**           | HTTP mocking for tests       |
+Each plugin owns its own documentation under `docs/plugins/<name>/`, which the
+wiki picks up automatically at build time.

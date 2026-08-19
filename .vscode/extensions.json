@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "oxc.oxc-vscode",
+    "streetsidesoftware.code-spell-checker",
+    "apollographql.vscode-apollo",
+    "Redis.redis-for-vscode",
+    "webpro.vscode-knip",
+    "unifiedjs.vscode-mdx"
+  ]
+}

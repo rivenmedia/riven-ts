@@ -68,6 +68,7 @@ export const transformSeries = (
     }
 
     const existing = aliases.get(language) ?? new Set<string>();
+
     aliases.set(language, existing.add(name));
   }
 

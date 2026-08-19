@@ -29,7 +29,9 @@ export class Season extends ShowLikeMediaItem {
   public show!: Opt<Ref<Show>>;
 
   @Field(() => [Episode])
-  @OneToMany(() => Episode, (episode) => episode.season)
+  @OneToMany(() => Episode, (episode) => episode.season, {
+    orphanRemoval: true,
+  })
   public episodes = new Collection<Episode>(this);
 
   public getPrettyName(): string {
@@ -80,6 +82,30 @@ export class Season extends ShowLikeMediaItem {
       where: {
         state: ["indexed", "scraped"],
       },
+    });
+  }
+
+  public async getIncompleteEpisodes() {
+    return this.episodes.matching({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        state: {
+          $nin: ["completed", "unreleased"],
+        },
+      },
+      orderBy: { releaseDate: "asc nulls last" },
+    });
+  }
+
+  public async getUnreleasedEpisodes() {
+    return this.episodes.matching({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        state: "unreleased",
+      },
+      orderBy: { releaseDate: "asc nulls last" },
     });
   }
 }

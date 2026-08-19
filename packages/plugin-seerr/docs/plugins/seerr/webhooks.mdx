@@ -1,0 +1,139 @@
+---
+title: Webhooks
+description: Push approved Seerr requests to Riven the moment they happen.
+---
+
+By default the Seerr plugin polls for requests on an interval. Configuring the
+webhook instead lets Seerr push approved requests to Riven immediately.
+
+Riven validates your Seerr webhook configuration on startup and the plugin fails to load
+if it is wrong, so it is worth letting Riven configure it for you.
+
+## Let Riven configure it (recommended)
+
+<Steps>
+<Step>
+
+### Enable the webhook agent in Seerr
+
+Go to **Settings → Notifications → Webhook** and turn the agent on.
+
+<Callout type="warn">
+  Riven skips webhook validation entirely while the agent is disabled — nothing
+  is checked and nothing is fixed. This step cannot be automated.
+</Callout>
+
+</Step>
+<Step>
+
+### Set the webhook URL
+
+Point it at Riven's GraphQL endpoint, e.g. `http://riven:3000`.
+
+Riven never sets this for you. Make sure the API is actually reachable from
+Seerr — if Riven runs in Docker, that requires
+`RIVEN_SETTING__gqlHost="0.0.0.0"` and a published port. See
+[Getting Started](/docs/getting-started).
+
+</Step>
+<Step>
+
+### Enable autofix and restart Riven
+
+```bash
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__autofixWebhookBody=true
+```
+
+On the next start Riven writes the correct JSON payload and enables exactly the
+two notification types it needs. Look for
+`Automatically fixed Seerr webhook settings` in the logs.
+
+</Step>
+<Step>
+
+### Stop polling
+
+With the webhook live, disable the interval — Riven still does one full sync at
+startup to pick up anything it missed:
+
+```bash
+RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__updateIntervalSeconds=null
+```
+
+</Step>
+</Steps>
+
+## Configuring it manually
+
+If you would rather not grant Riven write access to your Seerr settings, leave
+`autofixWebhookBody` off and configure the agent yourself.
+
+Enable these two notification types, and **only** these two:
+
+- Request Approved
+- Request Automatically Approved
+
+Riven ignores every other type. Leaving extras enabled works but logs a warning
+and produces webhook calls that are discarded.
+
+Then set the JSON payload to exactly this:
+
+```json
+{
+  "query": "mutation ($input: SeerrHandleWebhookInput!) { seerrHandleWebhook(input: $input) }",
+  "variables": {
+    "input": {
+      "payload": {
+        "notification_type": "{{notification_type}}",
+        "{{media}}": {
+          "imdbId": "{{media_imdbid}}",
+          "media_type": "{{media_type}}",
+          "tmdbId": "{{media_tmdbid}}",
+          "tvdbId": "{{media_tvdbid}}"
+        },
+        "{{request}}": {
+          "request_id": "{{request_id}}",
+          "requestedBy_email": "{{requestedBy_email}}"
+        },
+        "{{extra}}": []
+      }
+    }
+  }
+}
+```
+
+<Callout type="warn">
+  Riven compares this payload literally. Any added, renamed, or removed field
+  fails validation and stops Riven from starting. That includes the trailing
+  empty array, which is what carries the requested season numbers for shows.
+</Callout>
+
+## Verifying
+
+Press **Test** in Seerr's webhook settings. Riven logs
+`Seerr webhook notification received` and returns `true`. Then approve a real
+request and watch it enter the pipeline.
+
+## Troubleshooting
+
+**`Invalid Seerr webhook settings`** — the notification types or the JSON
+payload don't match. The error lists exactly which. Either fix them by hand or
+set `autofixWebhookBody=true`.
+
+**`Invalid Seerr metadata provider settings`** — unrelated to webhooks, but it
+is checked first, so it will mask them. Riven needs both the TV **and** Anime
+metadata providers in Seerr set to TVDB. Fix them at
+**Settings → General → Metadata**, or set
+`RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__autofixMetadataProviders=true`.
+
+**Nothing arrives, no errors** — Seerr can't reach Riven. Validation only checks
+Seerr's stored settings; it never tests the URL. Curl the endpoint from inside
+the Seerr container:
+
+```bash
+docker compose exec seerr wget -qO- --post-data '{"query":"{ __typename }"}' \
+  --header 'content-type: application/json' http://riven:3000
+```
+
+**`Received unsupported Seerr notification type`** — an extra notification type
+is enabled in Seerr. Harmless; turn it off to quiet the log.

@@ -3,7 +3,9 @@
     "includes": [
       "apps/riven/lib/**/*.ts",
       "apps/frontend/app/**/*.tsx",
-      "apps/frontend/app/**/*.ts"
+      "apps/frontend/app/**/*.ts",
+      "apps/riven-tui/lib/**/*.ts",
+      "apps/riven-tui/lib/**/*.tsx"
     ],
     "service": {
       "name": "Riven",

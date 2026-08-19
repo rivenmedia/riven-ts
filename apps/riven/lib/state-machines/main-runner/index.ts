@@ -235,7 +235,7 @@ export const mainRunnerMachine = setup({
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
     isOngoingItem: (_, item: Movie | Show) => {
       if (item instanceof Show) {
-        return item.state === "ongoing";
+        return item.status === "continuing";
       }
 
       return !item.isReleased;
@@ -529,6 +529,20 @@ export const mainRunnerMachine = setup({
             ],
           },
 
+          "riven.item-request.removed": {
+            description:
+              "Indicates that an item request has been successfully removed.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { title } }) => ({
+                  message: `Successfully removed ${chalk.bold(title)} from the library.`,
+                  level: "info",
+                }),
+              },
+            ],
+          },
+
           /**
            * Index lifecycle events
            */
@@ -549,7 +563,6 @@ export const mainRunnerMachine = setup({
                   type: "log",
                   params: ({ event: { item } }) => ({
                     message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
-                    level: "info",
                   }),
                 },
               ],
@@ -568,10 +581,26 @@ export const mainRunnerMachine = setup({
                 },
                 {
                   type: "log",
-                  params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
-                    level: "info",
-                  }),
+                  params: ({ event: { item, meta } }) => {
+                    if (
+                      meta.type === "show" &&
+                      meta.isAdditionalSeasonRequest
+                    ) {
+                      return {
+                        message: `Successfully requested additional seasons for ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    if (meta.isReindex) {
+                      return {
+                        message: `Successfully re-indexed ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    return {
+                      message: `Successfully indexed ${chalk.bold(item.fullTitle)}. Future episodes will be re-indexed after their air date.`,
+                    };
+                  },
                 },
                 {
                   type: "processMediaItem",
@@ -589,10 +618,20 @@ export const mainRunnerMachine = setup({
               actions: [
                 {
                   type: "log",
-                  params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}`,
-                    level: "info",
-                  }),
+                  params: ({ event: { item, meta } }) => {
+                    if (
+                      meta.type === "show" &&
+                      meta.isAdditionalSeasonRequest
+                    ) {
+                      return {
+                        message: `Successfully requested additional seasons for ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    return {
+                      message: `Successfully indexed ${chalk.bold(item.fullTitle)}.`,
+                    };
+                  },
                 },
                 {
                   type: "processMediaItem",
@@ -601,13 +640,15 @@ export const mainRunnerMachine = setup({
               ],
             },
             {
-              actions: {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
-                  level: "error",
-                }),
-              },
+              actions: [
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
+                    level: "error",
+                  }),
+                },
+              ],
             },
           ],
 
@@ -639,17 +680,10 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          "riven.media-item.scrape.error.no-new-streams": {
+          "riven.media-item.scrape.error.no-streams-found": {
             description:
-              "Indicates that a media item scrape completed successfully, but no new streams were found.",
+              "Indicates that no streams were found when attempting to scrape a media item.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `No new streams found for ${chalk.bold(item.fullTitle)}.`,
-                  level: "verbose",
-                }),
-              },
               {
                 type: "fanOutDownload",
                 params: ({ event: { item } }) => ({ item }),
@@ -665,7 +699,6 @@ export const mainRunnerMachine = setup({
                 type: "log",
                 params: ({ event: { item } }) => ({
                   message: `Successfully scraped ${item.type}: ${chalk.bold(item.fullTitle)}`,
-                  level: "info",
                 }),
               },
             ],

@@ -1,18 +1,60 @@
-import { MediaItem, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  MediaItem,
+  Movie,
+  Season,
+} from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
+import { settings } from "../../../utilities/settings.ts";
 import { services } from "../../database.ts";
 import { BaseService } from "../core/base-service.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
+  readonly #rootItemTypes = new Set<MediaItemType>([
+    "movie",
+    settings.preferSeasonPacks ? "season" : "show",
+  ]);
+
+  public get rootItemTypes() {
+    return new Set(this.#rootItemTypes);
+  }
+
+  #shouldFanOut(item: MediaItem) {
+    if (item instanceof Movie || item instanceof Episode) {
+      // No fan-out necessary for movies or individual episodes,
+      // as they are the leaf nodes in the media item hierarchy
+      return false;
+    }
+
+    if (item instanceof Season) {
+      return item.state === "partially_completed";
+    }
+
+    const isPartialRequest = item.itemRequest.getProperty("isPartialRequest");
+
+    if (isPartialRequest) {
+      return true;
+    }
+
+    const isOngoingShow = item.itemRequest.getProperty("state") === "ongoing";
+
+    if (isOngoingShow) {
+      return true;
+    }
+
+    return settings.preferSeasonPacks;
+  }
+
   @CreateRequestContext()
   public async getMediaItemById<
     Hint extends string = never,
@@ -38,13 +80,7 @@ export class MediaItemService extends BaseService {
         { populate: ["itemRequest"] },
       );
 
-      const { settings } = await import("../../../utilities/settings.ts");
-
-      if (
-        item.itemRequest.getProperty("isPartialRequest") ||
-        (item instanceof Show &&
-          (item.status === "continuing" || settings.preferSeasonPacks))
-      ) {
+      if (this.#shouldFanOut(item)) {
         return await services.downloaderService.getFanOutDownloadItems(id);
       }
 

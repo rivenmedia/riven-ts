@@ -1,7 +1,11 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "NODE_ENV",
+    "RUNNER_ARCH", // Used to cache bust CI matrices
+    "RUNNER_OS" // Used to cache bust CI matrices
+  ],
   "globalPassThroughEnv": ["DEBUG", "CI"],
   "globalDependencies": [".node-version"],
   "futureFlags": {

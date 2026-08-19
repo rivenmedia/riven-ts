@@ -2,6 +2,7 @@ reviews:
   auto_review:
     enabled: false
   profile: chill
+  review_status: false
   path_filters:
     - "!packages/plugin-*/openapi-schema.*"
     - "!apps/riven/lib/database/migrations/**"

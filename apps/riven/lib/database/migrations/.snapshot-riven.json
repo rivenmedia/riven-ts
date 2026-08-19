@@ -98,14 +98,16 @@
           "constraintName": "blacklisted_stream_media_item_id_foreign",
           "localTableName": "public.blacklisted_stream",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.media_item"
+          "referencedTableName": "public.media_item",
+          "deleteRule": "cascade"
         },
         "blacklisted_stream_stream_info_hash_foreign": {
           "columnNames": ["stream_info_hash"],
           "constraintName": "blacklisted_stream_stream_info_hash_foreign",
           "localTableName": "public.blacklisted_stream",
           "referencedColumnNames": ["info_hash"],
-          "referencedTableName": "public.stream"
+          "referencedTableName": "public.stream",
+          "deleteRule": "cascade"
         }
       },
       "comment": null
@@ -512,7 +514,8 @@
           "constraintName": "file_system_entry_media_item_id_foreign",
           "localTableName": "public.file_system_entry",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.media_item"
+          "referencedTableName": "public.media_item",
+          "deleteRule": "cascade"
         }
       },
       "comment": null
@@ -673,11 +676,12 @@
           "collation": null,
           "enumItems": [
             "requested",
-            "requested_additional_seasons",
             "completed",
             "failed",
             "ongoing",
-            "unreleased"
+            "unreleased",
+            "processing",
+            "paused"
           ],
           "mappedType": "enum"
         },
@@ -770,8 +774,8 @@
       "checks": [
         {
           "name": "item_request_state_check",
-          "expression": "\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased')",
-          "definition": "check (\"state\" in ('requested', 'requested_additional_seasons', 'completed', 'failed', 'ongoing', 'unreleased'))",
+          "expression": "\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased', 'processing', 'paused')",
+          "definition": "check (\"state\" in ('requested', 'completed', 'failed', 'ongoing', 'unreleased', 'processing', 'paused'))",
           "columnName": "state"
         },
         {
@@ -1276,9 +1280,7 @@
           "comment": null,
           "collation": null,
           "enumItems": [
-            "unknown",
             "unreleased",
-            "ongoing",
             "indexed",
             "scraped",
             "downloaded",
@@ -1460,8 +1462,8 @@
         },
         {
           "name": "media_item_state_check",
-          "expression": "\"state\" in ('unknown', 'unreleased', 'ongoing', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused')",
-          "definition": "check (\"state\" in ('unknown', 'unreleased', 'ongoing', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused'))",
+          "expression": "\"state\" in ('unreleased', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused')",
+          "definition": "check (\"state\" in ('unreleased', 'indexed', 'scraped', 'downloaded', 'completed', 'partially_completed', 'failed', 'paused'))",
           "columnName": "state"
         },
         {
@@ -1492,7 +1494,8 @@
           "constraintName": "media_item_item_request_id_foreign",
           "localTableName": "public.media_item",
           "referencedColumnNames": ["id"],
-          "referencedTableName": "public.item_request"
+          "referencedTableName": "public.item_request",
+          "deleteRule": "cascade"
         },
         "media_item_season_id_foreign": {
           "columnNames": ["season_id"],
@@ -1580,79 +1583,6 @@
           "localTableName": "public.media_item_streams",
           "referencedColumnNames": ["info_hash"],
           "referencedTableName": "public.stream",
-          "updateRule": "cascade",
-          "deleteRule": "cascade"
-        }
-      },
-      "comment": null
-    },
-    {
-      "name": "media_item_subtitles",
-      "schema": "public",
-      "columns": {
-        "file_system_entry_id": {
-          "name": "file_system_entry_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": true,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        },
-        "media_item_id": {
-          "name": "media_item_id",
-          "type": "uuid",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": true,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "uuid"
-        }
-      },
-      "indexes": [
-        {
-          "columnNames": ["media_item_id", "file_system_entry_id"],
-          "composite": true,
-          "constraint": true,
-          "keyName": "media_item_subtitles_pkey",
-          "primary": true,
-          "unique": true
-        }
-      ],
-      "checks": [],
-      "triggers": [],
-      "foreignKeys": {
-        "media_item_subtitles_file_system_entry_id_foreign": {
-          "columnNames": ["file_system_entry_id"],
-          "constraintName": "media_item_subtitles_file_system_entry_id_foreign",
-          "localTableName": "public.media_item_subtitles",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.file_system_entry",
-          "updateRule": "cascade",
-          "deleteRule": "cascade"
-        },
-        "media_item_subtitles_media_item_id_foreign": {
-          "columnNames": ["media_item_id"],
-          "constraintName": "media_item_subtitles_media_item_id_foreign",
-          "localTableName": "public.media_item_subtitles",
-          "referencedColumnNames": ["id"],
-          "referencedTableName": "public.media_item",
           "updateRule": "cascade",
           "deleteRule": "cascade"
         }

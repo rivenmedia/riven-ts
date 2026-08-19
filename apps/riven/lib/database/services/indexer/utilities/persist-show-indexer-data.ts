@@ -29,7 +29,7 @@ export async function persistShowIndexerData(
 
   const processableStates = ItemRequestState.extract([
     "requested",
-    "requested_additional_seasons",
+    "processing",
     "ongoing",
     "unreleased",
   ]);
@@ -45,14 +45,23 @@ export async function persistShowIndexerData(
     {
       itemRequest: { id: itemRequest.id },
     },
-    { populate: ["$infer"] },
+    { populate: ["$infer", "seasons:ref", "seasons.episodes:ref"] },
   );
 
-  if (itemRequest.state === "requested_additional_seasons") {
-    itemRequest.state = "completed";
-
-    return existingShow;
-  }
+  const isAdditionalSeasonRequest = Boolean(
+    await existingShow?.seasons.loadCount({
+      where: {
+        isRequested: true,
+        isSpecial: false,
+        scrapedTimes: 0,
+        episodes: {
+          $every: {
+            scrapedTimes: 0,
+          },
+        },
+      },
+    }),
+  );
 
   if (existingShow?.status === "ended" && itemRequest.state === "completed") {
     throw new MediaItemIndexError({
@@ -63,12 +72,13 @@ export async function persistShowIndexerData(
 
   const { tvdbId } = itemRequest;
 
-  if (!tvdbId) {
-    throw new MediaItemIndexError({
+  assert.ok(
+    tvdbId,
+    new MediaItemIndexError({
       item: itemRequest,
       error: "Item request is missing tvdbId",
-    });
-  }
+    }),
+  );
 
   try {
     const indexedAt = DateTime.utc().toJSDate();
@@ -91,13 +101,29 @@ export async function persistShowIndexerData(
       nextAirDate: null, // Reset the next air date; it will be recalculated during episode processing
       indexedAt,
       seasons: [],
+      episodes: [],
     });
 
+    if (existingShow) {
+      show.id = existingShow.id;
+    }
+
     await em.upsert(Show, show, {
-      onConflictExcludeFields: ["indexedAt"],
+      onConflictExcludeFields: [
+        "createdAt",
+        "indexedAt",
+        "failedScrapeAttempts",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
     });
 
     for (const season of Object.values(item.seasons)) {
+      const existingSeason = existingShow?.seasons.find(
+        ({ number }) => number === season.number,
+      );
+
       const seasonTitle = [
         `Season ${season.number.toString().padStart(2, "0")}`,
         season.title,
@@ -124,13 +150,28 @@ export async function persistShowIndexerData(
         episodes: [],
       });
 
+      if (existingSeason) {
+        seasonEntry.id = existingSeason.id;
+      }
+
       show.seasons.add(seasonEntry);
 
       await em.upsert(Season, seasonEntry, {
-        onConflictExcludeFields: ["indexedAt"],
+        onConflictExcludeFields: [
+          "createdAt",
+          "failedScrapeAttempts",
+          "indexedAt",
+          "scrapedAt",
+          "scrapedTimes",
+          "state",
+        ],
       });
 
       for (const episode of season.episodes) {
+        const existingEpisode = existingSeason?.episodes.find(
+          ({ number }) => number === episode.number,
+        );
+
         const episodeEntry = em.create(Episode, {
           title: episode.title,
           fullTitle: `${seasonEntry.fullTitle}E${episode.number.toString().padStart(2, "0")} - ${episode.title}`,
@@ -146,28 +187,40 @@ export async function persistShowIndexerData(
           isRequested: seasonEntry.isRequested,
           itemRequest,
           indexedAt,
+          isSpecial: seasonEntry.isSpecial,
         });
 
-        if (
-          !seasonEntry.isSpecial &&
-          !episodeEntry.isReleased &&
-          episodeEntry.releaseDate &&
-          !show.nextAirDate
-        ) {
-          show.nextAirDate = episodeEntry.releaseDate;
-
-          await em.upsert(Show, show, {
-            onConflictExcludeFields: ["indexedAt"],
-          });
+        if (existingEpisode) {
+          episodeEntry.id = existingEpisode.id;
         }
 
         seasonEntry.episodes.add(episodeEntry);
+        show.episodes.add(episodeEntry);
 
         await em.upsert(Episode, episodeEntry, {
-          onConflictExcludeFields: ["indexedAt"],
+          onConflictExcludeFields: [
+            "createdAt",
+            "failedScrapeAttempts",
+            "indexedAt",
+            "scrapedAt",
+            "scrapedTimes",
+            "state",
+          ],
         });
       }
     }
+
+    // Re-upsert to compute dynamic properties (e.g. nextAirDate) on the show
+    await em.upsert(Show, show, {
+      onConflictExcludeFields: [
+        "createdAt",
+        "failedScrapeAttempts",
+        "indexedAt",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
+    });
 
     await validateOrReject(show);
 
@@ -189,7 +242,11 @@ export async function persistShowIndexerData(
       ...(!itemRequest.tvdbId && show.tvdbId && { tvdbId: show.tvdbId }),
     });
 
-    return show;
+    return {
+      item: show,
+      isReindex: Boolean(existingShow),
+      isAdditionalSeasonRequest,
+    };
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])

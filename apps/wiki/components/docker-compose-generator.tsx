@@ -24,6 +24,7 @@ interface TSConfig {
   seerrUrl: string;
   addAnalyticsServices: boolean;
   logsPath: string;
+  dataPath: string;
 }
 
 interface V1Config {
@@ -165,8 +166,10 @@ function buildTSCompose(cfg: TSConfig): {
         security_opt: ["apparmor:unconfined"],
         devices: ["/dev/fuse"],
         env_file: ".env",
+        ports: ["3000:3000"],
         volumes: [
           `${cfg.logsPath}:/app/logs`,
+          `${cfg.dataPath}:/app/data`,
           `${cfg.vfsMountPath}:/mount:rshared,z`,
         ],
         depends_on: {
@@ -253,14 +256,37 @@ function buildTSCompose(cfg: TSConfig): {
 
   const composeStr = stringify(compose, { lineWidth: 0, nullStr: "" });
 
+  // A plugin only runs if it is listed here. `tmdb` and `tvdb` are always on.
+  // Torrentio needs no configuration, so it is the default scraper.
+  const enabledPlugins = ["torrentio"];
+
+  if (cfg.debridProvider !== "none" && cfg.debridApiKey) {
+    enabledPlugins.push("stremthru");
+  }
+
+  if (cfg.contentSource !== "none" && cfg.contentApiKey) {
+    enabledPlugins.push(cfg.contentSource);
+  }
+
+  if (cfg.mediaServer !== "none") {
+    enabledPlugins.push(cfg.mediaServer);
+  }
+
   // .env file
   const envLines: string[] = [
     "# Core Settings",
     `RIVEN_SETTING__databaseUrl="postgres+psycopg2://${cfg.dbUser || "riven"}:${cfg.dbPassword || "changeme"}@postgres:5432/${cfg.dbName || "riven"}"`,
     `RIVEN_SETTING__redisUrl="redis://redis:6379"`,
     `RIVEN_SETTING__vfsMountPath="/mount"`,
+    // Defaults to localhost, which is unreachable from outside the container.
+    `RIVEN_SETTING__gqlHost="0.0.0.0"`,
+    `RIVEN_SETTING__rankingConfigPath="/app/data/riven-ranking-config.json"`,
     `RIVEN_SETTING__logLevel="info"`,
     `RIVEN_SETTING__enabledLogTransports=["console"]`,
+    `RIVEN_SETTING__enabledPlugins=[${enabledPlugins
+      .toSorted()
+      .map((plugin) => `"${plugin}"`)
+      .join(",")}]`,
     "",
   ];
 
@@ -626,8 +652,18 @@ function TSConfigForm({
         onChange={(value) => {
           update("logsPath", value);
         }}
-        placeholder="logs"
-        hint="Absolute path on your host for the logs"
+        placeholder="./logs"
+        hint="Host path for Riven's log files"
+      />
+
+      <InputField
+        label="Data Path"
+        value={config.dataPath}
+        onChange={(value) => {
+          update("dataPath", value);
+        }}
+        placeholder="./data"
+        hint="Host path for the generated torrent ranking config"
       />
 
       <div className="grid grid-cols-3 gap-4">
@@ -924,8 +960,12 @@ function V1ConfigForm({
 
 function TSPreview({
   output,
+  logsPath,
+  dataPath,
 }: {
   output: { compose: string; env: string; systemd: string };
+  logsPath: string;
+  dataPath: string;
 }) {
   const [tab, setTab] = useState<"systemd" | "compose" | "env">("systemd");
 
@@ -991,12 +1031,25 @@ function TSPreview({
         </>
       )}
       {tab === "compose" && (
-        <CodePreview
-          code={output.compose}
-          language="yaml"
-          label="Docker Compose"
-          filename="docker-compose.yml"
-        />
+        <>
+          <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 text-sm space-y-2">
+            <p className="font-medium">Before starting:</p>
+            <p className="text-fd-muted-foreground text-xs">
+              The container runs as UID/GID 1000, so the bind-mounted
+              directories must be owned by it:
+            </p>
+            <code className="block rounded bg-fd-muted px-1.5 py-0.5 text-xs">
+              mkdir -p {logsPath} {dataPath} &amp;&amp; sudo chown -R 1000:1000{" "}
+              {logsPath} {dataPath}
+            </code>
+          </div>
+          <CodePreview
+            code={output.compose}
+            language="yaml"
+            label="Docker Compose"
+            filename="docker-compose.yml"
+          />
+        </>
       )}
       {tab === "env" && (
         <CodePreview
@@ -1075,6 +1128,7 @@ export default function DockerComposeGenerator() {
   const [tsConfig, setTSConfig] = useState<TSConfig>({
     vfsMountPath: "/mnt/riven",
     logsPath: "./logs",
+    dataPath: "./data",
     dbUser: "riven",
     dbPassword: "",
     dbName: "riven",
@@ -1171,7 +1225,11 @@ export default function DockerComposeGenerator() {
           <h3 className="text-xl font-semibold">Generated Files</h3>
 
           {version === "ts" ? (
-            <TSPreview output={tsOutput()} />
+            <TSPreview
+              output={tsOutput()}
+              logsPath={tsConfig.logsPath}
+              dataPath={tsConfig.dataPath}
+            />
           ) : (
             <V1Preview output={v1Output()} />
           )}

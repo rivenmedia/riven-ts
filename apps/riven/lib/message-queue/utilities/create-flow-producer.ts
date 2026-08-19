@@ -4,6 +4,7 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { telemetry } from "../../utilities/telemetry.ts";
 import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
+import { queueRegistry } from "./queue-registry.ts";
 
 import type { Flow } from "../flows/index.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
@@ -60,12 +61,39 @@ export class ExtendedFlowProducer extends FlowProducer {
       children,
     );
 
+    const { jobId } = job.opts ?? {};
+
+    if (jobId) {
+      const queue = queueRegistry.get(job.queueName);
+
+      if (queue) {
+        const existingFlow = await this.getFlow<I, O>({
+          id: jobId,
+          queueName: job.queueName,
+        });
+
+        // oxlint-disable-next-line typescript/no-unnecessary-condition - BullMQ types are wrong here, existingFlow can be undefined
+        if (existingFlow) {
+          return existingFlow;
+        }
+      }
+    }
+
     return this.add(job);
   }
 
+  public override async getFlow<
+    I extends ZodObject<{
+      type: ZodLiteral<RivenEvent["type"]>;
+    }>,
+    O extends ZodType,
+  >(opts: NodeOpts): Promise<PluginJobNode<ParamsFor<z.input<I>>, z.infer<O>>>;
+
   public override async getFlow<T extends Flow>(
     opts: NodeOpts,
-  ): Promise<TypedJobNode<T["input"], T["output"]>> {
+  ): Promise<TypedJobNode<T["input"], T["output"]>>;
+
+  public override async getFlow(opts: NodeOpts) {
     return super.getFlow(opts);
   }
 }
