@@ -564,6 +564,9 @@ importers:
       '@repo/plugin-tvdb':
         specifier: workspace:^
         version: link:../../packages/plugin-tvdb
+      '@repo/riven-tui':
+        specifier: workspace:^
+        version: link:../riven-tui
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
@@ -818,9 +821,6 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../../packages/core/util-vitest-config
-      '@repo/riven':
-        specifier: workspace:^
-        version: link:../riven
       '@repo/util-wiki-helpers':
         specifier: workspace:^
         version: link:../../packages/util-docs-generation

@@ -49,7 +49,6 @@
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/riven": "workspace:^",
     "@repo/util-wiki-helpers": "workspace:^",
     "@swc-node/register": "catalog:",
     "@swc/core": "catalog:",

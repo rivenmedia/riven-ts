@@ -39,7 +39,8 @@
     "mikro-orm": "mikro-orm",
     "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "tui": "riven-tui"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
@@ -68,6 +69,7 @@
     "@repo/plugin-tmdb": "workspace:^",
     "@repo/plugin-torrentio": "workspace:^",
     "@repo/plugin-tvdb": "workspace:^",
+    "@repo/riven-tui": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "@repo/util-wiki-helpers": "workspace:^",
