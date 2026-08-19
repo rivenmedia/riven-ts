@@ -101,7 +101,7 @@ export const startGqlServer = fromPromise<
     cors(),
     express.json(),
     expressMiddleware(server, {
-      context: buildContextFunction(sendEvent, sendExternalEvent),
+      context: buildContextFunction(sendEvent, sendExternalEvent, validPlugins),
     }),
   );
 
