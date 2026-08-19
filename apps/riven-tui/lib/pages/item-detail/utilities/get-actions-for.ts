@@ -4,5 +4,7 @@ export function getActionsFor(
   actions: readonly ItemAction[],
   type: MediaItemType,
 ): ItemAction[] {
-  return actions.filter((action) => action.appliesTo.includes(type));
+  return actions.filter(
+    (action) => action.when !== false && action.appliesTo.includes(type),
+  );
 }

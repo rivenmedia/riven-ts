@@ -37,6 +37,7 @@ export type ItemAction<
   id: string;
   label: string;
   mutation: D;
+  when?: boolean;
   buildResultMessageData: (
     target: ActionTarget,
     data: ApolloClient.MutateResult<ReturnData> | null,

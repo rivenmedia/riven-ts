@@ -45,6 +45,7 @@ export function ItemDetailPageLayout() {
       appliesTo: ["Movie", "Show", "Season", "Episode"],
       id: "blacklist-active-stream",
       label: "Blacklist active stream",
+      when: item.hasActiveStream,
       description:
         "Blacklist the currently active stream and search for a replacement.",
       variables: {
