@@ -2,6 +2,7 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text, useInput } from "ink";
 import Link from "ink-link";
 import Image from "ink-picture";
+import { DateTime } from "luxon";
 
 import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
 import { DetailRow } from "../components/detail-row.tsx";
@@ -83,7 +84,10 @@ export function ItemDetailOverviewTab() {
         <DetailRow label="Year" value={item.year?.toString() ?? "—"} />
         <DetailRow label="Rating" value={item.rating?.toFixed(1) ?? "—"} />
         <DetailRow label="Content rating" value={contentRating ?? "—"} />
-        <DetailRow label="Release date" value={formatDate(item.releaseDate)} />
+        <DetailRow
+          label="Release date"
+          value={formatDate(item.releaseDate, DateTime.DATE_SHORT)}
+        />
         <DetailRow label="Genres" value={formatList(item.genres)} />
         {item.__typename === "Show" && item.status && (
           <DetailRow label="Status" value={item.status} />
@@ -104,7 +108,7 @@ export function ItemDetailOverviewTab() {
           value={item.filesystemEntries.length.toString()}
         />
         <DetailRow label="Subtitles" value={item.subtitles.length.toString()} />
-        <DetailRow label="Scraped at" value={formatDate(item.scrapedAt)} />
+        <DetailRow label="Last scraped at" value={formatDate(item.scrapedAt)} />
         <DetailRow label="Indexed at" value={formatDate(item.indexedAt)} />
       </Box>
     </Box>

@@ -4,7 +4,7 @@ import type { DateTimeFormatOptions } from "luxon";
 
 export function formatDate(
   value: string | null | undefined,
-  format: DateTimeFormatOptions = DateTime.DATE_SHORT,
+  format: DateTimeFormatOptions = DateTime.DATETIME_SHORT_WITH_SECONDS,
 ): string {
   if (!value) {
     return "—";
