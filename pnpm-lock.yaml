@@ -757,6 +757,9 @@ importers:
       '@mishieck/ink-titled-box':
         specifier: 'catalog:'
         version: 0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.2.15)(react-devtools-core@7.0.1)(react@19.2.6))(react@19.2.6)
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       fullscreen-ink:
         specifier: 'catalog:'
         version: 0.1.0(@types/react@19.2.15)(react-devtools-core@7.0.1)
@@ -821,9 +824,6 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../../packages/core/util-vitest-config
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../../packages/util-docs-generation
       '@swc-node/register':
         specifier: 'catalog:'
         version: 1.11.1(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@swc/core@1.15.40)(@swc/types@0.1.26)(@typescript/typescript6@6.0.2)

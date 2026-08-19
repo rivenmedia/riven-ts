@@ -66,7 +66,10 @@ export default {
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
+      ignoreDependencies: [
+        /@repo\/plugin(?<pluginName>.*)/u,
+        "@repo/riven-tui",
+      ],
       ignoreFiles: ["**/*.d.ts"],
     },
     "apps/riven-tui": {
