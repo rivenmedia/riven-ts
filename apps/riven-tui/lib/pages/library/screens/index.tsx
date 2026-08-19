@@ -1,7 +1,8 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import { useNavigate, useParams } from "react-router";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
 import { SelectList } from "../../../ui/select-list.tsx";
 import { GET_LIBRARY_ITEMS } from "../queries/get-library-items.query.ts";
@@ -22,11 +23,7 @@ export function LibraryScreenIndexScreen() {
     },
   });
 
-  useInput((input) => {
-    if (input.toLowerCase() === "r") {
-      void refetch();
-    }
-  });
+  useRefetch(refetch);
 
   return (
     <SelectList

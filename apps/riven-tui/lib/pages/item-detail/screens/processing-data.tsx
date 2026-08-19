@@ -1,7 +1,8 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import { DateTime } from "luxon";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { DetailRow } from "../components/detail-row.tsx";
 import { useItemId } from "../hooks/use-item-id.ts";
 import { GET_MEDIA_ITEM_PROCESSING_DATA } from "../queries/get-media-item-processing-data.query.ts";
@@ -16,11 +17,7 @@ export function ItemDetailProcessingDataScreen() {
     },
   });
 
-  useInput((input) => {
-    if (input.toLowerCase() === "r") {
-      void refetch();
-    }
-  });
+  useRefetch(refetch);
 
   if (!data.mediaItemById.nextScrapeAttemptAt) {
     return <Text dimColor>No processor job data found</Text>;

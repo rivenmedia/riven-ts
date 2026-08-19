@@ -1,8 +1,9 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import SyntaxHighlight from "ink-syntax-highlight";
 import stringify from "json-stringify-pretty-compact";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { DetailRow } from "../components/detail-row.tsx";
 import { useItemId } from "../hooks/use-item-id.ts";
 import { GET_MEDIA_ITEM_ACTIVE_STREAM } from "../queries/get-media-item-active-stream.query.ts";
@@ -16,11 +17,7 @@ export function ItemDetailActiveStreamScreen() {
     },
   });
 
-  useInput((input) => {
-    if (input.toLowerCase() === "r") {
-      void refetch();
-    }
-  });
+  useRefetch(refetch);
 
   if (!data.mediaItemById.activeStream) {
     return <Text dimColor>No active stream found</Text>;

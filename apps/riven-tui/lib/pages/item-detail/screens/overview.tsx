@@ -1,9 +1,10 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import Link from "ink-link";
 import Image from "ink-picture";
 import { DateTime } from "luxon";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
 import { DetailRow } from "../components/detail-row.tsx";
 import { useItemId } from "../hooks/use-item-id.ts";
@@ -24,14 +25,7 @@ export function ItemDetailOverviewTab() {
     variables: { mediaItemId: id },
   });
 
-  useInput(
-    (input) => {
-      if (input.toLowerCase() === "r") {
-        void refetch();
-      }
-    },
-    { isActive: !isActionsMenuVisible },
-  );
+  useRefetch(refetch, !isActionsMenuVisible);
 
   const contentRating = getContentRating(item);
 

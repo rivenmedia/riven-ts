@@ -1,7 +1,8 @@
 import { useSuspenseQuery } from "@apollo/client/react";
 import { UnorderedList } from "@inkjs/ui";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { useItemId } from "../hooks/use-item-id.ts";
 import { GET_MEDIA_ITEM_STREAMS } from "../queries/get-media-item-streams.query.ts";
 
@@ -14,11 +15,7 @@ export function ItemDetailStreamsScreen() {
     },
   });
 
-  useInput((input) => {
-    if (input.toLowerCase() === "r") {
-      void refetch();
-    }
-  });
+  useRefetch(refetch);
 
   if (data.mediaItemById.streams.length === 0) {
     return <Text dimColor>No streams found</Text>;

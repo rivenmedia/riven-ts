@@ -1,7 +1,8 @@
 import { useSuspenseQuery } from "@apollo/client/react";
 import { UnorderedList } from "@inkjs/ui";
-import { Text, useInput } from "ink";
+import { Text } from "ink";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { useItemId } from "../hooks/use-item-id.ts";
 import { GET_MEDIA_ITEM_SUBTITLES } from "../queries/get-media-item-subtitles.query.ts";
 
@@ -12,11 +13,7 @@ export function ItemDetailSubtitlesScreen() {
     },
   });
 
-  useInput((input) => {
-    if (input.toLowerCase() === "r") {
-      void refetch();
-    }
-  });
+  useRefetch(refetch);
 
   if (data.mediaItemById.subtitles.length === 0) {
     return <Text dimColor>No subtitles found</Text>;

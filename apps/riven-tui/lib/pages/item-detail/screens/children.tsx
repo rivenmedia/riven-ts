@@ -1,7 +1,8 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text, useInput } from "ink";
+import { Box, Text } from "ink";
 import { useNavigate } from "react-router";
 
+import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
 import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
 import { SelectList } from "../../../ui/select-list.tsx";
@@ -23,14 +24,7 @@ export function ItemDetailChildrenTab() {
     variables: { mediaItemId: id },
   });
 
-  useInput(
-    (input) => {
-      if (input.toLowerCase() === "r") {
-        void refetch();
-      }
-    },
-    { isActive: !isActionsMenuVisible },
-  );
+  useRefetch(refetch, !isActionsMenuVisible);
 
   const childItems = getChildren(item);
 
