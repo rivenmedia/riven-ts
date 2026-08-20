@@ -133,7 +133,7 @@ export class MediaItemService extends BaseService {
       orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
       ...(before ? { before, last: itemsPerPage } : {}),
       ...(after ? { after, first: itemsPerPage } : {}),
-      ...(after && before ? {} : { first: itemsPerPage }),
+      ...(before == null && after == null ? { first: itemsPerPage } : {}),
     });
   }
 }
