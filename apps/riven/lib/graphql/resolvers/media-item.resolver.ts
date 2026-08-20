@@ -17,6 +17,7 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 import {
   Arg,
+  Args,
   Ctx,
   FieldResolver,
   ID,
@@ -29,10 +30,17 @@ import {
 
 import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
 import { queueRegistry } from "../../message-queue/utilities/queue-registry.ts";
+import { PaginationArgs } from "../args/pagination.args.ts";
 import { CoreContext } from "../decorators/core-context.ts";
+import { createCursorType } from "../types/create-cursor-type.ts";
 
 import type { ApolloServerContext } from "../context.ts";
 import type { UUID } from "node:crypto";
+
+const MediaItemCursor = createCursorType<MediaItem>(
+  "MediaItem",
+  MediaItemUnion,
+);
 
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
@@ -47,25 +55,24 @@ export class MediaItemResolver {
     return services.mediaItemService.getMediaItemById(id);
   }
 
-  @Query(() => [MediaItemUnion])
+  @Query(() => MediaItemCursor)
   public async mediaItems(
     @Arg("type", () => [MediaItemType.enum], {
-      defaultValue: MediaItemType.options,
+      defaultValue: ["movie", "show"],
     })
     filter: MediaItemType[],
-    @Arg("limit", () => Int, { defaultValue: 25 })
-    limit: number,
-    @Arg("page", () => Int, { defaultValue: 1 })
-    page: number,
     @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
     includeUnrequestedItems: boolean,
+    @Args(() => PaginationArgs)
+    { after, before, itemsPerPage }: PaginationArgs,
     @CoreContext() { services: { mediaItemService } }: CoreContext,
-  ): Promise<MediaItem[]> {
+  ) {
     return mediaItemService.getPaginatedMediaItems({
       filter,
       includeUnrequestedItems,
-      limit,
-      page,
+      itemsPerPage,
+      after,
+      before,
     });
   }
 

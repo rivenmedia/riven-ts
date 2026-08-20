@@ -33,8 +33,8 @@ it("defaults to page 1", async ({
   // Create a second movie to ensure pagination works correctly
   await movieFactory.createOne({ title: "B Movie" });
 
-  const items = await mediaItemService.getPaginatedMediaItems({
-    limit: 1,
+  const { items } = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 1,
   });
 
   expect(items).toHaveLength(1);
@@ -47,7 +47,7 @@ it("defaults to 25 items per page", async ({
 }) => {
   await seedIndexedMovie(50);
 
-  const items = await mediaItemService.getPaginatedMediaItems({
+  const { items } = await mediaItemService.getPaginatedMediaItems({
     filter: ["movie"],
   });
 
@@ -58,7 +58,9 @@ it("returns a paginated list of media items", async ({
   seeders: { seedIndexedMovie },
   services: { mediaItemService },
 }) => {
-  const movies = await seedIndexedMovie(10);
+  expect.assertions(4);
+
+  const movies = await seedIndexedMovie(20);
   const sortedMovies = sortByTitleAndState(
     movies.map(({ movie }) => ({
       fullTitle: movie.fullTitle,
@@ -66,40 +68,33 @@ it("returns a paginated list of media items", async ({
     })),
   );
 
-  const pageOne = await mediaItemService.getPaginatedMediaItems({
-    limit: 5,
-  });
+  let offset = 0;
+  let cursor: string | null = null;
 
-  expect(pageOne).toHaveLength(5);
+  const itemsPerPage = 5;
 
-  expect(pageOne).toStrictEqual(
-    expect.arrayContaining(
-      sortedMovies.slice(0, 5).map(({ fullTitle, state }) =>
-        expect.objectContaining({
-          fullTitle,
-          state,
-        }),
+  do {
+    const page = await mediaItemService.getPaginatedMediaItems({
+      itemsPerPage,
+      after: cursor,
+    });
+
+    expect(page.items).toStrictEqual(
+      expect.arrayContaining(
+        sortedMovies
+          .slice(offset, offset + itemsPerPage)
+          .map(({ fullTitle, state }) =>
+            expect.objectContaining({
+              fullTitle,
+              state,
+            }),
+          ),
       ),
-    ),
-  );
+    );
 
-  const pageTwo = await mediaItemService.getPaginatedMediaItems({
-    limit: 5,
-    page: 2,
-  });
-
-  expect(pageTwo).toHaveLength(5);
-
-  expect(pageTwo).toStrictEqual(
-    expect.arrayContaining(
-      sortedMovies.slice(5, 10).map(({ fullTitle, state }) =>
-        expect.objectContaining({
-          fullTitle,
-          state,
-        }),
-      ),
-    ),
-  );
+    offset += itemsPerPage;
+    cursor = page.endCursor;
+  } while (offset < sortedMovies.length);
 });
 
 it("filters to the selected media item type", async ({
@@ -109,9 +104,9 @@ it("filters to the selected media item type", async ({
   await seedIndexedMovie(10);
   await seedIndexedShow();
 
-  const items = await mediaItemService.getPaginatedMediaItems({
+  const { items } = await mediaItemService.getPaginatedMediaItems({
     filter: ["movie"],
-    limit: 100,
+    itemsPerPage: 100,
   });
 
   expect(items).toHaveLength(10);
@@ -124,7 +119,7 @@ it("filters to movies and shows by default", async ({
   await seedIndexedMovie(10);
   await seedIndexedShow();
 
-  const items = await mediaItemService.getPaginatedMediaItems();
+  const { items } = await mediaItemService.getPaginatedMediaItems();
 
   expect(items).toStrictEqual(
     expect.not.arrayContaining([
@@ -141,7 +136,7 @@ it("orders by title and then state", async ({
 }) => {
   const movies = await seedIndexedMovie(10);
 
-  const items = await mediaItemService.getPaginatedMediaItems();
+  const { items } = await mediaItemService.getPaginatedMediaItems();
 
   const expectedMovies = sortByTitleAndState(
     movies.map(({ movie }) => ({
@@ -167,7 +162,8 @@ it("returns unrequested items when includeUnrequestedItems is true", async ({
   services: { mediaItemService },
 }) => {
   const show = await seedPartiallyRequestedShow();
-  const items = await mediaItemService.getPaginatedMediaItems({
+
+  const { items } = await mediaItemService.getPaginatedMediaItems({
     filter: ["season"],
     includeUnrequestedItems: true,
   });
@@ -182,7 +178,8 @@ it("does not return unrequested items when includeUnrequestedItems is false", as
   services: { mediaItemService },
 }) => {
   const show = await seedPartiallyRequestedShow();
-  const items = await mediaItemService.getPaginatedMediaItems({
+
+  const { items } = await mediaItemService.getPaginatedMediaItems({
     filter: ["season"],
     includeUnrequestedItems: false,
   });

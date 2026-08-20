@@ -84,11 +84,13 @@ describe("mediaItems", () => {
     GetMediaItemsQuery,
     GetMediaItemsQueryVariables
   > = gql`
-    query GetMediaItems($limit: Int, $page: Int) {
-      mediaItems(limit: $limit, page: $page) {
-        ... on MediaItem {
-          id
-          fullTitle
+    query GetMediaItems($itemsPerPage: Int, $after: String) {
+      mediaItems(after: $after, itemsPerPage: $itemsPerPage) {
+        items {
+          ... on MediaItem {
+            id
+            fullTitle
+          }
         }
       }
     }
@@ -108,8 +110,7 @@ describe("mediaItems", () => {
       {
         query: GET_MEDIA_ITEMS,
         variables: {
-          limit: 10,
-          page: 1,
+          itemsPerPage: 10,
         },
       },
       { contextValue: gqlContext },
@@ -118,7 +119,7 @@ describe("mediaItems", () => {
     expect.assert(body.kind === "single");
 
     expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.mediaItems).toHaveLength(10);
+    expect(body.singleResult.data?.mediaItems.items).toHaveLength(10);
   });
 
   it("defaults to 25 items per page", async ({
@@ -134,9 +135,6 @@ describe("mediaItems", () => {
     >(
       {
         query: GET_MEDIA_ITEMS,
-        variables: {
-          page: 1,
-        },
       },
       { contextValue: gqlContext },
     );
@@ -144,7 +142,7 @@ describe("mediaItems", () => {
     expect.assert(body.kind === "single");
 
     expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.mediaItems).toHaveLength(25);
+    expect(body.singleResult.data?.mediaItems.items).toHaveLength(25);
   });
 
   it("defaults to page 1", async ({
@@ -161,14 +159,14 @@ describe("mediaItems", () => {
       GetMediaItemsQuery,
       GetMediaItemsQueryVariables
     >(
-      { query: GET_MEDIA_ITEMS, variables: { limit: 1 } },
+      { query: GET_MEDIA_ITEMS, variables: { itemsPerPage: 1 } },
       { contextValue: gqlContext },
     );
 
     expect.assert(body.kind === "single");
 
     expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.mediaItems[0]?.fullTitle).toBe(
+    expect(body.singleResult.data?.mediaItems.items[0]?.fullTitle).toBe(
       movieA.fullTitle,
     );
   });

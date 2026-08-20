@@ -12,14 +12,22 @@ export const GET_LIBRARY_ITEMS: TypedDocumentNode<
 > = gql`
   query RivenTuiGetLibraryItems(
     $type: [MediaItemType!]!
-    $limit: Int!
-    $page: Int!
+    $after: String
+    $itemsPerPage: Int
   ) {
-    mediaItems(type: $type, limit: $limit, page: $page) {
-      ... on MediaItem {
-        id
-        fullTitle
-        state
+    mediaItems(type: $type, after: $after, itemsPerPage: $itemsPerPage) {
+      hasNextPage
+      hasPrevPage
+      endCursor
+      startCursor
+      totalCount
+      length
+      items {
+        ... on MediaItem {
+          id
+          fullTitle
+          state
+        }
       }
     }
   }

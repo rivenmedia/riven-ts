@@ -107,27 +107,33 @@ export class MediaItemService extends BaseService {
   public async getPaginatedMediaItems({
     filter = ["movie", "show"],
     includeUnrequestedItems = false,
-    limit = 25,
-    page = 1,
+    before,
+    after,
+    itemsPerPage = 25,
   }: {
     filter?: MediaItemType[];
     includeUnrequestedItems?: boolean;
-    limit?: number;
-    page?: number;
+    before?: string | null;
+    after?: string | null;
+    itemsPerPage?: number;
   } = {}) {
-    return this.em.find(
-      MediaItem,
-      {
+    if (before && after) {
+      throw new Error(
+        "Cannot specify both 'before' and 'after' cursors for pagination.",
+      );
+    }
+
+    return this.em.findByCursor(MediaItem, {
+      where: {
         type: { $in: filter },
         isRequested: {
           $in: [true, !includeUnrequestedItems],
         },
       },
-      {
-        orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
-        limit,
-        offset: (page - 1) * limit,
-      },
-    );
+      orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
+      ...(before ? { before, last: itemsPerPage } : {}),
+      ...(after ? { after, first: itemsPerPage } : {}),
+      ...(after && before ? {} : { first: itemsPerPage }),
+    });
   }
 }
