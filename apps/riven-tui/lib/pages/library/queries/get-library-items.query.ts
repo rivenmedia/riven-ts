@@ -10,8 +10,12 @@ export const GET_LIBRARY_ITEMS: TypedDocumentNode<
   RivenTuiGetLibraryItemsQuery,
   RivenTuiGetLibraryItemsQueryVariables
 > = gql`
-  query RivenTuiGetLibraryItems($type: [MediaItemType!]!) {
-    mediaItems(type: $type) {
+  query RivenTuiGetLibraryItems(
+    $type: [MediaItemType!]!
+    $limit: Int!
+    $page: Int!
+  ) {
+    mediaItems(type: $type, limit: $limit, page: $page) {
       ... on MediaItem {
         id
         fullTitle

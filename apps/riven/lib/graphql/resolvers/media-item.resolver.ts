@@ -53,6 +53,10 @@ export class MediaItemResolver {
       defaultValue: MediaItemType.options,
     })
     filter: MediaItemType[],
+    @Arg("limit", () => Int, { defaultValue: 25 })
+    limit: number,
+    @Arg("page", () => Int, { defaultValue: 1 })
+    page: number,
     @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
     includeUnrequestedItems: boolean,
     @CoreContext() { em }: CoreContext,
@@ -61,11 +65,16 @@ export class MediaItemResolver {
       MediaItem,
       {
         type: { $in: filter },
-        isRequested: includeUnrequestedItems ? { $in: [true, false] } : true,
+        isRequested: includeUnrequestedItems
+          ? {
+              $in: [true, false],
+            }
+          : true,
       },
       {
         orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
-        // limit: 25,
+        limit,
+        offset: (page - 1) * limit,
         overfetch: true,
       },
     );

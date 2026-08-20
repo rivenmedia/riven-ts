@@ -22,7 +22,8 @@ export function LibraryScreenLayout() {
       }}
       footer={
         <Text dimColor>
-          [↑/↓] navigate · [enter] view · [r] refresh · [q] quit
+          [↑/↓] navigate · [m/n] change page · [enter] view · [r] refresh · [q]
+          quit
         </Text>
       }
       tabs={{

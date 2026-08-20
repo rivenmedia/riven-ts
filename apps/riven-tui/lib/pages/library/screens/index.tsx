@@ -1,6 +1,6 @@
 import { useSuspenseQuery } from "@apollo/client/react";
-import { Box, Text } from "ink";
-import { useNavigate, useParams } from "react-router";
+import { Box, Text, useInput } from "ink";
+import { useNavigate, useParams, useSearchParams } from "react-router";
 
 import { useRefetch } from "../../../hooks/use-refetch.ts";
 import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
@@ -13,17 +13,43 @@ export function LibraryScreenIndexScreen() {
   const params = useParams<{
     type?: Extract<MediaItemType, "movie" | "show">;
   }>();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const navigate = useNavigate();
+  const limit = 25;
 
   const { refetch, data } = useSuspenseQuery(GET_LIBRARY_ITEMS, {
     fetchPolicy: "network-only",
     variables: {
       type: params.type ? [params.type] : ["movie", "show"],
+      limit,
+      page: Number(searchParams.get("page") ?? 1),
     },
   });
 
   useRefetch(refetch);
+
+  useInput((input) => {
+    if (input === "m" && data.mediaItems.length === limit) {
+      setSearchParams((search) => {
+        const currentPage = Number(search.get("page") ?? 1);
+
+        search.set("page", String(currentPage + 1));
+
+        return search;
+      });
+    }
+
+    if (input === "n") {
+      setSearchParams((search) => {
+        const currentPage = Number(search.get("page") ?? 1);
+
+        search.set("page", String(Math.max(currentPage - 1, 1)));
+
+        return search;
+      });
+    }
+  });
 
   return (
     <SelectList
