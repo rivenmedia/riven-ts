@@ -117,6 +117,24 @@ it("filters to the selected media item type", async ({
   expect(items).toHaveLength(10);
 });
 
+it("filters to movies and shows by default", async ({
+  seeders: { seedIndexedMovie, seedIndexedShow },
+  services: { mediaItemService },
+}) => {
+  await seedIndexedMovie(10);
+  await seedIndexedShow();
+
+  const items = await mediaItemService.getPaginatedMediaItems();
+
+  expect(items).toStrictEqual(
+    expect.not.arrayContaining([
+      expect.objectContaining({
+        type: expect.stringMatching(/^season|episode$/u),
+      }),
+    ]),
+  );
+});
+
 it("orders by title and then state", async ({
   seeders: { seedIndexedMovie },
   services: { mediaItemService },
@@ -141,5 +159,37 @@ it("orders by title and then state", async ({
         }),
       ),
     ),
+  );
+});
+
+it("returns unrequested items when includeUnrequestedItems is true", async ({
+  seeders: { seedPartiallyRequestedShow },
+  services: { mediaItemService },
+}) => {
+  const show = await seedPartiallyRequestedShow();
+  const items = await mediaItemService.getPaginatedMediaItems({
+    filter: ["season"],
+    includeUnrequestedItems: true,
+  });
+
+  expect.assert(show.seasons);
+
+  expect(items).toHaveLength(show.seasons.length);
+});
+
+it("does not return unrequested items when includeUnrequestedItems is false", async ({
+  seeders: { seedPartiallyRequestedShow },
+  services: { mediaItemService },
+}) => {
+  const show = await seedPartiallyRequestedShow();
+  const items = await mediaItemService.getPaginatedMediaItems({
+    filter: ["season"],
+    includeUnrequestedItems: false,
+  });
+
+  expect.assert(show.seasons);
+
+  expect(items).toHaveLength(
+    show.seasons.filter((season) => season.isRequested).length,
   );
 });

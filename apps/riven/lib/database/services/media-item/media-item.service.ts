@@ -4,7 +4,6 @@ import {
   Movie,
   Season,
 } from "@repo/util-plugin-sdk/dto/entities";
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 import {
   CreateRequestContext,
@@ -18,6 +17,7 @@ import { BaseService } from "../core/base-service.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
@@ -105,7 +105,7 @@ export class MediaItemService extends BaseService {
 
   @EnsureRequestContext()
   public async getPaginatedMediaItems({
-    filter = MediaItemType.options,
+    filter = ["movie", "show"],
     includeUnrequestedItems = false,
     limit = 25,
     page = 1,
