@@ -59,25 +59,14 @@ export class MediaItemResolver {
     page: number,
     @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
     includeUnrequestedItems: boolean,
-    @CoreContext() { em }: CoreContext,
+    @CoreContext() { services: { mediaItemService } }: CoreContext,
   ): Promise<MediaItem[]> {
-    return em.find(
-      MediaItem,
-      {
-        type: { $in: filter },
-        isRequested: includeUnrequestedItems
-          ? {
-              $in: [true, false],
-            }
-          : true,
-      },
-      {
-        orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
-        limit,
-        offset: (page - 1) * limit,
-        overfetch: true,
-      },
-    );
+    return mediaItemService.getPaginatedMediaItems({
+      filter,
+      includeUnrequestedItems,
+      limit,
+      page,
+    });
   }
 
   @Query(() => Int)

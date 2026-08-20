@@ -4,9 +4,11 @@ import {
   Movie,
   Season,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
@@ -16,7 +18,6 @@ import { BaseService } from "../core/base-service.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
-import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
 export class MediaItemService extends BaseService {
@@ -100,5 +101,33 @@ export class MediaItemService extends BaseService {
   @Transactional()
   public async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);
+  }
+
+  @EnsureRequestContext()
+  public async getPaginatedMediaItems({
+    filter = MediaItemType.options,
+    includeUnrequestedItems = false,
+    limit = 25,
+    page = 1,
+  }: {
+    filter?: MediaItemType[];
+    includeUnrequestedItems?: boolean;
+    limit?: number;
+    page?: number;
+  } = {}) {
+    return this.em.find(
+      MediaItem,
+      {
+        type: { $in: filter },
+        isRequested: {
+          $in: [true, !includeUnrequestedItems],
+        },
+      },
+      {
+        orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
+        limit,
+        offset: (page - 1) * limit,
+      },
+    );
   }
 }

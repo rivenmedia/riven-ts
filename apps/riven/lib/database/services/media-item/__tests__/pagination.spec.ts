@@ -1,0 +1,145 @@
+import { expect } from "vitest";
+
+import { it } from "../../../../__tests__/test-context.ts";
+
+function sortByTitleAndState(items: { fullTitle: string; state: string }[]) {
+  return items.toSorted((a, b) => {
+    if (a.fullTitle < b.fullTitle) {
+      return -1;
+    }
+
+    if (a.fullTitle > b.fullTitle) {
+      return 1;
+    }
+
+    if (a.state < b.state) {
+      return -1;
+    }
+
+    if (a.state > b.state) {
+      return 1;
+    }
+
+    return 0;
+  });
+}
+
+it("defaults to page 1", async ({
+  services: { mediaItemService },
+  factories: { movieFactory },
+}) => {
+  const movieA = await movieFactory.createOne({ title: "A Movie" });
+
+  // Create a second movie to ensure pagination works correctly
+  await movieFactory.createOne({ title: "B Movie" });
+
+  const items = await mediaItemService.getPaginatedMediaItems({
+    limit: 1,
+  });
+
+  expect(items).toHaveLength(1);
+  expect(items[0]?.fullTitle).toBe(movieA.fullTitle);
+});
+
+it("defaults to 25 items per page", async ({
+  seeders: { seedIndexedMovie },
+  services: { mediaItemService },
+}) => {
+  await seedIndexedMovie(50);
+
+  const items = await mediaItemService.getPaginatedMediaItems({
+    filter: ["movie"],
+  });
+
+  expect(items).toHaveLength(25);
+});
+
+it("returns a paginated list of media items", async ({
+  seeders: { seedIndexedMovie },
+  services: { mediaItemService },
+}) => {
+  const movies = await seedIndexedMovie(10);
+  const sortedMovies = sortByTitleAndState(
+    movies.map(({ movie }) => ({
+      fullTitle: movie.fullTitle,
+      state: movie.state,
+    })),
+  );
+
+  const pageOne = await mediaItemService.getPaginatedMediaItems({
+    limit: 5,
+  });
+
+  expect(pageOne).toHaveLength(5);
+
+  expect(pageOne).toStrictEqual(
+    expect.arrayContaining(
+      sortedMovies.slice(0, 5).map(({ fullTitle, state }) =>
+        expect.objectContaining({
+          fullTitle,
+          state,
+        }),
+      ),
+    ),
+  );
+
+  const pageTwo = await mediaItemService.getPaginatedMediaItems({
+    limit: 5,
+    page: 2,
+  });
+
+  expect(pageTwo).toHaveLength(5);
+
+  expect(pageTwo).toStrictEqual(
+    expect.arrayContaining(
+      sortedMovies.slice(5, 10).map(({ fullTitle, state }) =>
+        expect.objectContaining({
+          fullTitle,
+          state,
+        }),
+      ),
+    ),
+  );
+});
+
+it("filters to the selected media item type", async ({
+  seeders: { seedIndexedMovie, seedIndexedShow },
+  services: { mediaItemService },
+}) => {
+  await seedIndexedMovie(10);
+  await seedIndexedShow();
+
+  const items = await mediaItemService.getPaginatedMediaItems({
+    filter: ["movie"],
+    limit: 100,
+  });
+
+  expect(items).toHaveLength(10);
+});
+
+it("orders by title and then state", async ({
+  seeders: { seedIndexedMovie },
+  services: { mediaItemService },
+}) => {
+  const movies = await seedIndexedMovie(10);
+
+  const items = await mediaItemService.getPaginatedMediaItems();
+
+  const expectedMovies = sortByTitleAndState(
+    movies.map(({ movie }) => ({
+      fullTitle: movie.fullTitle,
+      state: movie.state,
+    })),
+  );
+
+  expect(items).toStrictEqual(
+    expect.arrayContaining(
+      expectedMovies.map(({ fullTitle, state }) =>
+        expect.objectContaining({
+          fullTitle,
+          state,
+        }),
+      ),
+    ),
+  );
+});

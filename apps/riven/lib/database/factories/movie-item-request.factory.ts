@@ -15,7 +15,7 @@ export class MovieItemRequestFactory extends Factory<ItemRequest> {
       requestedBy: faker.internet.email(),
       state: "requested",
       type: "movie",
-      tmdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
+      tmdbId: faker.string.numeric({ length: 10 }),
       ...input,
     };
   }
