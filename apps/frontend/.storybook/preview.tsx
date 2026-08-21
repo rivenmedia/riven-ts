@@ -1,19 +1,20 @@
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
 import "@/lib/styles/app.css";
+import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
 import { Providers } from "@/components/providers";
 
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
+import mswAddon from "msw-storybook-addon";
+import { useEffect } from "react";
 import { themes } from "storybook/theming";
-
-import { mswAddon } from "./addons/msw";
 
 export const preview = definePreview({
   tags: ["autodocs"],
-  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon],
+  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon()],
   parameters: {
     controls: {
       matchers: {
@@ -21,7 +22,6 @@ export const preview = definePreview({
         date: /Date$/iu,
       },
     },
-    layout: "centered",
     nextjs: {
       appDirectory: true,
     },
@@ -39,13 +39,23 @@ export const preview = definePreview({
     },
   },
   decorators: [
-    (Story) => (
-      <Providers>
-        <Story />
-      </Providers>
-    ),
+    (Story) => {
+      useEffect(() => {
+        // Add the font variables to the html tag
+        document.documentElement.classList.add(
+          fontSansSerif.variable,
+          fontMono.variable,
+          fontSerif.variable,
+        );
+      }, []);
+
+      return (
+        <Providers>
+          <Story />
+        </Providers>
+      );
+    },
   ],
 });
 
-// oxlint-disable-next-line import/no-default-export
 export default preview;

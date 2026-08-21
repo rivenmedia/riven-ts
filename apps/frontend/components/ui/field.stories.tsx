@@ -39,9 +39,7 @@ const meta = preview.meta({
       options: ["vertical", "horizontal", "responsive"],
     },
   },
-  parameters: {
-    layout: "centered",
-  },
+
   args: {
     orientation: "vertical",
   },

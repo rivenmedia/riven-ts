@@ -38,9 +38,6 @@ const meta = preview.meta({
   args: {
     className: "w-96",
   },
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

@@ -23,9 +23,6 @@ const meta = preview.meta({
   title: "ui/Kbd",
   component: Kbd,
   tags: ["autodocs"],
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

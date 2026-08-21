@@ -42,9 +42,6 @@ const meta = preview.meta({
       </DropdownMenuContent>
     </DropdownMenu>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

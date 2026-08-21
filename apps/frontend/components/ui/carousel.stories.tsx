@@ -35,9 +35,6 @@ const meta = preview.meta({
       <CarouselNext />
     </Carousel>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

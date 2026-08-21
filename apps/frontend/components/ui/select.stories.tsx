@@ -59,9 +59,6 @@ const meta = preview.meta({
       </SelectContent>
     </Select>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

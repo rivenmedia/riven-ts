@@ -41,9 +41,6 @@ const meta = preview.meta({
       </PaginationContent>
     </Pagination>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

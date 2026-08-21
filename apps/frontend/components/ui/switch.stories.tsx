@@ -12,9 +12,7 @@ const meta = preview.meta({
   component: Switch,
   tags: ["autodocs"],
   argTypes: {},
-  parameters: {
-    layout: "centered",
-  },
+
   render: (args) => (
     <div className="flex items-center space-x-2">
       <Switch {...args} />

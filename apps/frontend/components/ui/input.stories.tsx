@@ -19,9 +19,6 @@ const meta = preview.meta({
     placeholder: "Email",
     disabled: false,
   },
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

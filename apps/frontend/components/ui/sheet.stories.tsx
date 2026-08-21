@@ -51,9 +51,6 @@ const meta = preview.meta({
       </SheetContent>
     </Sheet>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

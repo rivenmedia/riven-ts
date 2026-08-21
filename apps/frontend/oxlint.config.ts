@@ -12,5 +12,12 @@ export default defineConfig({
         "typescript/promise-function-async": "allow",
       },
     },
+    {
+      files: [".storybook/main.ts", ".storybook/preview.tsx"],
+      plugins: ["import"],
+      rules: {
+        "import/no-default-export": "off",
+      },
+    },
   ],
 });

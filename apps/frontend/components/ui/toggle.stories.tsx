@@ -19,9 +19,6 @@ const meta = preview.meta({
     children: <Bold className="h-4 w-4" />,
     "aria-label": "Toggle bold",
   },
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

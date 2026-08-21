@@ -32,9 +32,7 @@ const meta = preview.meta({
     side: "top",
     children: "Add to library",
   },
-  parameters: {
-    layout: "centered",
-  },
+
   render: (args) => (
     <TooltipProvider>
       <Tooltip>

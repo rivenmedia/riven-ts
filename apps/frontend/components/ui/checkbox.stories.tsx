@@ -22,9 +22,6 @@ const meta = preview.meta({
       <Label htmlFor={args.id}>Accept terms and conditions</Label>
     </div>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

@@ -28,9 +28,6 @@ const meta = preview.meta({
       <TabsContent value="password">Change your password here.</TabsContent>
     </Tabs>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

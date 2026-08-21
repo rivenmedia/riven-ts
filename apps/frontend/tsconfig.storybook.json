@@ -7,6 +7,11 @@
     "composite": true
   },
   "files": [],
-  "include": [".storybook/**/*.ts", ".storybook/**/*.tsx", "**/*.tsx"],
+  "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "**/*.tsx",
+    "**/*.ts"
+  ],
   "exclude": []
 }

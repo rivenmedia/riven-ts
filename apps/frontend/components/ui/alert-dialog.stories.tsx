@@ -40,9 +40,6 @@ const meta = preview.meta({
       </AlertDialogContent>
     </AlertDialog>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

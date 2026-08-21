@@ -22,9 +22,6 @@ const meta = preview.meta({
       <PopoverContent>Place content for the popover here.</PopoverContent>
     </Popover>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

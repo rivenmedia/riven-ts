@@ -62,9 +62,7 @@ const meta = preview.meta({
       options: ["horizontal", "vertical"],
     },
   },
-  parameters: {
-    layout: "centered",
-  },
+
   args: {
     orientation: "horizontal",
   },

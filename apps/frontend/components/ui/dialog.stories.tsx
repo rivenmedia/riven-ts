@@ -41,9 +41,6 @@ const meta = preview.meta({
       </DialogContent>
     </Dialog>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

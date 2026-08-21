@@ -15,9 +15,6 @@ const meta = preview.meta({
       <AvatarFallback>CN</AvatarFallback>
     </Avatar>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

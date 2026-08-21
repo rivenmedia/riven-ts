@@ -22,9 +22,6 @@ const meta = preview.meta({
     variant: "default",
     children: "Badge",
   },
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

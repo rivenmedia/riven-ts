@@ -39,9 +39,6 @@ const meta = preview.meta({
     numberOfMonths: 1,
     showOutsideDays: true,
   },
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**

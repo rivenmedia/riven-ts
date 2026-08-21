@@ -41,9 +41,6 @@ const meta = preview.meta({
       </DrawerContent>
     </Drawer>
   ),
-  parameters: {
-    layout: "centered",
-  },
 });
 
 /**
