@@ -147,7 +147,10 @@ export async function riven() {
     actor.start();
     actor.send({ type: "BOOTSTRAP" });
 
-    await waitFor(actor, (state) => state.matches("Shutdown"));
+    await waitFor(
+      actor,
+      (state) => state.matches("Shutdown") || state.matches("Errored"),
+    );
 
     // Remove any registered process listeners.
     // This is less important in production, but poses a problem in tests:

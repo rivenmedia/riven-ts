@@ -7,6 +7,7 @@ import {
 
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
@@ -100,5 +101,39 @@ export class MediaItemService extends BaseService {
   @Transactional()
   public async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);
+  }
+
+  @EnsureRequestContext()
+  public async getPaginatedMediaItems({
+    filter = ["movie", "show"],
+    includeUnrequestedItems = false,
+    before,
+    after,
+    itemsPerPage = 25,
+  }: {
+    filter?: MediaItemType[];
+    includeUnrequestedItems?: boolean;
+    before?: string | null;
+    after?: string | null;
+    itemsPerPage?: number;
+  } = {}) {
+    if (before && after) {
+      throw new Error(
+        "Cannot specify both 'before' and 'after' cursors for pagination.",
+      );
+    }
+
+    return this.em.findByCursor(MediaItem, {
+      where: {
+        type: { $in: filter },
+        isRequested: {
+          $in: [true, !includeUnrequestedItems],
+        },
+      },
+      orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
+      ...(before ? { before, last: itemsPerPage } : {}),
+      ...(after ? { after, first: itemsPerPage } : {}),
+      ...(before == null && after == null ? { first: itemsPerPage } : {}),
+    });
   }
 }

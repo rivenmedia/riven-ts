@@ -167,9 +167,7 @@ export function ItemDetailPageLayout() {
         title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
         content: <MediaItemStateBadge state={item.state} />,
       }}
-      footer={
-        <Text dimColor>[a] actions · [r] refresh · [esc] back · [q] quit</Text>
-      }
+      footer={<Text dimColor>[a]ctions · [r]efresh · [esc] back · [q]uit</Text>}
       tabs={{
         [`/item/${item.id}`]: {
           label: "Overview",

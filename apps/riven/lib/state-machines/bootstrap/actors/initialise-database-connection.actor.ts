@@ -65,6 +65,8 @@ export const initialiseDatabaseConnection =
         }
       }
 
+      await database.orm.connect();
+
       return {
         orm: database.orm,
         services,

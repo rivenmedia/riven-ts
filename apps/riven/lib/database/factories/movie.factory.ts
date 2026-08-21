@@ -22,7 +22,8 @@ export class MovieFactory extends Factory<Movie> {
       posterPath: faker.image.url(),
       contentRating: faker.helpers.arrayElement(MovieContentRating.options),
       itemRequest,
-      tmdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
+      tmdbId: faker.string.numeric({ length: 10 }),
+      indexedAt: faker.date.past(),
       ...input,
       isRequested: true, // Movies are always requested
     };
