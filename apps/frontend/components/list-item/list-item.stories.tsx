@@ -54,5 +54,6 @@ export const Selectable = meta.story({
       year: 1999,
     },
     isSelectable: true,
+    indexer: "tmdb",
   },
 });

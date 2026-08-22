@@ -7,7 +7,13 @@ import {
 } from "@/components/_ui/tooltip";
 
 import { Plus } from "lucide-react";
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import {
+  expect,
+  userEvent,
+  waitFor,
+  waitForElementToBeRemoved,
+  within,
+} from "storybook/test";
 
 /**
  * A popup that displays information related to an element when the element
@@ -96,14 +102,13 @@ Default.test(
     });
 
     await step("unhover trigger", async () => {
-      await userEvent.unhover(triggerBtn);
-      await waitFor(async () => {
-        const tooltipElement = canvasElement.ownerDocument.body.querySelector(
-          "[data-radix-popper-content-wrapper]",
-        );
+      const tooltipElement = canvasElement.ownerDocument.body.querySelector(
+        "[data-radix-popper-content-wrapper]",
+      );
 
-        await expect(tooltipElement).toBeNull();
-      });
+      await userEvent.unhover(triggerBtn);
+
+      await waitForElementToBeRemoved(tooltipElement);
     });
   },
 );

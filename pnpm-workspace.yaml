@@ -173,6 +173,8 @@ catalog:
   "@storybook/addon-vitest": ^10.4.6
   msw-storybook-addon: ^3.0.0
   eslint-plugin-playwright: ^2.10.5
+  "@react-spring/web": ^10.1.2
+  "@chromatic-com/storybook": ^5.3.0
 
 catalogs:
   typescript7-native:
