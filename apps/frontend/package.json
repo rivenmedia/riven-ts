@@ -19,7 +19,7 @@
     "test": "vitest run",
     "test:component": "vitest --project storybook",
     "test:watch": "vitest watch",
-    "chromatic": "pnpx chromatic --project-token=chpt_2e6c34482c197f5 --config-file=chromatic.config.json"
+    "chromatic": "pnpx chromatic --project-token=chpt_2e6c34482c197f5"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
