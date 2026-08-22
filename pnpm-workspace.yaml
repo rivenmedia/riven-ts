@@ -175,6 +175,8 @@ catalog:
   eslint-plugin-playwright: ^2.10.5
   "@react-spring/web": ^10.1.2
   "@chromatic-com/storybook": ^5.3.0
+  "@internationalized/date": ^3.12.3
+  use-mask-input: ^3.13.0
 
 catalogs:
   typescript7-native:

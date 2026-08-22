@@ -1,3 +1,5 @@
+// oxlint-disable-next-line import/no-unassigned-import
+import "@/lib/luxon-settings";
 import { Providers } from "../components/providers.tsx";
 
 import "@/lib/styles/themes/all.css";

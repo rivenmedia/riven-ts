@@ -46,6 +46,7 @@ export const preview = definePreview({
           fontSansSerif.variable,
           fontMono.variable,
           fontSerif.variable,
+          "dark",
         );
       }, []);
 

@@ -10,7 +10,6 @@ const meta = preview.meta({
   parameters: {
     layout: "padded",
   },
-  render: (args) => <AnimatedToggle {...args} />,
 });
 
 export const Default = meta.story({
