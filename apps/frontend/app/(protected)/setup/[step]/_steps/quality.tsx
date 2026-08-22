@@ -3,15 +3,15 @@ import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Button } from "@/components/ui/button";
+} from "@/components/_ui/accordion";
+import { Button } from "@/components/_ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/ui/card";
+} from "@/components/_ui/card";
 import { cn } from "@/lib/utils";
 
 interface SetupQualityStepProps {

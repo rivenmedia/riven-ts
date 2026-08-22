@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/_ui/button";
 
 import { kebabCase } from "es-toolkit";
 import Link from "next/link";

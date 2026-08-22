@@ -1,4 +1,9 @@
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/_ui/tabs";
 import { authClient } from "@/lib/auth/client";
 import { query } from "@/lib/graphql/client";
 

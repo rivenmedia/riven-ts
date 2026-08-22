@@ -7,6 +7,7 @@
     "build": "next build",
     "build-storybook": "storybook build",
     "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
+    "codegen:gql:watch": "pnpm codegen:gql --watch",
     "dev": "next dev -p 9000 --experimental-https",
     "e2e": "playwright test --ui",
     "e2e:headless": "playwright test",

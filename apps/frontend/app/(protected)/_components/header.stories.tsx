@@ -6,7 +6,7 @@ import { expect, userEvent, waitFor, within } from "storybook/test";
 import { Header } from "./header";
 
 const meta = preview.meta({
-  title: "Components / Media / Header",
+  title: "Components / Header",
   component: Header,
   args: {
     modifierKey: "⌃" as const,

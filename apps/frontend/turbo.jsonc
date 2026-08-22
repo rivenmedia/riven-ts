@@ -8,13 +8,19 @@
     "codegen:gql": {
       "dependsOn": ["@repo/riven#codegen:gql-schema"]
     },
+    "codegen:gql:watch": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"],
+      "cache": false,
+      "persistent": true
+    },
     "e2e": {
       "passThroughEnv": ["DATABASE_FILE_NAME"]
     },
     "e2e:headless": {},
     "storybook": {
       "cache": false,
-      "persistent": true
+      "persistent": true,
+      "with": ["codegen:gql:watch"]
     },
     "build-storybook": {
       "dependsOn": ["codegen:gql"],

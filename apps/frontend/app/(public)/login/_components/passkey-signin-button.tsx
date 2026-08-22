@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/_ui/button";
 
 import { Fingerprint, StarIcon } from "lucide-react";
 

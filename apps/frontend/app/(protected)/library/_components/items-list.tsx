@@ -1,4 +1,4 @@
-import { ListItem } from "@/components/media/list-item";
+import { ListItem } from "@/components/list-item/list-item";
 
 import { LibraryPagination } from "./pagination";
 

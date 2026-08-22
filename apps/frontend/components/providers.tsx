@@ -5,7 +5,7 @@ import { ThemeProvider, themes } from "@/components/providers/theme-provider";
 import { ProgressProvider } from "@bprogress/next/app";
 import { ToastContainer } from "react-toastify";
 
-import { TooltipProvider } from "./ui/tooltip";
+import { TooltipProvider } from "./_ui/tooltip";
 
 import type { PropsWithChildren } from "react";
 

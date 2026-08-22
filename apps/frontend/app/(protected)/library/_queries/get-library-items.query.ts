@@ -12,10 +12,14 @@ export const GET_LIBRARY_ITEMS_QUERY: TypedDocumentNode<
 > = gql`
   query GetLibraryItems {
     mediaItems {
-      id
-      title
-      posterPath
-      type
+      items {
+        ... on MediaItem {
+          id
+          title
+          posterPath
+          type
+        }
+      }
     }
   }
 `;

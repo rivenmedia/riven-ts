@@ -1,6 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/_ui/button";
 import { authClient } from "@/lib/auth/client";
 
 import { LogOut } from "lucide-react";

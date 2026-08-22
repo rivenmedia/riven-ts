@@ -1,10 +1,10 @@
-import { ThemeSwitcher } from "@/components/theme-switcher";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/ui/tooltip";
+} from "@/components/_ui/tooltip";
+import { ThemeSwitcher } from "@/components/theme-switcher/theme-switcher";
 import { cn, getInitials } from "@/lib/utils";
 
 import { Mountain } from "lucide-react";

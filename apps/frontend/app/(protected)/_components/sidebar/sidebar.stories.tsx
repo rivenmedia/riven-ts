@@ -15,7 +15,7 @@ import { DateTime } from "luxon";
 import { Sidebar } from "./sidebar";
 
 const meta = preview.meta({
-  title: "Components / Media / Sidebar",
+  title: "Components / Sidebar",
   component: Sidebar,
   args: {
     currentPath: "/",

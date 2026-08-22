@@ -1,7 +1,7 @@
 "use client";
 
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/_ui/badge";
+import { Button } from "@/components/_ui/button";
 
 import { ArrowLeft, Home, RotateCcw, TriangleAlert } from "lucide-react";
 import Link from "next/link";

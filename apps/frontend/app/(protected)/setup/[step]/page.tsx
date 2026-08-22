@@ -1,13 +1,13 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { Button } from "@/components/_ui/button";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
+} from "@/components/_ui/card";
+import { Separator } from "@/components/_ui/separator";
 import { cn } from "@/lib/utils";
 
 import Link from "next/link";

@@ -1,14 +1,14 @@
 "use client";
 
-import { Field } from "@/components/ui/field";
-import { Input } from "@/components/ui/input";
+import { Field } from "@/components/_ui/field";
+import { Input } from "@/components/_ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select";
+} from "@/components/_ui/select";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
