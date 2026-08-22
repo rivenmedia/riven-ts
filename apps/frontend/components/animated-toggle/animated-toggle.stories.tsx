@@ -47,3 +47,9 @@ Default.test(
     await expect(args.onChange).toHaveBeenCalledWith("anime");
   },
 );
+
+export const WithDefaultValue = Default.extend({
+  args: {
+    defaultValue: "tv-shows",
+  },
+});
