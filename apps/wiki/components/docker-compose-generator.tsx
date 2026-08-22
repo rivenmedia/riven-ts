@@ -914,7 +914,7 @@ function V1ConfigForm({
 
       <div className="rounded-lg border border-fd-border bg-fd-muted/30 p-4 space-y-3">
         <div className="flex items-center justify-between">
-          <label className="text-sm font-medium">Secrets</label>
+          <span className="text-sm font-medium">Secrets</span>
           <button
             onClick={() => {
               update("backendApiKey", generateSecret(32));

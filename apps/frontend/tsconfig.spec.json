@@ -1,0 +1,28 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "rootDir": ".",
+    "noEmit": false
+  },
+  "files": ["vitest.setup.ts"],
+  "include": [
+    "next-env.d.ts",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "app/**/*.ts",
+    "app/**/*.tsx",
+    "app/**/*.mts",
+    "components/**/*.ts",
+    "components/**/*.tsx",
+    "components/**/*.mts",
+    "environment/**/*.ts",
+    "environment/**/*.tsx",
+    "environment/**/*.mts",
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "lib/**/*.mts"
+  ],
+  "exclude": ["**/*.stories.tsx"]
+}

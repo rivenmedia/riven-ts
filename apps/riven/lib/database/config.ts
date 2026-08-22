@@ -17,6 +17,13 @@ import { TextType, Type } from "@mikro-orm/core";
 import { GeneratedCacheAdapter, PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 import { withLogContext } from "../utilities/logger/log-context.ts";
+import {
+  Account,
+  Passkey,
+  Session,
+  User,
+  Verification,
+} from "./entities/index.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
@@ -39,13 +46,20 @@ const entities = [
   ItemRequest,
   Stream,
   BlacklistedStream,
+  Account,
+  Passkey,
+  Session,
+  User,
+  Verification,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {
   if (process.env["NODE_ENV"] === "production") {
     const { default: metadata } = await import(
       "@repo/riven/database-metadata-cache",
-      { with: { type: "json" } }
+      {
+        with: { type: "json" },
+      }
     );
 
     return {

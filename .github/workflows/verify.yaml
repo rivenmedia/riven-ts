@@ -39,6 +39,9 @@ jobs:
               - fuse
           - name: Formatting
             command: //#format:check:ci
+          - name: Component tests
+            command: test:component
+            concurrency: "100%"
 
           # Separate test jobs per-platform ensures that the project can build natively
           - name: Tests (linux-x64)
