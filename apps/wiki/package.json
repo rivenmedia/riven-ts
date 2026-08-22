@@ -12,18 +12,6 @@
     "start": "next start"
   },
   "dependencies": {
-    "fumadocs-core": "catalog:",
-    "fumadocs-ui": "catalog:",
-    "lucide-react": "catalog:",
-    "next": "catalog:",
-    "react": "catalog:",
-    "react-dom": "catalog:",
-    "shiki": "catalog:",
-    "yaml": "catalog:"
-  },
-  "devDependencies": {
-    "@repo/core-util-oxlint-config": "workspace:^",
-    "@repo/core-util-typescript-config": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
@@ -38,7 +26,20 @@
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/riven": "workspace:^",
     "@repo/riven-tui": "workspace:^",
+    "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "fumadocs-core": "catalog:",
+    "fumadocs-ui": "catalog:",
+    "lucide-react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "shiki": "catalog:",
+    "yaml": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/core-util-oxlint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
     "@tailwindcss/postcss": "catalog:",
     "@types/mdx": "catalog:",
     "@types/node": "catalog:",

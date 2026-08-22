@@ -1,0 +1,68 @@
+---
+title: Events
+description: Events that may be emitted by Riven
+---
+
+import z from "zod";
+import { RivenEvent } from "@repo/util-plugin-sdk/events";
+
+export const getEventName = (option) => option.shape.type.value;
+
+export const getEventPayloadSchema = (option) => {
+  const { type: _type, ...payload } = option.shape;
+  return z.toJSONSchema(z.object(payload));
+};
+
+export const describeType = (schema) => {
+  if (!schema) return "unknown";
+  if (schema.type) {
+    return Array.isArray(schema.type) ? schema.type.join(" | ") : schema.type;
+  }
+  if (schema.anyOf) return schema.anyOf.map(describeType).join(" | ");
+  if (schema.const !== undefined) return JSON.stringify(schema.const);
+  return "unknown";
+};
+
+<div>
+  {RivenEvent.options.map((option) => {
+    const name = getEventName(option);
+    const payloadSchema = getEventPayloadSchema(option);
+    const fields = Object.entries(payloadSchema.properties ?? {});
+
+    return (
+      <div key={name} className="mb-8 border-b pb-6 last:border-b-0">
+        <h3 className="text-lg font-semibold mb-2">
+          <code>{name}</code>
+        </h3>
+        {fields.length > 0 ? (
+          <table className="w-full text-sm">
+            <thead>
+              <tr>
+                <th className="text-left">Field</th>
+                <th className="text-left">Type</th>
+                <th className="text-left">Required</th>
+              </tr>
+            </thead>
+            <tbody>
+              {fields.map(([field, fieldSchema]) => (
+                <tr key={field}>
+                  <td>
+                    <code>{field}</code>
+                  </td>
+                  <td>
+                    <code>{describeType(fieldSchema)}</code>
+                  </td>
+                  <td>{payloadSchema.required?.includes(field) ? "Yes" : "No"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        ) : (
+          <p className="text-gray-600">No payload.</p>
+        )}
+      </div>
+    );
+
+})}
+
+</div>

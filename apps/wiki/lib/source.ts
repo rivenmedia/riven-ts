@@ -1,8 +1,8 @@
+import { workspaceImports } from "@/workspace-imports";
+
 import { docs } from "collections/server";
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
-
-import packageJson from "../package.json" with { type: "json" };
 
 import type { PageData } from "fumadocs-core/source";
 import type { DocsCollectionEntry } from "fumadocs-mdx/runtime/server";
@@ -12,23 +12,7 @@ type WorkspaceEntry = DocsCollectionEntry<
   PageData & { full?: boolean }
 >;
 
-/**
- * Every workspace that contributes docs, derived from this package's own
- * dependencies so adding a plugin needs no change here — the plugin generator
- * already adds itself as a dependency of `@repo/wiki`.
- */
-const workspaceImports = Object.keys({
-  ...packageJson.dependencies,
-  ...packageJson.devDependencies,
-}).filter(
-  (dependency) =>
-    dependency.startsWith("@repo/plugin-") ||
-    dependency === "@repo/riven" ||
-    dependency === "@repo/riven-tui" ||
-    dependency === "@repo/util-rank-torrent-name",
-);
-
-const workspaces = await Promise.all(
+const workspacePromises = await Promise.allSettled(
   workspaceImports.map(async (workspace) => {
     const { docs: workspaceDocs } = (await import(
       `../.source/${workspace}/server`
@@ -38,6 +22,17 @@ const workspaces = await Promise.all(
 
     return [workspace, workspaceDocs.toFumadocsSource()];
   }),
+);
+
+console.log(
+  workspacePromises.filter(
+    (result) =>
+      result.status === "rejected" && result.reason.code !== "MODULE_NOT_FOUND",
+  ),
+);
+
+const workspaces = workspacePromises.flatMap((result) =>
+  result.status === "fulfilled" ? [result.value] : [],
 );
 
 export const source = loader(

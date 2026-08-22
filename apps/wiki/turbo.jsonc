@@ -13,7 +13,7 @@
       ]
     },
     "dev": {
-      "dependsOn": ["^codegen:config-docs"]
+      "dependsOn": ["^build", "^codegen:config-docs"]
     }
   }
 }

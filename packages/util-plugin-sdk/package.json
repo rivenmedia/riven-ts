@@ -58,7 +58,8 @@
     "./datasource-context": {
       "production": "./dist/datasource/context.js",
       "default": "./lib/datasource/context.ts"
-    }
+    },
+    "./wiki.config": "./wiki.config.ts"
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
@@ -70,6 +71,7 @@
   "dependencies": {
     "@mikro-orm/decorators": "catalog:",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",
     "http-status-codes": "catalog:",

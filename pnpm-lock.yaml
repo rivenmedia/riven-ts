@@ -860,37 +860,6 @@ importers:
 
   apps/wiki:
     dependencies:
-      fumadocs-core:
-        specifier: 'catalog:'
-        version: 16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
-      fumadocs-ui:
-        specifier: 'catalog:'
-        version: 16.8.12(@tailwindcss/oxide@4.3.0)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tailwindcss@4.3.0)
-      lucide-react:
-        specifier: 'catalog:'
-        version: 0.562.0(react@19.2.6)
-      next:
-        specifier: 'catalog:'
-        version: 16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
-      react:
-        specifier: 'catalog:'
-        version: 19.2.6
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.6(react@19.2.6)
-      shiki:
-        specifier: 'catalog:'
-        version: 4.1.0
-      yaml:
-        specifier: 'catalog:'
-        version: 2.9.0
-    devDependencies:
-      '@repo/core-util-oxlint-config':
-        specifier: workspace:^
-        version: link:../../packages/core/util-oxlint-config
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../../packages/core/util-typescript-config
       '@repo/plugin-comet':
         specifier: workspace:^
         version: link:../../packages/plugin-comet
@@ -933,9 +902,43 @@ importers:
       '@repo/riven-tui':
         specifier: workspace:^
         version: link:../riven-tui
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../../packages/util-plugin-sdk
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      fumadocs-core:
+        specifier: 'catalog:'
+        version: 16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3)
+      fumadocs-ui:
+        specifier: 'catalog:'
+        version: 16.8.12(@tailwindcss/oxide@4.3.0)(@types/mdx@2.0.13)(@types/react-dom@19.2.3(@types/react@19.2.15))(@types/react@19.2.15)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1)(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.2.15)(lucide-react@0.562.0(react@19.2.6))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(zod@4.4.3))(next@16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)(tailwindcss@4.3.0)
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.562.0(react@19.2.6)
+      next:
+        specifier: 'catalog:'
+        version: 16.3.0(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.6
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.6(react@19.2.6)
+      shiki:
+        specifier: 'catalog:'
+        version: 4.1.0
+      yaml:
+        specifier: 'catalog:'
+        version: 2.9.0
+    devDependencies:
+      '@repo/core-util-oxlint-config':
+        specifier: workspace:^
+        version: link:../../packages/core/util-oxlint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../../packages/core/util-typescript-config
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.0
@@ -2000,6 +2003,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../util-rank-torrent-name
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-wiki-helpers
       es-toolkit:
         specifier: 'catalog:'
         version: 1.46.1

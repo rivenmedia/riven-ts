@@ -1,21 +1,13 @@
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 
-import packageJson from "./package.json" with { type: "json" };
-
-const workspaceImports = Object.keys(packageJson.devDependencies).filter(
-  (dep) =>
-    dep.startsWith("@repo/plugin-") ||
-    dep === "@repo/riven" ||
-    dep === "@repo/riven-tui" ||
-    dep === "@repo/util-rank-torrent-name",
-);
+import { workspaceImports } from "./workspace-imports";
 
 interface WorkspaceConfig {
   config: Record<string, unknown>;
   dir: string;
 }
 
-const workspaces = await Promise.all(
+const workspacePromises = await Promise.allSettled(
   workspaceImports.map<Promise<[string, WorkspaceConfig]>>(
     async (workspace) => {
       const { dir, ...config } = (await import(`${workspace}/wiki.config`)) as {
@@ -32,6 +24,10 @@ const workspaces = await Promise.all(
       ];
     },
   ),
+);
+
+const workspaces = workspacePromises.flatMap((result) =>
+  result.status === "fulfilled" ? [result.value] : [],
 );
 
 export const docs = defineDocs({});

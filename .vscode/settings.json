@@ -95,7 +95,8 @@
     "**/Migration*.ts": true,
     "**/coverage": true,
     "**/*.typegen.ts": true,
-    "**/__generated__/graphql.ts": true
+    "**/__generated__/graphql.ts": true,
+    "**/svelte-frontend/**": true
   },
   "oxc.fmt.configPath": ".oxfmtrc.json",
   "editor.defaultFormatter": "oxc.oxc-vscode",
