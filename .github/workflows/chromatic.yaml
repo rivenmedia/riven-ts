@@ -28,10 +28,11 @@ jobs:
         env:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+          TURBO_SCM_BASE: main
 
       - name: Run Chromatic
         if: steps.get-required-tasks.outputs.required-tasks != '[]'
-        run: pnpm turbo --affected chromatic
+        run: pnpm turbo ${{ join(fromJson(steps.get-required-tasks.outputs.required-tasks), ' ') }} --continue
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
