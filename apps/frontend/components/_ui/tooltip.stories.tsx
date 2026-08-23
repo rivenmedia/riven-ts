@@ -19,6 +19,7 @@ const meta = preview.meta({
   tags: ["autodocs"],
   parameters: {
     chromatic: { disableSnapshot: true },
+    layout: "centered",
   },
   argTypes: {
     side: {
