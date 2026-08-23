@@ -17,9 +17,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Set Turborepo --affected SHAs
-        uses: ./.github/actions/set-turborepo-affected-shas
-
       - name: Set up project environment
         uses: ./.github/actions/set-up-project-environment
 
