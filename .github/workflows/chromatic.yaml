@@ -7,6 +7,9 @@ env:
   TURBO_RUN_SUMMARY: 1
   DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
 
+permissions:
+  contents: read
+
 jobs:
   chromatic:
     name: Run Chromatic
@@ -20,23 +23,12 @@ jobs:
       - name: Set up project environment
         uses: ./.github/actions/set-up-project-environment
 
-      - name: Get required tasks
-        id: get-required-tasks
-        uses: ./.github/actions/filter-cached-turbo-tasks
-        with:
-          tasks: '[ "chromatic" ]'
-        env:
-          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
-          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
-          TURBO_SCM_BASE: main
-
       - name: Run Chromatic
-        if: steps.get-required-tasks.outputs.required-tasks != '[]'
-        run: pnpm turbo ${{ join(fromJson(steps.get-required-tasks.outputs.required-tasks), ' ') }} --continue
+        run: pnpm turbo chromatic --continue
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - uses: charpeni/turborepo-summary-action@v1
-        if: always() && steps.get-required-tasks.outputs.required-tasks != '[]'
+        if: always()
