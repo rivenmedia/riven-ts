@@ -1,4 +1,5 @@
 export function ImmersiveBackground() {
+  // triggeer ci
   return (
     <div className="pointer-events-none fixed inset-0 z-0">
       <div className="absolute inset-0 bg-linear-to-b from-zinc-900 via-zinc-950 to-black" />
