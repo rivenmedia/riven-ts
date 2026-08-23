@@ -46,6 +46,12 @@ export const createFrontendComponentGenerator = (
       },
       {
         type: "confirm",
+        name: "disableAutoDocs",
+        message: "Disable Storybook auto docs?",
+        default: false,
+      },
+      {
+        type: "confirm",
         name: "confirm",
         message: (data) => {
           const { componentName, componentGroup } = data as PackageAnswers;
