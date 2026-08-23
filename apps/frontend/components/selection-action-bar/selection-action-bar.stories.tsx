@@ -1,10 +1,8 @@
 import { preview } from "@/.storybook/preview";
 
 import { ListChecks, LoaderCircle, Trash } from "lucide-react";
-import { startTransition, useState } from "react";
 import { fn } from "storybook/test";
 
-import { Button } from "../_ui/button";
 import { SelectionActionBar } from "./selection-action-bar";
 
 const meta = preview.meta({
@@ -26,24 +24,11 @@ const meta = preview.meta({
     ],
     onClear: fn(),
   },
-  render: (args) => {
-    const [count, setCount] = useState(args.count);
-
-    return (
-      <div className="relative h-40 w-full">
-        <Button
-          onClick={() => {
-            startTransition(() => {
-              setCount(count === 0 ? 5 : 0);
-            });
-          }}
-        >
-          Toggle
-        </Button>
-        {count > 0 && <SelectionActionBar {...args} count={count} />}
-      </div>
-    );
-  },
+  render: (args) => (
+    <div className="relative h-40 w-full">
+      <SelectionActionBar {...args} />
+    </div>
+  ),
 });
 
 export const Default = meta.story({
@@ -56,11 +41,5 @@ export const Loading = meta.story({
   args: {
     count: 5,
     disabled: true,
-  },
-});
-
-export const Hidden = meta.story({
-  args: {
-    count: 0,
   },
 });
