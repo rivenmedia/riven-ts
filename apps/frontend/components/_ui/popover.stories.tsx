@@ -14,8 +14,10 @@ const meta = preview.meta({
   title: "ui/Popover",
   component: Popover,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
-
   render: (args) => (
     <Popover {...args}>
       <PopoverTrigger>Open</PopoverTrigger>

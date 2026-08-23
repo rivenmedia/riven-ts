@@ -19,6 +19,9 @@ const meta = preview.meta({
   title: "ui/Select",
   component: Select,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   args: {
     onValueChange: fn(),

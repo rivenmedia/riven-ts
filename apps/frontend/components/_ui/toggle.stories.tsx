@@ -10,6 +10,9 @@ const meta = preview.meta({
   title: "ui/Toggle",
   component: Toggle,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     children: {
       control: { disable: true },

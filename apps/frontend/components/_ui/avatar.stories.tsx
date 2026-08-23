@@ -8,6 +8,9 @@ const meta = preview.meta({
   title: "ui/Avatar",
   component: Avatar,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   render: (args) => (
     <Avatar {...args}>

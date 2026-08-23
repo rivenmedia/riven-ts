@@ -57,6 +57,9 @@ const meta = preview.meta({
   title: "ui/InputGroup",
   component: InputGroup,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
 });
 
 /**

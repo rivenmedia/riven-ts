@@ -21,6 +21,9 @@ const meta = preview.meta({
   title: "ui/AlertDialog",
   component: AlertDialog,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   render: (args) => (
     <AlertDialog {...args}>

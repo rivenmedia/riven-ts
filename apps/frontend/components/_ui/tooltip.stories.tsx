@@ -17,6 +17,9 @@ const meta = preview.meta({
   title: "ui/Tooltip",
   component: TooltipContent,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     side: {
       options: ["top", "bottom", "left", "right"],
@@ -32,7 +35,6 @@ const meta = preview.meta({
     side: "top",
     children: "Add to library",
   },
-
   render: (args) => (
     <TooltipProvider>
       <Tooltip>

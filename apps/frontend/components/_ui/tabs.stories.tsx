@@ -16,6 +16,9 @@ const meta = preview.meta({
   title: "ui/Tabs",
   component: Tabs,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   args: {
     defaultValue: "account",

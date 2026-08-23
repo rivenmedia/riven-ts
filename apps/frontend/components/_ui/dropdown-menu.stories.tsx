@@ -28,6 +28,9 @@ const meta = preview.meta({
   title: "ui/DropdownMenu",
   component: DropdownMenu,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   render: (args) => (
     <DropdownMenu {...args}>

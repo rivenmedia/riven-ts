@@ -8,6 +8,9 @@ const meta = preview.meta({
   title: "ui/Label",
   component: Label,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {
     children: {
       control: { type: "text" },

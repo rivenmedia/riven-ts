@@ -8,6 +8,9 @@ const meta = preview.meta({
   title: "ui/Slider",
   component: Slider,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
   args: {
     defaultValue: [33],

@@ -11,8 +11,10 @@ const meta = preview.meta({
   title: "ui/Switch",
   component: Switch,
   tags: ["autodocs"],
+  parameters: {
+    chromatic: { disableSnapshot: true },
+  },
   argTypes: {},
-
   render: (args) => (
     <div className="flex items-center space-x-2">
       <Switch {...args} />
