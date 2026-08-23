@@ -3,6 +3,10 @@ name: Chromatic
 on:
   push:
 
+env:
+  TURBO_RUN_SUMMARY: 1
+  DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
+
 jobs:
   chromatic:
     name: Run Chromatic
@@ -23,3 +27,6 @@ jobs:
         run: pnpm turbo --affected chromatic
         env:
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
+
+      - uses: charpeni/turborepo-summary-action@v1
+        if: always()
