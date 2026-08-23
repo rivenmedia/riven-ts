@@ -8,7 +8,7 @@ export const baseVitestConfig = defineConfig(() => {
 
   return mergeConfig(
     { test: configDefaults },
-    {
+    defineConfig({
       test: {
         globals: true, // Enables testing-library auto cleanup
         exclude: ignorePatterns,
@@ -31,6 +31,6 @@ export const baseVitestConfig = defineConfig(() => {
           ignored: ignorePatterns,
         },
       },
-    },
+    }),
   );
 });
