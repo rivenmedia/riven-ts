@@ -4,6 +4,7 @@ import "@/lib/styles/app.css";
 import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
 import { Providers } from "@/components/providers";
 
+import chromaticAddon from "@chromatic-com/storybook";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
@@ -14,7 +15,13 @@ import { themes } from "storybook/theming";
 
 export const preview = definePreview({
   tags: ["autodocs"],
-  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon()],
+  addons: [
+    addonA11y(),
+    addonDocs(),
+    addonVitest(),
+    mswAddon(),
+    chromaticAddon(),
+  ],
   parameters: {
     controls: {
       matchers: {
