@@ -24,13 +24,13 @@
     },
     "build-storybook": {
       "dependsOn": ["codegen:gql"],
-      "inputs": [".storybook/**", "{app,components,lib}/**/*.tsx?"],
+      "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
     },
     "chromatic": {
       "passThroughEnv": ["CHROMATIC_PROJECT_TOKEN"],
       "dependsOn": ["transit:source-files"],
-      "inputs": ["{app,components,lib}/**/*.tsx?"]
+      "inputs": ["{app,components,lib}/**/*.{ts,tsx}"]
     }
   }
 }
