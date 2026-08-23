@@ -1,0 +1,25 @@
+name: Chromatic
+
+on:
+  push:
+
+jobs:
+  chromatic:
+    name: Run Chromatic
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: Set Turborepo --affected SHAs
+        uses: ./.github/actions/set-turborepo-affected-shas
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Run Chromatic
+        run: pnpm turbo --affected chromatic
+        env:
+          CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}

@@ -26,6 +26,11 @@
       "dependsOn": ["codegen:gql"],
       "inputs": [".storybook/**", "{app,components,lib}/**/*.tsx?"],
       "outputs": ["storybook-static"]
+    },
+    "chromatic": {
+      "passThroughEnv": ["CHROMATIC_PROJECT_TOKEN"],
+      "dependsOn": ["transit:source-files"],
+      "inputs": ["{app,components,lib}/**/*.tsx?"]
     }
   }
 }
