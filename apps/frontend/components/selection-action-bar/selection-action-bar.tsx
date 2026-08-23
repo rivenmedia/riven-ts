@@ -7,7 +7,7 @@ import { Button } from "../_ui/button";
 
 import type { ComponentType, SVGProps } from "react";
 
-interface SelectionAction {
+export interface SelectionAction {
   label: string;
   icon: ComponentType<SVGProps<SVGSVGElement>>;
   handleClick: () => void;
