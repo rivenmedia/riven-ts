@@ -1,6 +1,8 @@
 import { preview } from "@/.storybook/preview";
 import { Slider } from "@/components/_ui/slider";
 
+import { fn } from "storybook/test";
+
 /**
  * An input where the user selects a value from within a given range.
  */
@@ -30,6 +32,16 @@ export const Default = meta.story({});
 export const Inverted = meta.story({
   args: {
     inverted: true,
+  },
+});
+
+/**
+ * Use multiple default values to create a range slider.
+ */
+export const Range = meta.story({
+  args: {
+    defaultValue: [33, 66],
+    onChange: fn(),
   },
 });
 

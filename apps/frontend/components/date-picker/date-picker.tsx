@@ -16,6 +16,7 @@ interface DatePickerProps {
   placeholder: string;
   minDate?: DateTime;
   maxDate?: DateTime;
+  required?: boolean;
 }
 
 export function DatePicker({
@@ -24,6 +25,7 @@ export function DatePicker({
   placeholder,
   minDate,
   maxDate,
+  required = false,
 }: DatePickerProps) {
   const { register, setValue } = useFormContext();
   const registerWithMask = useHookFormMask(register);
@@ -39,6 +41,7 @@ export function DatePicker({
     placeholder: " ",
     showMaskOnHover: false,
     showMaskOnFocus: false,
+    required,
   });
 
   return (
