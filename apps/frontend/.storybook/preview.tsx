@@ -9,9 +9,12 @@ import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
+import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
 import { useLayoutEffect } from "react";
 import { themes } from "storybook/theming";
+
+import type { MswApi } from "msw-storybook-addon";
 
 export const preview = definePreview({
   tags: ["autodocs"],
@@ -69,6 +72,11 @@ export const preview = definePreview({
       );
     },
   ],
+  beforeEach({ msw }) {
+    const server = msw as MswApi;
+
+    server.use(http.get("https://picsum.photos/**", passthrough));
+  },
 });
 
 export default preview;
