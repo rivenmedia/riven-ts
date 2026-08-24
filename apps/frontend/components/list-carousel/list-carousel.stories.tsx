@@ -43,7 +43,8 @@ export const Loading = meta.story({
 
 export const FetchError = meta.story({
   args: {
-    itemsPromise: Promise.reject(new Error("Failed to load items")),
+    // oxlint-disable-next-line typescript/no-explicit-any
+    itemsPromise: Promise.resolve<any>("invalid data"),
     indexer: "tmdb",
   },
 });
