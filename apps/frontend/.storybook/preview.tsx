@@ -44,6 +44,11 @@ export const preview = definePreview({
     backgrounds: {
       disable: true,
     },
+    options: {
+      storySort: {
+        method: "alphabetical",
+      },
+    },
   },
   decorators: [
     (Story) => {
