@@ -18,3 +18,8 @@ runs:
         key: ${{ runner.os }}-knip-cache-${{ inputs.task }}-${{ hashFiles('**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}') }}
         restore-keys: |
           ${{ runner.os }}-knip-cache-${{ inputs.task }}-
+
+    - name: Install Playwright dependencies
+      if: ${{ inputs.task == 'test:component' }}
+      shell: bash
+      run: pnpm dlx playwright install --with-deps

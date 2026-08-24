@@ -44,8 +44,6 @@ jobs:
           - name: Component tests
             command: test:component
             concurrency: "100%"
-            runner-requirements:
-              - chromium
 
           # Separate test jobs per-platform ensures that the project can build natively
           - name: Tests (linux-x64)

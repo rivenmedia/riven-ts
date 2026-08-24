@@ -16,10 +16,6 @@ inputs:
     description: Whether to install redis-server (required for integration tests)
     required: false
     default: "false"
-  install-chromium:
-    description: Whether to install chromium (required for component tests)
-    required: false
-    default: "false"
   set-up-postgres-service:
     description: Whether to set up the postgres service (required for migration check)
     required: false
@@ -45,10 +41,6 @@ runs:
           sudo apt-get update
           sudo apt-get install -y fuse libfuse-dev
         fi
-
-    - name: Install Chromium
-      if: ${{ inputs.install-chromium == 'true' }}
-      uses: browser-actions/setup-chrome@v2
 
     - name: Set up Postgres service
       shell: bash

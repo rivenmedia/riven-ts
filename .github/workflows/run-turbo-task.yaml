@@ -102,7 +102,6 @@ jobs:
         with:
           install-fuse: ${{ contains(fromJson(inputs.runner-requirements), 'fuse') }}
           install-redis-server: ${{ contains(fromJson(inputs.runner-requirements), 'redis-server') }}
-          install-chromium: ${{ contains(fromJson(inputs.runner-requirements), 'chromium') }}
           set-up-postgres-service:
             ${{ contains(fromJson(inputs.runner-requirements),
             'postgres-service') }}
