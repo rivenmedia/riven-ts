@@ -28,7 +28,7 @@ export function DatePicker({
   minDate,
   maxDate,
   required = false,
-  "aria-label": ariaLabel,
+  "aria-label": ariaLabel = "Select a date",
 }: DatePickerProps) {
   const { register, setValue } = useFormContext();
   const registerWithMask = useHookFormMask(register);
