@@ -152,10 +152,7 @@ Default.test(
       "Verify that the correct date is selected in the datepicker",
       async () => {
         const selectedDateButton = await dialog.findByRole("button", {
-          name: new RegExp(
-            `${DateTime.now().day.toString()}(.*)+selected`,
-            "iu",
-          ),
+          name: new RegExp(`${expectedDate.day.toString()}(.*)+selected`, "iu"),
         });
 
         await expect(selectedDateButton).toBeInTheDocument();
