@@ -10,7 +10,7 @@ import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import mswAddon from "msw-storybook-addon";
-import { useEffect } from "react";
+import { useLayoutEffect } from "react";
 import { themes } from "storybook/theming";
 
 export const preview = definePreview({
@@ -52,7 +52,7 @@ export const preview = definePreview({
   },
   decorators: [
     (Story) => {
-      useEffect(() => {
+      useLayoutEffect(() => {
         // Add the font variables to the html tag
         document.documentElement.classList.add(
           fontSansSerif.variable,
