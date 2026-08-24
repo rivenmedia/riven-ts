@@ -1,7 +1,7 @@
 import { Button } from "@/components/_ui/button";
 
 import { ListChecks, LoaderCircle, Trash, X } from "lucide-react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { removeItems } from "../_actions/remove-items.action";
 import { resetItems } from "../_actions/reset-items.action";

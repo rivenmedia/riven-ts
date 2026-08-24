@@ -14,7 +14,7 @@ import { Input } from "@/components/_ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { Controller } from "react-hook-form";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import { registerUser } from "../_actions/register.action";
 import { registerSchema } from "../_form-schemas/register.schema";

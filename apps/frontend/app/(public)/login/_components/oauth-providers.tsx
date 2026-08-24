@@ -5,7 +5,7 @@ import { StarIcon } from "lucide-react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
 import React, { useState } from "react";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
