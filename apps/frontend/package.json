@@ -43,6 +43,8 @@
     "next": "catalog:",
     "next-safe-action": "catalog:",
     "next-themes": "catalog:",
+    "postcss": "catalog:",
+    "postcss-easings": "catalog:",
     "radix-ui": "catalog:",
     "react": "catalog:",
     "react-day-picker": "catalog:",

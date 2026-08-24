@@ -177,6 +177,7 @@ catalog:
   "@chromatic-com/storybook": ^5.3.0
   "@internationalized/date": ^3.12.3
   use-mask-input: ^3.13.0
+  postcss-easings: ^4.0.0
 
 catalogs:
   typescript7-native:
