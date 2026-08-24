@@ -10,7 +10,6 @@ import { FormProvider, useForm } from "react-hook-form";
 
 import { Badge } from "../_ui/badge";
 import { Button } from "../_ui/button";
-import { Checkbox } from "../_ui/checkbox";
 import { Label } from "../_ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "../_ui/popover";
 import {
@@ -22,8 +21,8 @@ import {
 } from "../_ui/select";
 import { Separator } from "../_ui/separator";
 import { Slider } from "../_ui/slider";
-import { Toggle } from "../_ui/toggle";
 import { DatePicker } from "../date-picker/date-picker";
+import { SelectablePill } from "../selectable-pill/selectable-pill";
 import { LANGUAGE_OPTIONS, MOVIE_GENRES, TV_GENRES } from "./constants";
 import { FilterPopoverFormSchema } from "./filter-popover.form-schema";
 
@@ -67,18 +66,16 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
         availableGenres.values().map(([, id]) => [id, false]),
       ),
       language: "",
-      runtime: [0, 400],
-      voteAverage: [0, 10],
-      voteCount: [0, 1000],
+      runtime: [0, 400] as const,
+      voteAverage: [0, 10] as const,
+      voteCount: [0, 1000] as const,
     },
   });
 
-  const [genres, runtime, voteAverage, voteCount, contentRatings] = form.watch([
-    "genres",
+  const [runtime, voteAverage, voteCount] = form.watch([
     "runtime",
     "voteAverage",
     "voteCount",
-    "contentRatings",
   ]);
 
   const handleSubmit = form.handleSubmit((data) => {
@@ -140,6 +137,7 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
       <PopoverContent
         className="bg-popover max-h-[80vh] w-96 overflow-y-auto rounded-2xl border-none shadow-2xl shadow-black/50"
         align="end"
+        aria-label="Filters"
       >
         <FormProvider {...form}>
           <form
@@ -169,15 +167,26 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               <span className="text-sm font-medium">Release Date</span>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <span className="text-muted-foreground text-xs">From</span>
-                  <DatePicker
-                    name="releaseDateFrom"
-                    placeholder="Pick a date"
-                  />
+                  <Label aria-label="Release Date From">
+                    <div>
+                      <p className="text-muted-foreground text-xs">From</p>
+                      <DatePicker
+                        name="releaseDateFrom"
+                        placeholder="Pick a date"
+                      />
+                    </div>
+                  </Label>
                 </div>
                 <div className="space-y-1">
-                  <span className="text-muted-foreground text-xs">To</span>
-                  <DatePicker name="releaseDateTo" placeholder="Pick a date" />
+                  <Label aria-label="Release Date To">
+                    <div>
+                      <p className="text-muted-foreground text-xs">To</p>
+                      <DatePicker
+                        name="releaseDateTo"
+                        placeholder="Pick a date"
+                      />
+                    </div>
+                  </Label>
                 </div>
               </div>
             </div>
@@ -189,36 +198,12 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               <span className="text-sm font-medium">Genres</span>
               <div className="flex flex-wrap gap-1">
                 {availableGenres.map(([name, id]) => (
-                  <Toggle
-                    asChild
+                  <SelectablePill
                     key={id}
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs"
-                    pressed={Boolean(genres[id])}
-                  >
-                    <Label>
-                      <Checkbox
-                        {...form.register("genres")}
-                        hidden
-                        value={id}
-                        onCheckedChange={(checked) => {
-                          if (checked === "indeterminate") {
-                            return;
-                          }
-
-                          const { ...currentGenres } = form.getValues("genres");
-
-                          currentGenres[id] = checked;
-
-                          form.setValue("genres", currentGenres, {
-                            shouldDirty: true,
-                          });
-                        }}
-                      />
-                      {name}
-                    </Label>
-                  </Toggle>
+                    value={id}
+                    label={name}
+                    name="genres"
+                  />
                 ))}
               </div>
             </div>
@@ -226,30 +211,32 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
             <Separator />
 
             {/* <!-- Language --> */}
-            <div className="space-y-2">
-              <span className="text-sm font-medium">Language</span>
-              <Select
-                {...form.register("language")}
-                onValueChange={(value) => {
-                  form.setValue("language", value, { shouldDirty: true });
-                }}
-              >
-                <SelectTrigger className="h-8 text-xs">
-                  <SelectValue placeholder="All Languages" />
-                </SelectTrigger>
-                <SelectContent className="bg-popover rounded-2xl border-none shadow-2xl shadow-black/50">
-                  {LANGUAGE_OPTIONS.map((lang) => (
-                    <SelectItem
-                      key={lang.value}
-                      value={lang.value}
-                      className="text-xs"
-                    >
-                      {lang.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+            <Label className="space-y-2">
+              <div>
+                <span className="text-sm font-medium">Language</span>
+                <Select
+                  {...form.register("language")}
+                  onValueChange={(value) => {
+                    form.setValue("language", value, { shouldDirty: true });
+                  }}
+                >
+                  <SelectTrigger className="h-8 text-xs">
+                    <SelectValue placeholder="All Languages" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-popover rounded-2xl border-none shadow-2xl shadow-black/50">
+                    {LANGUAGE_OPTIONS.map((lang) => (
+                      <SelectItem
+                        key={lang.value}
+                        value={lang.value}
+                        className="text-xs"
+                      >
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </Label>
 
             {/* <!-- Content Rating (Movies only) --> */}
             <Separator />
@@ -257,42 +244,12 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               <span className="text-sm font-medium">Content Rating</span>
               <div className="flex flex-wrap gap-1">
                 {availableContentRatings.map((rating) => (
-                  <Toggle
-                    asChild
+                  <SelectablePill
                     key={rating}
-                    size="sm"
-                    variant="outline"
-                    className="h-7 px-2 text-xs"
-                    pressed={contentRatings[rating]}
-                  >
-                    <Label>
-                      <Checkbox
-                        {...form.register("contentRatings")}
-                        hidden
-                        value={rating}
-                        onCheckedChange={(checked) => {
-                          if (checked === "indeterminate") {
-                            return;
-                          }
-
-                          const { ...currentContentRatings } =
-                            form.getValues("contentRatings");
-
-                          currentContentRatings[rating] = checked;
-
-                          form.setValue(
-                            "contentRatings",
-                            currentContentRatings,
-                            {
-                              shouldDirty: true,
-                            },
-                          );
-                        }}
-                      />
-
-                      {rating.toUpperCase()}
-                    </Label>
-                  </Toggle>
+                    value={rating}
+                    label={rating.toUpperCase()}
+                    name="contentRatings"
+                  />
                 ))}
               </div>
             </div>
@@ -309,6 +266,7 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               </div>
               <Slider
                 {...form.register("runtime")}
+                aria-label="Runtime"
                 defaultValue={runtime}
                 min={0}
                 max={400}
@@ -329,6 +287,7 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               </div>
               <Slider
                 {...form.register("voteAverage")}
+                aria-label="Vote average"
                 defaultValue={voteAverage}
                 min={0}
                 max={10}
@@ -349,6 +308,7 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               </div>
               <Slider
                 {...form.register("voteCount")}
+                aria-label="Vote count"
                 defaultValue={voteCount}
                 min={0}
                 max={1000}

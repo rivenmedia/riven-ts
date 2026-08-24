@@ -10,7 +10,9 @@ import { Calendar } from "../_ui/calendar";
 import { Input } from "../_ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../_ui/popover";
 
-interface DatePickerProps {
+import type { ComponentProps } from "react";
+
+interface DatePickerProps extends Pick<ComponentProps<"input">, "aria-label"> {
   name: string;
   defaultValue?: string;
   placeholder: string;
@@ -26,6 +28,7 @@ export function DatePicker({
   minDate,
   maxDate,
   required = false,
+  "aria-label": ariaLabel,
 }: DatePickerProps) {
   const { register, setValue } = useFormContext();
   const registerWithMask = useHookFormMask(register);
@@ -58,7 +61,7 @@ export function DatePicker({
         )}
         <Input
           {...field}
-          aria-label="Select a date"
+          aria-label={ariaLabel}
           type="text"
           defaultValue={defaultValue}
           className="relative z-10 w-full bg-transparent font-mono text-sm"

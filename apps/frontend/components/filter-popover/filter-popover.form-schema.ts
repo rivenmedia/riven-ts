@@ -15,12 +15,9 @@ const FloatRange = z
   });
 
 export const FilterPopoverFormSchema = z.object({
-  contentRatings: z.record(
-    MediaItemContentRating.exclude(["unknown"]),
-    z.boolean(),
-  ),
+  contentRatings: z.partialRecord(MediaItemContentRating, z.boolean()),
   genres: z.record(z.int(), z.boolean()),
-  language: z.string().optional(),
+  language: z.string(),
   releaseDateFrom: z.iso.date().or(z.literal("")),
   releaseDateTo: z.iso.date().or(z.literal("")),
   runtime: IntRange,
