@@ -167,10 +167,11 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
               <span className="text-sm font-medium">Release Date</span>
               <div className="grid grid-cols-2 gap-2">
                 <div className="space-y-1">
-                  <Label aria-label="Release Date From">
+                  <Label>
                     <div>
                       <p className="text-muted-foreground text-xs">From</p>
                       <DatePicker
+                        aria-label="Release Date From"
                         name="releaseDateFrom"
                         placeholder="Pick a date"
                       />
@@ -178,10 +179,11 @@ export function FilterPopover({ onApply, mediaType }: FilterPopoverProps) {
                   </Label>
                 </div>
                 <div className="space-y-1">
-                  <Label aria-label="Release Date To">
+                  <Label>
                     <div>
                       <p className="text-muted-foreground text-xs">To</p>
                       <DatePicker
+                        aria-label="Release Date To"
                         name="releaseDateTo"
                         placeholder="Pick a date"
                       />
