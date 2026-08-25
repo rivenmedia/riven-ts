@@ -177,9 +177,12 @@ export function NotificationCenter({
                       <p className="text-muted-foreground text-xs">
                         {notification.message}
                       </p>
-                      <p className="text-muted-foreground/70 text-xs">
+                      <time
+                        dateTime={notification.timestamp}
+                        className="text-muted-foreground/70 text-xs"
+                      >
                         {formatTimestamp(notification.timestamp)}
-                      </p>
+                      </time>
                     </div>
                     <div className="flex flex-col gap-1">
                       {!notification.read && (

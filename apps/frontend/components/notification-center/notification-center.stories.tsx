@@ -2,7 +2,7 @@ import { preview } from "@/.storybook/preview";
 
 import { DateTime } from "luxon";
 import { useMemo } from "react";
-import { fn, userEvent } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import {
   NotificationsContext,
@@ -125,6 +125,64 @@ export const WithNotifications = meta.story({
     },
   ],
 });
+
+WithNotifications.test(
+  'Shows a toast when the "Mark all as read" button is clicked',
+  async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const dialog = within(
+      body.getByRole("dialog", {
+        name: /notifications/iu,
+      }),
+    );
+
+    const button = dialog.getByRole("button", {
+      name: /mark all as read/iu,
+    });
+
+    await userEvent.click(button);
+
+    const toastContainer = within(
+      body.getByRole("region", { name: /notifications/iu }),
+    );
+
+    await waitFor(async () => {
+      const toastItem = toastContainer.getByRole("listitem");
+
+      await expect(toastItem).toHaveTextContent(
+        /all notifications marked as read/iu,
+      );
+    });
+  },
+);
+
+WithNotifications.test(
+  'Shows a toast when the "Clear all notifications" button is clicked',
+  async ({ canvasElement }) => {
+    const body = within(canvasElement.ownerDocument.body);
+    const dialog = within(
+      body.getByRole("dialog", {
+        name: /notifications/iu,
+      }),
+    );
+
+    const button = dialog.getByRole("button", {
+      name: /clear all notifications/iu,
+    });
+
+    await userEvent.click(button);
+
+    const toastContainer = within(
+      body.getByRole("region", { name: /notifications/iu }),
+    );
+
+    await waitFor(async () => {
+      const toastItem = toastContainer.getByRole("listitem");
+
+      await expect(toastItem).toHaveTextContent(/all notifications cleared/iu);
+    });
+  },
+);
 
 export const ErroredConnectionStatus = meta.story({
   decorators: [

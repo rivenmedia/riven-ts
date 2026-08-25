@@ -12,6 +12,7 @@ import { definePreview } from "@storybook/nextjs-vite";
 import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
 import { useLayoutEffect } from "react";
+import { toast } from "sonner";
 import { themes } from "storybook/theming";
 
 import type { MswApi } from "msw-storybook-addon";
@@ -76,6 +77,8 @@ export const preview = definePreview({
     const server = msw as MswApi;
 
     server.use(http.get("https://picsum.photos/**", passthrough));
+
+    toast.dismiss();
   },
 });
 
