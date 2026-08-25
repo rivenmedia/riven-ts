@@ -3,6 +3,7 @@ import { authClient } from "@/lib/auth/client";
 
 import { Link2, Link2Off } from "lucide-react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import type { Account, Provider } from "./types";
@@ -18,12 +19,32 @@ export function SingleAccountLink({
   provider,
   providerId,
 }: SingleAccountLinkProps) {
+  const router = useRouter();
+
   if (!provider.enabled || providerId === "credential") {
     return null;
   }
 
   const providerName =
     provider.name ?? providerId.charAt(0).toUpperCase() + providerId.slice(1);
+
+  async function handleLink() {
+    // Use oauth2.link() for generic OAuth providers
+    await authClient.oauth2.link({
+      providerId,
+      callbackURL: "/auth",
+    });
+
+    toast.success(`${providerId} linked successfully.`);
+  }
+
+  async function handleUnlink() {
+    await authClient.unlinkAccount({ providerId });
+
+    toast.success(`${providerId} unlinked successfully.`);
+
+    router.refresh();
+  }
 
   return (
     <div className="border-border/60 flex items-center justify-between border-t py-3">
@@ -41,14 +62,8 @@ export function SingleAccountLink({
         <Button
           variant="destructive"
           size="sm"
-          onClick={async () => {
-            await authClient.unlinkAccount({
-              providerId,
-            });
-
-            toast.success(`${providerId} unlinked successfully.`);
-
-            await goto(resolve("/auth"), { invalidateAll: true });
+          onClick={() => {
+            void handleUnlink();
           }}
         >
           <Link2Off className="mr-2 h-4 w-4" />
@@ -57,22 +72,8 @@ export function SingleAccountLink({
       ) : (
         <Button
           size="sm"
-          onClick={async () => {
-            if (isGenericOAuthProvider(providerId)) {
-              // Use oauth2.link() for generic OAuth providers
-              await authClient.oauth2.link({
-                providerId,
-                callbackURL: "/auth",
-              });
-            } else {
-              // Use linkSocial() for built-in social providers (plex)
-              await authClient.linkSocial({
-                provider: providerId,
-                callbackURL: "/auth",
-              });
-            }
-
-            toast.success(`${providerId} linked successfully.`);
+          onClick={() => {
+            void handleLink();
           }}
         >
           <Link2 className="mr-2 h-4 w-4" />
