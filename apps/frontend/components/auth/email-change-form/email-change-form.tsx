@@ -6,7 +6,6 @@ import {
   FieldLabel,
 } from "@/components/_ui/field";
 import { Input } from "@/components/_ui/input";
-import { Label } from "@/components/_ui/label";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
