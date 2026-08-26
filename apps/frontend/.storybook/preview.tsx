@@ -1,3 +1,5 @@
+// oxlint-disable-next-line import/no-unassigned-import
+import "msw-storybook-addon/types";
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
 import "@/lib/styles/app.css";
@@ -11,11 +13,10 @@ import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
+import { setupWorker } from "msw/browser";
 import { useLayoutEffect } from "react";
 import { toast } from "sonner";
 import { themes } from "storybook/theming";
-
-import type { MswApi } from "msw-storybook-addon";
 
 export const preview = definePreview({
   tags: ["autodocs"],
@@ -23,8 +24,20 @@ export const preview = definePreview({
     addonA11y(),
     addonDocs(),
     addonVitest(),
-    mswAddon(),
     chromaticAddon(),
+    mswAddon(async () => {
+      const worker = setupWorker(
+        http.get("https://picsum.photos/**", passthrough),
+        http.get("**virtual:next/image**", passthrough),
+      );
+
+      await worker.start({
+        // onUnhandledRequest: "error", // Don't send out real requests in Storybook, they should always be mocked
+        serviceWorker: { url: "/mockServiceWorker.js" },
+      });
+
+      return worker;
+    }),
   ],
   parameters: {
     controls: {
@@ -73,11 +86,7 @@ export const preview = definePreview({
       );
     },
   ],
-  beforeEach({ msw }) {
-    const server = msw as MswApi;
-
-    server.use(http.get("https://picsum.photos/**", passthrough));
-
+  beforeEach() {
     toast.dismiss();
   },
 });

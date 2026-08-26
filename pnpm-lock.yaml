@@ -81,9 +81,6 @@ catalogs:
     '@inkjs/ui':
       specifier: ^2.0.0
       version: 2.0.0
-    '@internationalized/date':
-      specifier: ^3.12.3
-      version: 3.12.3
     '@isaacs/ttlcache':
       specifier: ^2.1.5
       version: 2.1.5
@@ -270,9 +267,6 @@ catalogs:
     dataloader:
       specifier: ^2.2.3
       version: 2.2.3
-    date-fns:
-      specifier: ^4.4.0
-      version: 4.4.0
     dedent:
       specifier: ^1.7.2
       version: 1.7.2
@@ -648,15 +642,15 @@ importers:
       consola:
         specifier: 'catalog:'
         version: 3.4.2
-      date-fns:
-        specifier: 'catalog:'
-        version: 4.4.0
       embla-carousel-react:
         specifier: 'catalog:'
         version: 8.6.0(react@19.2.6)
       graphql:
         specifier: 'catalog:'
         version: 16.14.0
+      http-status-codes:
+        specifier: 'catalog:'
+        version: 2.3.0
       lucide-react:
         specifier: 'catalog:'
         version: 0.562.0(react@19.2.6)
@@ -742,9 +736,6 @@ importers:
       '@graphql-codegen/typescript-operations':
         specifier: 'catalog:'
         version: 5.1.0(graphql@16.14.0)
-      '@internationalized/date':
-        specifier: 'catalog:'
-        version: 3.12.3
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
@@ -4339,9 +4330,6 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
-
-  '@internationalized/date@3.12.3':
-    resolution: {integrity: sha512-fuLX+3ZKLsxI73y8b01EG/WjHb6gE6weCqlfawPO27kBWGMh9G1yH6Csv1uU7/cac9H2GHmOMt6CjmuQ1aia4Q==}
 
   '@ioredis/commands@1.5.1':
     resolution: {integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==}
@@ -15581,10 +15569,6 @@ snapshots:
     optionalDependencies:
       '@types/node': 24.12.4
 
-  '@internationalized/date@3.12.3':
-    dependencies:
-      '@swc/helpers': 0.5.15
-
   '@ioredis/commands@1.5.1': {}
 
   '@isaacs/cliui@8.0.2':
@@ -19334,9 +19318,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.7)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.7)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
     optionalDependencies:
-      '@vitest/browser': 4.1.7(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
+      '@vitest/browser': 4.1.7(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
 
   '@vitest/expect@3.2.4':
     dependencies:

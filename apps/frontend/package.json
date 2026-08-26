@@ -19,7 +19,8 @@
     "test": "vitest run",
     "test:component": "vitest --project storybook",
     "test:watch": "vitest watch",
-    "chromatic": "pnpx chromatic"
+    "chromatic": "pnpx chromatic",
+    "msw:init": "msw init"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
@@ -35,9 +36,9 @@
     "class-variance-authority": "catalog:",
     "clsx": "catalog:",
     "consola": "catalog:",
-    "date-fns": "catalog:",
     "embla-carousel-react": "catalog:",
     "graphql": "catalog:",
+    "http-status-codes": "catalog:",
     "lucide-react": "catalog:",
     "luxon": "catalog:",
     "next": "catalog:",
@@ -68,7 +69,6 @@
     "@graphql-codegen/cli": "catalog:",
     "@graphql-codegen/typescript": "catalog:",
     "@graphql-codegen/typescript-operations": "catalog:",
-    "@internationalized/date": "catalog:",
     "@playwright/test": "catalog:",
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",

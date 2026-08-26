@@ -17,19 +17,23 @@
       "passThroughEnv": ["DATABASE_FILE_NAME"]
     },
     "e2e:headless": {},
+    "msw:init": {
+      "cache": false
+    },
     "storybook": {
+      "dependsOn": ["msw:init"],
       "cache": false,
       "persistent": true,
       "with": ["codegen:gql:watch"]
     },
     "build-storybook": {
-      "dependsOn": ["codegen:gql"],
+      "dependsOn": ["msw:init", "codegen:gql"],
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
     },
     "chromatic": {
       "passThroughEnv": ["CHROMATIC_PROJECT_TOKEN"],
-      "dependsOn": ["transit:source-files"],
+      "dependsOn": ["msw:init", "transit:source-files"],
       "inputs": ["{app,components,lib}/**/*.{ts,tsx}"]
     }
   }
