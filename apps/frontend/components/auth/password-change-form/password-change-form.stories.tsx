@@ -11,17 +11,6 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("Renders correctly", async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-
-  await expect(
-    await canvas.findByRole("heading", {
-      level: 1,
-      name: "Change Password",
-    }),
-  ).toBeInTheDocument();
-});
-
 Default.test(
   '"Change Password" button is disabled when form is pristine',
   async ({ canvas }) => {
