@@ -84,12 +84,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
       <head>
         <script
           type="application/ld+json"
+          // oxlint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(jsonLd).replaceAll("<", String.raw`\u003c`),
           }}
         />
         <script
           type="application/ld+json"
+          // oxlint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(jsonLdProject).replaceAll(
               "<",

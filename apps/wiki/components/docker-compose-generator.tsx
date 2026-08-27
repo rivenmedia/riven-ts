@@ -598,6 +598,7 @@ function CodePreview({
           <button
             onClick={() => void handleCopy()}
             className="inline-flex items-center gap-1.5 rounded-md border border-fd-border bg-fd-background px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/50"
+            type="button"
           >
             {copied ? (
               <>
@@ -612,6 +613,7 @@ function CodePreview({
           <button
             onClick={handleDownload}
             className="inline-flex items-center gap-1.5 rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-500"
+            type="button"
           >
             <Download className="h-3.5 w-3.5" /> Download
           </button>
@@ -619,6 +621,7 @@ function CodePreview({
       </div>
       <div
         className="max-h-[75vh] overflow-auto rounded-lg border border-fd-border text-xs [&_pre]:m-0! [&_pre]:bg-transparent! [&_pre]:py-3"
+        // oxlint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{
           __html: highlighted || "<pre><code>Loading...</code></pre>",
         }}
@@ -699,6 +702,7 @@ function TSConfigForm({
           update("dbPassword", generateSecret(24));
         }}
         className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
+        type="button"
       >
         Generate DB Password
       </button>
@@ -922,6 +926,7 @@ function V1ConfigForm({
               update("dbPassword", generateSecret(24));
             }}
             className="rounded-md bg-purple-600 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-purple-500"
+            type="button"
           >
             Generate All
           </button>
@@ -989,6 +994,7 @@ function TSPreview({
                 ? "border-b-2 border-purple-500 text-purple-400"
                 : "text-fd-muted-foreground hover:text-fd-foreground"
             }`}
+            type="button"
           >
             {label}
           </button>
@@ -1082,6 +1088,7 @@ function V1Preview({
               ? "border-b-2 border-fd-primary text-fd-primary"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
+          type="button"
         >
           1. riven-mount.service
         </button>
@@ -1094,6 +1101,7 @@ function V1Preview({
               ? "border-b-2 border-fd-primary text-fd-primary"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
+          type="button"
         >
           2. docker-compose.yml
         </button>
@@ -1182,6 +1190,7 @@ export default function DockerComposeGenerator() {
               ? "bg-purple-600 text-white shadow-sm"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
+          type="button"
         >
           Riven TS (Recommended)
         </button>
@@ -1194,6 +1203,7 @@ export default function DockerComposeGenerator() {
               ? "bg-fd-muted text-fd-foreground shadow-sm"
               : "text-fd-muted-foreground hover:text-fd-foreground"
           }`}
+          type="button"
         >
           Legacy v1
         </button>

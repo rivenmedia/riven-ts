@@ -30,3 +30,5 @@ export const user = ac.newRole({
 export const manager = ac.newRole({
   item: ItemPermission.options,
 });
+
+export const UserRole = z.enum(["user", "manager", "admin"]);

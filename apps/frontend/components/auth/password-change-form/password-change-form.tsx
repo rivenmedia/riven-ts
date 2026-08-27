@@ -6,7 +6,7 @@ import { Switch } from "@/components/_ui/switch";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
@@ -80,6 +80,8 @@ export function PasswordChangeForm() {
     );
   }
 
+  const revokeSessionsId = useId();
+
   return (
     <form
       onSubmit={(event) => void handleSubmit(event)}
@@ -110,12 +112,12 @@ export function PasswordChangeForm() {
               <div className="flex items-center gap-2">
                 <Switch
                   {...form.register("revokeSessions")}
-                  id="revokeSessions"
+                  id={revokeSessionsId}
                   onCheckedChange={(checked) => {
                     form.setValue("revokeSessions", checked);
                   }}
                 />
-                <FieldLabel htmlFor="revokeSessions">
+                <FieldLabel htmlFor={revokeSessionsId}>
                   Revoke all other sessions
                 </FieldLabel>
               </div>

@@ -11,18 +11,15 @@ export const oxlintPluginReactConfig = defineConfig({
       rules: {
         "react/react-in-jsx-scope": "off", // Not needed with React 17+
         "react/jsx-filename-extension": ["error", { extensions: [".tsx"] }],
+        "react/jsx-pascal-case": ["deny", { allowAllCaps: true }],
+        "react/jsx-props-no-spreading": "allow", // ShadCN mimics native HTML elements and allows props such as aria-*
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
-        "react/button-has-type": "off",
         "react/forbid-component-props": "off",
-        "react/jsx-curly-brace-presence": "off",
         "react/jsx-max-depth": "off",
         "react/jsx-no-literals": "off",
-        "react/jsx-pascal-case": "off",
-        "react/no-danger": "off",
         "react/no-multi-comp": "off",
         "react/only-export-components": "off",
-        "react/jsx-props-no-spreading": "allow", // ShadCN mimics native HTML elements and allows props such as aria-*
       },
     },
   ],
