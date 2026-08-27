@@ -1,6 +1,6 @@
 import { preview } from "@/.storybook/preview";
 
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 
 import { CreateUserForm } from "./create-user-form";
 
@@ -13,7 +13,7 @@ export const Default = meta.story();
 
 Default.test(
   "Shows a success toast when the form is submitted with valid data",
-  async ({ canvas }) => {
+  async ({ canvas, userEvent }) => {
     const usernameInput = await canvas.findByRole("textbox", {
       name: /username/iu,
     });
@@ -31,7 +31,7 @@ Default.test(
     await userEvent.type(passwordInput, "Password123!");
     await userEvent.type(confirmPasswordInput, "Password123!");
 
-    await userEvent.type(roleSelect, "user{enter}");
+    await userEvent.type(roleSelect, "user{Enter}");
 
     const createUserButton = await canvas.findByRole("button", {
       name: /create user/iu,
