@@ -24,7 +24,7 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
   });
 
   const {
-    formState: { isSubmitting },
+    formState: { isSubmitting, isDirty },
   } = form;
 
   function renderField(
@@ -79,7 +79,12 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
           </div>
         }
         footer={
-          <Button variant="secondary" size="sm" disabled={isSubmitting}>
+          <Button
+            variant="secondary"
+            size="sm"
+            disabled={!isDirty || isSubmitting}
+            type="submit"
+          >
             {isSubmitting && (
               <LoaderCircle className="mr-2 h-5 w-5 animate-spin" />
             )}

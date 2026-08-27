@@ -51,6 +51,7 @@ export function SelectionActionBar({
                   ? "hover:bg-red-500/20 hover:text-red-400"
                   : "hover:bg-white/10",
               )}
+              type="button"
             >
               {disabled ? (
                 <LoaderCircle className="h-3.5 w-3.5 animate-spin" />
@@ -66,6 +67,7 @@ export function SelectionActionBar({
             size="icon"
             className="h-9 w-9 rounded-xl hover:bg-white/10"
             onClick={onClear}
+            type="button"
           >
             <X className="h-4 w-4" />
           </Button>

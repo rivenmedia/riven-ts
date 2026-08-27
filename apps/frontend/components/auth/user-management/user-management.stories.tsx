@@ -6,36 +6,11 @@ import { expect, waitFor, within } from "storybook/test";
 
 import { UserManagement } from "./user-management";
 
-import type { Session } from "@/lib/auth/client";
-
 const meta = preview.meta({
   title: "Auth / UserManagement",
   component: UserManagement,
   beforeEach({ msw }) {
     msw.use(
-      http.get("**/api/auth/get-session", () =>
-        HttpResponse.json<Session>({
-          session: {
-            createdAt: DateTime.now().toJSDate(),
-            expiresAt: DateTime.now().plus({ hours: 1 }).toJSDate(),
-            id: "session-1",
-            updatedAt: DateTime.now().toJSDate(),
-            token: "session-token",
-            userId: "1",
-          },
-          user: {
-            id: "1",
-            username: "admin",
-            email: "admin@example.com",
-            role: "admin",
-            banned: false,
-            createdAt: DateTime.now().toJSDate(),
-            emailVerified: true,
-            name: "Admin User",
-            updatedAt: DateTime.now().toJSDate(),
-          },
-        }),
-      ),
       http.post("**/api/auth/admin/remove-user", () =>
         HttpResponse.json({ success: true }),
       ),
@@ -45,6 +20,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
   args: {
+    currentUserId: "1",
     users: [
       {
         id: "1",

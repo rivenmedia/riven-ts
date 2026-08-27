@@ -18,7 +18,7 @@ export function Passkeys() {
       content={
         <ErrorBoundary
           fallback={
-            <p className="text-red-500 text-sm">Failed to load passkeys</p>
+            <p className="text-red-400 text-sm">Failed to load passkeys</p>
           }
         >
           <Suspense
@@ -39,6 +39,7 @@ export function Passkeys() {
           onClick={() => {
             void registerPasskey();
           }}
+          type="button"
         >
           <Fingerprint className="mr-2 h-4 w-4" />
           {isRegisteringPasskey ? "Registering..." : "Add Passkey"}

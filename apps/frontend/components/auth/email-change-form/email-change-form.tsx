@@ -8,6 +8,7 @@ import {
 import { Input } from "@/components/_ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { delay } from "es-toolkit";
 import { LoaderCircle } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 import z from "zod";
@@ -23,12 +24,12 @@ export function EmailChangeForm() {
     resolver: zodResolver(EmailChangeFormSchema),
   });
 
-  const { formState } = form;
+  const {
+    formState: { errors, isDirty, isSubmitting },
+  } = form;
 
-  const handleSubmit = form.handleSubmit(async (data) => {
-    await new Promise((resolve) => {
-      setTimeout(resolve, 2000);
-    });
+  const handleSubmit = form.handleSubmit(async (_data) => {
+    await delay(2000);
   });
 
   return (
@@ -44,7 +45,7 @@ export function EmailChangeForm() {
           title="Change Email"
           description="Manage your email address associated with your account."
           content={
-            <Field data-invalid={Boolean(formState.errors.newEmail)}>
+            <Field data-invalid={Boolean(errors.newEmail)}>
               <FieldLabel className="flex-col items-start">
                 New Email
                 <FieldContent className="w-full">
@@ -56,17 +57,17 @@ export function EmailChangeForm() {
                   />
                 </FieldContent>
               </FieldLabel>
-              <FieldError errors={[formState.errors.newEmail]} />
+              <FieldError errors={[errors.newEmail]} />
             </Field>
           }
           footer={
             <Button
               variant="secondary"
               size="sm"
-              disabled={formState.isSubmitting}
+              disabled={!isDirty || isSubmitting}
               type="submit"
             >
-              {formState.isSubmitting && (
+              {isSubmitting && (
                 <LoaderCircle className="mr-2 h-5 w-5 animate-spin" />
               )}
               Change Email

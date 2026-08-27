@@ -7,7 +7,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/_ui/table";
-import { authClient } from "@/lib/auth/client";
 
 import { DateTime } from "luxon";
 
@@ -17,24 +16,11 @@ import { DeleteUserConfirmationDialog } from "./components/delete-user-confirmat
 import type { User } from "@/lib/auth/client";
 
 export interface UserManagementProps {
+  currentUserId: string;
   users: User[];
 }
 
-export function UserManagement({ users }: UserManagementProps) {
-  const { data, isPending } = authClient.useSession();
-
-  if (isPending) {
-    return null;
-  }
-
-  const currentUserId = data?.user.id;
-
-  if (!currentUserId) {
-    throw new Error(
-      "UserManagement component must be used within a session context. No current user found.",
-    );
-  }
-
+export function UserManagement({ currentUserId, users }: UserManagementProps) {
   return (
     <FormBase
       title="User Management"

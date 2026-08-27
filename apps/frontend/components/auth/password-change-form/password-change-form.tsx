@@ -60,6 +60,7 @@ export function PasswordChangeForm() {
         <ButtonGroup className="w-full">
           <Input
             {...register}
+            aria-invalid={Boolean(form.formState.errors[name])}
             id={name}
             type={passwordVisibility[name] ? "text" : "password"}
           />
