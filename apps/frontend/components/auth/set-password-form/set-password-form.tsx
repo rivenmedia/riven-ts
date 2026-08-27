@@ -11,9 +11,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormBase } from "../form-base/form-base";
-import { SetPasswordFormSchema } from "./set-password-form-schema";
+import { SetPasswordFormSchema } from "./set-password.form-schema";
 
-import type { SetPasswordFormValues } from "./set-password-form-schema";
+import type { SetPasswordFormValues } from "./set-password.form-schema";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export function SetPasswordForm() {

@@ -11,9 +11,9 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { FormBase } from "../form-base/form-base";
-import { PasswordChangeFormSchema } from "./password-change-form-schema";
+import { PasswordChangeFormSchema } from "./password-change.form-schema";
 
-import type { PasswordChangeFormValues } from "./password-change-form-schema";
+import type { PasswordChangeFormValues } from "./password-change.form-schema";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export function PasswordChangeForm() {

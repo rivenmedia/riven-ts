@@ -1,5 +1,7 @@
 import { cn } from "@/lib/utils";
 
+import { kebabCase } from "es-toolkit";
+
 import type { ReactNode } from "react";
 
 export interface FormBaseProps extends Pick<
@@ -27,7 +29,12 @@ export function FormBase({
       )}
     >
       <div>
-        <h2 className="text-base font-semibold">{title}</h2>
+        <h2
+          className="text-base font-semibold"
+          id={`${kebabCase(title)}-form-title`}
+        >
+          {title}
+        </h2>
         {description && (
           <p className="text-muted-foreground mt-1 text-sm">{description}</p>
         )}

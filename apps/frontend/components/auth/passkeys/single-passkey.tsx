@@ -15,7 +15,7 @@ import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { usePasskeyForm } from "./passkey-form-provider";
-import { PasskeyFormSchema } from "./passkey-form-schema";
+import { PasskeyFormSchema } from "./passkey.form-schema";
 
 import type { Passkey } from "@better-auth/passkey/client";
 
