@@ -26,7 +26,7 @@ export function UserManagement({ currentUserId, users }: UserManagementProps) {
       title="User Management"
       description="Manage existing users in the system."
       content={
-        <div className="border-border/60 mt-6 overflow-x-auto border-y">
+        <div className="border-border/60 overflow-x-auto border-y">
           <Table>
             <TableHeader>
               <TableRow>

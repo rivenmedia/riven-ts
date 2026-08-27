@@ -1,5 +1,10 @@
 import { Button } from "@/components/_ui/button";
-import { Field, FieldError, FieldLabel } from "@/components/_ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/_ui/field";
 import { Input } from "@/components/_ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -34,12 +39,8 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
   ) {
     return (
       <Field data-invalid={Boolean(form.formState.errors[name])}>
-        <div>
-          <FieldLabel htmlFor={name} className="mb-1">
-            {label}
-          </FieldLabel>
-          <Input {...inputProps} id={name} />
-        </div>
+        <FieldLabel htmlFor={name}>{label}</FieldLabel>
+        <Input {...inputProps} id={name} />
         <FieldError errors={[form.formState.errors[name]]} />
       </Field>
     );
@@ -60,7 +61,7 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
         title="Update Profile"
         description="Update your user profile information including username, name, and avatar."
         content={
-          <div className="flex flex-col gap-2">
+          <FieldGroup>
             {renderField("username", "Username", {
               ...form.register("username"),
               placeholder: "Enter your username",
@@ -76,7 +77,7 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
               placeholder: "Enter your avatar URL",
               disabled: isSubmitting,
             })}
-          </div>
+          </FieldGroup>
         }
         footer={
           <Button

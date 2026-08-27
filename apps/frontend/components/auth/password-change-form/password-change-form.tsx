@@ -1,6 +1,11 @@
 import { Button } from "@/components/_ui/button";
 import { ButtonGroup } from "@/components/_ui/button-group";
-import { Field, FieldError, FieldLabel } from "@/components/_ui/field";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/components/_ui/field";
 import { Input } from "@/components/_ui/input";
 import { Switch } from "@/components/_ui/switch";
 
@@ -93,7 +98,7 @@ export function PasswordChangeForm() {
         title="Change Password"
         description="Update your account password to keep your account secure"
         content={
-          <>
+          <FieldGroup>
             {renderPasswordField(
               "currentPassword",
               "Current Password",
@@ -109,7 +114,7 @@ export function PasswordChangeForm() {
               "Confirm New Password",
               form.register("confirmNewPassword", { deps: "newPassword" }),
             )}
-            <Field className="mt-4">
+            <Field>
               <div className="flex items-center gap-2">
                 <Switch
                   {...form.register("revokeSessions")}
@@ -124,7 +129,7 @@ export function PasswordChangeForm() {
               </div>
               <FieldError errors={[form.formState.errors.revokeSessions]} />
             </Field>
-          </>
+          </FieldGroup>
         }
         footer={
           <Button

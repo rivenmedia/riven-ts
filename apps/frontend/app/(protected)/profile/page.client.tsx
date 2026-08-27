@@ -1,6 +1,7 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
 import { Badge } from "@/components/_ui/badge";
 import { Button } from "@/components/_ui/button";
+import { Separator } from "@/components/_ui/separator";
 import { AccountLinks } from "@/components/auth/account-links/account-links";
 import { CreateUserForm } from "@/components/auth/create-user-form/create-user-form";
 import { EmailChangeForm } from "@/components/auth/email-change-form/email-change-form";
@@ -124,8 +125,11 @@ export function ProfilePage({
           </Button>
         </div>
       </section>
+
       {hasCredentialProvider ? <PasswordChangeForm /> : <SetPasswordForm />}
+      <Separator />
       <EmailChangeForm />
+      <Separator />
       <UpdateProfileForm
         data={{
           avatar: user.image ?? "",
@@ -133,13 +137,17 @@ export function ProfilePage({
           username: user.username ?? "",
         }}
       />
+      <Separator />
       {canManageUsers && (
         <>
           <CreateUserForm />
+          <Separator />
           <UserManagement currentUserId={user.id} users={[]} />
+          <Separator />
         </>
       )}
       <AccountLinks accounts={[]} providers={{}} />
+      <Separator />
       <PasskeyFormProvider>
         <Passkeys />
       </PasskeyFormProvider>

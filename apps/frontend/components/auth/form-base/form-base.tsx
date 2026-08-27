@@ -23,10 +23,7 @@ export function FormBase({
 }: FormBaseProps) {
   return (
     <section
-      className={cn(
-        "border-border/60 grid gap-4 border-b py-6 md:grid-cols-[12rem_minmax(0,1fr)]",
-        className,
-      )}
+      className={cn("grid gap-4 md:grid-cols-[12rem_minmax(0,1fr)]", className)}
     >
       <div>
         <h2
