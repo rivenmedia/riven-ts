@@ -3,9 +3,9 @@
 import { ThemeProvider, themes } from "@/components/providers/theme-provider";
 
 import { ProgressProvider } from "@bprogress/next/app";
-import { Toaster } from "sonner";
 
 import { TooltipProvider } from "./_ui/tooltip";
+import { Toaster } from "./toaster/toaster";
 
 import type { PropsWithChildren } from "react";
 
