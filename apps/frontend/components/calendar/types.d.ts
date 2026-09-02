@@ -24,6 +24,6 @@ export interface CalendarDay {
 export interface FilterOption {
   id: string;
   label: string;
-  type: string;
-  icon: ComponentType;
+  type: MediaItemType;
+  icon: ComponentType<HTMLAttributes>;
 }
