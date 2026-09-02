@@ -11,15 +11,15 @@ export interface StatusBadgeProps extends Pick<
   "className"
 > {
   state: MediaItemState;
-  small?: boolean;
+  large?: boolean;
 }
 
 export function StatusBadge({
   state,
-  small = false,
+  large = false,
   className,
 }: StatusBadgeProps) {
-  const sizeClasses = small ? "px-2 py-0.5 text-xs" : "px-2.5 py-1 text-xs";
+  const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
 
   return (
     <Badge

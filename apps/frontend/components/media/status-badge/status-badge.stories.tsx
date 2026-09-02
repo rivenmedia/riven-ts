@@ -21,22 +21,24 @@ const meta = preview.meta({
         "requested",
       ],
     },
-    small: {
+    large: {
       control: "boolean",
     },
   },
   args: {
     state: "completed" as const,
-    small: true,
+    large: true,
   },
 });
 
+export const Default = meta.story();
+
 export const AllStates = meta.story({
-  render() {
+  render({ large = false }) {
     return (
       <div className="flex flex-wrap gap-2">
         {MediaItemState.options.map((state) => (
-          <StatusBadge key={state} state={state} />
+          <StatusBadge key={state} state={state} large={large} />
         ))}
       </div>
     );
