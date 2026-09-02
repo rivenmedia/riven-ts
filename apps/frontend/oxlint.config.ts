@@ -19,5 +19,12 @@ export default defineConfig({
         "import/no-default-export": "off",
       },
     },
+    {
+      files: ["*.tsx"],
+      plugins: ["react"],
+      rules: {
+        "react/no-unknown-property": ["deny", { ignore: ["jsx", "global"] }], // Allow jsx/global attributes https://nextjs.org/blog/styling-next-with-styled-jsx
+      },
+    },
   ],
 });
