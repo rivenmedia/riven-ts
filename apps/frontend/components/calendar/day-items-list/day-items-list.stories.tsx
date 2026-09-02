@@ -1,13 +1,13 @@
 import { preview } from "@/.storybook/preview";
 
-import { CalendarDate } from "@internationalized/date";
+import { DateTime } from "luxon";
 
 import { DayItemsList } from "./day-items-list";
 
 import type { CalendarDay } from "../types";
 
 const day: CalendarDay = {
-  date: new CalendarDate(2024, 6, 12),
+  date: DateTime.local(2024, 6, 12),
   dateKey: "2024-06-12",
   isCurrentMonth: true,
   items: [

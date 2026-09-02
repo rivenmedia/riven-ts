@@ -1,13 +1,13 @@
 import { preview } from "@/.storybook/preview";
 
-import { CalendarDate } from "@internationalized/date";
+import { DateTime } from "luxon";
 
 import { CalendarDayCell } from "./calendar-day-cell";
 
 import type { CalendarDay } from "../types";
 
 const busyDay: CalendarDay = {
-  date: new CalendarDate(2024, 6, 12),
+  date: DateTime.local(2024, 6, 12),
   dateKey: "2024-06-12",
   isCurrentMonth: true,
   items: [
@@ -51,7 +51,7 @@ const busyDay: CalendarDay = {
 };
 
 const emptyDay: CalendarDay = {
-  date: new CalendarDate(2024, 6, 15),
+  date: DateTime.local(2024, 6, 15),
   dateKey: "2024-06-15",
   isCurrentMonth: true,
   items: [],
@@ -59,7 +59,7 @@ const emptyDay: CalendarDay = {
 
 const outsideMonthDay: CalendarDay = {
   ...emptyDay,
-  date: new CalendarDate(2024, 5, 30),
+  date: DateTime.local(2024, 5, 30),
   dateKey: "2024-05-30",
   isCurrentMonth: false,
 };

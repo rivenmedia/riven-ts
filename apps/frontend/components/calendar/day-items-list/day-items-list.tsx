@@ -8,6 +8,7 @@ import {
 } from "@/components/_ui/dialog";
 
 import { EntertainmentItem } from "../entertainment-item/entertainment-item";
+import { formatDayTitle } from "../utilities/format-day-title";
 
 import type { CalendarDay } from "../types";
 
@@ -46,7 +47,7 @@ export function DayItemsList({
           <DialogContent className="max-w-md">
             <DialogHeader>
               <DialogTitle className="text-lg font-bold">
-                {/* {formatDayTitle(day.date)} */}
+                {formatDayTitle(day.date)}
               </DialogTitle>
               <DialogDescription>
                 {day.items.length} item{day.items.length === 1 ? "" : "s"}

@@ -1,5 +1,5 @@
-import type { CalendarDate } from "@internationalized/date";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import type { DateTime } from "luxon";
 import type { ComponentType } from "react";
 
 export interface EntertainmentItemData {
@@ -15,7 +15,7 @@ export interface EntertainmentItemData {
 }
 
 export interface CalendarDay {
-  date: CalendarDate;
+  date: DateTime;
   dateKey: string;
   isCurrentMonth: boolean;
   items: EntertainmentItemData[];
