@@ -4,19 +4,8 @@ import { Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
+import type { EntertainmentItemData } from "../types";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
-
-export interface EntertainmentItemData {
-  itemId: number;
-  tvdbId: string;
-  tmdbId: string;
-  showTitle: string;
-  itemType: MediaItemType;
-  airedAt: string;
-  season?: number;
-  episode?: number;
-  lastState?: string;
-}
 
 const typeStyles = {
   movie: {

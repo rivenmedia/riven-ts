@@ -81,6 +81,9 @@ catalogs:
     '@inkjs/ui':
       specifier: ^2.0.0
       version: 2.0.0
+    '@internationalized/date':
+      specifier: ^3.12.3
+      version: 3.12.3
     '@isaacs/ttlcache':
       specifier: ^2.1.5
       version: 2.1.5
@@ -618,6 +621,9 @@ importers:
       '@hookform/resolvers':
         specifier: 'catalog:'
         version: 5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(class-validator@0.14.3)(react-hook-form@7.85.0(react@19.2.6))(zod@4.4.3)
+      '@internationalized/date':
+        specifier: 'catalog:'
+        version: 3.12.3
       '@next-safe-action/adapter-react-hook-form':
         specifier: 'catalog:'
         version: 2.1.0(@hookform/resolvers@5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(class-validator@0.14.3)(react-hook-form@7.85.0(react@19.2.6))(zod@4.4.3))(next-safe-action@8.6.0(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.2.6(react@19.2.6))(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react-hook-form@7.85.0(react@19.2.6))(react@19.2.6)
@@ -4330,6 +4336,9 @@ packages:
     peerDependenciesMeta:
       '@types/node':
         optional: true
+
+  '@internationalized/date@3.12.3':
+    resolution: {integrity: sha512-fuLX+3ZKLsxI73y8b01EG/WjHb6gE6weCqlfawPO27kBWGMh9G1yH6Csv1uU7/cac9H2GHmOMt6CjmuQ1aia4Q==}
 
   '@ioredis/commands@1.5.1':
     resolution: {integrity: sha512-JH8ZL/ywcJyR9MmJ5BNqZllXNZQqQbnVZOqpPQqE1vHiFgAw4NHbvE0FOduNU8IX9babitBT46571OnPTT0Zcw==}
@@ -15568,6 +15577,10 @@ snapshots:
   '@inquirer/type@3.0.10(@types/node@24.12.4)':
     optionalDependencies:
       '@types/node': 24.12.4
+
+  '@internationalized/date@3.12.3':
+    dependencies:
+      '@swc/helpers': 0.5.15
 
   '@ioredis/commands@1.5.1': {}
 

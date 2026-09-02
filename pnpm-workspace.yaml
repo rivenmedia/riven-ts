@@ -176,6 +176,7 @@ catalog:
   use-mask-input: ^3.13.0
   postcss-easings: ^4.0.0
   sonner: ^2.0.8
+  "@internationalized/date": ^3.12.3
 
 catalogs:
   typescript7-native:
