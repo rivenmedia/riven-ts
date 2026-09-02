@@ -102,23 +102,30 @@ export function LibraryChartsCard({
         <h2 className="text-base font-semibold">Content Breakdown</h2>
         <div className="mt-6 grid items-center gap-6 sm:grid-cols-[14rem_minmax(0,1fr)]">
           {isLoading && <Spinner />}
-          <ChartContainer config={{}} className="mx-auto h-56 w-56">
-            <PieChart responsive>
-              <ChartTooltip
-                animationDuration={0}
-                content={<ChartTooltipContent />}
-              />
-              <Pie
-                data={contentRows}
-                dataKey="value"
-                nameKey="label"
-                innerRadius={40}
-                cornerRadius={5}
-                paddingAngle={3}
-              />
-            </PieChart>
-          </ChartContainer>
-          {renderLegendRows()}
+          {contentRows.length === 0 && !isLoading && (
+            <p className="text-muted-foreground">No data available</p>
+          )}
+          {contentRows.length > 0 && !isLoading && (
+            <>
+              <ChartContainer config={{}} className="mx-auto h-56 w-56">
+                <PieChart responsive>
+                  <ChartTooltip
+                    animationDuration={0}
+                    content={<ChartTooltipContent />}
+                  />
+                  <Pie
+                    data={contentRows}
+                    dataKey="value"
+                    nameKey="label"
+                    innerRadius={40}
+                    cornerRadius={5}
+                    paddingAngle={3}
+                  />
+                </PieChart>
+              </ChartContainer>
+              {renderLegendRows()}
+            </>
+          )}
         </div>
       </div>
     </section>
