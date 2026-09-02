@@ -4,7 +4,6 @@ import { Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
-import type { AppRoutes } from "../../../.next/dev/types/routes";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 export interface EntertainmentItemData {
@@ -42,18 +41,18 @@ const typeStyles = {
   },
 } satisfies Record<MediaItemType, { item: string; icon: string; dot: string }>;
 
-function itemUrl(item: EntertainmentItemData): AppRoutes | undefined {
+function itemUrl(item: EntertainmentItemData) {
   const mediaType = item.itemType === "movie" ? "movie" : "tv";
 
   switch (item.itemType) {
     case "movie": {
       // For movies, prefer TMDB ID
       if (item.tmdbId) {
-        return `/details/media/${item.tmdbId}/${mediaType}`;
+        return `/details/media/${item.tmdbId}/${mediaType}` as const;
       }
 
       if (item.tvdbId) {
-        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb`;
+        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb` as const;
       }
 
       break;
@@ -63,11 +62,11 @@ function itemUrl(item: EntertainmentItemData): AppRoutes | undefined {
     case "episode": {
       // For TV items, prefer TVDB ID to skip TMDB→TVDB resolution
       if (item.tvdbId) {
-        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb`;
+        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb` as const;
       }
 
       if (item.tmdbId) {
-        return `/details/media/${item.tmdbId}/${mediaType}`;
+        return `/details/media/${item.tmdbId}/${mediaType}` as const;
       }
 
       break;
