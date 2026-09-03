@@ -5,15 +5,19 @@ import { fn } from "storybook/test";
 
 import { FileInformationPanel } from "./file-information-panel";
 
+import type { UUID } from "node:crypto";
+
 const meta = preview.meta({
   title: "Media / FileInformationPanel",
   component: FileInformationPanel,
+  args: {
+    fallbackMediaMetadata: {},
+    onDeleteEntry: fn(),
+  },
 });
 
 export const Default = meta.story({
   args: {
-    fallbackMediaMetadata: {},
-    onDeleteEntry: fn(),
     entries: [
       {
         fileSize: {
@@ -49,6 +53,17 @@ export const Default = meta.story({
           isRemux: true,
           containerFormat: ["mkv"],
         },
+      },
+    ],
+  },
+});
+
+export const MinimalFields = meta.story({
+  args: {
+    entries: [
+      {
+        id: "1234" as UUID,
+        originalFilename: "movie.mkv",
       },
     ],
   },

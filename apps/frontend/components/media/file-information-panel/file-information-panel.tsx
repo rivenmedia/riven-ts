@@ -9,9 +9,10 @@ import type {
   MediaMetadata,
 } from "@/app/_types/__generated__/graphql";
 import type { UUID } from "node:crypto";
+import type { PartialDeep } from "type-fest";
 
 export interface FileInformationPanelProps {
-  entries: Omit<MediaEntry, "mediaItem">[];
+  entries: Omit<PartialDeep<MediaEntry>, "mediaItem">[];
   fallbackMediaMetadata: MediaMetadata | undefined;
   onDeleteEntry: (id: UUID, label: string) => void | Promise<void>;
 }
@@ -69,7 +70,7 @@ export function FileInformationPanel({
               Video
             </span>
             <div className="flex flex-wrap gap-2">
-              {video.resolution.width && video.resolution.height && (
+              {video.resolution?.width && video.resolution.height && (
                 <Badge
                   variant="secondary"
                   className="text-muted-foreground border border-white/10 bg-white/5 font-mono text-xs backdrop-blur-sm"
