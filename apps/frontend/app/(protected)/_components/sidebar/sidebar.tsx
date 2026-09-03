@@ -4,6 +4,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/_ui/tooltip";
+import { NotificationCenter } from "@/components/notification-center/notification-center";
 import { ThemeSwitcher } from "@/components/theme-switcher/theme-switcher";
 import { cn, getInitials } from "@/lib/utils";
 
@@ -67,12 +68,16 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
       </nav>
 
       <div className="mt-auto flex flex-col items-center gap-3.5 pb-4">
-        {/* <NotificationCenter
-            variant="ghost"
-            side="right"
-            align="end"
-            className="hover:bg-accent/80 group rounded-md transition-colors"
-          /> */}
+        <NotificationCenter
+          buttonProps={{
+            variant: "ghost",
+            className: "hover:bg-accent/80 group rounded-md transition-colors",
+          }}
+          popoverProps={{
+            side: "right",
+            align: "end",
+          }}
+        />
         <ThemeSwitcher />
         {user ? (
           <>

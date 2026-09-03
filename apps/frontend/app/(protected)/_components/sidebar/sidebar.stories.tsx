@@ -1,4 +1,5 @@
 import { preview } from "@/.storybook/preview";
+import { NotificationsProvider } from "@/components/providers/notifications-provider";
 
 import {
   CalendarDays,
@@ -33,6 +34,18 @@ const meta = preview.meta({
   parameters: {
     layout: "fullscreen",
   },
+  globals: {
+    viewport: {
+      value: "desktop",
+    },
+  },
+  decorators: [
+    (Story) => (
+      <NotificationsProvider>
+        <Story />
+      </NotificationsProvider>
+    ),
+  ],
 });
 
 export const LoggedIn = meta.story({
