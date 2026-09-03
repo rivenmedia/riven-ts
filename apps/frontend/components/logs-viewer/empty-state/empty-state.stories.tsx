@@ -5,7 +5,7 @@ import { fn } from "storybook/test";
 import { EmptyState } from "./empty-state";
 
 const meta = preview.meta({
-  title: "Logs / EmptyState",
+  title: "Logs Viewer / EmptyState",
   component: EmptyState,
 });
 

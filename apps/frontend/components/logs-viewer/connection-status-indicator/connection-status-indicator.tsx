@@ -19,16 +19,20 @@ export function ConnectionStatusIndicator({
 }: ConnectionStatusIndicatorProps) {
   function renderStatusText() {
     switch (connectionStatus) {
-      case "connected":
+      case "connected": {
         return "Connected";
-      case "connecting":
+      }
+      case "connecting": {
         return reconnectAttempts > 0
-          ? `Reconnecting... (${reconnectAttempts}/${maxReconnectAttempts})`
+          ? `Reconnecting... (${reconnectAttempts.toString()}/${maxReconnectAttempts.toString()})`
           : "Connecting...";
-      case "disconnected":
+      }
+      case "disconnected": {
         return "Disconnected";
-      case "error":
+      }
+      case "error": {
         return "Connection Error";
+      }
     }
   }
 
@@ -42,7 +46,7 @@ export function ConnectionStatusIndicator({
           connectionStatus === "error" && "bg-red-500",
           "h-2 w-2 rounded-full",
         )}
-      ></div>
+      />
       <span className="text-muted-foreground text-sm">
         {renderStatusText()}
       </span>

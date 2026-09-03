@@ -20,6 +20,7 @@ export function ErrorDisplay({
       <button
         className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors"
         onClick={retryAction}
+        type="button"
       >
         {buttonText}
       </button>

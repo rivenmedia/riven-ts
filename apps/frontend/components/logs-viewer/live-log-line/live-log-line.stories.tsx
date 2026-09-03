@@ -3,7 +3,7 @@ import { preview } from "@/.storybook/preview";
 import { LiveLogLine } from "./live-log-line";
 
 const meta = preview.meta({
-  title: "Logs / LiveLogLine",
+  title: "Logs Viewer / LiveLogLine",
   component: LiveLogLine,
 });
 

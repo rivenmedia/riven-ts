@@ -5,7 +5,7 @@ import { fn } from "storybook/test";
 import { ErrorDisplay } from "./error-display";
 
 const meta = preview.meta({
-  title: "Logs / ErrorDisplay",
+  title: "Logs Viewer / ErrorDisplay",
   component: ErrorDisplay,
   args: {
     errorMessage:

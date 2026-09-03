@@ -3,7 +3,7 @@ import { preview } from "@/.storybook/preview";
 import { LoadingSpinner } from "./loading-spinner";
 
 const meta = preview.meta({
-  title: "Logs / LoadingSpinner",
+  title: "Logs Viewer / LoadingSpinner",
   component: LoadingSpinner,
 });
 

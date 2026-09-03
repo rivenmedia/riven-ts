@@ -12,6 +12,7 @@ export function EmptyState({ message, actionText, actionFn }: EmptyStateProps) {
         <button
           className="bg-primary/10 hover:bg-primary/20 text-primary mt-4 rounded-lg px-4 py-2 text-sm font-medium transition-colors"
           onClick={actionFn}
+          type="button"
         >
           {actionText}
         </button>

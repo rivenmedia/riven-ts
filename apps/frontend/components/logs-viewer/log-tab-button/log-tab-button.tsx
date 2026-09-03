@@ -14,6 +14,7 @@ export function LogTabButton({ name, isActive, onclick }: LogTabButtonProps) {
         isActive ? "bg-primary/10 text-primary" : "hover:bg-muted/50",
       )}
       onClick={onclick}
+      type="button"
     >
       {name}
     </button>

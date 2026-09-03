@@ -3,9 +3,9 @@ import type { LogLevel } from "@/app/_types/__generated__/graphql";
 export interface LogEntryRowProps {
   log: {
     timestamp?: string | null;
-    level?: Lowercase<LogLevel> | null;
+    level: Lowercase<LogLevel>;
     message?: string | null;
-    target?: string | null;
+    source?: string | null;
   };
 }
 
@@ -17,7 +17,7 @@ export function LogEntryRow({ log }: LogEntryRowProps) {
     debug: "text-blue-400",
   };
 
-  const level = (log?.level?.toLowerCase() as Lowercase<LogLevel>) ?? "";
+  const level = log.level.toLowerCase() as Lowercase<LogLevel>;
   const levelClassName = levelColors[level] ?? "text-foreground";
 
   return (
@@ -30,7 +30,7 @@ export function LogEntryRow({ log }: LogEntryRowProps) {
           {level}
         </span>
         <span className="text-muted-foreground/70 shrink-0">
-          {log.target ?? ""}
+          {log.source ?? ""}
         </span>
         <span className="wrap-break-word whitespace-pre-wrap">
           {log.message ?? ""}

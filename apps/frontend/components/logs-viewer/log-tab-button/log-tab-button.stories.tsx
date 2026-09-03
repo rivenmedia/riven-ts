@@ -5,7 +5,7 @@ import { fn } from "storybook/test";
 import { LogTabButton } from "./log-tab-button";
 
 const meta = preview.meta({
-  title: "Logs / LogTabButton",
+  title: "Logs Viewer / LogTabButton",
   component: LogTabButton,
   args: {
     name: "Live Logs",

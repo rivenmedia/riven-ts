@@ -3,7 +3,7 @@ import { preview } from "@/.storybook/preview";
 import { ConnectionStatusIndicator } from "./connection-status-indicator";
 
 const meta = preview.meta({
-  title: "Logs / ConnectionStatusIndicator",
+  title: "Logs Viewer / ConnectionStatusIndicator",
   component: ConnectionStatusIndicator,
   args: {
     reconnectAttempts: 0,
