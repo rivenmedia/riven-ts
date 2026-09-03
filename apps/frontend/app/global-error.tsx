@@ -8,9 +8,10 @@ import Link from "next/link";
 
 import type { ErrorInfo } from "next/error";
 
-export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
+export default function GlobalErrorPage({ retry, error }: ErrorInfo) {
   const isBrowser = typeof window !== "undefined";
-  const message = error.message || "Something went wrong";
+  const message =
+    (error instanceof Error && error.message) || "Something went wrong";
   const statusCode = Math.trunc(
     Number(/status code (\d+)/iu.exec(message)?.[1] ?? "500"),
   );
@@ -28,6 +29,12 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
         return {
           title: "Access denied",
           detail: "Your account does not have permission to view this page.",
+        };
+      }
+      case 404: {
+        return {
+          title: "Page not found",
+          detail: "The page or metadata record could not be found.",
         };
       }
     }
@@ -50,13 +57,14 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
 
   return (
     <div className="relative isolate flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-4 py-16 md:px-10">
-      <div className="absolute inset-0 -z-10">
+      <div className="absolute inset-0 -z-10 animate-in fade-in duration-500 ease-[easeOutCubic] starting:opacity-50">
         <div className="bg-background absolute inset-0" />
         <div className="via-primary/50 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent" />
         <div className="bg-primary/10 absolute top-1/4 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full blur-[110px]" />
         <div className="bg-accent/10 absolute right-0 bottom-0 h-72 w-72 rounded-full blur-[120px]" />
       </div>
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8">
+
+      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 animate-in starting:bottom-[-2] slide-in-from-bottom-3 duration-450 ease-[easeOutCubic]">
         <div className="flex flex-col gap-5">
           <Badge
             variant="outline"
@@ -65,15 +73,18 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
             <TriangleAlert className="size-3" />
             Error
           </Badge>
-          <div className="font-heading text-foreground/90 text-[8rem] leading-none font-bold sm:text-[10rem]">
+
+          <div className="text-foreground/90 font-mono text-[8rem] leading-none font-bold sm:text-[10rem]">
             {statusCode}
           </div>
+
           <div>
             <h1 className="font-heading text-foreground text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
               {title}
             </h1>
             <div className="bg-primary mt-3 h-1 w-16 rounded-full" />
           </div>
+
           <div className="max-w-2xl space-y-3">
             <p className="text-muted-foreground text-base leading-7 md:text-lg">
               {detail}
@@ -85,18 +96,20 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
             )}
           </div>
         </div>
+
         <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             onClick={() => {
-              globalThis.window.history.back();
+              window.history.back();
             }}
             disabled={!isBrowser}
+            type="button"
           >
             <ArrowLeft />
             Back
           </Button>
-          <Button asChild variant="outline">
+          <Button asChild variant="outline" type="button">
             <Link href="/">
               <Home />
               Home
@@ -104,8 +117,9 @@ export default function GlobalErrorPage({ unstable_retry, error }: ErrorInfo) {
           </Button>
           <Button
             variant="ghost"
-            onClick={unstable_retry}
+            onClick={retry}
             disabled={!isBrowser}
+            type="button"
           >
             <RotateCcw />
             Retry
