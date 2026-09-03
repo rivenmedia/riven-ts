@@ -1,4 +1,5 @@
 !app/**/logs/
+!components/**/logs/
 
 # Playwright
 test-results/
