@@ -1,30 +1,30 @@
 import { Checkbox } from "@/components/_ui/checkbox";
+import { Label } from "@/components/_ui/label";
 import { cn } from "@/lib/utils";
-
-import { useState } from "react";
 
 import { getTypeStyle } from "../utilities/get-type-style";
 
 import type { FilterOption } from "../types";
 
 export interface TypeFilterChipsProps {
-  options: FilterOption[];
+  options: readonly FilterOption[];
   filters: Record<string, boolean>;
+  onChange: (filters: Record<string, boolean>) => void;
 }
 
-export function TypeFilterChips({ options, filters }: TypeFilterChipsProps) {
-  const [selected, setSelected] = useState<Record<string, boolean>>({
-    ...filters,
-  });
-
+export function TypeFilterChips({
+  options,
+  filters,
+  onChange,
+}: TypeFilterChipsProps) {
   return (
     <section className="flex flex-wrap items-center gap-2">
       {options.map(({ icon: Icon, id, label, type }) => {
-        const isSelected = selected[type] !== false;
+        const isSelected = filters[type] !== false;
         const style = getTypeStyle(type);
 
         return (
-          <label
+          <Label
             key={id}
             htmlFor={id}
             className={cn(
@@ -38,15 +38,15 @@ export function TypeFilterChips({ options, filters }: TypeFilterChipsProps) {
               checked={isSelected}
               className="size-4"
               onCheckedChange={(checked) => {
-                setSelected((prev) => ({
-                  ...prev,
+                onChange({
+                  ...filters,
                   [type]: Boolean(checked),
-                }));
+                });
               }}
             />
             <Icon className={cn("h-4 w-4", style.icon)} />
             {label}
-          </label>
+          </Label>
         );
       })}
     </section>

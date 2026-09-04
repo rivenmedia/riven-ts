@@ -1,9 +1,10 @@
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { DateTime } from "luxon";
+import type { UUID } from "node:crypto";
 import type { ComponentType } from "react";
 
 export interface EntertainmentItemData {
-  itemId: number;
+  itemId: UUID;
   tvdbId: string;
   tmdbId: string;
   showTitle: string;
