@@ -18,9 +18,7 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("Renders correctly", async ({ canvasElement }) => {
-  const canvas = within(canvasElement);
-
+Default.test("Renders correctly", async ({ canvas }) => {
   await expect(
     await canvas.findByRole("heading", {
       level: 1,

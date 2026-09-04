@@ -12,6 +12,9 @@ export interface CalendarDayCellProps {
 export function CalendarDayCell({ day, isToday }: CalendarDayCellProps) {
   return (
     <div
+      aria-current={isToday ? "date" : undefined}
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
+      role="gridcell"
       className={cn(
         "group/day min-h-32 rounded-md border p-2 transition-colors",
         day.isCurrentMonth

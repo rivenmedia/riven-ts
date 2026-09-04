@@ -15,7 +15,8 @@ export function CalendarMobileDayCard({
   isToday,
 }: CalendarMobileDayCardProps) {
   return (
-    <div
+    <li
+      aria-current={isToday ? "date" : undefined}
       className={cn(
         "bg-card/80 border-border rounded-md border p-3",
         isToday && "border-primary/70 bg-primary/5",
@@ -30,6 +31,6 @@ export function CalendarMobileDayCard({
         </div>
       </div>
       <DayItemsList day={day} />
-    </div>
+    </li>
   );
 }
