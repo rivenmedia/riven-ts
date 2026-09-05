@@ -1,10 +1,14 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
+import { betterAuth } from "better-auth";
+import { mikroOrmAdapter } from "better-auth-mikro-orm";
+import { testUtils } from "better-auth/plugins";
 import { graphql, passthrough } from "msw";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { test as testBase, vi } from "vitest";
 
+import { authConfig } from "../auth/auth.ts";
 import { CoreKey } from "../graphql/context.ts";
 import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
 import { logger } from "../utilities/logger/logger.ts";
@@ -17,10 +21,11 @@ import type { MainRunnerMachineIntake } from "../state-machines/main-runner/inde
 import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
+import type { SetReturnType } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+// oxlint-disable-next-line typescript/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
 export const it = testBase
@@ -83,12 +88,35 @@ export const it = testBase
 
     return database.orm;
   })
+  .extend("em", ({ orm }) => orm.em.fork())
+  .extend("authHelpers", async ({ orm, em }) => {
+    const testUtilsPlugin = testUtils();
+
+    type TestUtilsInitReturn = Awaited<ReturnType<typeof testUtilsPlugin.init>>;
+
+    const fixedTestUtilsPlugin = {
+      ...testUtilsPlugin,
+      init: testUtilsPlugin.init.bind(null),
+    };
+
+    // Fork the entity manager to avoid global context errors
+    orm.em = em;
+
+    const instance = betterAuth({
+      ...authConfig,
+      database: mikroOrmAdapter(orm),
+      plugins: [fixedTestUtilsPlugin],
+    });
+
+    const { test } = await instance.$context;
+
+    return test;
+  })
   .extend("services", { scope: "file" }, async () => {
     const { services } = await import("../database/database.ts");
 
     return services;
   })
-  .extend("em", ({ orm }) => orm.em.fork())
   .extend("factories", async ({ em }) => {
     const { EpisodeFactory } =
       await import("../database/factories/episode.factory.ts");

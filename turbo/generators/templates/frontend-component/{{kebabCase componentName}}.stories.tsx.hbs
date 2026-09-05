@@ -1,0 +1,28 @@
+import { preview } from "@/.storybook/preview";
+
+import { expect, within } from "storybook/test";
+
+import { {{pascalCase componentName}} } from "./{{kebabCase componentName}}";
+
+const meta = preview.meta({
+  {{#if componentGroup}}
+    title: "{{pascalCase componentGroup}} / {{pascalCase componentName}}",
+  {{else}}
+    title: "Components / {{pascalCase componentName}}",
+  {{/if}}
+  component: {{pascalCase componentName}},
+  {{#if disableAutoDocs}}
+    tags: ["!autodocs"],
+  {{/if}}
+});
+
+export const Default = meta.story();
+
+Default.test("Renders correctly", async ({ canvas }) => {
+  await expect(
+    await canvas.findByRole("heading", {
+      level: 1,
+      name: "{{pascalCase componentName}}",
+    }),
+  ).toBeInTheDocument();
+});

@@ -37,8 +37,13 @@ jobs:
             command: lint
             runner-requirements:
               - fuse
+
           - name: Formatting
             command: //#format:check:ci
+
+          - name: Component tests
+            command: test:component
+            concurrency: "100%"
 
           # Separate test jobs per-platform ensures that the project can build natively
           - name: Tests (linux-x64)
@@ -48,28 +53,35 @@ jobs:
               - redis-server
               - fuse
             runner: ubuntu-latest
+
           - name: Tests (linux-arm64)
             command: test
             concurrency: "100%"
             runner-requirements: *test-runner-requirements
             runner: ubuntu-24.04-arm
+
           - name: Tests (macos-arm64)
             command: test
             concurrency: "100%"
             runner-requirements: *test-runner-requirements
             runner: macos-latest
+
           - name: Check for missing migrations
             command: migration:check
             runner-requirements:
               - postgres-service
             env:
               RIVEN_SETTING__databaseUrl: postgres+psycopg2://runner:runner@127.0.0.1:5432/riven
+
           - name: Knip (development)
             command: //#knip:ci:development
+
           - name: Knip (production)
             command: //#knip:ci:production
+
           - name: Build
             command: build
+
           - name: Validate generators
             command: //#validate-generators
             runner-requirements:

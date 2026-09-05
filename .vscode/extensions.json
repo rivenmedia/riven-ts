@@ -5,6 +5,7 @@
     "apollographql.vscode-apollo",
     "Redis.redis-for-vscode",
     "webpro.vscode-knip",
-    "unifiedjs.vscode-mdx"
+    "unifiedjs.vscode-mdx",
+    "bradlc.vscode-tailwindcss"
   ]
 }

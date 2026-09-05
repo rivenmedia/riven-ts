@@ -1,0 +1,36 @@
+{
+  "name": "@repo/util-auth",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    "./access-control": {
+      "production": "./dist/access-control.js",
+      "default": "./lib/access-control.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.lib.json",
+    "check-types": "tsc --noEmit --project tsconfig.lib.json && tsc --noEmit --project tsconfig.spec.json",
+    "lint": "oxlint",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "better-auth": "catalog:",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@repo/core-util-oxlint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}
