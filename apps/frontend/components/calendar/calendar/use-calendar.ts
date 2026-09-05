@@ -1,35 +1,57 @@
-import { DateTime, Interval } from "luxon";
-import { useState } from "react";
+import { DateTime, Info, Interval, Settings } from "luxon";
+import { useEffect, useMemo, useState } from "react";
 
 export function useCalendar() {
-  const today = DateTime.local({ locale: "en-US" });
-  const currentMonth = today.startOf("month");
+  const today = DateTime.local();
+  const currentMonth = today.startOf("month", { useLocaleWeeks: true });
 
-  const [selectedDate, setSelectedDate] = useState(currentMonth);
+  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
 
-  const startOfWeek = today.startOf("week", { useLocaleWeeks: true });
-  const endOfWeek = today.endOf("week", { useLocaleWeeks: true });
+  useEffect(() => {
+    setSelectedMonth(selectedMonth.setLocale(Settings.defaultLocale));
+  }, [Settings.defaultLocale]);
 
-  const dayNames = Interval.fromDateTimes(startOfWeek, endOfWeek)
-    .splitBy({ days: 1 })
-    .map((interval) => interval.start.toFormat("ccc"));
+  const endOfMonth = selectedMonth.endOf("month", { useLocaleWeeks: true });
 
-  const currentMonthDays = DateTime.min(
-    selectedDate.minus({ day: 1 }),
-    startOfWeek,
-  )
-    .until(selectedDate.plus({ months: 1 }))
-    .splitBy({ days: 1 });
+  const intervalEnd = DateTime.max(
+    endOfMonth,
+    endOfMonth.endOf("week", { useLocaleWeeks: true }),
+  );
+
+  const currentMonthDays = Interval.fromDateTimes(
+    selectedMonth.startOf("week", { useLocaleWeeks: true }),
+    intervalEnd,
+  ).splitBy({ days: 1 });
 
   function isToday(date: DateTime) {
     return date.hasSame(today, "day");
   }
 
+  function isCurrentMonth(date: DateTime) {
+    return date.hasSame(selectedMonth, "month");
+  }
+
+  const dayNames = useMemo(() => {
+    const names = Info.weekdays("short");
+    const startOfWeek = Info.getStartOfWeek();
+
+    return [
+      ...names.slice(startOfWeek - 1),
+      ...names.slice(0, startOfWeek - 1),
+    ];
+  }, [Settings.defaultLocale]);
+
+  function resetToToday() {
+    setSelectedMonth(currentMonth);
+  }
+
   return {
-    selectedDate,
-    setSelectedDate,
+    selectedMonth,
+    setSelectedMonth,
     dayNames,
     currentMonthDays,
     isToday,
+    isCurrentMonth,
+    resetToToday,
   };
 }

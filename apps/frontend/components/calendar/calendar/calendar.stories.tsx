@@ -44,7 +44,11 @@ const meta = preview.meta({
     ],
   },
   beforeEach() {
-    const now = DateTime.fromObject({ year: 2026, month: 9, day: 4 });
+    const now = DateTime.fromObject({
+      year: 2026,
+      month: 9,
+      day: 4,
+    });
 
     Settings.now = () => now.toMillis();
   },
@@ -118,6 +122,214 @@ Desktop.test(
     await expect(within(currentDateCell).queryAllByRole("link")).toHaveLength(
       1,
     );
+  },
+);
+
+Desktop.test(
+  "Adjusts the calendar based on the current locale",
+  {
+    beforeEach() {
+      Settings.defaultLocale = "en-US";
+    },
+    afterEach() {
+      Settings.resetCaches();
+    },
+  },
+  async ({ canvas, userEvent, step }) => {
+    const filterButton = canvas.getByRole("checkbox", {
+      name: /episodes/iu,
+    });
+
+    const testCases = [
+      {
+        locale: "en-US",
+        expectedMonthResults: [
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 8 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "26",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 9 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "30",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 10 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "27",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 11 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "1",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 12 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "29",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2027, month: 1 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "27",
+          },
+        ],
+        expectedDayHeaders: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
+      },
+      {
+        locale: "en-GB",
+        expectedMonthResults: [
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 8 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "27",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 9 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "31",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 10 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "28",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 11 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "26",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 12 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "30",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2027, month: 1 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "28",
+          },
+        ],
+        expectedDayHeaders: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      },
+      {
+        locale: "fa-IR",
+        expectedMonthResults: [
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 8 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "1",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 9 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "29",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 10 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "26",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 11 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "31",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 12 }),
+            expectedDayCells: 35,
+            firstDayAccessibleName: "28",
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2027, month: 1 }),
+            expectedDayCells: 42,
+            firstDayAccessibleName: "26",
+          },
+        ],
+        expectedDayHeaders: [
+          "شنبه",
+          "یکشنبه",
+          "دوشنبه",
+          "سه‌شنبه",
+          "چهارشنبه",
+          "پنجشنبه",
+          "جمعه",
+        ],
+      },
+    ] as const;
+
+    for (const testCase of testCases) {
+      await step(testCase.locale, async () => {
+        Settings.defaultLocale = testCase.locale;
+
+        await userEvent.dblClick(filterButton); // Force a re-render after updating the locale
+
+        await step(
+          `Verify day headers match the expected order (${testCase.expectedDayHeaders.toString()})`,
+          async () => {
+            const dayHeaders = await canvas.findAllByRole("columnheader");
+
+            for (let i = 0; i < dayHeaders.length; i++) {
+              const expectedDayHeader = testCase.expectedDayHeaders[i];
+
+              if (expectedDayHeader == null) {
+                throw new Error("Expected day header is missing");
+              }
+
+              await expect(dayHeaders[i]).toHaveTextContent(expectedDayHeader);
+            }
+          },
+        );
+
+        const previousMonthButton = await canvas.findByRole("button", {
+          name: /previous month/iu,
+        });
+
+        const todayButton = canvas.getByRole("button", {
+          name: /today/iu,
+        });
+
+        await userEvent.click(todayButton);
+
+        await userEvent.click(previousMonthButton);
+
+        const nextMonthButton = await canvas.findByRole("button", {
+          name: /next month/iu,
+        });
+
+        for (const {
+          datetime,
+          expectedDayCells,
+          firstDayAccessibleName,
+        } of testCase.expectedMonthResults) {
+          await step(
+            `Verify month: ${datetime.toFormat("LLLL yyyy")}`,
+            async () => {
+              const dayCells = await canvas.findAllByRole("gridcell");
+
+              await step(
+                `Verify there are ${expectedDayCells.toString()} day cells`,
+                async () => {
+                  await expect(dayCells).toHaveLength(expectedDayCells);
+                },
+              );
+
+              await step(
+                `Verify the first day cell is "${firstDayAccessibleName}"`,
+                async () => {
+                  await expect(dayCells[0]).toHaveAccessibleName(
+                    firstDayAccessibleName,
+                  );
+                },
+              );
+
+              await userEvent.click(nextMonthButton);
+            },
+          );
+        }
+      });
+    }
   },
 );
 

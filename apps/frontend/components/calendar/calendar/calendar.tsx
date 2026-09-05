@@ -17,8 +17,15 @@ export interface CalendarProps {
 }
 
 export function Calendar({ items }: CalendarProps) {
-  const { dayNames, selectedDate, setSelectedDate, currentMonthDays, isToday } =
-    useCalendar();
+  const {
+    dayNames,
+    selectedMonth,
+    setSelectedMonth,
+    currentMonthDays,
+    isToday,
+    isCurrentMonth,
+    resetToToday,
+  } = useCalendar();
 
   const shouldRenderMobileCalendar = useMedia("(max-width: 768px)");
 
@@ -54,7 +61,7 @@ export function Calendar({ items }: CalendarProps) {
 
     return {
       date: interval.start,
-      isCurrentMonth: interval.start.hasSame(selectedDate, "month"),
+      isCurrentMonth: isCurrentMonth(interval.start),
       items: filteredItems[dateKey] ?? [],
       dateKey,
     };
@@ -92,6 +99,7 @@ export function Calendar({ items }: CalendarProps) {
         {dayNames.map((day) => (
           <div
             key={day}
+            role="columnheader"
             className="bg-muted/40 text-muted-foreground px-3 py-2 text-center text-xs font-bold uppercase"
           >
             {day}
@@ -112,15 +120,18 @@ export function Calendar({ items }: CalendarProps) {
     <>
       <header className="border-border/60 flex flex-col gap-4 border-b pb-5 md:flex-row md:items-end md:justify-between">
         <h1 className="truncate text-3xl font-bold tracking-tight">
-          {selectedDate.toFormat("LLLL yyyy")}
+          {selectedMonth.toFormat("LLLL yyyy")}
         </h1>
         <div className="flex items-center gap-2">
+          <Button type="button" variant="outline" onClick={resetToToday}>
+            Today
+          </Button>
           <Button
             variant="outline"
             size="icon-sm"
             aria-label="Previous month"
             onClick={() => {
-              setSelectedDate(selectedDate.minus({ months: 1 }));
+              setSelectedMonth(selectedMonth.minus({ months: 1 }));
             }}
             type="button"
           >
@@ -131,7 +142,7 @@ export function Calendar({ items }: CalendarProps) {
             size="icon-sm"
             aria-label="Next month"
             onClick={() => {
-              setSelectedDate(selectedDate.plus({ months: 1 }));
+              setSelectedMonth(selectedMonth.plus({ months: 1 }));
             }}
             type="button"
           >
