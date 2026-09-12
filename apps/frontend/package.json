@@ -80,6 +80,7 @@
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/feature-settings": "workspace:^",
     "@storybook/addon-a11y": "^10.4.6",
     "@storybook/addon-docs": "^10.4.6",
     "@storybook/addon-vitest": "catalog:",

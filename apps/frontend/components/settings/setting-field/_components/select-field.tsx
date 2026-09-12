@@ -32,7 +32,9 @@ export function SettingsSelectField({
 }: SettingsSelectFieldProps) {
   const id = useId();
 
-  const { register, getValues } = useFormContext<{ [name]: string }>();
+  const { register, getValues, setValue } = useFormContext<{
+    [name]: string;
+  }>();
   const defaultValue = useMemo(() => getValues(name), [getValues, name]);
   const field = register(name, props.registerOptions);
 
@@ -43,7 +45,17 @@ export function SettingsSelectField({
         <p className="text-muted-foreground text-sm">{description}</p>
       )}
       <div className="flex max-w-xl items-center gap-2">
-        <Select {...props} {...field} defaultValue={defaultValue}>
+        <Select
+          {...props}
+          {...field}
+          defaultValue={defaultValue}
+          onValueChange={(value) => {
+            setValue(name, value, {
+              shouldDirty: true,
+              shouldTouch: true,
+            });
+          }}
+        >
           <SelectTrigger className="max-w-xs">
             <SelectValue />
           </SelectTrigger>

@@ -47,7 +47,10 @@ export function SettingsBooleanField({
         id={id}
         defaultChecked={defaultValue}
         onCheckedChange={(checked) => {
-          setValue(name, checked);
+          setValue(name, checked, {
+            shouldDirty: true,
+            shouldTouch: true,
+          });
         }}
       />
     </div>
