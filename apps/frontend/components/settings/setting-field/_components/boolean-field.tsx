@@ -34,7 +34,7 @@ export function SettingsBooleanField({
   return (
     <div className="flex items-center justify-between gap-4">
       <div className="space-y-0.5">
-        <Label className="text-base" htmlFor={id}>
+        <Label className="text-sm" htmlFor={id}>
           {label}
         </Label>
         {description && (
