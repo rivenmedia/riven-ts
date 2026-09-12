@@ -6,12 +6,10 @@ import {
 } from "@/components/_ui/tabs";
 import { PageShell } from "@/components/page-shell/page-shell";
 import { DangerZone } from "@/components/settings/danger-zone/danger-zone";
+import { GeneralTab } from "@/components/settings/general-tab/general-tab";
+import { PluginsTab } from "@/components/settings/plugins-tab/plugins-tab";
 
 import { useState } from "react";
-
-import { GeneralTab } from "./_components/general-tab";
-import { PluginsTab } from "./_components/plugins-tab";
-import { RankingTab } from "./_components/ranking-tab";
 
 export function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
@@ -27,40 +25,59 @@ export function SettingsPage() {
             Configure Riven, plugins, and ranking preferences.
           </p>
         </div>
-
         <Tabs value={activeTab} onValueChange={setActiveTab}>
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="plugins">Plugins</TabsTrigger>
-            <TabsTrigger value="ranking">Ranking</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GeneralTab />
+            <GeneralTab
+              data={{
+                enableNotifications: true,
+                instanceName: "",
+                logLevel: "DEBUG",
+              }}
+            />
             {canManageSettings && (
               <div className="mt-8">
                 <DangerZone />
               </div>
             )}
           </TabsContent>
-
           <TabsContent value="plugins">
-            <PluginsTab />
-          </TabsContent>
-          <TabsContent value="ranking">
-            <RankingTab />
-            {/* <RankingTab
-                    bind:rank
-                    rankSchema={data.rankSettingsSchema}
-                    {qualityProfiles}
-                    bind:customProfiles
-                    bind:activeProfileName
-                    bind:newProfileName
-                    bind:savingProfile
-                    {saveAsProfile}
-                    {toggleProfileEnabled}
-                    {applyProfile}
-                    {deleteCustomProfile}
-                    {saveActiveProfileSettings} /> */}
+            <PluginsTab
+              plugins={[
+                {
+                  title: "@repo/plugin-comet",
+                  id: "example-plugin-1",
+                  isEnabled: true,
+                  fields: [
+                    {
+                      type: "text",
+                      config: {
+                        label: "API Key",
+                        name: "apiKey",
+                      },
+                    },
+                  ],
+                },
+                {
+                  title: "@repo/plugin-stremthru",
+                  id: "example-plugin-2",
+                  isEnabled: false,
+                  fields: [
+                    {
+                      type: "text",
+                      config: {
+                        label: "Example Field",
+                        description: "This is an example field.",
+                        name: "exampleField",
+                      },
+                    },
+                  ],
+                },
+              ]}
+            />
           </TabsContent>
         </Tabs>
       </div>
