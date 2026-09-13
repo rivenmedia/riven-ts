@@ -8,6 +8,7 @@ import { PageShell } from "@/components/page-shell/page-shell";
 import { DangerZone } from "@/components/settings/danger-zone/danger-zone";
 import { GeneralTab } from "@/components/settings/general-tab/general-tab";
 import { PluginsTab } from "@/components/settings/plugins-tab/plugins-tab";
+import { RankingTab } from "@/components/settings/ranking-tab/ranking-tab";
 
 import { useState } from "react";
 
@@ -29,6 +30,7 @@ export function SettingsPage() {
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="plugins">Plugins</TabsTrigger>
+            <TabsTrigger value="ranking">Ranking</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
             <GeneralTab
@@ -78,6 +80,9 @@ export function SettingsPage() {
                 },
               ]}
             />
+          </TabsContent>
+          <TabsContent value="ranking">
+            <RankingTab selectedProfile="balanced" />
           </TabsContent>
         </Tabs>
       </div>

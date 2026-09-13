@@ -5,16 +5,22 @@ import { SettingsCustomRankField } from "./_components/custom-rank-field";
 import { SettingsDictionaryField } from "./_components/dictionary-field";
 import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field";
 import { SettingsNumberField } from "./_components/number-field";
-import { SettingsPasswordField } from "./_components/password-field";
+import { SettingsSecretField } from "./_components/secret-field";
 import { SettingsSelectField } from "./_components/select-field";
 import { SettingsStringArrayField } from "./_components/string-array-field";
 import { SettingsTextField } from "./_components/text-field";
 
 import type { ComponentProps, ComponentType } from "react";
 
+export interface CommonSettingFieldProps {
+  name: string;
+  label: string;
+  description?: string;
+}
+
 type SettingsFieldType =
   | "text"
-  | "password"
+  | "secret"
   | "number"
   | "boolean"
   | "nullable_boolean"
@@ -25,7 +31,7 @@ type SettingsFieldType =
 
 const settingFieldComponents = {
   text: SettingsTextField,
-  password: SettingsPasswordField,
+  secret: SettingsSecretField,
   number: SettingsNumberField,
   boolean: SettingsBooleanField,
   nullable_boolean: SettingsNullableBooleanField,

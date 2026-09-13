@@ -5,15 +5,13 @@ import { Switch } from "@/components/_ui/switch";
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
 
-export interface SettingsCustomRankFieldProps {
-  name: string;
-  label: string;
-}
+import type { CommonSettingFieldProps } from "../setting-field";
 
 export function SettingsCustomRankField({
   name,
   label,
-}: SettingsCustomRankFieldProps) {
+  description,
+}: CommonSettingFieldProps) {
   const id = useId();
 
   const { register, setValue, watch } = useFormContext<{
@@ -29,7 +27,12 @@ export function SettingsCustomRankField({
 
   return (
     <div className="bg-muted/30 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm">
-      <span className="min-w-0 truncate ">{label}</span>
+      <div>
+        <span className="min-w-0 truncate">{label}</span>
+        {description && (
+          <p className="text-muted-foreground text-sm">{description}</p>
+        )}
+      </div>
       <div className="flex items-center gap-3">
         <Label className="flex items-center gap-2">
           Fetch
@@ -41,13 +44,7 @@ export function SettingsCustomRankField({
             }}
           />
         </Label>
-        <Input
-          {...rankField}
-          id={id}
-          type="number"
-          placeholder="Ignored"
-          className="h-8 w-24 "
-        />
+        <Input {...rankField} id={id} type="number" className="h-8 w-24 " />
       </div>
     </div>
   );

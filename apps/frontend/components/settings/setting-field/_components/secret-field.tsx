@@ -7,31 +7,25 @@ import { Eye, EyeOff } from "lucide-react";
 import { useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsPasswordFieldProps extends Omit<
-  ComponentProps<"input">,
-  keyof RegisterOptions | "type"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsSecretFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
 }
 
-export function SettingsPasswordField({
+export function SettingsSecretField({
   name,
   label,
   description,
   ...props
-}: SettingsPasswordFieldProps) {
+}: SettingsSecretFieldProps) {
   const id = useId();
 
   const { register } = useFormContext();
   const field = register(name, props.registerOptions);
 
-  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+  const [isValueVisible, setIsValueVisible] = useState(false);
 
   return (
     <div className="space-y-2">
@@ -44,20 +38,20 @@ export function SettingsPasswordField({
           {...props}
           {...field}
           id={id}
-          type={isPasswordVisible ? "text" : "password"}
+          type={isValueVisible ? "text" : "password"}
           className="max-w-xl"
         />
         <ButtonGroup className="shrink-0">
           <Button
-            aria-label={isPasswordVisible ? "Hide password" : "Show password"}
+            aria-label={isValueVisible ? "Hide password" : "Show password"}
             onClick={() => {
-              setIsPasswordVisible(!isPasswordVisible);
+              setIsValueVisible(!isValueVisible);
             }}
             variant="outline"
             size="icon"
             type="button"
           >
-            {isPasswordVisible ? <EyeOff /> : <Eye />}
+            {isValueVisible ? <EyeOff /> : <Eye />}
           </Button>
         </ButtonGroup>
       </div>

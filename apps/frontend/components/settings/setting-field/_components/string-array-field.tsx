@@ -15,17 +15,10 @@ import { Label } from "@/components/_ui/label";
 import React, { useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { Select } from "@/components/_ui/select";
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsStringArrayFieldProps extends Omit<
-  ComponentProps<typeof Select>,
-  keyof RegisterOptions | "type"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsStringArrayFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
   options?: string[];
   allowCustomOptions?: boolean;

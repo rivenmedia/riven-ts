@@ -4,7 +4,8 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": ".",
-    "noEmit": false
+    "noEmit": false,
+    "types": ["@repo/util-plugin-sdk"]
   },
   "files": ["vitest.setup.ts"],
   "include": [

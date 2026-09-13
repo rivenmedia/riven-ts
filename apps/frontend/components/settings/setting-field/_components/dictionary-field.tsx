@@ -13,16 +13,16 @@ import { useFieldArray, useFormContext } from "react-hook-form";
 
 import { SettingField } from "../setting-field";
 
-import type { SettingFieldProps } from "../setting-field";
+import type {
+  CommonSettingFieldProps,
+  SettingFieldProps,
+} from "../setting-field";
 
-export interface SettingsDictionaryFieldProps {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsDictionaryFieldProps extends CommonSettingFieldProps {
   keyLabel?: string;
   addLabel?: string;
   keyPlaceholder?: string;
-  itemFields: Record<string, SettingFieldProps>;
+  itemFields: SettingFieldProps[];
 }
 
 export function SettingsDictionaryField({
@@ -95,7 +95,7 @@ export function SettingsDictionaryField({
                 </Tooltip>
               </div>
               <div className="space-y-3">
-                {Object.values(itemFields).map((itemField) => (
+                {itemFields.map((itemField) => (
                   <SettingField
                     key={itemField.config.name}
                     {...itemField}
@@ -113,10 +113,7 @@ export function SettingsDictionaryField({
           className="rounded-md border px-3 py-2 text-sm"
           onClick={() => {
             const fieldDefaults = Object.fromEntries(
-              Object.values(itemFields).map((itemField) => [
-                itemField.config.name,
-                "",
-              ]),
+              itemFields.map((itemField) => [itemField.config.name, ""]),
             );
 
             append({

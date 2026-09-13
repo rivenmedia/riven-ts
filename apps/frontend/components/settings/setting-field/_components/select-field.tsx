@@ -10,16 +10,10 @@ import {
 import { useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsSelectFieldProps extends Omit<
-  ComponentProps<typeof Select>,
-  keyof RegisterOptions | "type"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsSelectFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
   options: { value: string; label: string }[];
 }

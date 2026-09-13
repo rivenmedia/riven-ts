@@ -29,9 +29,9 @@ Text.test("Typing updates the input value", async ({ canvas }) => {
   await expect(input).toHaveValue("My Riven Instance");
 });
 
-export const Password = meta.story({
+export const Secret = meta.story({
   args: {
-    type: "password",
+    type: "secret",
     config: {
       label: "API Key",
       name: "api-key",
@@ -47,8 +47,8 @@ export const Password = meta.story({
   ],
 });
 
-Password.test(
-  "Clicking the eye icon toggles password visibility",
+Secret.test(
+  "Clicking the eye icon toggles secret visibility",
   async ({ canvas, step }) => {
     const input = canvas.getByLabelText(/api key/iu);
 
@@ -56,7 +56,7 @@ Password.test(
       await expect(input).toHaveAttribute("type", "password");
     });
 
-    await step("Reveals the password when shown", async () => {
+    await step("Reveals the value when shown", async () => {
       await userEvent.click(
         canvas.getByRole("button", { name: /show password/iu }),
       );
@@ -64,7 +64,7 @@ Password.test(
       await expect(input).toHaveAttribute("type", "text");
     });
 
-    await step("Hides the password again", async () => {
+    await step("Hides the value again", async () => {
       await userEvent.click(
         canvas.getByRole("button", { name: /hide password/iu }),
       );
@@ -268,6 +268,7 @@ export const CustomRank = meta.story({
     config: {
       label: "1080p",
       name: "custom-rank",
+      description: "Custom rank for the 1080p resolution",
     },
   },
   decorators: [
@@ -311,15 +312,15 @@ export const Dictionary = meta.story({
       name: "dictionary",
       keyLabel: "Profile key",
       addLabel: "Add profile",
-      itemFields: {
-        enabled: {
+      itemFields: [
+        {
           type: "boolean",
           config: {
             label: "Enabled",
             name: "enabled",
           },
         },
-      },
+      ],
     },
   },
   decorators: [

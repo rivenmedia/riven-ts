@@ -10,7 +10,7 @@ import {
 import { useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 import type { Except } from "type-fest";
 
@@ -20,13 +20,7 @@ const values = {
   null: "null",
 } as const;
 
-export interface SettingsNullableBooleanFieldProps extends Omit<
-  ComponentProps<typeof Select>,
-  keyof RegisterOptions | "defaultValue"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsNullableBooleanFieldProps extends CommonSettingFieldProps {
   registerOptions?: Except<
     RegisterOptions,
     "valueAsDate" | "valueAsNumber" | "setValueAs"

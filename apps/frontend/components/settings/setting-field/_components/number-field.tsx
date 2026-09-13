@@ -4,16 +4,12 @@ import { Label } from "@/components/_ui/label";
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
 
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { ComponentProps } from "react";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsNumberFieldProps extends Omit<
-  ComponentProps<"input">,
-  keyof RegisterOptions | "type"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsNumberFieldProps
+  extends Pick<ComponentProps<"input">, "step">, CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
 }
 

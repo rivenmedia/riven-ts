@@ -4,16 +4,10 @@ import { Label } from "@/components/_ui/label";
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsTextFieldProps extends Omit<
-  ComponentProps<"input">,
-  keyof RegisterOptions | "type"
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsTextFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
 }
 

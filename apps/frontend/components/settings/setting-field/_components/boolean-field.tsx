@@ -4,16 +4,10 @@ import { Switch } from "@/components/_ui/switch";
 import { useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { ComponentProps } from "react";
+import type { CommonSettingFieldProps } from "../setting-field";
 import type { RegisterOptions } from "react-hook-form";
 
-export interface SettingsBooleanFieldProps extends Omit<
-  ComponentProps<typeof Switch>,
-  keyof RegisterOptions
-> {
-  name: string;
-  label: string;
-  description?: string;
+export interface SettingsBooleanFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
 }
 

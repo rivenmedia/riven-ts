@@ -5,7 +5,8 @@
     "composite": true,
     "rootDir": ".",
     "outDir": "dist",
-    "noEmit": false
+    "noEmit": false,
+    "types": ["@repo/util-plugin-sdk"]
   },
   "files": [],
   "include": [
