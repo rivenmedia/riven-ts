@@ -17,12 +17,13 @@ export function SettingsNumberField({
   name,
   label,
   description,
+  registerOptions,
   ...props
 }: SettingsNumberFieldProps) {
   const id = useId();
 
   const { register } = useFormContext();
-  const field = register(name, props.registerOptions);
+  const field = register(name, registerOptions);
 
   return (
     <div className="space-y-2">

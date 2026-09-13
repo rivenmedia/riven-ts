@@ -39,7 +39,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
     });
 
     it('returns a "number" field with min and/or max constraints for an int schema with constraints', () => {
-      const schema = z.int().min(1).max(10).meta({
+      const schema = z.int().min(0).max(10).meta({
         title: "Number Field with Constraints",
         description: "A number field with min and max constraints",
       });
@@ -57,7 +57,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 description: "A number field with min and max constraints",
                 name: "numberField",
                 registerOptions: {
-                  min: 1,
+                  min: 0,
                   max: 10,
                   required: true,
                 },
@@ -295,6 +295,36 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 label: "Secret Field",
                 name: "secretField",
                 registerOptions: { required: true },
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it("sets size constraints if provided on the schema", () => {
+      const schema = z
+        .string()
+        .min(5)
+        .max(10)
+        .meta({ title: "Sized Text Field" });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "sizedTextField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "sizedTextField",
+            {
+              type: "text",
+              config: {
+                label: "Sized Text Field",
+                name: "sizedTextField",
+                registerOptions: {
+                  required: true,
+                  minLength: 5,
+                  maxLength: 10,
+                },
               },
             },
           ],

@@ -50,6 +50,7 @@ export function buildSettingsConfigFromZodSchema(
 
   switch (schema._zod.def.type) {
     case "string": {
+      const { minLength, maxLength } = schema as ZodString;
       const commonConfig = buildCommonConfig(schema, key);
 
       if (meta.secret) {
@@ -67,6 +68,8 @@ export function buildSettingsConfigFromZodSchema(
         config: {
           ...commonConfig,
           registerOptions: {
+            ...(minLength == null ? {} : { minLength }),
+            ...(maxLength == null ? {} : { maxLength }),
             required,
           },
         },
@@ -98,8 +101,8 @@ export function buildSettingsConfigFromZodSchema(
       const commonConfig = buildCommonConfig(schema, key);
 
       const { minValue, maxValue, format } = schema as ZodNumber;
-      const hasMinConstraint = minValue && Number.isFinite(minValue);
-      const hasMaxConstraint = maxValue && Number.isFinite(maxValue);
+      const hasMinConstraint = minValue != null && Number.isFinite(minValue);
+      const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
 
       const isInt = format === "safeint";
 

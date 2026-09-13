@@ -15,12 +15,12 @@ export function SettingsTextField({
   name,
   label,
   description,
-  ...props
+  registerOptions,
 }: SettingsTextFieldProps) {
   const id = useId();
 
   const { register } = useFormContext();
-  const field = register(name, props.registerOptions);
+  const field = register(name, registerOptions);
 
   return (
     <div className="space-y-2">
@@ -28,7 +28,7 @@ export function SettingsTextField({
       {description && (
         <p className="text-muted-foreground text-sm">{description}</p>
       )}
-      <Input {...props} {...field} id={id} className="max-w-xl" />
+      <Input {...field} id={id} className="max-w-xl" />
     </div>
   );
 }

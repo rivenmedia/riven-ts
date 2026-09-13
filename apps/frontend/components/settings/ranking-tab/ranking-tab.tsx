@@ -40,6 +40,7 @@ export function RankingTab({ selectedProfile }: RankingTabProps) {
   const form = useForm({
     resolver: zodResolver(RankingModelSchema),
     defaultValues,
+    progressive: true,
   });
 
   const { isDirty } = form.formState;
