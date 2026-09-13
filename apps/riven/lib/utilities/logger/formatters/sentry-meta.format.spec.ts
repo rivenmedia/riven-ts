@@ -17,6 +17,8 @@ it("does not throw without an active log context", () => {
 });
 
 it("adds active log context metadata", () => {
+  expect.assertions(1);
+
   const sessionId = "00000000-0000-4000-8000-000000000000" as SessionID;
 
   withLogContext(
