@@ -3,6 +3,10 @@ name: Run turbo task
 on:
   workflow_call:
     inputs:
+      runner:
+        description: The runner to use for the turbo task
+        type: string
+        required: true
       task:
         description: The name of the turbo task to run
         type: string
@@ -65,6 +69,9 @@ jobs:
         with:
           tasks: '[ "${{ inputs.task }}" ]'
           turbo-version: ${{ steps.get-turbo-version.outputs.result }}
+        env:
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - name: Output required tasks
         run: |
@@ -74,7 +81,7 @@ jobs:
     name: Run ${{ inputs.task }}
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
-    runs-on: ubuntu-latest
+    runs-on: ${{ inputs.runner }}
     permissions:
       contents: read
       pull-requests: write

@@ -1,21 +1,10 @@
-import { type Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
-import {
-  RivenEvent,
-  type RivenExternalEvent,
-} from "@repo/util-plugin-sdk/events";
+import { Show } from "@repo/util-plugin-sdk/dto/entities";
+import { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 import chalk from "chalk";
 import { Duration } from "luxon";
 import os from "node:os";
-import {
-  type ActorRef,
-  type Snapshot,
-  assign,
-  enqueueActions,
-  forwardTo,
-  raise,
-  setup,
-} from "xstate";
+import { assign, enqueueActions, forwardTo, raise, setup } from "xstate";
 
 import { postProcessItemProcessor } from "../../message-queue/flows/post-process-media-item/post-process-media-item.processor.ts";
 import { PostProcessMediaItemFlow } from "../../message-queue/flows/post-process-media-item/post-process-media-item.schema.ts";
@@ -47,23 +36,14 @@ import { logger } from "../../utilities/logger/logger.ts";
 import { settings } from "../../utilities/settings.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
-import {
-  type FanOutDownloadInput,
-  fanOutDownload,
-} from "./actors/fan-out-download.actor.ts";
+import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
 import { jobEnqueuer } from "./actors/job-enqueuer.actor.ts";
 import { processItemRequest } from "./actors/process-item-request.actor.ts";
 import { processMediaItem } from "./actors/process-media-item.actor.ts";
 import { requestContentServices } from "./actors/request-content-services.actor.ts";
-import {
-  type RequestItemInput,
-  requestItem,
-} from "./actors/request-item.actor.ts";
+import { requestItem } from "./actors/request-item.actor.ts";
 import { retryLibrary } from "./actors/retry-library.actor.ts";
-import {
-  type ScheduleReindexInput,
-  scheduleReindex,
-} from "./actors/schedule-reindex.actor.ts";
+import { scheduleReindex } from "./actors/schedule-reindex.actor.ts";
 
 import type { RivenInternalEvent } from "../../message-queue/events/index.ts";
 import type { Flow } from "../../message-queue/flows/index.ts";
@@ -77,7 +57,13 @@ import type {
   ValidPluginMap,
 } from "../../types/plugins.ts";
 import type { RivenMachineEvent } from "../program/index.ts";
+import type { FanOutDownloadInput } from "./actors/fan-out-download.actor.ts";
+import type { RequestItemInput } from "./actors/request-item.actor.ts";
+import type { ScheduleReindexInput } from "./actors/schedule-reindex.actor.ts";
+import type { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import type { RivenExternalEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue, Worker } from "bullmq";
+import type { ActorRef, Snapshot } from "xstate";
 
 export interface MainRunnerMachineContext {
   availableParallelism: number;
@@ -249,7 +235,7 @@ export const mainRunnerMachine = setup({
     isRivenEvent: ({ event }) => RivenEvent.safeParse(event).success,
     isOngoingItem: (_, item: Movie | Show) => {
       if (item instanceof Show) {
-        return item.state === "ongoing";
+        return item.status === "continuing";
       }
 
       return !item.isReleased;
@@ -543,6 +529,20 @@ export const mainRunnerMachine = setup({
             ],
           },
 
+          "riven.item-request.removed": {
+            description:
+              "Indicates that an item request has been successfully removed.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { title } }) => ({
+                  message: `Successfully removed ${chalk.bold(title)} from the library.`,
+                  level: "info",
+                }),
+              },
+            ],
+          },
+
           /**
            * Index lifecycle events
            */
@@ -563,7 +563,6 @@ export const mainRunnerMachine = setup({
                   type: "log",
                   params: ({ event: { item } }) => ({
                     message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. This item is not yet released and will be scheduled for re-indexing at a later date.`,
-                    level: "info",
                   }),
                 },
               ],
@@ -582,10 +581,26 @@ export const mainRunnerMachine = setup({
                 },
                 {
                   type: "log",
-                  params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}. Attempting to download all available episodes; future episodes will be re-indexed after their air date.`,
-                    level: "info",
-                  }),
+                  params: ({ event: { item, meta } }) => {
+                    if (
+                      meta.type === "show" &&
+                      meta.isAdditionalSeasonRequest
+                    ) {
+                      return {
+                        message: `Successfully requested additional seasons for ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    if (meta.isReindex) {
+                      return {
+                        message: `Successfully re-indexed ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    return {
+                      message: `Successfully indexed ${chalk.bold(item.fullTitle)}. Future episodes will be re-indexed after their air date.`,
+                    };
+                  },
                 },
                 {
                   type: "processMediaItem",
@@ -603,10 +618,20 @@ export const mainRunnerMachine = setup({
               actions: [
                 {
                   type: "log",
-                  params: ({ event: { item } }) => ({
-                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}`,
-                    level: "info",
-                  }),
+                  params: ({ event: { item, meta } }) => {
+                    if (
+                      meta.type === "show" &&
+                      meta.isAdditionalSeasonRequest
+                    ) {
+                      return {
+                        message: `Successfully requested additional seasons for ${chalk.bold(item.fullTitle)}.`,
+                      };
+                    }
+
+                    return {
+                      message: `Successfully indexed ${chalk.bold(item.fullTitle)}.`,
+                    };
+                  },
                 },
                 {
                   type: "processMediaItem",
@@ -615,13 +640,15 @@ export const mainRunnerMachine = setup({
               ],
             },
             {
-              actions: {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
-                  level: "error",
-                }),
-              },
+              actions: [
+                {
+                  type: "log",
+                  params: ({ event: { item } }) => ({
+                    message: `Successfully indexed ${item.type}: ${chalk.bold(item.fullTitle)}, but could not determine the next action.`,
+                    level: "error",
+                  }),
+                },
+              ],
             },
           ],
 
@@ -653,17 +680,10 @@ export const mainRunnerMachine = setup({
            * Scrape lifecycle events
            */
 
-          "riven.media-item.scrape.error.no-new-streams": {
+          "riven.media-item.scrape.error.no-streams-found": {
             description:
-              "Indicates that a media item scrape completed successfully, but no new streams were found.",
+              "Indicates that no streams were found when attempting to scrape a media item.",
             actions: [
-              {
-                type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `No new streams found for ${chalk.bold(item.fullTitle)}.`,
-                  level: "verbose",
-                }),
-              },
               {
                 type: "fanOutDownload",
                 params: ({ event: { item } }) => ({ item }),
@@ -679,7 +699,6 @@ export const mainRunnerMachine = setup({
                 type: "log",
                 params: ({ event: { item } }) => ({
                   message: `Successfully scraped ${item.type}: ${chalk.bold(item.fullTitle)}`,
-                  level: "info",
                 }),
               },
             ],

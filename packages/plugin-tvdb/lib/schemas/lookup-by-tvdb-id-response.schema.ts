@@ -1,5 +1,7 @@
-import { type TimezoneName, getAllTimezones } from "countries-and-timezones";
+import { getAllTimezones } from "countries-and-timezones";
 import z from "zod";
+
+import type { TimezoneName } from "countries-and-timezones";
 
 export const LookupByTvdbIdResponse = z.object({
   network: z

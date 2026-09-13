@@ -8,7 +8,9 @@ import {
   ManyToMany,
   PrimaryKey,
   Property,
+  OneToMany,
 } from "@mikro-orm/decorators/legacy";
+import { JSONObjectResolver } from "graphql-scalars";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import { StreamRepository } from "../../repositories/stream.repository.ts";
@@ -19,18 +21,26 @@ import type { ParsedData } from "@repo/util-rank-torrent-name";
 @ObjectType()
 @Entity({ repository: () => StreamRepository })
 export class Stream {
-  [PrimaryKeyProp]!: "infoHash";
+  public [PrimaryKeyProp]!: "infoHash";
 
-  [EntityRepositoryType]?: StreamRepository;
+  public [EntityRepositoryType]?: StreamRepository;
 
   @Field(() => ID)
   @PrimaryKey()
-  infoHash!: string;
+  public infoHash!: string;
 
+  @Field(() => JSONObjectResolver)
   @Property({ type: "json" })
-  parsedData!: ParsedData;
+  public parsedData!: ParsedData;
 
   @Field(() => [MediaItem])
   @ManyToMany(() => MediaItem, "streams")
-  parents = new Collection<MediaItem>(this);
+  public parents = new Collection<MediaItem>(this);
+
+  @Field(() => [MediaItem])
+  @OneToMany({
+    entity: () => MediaItem,
+    mappedBy: "activeStream",
+  })
+  public activeParents = new Collection<MediaItem>(this);
 }

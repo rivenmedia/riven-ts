@@ -14,7 +14,7 @@ it.skip("instantiates plugin datasources", async ({ actor }) => {
 
   expect(registeredPlugin).toBeDefined();
 
-  const DataSourceConstructor = testPlugin.default.dataSources?.[0];
+  const DataSourceConstructor = testPlugin.plugin.dataSources?.[0];
 
   expect.assert(DataSourceConstructor);
 

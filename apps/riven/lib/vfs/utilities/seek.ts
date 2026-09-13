@@ -24,7 +24,7 @@ export function seek(from: number, to: number) {
   );
 
   // Drain without blocking. We don't want a slow or large stream to delay the reconnect.
-  void responsePromise?.then(({ body }) => body.dump());
+  void responsePromise?.then(async ({ body }) => body.dump());
 
   fdToResponsePromiseMap.delete(fd);
   fdToCurrentStreamPositionMap.delete(fd);

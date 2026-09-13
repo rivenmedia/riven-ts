@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { parse } from "./parse.ts";
 
-describe("parse", () => {
+describe(parse, () => {
   it("should throw on empty input", () => {
     expect(() => parse("")).toThrow(TypeError);
   });
@@ -22,8 +22,8 @@ describe("parse", () => {
   it("should parse a TV show with season and episode", () => {
     const data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]");
     expect(data.title).toBe("The Walking Dead");
-    expect(data.seasons).toEqual([5]);
-    expect(data.episodes).toEqual([3]);
+    expect(data.seasons).toStrictEqual([5]);
+    expect(data.episodes).toStrictEqual([3]);
     expect(data.resolution).toBe("720p");
     expect(data.type).toBe("show");
   });
@@ -33,7 +33,7 @@ describe("parse", () => {
       "Movie.2023.2160p.UHD.BluRay.REMUX.HDR.DV.HEVC.DTS-HD.MA.5.1-GROUP",
     );
 
-    // ptt-viren may return "4k" or "2160p" for UHD content
+    // `ptt-viren` may return "4k" or "2160p" for UHD content
     expect(["2160p", "4k"]).toContain(data.resolution);
     expect(data.hdr?.length).toBeGreaterThan(0);
   });

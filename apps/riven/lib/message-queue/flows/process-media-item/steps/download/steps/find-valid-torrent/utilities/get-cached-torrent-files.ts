@@ -19,7 +19,7 @@ export async function getCachedTorrentFiles(
     MediaItemDownloadCacheCheckRequestedResponse,
     `Find cached torrents for ${pluginName}${provider ? ` on ${provider}` : ""}`,
     pluginName,
-    { infoHashes: infoHashes, provider },
+    { infoHashes, provider },
     {
       jobId: `${infoHashes.join(",")}-cache-check-${pluginName}-${provider ?? ""}`,
       removeDependencyOnFailure: true,

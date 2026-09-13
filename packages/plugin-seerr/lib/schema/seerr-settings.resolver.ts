@@ -7,7 +7,7 @@ import { SeerrSettings } from "./types/seerr-settings.type.ts";
 @Resolver(() => Settings)
 export class SeerrSettingsResolver {
   @FieldResolver(() => SeerrSettings)
-  seerr(): SeerrSettings {
+  public seerr(): SeerrSettings {
     return {
       apiKey: "seerr-api-key",
       url: "seerr-url",

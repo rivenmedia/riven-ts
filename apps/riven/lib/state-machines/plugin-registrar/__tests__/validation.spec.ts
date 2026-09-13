@@ -1,4 +1,4 @@
-import * as testPlugin from "@repo/plugin-test";
+import { plugin as testPlugin } from "@repo/plugin-test";
 
 import { expect, vi } from "vitest";
 import { toPromise } from "xstate";
@@ -10,7 +10,7 @@ vi.mock(import("node:timers/promises"), async (importOriginal) => {
 
   return {
     ...originalModule,
-    setTimeout: vi.fn(),
+    setTimeout: vi.fn<() => Promise<never>>(),
   };
 });
 
@@ -26,7 +26,7 @@ it('validates the plugin on "riven.validate-plugin" event', async ({
 
 it("retries validation up to 3 times on failure", async ({ actor }) => {
   const validatePluginSpy = vi
-    .spyOn(testPlugin.default, "validator")
+    .spyOn(testPlugin, "validator")
     .mockResolvedValue(false);
 
   await vi.waitFor(() => {

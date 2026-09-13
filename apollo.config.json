@@ -1,6 +1,10 @@
 {
   "client": {
-    "includes": ["apps/riven/lib/**/*.ts"],
+    "includes": [
+      "apps/riven/lib/**/*.ts",
+      "apps/riven-tui/lib/**/*.ts",
+      "apps/riven-tui/lib/**/*.tsx"
+    ],
     "service": {
       "name": "Riven",
       "localSchemaFile": "apps/riven/schema.graphql"

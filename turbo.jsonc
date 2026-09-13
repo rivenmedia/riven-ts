@@ -1,7 +1,11 @@
 {
   "$schema": "https://turborepo.dev/schema.json",
   "ui": "tui",
-  "globalEnv": ["NODE_ENV"],
+  "globalEnv": [
+    "NODE_ENV",
+    "RUNNER_ARCH", // Used to cache bust CI matrices
+    "RUNNER_OS" // Used to cache bust CI matrices
+  ],
   "globalPassThroughEnv": ["DEBUG", "CI"],
   "globalDependencies": [".node-version"],
   "futureFlags": {
@@ -28,13 +32,6 @@
         "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
         "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
         "!**/{logs,node_modules,temp,.turbo,.next,coverage,docker-data,dist}/**"
-      ]
-    },
-    "check-types": {
-      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
-      "inputs": [
-        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
-        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
     "dev": {
@@ -72,13 +69,27 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "lint": {
-      "dependsOn": ["codegen:api-schemas"],
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
       ]
     },
-    "lint:fix": {},
+    "lint:fix": {
+      "cache": false,
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"]
+    },
+    "//#lint": {
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!apps/**",
+        "!packages/**",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
+      ]
+    },
+    "//#lint:fix": {
+      "cache": false
+    },
     "//#format:check:ci": {
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql,.md,.markdown,.mdx}",

@@ -3,8 +3,8 @@ import { Field, ObjectType } from "type-graphql";
 @ObjectType()
 export class MdblistSettings {
   @Field(() => String)
-  apiKey!: string;
+  public apiKey!: string;
 
   @Field(() => [String])
-  lists!: string[];
+  public lists!: string[];
 }

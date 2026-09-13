@@ -1,4 +1,6 @@
 import { StarCounter } from "@/components/star-counter";
+import { getPlugins } from "@/lib/plugins";
+
 import {
   ArrowRight,
   BarChart3,
@@ -6,13 +8,14 @@ import {
   Cog,
   Download,
   GitBranch,
-  type LucideIcon,
   Puzzle,
   Settings,
   Shield,
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+
+import type { LucideIcon } from "lucide-react";
 
 const features: { icon: LucideIcon; title: string; description: string }[] = [
   {
@@ -37,7 +40,7 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
     icon: Bell,
     title: "Notifications",
     description:
-      "Stay updated with Discord, Apprise, and webhook notifications for media events.",
+      "Stay updated with Discord, webhook, and custom notification URLs for media events.",
   },
   {
     icon: BarChart3,
@@ -53,22 +56,13 @@ const features: { icon: LucideIcon; title: string; description: string }[] = [
   },
 ];
 
-const integrations = [
-  { name: "Plex", url: "https://plex.tv" },
-  { name: "Jellyfin", url: "https://jellyfin.org" },
-  { name: "Emby", url: "https://emby.media" },
+const debridStores = [
   { name: "Real-Debrid", url: "https://real-debrid.com" },
-  { name: "All-Debrid", url: "https://alldebrid.com" },
-  { name: "Torrentio", url: "https://torrentio.strem.fun" },
-  { name: "Comet", url: "https://github.com/g0ldyy/comet" },
-  { name: "StremThru", url: "https://github.com/MunifTanjim/stremthru" },
-  { name: "Listrr", url: "https://listrr.pro" },
-  { name: "MDBList", url: "https://mdblist.com" },
-  { name: "Seerr", url: "https://github.com/seerr-team/seerr" },
-  { name: "TMDB", url: "https://www.themoviedb.org" },
-  { name: "TVDB", url: "https://thetvdb.com" },
-  { name: "Subdl", url: "https://subdl.com" },
-  { name: "Apprise", url: "https://github.com/caronc/apprise" },
+  {
+    name: "TorBox",
+    url: "https://torbox.app/subscription?referral=7db23db7-e438-49fd-8d6f-629642a23858",
+  },
+  { name: "AllDebrid", url: "https://alldebrid.com" },
 ];
 
 const statusIndicators = [
@@ -77,20 +71,19 @@ const statusIndicators = [
   { label: "Docker Ready", color: "bg-purple-500" },
 ];
 
-const stats = [
-  { value: "12+", label: "Plugins" },
-  { value: "100%", label: "Open Source" },
-  { value: "24/7", label: "Automated" },
-];
-
 async function getGitHubStars() {
   try {
     const res = await fetch(
       "https://api.github.com/repos/rivenmedia/riven-ts",
       { next: { revalidate: 3600 } },
     );
-    if (!res.ok) return null;
+
+    if (!res.ok) {
+      return null;
+    }
+
     const data = (await res.json()) as { stargazers_count: number };
+
     return data.stargazers_count;
   } catch {
     return null;
@@ -99,6 +92,13 @@ async function getGitHubStars() {
 
 export default async function HomePage() {
   const stars = await getGitHubStars();
+  const plugins = getPlugins();
+  const stats = [
+    { value: String(plugins.length), label: "Plugins" },
+    { value: "100%", label: "Open Source" },
+    { value: "24/7", label: "Automated" },
+  ];
+
   return (
     <main className="flex flex-1 flex-col">
       {/* Hero */}
@@ -206,18 +206,34 @@ export default async function HomePage() {
           </div>
 
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
-            {integrations.map((integration) => (
-              <a
-                key={integration.name}
-                href={integration.url}
-                target="_blank"
-                rel="noopener noreferrer"
+            {plugins.map((plugin) => (
+              <Link
+                key={plugin.name}
+                href={plugin.url}
                 className="flex items-center justify-center rounded-lg border border-fd-border bg-fd-card px-4 py-3 text-sm font-medium transition-all hover:border-purple-500/30 hover:bg-fd-muted/50"
               >
-                {integration.name}
-              </a>
+                {plugin.title}
+              </Link>
             ))}
           </div>
+
+          <p className="mt-6 text-center text-sm text-fd-muted-foreground">
+            StremThru connects Riven to your debrid store, including{" "}
+            {debridStores.map((store, i) => (
+              <span key={store.name}>
+                {i > 0 && (i === debridStores.length - 1 ? " and " : ", ")}
+                <a
+                  href={store.url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-purple-400 underline underline-offset-2"
+                >
+                  {store.name}
+                </a>
+              </span>
+            ))}
+            .
+          </p>
         </div>
       </section>
 

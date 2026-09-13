@@ -1,10 +1,10 @@
-import * as Sentry from "@sentry/node";
+import { getActiveSpan } from "@sentry/node";
 import { format } from "winston";
 
 import { getLogContext } from "../log-context.ts";
 
 export const sentryMetaFormat = format((info) => {
-  const activeSpan = Sentry.getActiveSpan();
+  const activeSpan = getActiveSpan();
 
   if (activeSpan) {
     const { spanId, traceId } = activeSpan.spanContext();
@@ -13,8 +13,17 @@ export const sentryMetaFormat = format((info) => {
     info["span.id"] = spanId;
   }
 
-  return {
-    ...info,
-    ...getLogContext(),
-  };
+  try {
+    return {
+      ...info,
+      ...getLogContext(),
+    };
+  } catch (error) {
+    // oxlint-disable-next-line no-console
+    console.error(
+      `Unexpected error whilst logging "${info.message as string}": ${error instanceof Error ? error.message : String(error)}`,
+    );
+
+    throw error;
+  }
 });

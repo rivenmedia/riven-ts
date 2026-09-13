@@ -1,10 +1,14 @@
 import { buildSchema } from "@repo/core-util-graphql-schema";
 
 import { ApolloServer } from "@apollo/server";
+import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
-import { startStandaloneServer } from "@apollo/server/standalone";
+import { expressMiddleware } from "@as-integrations/express5";
+import cors from "cors";
+import express from "express";
+import { createServer } from "node:http";
 import { URL } from "node:url";
-import { type ActorRefFromLogic, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { initApolloClient } from "../../../graphql/apollo-client.ts";
 import { buildContextFunction } from "../../../graphql/build-context-function.ts";
@@ -12,12 +16,16 @@ import { resolvers } from "../../../graphql/resolvers/index.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { redisCache } from "../../../utilities/redis-cache.ts";
 import { settings } from "../../../utilities/settings.ts";
-import { mainRunnerMachine } from "../../main-runner/index.js";
 
 import type { ApolloServerContext } from "../../../graphql/context.ts";
 import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type {
+  mainRunnerMachine,
+  MainRunnerMachineIntake,
+} from "../../main-runner/index.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
+import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
@@ -36,8 +44,13 @@ export const startGqlServer = fromPromise<
 >(async ({ input: { mainRunnerRef, validPlugins } }) => {
   const pluginResolvers = validPlugins
     .values()
-    .flatMap((p) => p.config.resolvers)
+    .flatMap(({ config }) => config.resolvers)
     .toArray();
+
+  const app = express();
+  const httpServer = createServer((...args) => {
+    app(...args);
+  });
 
   const server = new ApolloServer<ApolloServerContext>({
     cache: redisCache,
@@ -48,7 +61,7 @@ export const startGqlServer = fromPromise<
     plugins: [
       ApolloServerPluginLandingPageLocalDefault(),
       {
-        requestDidStart({ request: { operationName } }) {
+        async requestDidStart({ request: { operationName } }) {
           if (operationName) {
             logger.silly(`Received ${operationName}`, {
               "riven.gql.operation-name": operationName,
@@ -58,6 +71,7 @@ export const startGqlServer = fromPromise<
           return Promise.resolve();
         },
       },
+      ApolloServerPluginDrainHttpServer({ httpServer }),
     ],
     formatError(formattedError, error) {
       logger.error("GraphQL Error:", { err: error });
@@ -66,7 +80,9 @@ export const startGqlServer = fromPromise<
     },
   });
 
-  const sendEvent: GraphQLContext["sendEvent"] = (event) => {
+  await server.start();
+
+  const sendExternalEvent: GraphQLContext["sendEvent"] = (event) => {
     if (!event.type.startsWith("riven-external.")) {
       throw new Error(
         "Only `riven-external.` events can be sent from the GraphQL server",
@@ -76,18 +92,37 @@ export const startGqlServer = fromPromise<
     mainRunnerRef.send(event);
   };
 
-  const { url } = await startStandaloneServer(server, {
-    listen: {
-      host: settings.gqlHost,
-      port: settings.gqlPort,
-    },
-    context: buildContextFunction(sendEvent),
+  const sendEvent: MainRunnerMachineIntake = (event) => {
+    mainRunnerRef.send(event);
+  };
+
+  app.use(
+    "/",
+    cors(),
+    express.json(),
+    expressMiddleware(server, {
+      context: buildContextFunction(sendEvent, sendExternalEvent, validPlugins),
+    }),
+  );
+
+  const url = new URL(
+    `http://${settings.gqlHost}:${settings.gqlPort.toString()}/`,
+  );
+
+  await new Promise<void>((resolve) => {
+    httpServer.listen(
+      {
+        host: url.hostname,
+        port: url.port,
+      },
+      resolve,
+    );
   });
 
-  initApolloClient(new URL(url));
+  initApolloClient(url);
 
   return {
     server,
-    url,
+    url: url.toString(),
   };
 });

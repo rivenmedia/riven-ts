@@ -55,4 +55,6 @@ export const initialiseDatabaseConnection = fromPromise(async () => {
 
     await database.orm.migrator.up();
   }
+
+  await database.orm.connect();
 });

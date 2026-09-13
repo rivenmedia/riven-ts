@@ -1,4 +1,4 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
@@ -6,12 +6,15 @@ import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.t
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class TmdbAPIError extends Error {}
+class TmdbAPIError extends Error {
+  public override name = "TmdbAPIError";
+}
 
 export class TmdbAPI extends BaseDataSource<TmdbSettings> {
-  override baseURL = "https://api.themoviedb.org/3/";
-  override serviceName = "Tmdb";
+  public override baseURL = "https://api.themoviedb.org/3/";
+  public override serviceName = "Tmdb";
 
   protected override rateLimiterOptions?: RateLimiterOptions = {
     max: 40,
@@ -25,11 +28,11 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     requestOpts.headers["authorization"] = `Bearer ${this.settings.apiKey}`;
   }
 
-  override validate() {
+  public override validate() {
     return true;
   }
 
-  async getTmdbIdFromImdbId(imdbId: string) {
+  public async getTmdbIdFromImdbId(imdbId: string) {
     try {
       const { movie_results: movieResults } = await this.findById(imdbId, {
         external_source: "imdb_id",
@@ -51,7 +54,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     }
   }
 
-  async findById(externalId: string, params: FindByIdQueryParams) {
+  public async findById(externalId: string, params: FindByIdQueryParams) {
     const response = await this.get<unknown>(`find/${externalId}`, {
       params,
     });
@@ -59,7 +62,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return findById200Schema.parse(response);
   }
 
-  async getMovieDetails(movieId: string) {
+  public async getMovieDetails(movieId: string) {
     const response = await this.get<unknown>(`movie/${movieId}`);
 
     return movieDetails200Schema.parse(response);

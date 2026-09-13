@@ -1,0 +1,84 @@
+---
+title: Navigation
+description: Screens and keyboard controls in the Riven TUI
+---
+
+The TUI has two main screens: the **Library**, and **Item Detail** for a
+single movie, show, season, or episode. Every screen shows its available
+keys in the footer.
+
+## Global keys
+
+| Key                | Action                            |
+| ------------------ | --------------------------------- |
+| `↑`/`↓` or `k`/`j` | Move the selection up/down        |
+| `shift` + `↑`/`↓`  | Jump a page at a time             |
+| `enter`            | Open the selected item            |
+| `r`                | Refresh the current screen's data |
+| `q`                | Quit the TUI                      |
+
+## Library
+
+The Library screen lists the top-level items (movies and shows) in your
+Riven instance, with tabs to filter by type:
+
+- **All** - every movie and show
+- **Movies**
+- **Shows**
+
+Each row shows the item's title, type, and current state badge (see
+[State badges](#state-badges)). Press `enter` on a row to open its
+[item detail](#item-detail) screen.
+
+## Item detail
+
+Opening an item shows its detail screen, with tabs for the data available on
+that item. Tabs that don't apply - for example "Streams" when an item has no
+streams - are hidden automatically.
+
+| Key                 | Action                                     |
+| ------------------- | ------------------------------------------ |
+| `tab` / `shift+tab` | Switch between tabs                        |
+| `esc`               | Go back to the previous screen             |
+| `a`                 | Open the [actions menu](/docs/tui/actions) |
+| `r`                 | Refresh the current tab's data             |
+
+### Tabs
+
+- **Overview** - poster, external IDs (TMDb/TVDB, IMDb), year, rating,
+  content rating, release date, genres, and item-type-specific fields like a
+  show's status or a movie's runtime. Also summarizes counts for streams,
+  blacklisted streams, files, and subtitles, plus when the item was last
+  scraped and indexed.
+- **Children** - for shows and seasons, the list of seasons or episodes
+  underneath the item, each with its own state badge. Press `enter` on a
+  child to drill into its own detail screen.
+- **Files** - media entries matched to the item on disk, including the
+  originating plugin and provider.
+- **Subtitles** - subtitle entries found for the item, with language and
+  source provider.
+- **Streams** - streams discovered for the item, including info hash and
+  parsed release data.
+- **Active stream** - the currently active stream's info hash and parsed
+  data, if the item has one.
+- **Processing data** - internal processing state, such as when the item is
+  next scheduled to be scraped.
+
+### State badges
+
+Items and children are shown with a colored badge for their processing
+state:
+
+| State                 | Label               |
+| --------------------- | ------------------- |
+| `unreleased`          | Unreleased          |
+| `indexed`             | Indexed             |
+| `scraped`             | Scraped             |
+| `downloaded`          | Downloaded          |
+| `partially_completed` | Partially completed |
+| `completed`           | Completed           |
+| `paused`              | Paused              |
+| `failed`              | Failed              |
+
+Children that haven't been requested show as **Unrequested** instead of
+their underlying state.

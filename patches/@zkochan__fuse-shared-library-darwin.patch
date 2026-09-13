@@ -1,0 +1,13 @@
+diff --git a/index.js b/index.js
+index 08f812a72baa9794e0aefb406f5ce17e12352a99..d5b712845ee459b36be9121cd2c5478910c4c667 100644
+--- a/index.js
++++ b/index.js
+@@ -4,7 +4,7 @@ const path = require('path')
+ 
+ const OSXFUSE_VERSION = '4.1.2'
+ const OSXFUSE = '/usr/local/lib'
+-const lib = path.join(OSXFUSE, 'libosxfuse.2.dylib')
++const lib = path.join(OSXFUSE, 'libfuse.2.dylib')
+ const include = '/usr/local/include/fuse'
+ 
+ module.exports = {

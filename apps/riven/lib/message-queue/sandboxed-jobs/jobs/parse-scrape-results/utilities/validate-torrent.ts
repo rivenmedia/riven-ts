@@ -1,4 +1,4 @@
-import { type TypedDocumentNode, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 import { client } from "../../../../../graphql/apollo-client.ts";
 
@@ -7,11 +7,12 @@ import type {
   GetValidateTorrentItemQuery,
   GetValidateTorrentItemQueryVariables,
 } from "./validate-torrent.typegen.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 import type { UUID } from "node:crypto";
 
 export class SkippedTorrentError extends Error {
-  constructor(
+  public constructor(
     message: string,
     itemTitle: string,
     torrentTitle: string,
@@ -152,16 +153,18 @@ export const validateTorrent = async (
     const candidateYears = new Set<number>();
 
     if (item.year) {
-      getYearCandidates(item.year).forEach((year) => candidateYears.add(year));
+      for (const year of getYearCandidates(item.year)) {
+        candidateYears.add(year);
+      }
     }
 
     if (topLevelItem.year) {
-      getYearCandidates(topLevelItem.year).forEach((year) =>
-        candidateYears.add(year),
-      );
+      for (const year of getYearCandidates(topLevelItem.year)) {
+        candidateYears.add(year);
+      }
     }
 
-    if (candidateYears.size && !candidateYears.has(parsedData.year)) {
+    if (candidateYears.size > 0 && !candidateYears.has(parsedData.year)) {
       throw new SkippedTorrentError(
         "Skipping torrent with incorrect year",
         item.fullTitle,
@@ -172,7 +175,7 @@ export const validateTorrent = async (
   }
 
   if (item.__typename === "Movie") {
-    if (parsedData.seasons.length || parsedData.episodes.length) {
+    if (parsedData.seasons.length > 0 || parsedData.episodes.length > 0) {
       throw new SkippedTorrentError(
         "Skipping show torrent for movie",
         item.fullTitle,
@@ -180,19 +183,20 @@ export const validateTorrent = async (
         infoHash,
       );
     }
-  } else {
-    if (parsedData.seasons.length === 0 && parsedData.episodes.length === 0) {
-      throw new SkippedTorrentError(
-        `Skipping torrent with no seasons or episodes for ${item.type} item`,
-        item.fullTitle,
-        parsedData.rawTitle,
-        infoHash,
-      );
-    }
+  } else if (
+    parsedData.seasons.length === 0 &&
+    parsedData.episodes.length === 0
+  ) {
+    throw new SkippedTorrentError(
+      `Skipping torrent with no seasons or episodes for ${item.type} item`,
+      item.fullTitle,
+      parsedData.rawTitle,
+      infoHash,
+    );
   }
 
   if (item.__typename === "Show") {
-    if (parsedData.seasons.length) {
+    if (parsedData.seasons.length > 0) {
       const seasonsIntersection = new Set(parsedData.seasons).intersection(
         new Set(item.seasons.map((season) => season.number)),
       );
@@ -211,11 +215,11 @@ export const validateTorrent = async (
     }
 
     if (
-      parsedData.episodes.length &&
+      parsedData.episodes.length > 0 &&
       item.seasons.length === 1 &&
       item.seasons[0]?.episodes.length
     ) {
-      const { episodes } = item.seasons[0];
+      const [{ episodes }] = item.seasons;
 
       const episodesIntersection = new Set(parsedData.episodes).intersection(
         new Set(
@@ -238,7 +242,7 @@ export const validateTorrent = async (
 
   if (item.__typename === "Season") {
     if (parsedData.seasons.length === 0) {
-      if (parsedData.episodes.length) {
+      if (parsedData.episodes.length > 0) {
         // If we don't have seasons, check that each *absolute* number is found in the list.
         // Some items name torrents using absolute episodes only (e.g. One Piece 0001-1000)
 
@@ -271,7 +275,7 @@ export const validateTorrent = async (
         );
       }
 
-      if (parsedData.episodes.length) {
+      if (parsedData.episodes.length > 0) {
         // If we have seasons and episodes, check that each *relative* number is found in the list
         const relativeEpisodesIntersection = new Set(
           parsedData.episodes,

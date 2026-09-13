@@ -6,14 +6,14 @@ import { Factory } from "@mikro-orm/seeder";
 import type { EntityData } from "@mikro-orm/core";
 
 export class MediaEntryFactory extends Factory<MediaEntry> {
-  model = MediaEntry;
+  public model = MediaEntry;
 
   protected override definition(
     input: EntityData<MediaEntry> = {},
   ): EntityData<MediaEntry> {
     return {
       fileSize: faker.number.int({ min: 1024 * 1024 }),
-      originalFilename: faker.system.fileName(),
+      originalFilename: faker.system.fileName().replace(/\.\w+$/u, ".mkv"),
       plugin: faker.lorem.word(),
       ...input,
     };

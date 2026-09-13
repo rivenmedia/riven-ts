@@ -4,8 +4,10 @@ import z from "zod";
 
 import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
 import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { type ParsedData, ParsedDataSchema } from "../schemas.ts";
+import { ParsedDataSchema } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
+
+import type { ParsedData } from "../schemas.ts";
 
 const parser = new Parser()
   .addHandlers(adultHandlers)
@@ -14,17 +16,15 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "channels",
-      pattern: new RegExp("\\+?2[\\.\\s]0(?:x[2-4])?\\b", "i"),
+      pattern: /\+?2[.\s]0(?:x[2-4])?\b/iu,
       transform: transforms.toValueSet("2.0"),
       remove: true,
       keepMatching: true,
     },
     {
       field: "complete",
-      pattern: new RegExp(
-        "(?:\\bthe\\W)?(?:\\bcomplete\\b|\\bfull\\b|\\ball\\b)\\b.*\\b(?:series|seasons|collection|episodes|set|pack|movies)\\b",
-        "i",
-      ),
+      pattern:
+        /(?:\bthe\W)?(?:\bcomplete\b|\bfull\b|\ball\b)\b.*\b(?:series|seasons|collection|episodes|set|pack|movies)\b/iu,
       transform: transforms.toBoolean(),
       remove: true,
     },
@@ -34,18 +34,18 @@ const parser = new Parser()
     {
       field: "episodes",
       process: (title, meta, result) => {
-        const animePattern = new RegExp("One.*?Piece|Bleach|Naruto");
+        const animePattern = /One.*?Piece|Bleach|Naruto/u;
 
         if (animePattern.test(title)) {
           if (result.has("episodes")) {
             return meta;
           }
 
-          const episodePattern = new RegExp("\\b\\d{1,4}\\b");
+          const episodePattern = /\b\d{1,4}\b/u;
           const matches = episodePattern.exec(title);
 
           if (matches) {
-            meta.value = [parseInt(matches[0], 10)];
+            meta.value = [Math.trunc(Number(matches[0]))];
             meta.mIndex = matches.index;
             meta.remove = true;
           }
@@ -58,14 +58,14 @@ const parser = new Parser()
   .addHandlers([
     {
       field: "bitrate",
-      pattern: new RegExp("\\b\\d+[kmg]bps\\b", "i"),
+      pattern: /\b\d+[kmg]bps\b/iu,
       matchGroup: 1,
       remove: true,
       transform: transforms.toLowercase(),
     },
     {
       field: "site",
-      pattern: new RegExp("rarbg|torrentleech|(?:the)?piratebay", "i"),
+      pattern: /rarbg|torrentleech|(?:the)?piratebay/iu,
       remove: true,
     },
   ]);
@@ -104,15 +104,15 @@ export function parseFilePath(filePath: string) {
     );
   }
 
-  const parseData = parts.reduce<ParsedData | null>((acc, part) => {
-    try {
-      const parsedPart = parse(part);
+  const parseData = {} as ParsedData;
 
-      return merge(acc ?? {}, parsedPart);
+  for (const part of parts) {
+    try {
+      merge(parseData, parse(part));
     } catch {
-      return acc;
+      // Continue to next part
     }
-  }, null);
+  }
 
   const parsedData = ParsedDataSchema.safeParse({
     ...parseData,

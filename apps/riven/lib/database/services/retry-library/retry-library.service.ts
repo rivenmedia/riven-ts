@@ -6,7 +6,7 @@ import { BaseService } from "../core/base-service.ts";
 
 export class RetryLibraryService extends BaseService {
   @CreateRequestContext()
-  async getMediaItemsToRetry() {
+  public async getMediaItemsToRetry() {
     return this.em.getRepository(MediaItem).find(
       {
         isRequested: true,
@@ -25,10 +25,10 @@ export class RetryLibraryService extends BaseService {
   }
 
   @CreateRequestContext()
-  async getItemRequestsToRetry() {
+  public async getItemRequestsToRetry() {
     return this.em.getRepository(ItemRequest).find({
       state: {
-        $in: ["failed", "requested"],
+        $ne: "completed",
       },
     });
   }

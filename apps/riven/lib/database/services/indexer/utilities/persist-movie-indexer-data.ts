@@ -1,4 +1,5 @@
 import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
@@ -21,8 +22,13 @@ export async function persistMovieIndexerData(
     id: item.id,
   });
 
-  assert(
-    itemRequest.state === "requested",
+  const processableStates = ItemRequestState.extract([
+    "requested",
+    "unreleased",
+  ]);
+
+  assert.ok(
+    processableStates.safeParse(itemRequest.state).success,
     new MediaItemIndexErrorIncorrectState({
       item: itemRequest,
     }),
@@ -38,6 +44,10 @@ export async function persistMovieIndexerData(
     });
   }
 
+  const existingMovie = await em.findOne(Movie, {
+    tmdbId,
+  });
+
   try {
     const releaseDate = item.releaseDate
       ? DateTime.fromISO(item.releaseDate)
@@ -45,6 +55,7 @@ export async function persistMovieIndexerData(
 
     const mediaItem = em.create(Movie, {
       title: item.title,
+      fullTitle: item.title,
       imdbId: item.imdbId ?? itemRequest.imdbId ?? null,
       tmdbId,
       contentRating: item.contentRating,
@@ -62,7 +73,15 @@ export async function persistMovieIndexerData(
       indexedAt: DateTime.utc().toJSDate(),
     });
 
+    if (existingMovie) {
+      mediaItem.id = existingMovie.id;
+    }
+
     await validateOrReject(mediaItem);
+
+    await em.upsert(Movie, mediaItem, {
+      onConflictExcludeFields: ["createdAt", "indexedAt", "scrapedAt"],
+    });
 
     em.assign(itemRequest, {
       state: mediaItem.isReleased ? "completed" : "unreleased",
@@ -71,20 +90,23 @@ export async function persistMovieIndexerData(
       tmdbId: itemRequest.tmdbId ?? mediaItem.tmdbId,
     });
 
-    return mediaItem;
+    return {
+      item: mediaItem,
+      isReindex: Boolean(existingMovie),
+    };
   } catch (error) {
     const errorMessage = z
       .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((error) => {
-        if (Array.isArray(error)) {
-          return error
+      .transform((rawError) => {
+        if (Array.isArray(rawError)) {
+          return rawError
             .map((err) =>
               err.constraints ? Object.values(err.constraints).join("; ") : "",
             )
             .join("; ");
         }
 
-        return error.message;
+        return rawError.message;
       })
       .parse(error);
 

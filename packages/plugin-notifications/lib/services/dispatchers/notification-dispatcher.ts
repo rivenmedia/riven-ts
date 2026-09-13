@@ -3,9 +3,9 @@ import type { NotificationPayload } from "../../schemas/notification-payload.sch
 import type { NotificationService } from "../parse-notification-url.ts";
 
 export interface NotificationDispatcher<T extends NotificationService> {
-  send(
+  send: (
     service: Omit<T, "type">,
     payload: NotificationPayload,
     api: NotificationsAPI,
-  ): Promise<void>;
+  ) => Promise<void>;
 }

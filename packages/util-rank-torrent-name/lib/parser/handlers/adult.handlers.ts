@@ -1,4 +1,6 @@
-import { type Handler, transforms } from "@viren070/parse-torrent-title";
+import { transforms } from "@viren070/parse-torrent-title";
+
+import type { Handler } from "@viren070/parse-torrent-title";
 
 const keywords = new Set([
   "10musume",
@@ -1054,15 +1056,12 @@ const keywords = new Set([
   "young pussy",
 ]);
 
-const adultPattern = new RegExp(
-  `\\b(${Array.from(keywords).join("|")})\\b`,
-  "i",
-);
+const adultPattern = new RegExp(`\\b(${[...keywords].join("|")})\\b`, "iu");
 
 export const adultHandlers: Handler[] = [
   {
     field: "adult",
-    pattern: new RegExp("\\b(XXX|xxx|Xxx)\\b"),
+    pattern: /\bXXX|xxx|Xxx\b/u,
     transform: transforms.toBoolean(),
     remove: true,
   },

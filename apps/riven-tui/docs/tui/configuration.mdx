@@ -1,0 +1,48 @@
+---
+title: Configuration
+description: Environment variables for connecting the Riven TUI to a Riven instance
+---
+
+The TUI is configured entirely through environment variables, validated at
+startup by a [Zod](https://zod.dev) schema
+(`lib/riven-tui-settings.schema.ts`). If a required value is missing or
+invalid, the TUI exits immediately with a validation error instead of
+starting in a broken state.
+
+## Variables
+
+| Variable                         | Description                                               | Default                         |
+| -------------------------------- | --------------------------------------------------------- | ------------------------------- |
+| `RIVEN_TUI_SETTING__graphqlUrl`  | The GraphQL endpoint of the Riven instance to connect to. | `http://localhost:3000/graphql` |
+| `RIVEN_TUI_SETTING__enableDebug` | Enables debug output.                                     | `false`                         |
+
+## Setting variables
+
+When running from source with `pnpm --filter @repo/riven-tui dev` or `start`,
+the TUI automatically loads a `.env.riven-tui` file from the app directory if
+one exists. Copy the provided example to get started:
+
+```bash
+cp apps/riven-tui/.env.riven-tui.example apps/riven-tui/.env.riven-tui
+```
+
+```bash title=".env.riven-tui"
+RIVEN_TUI_SETTING__graphqlUrl="http://localhost:3000/graphql"
+RIVEN_TUI_SETTING__enableDebug="false"
+```
+
+When running inside the Riven Docker container (see
+[Getting Started](/docs/tui/getting-started)), set the variables directly in the
+`docker exec` invocation or the container's environment, since the TUI shares
+the container with the Riven process it's inspecting:
+
+```bash
+docker exec -it -e RIVEN_TUI_SETTING__graphqlUrl="http://localhost:3000/graphql" \
+  <riven-container> node tui/dist/cli.js
+```
+
+<Callout type="info">
+  Because the TUI talks to Riven purely over HTTP,
+  `RIVEN_TUI_SETTING__graphqlUrl` can point at any reachable Riven instance - it
+  doesn't need to run on the same host or in the same container.
+</Callout>

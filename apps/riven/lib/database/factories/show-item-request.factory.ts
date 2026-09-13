@@ -6,16 +6,16 @@ import { Factory } from "@mikro-orm/seeder";
 import type { EntityData } from "@mikro-orm/core";
 
 export class ShowItemRequestFactory extends Factory<ItemRequest> {
-  model = ItemRequest;
+  public model = ItemRequest;
 
   protected override definition(
     input: EntityData<ItemRequest> = {},
   ): EntityData<ItemRequest> {
     return {
       requestedBy: faker.internet.email(),
-      state: "completed",
+      state: "requested",
       type: "show",
-      tvdbId: faker.string.numeric({ length: { min: 1, max: 10 } }),
+      tvdbId: faker.string.numeric({ length: 10 }),
       ...input,
     };
   }

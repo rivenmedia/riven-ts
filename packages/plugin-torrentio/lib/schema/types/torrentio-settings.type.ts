@@ -3,5 +3,5 @@ import { Field, ObjectType } from "type-graphql";
 @ObjectType()
 export class TorrentioSettings {
   @Field()
-  apiKey!: string;
+  public apiKey!: string;
 }

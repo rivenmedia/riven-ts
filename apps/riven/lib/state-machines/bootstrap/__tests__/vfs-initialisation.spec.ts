@@ -6,6 +6,8 @@ import { toPromise } from "xstate";
 import { initialiseVfs } from "../actors/initialise-vfs.actor.ts";
 import { it } from "./helpers/test-context.ts";
 
+import type { Stats } from "node:fs";
+
 vi.mock(import("@zkochan/fuse-native"));
 vi.mock(import("node:fs/promises"), { spy: true });
 
@@ -22,7 +24,9 @@ it("throws an error if process UID or GID cannot be determined", async ({
   // @ts-expect-error - We are intentionally mocking these functions to return undefined to simulate the error condition
   vi.spyOn(process, "getgid", "get").mockReturnValue(undefined);
 
-  await expect(toPromise(actor.start())).rejects.toThrow();
+  await expect(toPromise(actor.start())).rejects.toThrow(
+    /unable to determine process uid or gid/iu,
+  );
 });
 
 it("throws an error if the mount path does not exist", async ({ actor }) => {
@@ -34,7 +38,7 @@ it("throws an error if the mount path does not exist", async ({ actor }) => {
   vi.spyOn(fs, "stat").mockRejectedValue(error);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" does not exist. Please create this directory./,
+    /VFS mount path "(.*)" does not exist. Please create this directory./u,
   );
 });
 
@@ -42,11 +46,11 @@ it("throws an error if the mount path is not a directory", async ({
   actor,
 }) => {
   vi.spyOn(fs, "stat").mockResolvedValue({
-    isDirectory: vi.fn().mockReturnValue(false),
+    isDirectory: vi.fn<Stats["isDirectory"]>().mockReturnValue(false),
   } as never);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" exists, but is not a directory./,
+    /VFS mount path "(.*)" exists, but is not a directory./u,
   );
 });
 
@@ -60,13 +64,13 @@ it("throws an error if the mount path is not owned by the current user", async (
   vi.spyOn(process, "getgid").mockReturnValue(gid);
 
   vi.spyOn(fs, "stat").mockResolvedValue({
-    isDirectory: vi.fn().mockReturnValue(true),
+    isDirectory: vi.fn<Stats["isDirectory"]>().mockReturnValue(true),
     uid: 9999,
     gid: 9999,
   } as never);
 
   await expect(toPromise(actor.start())).rejects.toThrow(
-    /VFS mount path "(.*)" is not owned by the current user./,
+    /VFS mount path "(.*)" is not owned by the current user./u,
   );
 });
 
@@ -80,14 +84,15 @@ it("does not throw an error if the mount path is present and owned by the curren
   vi.spyOn(process, "getgid").mockReturnValue(gid);
 
   vi.spyOn(fs, "stat").mockResolvedValue({
-    isDirectory: vi.fn().mockReturnValue(true),
+    isDirectory: vi.fn<Stats["isDirectory"]>().mockReturnValue(true),
     uid,
     gid,
   } as never);
 
+  // oxlint-disable-next-line prefer-arrow-callback vitest/prefer-mock-return-shorthand - This is needed to provide a class constructor for the Fuse mock implementation
   vi.mocked(Fuse).mockImplementation(function MockFuseConstructor() {
     return {
-      mount: vi.fn((cb: (err?: Error | null) => void) => {
+      mount: vi.fn<InstanceType<typeof Fuse>["mount"]>((cb) => {
         cb(null);
       }),
     } as never;

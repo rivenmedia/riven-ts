@@ -2,7 +2,6 @@ import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import {
-  type SnapshotFrom,
   createActor,
   createEmptyActor,
   fromCallback,
@@ -11,11 +10,13 @@ import {
 
 import { it as baseIt } from "./__tests__/test-context.ts";
 import { riven } from "./riven.ts";
-import { type BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
 import * as rivenMachineModule from "./state-machines/program/index.ts";
 import { rivenMachine } from "./state-machines/program/index.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 import * as settingsModule from "./utilities/settings.ts";
+
+import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts";
+import type { AnyActor, SnapshotFrom } from "xstate";
 
 const it = baseIt
   .extend("mockRivenMachine", () =>
@@ -33,34 +34,43 @@ const it = baseIt
             vfs: {} as never,
           });
         }) as never,
-        mainRunnerMachine: fromCallback(() => {
-          /* empty */
-        }) as never,
+        mainRunnerMachine: fromCallback(() => undefined) as never,
         shutdown: createEmptyActor() as never,
         stopGqlServer: createEmptyActor() as never,
         unmountVfs: createEmptyActor() as never,
       },
     }),
   )
-  .extend(
-    "createRivenMachineActor",
-    ({ mockRivenMachine }) =>
-      (machineLogic: typeof mockRivenMachine = mockRivenMachine) => {
-        const actor = createActor(machineLogic, {
-          input: {
-            sessionId: SessionID.parse(randomUUID()),
-            mockScenario: undefined,
-          },
-        });
+  .extend("createRivenMachineActor", ({ mockRivenMachine }, { onCleanup }) => {
+    const actors = new Set<AnyActor>();
 
-        vi.spyOn(actor, "send");
-        vi.spyOn(rivenMachineModule, "createRivenMachine").mockReturnValue(
-          actor,
-        );
+    onCleanup(() => {
+      for (const actor of actors) {
+        actor.stop();
+      }
+    });
 
-        return actor;
-      },
-  );
+    return (machineLogic: typeof mockRivenMachine = mockRivenMachine) => {
+      const actor = createActor(machineLogic, {
+        input: {
+          sessionId: SessionID.parse(randomUUID()),
+          mockScenario: undefined,
+        },
+      });
+
+      vi.spyOn(actor, "send");
+      vi.spyOn(rivenMachineModule, "createRivenMachine").mockReturnValue(actor);
+
+      actors.add(actor);
+
+      return actor;
+    };
+  });
+
+it.beforeEach(() => {
+  // oxlint-disable-next-line vitest/prefer-mock-return-shorthand - we need to genuinely overwrite the implementation here to avoid actually calling the real process.exit()
+  vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+});
 
 it.afterEach(() => {
   process.exitCode = undefined;
@@ -97,7 +107,9 @@ it("exits with code 1 on uncaught exceptions", async ({
 }) => {
   vi.useFakeTimers();
 
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
+  const onSpy = vi.spyOn(process, "on");
 
   const rivenMachineActor = createRivenMachineActor();
 
@@ -107,7 +119,18 @@ it("exits with code 1 on uncaught exceptions", async ({
     expect(rivenMachineActor.getSnapshot().value).toBe("Running");
   });
 
-  process.emit("uncaughtException", new Error("Test uncaught exception"));
+  // Invoke the handler riven() registered directly, rather than emitting
+  // "uncaughtException" on `process` itself: Wallaby & Vitest also listen for that event
+  // to detect genuinely uncaught errors, so emitting it manually gets misattributed as a
+  // real crash instead of exercising the handler under test.
+  const [, uncaughtExceptionHandler] = onSpy.mock.calls.find(
+    ([event]) => event === "uncaughtException",
+  ) as [string, NodeJS.UncaughtExceptionListener];
+
+  uncaughtExceptionHandler(
+    new Error("Test uncaught exception"),
+    "uncaughtException",
+  );
 
   expect(rivenMachineActor).toHaveReceivedEvent({
     type: "riven.core.shutdown",
@@ -119,14 +142,15 @@ it("exits with code 1 on uncaught exceptions", async ({
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(1);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledOnce();
   });
 });
 
 it("does not force quit the process if shutdown succeeds within the configured timeout", async ({
   createRivenMachineActor,
 }) => {
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
 
   const rivenMachineActor = createRivenMachineActor();
 
@@ -144,7 +168,7 @@ it("does not force quit the process if shutdown succeeds within the configured t
 
   await vi.waitFor(() => {
     expect(process.exitCode).toBe(0);
-    expect(exitSpy).toHaveBeenCalled();
+    expect(exitSpy).toHaveBeenCalledWith();
   });
 });
 
@@ -158,15 +182,16 @@ it("force quits the process if shutdown takes longer than the configured timeout
     shutdownTimeoutSeconds: 1,
   } as never);
 
-  const exitSpy = vi.spyOn(process, "exit");
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
 
   const rivenMachineActor = createRivenMachineActor(
     mockRivenMachine.provide({
       actors: {
         shutdown: fromPromise(
-          () =>
+          async () =>
             new Promise(() => {
-              /* never resolves, simulating a shutdown that hangs indefinitely */
+              /* Never resolves, simulating a shutdown that hangs indefinitely */
             }),
         ) as never,
       },
@@ -184,5 +209,5 @@ it("force quits the process if shutdown takes longer than the configured timeout
   await vi.runOnlyPendingTimersAsync();
 
   expect(process.exitCode).toBe(1);
-  expect(exitSpy).toHaveBeenCalled();
+  expect(exitSpy).toHaveBeenCalledWith();
 });

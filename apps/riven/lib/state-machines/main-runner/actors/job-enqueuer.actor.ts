@@ -1,5 +1,3 @@
-import { RivenEvent } from "@repo/util-plugin-sdk/events";
-
 import chalk from "chalk";
 import { fromCallback } from "xstate";
 
@@ -9,6 +7,7 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { serialiseEventData } from "../../../utilities/serialisers/serialise-event-data.ts";
 
 import type { PluginQueueMap, ValidPluginMap } from "../../../types/plugins.ts";
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { FlowJob } from "bullmq";
 
 export interface JobEnqueuerInput {
@@ -19,7 +18,9 @@ export interface JobEnqueuerInput {
 export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
   ({ receive, input: { plugins, pluginQueues } }) => {
     receive(({ type, ...event }) => {
-      const jobs = plugins.values().reduce<FlowJob[]>((acc, plugin) => {
+      const jobs: FlowJob[] = [];
+
+      for (const plugin of plugins.values()) {
         const queue = pluginQueues.get(plugin.config.name)?.get(type);
 
         if (!queue) {
@@ -27,17 +28,15 @@ export const jobEnqueuer = fromCallback<RivenEvent, JobEnqueuerInput>(
             `No queue found for event "${type}" and plugin "${plugin.config.name.description ?? "unknown"}". Event will not be broadcast to this plugin.`,
           );
 
-          return acc;
+          continue;
         }
 
-        acc.push({
+        jobs.push({
           name: type,
           queueName: queue.name,
           data: serialiseEventData(type, event),
         });
-
-        return acc;
-      }, []);
+      }
 
       if (jobs.length === 0) {
         logger.silly(

@@ -7,5 +7,5 @@ export class FilterArguments {
   @Field(() => getRequestQueryParamsFilterEnum, {
     defaultValue: "approved",
   })
-  filter!: string;
+  public filter!: string;
 }

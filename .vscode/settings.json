@@ -20,6 +20,8 @@
     "listrr",
     "mikro",
     "millis",
+    "oxfmt",
+    "oxlint",
     "pdtv",
     "PGID",
     "ppvrip",
@@ -90,6 +92,16 @@
     "**/*.code-search": true,
     "**/dist": true,
     "**/.snapshot-riven.json": true,
-    "**/Migration*.ts": true
+    "**/Migration*.ts": true,
+    "**/coverage": true,
+    "**/*.typegen.ts": true,
+    "**/__generated__/graphql.ts": true
+  },
+  "oxc.fmt.configPath": ".oxfmtrc.json",
+  "editor.defaultFormatter": "oxc.oxc-vscode",
+  "editor.formatOnSave": true,
+  "oxc.typeAware": true,
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "always"
   }
 }

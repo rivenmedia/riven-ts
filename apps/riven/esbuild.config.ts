@@ -1,7 +1,7 @@
-import * as esbuild from "esbuild";
+import { build } from "esbuild";
 import { nodeExternalsPlugin } from "esbuild-node-externals";
 
-await esbuild.build({
+await build({
   entryPoints: ["lib/message-queue/sandboxed-jobs/jobs/**/*.processor.ts"],
   outdir: "dist/workers",
   bundle: true,

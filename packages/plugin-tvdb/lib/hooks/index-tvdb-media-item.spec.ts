@@ -60,7 +60,7 @@ it("returns the series if the item has a tvdbId", async ({
       () => HttpResponse.json(breakingBadExtendedSeriesFixture),
     ),
     http.get(`https://api.tvmaze.com/lookup/shows`, ({ request }) => {
-      const searchParams = new URL(request.url).searchParams;
+      const { searchParams } = new URL(request.url);
 
       if (
         searchParams.get("thetvdb") !==

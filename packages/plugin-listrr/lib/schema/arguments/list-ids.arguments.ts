@@ -8,5 +8,5 @@ export class ListIdsArguments {
     each: true,
   })
   @ArrayUnique()
-  listIds!: string[];
+  public listIds!: string[];
 }

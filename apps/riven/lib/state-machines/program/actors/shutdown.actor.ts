@@ -1,10 +1,11 @@
-import { type ActorRefFrom, fromPromise } from "xstate";
+import { fromPromise } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
 import { keyvInstance } from "../../../utilities/redis-cache.ts";
 
 import type { mainRunnerMachine } from "../../main-runner/index.ts";
 import type { Worker } from "bullmq";
+import type { ActorRefFrom } from "xstate";
 
 async function forceCloseWorker(worker: Worker) {
   try {
@@ -16,15 +17,11 @@ async function forceCloseWorker(worker: Worker) {
   }
 }
 
-function attemptGracefulShutdown(worker: Worker) {
+async function attemptGracefulShutdown(worker: Worker) {
   return new Promise<void>((resolve) => {
     logger.debug(`Attempting graceful shutdown of worker ${worker.name}...`);
 
     const signal = AbortSignal.timeout(10_000);
-
-    const removeAbortListener = () => {
-      signal.removeEventListener("abort", onAbort);
-    };
 
     const forceClose = () => {
       void forceCloseWorker(worker).finally(() => {
@@ -41,6 +38,10 @@ function attemptGracefulShutdown(worker: Worker) {
     };
 
     signal.addEventListener("abort", onAbort, { once: true });
+
+    const removeAbortListener = () => {
+      signal.removeEventListener("abort", onAbort);
+    };
 
     worker
       .close()
@@ -87,13 +88,15 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
 
     // Close workers
     await Promise.all(
-      flowWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
+      flowWorkers.map(async ({ worker }) => attemptGracefulShutdown(worker)),
     );
 
     logger.debug("Flow workers closed");
 
     await Promise.all(
-      sandboxedWorkers.map(({ worker }) => attemptGracefulShutdown(worker)),
+      sandboxedWorkers.map(async ({ worker }) =>
+        attemptGracefulShutdown(worker),
+      ),
     );
 
     logger.debug("Sandboxed workers closed");
@@ -102,7 +105,9 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
       plugins
         .values()
         .flatMap(({ dataSources }) =>
-          dataSources.values().map(({ worker }) => forceCloseWorker(worker)),
+          dataSources
+            .values()
+            .map(async ({ worker }) => forceCloseWorker(worker)),
         ),
     );
 

@@ -15,7 +15,7 @@ it("throws an error if the record is empty", () => {
   const { success, error } = schema.safeParse({});
 
   expect(success).toBe(false);
-  expect(error).toEqual(
+  expect(error).toStrictEqual(
     expect.objectContaining({
       issues: [
         expect.objectContaining({

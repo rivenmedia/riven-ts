@@ -1,15 +1,18 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { URL } from "node:url";
 
-import { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import { SubtitleSearchResponse } from "../schemas/subtitle-search.response.schema.ts";
 import { extractSrtFromZip } from "../utilities/extract-srt-from-zip.ts";
 
+import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import type { SubdlSettings } from "../subdl-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class SubdlAPIError extends Error {}
+class SubdlAPIError extends Error {
+  public override name = "SubdlAPIError";
+}
 
 export interface SubtitleSearchOptions {
   tmdbId?: string | undefined;
@@ -21,8 +24,8 @@ export interface SubtitleSearchOptions {
 }
 
 export class SubdlAPI extends BaseDataSource<SubdlSettings> {
-  override baseURL = "https://api.subdl.com/api/v1/";
-  override serviceName = "SubDL";
+  public override baseURL = "https://api.subdl.com/api/v1/";
+  public override serviceName = "SubDL";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
     max: 5,
@@ -36,7 +39,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
     requestOpts.params.set("api_key", this.settings.apiKey);
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       const response = await this.get<unknown>("subtitles", {
         params: {
@@ -54,7 +57,7 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
     }
   }
 
-  async searchSubtitles(
+  public async searchSubtitles(
     options: SubtitleSearchOptions,
   ): Promise<SubtitleResponse[]> {
     const params = new URLSearchParams({
@@ -109,7 +112,9 @@ export class SubdlAPI extends BaseDataSource<SubdlSettings> {
   /**
    * Download a subtitle ZIP from SubDL, extract the first `.srt` file, and return its content.
    */
-  async downloadSubtitle(subtitleUrl: string): Promise<string | undefined> {
+  public async downloadSubtitle(
+    subtitleUrl: string,
+  ): Promise<string | undefined> {
     const url = new URL(
       subtitleUrl,
       subtitleUrl.startsWith("http") ? undefined : `https://dl.subdl.com`,

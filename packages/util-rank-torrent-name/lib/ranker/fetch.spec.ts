@@ -112,7 +112,7 @@ describe("resolution filtering", () => {
   it("accepts unknown resolution by default", ({ settings, rankingModel }) => {
     const data = parse("Movie 2024-GROUP");
     const result = checkFetch(data, settings, rankingModel);
-    // unknown resolution is enabled by default
+    // Unknown resolution is enabled by default
     expect(result.failedChecks).not.toContain("resolution_unknown");
   });
 

@@ -28,29 +28,29 @@ export const getMoviesDirectoryEntries = async (
     },
   );
 
-  return Array.from(
-    await reduceAsync(
-      entries,
-      async (acc, entry) => {
-        const vfsFileName = await entry.getVfsFileName();
+  const pathNames = await reduceAsync(
+    entries,
+    async (acc, entry) => {
+      const vfsFileName = await entry.getVfsFileName();
 
-        if (pathType === "single-movie") {
-          acc.add(vfsFileName);
+      if (pathType === "single-movie") {
+        acc.add(vfsFileName);
 
-          const subtitles = await em.find(SubtitleEntry, {
-            mediaItem: entry.mediaItem.id,
-          });
+        const subtitles = await em.find(SubtitleEntry, {
+          mediaItem: entry.mediaItem.id,
+        });
 
-          for (const subtitle of subtitles) {
-            acc.add(await subtitle.getVfsFileName());
-          }
-
-          return acc;
+        for (const subtitle of subtitles) {
+          acc.add(await subtitle.getVfsFileName());
         }
 
-        return acc.add(path.parse(vfsFileName).name);
-      },
-      new Set<string>(),
-    ),
+        return acc;
+      }
+
+      return acc.add(path.parse(vfsFileName).name);
+    },
+    new Set<string>(),
   );
+
+  return [...pathNames];
 };

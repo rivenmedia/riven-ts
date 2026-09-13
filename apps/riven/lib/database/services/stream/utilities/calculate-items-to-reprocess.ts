@@ -1,10 +1,11 @@
 import {
   Episode,
-  type MediaItem,
   Movie,
   Season,
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
+
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export async function calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
   if (mediaItems.size === 0) {

@@ -2,22 +2,22 @@ export const config = {
   /**
    * Kernel block size; the byte length the OS reads/writes at a time.
    */
-  blockSize: 131072, // 128 KB
+  blockSize: 131_072, // 128 KB
 
   /**
    * Default header size for scanning purposes.
    */
-  headerSize: 262144, // 256 KB
+  headerSize: 262_144, // 256 KB
 
   /**
    * Minimum footer size for scanning purposes.
    */
-  minFooterSize: 16384, // 16 KB
+  minFooterSize: 16_384, // 16 KB
 
   /**
    * Maximum footer size for scanning purposes.
    */
-  maxFooterSize: 10485760, // 10 MB
+  maxFooterSize: 10_485_760, // 10 MB
 
   /**
    * Target footer size as a percentage of the file size.
@@ -27,7 +27,7 @@ export const config = {
   /**
    * Chunk size (in bytes) used for streaming calculations.
    */
-  chunkSize: 1048576, // 1 MB
+  chunkSize: 1_048_576, // 1 MB
 
   /**
    * Timeout for detecting stalled streams.

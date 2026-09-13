@@ -5,22 +5,24 @@ import { FieldResolver, Int, Resolver, Root } from "type-graphql";
 @Resolver(() => Season)
 export class SeasonResolver {
   @FieldResolver(() => Show)
-  show(@Root() season: Season) {
+  public async show(@Root() season: Season) {
     return season.show.loadOrFail();
   }
 
   @FieldResolver(() => [Episode])
-  episodes(@Root() season: Season) {
-    return season.episodes.loadItems();
+  public async episodes(@Root() season: Season) {
+    return season.episodes.loadItems({
+      orderBy: { number: "asc" },
+    });
   }
 
   @FieldResolver(() => Int)
-  totalEpisodes(@Root() season: Season) {
+  public async totalEpisodes(@Root() season: Season) {
     return season.episodes.loadCount();
   }
 
   @FieldResolver(() => Int)
-  expectedFileCount(@Root() season: Season) {
+  public async expectedFileCount(@Root() season: Season) {
     return season.episodes.loadCount();
   }
 }

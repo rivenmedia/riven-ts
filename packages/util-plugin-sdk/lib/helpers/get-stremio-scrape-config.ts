@@ -1,10 +1,6 @@
-import {
-  Episode,
-  type MediaItem,
-  Movie,
-  Season,
-  Show,
-} from "../dto/entities/index.ts";
+import { Episode, Movie, Season, Show } from "../dto/entities/index.ts";
+
+import type { MediaItem } from "../dto/entities/index.ts";
 
 function formatStremioIdentifier(seasonNumber: number, episodeNumber: number) {
   return `:${seasonNumber.toString()}:${episodeNumber.toString()}` as const;

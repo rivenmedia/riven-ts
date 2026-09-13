@@ -4,10 +4,9 @@ import {
 } from "@repo/feature-settings/resolver";
 
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
-import {
-  type BuildSchemaOptions,
-  buildSchema as baseBuildSchema,
-} from "type-graphql";
+import { buildSchema as baseBuildSchema } from "type-graphql";
+
+import type { BuildSchemaOptions } from "type-graphql";
 
 export const buildSchema = async (
   options: Omit<BuildSchemaOptions, "resolvers"> & {

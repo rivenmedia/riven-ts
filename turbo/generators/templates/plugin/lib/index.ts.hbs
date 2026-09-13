@@ -9,7 +9,7 @@ import { {{pascalCase pluginName}}Settings } from "./{{kebabCase pluginName}}-se
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
-export default {
+export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [{{pascalCase pluginName}}API],
@@ -21,7 +21,7 @@ export default {
     // Add more hooks as needed
   },
   settingsSchema: {{pascalCase pluginName}}Settings,
-  validator() {
+  async validator() {
     return Promise.resolve(true);
   },
-} satisfies RivenPlugin as RivenPlugin;
+};

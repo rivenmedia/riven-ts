@@ -19,22 +19,22 @@ const it = baseIt.extend("rankingConfig", () =>
     hdtv: -5000,
     hevc: 500,
     mpeg: -1000,
-    remux: 10000,
-    vhs: -10000,
+    remux: 10_000,
+    vhs: -10_000,
     web: 100,
     webdl: 200,
-    webmux: -10000,
-    xvid: -10000,
-    pdtv: -10000,
+    webmux: -10_000,
+    xvid: -10_000,
+    pdtv: -10_000,
     bdrip: -5000,
-    brrip: -10000,
+    brrip: -10_000,
     dvdrip: -5000,
-    hdrip: -10000,
-    ppvrip: -10000,
-    tvrip: -10000,
+    hdrip: -10_000,
+    ppvrip: -10_000,
+    tvrip: -10_000,
     uhdrip: -5000,
-    vhsrip: -10000,
-    webdlrip: -10000,
+    vhsrip: -10_000,
+    webdlrip: -10_000,
     webrip: -1000,
     bit10: 100,
     dolbyVision: 3000,
@@ -48,23 +48,23 @@ const it = baseIt.extend("rankingConfig", () =>
     dtsLossless: 2000,
     mp3: -1000,
     truehd: 2000,
-    threeD: -10000,
+    threeD: -10_000,
     converted: -1000,
     documentary: -250,
     dubbed: -1000,
     edition: 100,
     proper: 20,
     repack: 20,
-    site: -10000,
-    upscaled: -10000,
-    cam: -10000,
-    cleanAudio: -10000,
-    r5: -10000,
-    satrip: -10000,
-    screener: -10000,
-    size: -10000,
-    telecine: -10000,
-    telesync: -10000,
+    site: -10_000,
+    upscaled: -10_000,
+    cam: -10_000,
+    cleanAudio: -10_000,
+    r5: -10_000,
+    satrip: -10_000,
+    screener: -10_000,
+    size: -10_000,
+    telecine: -10_000,
+    telesync: -10_000,
     scene: 0,
   }),
 );
@@ -138,21 +138,24 @@ it("sorts torrents correctly", ({ rankingConfig }) => {
     "1234567890123456789012345678901234567892", // Guardians of the Galaxy Vol. 2 (2017) 720p HDTC x264 MKVTV
     "1234567890123456789012345678901234567895", // [SubsPlease] Fairy Tail - 100 Years Quest - 05 (1080p) [1107F3A9].mkv
     "1234567890123456789012345678901234567891", // Madame Web 2024 1080p WEBRip 1400MB DD 5.1 x264-GalaxyRG[TGx]
-    "1234567890123456789012345678901234567894", // ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
+    "1234567890123456789012345678901234567894", // Ww.Tamilblasters.sbs - 8 Bit Christmas (2021) HQ HDRip - x264 - Telugu (Fan Dub) - 400MB
   ];
 
   const settings = createSettings();
-  const rtnInstance = new RTN(settings, {
-    ...rankingConfig,
-    dolbyVision: 3000,
-  });
+  const rtnInstance = new RTN(
+    {
+      ...rankingConfig,
+      dolbyVision: 3000,
+    },
+    settings,
+  );
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
   );
   const sortedTorrents = rtnInstance.sortTorrents(rankedTorrents);
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
 it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
@@ -188,7 +191,7 @@ it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
       r2160p: true,
     },
   });
-  const rtnInstance = new RTN(settings, rankingConfig);
+  const rtnInstance = new RTN(rankingConfig, settings);
   const rankedTorrents = Object.entries(torrents).map(
     ([hash, [correctTitle, rawTitle]]) =>
       rtnInstance.rankTorrent(rawTitle, hash, correctTitle, {}),
@@ -203,7 +206,7 @@ it("sorts torrents with a resolution filter correctly", ({ rankingConfig }) => {
     "1234567890123456789012345678901234567890", // Sprint.2024.S01.COMPLETE.4k.WEBDL.h264-EDITH[TGx]
   ];
 
-  expect(sortedTorrents.map(({ hash }) => hash)).toEqual(expectedOrder);
+  expect(sortedTorrents.map(({ hash }) => hash)).toStrictEqual(expectedOrder);
 });
 
 it.for([
@@ -268,8 +271,8 @@ it.for([
     const data = parse(rawTitle);
 
     expect(data.type).toBe(expectedType);
-    expect(data.seasons).toEqual(expectedSeasons);
-    expect(data.episodes).toEqual(expectedEpisodes);
+    expect(data.seasons).toStrictEqual(expectedSeasons);
+    expect(data.episodes).toStrictEqual(expectedEpisodes);
   },
 );
 
@@ -314,7 +317,7 @@ it("handles bucket limits correctly", ({ rankingConfig }) => {
     "38b640c9b942b95565fb69eb17470b1b8d0e23bc": "Movie.2024.720p.WEBDL.mkv",
   };
 
-  const rtnInstance = new RTN(createSettings(), rankingConfig);
+  const rtnInstance = new RTN(rankingConfig, createSettings());
   const rankedTorrents = Object.entries({
     ...unknownResTorrents,
     ...hdTorrents,
@@ -340,5 +343,5 @@ it("handles bucket limits correctly", ({ rankingConfig }) => {
 
   const expectedTotal = 6; // 2 from for resolution bucket
 
-  expect(sortedTorrents.length).toBe(expectedTotal);
+  expect(sortedTorrents).toHaveLength(expectedTotal);
 });

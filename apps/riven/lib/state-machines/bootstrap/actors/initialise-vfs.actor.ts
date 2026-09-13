@@ -66,17 +66,21 @@ export const initialiseVfs = fromPromise<
                 sudo fusermount -uz ${mountPath}
                 sudo fusermount3 -uz ${mountPath}
               `,
+              { cause: error },
             );
           }
 
           break;
         }
-        case "ENOENT":
+        case "ENOENT": {
           throw new Error(
             `VFS mount path "${mountPath}" does not exist. Please create this directory.`,
+            { cause: error },
           );
-        default:
+        }
+        default: {
           throw error;
+        }
       }
     } else {
       throw error;

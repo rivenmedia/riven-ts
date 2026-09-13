@@ -7,7 +7,7 @@ import { JellyfinSettings } from "./types/jellyfin-settings.type.ts";
 @Resolver(() => Settings)
 export class JellyfinSettingsResolver {
   @FieldResolver(() => JellyfinSettings)
-  jellyfin(): JellyfinSettings {
+  public jellyfin(): JellyfinSettings {
     return {
       apiKey: "jellyfin-api-key",
     };

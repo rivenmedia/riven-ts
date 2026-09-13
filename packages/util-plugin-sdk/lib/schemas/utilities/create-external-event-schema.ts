@@ -1,4 +1,6 @@
-import z, { type ZodType } from "zod";
+import z from "zod";
+
+import type { ZodType } from "zod";
 
 export const createExternalEventSchema = <
   Type extends string,

@@ -1,4 +1,4 @@
-import z, { type ZodObject } from "zod";
+import z from "zod";
 
 import {
   ContentServiceRequestedEvent,
@@ -24,6 +24,10 @@ import {
   ItemRequestCreateSuccessEvent,
   ItemRequestCreateSuccessEventHandler,
 } from "./item-request.create.success.event.ts";
+import {
+  ItemRequestRemovedEvent,
+  ItemRequestRemovedEventHandler,
+} from "./item-request.removed.event.ts";
 import {
   ItemRequestUpdateSuccessEvent,
   ItemRequestUpdateSuccessEventHandler,
@@ -91,9 +95,9 @@ import {
   MediaItemScrapeErrorIncorrectStateEventHandler,
 } from "./media-item.scrape.error.incorrect-state.event.ts";
 import {
-  MediaItemScrapeErrorNoNewStreamsEvent,
-  MediaItemScrapeErrorNoNewStreamsEventHandler,
-} from "./media-item.scrape.error.no-new-streams.event.ts";
+  MediaItemScrapeErrorNoStreamsFoundEvent,
+  MediaItemScrapeErrorNoStreamsFoundEventHandler,
+} from "./media-item.scrape.error.no-streams-found.event.ts";
 import {
   MediaItemScrapeSuccessEvent,
   MediaItemScrapeSuccessEventHandler,
@@ -111,11 +115,14 @@ import {
   MediaItemSubtitleRequestedEventHandler,
 } from "./media-item.subtitle-requested.event.ts";
 
+import type { ZodObject } from "zod";
+
 export const RivenEvent = z.discriminatedUnion("type", [
   CoreStartedEvent,
   ItemRequestCreateSuccessEvent,
   ItemRequestCreateErrorEvent,
   ItemRequestCreateErrorConflictEvent,
+  ItemRequestRemovedEvent,
   ItemRequestUpdateSuccessEvent,
   MediaItemIndexRequestedMovieEvent,
   MediaItemIndexRequestedShowEvent,
@@ -126,7 +133,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   CoreShutdownEvent,
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeSuccessEvent,
-  MediaItemScrapeErrorNoNewStreamsEvent,
+  MediaItemScrapeErrorNoStreamsFoundEvent,
   MediaItemScrapeErrorIncorrectStateEvent,
   MediaItemScrapeErrorEvent,
   MediaItemDownloadRequestedEvent,
@@ -169,6 +176,7 @@ export const RivenEventHandler = {
   "riven.item-request.create.error": ItemRequestCreateErrorEventHandler,
   "riven.item-request.create.error.conflict":
     ItemRequestCreateErrorConflictEventHandler,
+  "riven.item-request.removed": ItemRequestRemovedEventHandler,
   "riven.item-request.update.success": ItemRequestUpdateSuccessEventHandler,
 
   // Item indexing
@@ -186,8 +194,8 @@ export const RivenEventHandler = {
   "riven.media-item.scrape.error": MediaItemScrapeErrorEventHandler,
   "riven.media-item.scrape.error.incorrect-state":
     MediaItemScrapeErrorIncorrectStateEventHandler,
-  "riven.media-item.scrape.error.no-new-streams":
-    MediaItemScrapeErrorNoNewStreamsEventHandler,
+  "riven.media-item.scrape.error.no-streams-found":
+    MediaItemScrapeErrorNoStreamsFoundEventHandler,
   "riven.media-item.scrape.success": MediaItemScrapeSuccessEventHandler,
 
   // Item downloading

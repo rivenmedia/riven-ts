@@ -9,7 +9,7 @@ import type { UUID } from "node:crypto";
 
 export class MediaEntryService extends BaseService {
   @CreateRequestContext()
-  async getMediaEntryById<
+  public async getMediaEntryById<
     Hint extends string = never,
     Fields extends string = never,
     Excludes extends string = never,

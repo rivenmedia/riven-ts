@@ -1,15 +1,22 @@
 import Fuse from "@zkochan/fuse-native";
 import fs from "node:fs";
+import path from "node:path";
 import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
+import { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
 import { getattrSync } from "./getattr.ts";
 
+// oxlint-disable-next-line no-bitwise
 const dirMode = fs.constants.S_IFDIR | 0o755;
+
+// oxlint-disable-next-line no-bitwise
 const fileMode = fs.constants.S_IFREG | 0o644;
 
+type GetAttrCallback = Parameters<typeof getattrSync>[1];
+
 it("returns directory stats for the root directory", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/", callback);
 
@@ -27,18 +34,8 @@ it("returns directory stats for the root directory", async () => {
   });
 });
 
-it("returns ENOENT for ignored paths", async () => {
-  const callback = vi.fn();
-
-  getattrSync("/.Trash", callback);
-
-  await vi.waitFor(() => {
-    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
-  });
-});
-
 it("returns ENOENT for hidden paths", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/somefolder/.hidden", callback);
 
@@ -48,12 +45,42 @@ it("returns ENOENT for hidden paths", async () => {
 });
 
 it("returns ENOENT for unknown paths", async () => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/unknownpath", callback);
 
   await vi.waitFor(() => {
     expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("returns file stats for movie directories", async ({
+  seeders: { seedCompletedMovie },
+}) => {
+  const { movie } = await seedCompletedMovie();
+  const [mediaEntry] = await movie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn<GetAttrCallback>();
+
+  const pathInfo = PathInfo.parse(
+    `/${mediaEntry.baseDirectory}/${mediaEntry.path}`,
+  );
+
+  getattrSync(pathInfo.dir, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(null, {
+      atime: expect.any(Date),
+      ctime: expect.any(Date),
+      mtime: expect.any(Date),
+      mode: dirMode,
+      gid: expect.any(Number),
+      uid: expect.any(Number),
+      size: 0,
+      nlink: 2,
+    });
   });
 });
 
@@ -65,7 +92,7 @@ it("returns file stats for movie files", async ({
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
@@ -88,7 +115,7 @@ it("returns directory stats for /movies", async ({
 }) => {
   await seedCompletedMovie(3);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/movies", callback);
 
@@ -111,7 +138,7 @@ it("returns directory stats for /shows", async ({
 }) => {
   await seedCompletedShow(3);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync("/shows", callback);
 
@@ -134,7 +161,7 @@ it("returns directory stats for single shows", async ({
 }) => {
   const seasonsCount = await completedShow.seasons.loadCount();
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}`, callback);
 
@@ -155,7 +182,7 @@ it("returns directory stats for single shows", async ({
 it("returns directory stats for single seasons", async ({
   completedShowContext: { completedShow },
 }) => {
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/shows/{tvdb-${completedShow.tvdbId}}/Season 01`, callback);
 
@@ -184,7 +211,7 @@ it("returns file stats for episodes", async ({
 
   expect.assert(mediaEntry);
 
-  const callback = vi.fn();
+  const callback = vi.fn<GetAttrCallback>();
 
   getattrSync(`/${mediaEntry.baseDirectory}/${mediaEntry.path}`, callback);
 
@@ -199,5 +226,53 @@ it("returns file stats for episodes", async ({
       size: mediaEntry.fileSize,
       nlink: 1,
     });
+  });
+});
+
+it("does not return file stats for movie files with non-matching extensions", async ({
+  seeders: { seedCompletedMovie },
+}) => {
+  const { movie } = await seedCompletedMovie();
+
+  const [mediaEntry] = await movie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn<GetAttrCallback>();
+
+  const unknownFilePath = mediaEntry.path.replace(
+    path.extname(mediaEntry.path),
+    ".unknown-extension",
+  );
+
+  getattrSync(`/${mediaEntry.baseDirectory}/${unknownFilePath}`, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
+  });
+});
+
+it("does not return file stats for episode files with non-matching extensions", async ({
+  seeders: { seedCompletedShow },
+}) => {
+  const { episodes: [episode] = [] } = await seedCompletedShow();
+
+  expect.assert(episode);
+
+  const [mediaEntry] = await episode.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const callback = vi.fn<GetAttrCallback>();
+
+  const unknownFilePath = mediaEntry.path.replace(
+    path.extname(mediaEntry.path),
+    ".unknown-extension",
+  );
+
+  getattrSync(`/${mediaEntry.baseDirectory}/${unknownFilePath}`, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.ENOENT);
   });
 });

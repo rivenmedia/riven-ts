@@ -1,3 +1,5 @@
+// oxlint-disable node/no-sync
+
 import { readdirSync } from "node:fs";
 
 import type { UserConfig } from "@commitlint/types";
@@ -21,7 +23,7 @@ function stripPrefix(name: string) {
 }
 
 function getScopes() {
-  const scopes = new Set(["repo", "deps"]);
+  const scopes = new Set(["repo", "deps", "ci"]);
 
   // Get scopes from apps directory
   for (const dir of getDirNames("apps")) {
@@ -30,17 +32,17 @@ function getScopes() {
 
   // Get scopes from packages directory
   for (const directory of getDirNames("packages")) {
-    scopes.add(stripPrefix(directory));
-
     // Get scopes from packages/core/* subdirectories
     if (directory === "core") {
       for (const subDir of getDirNames(`packages/${directory}`)) {
         scopes.add(stripPrefix(subDir));
       }
+    } else {
+      scopes.add(stripPrefix(directory));
     }
   }
 
-  return Array.from(scopes).sort();
+  return [...scopes].toSorted();
 }
 
 export default {

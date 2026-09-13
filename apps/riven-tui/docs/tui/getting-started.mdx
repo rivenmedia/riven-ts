@@ -1,0 +1,50 @@
+---
+title: Getting Started
+description: How to use the Riven TUI (Terminal UI)
+---
+
+The Riven TUI is a terminal client for browsing and managing a running Riven
+instance. It talks to Riven's GraphQL API over HTTP - it does not run any
+Riven code itself, so it can be pointed at any reachable instance, local or
+remote.
+
+## Prerequisites
+
+- A running Riven instance with its GraphQL API reachable (defaults to
+  `http://localhost:3000/graphql`).
+- A terminal that supports full-screen apps (most modern terminal emulators
+  do).
+
+## Running from the Riven container
+
+Riven's Docker image bundles the TUI alongside the main application, so you
+can run it directly inside a running container without any extra setup:
+
+```bash
+docker exec -it <riven-container> npm run tui
+```
+
+This connects to the Riven instance running in that same container.
+
+## Running from source
+
+From the root of the `riven-ts` monorepo:
+
+```bash
+pnpm --filter @repo/riven-tui dev
+```
+
+By default this connects to `http://localhost:3000/graphql`. See
+[Configuration](/docs/tui/configuration) for how to point it at a different
+instance.
+
+To run a production build instead:
+
+```bash
+pnpm --filter @repo/riven-tui build
+pnpm --filter @repo/riven-tui start
+```
+
+## Quitting
+
+Press `q` from anywhere outside a text input to exit the TUI.

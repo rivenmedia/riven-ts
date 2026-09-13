@@ -5,5 +5,5 @@ import type { Logger } from "winston";
 export interface GraphQLContext {
   logger: Logger;
   sendEvent: (event: RivenExternalEvent) => void;
-  plugins: Partial<Record<symbol, { dataSources: DataSourceMap }>>;
+  plugins: Map<symbol, { dataSources: DataSourceMap }>;
 }

@@ -15,7 +15,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 @Resolver()
 export class SeerrResolver {
   @Query(() => Boolean)
-  seerrIsValid(
+  public async seerrIsValid(
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<boolean> {
     return api.validate();
@@ -23,24 +23,28 @@ export class SeerrResolver {
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async seerrMovies(
-    @Args() { filter }: FilterArguments,
+  public async seerrMovies(
+    @Args(() => FilterArguments) { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
-    return (await api.getContent(filter)).movies;
+    const { movies } = await api.getContent(filter);
+
+    return movies;
   }
 
   @CacheControl({ maxAge: 300 })
   @Query(() => [ExternalIds])
-  async seerrShows(
-    @Args() { filter }: FilterArguments,
+  public async seerrShows(
+    @Args(() => FilterArguments) { filter }: FilterArguments,
     @PluginDataSource(pluginConfig.name, SeerrAPI) api: SeerrAPI,
   ): Promise<ExternalIds[]> {
-    return (await api.getContent(filter)).shows;
+    const { shows } = await api.getContent(filter);
+
+    return shows;
   }
 
   @Mutation(() => Boolean)
-  seerrHandleWebhook(
+  public seerrHandleWebhook(
     @Arg("input", () => SeerrHandleWebhookInput) input: SeerrHandleWebhookInput,
     @Ctx() { logger, sendEvent }: GraphQLContext,
   ) {

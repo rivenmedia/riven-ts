@@ -13,7 +13,7 @@ import type { Job, ParentOptions } from "bullmq";
 export function createJobParentConfig(
   job: Pick<Job, "id" | "queueQualifiedName">,
 ): ParentOptions {
-  assert(job.id, "Job must have an ID to be used as a parent job");
+  assert.ok(job.id, "Job must have an ID to be used as a parent job");
 
   return {
     id: job.id,

@@ -1,16 +1,17 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { LookupByTvdbIdResponse } from "../schemas/lookup-by-tvdb-id-response.schema.ts";
-import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
+import type { TvdbSettings } from "../tvdb-settings.schema.ts";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { TimezoneName } from "countries-and-timezones";
 
 export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
-  override baseURL = "https://api.tvmaze.com";
-  override serviceName = "Tvdb - TvMaze";
+  public override baseURL = "https://api.tvmaze.com";
+  public override serviceName = "Tvdb - TvMaze";
 
   protected override rateLimiterOptions: RateLimiterOptions = {
-    duration: 10000,
+    duration: 10_000,
     max: 20,
   };
 
@@ -21,7 +22,9 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
    * @param tvdbId The TVDB ID to retrieve timezone for
    * @returns The IANA-compliant timezone of the show's original network, if present
    */
-  async getShowTimezone(tvdbId: string): Promise<TimezoneName | undefined> {
+  public async getShowTimezone(
+    tvdbId: string,
+  ): Promise<TimezoneName | undefined> {
     try {
       const showResponse = await this.get<unknown>("lookup/shows", {
         params: {
@@ -42,11 +45,11 @@ export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
         { err: error },
       );
 
-      return;
+      return undefined;
     }
   }
 
-  override validate() {
+  public override validate() {
     return true;
   }
 }

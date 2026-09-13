@@ -14,7 +14,8 @@ export const ListrrSettings = z.object({
   showLists: json(z.array(z.string().min(1)))
     .default([])
     .describe("List of Listrr show lists to request"),
-  updateIntervalSeconds: z
+  updateIntervalSeconds: z.coerce
+    .number()
     .int()
     .nonnegative()
     .default(Duration.fromObject({ days: 1 }).as("seconds"))

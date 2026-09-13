@@ -6,6 +6,7 @@ const workspaceImports = Object.keys(packageJson.devDependencies).filter(
   (dep) =>
     dep.startsWith("@repo/plugin-") ||
     dep === "@repo/riven" ||
+    dep === "@repo/riven-tui" ||
     dep === "@repo/util-rank-torrent-name",
 );
 

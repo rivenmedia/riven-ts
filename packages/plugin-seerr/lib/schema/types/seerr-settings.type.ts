@@ -10,11 +10,11 @@ registerEnumType(getRequestQueryParamsFilterEnum, {
 @ObjectType()
 export class SeerrSettings {
   @Field()
-  apiKey!: string;
+  public apiKey!: string;
 
   @Field()
-  url!: string;
+  public url!: string;
 
   @Field(() => getRequestQueryParamsFilterEnum)
-  filter!: string;
+  public filter!: string;
 }

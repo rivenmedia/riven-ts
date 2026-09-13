@@ -55,10 +55,10 @@ export function getLevRatio(
   let best = 0;
 
   for (const candidate of candidates) {
-    const r = levRatio(candidate, normalisedParsed);
+    const ratio = levRatio(candidate, normalisedParsed);
 
-    if (r > best) {
-      best = r;
+    if (ratio > best) {
+      best = ratio;
     }
   }
 

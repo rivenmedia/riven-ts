@@ -1,19 +1,16 @@
-import {
-  BaseDataSource,
-  type ParamsFor,
-  type RateLimiterOptions,
-} from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 import {
   Episode,
-  type MediaItem,
   Movie,
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CometSettings } from "../comet-settings.schema.ts";
 import { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
 
+import type { CometSettings } from "../comet-settings.schema.ts";
+import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 
 interface CometScrapeConfig {
@@ -22,13 +19,15 @@ interface CometScrapeConfig {
   imdbId: string;
 }
 
-class CometAPIError extends Error {}
+class CometAPIError extends Error {
+  public override name = "CometAPIError";
+}
 
 export class CometAPI extends BaseDataSource<CometSettings> {
-  override baseURL = this.settings.url;
-  override serviceName = "Comet";
+  public override baseURL = this.settings.url;
+  public override serviceName = "Comet";
 
-  override async validate() {
+  public override async validate() {
     try {
       // Implement your own validation logic here
       await this.get("validate");
@@ -44,7 +43,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
     duration: 60 * 1000,
   };
 
-  async scrape({
+  public async scrape({
     item,
   }: ParamsFor<MediaItemScrapeRequestedEvent>): Promise<
     Record<string, string>
@@ -63,7 +62,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
 
       const parsed = CometScrapeResponse.parse(response);
 
-      if (!parsed.streams.length) {
+      if (parsed.streams.length === 0) {
         this.logger.info(
           `No streams found for item ${item.fullTitle} (IMDB: ${item.imdbId})`,
         );
@@ -86,7 +85,7 @@ export class CometAPI extends BaseDataSource<CometSettings> {
         const title =
           stream.behaviorHints.filename ??
           // Comet prefixes description lines with emoji (e.g., "<emoji> Title"), strip it
-          stream.description.split("\n")[0]?.substring(1).trim();
+          stream.description.split("\n")[0]?.slice(1).trim();
 
         if (!title) {
           continue;

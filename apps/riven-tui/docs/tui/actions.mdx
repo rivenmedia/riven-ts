@@ -1,0 +1,35 @@
+---
+title: Actions
+description: Running mutations against a media item from the Riven TUI
+---
+
+From an [item detail](/docs/tui/navigation#item-detail) screen, press `a` to open
+the actions menu. It lists the actions available for that item's type,
+runs a GraphQL mutation when you confirm one, and reports whether it
+succeeded.
+
+## Using the actions menu
+
+| Key                | Action                                          |
+| ------------------ | ----------------------------------------------- |
+| `↑`/`↓` or `k`/`j` | Move between actions                            |
+| `enter`            | Select an action, or confirm/cancel a prompt    |
+| `esc`              | Cancel the current selection, or close the menu |
+| `a`                | Toggle the menu open/closed                     |
+
+Selecting an action shows a **Are you sure?** confirmation (defaulting to
+"No") before it runs. Once it completes, the menu shows a success or error
+message; pressing any key closes the menu.
+
+<Callout type="warn">
+  Actions like resetting a media item are destructive - they clear streams and
+  filesystem entries for the item. Confirm the target item before running one.
+</Callout>
+
+## Built-in actions
+
+| Action                  | Applies to                   | Description                                                                                                           |
+| ----------------------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| Blacklist active stream | Movie, Show, Season, Episode | Blacklists the currently active stream and searches for a replacement. Only shown when the item has an active stream. |
+| Remove request          | Movie, Show                  | Removes the item request, halting further processing.                                                                 |
+| Reset media item        | Movie, Show, Season, Episode | Resets the media item to its original state, clearing streams and filesystem entries.                                 |

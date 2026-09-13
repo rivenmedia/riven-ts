@@ -11,13 +11,13 @@ export const defaultPreset =
       bluray: 100,
       hdtv: -5000,
       hevc: 500,
-      remux: 10000,
+      remux: 10_000,
       web: 100,
       webdl: 200,
 
       // Rips
-      brrip: -10000,
-      hdrip: -10000,
+      brrip: -10_000,
+      hdrip: -10_000,
       webrip: -1000,
 
       // HDR

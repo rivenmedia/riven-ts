@@ -1,7 +1,7 @@
 import { parseFilePath } from "@repo/util-rank-torrent-name";
 
 import assert from "node:assert";
-import { extname } from "node:path";
+import path from "node:path";
 import z from "zod";
 
 import { logger } from "../../../../../utilities/logger/logger.ts";
@@ -20,43 +20,40 @@ const VALID_FILE_EXTENSIONS = z.enum([
 ]);
 
 export function mapItemsToFiles(items: DebridFile[]) {
-  return items.reduce<MapItemsToFilesSandboxedJob["output"]>(
-    (acc, file) => {
-      try {
-        const fileExtension = extname(file.name);
+  const acc: MapItemsToFilesSandboxedJob["output"] = {
+    episodes: {},
+    movies: {},
+  };
 
-        assert(
-          VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,
-          `Invalid file extension: ${fileExtension}`,
-        );
+  for (const file of items) {
+    try {
+      const fileExtension = path.extname(file.name);
 
-        const parseData = parseFilePath(file.path);
+      assert.ok(
+        VALID_FILE_EXTENSIONS.safeParse(fileExtension).success,
+        `Invalid file extension: ${fileExtension}`,
+      );
 
-        if (parseData.type === "movie") {
-          acc.movies[Object.keys(acc.movies).length.toString()] = file;
+      const parseData = parseFilePath(file.path);
 
-          return acc;
-        }
+      if (parseData.type === "movie") {
+        acc.movies[Object.keys(acc.movies).length.toString()] = file;
 
-        const seasonNumber = parseData.seasons[0] ?? "abs";
-        const episodeNumber = parseData.episodes[0];
-
-        assert(episodeNumber, "Episode number is required for show files");
-
-        const key = `${seasonNumber.toString()}:${episodeNumber.toString()}`;
-
-        acc.episodes[key] = file;
-
-        return acc;
-      } catch (error) {
-        logger.silly(`Error mapping file ${file.name}: ${String(error)}`);
-
-        return acc;
+        continue;
       }
-    },
-    {
-      episodes: {},
-      movies: {},
-    },
-  );
+
+      const seasonNumber = parseData.seasons[0] ?? "abs";
+      const [episodeNumber] = parseData.episodes;
+
+      assert.ok(episodeNumber, "Episode number is required for show files");
+
+      const key = `${seasonNumber.toString()}:${episodeNumber.toString()}`;
+
+      acc.episodes[key] = file;
+    } catch (error) {
+      logger.silly(`Error mapping file ${file.name}: ${String(error)}`);
+    }
+  }
+
+  return acc;
 }

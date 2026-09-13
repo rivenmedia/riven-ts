@@ -1,19 +1,21 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import { join } from "node:path";
+import path from "node:path";
 
-import { PlexSettings } from "../plex-settings.schema.ts";
 import { LibrarySectionsResponse } from "../schemas/library-sections-response.schema.ts";
 
+import type { PlexSettings } from "../plex-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 
-class PlexAPIError extends Error {}
+class PlexAPIError extends Error {
+  public override name = "PlexAPIError";
+}
 
 export class PlexAPI extends BaseDataSource<PlexSettings> {
-  override baseURL = this.settings.plexServerUrl;
+  public override baseURL = this.settings.plexServerUrl;
 
-  override serviceName = "Plex";
+  public override serviceName = "Plex";
 
   protected override willSendRequest(
     _path: string,
@@ -23,13 +25,13 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     requestOpts.headers["accept"] = "application/json";
   }
 
-  async updateSection(path: string) {
+  public async updateSection(sectionPath: string) {
     const response = await this.get<unknown>(`library/sections`);
     const sections = LibrarySectionsResponse.parse(response);
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        const fullPath = join(this.settings.plexLibraryPath, path);
+        const fullPath = path.join(this.settings.plexLibraryPath, sectionPath);
 
         if (fullPath.startsWith(location.path as string)) {
           if (!directory.key) {
@@ -49,11 +51,11 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
     }
 
     throw new PlexAPIError(
-      `No matching library section found for path: ${path}`,
+      `No matching library section found for path: ${sectionPath}`,
     );
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       const response = await this.get<unknown>(`library/sections`);
 

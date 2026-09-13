@@ -7,6 +7,7 @@ import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
 import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
+import { GetTorrentResponse } from "../schemas/get-torrent-response.schema.ts";
 import { ItemStatus } from "../schemas/item-status.schema.ts";
 import { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
 import { Store } from "../schemas/store.schema.ts";
@@ -18,28 +19,31 @@ import type {
   RequestOptions,
   ValueOrPromise,
 } from "@apollo/datasource-rest/dist/RESTDataSource.js";
+import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
-import type { URL } from "url";
+import type { URL } from "node:url";
 
 const storeNameHeader = "x-stremthru-store-name";
 
-class StremThruTorzAPIError extends Error {}
+class StremThruTorzAPIError extends Error {
+  public override name = "StremThruTorzAPIError";
+}
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
-  override baseURL = this.settings.stremThruUrl;
-  override serviceName = "StremThru [Torz]";
+  public override baseURL = this.settings.stremThruUrl;
+  public override serviceName = "StremThru [Torz]";
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself
 
   #validStores: Store[] = [];
 
-  get validStores() {
+  public get validStores() {
     return new Set(this.#validStores);
   }
 
-  #rateLimitedStores = new TTLCache<Store, true>();
+  readonly #rateLimitedStores = new TTLCache<Store, true>();
 
-  get rateLimitedStores() {
+  public get rateLimitedStores() {
     return new Map(
       this.#rateLimitedStores
         .keys()
@@ -50,6 +54,12 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
         .toArray(),
     );
   }
+
+  /**
+   * Stores that provide stream links directly from the torrent file,
+   * rather than requiring a separate link generation step.
+   */
+  readonly #directLinkStores = new Set<Store>(["premiumize", "debridlink"]);
 
   #buildCommonHeaders(store: Store) {
     return {
@@ -117,7 +127,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     }
   }
 
-  override async validate(): Promise<boolean> {
+  public override async validate(): Promise<boolean> {
     this.#validStores = [];
 
     const configuredStores = Store.options.filter(
@@ -189,7 +199,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return true;
   }
 
-  async addTorrent(infoHash: string, store: Store) {
+  public async addTorrent(infoHash: string, store: Store) {
     const response = await this.post<unknown>("v0/store/torz", {
       headers: this.#buildCommonHeaders(store),
       body: JSON.stringify({
@@ -222,7 +232,26 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     return data;
   }
 
-  async removeTorrent(id: string, store: Store) {
+  public async getTorrent(id: string, store: Store) {
+    const response = await this.get<unknown>(
+      `v0/store/torz/${encodeURIComponent(id)}`,
+      {
+        headers: this.#buildCommonHeaders(store),
+      },
+    );
+
+    const { data } = GetTorrentResponse.parse(response);
+
+    if (!data) {
+      throw new StremThruTorzAPIError(
+        `No data returned from ${store} for torrent ${id}`,
+      );
+    }
+
+    return data;
+  }
+
+  public async removeTorrent(id: string, store: Store) {
     const response = await this.delete<unknown>(`v0/store/torz/${id}`, {
       headers: this.#buildCommonHeaders(store),
     });
@@ -251,18 +280,20 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
       "unknown",
     ]);
 
-    return items.reduce<Record<string, DebridFile[]>>((acc, item) => {
+    const result: Record<string, DebridFile[]> = {};
+
+    for (const item of items) {
       if (!allowedStatuses.safeParse(item.status).success) {
-        return acc;
+        continue;
       }
 
-      acc[item.hash] = item.files;
+      result[item.hash] = item.files;
+    }
 
-      return acc;
-    }, {});
+    return result;
   }
 
-  async getCachedTorrents(infoHashes: string[], store: Store) {
+  public async getCachedTorrents(infoHashes: string[], store: Store) {
     const chunkSize = 500;
     const infoHashSet = new Set(infoHashes);
     const requests: Promise<Record<string, DebridFile[]>>[] = [];
@@ -275,20 +306,69 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
 
     const results = await Promise.all(requests);
 
-    return results.reduce<Record<string, DebridFile[]>>(
-      (acc, result) => Object.assign(acc, result),
-      {},
-    );
+    const combined: Record<string, DebridFile[]> = {};
+
+    for (const result of results) {
+      Object.assign(combined, result);
+    }
+
+    return combined;
   }
 
-  async generateLink(link: string, store: Store) {
+  async #getStreamLinkFromTorrentFile(mediaEntry: MediaEntry, store: Store) {
+    if (!mediaEntry.providerDownloadId) {
+      throw new Error(
+        `Media entry ${mediaEntry.id} does not have a provider download ID`,
+      );
+    }
+
+    const { files } = await this.getTorrent(
+      mediaEntry.providerDownloadId,
+      store,
+    );
+
+    const file = files.find(({ name }) => name === mediaEntry.originalFilename);
+
+    if (!file) {
+      throw new Error(
+        `File ${mediaEntry.originalFilename} not found in torrent ${mediaEntry.providerDownloadId} on store ${store}`,
+      );
+    }
+
+    if (!file.link) {
+      throw new Error(
+        `File ${mediaEntry.originalFilename} in torrent ${mediaEntry.providerDownloadId} on store ${store} does not have a download link`,
+      );
+    }
+
+    return file.link;
+  }
+
+  async #generateStreamLinkFromDownloadUrl(
+    mediaEntry: MediaEntry,
+    store: Store,
+  ) {
+    if (!mediaEntry.downloadUrl) {
+      throw new Error(
+        `Media entry ${mediaEntry.id} does not have a download URL`,
+      );
+    }
+
     const response = await this.post<unknown>("v0/store/torz/link/generate", {
-      body: JSON.stringify({ link }),
+      body: JSON.stringify({ link: mediaEntry.downloadUrl }),
       headers: this.#buildCommonHeaders(store),
     });
 
     const { data } = GenerateLinkResponse.parse(response);
 
     return data.link;
+  }
+
+  public async getStreamLink(mediaEntry: MediaEntry, store: Store) {
+    const storeProvidesDownloadLink = this.#directLinkStores.has(store);
+
+    return storeProvidesDownloadLink
+      ? this.#getStreamLinkFromTorrentFile(mediaEntry, store)
+      : this.#generateStreamLinkFromDownloadUrl(mediaEntry, store);
   }
 }

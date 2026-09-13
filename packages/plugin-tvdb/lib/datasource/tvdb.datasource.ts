@@ -1,21 +1,22 @@
-import { BaseDataSource, type RateLimiterOptions } from "@repo/util-plugin-sdk";
+import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { DateTime } from "luxon";
 import z from "zod";
 
-import {
-  type EpisodeBaseRecordSchema,
-  episodeBaseRecordSchema,
-} from "../__generated__/zod/episodeBaseRecordSchema.ts";
+import { episodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRecordSchema.ts";
 import { getAllSeries200Schema } from "../__generated__/zod/getAllSeriesSchema.ts";
 import { getSeriesExtendedQueryResponseSchema } from "../__generated__/zod/getSeriesExtendedSchema.ts";
 import { getSeriesTranslation200Schema } from "../__generated__/zod/getSeriesTranslationSchema.ts";
 import { postLogin200Schema } from "../__generated__/zod/postLoginSchema.ts";
-import { TvdbSettings } from "../tvdb-settings.schema.ts";
 
+import type { EpisodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRecordSchema.ts";
+import type { TvdbSettings } from "../tvdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 
-class TvdbAPIError extends Error {}
+class TvdbAPIError extends Error {
+  public override name = "TvdbAPIError";
+}
 
 interface TvdbToken {
   value: string;
@@ -23,8 +24,8 @@ interface TvdbToken {
 }
 
 export class TvdbAPI extends BaseDataSource<TvdbSettings> {
-  override baseURL = "https://api4.thetvdb.com/v4/";
-  override serviceName = "Tvdb";
+  public override baseURL = "https://api4.thetvdb.com/v4/";
+  public override serviceName = "Tvdb";
 
   #token: TvdbToken | null = null;
 
@@ -58,7 +59,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the series to retrieve episodes for
    * @param language The language code of the episodes to retrieve (default: "eng")
    */
-  async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
+  public async getAllEpisodesInOfficialOrder(id: string, language = "eng") {
     let nextUrl = `series/${id}/episodes/official/${language}`;
 
     const responseSchema = getAllSeries200Schema.extend({
@@ -73,7 +74,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
       const response = await this.get<unknown>(nextUrl);
       const { data, links } = responseSchema.parse(response);
 
-      if (!data.episodes.length) {
+      if (data.episodes.length === 0) {
         throw new TvdbAPIError(
           `Failed to retrieve episodes for series with id ${id}: No episodes in response`,
         );
@@ -94,7 +95,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    *
    * @param id The TVDB id of the series to retrieve
    */
-  async getSeries(id: string) {
+  public async getSeries(id: string) {
     const response = await this.get<unknown>(`series/${id}/extended`, {
       params: {
         short: "true",
@@ -120,7 +121,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
    * @param id The TVDB id of the series to retrieve translations for
    * @param language The language code of the translation to retrieve (default: "eng")
    */
-  async getSeriesTranslations(id: string, language = "eng") {
+  public async getSeriesTranslations(id: string, language = "eng") {
     const response = await this.get<unknown>(
       `series/${id}/translations/${language}`,
     );
@@ -176,7 +177,7 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     return this.#token;
   }
 
-  override async validate() {
+  public override async validate() {
     try {
       await this.#getAuthToken();
 

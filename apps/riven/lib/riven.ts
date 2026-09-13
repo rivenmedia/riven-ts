@@ -1,14 +1,14 @@
+#!/usr/bin/env node
+
 import { Duration } from "luxon";
 import { randomUUID } from "node:crypto";
 import { setEnvironmentData } from "node:worker_threads";
 
-import {
-  type LogContext,
-  withLogContext,
-} from "./utilities/logger/log-context.ts";
+import { withLogContext } from "./utilities/logger/log-context.ts";
 import { SessionID } from "./utilities/logger/session-id.ts";
 
 import type { rivenMachine } from "./state-machines/program/index.ts";
+import type { LogContext } from "./utilities/logger/log-context.ts";
 import type { ActorRefFromLogic } from "xstate";
 
 /**
@@ -107,7 +107,7 @@ export async function riven() {
       process.exit();
     }
 
-    process.on("uncaughtException", (error) => {
+    function handleUncaughtException(error: unknown) {
       process.exitCode = 1;
 
       withLogContext(baseLogContext, () => {
@@ -115,30 +115,54 @@ export async function riven() {
 
         maybeSendShutdownEvent(actor);
       });
-    });
+    }
 
-    process.on("unhandledRejection", (error) => {
+    function handleUnhandledRejection(error: unknown) {
       withLogContext(baseLogContext, () => {
         logger.error("Uncaught rejection", { err: error });
       });
-    });
+    }
+
+    const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+    const terminationSignalHandlers = new Map(
+      terminationSignals.map((signal) => [
+        signal,
+        () => {
+          maybeSendShutdownEvent(actor);
+
+          withLogContext(baseLogContext, () => {
+            logger.debug(`Received ${signal}`);
+          });
+        },
+      ]),
+    );
+
+    process.on("uncaughtException", handleUncaughtException);
+    process.on("unhandledRejection", handleUnhandledRejection);
+
+    for (const [signal, handler] of terminationSignalHandlers) {
+      process.on(signal, handler);
+    }
 
     actor.start();
     actor.send({ type: "BOOTSTRAP" });
 
-    const terminationSignals: NodeJS.Signals[] = ["SIGINT", "SIGTERM"];
+    await waitFor(
+      actor,
+      (state) => state.matches("Shutdown") || state.matches("Errored"),
+    );
 
-    for (const signal of terminationSignals) {
-      process.on(signal, () => {
-        maybeSendShutdownEvent(actor);
+    // Remove any registered process listeners.
+    // This is less important in production, but poses a problem in tests:
+    // When a test runner spawns multiple workers, any worker that runs this file
+    // causes a stack of unused handlers to accumulate, eventually causing the process to hang.
 
-        withLogContext(baseLogContext, () => {
-          logger.debug(`Received ${signal}`);
-        });
-      });
+    process.off("uncaughtException", handleUncaughtException);
+    process.off("unhandledRejection", handleUnhandledRejection);
+
+    for (const [signal, handler] of terminationSignalHandlers) {
+      process.off(signal, handler);
     }
-
-    await waitFor(actor, (state) => state.matches("Shutdown"));
 
     await shutdown();
   });

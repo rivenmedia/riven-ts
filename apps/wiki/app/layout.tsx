@@ -1,5 +1,4 @@
 import "@/app/global.css";
-
 import SearchDialog from "fumadocs-ui/components/dialog/search-default";
 import { RootProvider } from "fumadocs-ui/provider/next";
 import { Inter } from "next/font/google";
@@ -18,7 +17,7 @@ const jsonLd: WithContext<FAQPage> = {
       name: "What is Riven?",
       acceptedAnswer: {
         "@type": "Answer",
-        text: "Riven is a media automation system that uses a virtual file system and debrid services to find, organize, and stream your media. It integrates with Plex, Jellyfin, Emby, and many other services.",
+        text: "Riven is a media automation system that uses a virtual file system and debrid services to find, organize, and stream your media. It integrates with Plex, Jellyfin, and many other services.",
       },
     },
     {
@@ -86,13 +85,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLd).replaceAll("<", String.raw`\u003c`),
           }}
         />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
-            __html: JSON.stringify(jsonLdProject).replace(/</g, "\\u003c"),
+            __html: JSON.stringify(jsonLdProject).replaceAll(
+              "<",
+              String.raw`\u003c`,
+            ),
           }}
         />
       </head>

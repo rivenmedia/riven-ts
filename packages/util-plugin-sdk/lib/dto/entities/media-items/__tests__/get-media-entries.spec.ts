@@ -25,7 +25,7 @@ it("getMediaEntries() returns the associated media entry for a Movie media item"
   });
 
   const mediaEntry = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-movie.mkv",
     plugin: "test",
     mediaItem: movie,
@@ -35,7 +35,7 @@ it("getMediaEntries() returns the associated media entry for a Movie media item"
 
   await em.flush();
 
-  expect(await movie.getMediaEntries()).toEqual([mediaEntry]);
+  await expect(movie.getMediaEntries()).resolves.toStrictEqual([mediaEntry]);
 });
 
 it("getMediaEntries() returns the associated media entries for a Show media item", async ({
@@ -88,6 +88,7 @@ it("getMediaEntries() returns the associated media entries for a Show media item
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const episode2 = em.create(Episode, {
@@ -100,17 +101,20 @@ it("getMediaEntries() returns the associated media entries for a Show media item
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
+  show.episodes.add(episode1, episode2);
+
   const mediaEntry1 = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-show-s01e01.mkv",
     plugin: "test",
     mediaItem: episode1,
   });
 
   const mediaEntry2 = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-show-s01e02.mkv",
     plugin: "test",
     mediaItem: episode2,
@@ -123,7 +127,10 @@ it("getMediaEntries() returns the associated media entries for a Show media item
 
   await em.flush();
 
-  expect(await show.getMediaEntries()).toEqual([mediaEntry1, mediaEntry2]);
+  await expect(show.getMediaEntries()).resolves.toStrictEqual([
+    mediaEntry1,
+    mediaEntry2,
+  ]);
 });
 
 it("getMediaEntries() returns the associated media entries for a Season media item", async ({
@@ -187,6 +194,7 @@ it("getMediaEntries() returns the associated media entries for a Season media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const season2Episode1 = em.create(Episode, {
@@ -199,17 +207,18 @@ it("getMediaEntries() returns the associated media entries for a Season media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const season1Episode1MediaEntry = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-show-s01e01.mkv",
     plugin: "test",
     mediaItem: season1Episode1,
   });
 
   const season2Episode1MediaEntry = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-show-s02e01.mkv",
     plugin: "test",
     mediaItem: season2Episode1,
@@ -221,10 +230,16 @@ it("getMediaEntries() returns the associated media entries for a Season media it
   season1Episode1.filesystemEntries.add(season1Episode1MediaEntry);
   season2Episode1.filesystemEntries.add(season2Episode1MediaEntry);
 
+  show.episodes.add(season1Episode1, season2Episode1);
+
   await em.flush();
 
-  expect(await season1.getMediaEntries()).toEqual([season1Episode1MediaEntry]);
-  expect(await season2.getMediaEntries()).toEqual([season2Episode1MediaEntry]);
+  await expect(season1.getMediaEntries()).resolves.toStrictEqual([
+    season1Episode1MediaEntry,
+  ]);
+  await expect(season2.getMediaEntries()).resolves.toStrictEqual([
+    season2Episode1MediaEntry,
+  ]);
 });
 
 it("getMediaEntries() returns the associated media entry for an Episode media item", async ({
@@ -277,20 +292,22 @@ it("getMediaEntries() returns the associated media entry for an Episode media it
     itemRequest,
     tvdbId,
     indexedAt,
+    isSpecial: false,
   });
 
   const mediaEntry = em.create(MediaEntry, {
-    fileSize: 123456,
+    fileSize: 123_456,
     originalFilename: "test-show-s01e01.mkv",
     plugin: "test",
     mediaItem: episode,
   });
 
   season.episodes.add(episode);
+  show.episodes.add(episode);
 
   episode.filesystemEntries.add(mediaEntry);
 
   await em.flush();
 
-  expect(await episode.getMediaEntries()).toEqual([mediaEntry]);
+  await expect(episode.getMediaEntries()).resolves.toStrictEqual([mediaEntry]);
 });

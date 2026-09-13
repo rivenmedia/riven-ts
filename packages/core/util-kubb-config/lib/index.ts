@@ -1,9 +1,11 @@
-import { type InputData, type InputPath, defineConfig } from "@kubb/core";
+import { defineConfig } from "@kubb/core";
 import { pluginFaker } from "@kubb/plugin-faker";
 import { pluginMsw } from "@kubb/plugin-msw";
 import { pluginOas } from "@kubb/plugin-oas";
 import { pluginTs } from "@kubb/plugin-ts";
 import { pluginZod } from "@kubb/plugin-zod";
+
+import type { InputData, InputPath } from "@kubb/core";
 
 const outputPath = "./lib/__generated__";
 
@@ -26,10 +28,10 @@ export const buildKubbConfig = ({
       barrelType: false,
       path: outputPath,
       clean: true,
-      format: false, // Disable formatting to allow Prettier to handle it in the hooks.
+      format: false, // Disable formatting to allow Oxfmt to handle it in the hooks.
     },
     hooks: {
-      done: [`prettier --log-level silent --write ${outputPath}/**/*.ts`],
+      done: [`oxfmt --write ${outputPath}/**/*.ts`],
     },
     plugins: [
       pluginOas({

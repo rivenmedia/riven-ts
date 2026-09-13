@@ -1,41 +1,41 @@
 import { Entity, Index, Property, Unique } from "@mikro-orm/decorators/legacy";
-import { Field, Int, ObjectType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";
 
-@ObjectType()
+@ObjectType({ implements: FileSystemEntry })
 @Entity({
   discriminatorValue: "subtitle",
 })
 @Unique({ properties: ["mediaItem", "language"] })
 export class SubtitleEntry extends FileSystemEntry {
-  override type: Opt<"subtitle"> = "subtitle" as const;
+  public override type: Opt<"subtitle"> = "subtitle" as const;
 
   @Field(() => String)
   @Index()
   @Property()
-  language!: string;
+  public language!: string;
 
   @Field(() => String)
   @Property()
-  content!: string;
+  public content!: string;
 
   @Field(() => String)
   @Property()
-  fileHash!: string;
+  public fileHash!: string;
 
-  @Field(() => Int)
+  @Field(() => String)
   @Property()
-  sourceProvider!: string;
+  public sourceProvider!: string;
 
   @Field(() => String, { nullable: true })
   @Property()
-  sourceId?: string | null;
+  public sourceId?: string | null;
 
   @Property({ persist: false, hidden: true })
-  async getVfsFileName(): Promise<string> {
+  public async getVfsFileName(): Promise<string> {
     const prettyName = await this.mediaItem.getEntity().getPrettyName();
 
     if (!prettyName) {

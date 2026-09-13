@@ -7,7 +7,7 @@ import { TvdbSettings } from "./types/tvdb-settings.type.ts";
 @Resolver(() => Settings)
 export class TvdbSettingsResolver {
   @FieldResolver(() => TvdbSettings)
-  tvdb(): TvdbSettings {
+  public tvdb(): TvdbSettings {
     return {
       apiKey: "tvdb-api-key",
     };

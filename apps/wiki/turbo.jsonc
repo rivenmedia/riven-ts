@@ -5,7 +5,12 @@
     "build": {
       "dependsOn": ["^codegen:config-docs"],
       "outputs": ["$TURBO_EXTENDS$", ".next/**", "out/**"],
-      "inputs": ["$TURBO_EXTENDS$", "$TURBO_ROOT$/**/*.{md,mdx}"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        "$TURBO_ROOT$/**/*.{md,mdx}",
+        // Plugin display names and nav ordering live in fumadocs meta files
+        "$TURBO_ROOT$/**/docs/**/meta.json"
+      ]
     },
     "dev": {
       "dependsOn": ["^codegen:config-docs"]

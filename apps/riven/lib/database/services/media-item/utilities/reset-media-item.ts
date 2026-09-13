@@ -1,12 +1,9 @@
-import {
-  type MediaItem,
-  Season,
-  Show,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import type { EntityManager } from "@mikro-orm/core";
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-function getChildren(item: MediaItem) {
+async function getChildren(item: MediaItem) {
   if (item instanceof Show) {
     return item.seasons.loadItems();
   }
@@ -27,7 +24,7 @@ export async function resetMediaItem(
 
   if (children) {
     await Promise.all(
-      children.map((child) => resetMediaItem(em, child, resetItems)),
+      children.map(async (child) => resetMediaItem(em, child, resetItems)),
     );
   }
 

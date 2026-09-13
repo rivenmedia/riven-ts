@@ -1,4 +1,4 @@
-import { RivenEvent, RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
+import { RivenEventSchemaMap } from "@repo/util-plugin-sdk/events";
 import { ItemRequestInstance } from "@repo/util-plugin-sdk/schemas/media/item-request-instance";
 import { MediaEntryInstance } from "@repo/util-plugin-sdk/schemas/media/media-entry-instance";
 import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-item-instance";
@@ -7,6 +7,7 @@ import { SerialisedFileSystemEntry } from "./serialised-filesystem-entry.ts";
 import { SerialisedItemRequest } from "./serialised-item-request.ts";
 import { SerialisedMediaItem } from "./serialised-media-item.ts";
 
+import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { ZodCodec, ZodObject, ZodType } from "zod";
 
 /**

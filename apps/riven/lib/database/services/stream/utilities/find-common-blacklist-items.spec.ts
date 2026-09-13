@@ -50,7 +50,7 @@ it("returns an array of all media items that share the same active stream info h
   );
 
   expect(items).toHaveLength(1 + seasons.length + episodes.length);
-  expect(items).toEqual(
+  expect(items).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({ id: show.id }),
       ...seasons.map((season) => expect.objectContaining({ id: season.id })),
@@ -61,7 +61,7 @@ it("returns an array of all media items that share the same active stream info h
 
 it("does not return items with a different active stream info hash, plugin, or provider", async ({
   em,
-  completedMovieContext: { completedMovie: completedMovie },
+  completedMovieContext: { completedMovie },
 }) => {
   expect.assert(completedMovie.activeStream);
 
@@ -73,5 +73,42 @@ it("does not return items with a different active stream info hash, plugin, or p
     "different-provider",
   );
 
-  expect(items).toEqual([expect.objectContaining({ id: completedMovie.id })]);
+  expect(items).toStrictEqual([
+    expect.objectContaining({ id: completedMovie.id }),
+  ]);
+});
+
+it("does not return sibling show-like items with a different active stream info hash, plugin, or provider", async ({
+  em,
+  completedShowContext: { completedShow, episodes },
+  factories: { streamFactory },
+}) => {
+  expect.assert(completedShow.activeStream);
+
+  for (const episode of episodes) {
+    em.persist(episode).assign(episode, {
+      activeStream: await streamFactory.createOne(),
+    });
+  }
+
+  await em.flush();
+
+  const [episode] = episodes;
+
+  expect.assert(episode?.activeStream);
+
+  const [mediaEntry] = await episode.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  const items = await findCommonBlacklistItems(
+    em,
+    episode.id,
+    episode.activeStream.infoHash,
+    mediaEntry.plugin,
+    mediaEntry.provider,
+  );
+
+  expect(items).toHaveLength(1);
+  expect(items).toStrictEqual([expect.objectContaining({ id: episode.id })]);
 });

@@ -9,7 +9,10 @@ export interface StreamsSeederContext {
 }
 
 export class StreamsSeeder extends BaseSeeder<StreamsSeederContext> {
-  async run(em: EntityManager, context: StreamsSeederContext = this.context) {
+  public async run(
+    em: EntityManager,
+    context: StreamsSeederContext = this.context,
+  ) {
     context.streams = await new StreamFactory(em).create(10);
   }
 }

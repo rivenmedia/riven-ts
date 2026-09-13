@@ -23,7 +23,7 @@ it("resets a movie item", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: completedMovie.id,
@@ -47,7 +47,7 @@ it("resets a show item and all nested seasons and episodes", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: completedShow.id,
@@ -85,7 +85,7 @@ it("resets a season item and all nested episodes", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: season.id,
@@ -115,7 +115,7 @@ it("resets an episode item", async ({
 
   const serialisedItems = serialiseItems(resetItems);
 
-  expect(serialisedItems).toEqual(
+  expect(serialisedItems).toStrictEqual(
     expect.arrayContaining([
       expect.objectContaining({
         id: episode.id,
@@ -123,4 +123,22 @@ it("resets an episode item", async ({
       }),
     ]),
   );
+});
+
+it("resets a failed media item", async ({
+  em,
+  services,
+  seeders: { seedScrapedMovie },
+}) => {
+  const { movie } = await seedScrapedMovie();
+
+  movie.state = "failed";
+
+  await em.flush();
+
+  await services.mediaItemService.resetMediaItem(movie);
+
+  const resetMovie = await em.refreshOrFail(movie);
+
+  expect(resetMovie.state).toBe("indexed");
 });

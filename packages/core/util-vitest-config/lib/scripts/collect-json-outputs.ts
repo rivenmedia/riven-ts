@@ -1,9 +1,19 @@
 /**
  * See https://github.com/vercel/turborepo/blob/main/examples/with-vitest/packages/vitest-config/src/scripts/collect-json-outputs.ts
  */
-import fs from "fs/promises";
 import { glob } from "glob";
-import path from "path";
+import fs from "node:fs/promises";
+import path from "node:path";
+
+// Create clean patterns for display (without any "../" prefixes)
+const replaceDotPatterns = (str: string) => {
+  // Normalize and remove any ".." or "." path segments for safe display
+  const normalized = path.normalize(str);
+  const parts = normalized.split(path.sep);
+  const filteredParts = parts.filter((part) => part !== ".." && part !== ".");
+
+  return filteredParts.join(path.sep);
+};
 
 try {
   // Define the patterns to search
@@ -63,17 +73,8 @@ try {
     }
   }
 
-  // Create clean patterns for display (without any "../" prefixes)
-  const replaceDotPatterns = (str: string) => {
-    // Normalize and remove any ".." or "." path segments for safe display
-    const normalized = path.normalize(str);
-    const parts = normalized.split(path.sep);
-    const filteredParts = parts.filter((part) => part !== ".." && part !== ".");
-    return filteredParts.join(path.sep);
-  };
-
   if (directoriesWithCoverage.length > 0) {
-    console.log(
+    console.debug(
       `Found coverage.json in: ${directoriesWithCoverage
         .map(replaceDotPatterns)
         .join(", ")}`,
@@ -82,8 +83,9 @@ try {
     throw new Error("No coverage files found");
   }
 
-  console.log(`Coverage collected into: ${path.join(process.cwd())}`);
+  console.debug(`Coverage collected into: ${path.join(process.cwd())}`);
 } catch (error) {
+  // oxlint-disable-next-line no-console
   console.error("Error collecting coverage files:", error);
 
   process.exitCode = 1;
