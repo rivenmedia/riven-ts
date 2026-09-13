@@ -534,6 +534,65 @@ describe(buildSettingsConfigFromZodSchema, () => {
     });
   });
 
+  describe("nested object schemas", () => {
+    it("converts a nested object field into a group field", () => {
+      const schema = z.object({
+        require: z.string().array(),
+        resolutions: z
+          .object({
+            r2160p: z.boolean(),
+            r1080p: z.boolean(),
+          })
+          .meta({ title: "Resolutions" }),
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema);
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "require",
+            {
+              type: "string_array",
+              config: {
+                label: "require",
+                name: "require",
+                registerOptions: { required: true },
+              },
+            },
+          ],
+          [
+            "resolutions",
+            {
+              type: "group",
+              config: {
+                name: "Resolutions",
+                schema: [
+                  {
+                    type: "boolean",
+                    config: {
+                      label: "resolutions.r2160p",
+                      name: "resolutions.r2160p",
+                      registerOptions: { required: true },
+                    },
+                  },
+                  {
+                    type: "boolean",
+                    config: {
+                      label: "resolutions.r1080p",
+                      name: "resolutions.r1080p",
+                      registerOptions: { required: true },
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        ]),
+      );
+    });
+  });
+
   describe("default schemas", () => {
     it("unwraps the inner type correctly", () => {
       const schema = z

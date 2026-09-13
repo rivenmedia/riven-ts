@@ -146,7 +146,7 @@ export function buildSettingsConfigFromZodSchema(
         });
       }
 
-      break;
+      return settings;
     }
     case "record": {
       const commonConfig = buildCommonConfig(schema, key);
@@ -176,6 +176,8 @@ export function buildSettingsConfigFromZodSchema(
       });
     }
     case "object": {
+      const nestedSettings = new Map<string, SettingFieldProps>();
+
       const { shape } = schema as ZodObject<Record<string, ZodType>>;
 
       for (const [fieldKey, fieldSchema] of Object.entries(shape)) {
@@ -185,12 +187,29 @@ export function buildSettingsConfigFromZodSchema(
           required,
         );
 
-        for (const [nestedKey, nestedSetting] of setting.entries()) {
-          settings.set(nestedKey, nestedSetting);
+        for (const [nestedKey, nestedSetting] of setting) {
+          nestedSettings.set(nestedKey, nestedSetting);
         }
       }
 
-      break;
+      // A key means this object is nested within a parent schema, so it's
+      // rendered as its own group rather than flattened into the parent.
+      if (key) {
+        return settings.set(key, {
+          type: "group",
+          config: {
+            name: meta.title ?? key,
+            ...(meta.description && { description: meta.description }),
+            schema: [...nestedSettings.values()],
+          },
+        });
+      }
+
+      for (const [nestedKey, nestedSetting] of nestedSettings) {
+        settings.set(nestedKey, nestedSetting);
+      }
+
+      return settings;
     }
     case "default": {
       const innerSchema = (schema as ZodDefault).unwrap();
@@ -232,10 +251,7 @@ export function buildSettingsConfigFromZodSchema(
     case "template_literal":
     case "transform":
     case "void": {
-      // Handle other Zod types if needed
-      break;
+      return settings;
     }
   }
-
-  return settings;
 }
