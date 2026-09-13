@@ -7,6 +7,7 @@ import { SettingsNullableBooleanField } from "./_components/nullable-boolean-fie
 import { SettingsNumberField } from "./_components/number-field";
 import { SettingsSecretField } from "./_components/secret-field";
 import { SettingsSelectField } from "./_components/select-field";
+import { SettingGroup } from "./_components/setting-group";
 import { SettingsStringArrayField } from "./_components/string-array-field";
 import { SettingsTextField } from "./_components/text-field";
 
@@ -19,6 +20,7 @@ export interface CommonSettingFieldProps {
 }
 
 type SettingsFieldType =
+  | "group"
   | "text"
   | "secret"
   | "number"
@@ -30,6 +32,7 @@ type SettingsFieldType =
   | "dictionary";
 
 const settingFieldComponents = {
+  group: SettingGroup,
   text: SettingsTextField,
   secret: SettingsSecretField,
   number: SettingsNumberField,

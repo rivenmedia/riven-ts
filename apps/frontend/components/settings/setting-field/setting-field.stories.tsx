@@ -18,15 +18,21 @@ export const Text = meta.story({
       name: "instance-name",
     },
   },
-  decorators: [createFormDecorator({ progressive: true })],
+  decorators: [
+    createFormDecorator({
+      progressive: true,
+      defaultValues: { "instance-name": "My Riven Instance" },
+    }),
+  ],
 });
 
 Text.test("Typing updates the input value", async ({ canvas }) => {
   const input = canvas.getByRole("textbox", { name: /instance name/iu });
 
-  await userEvent.type(input, "My Riven Instance");
+  await userEvent.clear(input);
+  await userEvent.type(input, "Lorem ipsum dolor sit amet");
 
-  await expect(input).toHaveValue("My Riven Instance");
+  await expect(input).toHaveValue("Lorem ipsum dolor sit amet");
 });
 
 export const Secret = meta.story({
@@ -426,3 +432,36 @@ Dictionary.test(
     ).not.toBeInTheDocument();
   },
 );
+
+export const SettingGroup = meta.story({
+  args: {
+    type: "group",
+    config: {
+      name: "My Setting Group",
+      schema: [
+        {
+          type: "text",
+          config: {
+            name: "setting1",
+            label: "Setting 1",
+          },
+        },
+        {
+          type: "boolean",
+          config: {
+            name: "setting2",
+            label: "Setting 2",
+          },
+        },
+      ],
+    },
+  },
+  decorators: [
+    createFormDecorator({
+      defaultValues: {
+        setting1: "Setting 1 value",
+        setting2: true,
+      },
+    }),
+  ],
+});

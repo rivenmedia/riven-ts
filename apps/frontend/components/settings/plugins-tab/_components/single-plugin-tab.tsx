@@ -13,7 +13,7 @@ import { Switch } from "@/components/_ui/switch";
 
 import { FormProvider, useForm } from "react-hook-form";
 
-import { SettingGroup } from "../../setting-group/setting-group";
+import { SettingField } from "../../setting-field/setting-field";
 
 import type { PluginTab } from "../../plugins-tab/plugins-tab";
 
@@ -70,7 +70,13 @@ export function SinglePluginTab({ plugin }: { plugin: PluginTab }) {
         </CardHeader>
         <CardContent className="flex flex-col gap-4">
           <fieldset disabled={!isEnabled}>
-            <SettingGroup title="Settings" schema={plugin.fields} />
+            <SettingField
+              type="group"
+              config={{
+                name: "Settings",
+                schema: [...plugin.fields],
+              }}
+            />
           </fieldset>
         </CardContent>
         <CardFooter>

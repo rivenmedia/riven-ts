@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { buildSettingsConfigFromZodSchema } from "../_utilities/build-settings-config-from-zod-schema";
-import { SettingGroup } from "../setting-group/setting-group";
+import { SettingField } from "../setting-field/setting-field";
 import { RankingProfileCard } from "./_components/ranking-profile-card";
 import { RankingModelSchema, SettingsSchema } from "./ranking-tab.form-schema";
 
@@ -47,10 +47,12 @@ export function RankingTab({ selectedProfile }: RankingTabProps) {
   return (
     <FormProvider {...form}>
       <div className="space-y-8">
-        <SettingGroup
-          title="Settings"
-          description="General settings for the ranking system."
-          schema={parsedSettingsFields}
+        <SettingField
+          type="group"
+          config={{
+            name: "General",
+            schema: parsedSettingsFields.values().toArray(),
+          }}
         />
         <div>
           <h2 className="text-lg font-semibold">Ranking Profiles</h2>
@@ -79,12 +81,13 @@ export function RankingTab({ selectedProfile }: RankingTabProps) {
         {selectedProfile === "custom" && (
           <>
             {Object.entries(settingCategories).map(([category, fields]) => (
-              <SettingGroup
+              <SettingField
                 key={category}
-                title={category}
-                schema={
-                  new Map(fields.map((field) => [field.config.name, field]))
-                }
+                type="group"
+                config={{
+                  name: category,
+                  schema: fields,
+                }}
               />
             ))}
             <Button disabled={!isDirty} type="submit">

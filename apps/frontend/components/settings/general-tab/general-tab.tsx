@@ -5,7 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { startCase } from "es-toolkit";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { SettingGroup } from "../setting-group/setting-group";
+import { SettingField } from "../setting-field/setting-field";
 import { GeneralTabFormSchema } from "./general-tab.form-schema";
 
 import type { GeneralTabFormValues } from "./general-tab.form-schema";
@@ -25,42 +25,48 @@ export function GeneralTab({ data }: GeneralTabProps) {
   return (
     <FormProvider {...form}>
       <div className="space-y-8">
-        <SettingGroup
-          title="Instance"
-          schema={[
-            {
-              type: "text",
-              config: {
-                label: "Instance Name",
-                name: "instanceName",
+        <SettingField
+          type="group"
+          config={{
+            name: "Instance",
+            schema: [
+              {
+                type: "text",
+                config: {
+                  label: "Instance Name",
+                  name: "instanceName",
+                },
               },
-            },
-            {
-              type: "select",
-              config: {
-                label: "Log Level",
-                name: "logLevel",
-                options: Object.values(LogLevel)
-                  .toReversed()
-                  .map((level) => ({
-                    label: startCase(level),
-                    value: level,
-                  })),
+              {
+                type: "select",
+                config: {
+                  label: "Log Level",
+                  name: "logLevel",
+                  options: Object.values(LogLevel)
+                    .toReversed()
+                    .map((level) => ({
+                      label: startCase(level),
+                      value: level,
+                    })),
+                },
               },
-            },
-          ]}
+            ],
+          }}
         />
-        <SettingGroup
-          title="Notifications"
-          schema={[
-            {
-              type: "boolean",
-              config: {
-                label: "Enable Notifications",
-                name: "enableNotifications",
+        <SettingField
+          type="group"
+          config={{
+            name: "Notifications",
+            schema: [
+              {
+                type: "boolean",
+                config: {
+                  label: "Enable Notifications",
+                  name: "enableNotifications",
+                },
               },
-            },
-          ]}
+            ],
+          }}
         />
         <Button disabled={!isDirty} type="submit">
           Save general settings
