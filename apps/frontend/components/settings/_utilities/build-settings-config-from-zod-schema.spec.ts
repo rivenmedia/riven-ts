@@ -29,6 +29,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   max: Number.MAX_SAFE_INTEGER,
                   min: Number.MIN_SAFE_INTEGER,
+                  valueAsNumber: true,
                 },
                 step: 1,
               },
@@ -60,8 +61,41 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   min: 0,
                   max: 10,
                   required: true,
+                  valueAsNumber: true,
                 },
                 step: 1,
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it("assigns the step value when multipleOf is specified in the schema", () => {
+      const schema = z.int().multipleOf(5).meta({
+        title: "Number Field with Multiple Of",
+        description: "A number field with multipleOf constraint",
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "numberField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "numberField",
+            {
+              type: "number",
+              config: {
+                label: "Number Field with Multiple Of",
+                description: "A number field with multipleOf constraint",
+                name: "numberField",
+                registerOptions: {
+                  required: true,
+                  max: Number.MAX_SAFE_INTEGER,
+                  min: Number.MIN_SAFE_INTEGER,
+                  valueAsNumber: true,
+                },
+                step: 5,
               },
             },
           ],
@@ -90,7 +124,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 label: "Number Field",
                 description: "An optional number field",
                 name: "numberField",
-                registerOptions: { required: false },
+                registerOptions: {
+                  required: false,
+                  valueAsNumber: true,
+                },
                 step: 0.01,
               },
             },

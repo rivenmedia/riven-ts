@@ -3,99 +3,147 @@ import { z } from "zod";
 /**
  * @public
  */
-export const ResolutionConfigSchema = z.object({
-  /**
-   * @default false
-   */
-  r2160p: z.boolean().default(false),
+export const ResolutionConfigSchema = z
+  .object({
+    /**
+     * @default false
+     */
+    r2160p: z.boolean().meta({ title: "2160p" }).default(false),
 
-  /**
-   * @default true
-   */
-  r1080p: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    r1080p: z.boolean().meta({ title: "1080p" }).default(true),
 
-  /**
-   * @default true
-   */
-  r720p: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    r720p: z.boolean().meta({ title: "720p" }).default(true),
 
-  /**
-   * @default false
-   */
-  r480p: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    r480p: z.boolean().meta({ title: "480p" }).default(false),
 
-  /**
-   * @default false
-   */
-  r360p: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    r360p: z.boolean().meta({ title: "360p" }).default(false),
 
-  /**
-   * @default true
-   */
-  unknown: z.boolean().default(true),
-});
+    /**
+     * @default true
+     */
+    unknown: z.boolean().meta({ title: "Unknown" }).default(true),
+  })
+  .meta({
+    title: "Resolutions",
+    description: "Enable / disable specific resolutions",
+  });
 
 export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
 /**
  * @public
  */
-export const OptionsConfigSchema = z.object({
-  /**
-   * @default true
-   */
-  removeAllTrash: z.boolean().default(true),
+export const OptionsConfigSchema = z
+  .object({
+    /**
+     * @default true
+     */
+    removeAllTrash: z
+      .boolean()
+      .meta({ title: "Remove all trash" })
+      .default(true),
 
-  /**
-   * @default -10000
-   */
-  removeRanksUnder: z.number().default(-10_000),
+    /**
+     * @default -10000
+     */
+    removeRanksUnder: z
+      .int()
+      .multipleOf(10)
+      .meta({ title: "Remove ranks under" })
+      .default(-10_000),
 
-  /**
-   * @default false
-   */
-  removeUnknownLanguages: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    removeUnknownLanguages: z
+      .boolean()
+      .meta({ title: "Remove unknown languages" })
+      .default(false),
 
-  /**
-   * @default true
-   */
-  allowEnglishInLanguages: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    allowEnglishInLanguages: z
+      .boolean()
+      .meta({ title: "Allow English in languages" })
+      .default(true),
 
-  /**
-   * @default true
-   */
-  removeAdultContent: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    removeAdultContent: z
+      .boolean()
+      .meta({ title: "Remove adult content" })
+      .default(true),
 
-  /**
-   * @default 0.85
-   */
-  titleSimilarity: z.number().min(0).max(1).default(0.85),
-});
+    /**
+     * @default 0.85
+     */
+    titleSimilarity: z
+      .number()
+      .min(0)
+      .max(1)
+      .meta({ title: "Title similarity" })
+      .default(0.85),
+  })
+  .meta({
+    title: "Options",
+    description: "Configure various options for torrent ranking",
+  });
 
 /**
  * @public
  */
-export const LanguagesConfigSchema = z.object({
-  /**
-   * @default []
-   */
-  required: z.array(z.string()).default([]),
+export const LanguagesConfigSchema = z
+  .object({
+    /**
+     * @default []
+     */
+    required: z
+      .array(z.string())
+      .meta({ title: "Required languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  allowed: z.array(z.string()).default([]),
+    /**
+     * @default []
+     */
+    allowed: z
+      .array(z.string())
+      .meta({ title: "Allowed languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  exclude: z.array(z.string()).default([]),
+    /**
+     * @default []
+     */
+    exclude: z
+      .array(z.string())
+      .meta({ title: "Excluded languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  preferred: z.array(z.string()).default([]),
-});
+    /**
+     * @default []
+     */
+    preferred: z
+      .array(z.string())
+      .meta({ title: "Preferred languages" })
+      .default([]),
+  })
+  .meta({
+    title: "Languages",
+    description: "Configure language preferences for torrents",
+  });
 
 function compilePattern(pattern: string): RegExp {
   // Case-sensitive
@@ -112,9 +160,12 @@ function compilePatterns(patterns: string[]): RegExp[] {
 }
 
 export const SettingsSchema = z.object({
-  require: z.array(z.string()).default([]),
-  exclude: z.array(z.string()).default([]),
-  preferred: z.array(z.string()).default([]),
+  require: z.array(z.string()).meta({ title: "Required patterns" }).default([]),
+  exclude: z.array(z.string()).meta({ title: "Excluded patterns" }).default([]),
+  preferred: z
+    .array(z.string())
+    .meta({ title: "Preferred patterns" })
+    .default([]),
   resolutions: ResolutionConfigSchema.default(() =>
     ResolutionConfigSchema.parse({}),
   ),

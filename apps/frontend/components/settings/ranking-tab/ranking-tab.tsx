@@ -1,102 +1,30 @@
-import { Button } from "@/components/_ui/button";
-import { RankingModelSchemaMetadata } from "@repo/util-rank-torrent-name";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/_ui/tabs";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
-
-import { buildSettingsConfigFromZodSchema } from "../_utilities/build-settings-config-from-zod-schema";
-import { SettingField } from "../setting-field/setting-field";
-import { RankingProfileCard } from "./_components/ranking-profile-card";
-import { RankingModelSchema, SettingsSchema } from "./ranking-tab.form-schema";
-
-import type { SettingFieldProps } from "../setting-field/setting-field";
-import type { RankingModel } from "./ranking-tab.form-schema";
+import { RankingProfilesTab } from "./_components/ranking-profiles-tab";
+import { RankingSettingsTab } from "./_components/ranking-settings-tab";
 
 export interface RankingTabProps {
   selectedProfile: string;
 }
 
 export function RankingTab({ selectedProfile }: RankingTabProps) {
-  const parsedSettingsFields = buildSettingsConfigFromZodSchema(SettingsSchema);
-
-  const defaultValues: Partial<RankingModel> = {};
-  const settingCategories: Record<string, SettingFieldProps[]> = {};
-
-  for (const [key, field] of Object.entries(RankingModelSchema.shape)) {
-    const meta = RankingModelSchemaMetadata.parse(field.meta());
-
-    settingCategories[meta.category] ??= [];
-    settingCategories[meta.category]?.push({
-      type: "custom_rank",
-      config: {
-        label: key,
-        name: key,
-      },
-    });
-
-    defaultValues[key as keyof RankingModel] = null;
-  }
-
-  const form = useForm({
-    resolver: zodResolver(RankingModelSchema),
-    defaultValues,
-    progressive: true,
-  });
-
-  const { isDirty } = form.formState;
-
   return (
-    <FormProvider {...form}>
-      <div className="space-y-8">
-        <SettingField
-          type="group"
-          config={{
-            name: "General",
-            schema: parsedSettingsFields.values().toArray(),
-          }}
-        />
-        <div>
-          <h2 className="text-lg font-semibold">Ranking Profiles</h2>
-          <p className="text-sm text-muted-foreground">
-            Choose a ranking profile that best suits your needs, or customise
-            your own settings if needed.
-          </p>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-          <RankingProfileCard
-            title="Balanced"
-            description="A good mix of quality and size."
-            isSelected={selectedProfile === "balanced"}
-          />
-          <RankingProfileCard
-            title="Best Quality"
-            description="Highest resolution and bitrate."
-            isSelected={selectedProfile === "best-quality"}
-          />
-          <RankingProfileCard
-            title="Custom"
-            description="Customise your ranking settings."
-            isSelected={selectedProfile === "custom"}
-          />
-        </div>
-        {selectedProfile === "custom" && (
-          <>
-            {Object.entries(settingCategories).map(([category, fields]) => (
-              <SettingField
-                key={category}
-                type="group"
-                config={{
-                  name: category,
-                  schema: fields,
-                }}
-              />
-            ))}
-            <Button disabled={!isDirty} type="submit">
-              Save ranking settings
-            </Button>
-          </>
-        )}
-      </div>
-    </FormProvider>
+    <Tabs defaultValue="ranking-profiles" className="space-y-4">
+      <TabsList variant="line">
+        <TabsTrigger value="ranking-profiles">Ranking Profiles</TabsTrigger>
+        <TabsTrigger value="ranking-settings">Ranking Settings</TabsTrigger>
+      </TabsList>
+      <TabsContent value="ranking-profiles">
+        <RankingProfilesTab selectedProfile={selectedProfile} />
+      </TabsContent>
+      <TabsContent value="ranking-settings">
+        <RankingSettingsTab />
+      </TabsContent>
+    </Tabs>
   );
 }

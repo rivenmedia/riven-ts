@@ -100,9 +100,13 @@ export function buildSettingsConfigFromZodSchema(
     case "number": {
       const commonConfig = buildCommonConfig(schema, key);
 
-      const { minValue, maxValue, format } = schema as ZodNumber;
+      const { minValue, maxValue, format, _zod } = schema as ZodNumber;
       const hasMinConstraint = minValue != null && Number.isFinite(minValue);
       const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
+
+      const { multipleOf } = _zod.bag;
+      const hasStepConstraint =
+        typeof multipleOf === "number" && Number.isFinite(multipleOf);
 
       const isInt = format === "safeint";
 
@@ -114,8 +118,9 @@ export function buildSettingsConfigFromZodSchema(
             ...(hasMinConstraint ? { min: minValue } : {}),
             ...(hasMaxConstraint ? { max: maxValue } : {}),
             required,
+            valueAsNumber: true,
           },
-          step: isInt ? 1 : 0.01,
+          step: hasStepConstraint ? multipleOf : isInt ? 1 : 0.01,
         },
       });
     }
