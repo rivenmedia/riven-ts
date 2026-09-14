@@ -2,7 +2,7 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
 import { HttpResponse, http } from "msw";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 
 import { Store } from "../schemas/store.schema.ts";
 import { storeExpiredLinkStatusCodes } from "../utilities/store-expired-link-status-codes.ts";
@@ -146,4 +146,54 @@ it("does not classify a 403 response as expired for non-premiumize stores", asyn
       settings,
     }),
   ).rejects.toThrow(/status code 403/iu);
+});
+
+it("wraps a health check that does not respond in time with a clear error", async ({
+  dataSourceMap,
+  server,
+  plugin,
+  settings,
+  logger,
+}) => {
+  // The CDN never responds; the request is only settled by the abort signal below.
+  server.use(
+    http.head(
+      link,
+      async () =>
+        new Promise<never>(() => {
+          /* never resolves */
+        }),
+    ),
+  );
+
+  class TimeoutError extends Error {
+    public override name = "TimeoutError";
+  }
+
+  vi.spyOn(AbortSignal, "timeout").mockReturnValue(
+    AbortSignal.abort(
+      new TimeoutError("The operation was aborted due to timeout"),
+    ),
+  );
+
+  const streamLinkHealthCheckRequestedHook =
+    plugin.hooks["riven.media-item.stream-link.health-check.requested"];
+
+  expect.assert(streamLinkHealthCheckRequestedHook);
+
+  const item = new MediaEntry();
+
+  item.provider = "realdebrid";
+
+  await expect(
+    streamLinkHealthCheckRequestedHook({
+      dataSources: dataSourceMap,
+      event: {
+        item,
+        link,
+      },
+      logger,
+      settings,
+    }),
+  ).rejects.toThrow(/did not respond within 15s/iu);
 });
