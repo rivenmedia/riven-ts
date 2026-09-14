@@ -10,6 +10,9 @@ import { ItemDetailStreamsScreen } from "./pages/item-detail/screens/streams.tsx
 import { ItemDetailSubtitlesScreen } from "./pages/item-detail/screens/subtitles.tsx";
 import { LibraryScreenLayout } from "./pages/library/library.layout.tsx";
 import { LibraryScreenIndexScreen } from "./pages/library/screens/index.tsx";
+import { SearchScreenIndexScreen } from "./pages/search/screens/index.tsx";
+import { SearchResultDetailScreen } from "./pages/search/screens/result-detail.tsx";
+import { SearchScreenLayout } from "./pages/search/search.layout.tsx";
 
 export function Routes() {
   return (
@@ -17,6 +20,10 @@ export function Routes() {
       <Route path="library" element={<LibraryScreenLayout />}>
         <Route index element={<LibraryScreenIndexScreen />} />
         <Route path="type/:type" element={<LibraryScreenIndexScreen />} />
+      </Route>
+      <Route path="search" element={<SearchScreenLayout />}>
+        <Route index element={<SearchScreenIndexScreen />} />
+        <Route path="result" element={<SearchResultDetailScreen />} />
       </Route>
       <Route path="item/:id" element={<ItemDetailPageLayout />}>
         <Route index element={<ItemDetailOverviewTab />} />

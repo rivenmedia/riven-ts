@@ -9,6 +9,7 @@ import { logger } from "../../../../../../../utilities/logger/logger.ts";
 import { settings } from "../../../../../../../utilities/settings.ts";
 import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
+import { shouldSkipTorrent } from "./utilities/should-skip-torrent.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
@@ -28,6 +29,10 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
     const { title: itemTitle, aliases } =
       item instanceof ShowLikeMediaItem ? await item.getShow() : item;
 
+    const itemRequest = await item.itemRequest.load();
+
+    const requestPreferences = itemRequest?.preferences ?? null;
+
     const rankedResults: RankedResult[] = [];
 
     for (const [hash, rawTitle] of Object.entries(job.data.streams)) {
@@ -46,6 +51,20 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
         if (item.isAnime && settings.dubbedAnimeOnly && !parsedData.dubbed) {
           throw new SkippedTorrentError(
             "Skipping non-dubbed anime torrent",
+            itemTitle,
+            rawTitle,
+            hash,
+          );
+        }
+
+        const preferenceSkipReason = shouldSkipTorrent(
+          parsedData,
+          requestPreferences,
+        );
+
+        if (preferenceSkipReason) {
+          throw new SkippedTorrentError(
+            `Skipping torrent: ${preferenceSkipReason}`,
             itemTitle,
             rawTitle,
             hash,

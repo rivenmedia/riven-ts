@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
 import { ScrollArea } from "../scroll-area/scroll-area.tsx";
-import { TabBar } from "../tab-bar/tab-bar.tsx";
+import { TabBar, getActiveTabPath } from "../tab-bar/tab-bar.tsx";
 import { PageFooter } from "./components/page-footer.tsx";
 import { PageHeader } from "./components/page-header.tsx";
 
@@ -36,6 +36,8 @@ export function PageWrapper({
     tabs ? Object.entries(tabs).filter(([, { isHidden }]) => !isHidden) : [],
   );
 
+  const activeTabPath = getActiveTabPath(visibleTabs, pathname);
+
   return (
     <Box flexDirection="column" flexGrow={1}>
       <PageHeader title={header.title}>{header.content}</PageHeader>
@@ -53,6 +55,10 @@ export function PageWrapper({
             onChange={(href) => {
               if (!visibleTabs[href]) {
                 throw new Error(`Could not find tab with name "${href}"`);
+              }
+
+              if (activeTabPath === href) {
+                return;
               }
 
               void navigate(href, { replace: true });

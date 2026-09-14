@@ -58,6 +58,7 @@ export async function persistRequestedShow(
       tvdbId: item.tvdbId ?? null,
       tmdbId: item.tmdbId ?? null,
       externalRequestId: item.externalRequestId ?? null,
+      preferences: item.preferences ?? null,
     });
 
   itemRequest.seasons =
