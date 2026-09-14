@@ -1,7 +1,6 @@
 import { cn } from "cn";
 import { Check, Mountain } from "lucide-react";
 import Image from "next/image";
-import { useState } from "react";
 
 interface PortraitCardProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
@@ -11,7 +10,7 @@ interface PortraitCardProps extends Pick<
   subtitle?: string | null;
   image: string | null;
   isSelectable?: boolean;
-  defaultSelected?: boolean;
+  isSelected?: boolean;
   onSelectToggle?: () => void;
   topRight?: React.ReactNode;
   showContent?: boolean;
@@ -21,20 +20,13 @@ export function PortraitCard({
   image,
   title,
   className,
+  isSelected,
   isSelectable = false,
-  defaultSelected = false,
   onSelectToggle,
   showContent = true,
   subtitle,
   topRight,
 }: PortraitCardProps) {
-  const [isSelected, setIsSelected] = useState(defaultSelected);
-
-  function handleSelectToggle() {
-    setIsSelected((prev) => !prev);
-    onSelectToggle?.();
-  }
-
   function renderImage() {
     if (!image) {
       return (
@@ -69,7 +61,7 @@ export function PortraitCard({
           event.preventDefault();
           event.stopPropagation();
 
-          handleSelectToggle();
+          onSelectToggle?.();
         }}
         className={cn(
           "absolute top-3 left-3 z-30 flex h-6 w-6 items-center justify-center rounded-full border transition-all duration-200",
@@ -81,6 +73,7 @@ export function PortraitCard({
         // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
         role="checkbox"
         aria-checked={isSelected}
+        type="button"
       >
         {isSelected && <Check className="h-3 w-3" strokeWidth={3} />}
       </button>
@@ -114,7 +107,7 @@ export function PortraitCard({
   return (
     <div
       className={cn(
-        "group bg-card ring-border hover:ring-primary/30 relative aspect-2/3 w-full overflow-hidden rounded-xl shadow-sm ring-1 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50",
+        "text-left group bg-card ring-border hover:ring-primary/30 relative aspect-2/3 w-full overflow-hidden rounded-xl shadow-sm ring-1 transition-all duration-500 hover:shadow-2xl hover:shadow-black/50",
         isSelected &&
           "ring-primary shadow-[0_0_30px_rgba(var(--primary),0.3)] ring-2",
         className,

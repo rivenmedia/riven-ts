@@ -1,12 +1,11 @@
 import { cn } from "cn";
-import Link from "next/link";
 import { useMemo } from "react";
 
 import { Badge } from "../_ui/badge";
 import { PortraitCard } from "../portrait-card/portrait-card";
+import { useCardSelection } from "../providers/card-selection-provider";
 
 import type { MediaItem } from "@/app/_types/__generated__/graphql";
-import type { ComponentProps } from "react";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
@@ -28,6 +27,8 @@ export function ListItem({
   mediaItem,
   isSelectable = false,
 }: ListItemProps) {
+  const { selectedItems, toggleItemSelection } = useCardSelection();
+
   // Normalize type for different indexers
   const normalisedType = useMemo(() => {
     if (
@@ -78,10 +79,10 @@ export function ListItem({
         subtitle={subtitle}
         image={mediaItem.posterPath ?? null}
         isSelectable={isSelectable}
-        // isSelected={
-        //   isSelectable && !!data.riven_id && selectStore?.has(data.riven_id)
-        // }
-        // onSelectToggle={() => selectStore?.toggle(data.riven_id)}
+        isSelected={selectedItems.has(mediaItem.id)}
+        onSelectToggle={() => {
+          toggleItemSelection(mediaItem.id);
+        }}
         topRight={
           badge && (
             <Badge
@@ -100,7 +101,12 @@ export function ListItem({
   }
 
   return (
-    <button aria-disabled="true" tabIndex={-1} className={containerClasses}>
+    <button
+      aria-disabled="true"
+      tabIndex={-1}
+      className={containerClasses}
+      type="button"
+    >
       {renderCardContent()}
     </button>
   );

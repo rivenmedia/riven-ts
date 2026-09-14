@@ -1,89 +1,37 @@
-import { ProtectedLayoutWrapper } from "@/.storybook/decorators/protected-layout-wrapper";
 import preview from "@/.storybook/preview";
 
 import { LibraryPage } from "./page.client";
 
-import type { UUID } from "node:crypto";
+import type { MediaItem } from "@/app/_types/__generated__/graphql";
 
 const meta = preview.meta({
   title: "Pages / Library",
   component: LibraryPage,
-  tags: ["!autodocs"],
-  args: {
-    items: [],
-    totalItems: 0,
-  },
-  argTypes: {
-    items: {
-      control: {
-        disable: true,
-      },
-    },
-  },
-  parameters: {
-    layout: "fullscreen",
-    nextjs: {
-      navigation: {
-        pathname: "/library",
-      },
-    },
-  },
-  decorators: [ProtectedLayoutWrapper],
 });
 
 export const Default = meta.story({
   args: {
+    totalItems: 10,
     items: [
       {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix",
-        posterPath: "https://picsum.photos/200/300?cache=1",
+        id: "1",
         type: "movie",
+        title: "John Wick: Chapter 4",
+        year: 2023,
       },
       {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix Reloaded",
-        posterPath: "https://picsum.photos/200/300?cache=2",
-        type: "movie",
+        id: "2",
+        type: "series",
+        title: "Arcane",
+        year: 2024,
       },
-      {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix Revolutions",
-        posterPath: "https://picsum.photos/200/300?cache=3",
-        type: "movie",
-      },
-      {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix Resurrections",
-        posterPath: "https://picsum.photos/200/300?cache=4",
-        type: "movie",
-      },
-      {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix Revisited",
-        posterPath: "https://picsum.photos/200/300?cache=5",
-        type: "movie",
-      },
-      {
-        __typename: "Movie",
-        id: globalThis.crypto.randomUUID() as UUID,
-        title: "The Matrix Revisited",
-        posterPath: "https://picsum.photos/200/300?cache=6",
-        type: "movie",
-      },
-    ],
-    totalItems: 6,
+    ] as MediaItem[],
   },
 });
 
-export const NoItemsFound = meta.story({
+export const NoItems = meta.story({
   args: {
+    totalItems: 0,
     items: [],
-    totalItems: 10_000,
   },
 });

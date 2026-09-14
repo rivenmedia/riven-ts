@@ -1,6 +1,6 @@
 import { cn } from "cn";
 import { X, LoaderCircle } from "lucide-react";
-import { ViewTransition } from "react";
+import { startTransition, ViewTransition } from "react";
 
 import { Button } from "../_ui/button";
 
@@ -65,7 +65,11 @@ export function SelectionActionBar({
             variant="ghost"
             size="icon"
             className="h-9 w-9 rounded-xl hover:bg-white/10"
-            onClick={onClear}
+            onClick={() => {
+              startTransition(() => {
+                onClear();
+              });
+            }}
             type="button"
           >
             <X className="h-4 w-4" />
