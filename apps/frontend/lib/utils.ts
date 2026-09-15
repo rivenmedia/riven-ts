@@ -16,5 +16,5 @@ export function getInitials(value: string | null | undefined) {
     wordList.at(-1),
   ];
 
-  return (firstInitial + lastInitial).toUpperCase();
+  return `${firstInitial}${lastInitial}`.toUpperCase();
 }

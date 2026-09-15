@@ -21,8 +21,8 @@ import { ListItem } from "@/components/list-item/list-item";
 import { PageShell } from "@/components/page-shell/page-shell";
 import { CardSelectionProvider } from "@/components/providers/card-selection-provider";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
+import { startCase } from "es-toolkit";
 import { ListChecks, Loader2, Search, Trash } from "lucide-react";
 import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
@@ -83,16 +83,13 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                 <div className="mx-1 hidden h-6 w-px bg-white/10 md:block" />
                 <div className="flex shrink gap-2">
                   <Select {...register("type")} defaultValue="all">
-                    <SelectTrigger className="w-25 space-y-0">
+                    <SelectTrigger className="w-30 space-y-0">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="all">All types</SelectItem>
-                      {MediaItemType.options.map((type) => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
+                      <SelectItem value="movies">Movies</SelectItem>
+                      <SelectItem value="tv">TV Shows</SelectItem>
                     </SelectContent>
                   </Select>
                   <Select {...register("state")} defaultValue="all">
@@ -103,7 +100,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                       <SelectItem value="all">All states</SelectItem>
                       {MediaItemState.options.map((state) => (
                         <SelectItem key={state} value={state}>
-                          {state}
+                          {startCase(state)}
                         </SelectItem>
                       ))}
                     </SelectContent>
