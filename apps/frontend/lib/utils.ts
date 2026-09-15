@@ -1,12 +1,4 @@
-import { clsx } from "clsx";
 import { words } from "es-toolkit";
-import { twMerge } from "tailwind-merge";
-
-import type { ClassValue } from "clsx";
-
-export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs));
-}
 
 export function getInitials(value: string | null | undefined) {
   const wordList = words(value ?? "");
