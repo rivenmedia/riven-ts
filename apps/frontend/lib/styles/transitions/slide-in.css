@@ -1,5 +1,5 @@
 ::view-transition-new(.slide-in) {
-  animation: slide-in 0.4s ease-out forwards;
+  animation: slide-in 0.3s easeOutCubic forwards;
 }
 
 @keyframes slide-in {
