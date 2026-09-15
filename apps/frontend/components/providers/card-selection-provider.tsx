@@ -14,6 +14,7 @@ import type { PropsWithChildren } from "react";
 interface CardSelectionContextValue {
   selectedItems: Set<string>;
   toggleItemSelection: (id: string) => void;
+  clearSelection: () => void;
 }
 
 const CardSelectionContext = createContext<
@@ -46,10 +47,15 @@ export function CardSelectionProvider({
     });
   }
 
+  function clearSelection() {
+    setSelectedItems(new Set());
+  }
+
   const value = useMemo<CardSelectionContextValue>(
     () => ({
       selectedItems,
       toggleItemSelection,
+      clearSelection,
     }),
     [selectedItems],
   );
@@ -63,7 +69,7 @@ export function CardSelectionProvider({
           actions={actions}
           // disabled={actionInProgress}
           onClear={() => {
-            setSelectedItems(new Set());
+            clearSelection();
           }}
         />
       )}

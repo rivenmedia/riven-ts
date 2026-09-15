@@ -11,7 +11,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
   args: {
-    totalItems: 10,
+    totalItems: 2,
     items: [
       {
         id: "1",
