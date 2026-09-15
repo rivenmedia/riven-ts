@@ -27,7 +27,7 @@ export function SelectionActionBar({
   disabled,
 }: SelectionActionBarProps) {
   return (
-    <ViewTransition enter="slide-in" exit="slide-out">
+    <ViewTransition enter="slide-in" exit="slide-out" default="none">
       <div className="fixed bottom-8 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-3xl border border-white/10 bg-zinc-900/80 p-2 pl-4 shadow-2xl backdrop-blur-xl">
         <div className="mr-4 flex items-center gap-3">
           <div className="bg-primary/20 text-primary flex h-8 w-8 items-center justify-center rounded-xl text-sm font-bold">
