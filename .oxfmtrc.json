@@ -29,6 +29,11 @@
     "*.hbs",
     "**/docker-data",
     "**/.source",
+    "**/out",
+    "**/dist",
+    "**/playwright-report",
+    "**/storybook-static",
+    "**/test-results",
     "**/.pnpm_patches"
   ]
 }
