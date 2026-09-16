@@ -41,11 +41,12 @@ export function withLogContext<T>(
 }
 
 export function getLogContext(): LogContext {
-  const context = logContext.getStore();
-
-  if (!context) {
-    throw new Error("No log context available");
-  }
-
-  return context;
+  return (
+    logContext.getStore() ?? {
+      "riven.log.source": "unknown",
+      "riven.session.id": SessionID.parse(
+        getEnvironmentData("riven.session.id"),
+      ),
+    }
+  );
 }

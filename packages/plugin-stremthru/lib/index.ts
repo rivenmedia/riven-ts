@@ -10,6 +10,7 @@ import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
 import { StremThruSettings } from "./stremthru-settings.schema.ts";
+import { storeExpiredLinkStatusCodes } from "./utilities/store-expired-link-status-codes.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
@@ -101,10 +102,6 @@ export const plugin: RivenPlugin = {
       event,
       settings,
     }) => {
-      if (!event.item.downloadUrl) {
-        throw new Error("No download URL available for this media item.");
-      }
-
       const parsedStore = Store.safeParse(event.item.provider);
 
       if (!parsedStore.success) {
@@ -126,7 +123,7 @@ export const plugin: RivenPlugin = {
       }
 
       try {
-        const link = await api.generateLink(event.item.downloadUrl, store);
+        const link = await api.getStreamLink(event.item, store);
 
         return {
           success: true,
@@ -169,11 +166,9 @@ export const plugin: RivenPlugin = {
         StatusCodes.UNAVAILABLE_FOR_LEGAL_REASONS,
       ]);
 
-      const expiredStatusCodes = new Set<StatusCodes>();
-
-      if (item.provider === "torbox") {
-        expiredStatusCodes.add(StatusCodes.BAD_REQUEST);
-      }
+      const expiredStatusCodes = storeExpiredLinkStatusCodes(
+        item.provider as Store,
+      );
 
       const state =
         (deadStatusCodes.has(response.status) ? "dead" : null) ??

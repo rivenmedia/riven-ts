@@ -30,6 +30,7 @@ export const RequestStreamLinkFlow = createFlowSchema("request-stream-link", {
       .default("request-stream-link"),
     linkData: StreamLinkRequestedSuccessResponse.optional(),
     healthCheckJobId: z.string().optional(),
+    healthCheckAttempts: z.int().nonnegative().default(0),
     streamLinkRequestedJobId: z.string().optional(),
   }),
   output: z.url(),

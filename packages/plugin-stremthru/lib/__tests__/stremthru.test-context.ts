@@ -10,5 +10,6 @@ export const it: typeof pluginTestContext = pluginTestContext
     "settings",
     createMockPluginSettings(StremThruSettings, {
       realdebridApiKey: "test-realdebrid-api-key",
+      premiumizeApiKey: "test-premiumize-api-key",
     }),
   );

@@ -79,7 +79,9 @@
     },
     "tui": {
       "dependsOn": ["@repo/riven-tui#build"],
-      "passThroughEnv": ["RIVEN_TUI_SETTING__*"]
+      "passThroughEnv": ["RIVEN_TUI_SETTING__*"],
+      "cache": false,
+      "interactive": true
     }
   }
 }
