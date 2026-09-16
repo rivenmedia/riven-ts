@@ -15,8 +15,8 @@ import { createScopedLogger } from "@/lib/logger";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { useEffect } from "react";
-import { Controller } from "react-hook-form";
+import { useEffect, useId } from "react";
+import { toast } from "sonner";
 
 import { loginUser } from "../_actions/login.action";
 import { OAuthProviders } from "../_components/oauth-providers";
@@ -32,13 +32,13 @@ function handleSuccessfulSignin() {
 
 interface LoginFormProps {
   authProviders: AuthProvider[];
-  isCredentialProviderEnabled: boolean;
+  isCredentialLoginEnabled: boolean;
   lastLoginMethod: string | null;
 }
 
 export function LoginForm({
   authProviders,
-  isCredentialProviderEnabled,
+  isCredentialLoginEnabled,
   lastLoginMethod,
 }: LoginFormProps) {
   useEffect(() => {
@@ -68,7 +68,7 @@ export function LoginForm({
   }, []);
 
   const { form, handleSubmitWithAction } = useHookFormAction(
-    loginUser.bind(null, { isCredentialProviderEnabled }),
+    loginUser.bind(null, { isCredentialLoginEnabled }),
     zodResolver(loginSchema),
     {
       formProps: {
@@ -76,11 +76,25 @@ export function LoginForm({
           password: "",
           username: "",
         },
+        progressive: true,
+      },
+      actionProps: {
+        onNavigation({ navigationKind }) {
+          if (navigationKind === "redirect") {
+            toast.success("Login successful");
+          }
+        },
+        onError() {
+          toast.error("An error occurred during login");
+        },
       },
     },
   );
 
-  const { control } = form;
+  const { errors } = form.formState;
+
+  const usernameInputId = useId();
+  const passwordInputId = useId();
 
   return (
     <Card className="mx-auto w-full">
@@ -91,47 +105,36 @@ export function LoginForm({
         </CardDescription>
       </CardHeader>
       <CardContent>
-        {isCredentialProviderEnabled && (
+        {isCredentialLoginEnabled && (
           <>
-            <form onSubmit={(event) => void handleSubmitWithAction(event)}>
-              <Controller
-                control={control}
-                name="username"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                    <Input
-                      {...field}
-                      id={field.name}
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="username webauthn"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Controller
-                control={control}
-                name="password"
-                render={({ field, fieldState }) => (
-                  <Field data-invalid={fieldState.invalid}>
-                    <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                    <Input
-                      {...field}
-                      id={field.name}
-                      aria-invalid={fieldState.invalid}
-                      autoComplete="current-password webauthn"
-                      type="password"
-                    />
-                    {fieldState.invalid && (
-                      <FieldError errors={[fieldState.error]} />
-                    )}
-                  </Field>
-                )}
-              />
-              <Button className="mt-4 w-full">Submit</Button>
+            <form
+              className="space-y-2"
+              onSubmit={(event) => void handleSubmitWithAction(event)}
+            >
+              <Field data-invalid={Boolean(errors.username)}>
+                <FieldLabel htmlFor={usernameInputId}>Username</FieldLabel>
+                <Input
+                  {...form.register("username", { required: true })}
+                  id={usernameInputId}
+                  aria-invalid={Boolean(errors.username)}
+                  autoComplete="username webauthn"
+                />
+                {errors.username && <FieldError errors={[errors.username]} />}
+              </Field>
+              <Field data-invalid={Boolean(errors.password)}>
+                <FieldLabel htmlFor={passwordInputId}>Password</FieldLabel>
+                <Input
+                  {...form.register("password", { required: true })}
+                  id={passwordInputId}
+                  aria-invalid={Boolean(errors.password)}
+                  autoComplete="current-password webauthn"
+                  type="password"
+                />
+                {errors.password && <FieldError errors={[errors.password]} />}
+              </Field>
+              <Button className="mt-2 w-full" type="submit">
+                Submit
+              </Button>
             </form>
             <div className="relative my-4">
               <div className="absolute inset-0 flex items-center">

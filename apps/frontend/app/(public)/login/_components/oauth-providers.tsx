@@ -94,7 +94,7 @@ export function OAuthProviders({
     setIsPasskeyLoading(true);
 
     try {
-      await authClient.signIn.passkey({
+      const result = await authClient.signIn.passkey({
         fetchOptions: {
           onSuccess: onSignIn,
           onError(context) {

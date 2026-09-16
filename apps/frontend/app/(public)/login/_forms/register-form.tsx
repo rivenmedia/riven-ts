@@ -13,12 +13,11 @@ import { Input } from "@/components/_ui/input";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { Controller } from "react-hook-form";
+import { useId } from "react";
 import { toast } from "sonner";
 
 import { registerUser } from "../_actions/register.action";
 import { registerSchema } from "../_form-schemas/register.schema";
-import { loginLogger } from "../_utils/logger";
 
 interface RegisterFormProps {
   isSignupEnabled: boolean;
@@ -46,16 +45,20 @@ export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
             toast.success("Registration successful");
           }
         },
-        onError(args) {
-          loginLogger.error("Registration error:", args.error.serverError);
-
-          toast.error(
-            args.error.serverError ?? "An error occurred during registration",
-          );
+        onError() {
+          toast.error("An error occurred during registration");
         },
       },
     },
   );
+
+  const { errors } = form.formState;
+
+  const usernameInputId = useId();
+  const emailInputId = useId();
+  const imageInputId = useId();
+  const passwordInputId = useId();
+  const confirmPasswordInputId = useId();
 
   return (
     <Card className="mx-auto w-full">
@@ -66,96 +69,63 @@ export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={(event) => void handleSubmitWithAction(event)}>
-          <Controller
-            control={form.control}
-            name="username"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Username</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
+        <form
+          className="space-y-2"
+          onSubmit={(event) => void handleSubmitWithAction(event)}
+        >
+          <Field data-invalid={Boolean(errors.username)}>
+            <FieldLabel htmlFor={usernameInputId}>Username</FieldLabel>
+            <Input
+              {...form.register("username", { required: true })}
+              id={usernameInputId}
+              aria-invalid={Boolean(errors.username)}
+            />
+            {errors.username && <FieldError errors={[errors.username]} />}
+          </Field>
+          <Field data-invalid={Boolean(errors.email)}>
+            <FieldLabel htmlFor={emailInputId}>Email</FieldLabel>
+            <Input
+              {...form.register("email", { required: true })}
+              id={emailInputId}
+              aria-invalid={Boolean(errors.email)}
+              type="email"
+            />
+            {errors.email && <FieldError errors={[errors.email]} />}
+          </Field>
+          <Field data-invalid={Boolean(errors.image)}>
+            <FieldLabel htmlFor={imageInputId}>Image</FieldLabel>
+            <Input
+              {...form.register("image")}
+              id={imageInputId}
+              aria-invalid={Boolean(errors.image)}
+            />
+            {errors.image && <FieldError errors={[errors.image]} />}
+          </Field>
+          <Field data-invalid={Boolean(errors.password)}>
+            <FieldLabel htmlFor={passwordInputId}>Password</FieldLabel>
+            <Input
+              {...form.register("password", { required: true })}
+              id={passwordInputId}
+              aria-invalid={Boolean(errors.password)}
+              type="password"
+            />
+            {errors.password && <FieldError errors={[errors.password]} />}
+          </Field>
+          <Field data-invalid={Boolean(errors.confirmPassword)}>
+            <FieldLabel htmlFor={confirmPasswordInputId}>
+              Confirm Password
+            </FieldLabel>
+            <Input
+              {...form.register("confirmPassword", { required: true })}
+              id={confirmPasswordInputId}
+              aria-invalid={Boolean(errors.confirmPassword)}
+              type="password"
+            />
+            {errors.confirmPassword && (
+              <FieldError errors={[errors.confirmPassword]} />
             )}
-          />
-          <Controller
-            control={form.control}
-            name="email"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Email</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                  type="email"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="image"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Image</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="password"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Password</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                  type="password"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Controller
-            control={form.control}
-            name="confirmPassword"
-            render={({ field, fieldState }) => (
-              <Field data-invalid={fieldState.invalid}>
-                <FieldLabel htmlFor={field.name}>Confirm Password</FieldLabel>
-                <Input
-                  {...field}
-                  id={field.name}
-                  aria-invalid={fieldState.invalid}
-                  type="password"
-                />
-                {fieldState.invalid && (
-                  <FieldError errors={[fieldState.error]} />
-                )}
-              </Field>
-            )}
-          />
-          <Button type="submit" className="mt-4">
+          </Field>
+          <Button type="submit" className="mt-2">
             Submit
           </Button>
         </form>

@@ -5,7 +5,6 @@ import {
   TabsTrigger,
 } from "@/components/_ui/tabs";
 import { authClient } from "@/lib/auth/client";
-import { query } from "@/lib/graphql/client";
 
 import { Mountain } from "lucide-react";
 import Image from "next/image";
@@ -13,29 +12,24 @@ import Link from "next/link";
 
 import { LoginForm } from "./_forms/login-form";
 import { RegisterForm } from "./_forms/register-form";
-import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query";
+
+import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
 interface TabData {
   label: string;
   component: React.ReactNode;
 }
 
-export default async function LoginPage() {
-  const { data } = await query({
-    query: GET_AUTH_PROVIDERS,
-  });
+interface LoginPageProps {
+  authProviders: AuthProvider[];
+}
 
-  if (!data) {
-    throw new Error("Failed to fetch auth providers");
-  }
-
-  const { authProviders } = data;
-
+export function LoginPage({ authProviders }: LoginPageProps) {
   const credentialProvider = authProviders.find(
     ({ key }) => key === "credential",
   );
 
-  const isCredentialProviderEnabled =
+  const isCredentialSignupEnabled =
     (credentialProvider?.enabled && !credentialProvider.disableSignup) ?? false;
 
   const lastLoginMethod = authClient.getLastUsedLoginMethod();
@@ -47,11 +41,11 @@ export default async function LoginPage() {
         <LoginForm
           authProviders={authProviders}
           lastLoginMethod={lastLoginMethod}
-          isCredentialLoginEnabled={isCredentialProviderEnabled}
+          isCredentialLoginEnabled={credentialProvider?.enabled ?? false}
         />
       ),
     },
-    ...(isCredentialProviderEnabled
+    ...(isCredentialSignupEnabled
       ? [
           {
             label: "Register",

@@ -11,27 +11,30 @@ import { loginLogger } from "../_utils/logger";
 
 export const loginUser = actionClient
   .inputSchema(loginSchema)
-  .bindArgsSchemas([z.object({ isCredentialProviderEnabled: z.boolean() })])
+  .bindArgsSchemas([z.object({ isCredentialLoginEnabled: z.boolean() })])
   .action(
     async ({
       parsedInput: { username, password },
-      bindArgsParsedInputs: [{ isCredentialProviderEnabled }],
+      bindArgsParsedInputs: [{ isCredentialLoginEnabled }],
     }) => {
-      if (!isCredentialProviderEnabled) {
+      if (!isCredentialLoginEnabled) {
         throw new Error("Email/password login is disabled");
       }
 
-      const { error } = await authClient.signIn.username({
-        username,
-        password,
-      });
+      try {
+        await authClient.signIn.username({
+          username,
+          password,
+        });
 
-      if (error) {
+        return redirect("/");
+      } catch (error) {
         loginLogger.error("Error during login:", error);
 
-        throw new Error(error.message ?? error.statusText, { cause: error });
+        throw error;
       }
-
-      return redirect("/");
+    },
+    {
+      throwServerError: true,
     },
   );
