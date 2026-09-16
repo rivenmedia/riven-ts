@@ -4,7 +4,7 @@ import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
 import { flow } from "../../../message-queue/flows/producer.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { it } from "./helpers/test-context.ts";
 
 it("enqueues an item processor job for each incomplete item request in the database", async ({
@@ -199,9 +199,7 @@ it("schedules a retry library event at the configured interval", async ({
 
   await waitFor(actor, (state) => state.matches("Running"));
 
-  vi.advanceTimersByTime(
-    settingsModule.settings.retryLibraryIntervalSeconds * 1000 + 1000,
-  );
+  vi.advanceTimersByTime(settings.retryLibraryIntervalSeconds * 1000 + 1000);
 
   await vi.waitFor(() => {
     expect(retryLibraryCalls).toBe(2);
