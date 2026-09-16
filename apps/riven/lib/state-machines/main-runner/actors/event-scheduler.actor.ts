@@ -1,6 +1,5 @@
 import chalk from "chalk";
 import { Duration } from "luxon";
-import { setInterval } from "node:timers";
 import { fromCallback } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
