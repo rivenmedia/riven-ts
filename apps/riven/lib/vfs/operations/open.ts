@@ -6,6 +6,7 @@ import { services } from "../../database/database.ts";
 import { enqueueRequestStreamLink } from "../../message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
 import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
 import { logger } from "../../utilities/logger/logger.ts";
+import { config } from "../config.ts";
 import { FuseError, isFuseError } from "../errors/fuse-error.ts";
 import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
 import {
@@ -42,7 +43,7 @@ async function getStreamLinkFromCacheOrQueue(
     mediaItemTitle: mediaEntry.mediaItem.$.fullTitle,
   });
 
-  return runSingleJob(job, 10_000);
+  return runSingleJob(job, config.openTimeoutSeconds * 1000);
 }
 
 async function serveSubtitleFile(pathInfo: PathInfo) {
