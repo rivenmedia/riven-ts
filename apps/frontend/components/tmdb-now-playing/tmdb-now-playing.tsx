@@ -61,6 +61,7 @@ export interface TMDBNowPlayingItem {
 }
 
 export interface TmdbNowPlayingProps {
+  autoplayDelay?: number;
   data?: TMDBNowPlayingItem[];
   showRequestButton?: boolean;
   alignment?: "left" | "center" | "right";
@@ -72,8 +73,8 @@ export function TmdbNowPlaying({
   showRequestButton = true,
   alignment = "left",
   heightClass = "h-[350px] md:h-[420px]",
+  autoplayDelay = 5000,
 }: TmdbNowPlayingProps) {
-  const autoplayDelay = 5000;
   const autoplayPlugin = Autoplay({
     delay: autoplayDelay,
     stopOnMouseEnter: true,
