@@ -33,6 +33,7 @@ export const oxlintPluginImportConfig = defineConfig({
       plugins: ["import"],
       rules: {
         "import/no-unassigned-import": "allow",
+        "import/unambiguous": "allow",
       },
     },
     {

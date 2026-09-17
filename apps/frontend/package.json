@@ -40,6 +40,8 @@
     "clsx": "catalog:",
     "cn": "catalog:",
     "consola": "catalog:",
+    "embla-carousel-autoplay": "catalog:",
+    "embla-carousel-fade": "catalog:",
     "embla-carousel-react": "catalog:",
     "graphql": "catalog:",
     "http-status-codes": "catalog:",

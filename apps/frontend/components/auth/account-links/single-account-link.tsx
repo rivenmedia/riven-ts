@@ -65,6 +65,7 @@ export function SingleAccountLink({
           onClick={() => {
             void handleUnlink();
           }}
+          type="button"
         >
           <Link2Off className="mr-2 h-4 w-4" />
           Unlink
@@ -75,6 +76,7 @@ export function SingleAccountLink({
           onClick={() => {
             void handleLink();
           }}
+          type="button"
         >
           <Link2 className="mr-2 h-4 w-4" />
           Link

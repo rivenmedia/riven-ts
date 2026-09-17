@@ -36,7 +36,7 @@ export function BirthdayConfetti({ active }: BirthdayConfettiProps) {
 
   return (
     <div className="pointer-events-none fixed inset-0 z-50 overflow-hidden">
-      {Array.from({ length: 20 }).map((_, i) => {
+      {Array.from({ length: 20 }, () => crypto.randomUUID()).map((id, i) => {
         const animationName =
           CONFETTI_CONFIG.animations[i % CONFETTI_CONFIG.animations.length];
 
@@ -48,7 +48,7 @@ export function BirthdayConfetti({ active }: BirthdayConfettiProps) {
 
         return (
           <div
-            key={i}
+            key={id}
             className={cn(
               "confetti",
               CONFETTI_CONFIG.shapes[i % CONFETTI_CONFIG.shapes.length],

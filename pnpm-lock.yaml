@@ -279,6 +279,12 @@ catalogs:
     discord-api-types:
       specifier: 0.38.42
       version: 0.38.42
+    embla-carousel-autoplay:
+      specifier: ^8.6.0
+      version: 8.6.0
+    embla-carousel-fade:
+      specifier: ^8.6.0
+      version: 8.6.0
     embla-carousel-react:
       specifier: ^8.6.0
       version: 8.6.0
@@ -672,6 +678,12 @@ importers:
       consola:
         specifier: 'catalog:'
         version: 3.4.2
+      embla-carousel-autoplay:
+        specifier: 'catalog:'
+        version: 8.6.0(embla-carousel@8.6.0)
+      embla-carousel-fade:
+        specifier: 'catalog:'
+        version: 8.6.0(embla-carousel@8.6.0)
       embla-carousel-react:
         specifier: 'catalog:'
         version: 8.6.0(react@19.2.6)
@@ -8295,6 +8307,7 @@ packages:
   '@xmldom/xmldom@0.9.11':
     resolution: {integrity: sha512-tW8bcK3hsG0/uqSnNz6TK4BkcuZSezoU7DlnYssILmZDktPnSHHuDJJFM0AJv+13gz2r0iGdrj6qqKeUnxXEDg==}
     engines: {node: '>=14.6'}
+    deprecated: this version has critical issues, please update to the latest version
 
   '@xobotyi/scrollbar-width@1.9.5':
     resolution: {integrity: sha512-N8tkAACJx2ww8vFMneJmaAgmjAG1tnVBZJRLRcx061tmsLRZHSEZSLuGWnwPtunsSLvSqXQ2wfp7Mgqg1I+2dQ==}
@@ -9409,6 +9422,16 @@ packages:
 
   elliptic@6.6.1:
     resolution: {integrity: sha512-RaddvvMatK2LJHqFJ+YA4WysVN5Ita9E35botqIYspQ4TkRAlCicdzKOjlyv/1Za5RyTNn7di//eEV0uTAfe3g==}
+
+  embla-carousel-autoplay@8.6.0:
+    resolution: {integrity: sha512-OBu5G3nwaSXkZCo1A6LTaFMZ8EpkYbwIaH+bPqdBnDGQ2fh4+NbzjXjs2SktoPNKCtflfVMc75njaDHOYXcrsA==}
+    peerDependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-fade@8.6.0:
+    resolution: {integrity: sha512-qaYsx5mwCz72ZrjlsXgs1nKejSrW+UhkbOMwLgfRT7w2LtdEB03nPRI06GHuHv5ac2USvbEiX2/nAHctcDwvpg==}
+    peerDependencies:
+      embla-carousel: 8.6.0
 
   embla-carousel-react@8.6.0:
     resolution: {integrity: sha512-0/PjqU7geVmo6F734pmPqpyHqiM99olvyecY7zdweCw+6tKEXnrE90pBiBbMMU8s5tICemzpQ3hi5EpxzGW+JA==}
@@ -21031,6 +21054,14 @@ snapshots:
       inherits: 2.0.4
       minimalistic-assert: 1.0.1
       minimalistic-crypto-utils: 1.0.1
+
+  embla-carousel-autoplay@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
+
+  embla-carousel-fade@8.6.0(embla-carousel@8.6.0):
+    dependencies:
+      embla-carousel: 8.6.0
 
   embla-carousel-react@8.6.0(react@19.2.6):
     dependencies:

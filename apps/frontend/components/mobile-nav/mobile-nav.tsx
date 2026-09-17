@@ -51,6 +51,7 @@ export function MobileNav() {
             // onclick={() => (searchModalOpen = true)}
             aria-label="Open search"
             className="h-full flex-1 bg-transparent text-left text-sm font-medium text-white/40 outline-none"
+            type="button"
           >
             Search...
           </button>
