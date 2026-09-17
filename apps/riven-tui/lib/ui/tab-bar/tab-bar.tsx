@@ -4,7 +4,7 @@ import { useLocation } from "react-router";
 
 import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
 
-interface TabData {
+export interface TabData {
   label: string;
   isHidden?: boolean;
 }
@@ -15,10 +15,24 @@ export interface TabBarProps {
   onChange: (name: string) => void;
 }
 
+export function getActiveTabPath(
+  items: Record<string, TabData>,
+  pathname: string,
+): string | undefined {
+  const hrefs = Object.keys(items);
+
+  if (hrefs.includes(pathname)) {
+    return pathname;
+  }
+
+  return hrefs
+    .filter((href) => pathname.startsWith(`${href}/`))
+    .toSorted((a, b) => b.length - a.length)[0];
+}
+
 export function TabBar({ items, onChange }: TabBarProps) {
   const { pathname } = useLocation();
-  const defaultValue =
-    Object.keys(items).find((href) => pathname === href) ?? "";
+  const defaultValue = getActiveTabPath(items, pathname) ?? "";
 
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 

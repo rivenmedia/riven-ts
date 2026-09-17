@@ -32,9 +32,13 @@ export function ItemDetailPageLayout() {
   const { isVisible: isActionsMenuVisible } = useActionsMenuContext();
 
   useInput(
-    (_input, key) => {
+    (input, key) => {
       if (key.escape) {
         void navigate(-1);
+      }
+
+      if (input === "s") {
+        void navigate("/search");
       }
     },
     { isActive: !isActionsMenuVisible },
@@ -167,7 +171,11 @@ export function ItemDetailPageLayout() {
         title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
         content: <MediaItemStateBadge state={item.state} />,
       }}
-      footer={<Text dimColor>[a]ctions · [r]efresh · [esc] back · [q]uit</Text>}
+      footer={
+        <Text dimColor>
+          [a]ctions · [r]efresh · [s]earch · [esc] back · [q]uit
+        </Text>
+      }
       tabs={{
         [`/item/${item.id}`]: {
           label: "Overview",
