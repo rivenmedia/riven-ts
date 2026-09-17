@@ -11,13 +11,14 @@ import { Separator } from "@/components/_ui/separator";
 
 import { cn } from "cn";
 import Link from "next/link";
-import { use } from "react";
+import { useParams } from "next/navigation";
 
 import { useSteps } from "./_hooks/use-steps";
 import { SetupQualityStep } from "./_steps/quality";
 import { SetupReviewStep } from "./_steps/review";
 import { SetupWelcomeStep } from "./_steps/welcome";
 
+import type { ParamsOf } from "../../../../.next/types/routes";
 import type { Step } from "./_hooks/use-steps";
 
 const steps = [
@@ -29,15 +30,7 @@ const steps = [
   },
   {
     id: "quality",
-    component: () => (
-      <SetupQualityStep
-        general={{}}
-        generalSections={[]}
-        profiles={[]}
-        toggleProfileEnabled={() => {}}
-        saveGeneralSettings={() => {}}
-      />
-    ),
+    component: () => <SetupQualityStep generalSections={[]} profiles={[]} />,
     label: "Quality",
     description: "Choose profiles and instance defaults.",
   },
@@ -56,8 +49,8 @@ const steps = [
   },
 ] as const satisfies readonly Step[];
 
-export default function SetupStepPage({ params }: PageProps<"/setup/[step]">) {
-  const { step } = use(params);
+export default function SetupStepPage() {
+  const { step } = useParams<ParamsOf<"/setup/[step]">>();
 
   const {
     activeStep,

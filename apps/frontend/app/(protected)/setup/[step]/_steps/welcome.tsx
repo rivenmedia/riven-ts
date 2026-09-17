@@ -19,9 +19,9 @@ export function SetupWelcomeStep() {
             matched, and delivered with the defaults you choose.
           </p>
         </div>
-        <Card className="rounded-3xl px-6 py-6">
+        <Card className="rounded-3xl p-6 gap-6 text-base">
           <CardHeader className="px-0 py-0">
-            <CardTitle className="text-base">
+            <CardTitle className="font-semibold">
               This setup will walk you through
             </CardTitle>
           </CardHeader>

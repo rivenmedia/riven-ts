@@ -22,7 +22,6 @@ export function SetupReviewStep({
           point where the instance should be usable.
         </p>
       </div>
-
       <div className="grid gap-4 md:grid-cols-3">
         <div className="rounded-2xl border p-5">
           <p className="text-muted-foreground text-xs font-medium tracking-wide uppercase">
