@@ -7,6 +7,7 @@ import Link from "next/link";
 import React, { startTransition, useEffect, useState } from "react";
 import { useHoverDirty } from "react-use";
 
+import { fly } from "../_animations/fly";
 import { Button } from "../_ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
 import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
@@ -139,7 +140,7 @@ export function TmdbNowPlaying({
   }, [api]);
 
   if (!data || data.length === 0) {
-    return <TmdbNowPlayingSkeleton />;
+    return <TmdbNowPlayingSkeleton heightClass={heightClass} />;
   }
 
   return (
@@ -161,11 +162,7 @@ export function TmdbNowPlaying({
             const backgroundGradient =
               "radial-gradient(120% 160% at 0% 100%, black 0%, transparent 70%), linear-gradient(to bottom, transparent 10%, black 100%)";
 
-            function getAnimationClass(delay: number) {
-              return i === currentIndex
-                ? `animate-(--animate-fly-in) delay-${delay.toString()}`
-                : "hidden";
-            }
+            const animationClass = i === currentIndex ? fly : "hidden";
 
             return (
               <CarouselItem
@@ -197,36 +194,35 @@ export function TmdbNowPlaying({
                   <div className="flex w-full max-w-3xl flex-col">
                     <div
                       className={cn(
-                        "flex h-24 items-end",
-                        getAnimationClass(100),
+                        "flex h-24 items-end delay-100",
+                        animationClass,
                       )}
                     >
                       {item.logo ? (
-                        <div className="mb-4 relative w-full h-16">
+                        <div className="mb-4 relative w-full h-[10vw] max-h-35 max-w-125">
                           <Image
                             src={item.logo}
                             alt={displayTitle}
                             className={cn(
-                              "max-h-full max-w-[80%] drop-shadow-2xl",
+                              "max-h-full max-w-[80%] drop-shadow-2xl object-contain",
                               alignment === "left" && "object-bottom-left",
                               alignment === "right" && "object-bottom-right",
                               alignment === "center" && "object-bottom",
                             )}
                             fill
-                            objectFit="contain"
                           />
                         </div>
                       ) : (
-                        <h1 className="line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-4xl))]">
+                        <h1 className="line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-6xl))]">
                           {displayTitle}
                         </h1>
                       )}
                     </div>
                     <div
                       className={cn(
-                        "mt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-white md:mt-4 md:text-sm",
+                        "mt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-white md:mt-4 md:text-sm delay-200",
                         getAlignmentClasses(alignment, "flex"),
-                        getAnimationClass(200),
+                        animationClass,
                       )}
                     >
                       <span className="flex items-center justify-center rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[10px] leading-none font-bold tracking-wider uppercase backdrop-blur-md md:text-xs">
@@ -296,8 +292,8 @@ export function TmdbNowPlaying({
                     {item.overview && (
                       <p
                         className={cn(
-                          "mt-3 line-clamp-2 max-w-xl text-xs leading-relaxed text-white/90 drop-shadow-md md:mt-4 md:text-base",
-                          getAnimationClass(300),
+                          "mt-3 line-clamp-2 max-w-xl text-xs leading-relaxed text-white/90 drop-shadow-md md:mt-4 md:text-base delay-300",
+                          animationClass,
                         )}
                       >
                         {item.overview}
@@ -306,9 +302,9 @@ export function TmdbNowPlaying({
                     {item.genreIds?.length && (
                       <div
                         className={cn(
-                          "mt-4 flex flex-wrap gap-2 md:mt-6",
+                          "mt-4 flex flex-wrap gap-2 md:mt-6 delay-400",
                           getAlignmentClasses(alignment, "flex"),
-                          getAnimationClass(400),
+                          animationClass,
                         )}
                       >
                         {item.genreIds.slice(0, 4).map(
@@ -326,9 +322,9 @@ export function TmdbNowPlaying({
                     )}
                     <div
                       className={cn(
-                        "mt-6 flex flex-wrap gap-4 md:mt-8",
+                        "mt-6 flex flex-wrap gap-4 md:mt-8 delay-500",
                         getAlignmentClasses(alignment, "flex"),
-                        getAnimationClass(500),
+                        animationClass,
                       )}
                     >
                       {showRequestButton && (

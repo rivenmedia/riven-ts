@@ -4,7 +4,6 @@ import { Providers } from "../components/providers.tsx";
 
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
-import "@/lib/styles/app.css";
 
 import { fontMono, fontSansSerif, fontSerif } from "./fonts.ts";
 

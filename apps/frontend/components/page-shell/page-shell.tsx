@@ -1,5 +1,7 @@
 import { cn } from "cn";
 
+import { fly } from "../_animations/fly";
+
 import type { HTMLAttributes } from "react";
 
 export function PageShell({
@@ -10,7 +12,8 @@ export function PageShell({
   return (
     <main
       className={cn(
-        "mt-4 flex flex-col gap-6 p-4 pb-24 md:mt-14 md:gap-8 md:p-8 md:px-16 starting:opacity-0 animate-in fade-in duration-600 slide-in-from-bottom-[20px] ease-[easeOutCubic]",
+        "mt-4 flex flex-col gap-6 p-4 pb-24 md:mt-14 md:gap-8 md:p-8 md:px-16 duration-600",
+        fly,
         className,
       )}
       {...restProps}

@@ -1,7 +1,10 @@
 import preview from "@/.storybook/preview";
 
 import { faker } from "@faker-js/faker";
+import { ListChecks, Loader2, Trash } from "lucide-react";
+import { fn } from "storybook/test";
 
+import { CardSelectionProvider } from "../providers/card-selection-provider";
 import { ListCarousel } from "./list-carousel";
 
 const meta = preview.meta({
@@ -10,11 +13,34 @@ const meta = preview.meta({
   parameters: {
     layout: "padded",
   },
-  render: (args) => (
-    <div className="mx-12">
-      <ListCarousel {...args} />
-    </div>
-  ),
+  decorators: [
+    (Story) => (
+      <CardSelectionProvider
+        actions={[
+          {
+            label: "Reset",
+            icon: ListChecks,
+            handleClick: fn(),
+          },
+          {
+            label: "Retry",
+            icon: Loader2,
+            handleClick: fn(),
+          },
+          {
+            label: "Remove",
+            icon: Trash,
+            variant: "destructive",
+            handleClick: fn(),
+          },
+        ]}
+      >
+        <div className="mx-12">
+          <Story />
+        </div>
+      </CardSelectionProvider>
+    ),
+  ],
 });
 
 export const Default = meta.story({

@@ -1,8 +1,16 @@
 import { Skeleton } from "../_ui/skeleton";
 
-export function TmdbNowPlayingSkeleton() {
+interface TmdbNowPlayingSkeletonProps {
+  heightClass: string;
+}
+
+export function TmdbNowPlayingSkeleton({
+  heightClass,
+}: TmdbNowPlayingSkeletonProps) {
   return (
-    <div className="relative w-full overflow-hidden rounded-2xl {heightClass}">
+    <div
+      className={`relative w-full overflow-hidden rounded-2xl ${heightClass}`}
+    >
       <div className="from-background to-muted absolute inset-0 animate-pulse bg-linear-to-t" />
       <div className="absolute inset-0 z-2 flex flex-col justify-end p-8 md:p-12">
         <div className="w-full max-w-xl">

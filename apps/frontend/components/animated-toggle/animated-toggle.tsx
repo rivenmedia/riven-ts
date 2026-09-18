@@ -120,6 +120,7 @@ export function AnimatedToggle({
             onClick={() => {
               handleChange(option.value);
             }}
+            type="button"
           >
             {option.label}
           </Button>
@@ -159,6 +160,7 @@ export function AnimatedToggle({
                 size="sm"
                 tabIndex={-1}
                 className="text-primary-foreground hover:text-primary-foreground h-7 w-full rounded-lg px-4 text-xs font-bold hover:bg-transparent"
+                type="button"
               >
                 {option.label}
               </Button>

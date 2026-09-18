@@ -428,3 +428,9 @@ export const WithLogos = meta.story({
     ],
   },
 });
+
+export const Loading = meta.story({
+  args: {
+    data: [],
+  },
+});

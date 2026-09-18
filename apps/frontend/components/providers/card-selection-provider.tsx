@@ -78,13 +78,5 @@ export function CardSelectionProvider({
 }
 
 export function useCardSelection() {
-  const context = useContext(CardSelectionContext);
-
-  if (!context) {
-    throw new Error(
-      "useCardSelection must be used within a CardSelectionProvider",
-    );
-  }
-
-  return context;
+  return useContext(CardSelectionContext);
 }

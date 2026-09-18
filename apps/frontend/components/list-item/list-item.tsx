@@ -27,7 +27,13 @@ export function ListItem({
   mediaItem,
   isSelectable = false,
 }: ListItemProps) {
-  const { selectedItems, toggleItemSelection } = useCardSelection();
+  const cardSelectionContext = useCardSelection();
+
+  if (isSelectable && !cardSelectionContext) {
+    throw new Error(
+      "ListItem must be used within a CardSelectionProvider when isSelectable is true",
+    );
+  }
 
   // Normalize type for different indexers
   const normalisedType = useMemo(() => {
@@ -78,11 +84,14 @@ export function ListItem({
         title={mediaItem.title}
         subtitle={subtitle}
         image={mediaItem.posterPath ?? null}
-        isSelectable={isSelectable}
-        isSelected={selectedItems.has(mediaItem.id)}
-        onSelectToggle={() => {
-          toggleItemSelection(mediaItem.id);
-        }}
+        {...(isSelectable &&
+          cardSelectionContext && {
+            isSelectable: true,
+            isSelected: cardSelectionContext.selectedItems.has(mediaItem.id),
+            onSelectToggle: () => {
+              cardSelectionContext.toggleItemSelection(mediaItem.id);
+            },
+          })}
         topRight={
           badge && (
             <Badge

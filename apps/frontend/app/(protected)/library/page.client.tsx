@@ -199,7 +199,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                   {items.map((item, i) => (
                     <div
                       key={item.id}
-                      className="animate-in fade-in slide-in-from-bottom-4 fill-mode-backwards duration-700"
+                      className="animate-in fade-in slide-in-from-bottom-4 fill-mode-[backwards] duration-700"
                       style={{ animationDelay: `${(i * 30).toString()}ms` }}
                     >
                       <ListItem

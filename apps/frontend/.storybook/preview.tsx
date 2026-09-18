@@ -1,6 +1,5 @@
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
-import "@/lib/styles/app.css";
 import { i18n } from "@/.storybook/i18n";
 import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
 import { Providers } from "@/components/providers";

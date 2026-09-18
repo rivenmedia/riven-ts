@@ -1,17 +1,43 @@
 import preview from "@/.storybook/preview";
 
 import { faker } from "@faker-js/faker";
+import { ListChecks, Loader2, Trash } from "lucide-react";
+import { fn } from "storybook/test";
 
+import { CardSelectionProvider } from "../providers/card-selection-provider";
 import { ListItem } from "./list-item";
 
 const meta = preview.meta({
   title: "Components / List Item",
   component: ListItem,
-  render: (args) => (
-    <div className="w-48">
-      <ListItem {...args} />
-    </div>
-  ),
+  decorators: [
+    (Story) => (
+      <CardSelectionProvider
+        actions={[
+          {
+            label: "Reset",
+            icon: ListChecks,
+            handleClick: fn(),
+          },
+          {
+            label: "Retry",
+            icon: Loader2,
+            handleClick: fn(),
+          },
+          {
+            label: "Remove",
+            icon: Trash,
+            variant: "destructive",
+            handleClick: fn(),
+          },
+        ]}
+      >
+        <div className="w-48">
+          <Story />
+        </div>
+      </CardSelectionProvider>
+    ),
+  ],
 });
 
 export const Default = meta.story({
