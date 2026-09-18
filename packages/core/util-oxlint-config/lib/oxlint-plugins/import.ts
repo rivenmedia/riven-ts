@@ -29,6 +29,14 @@ export const oxlintPluginImportConfig = defineConfig({
       },
     },
     {
+      files: ["**/*.d.ts"],
+      plugins: ["import"],
+      rules: {
+        "import/no-unassigned-import": "allow",
+        "import/unambiguous": "allow",
+      },
+    },
+    {
       files: [configFiles],
       plugins: ["import"],
       rules: {

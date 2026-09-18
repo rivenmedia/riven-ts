@@ -92,6 +92,8 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   const { createDatabaseConfig } = await import("./lib/database/config.ts");
   const { SeedManager } = await import("@mikro-orm/seeder");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
+  const { initAuth } = await import("./lib/auth/auth.ts");
+
   const databaseConfig = await createDatabaseConfig();
 
   const { database, services } = await initORM({
@@ -109,6 +111,11 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
   });
 
   await database.orm.schema.create();
+
+  // Fork the entity manager to avoid global context errors
+  database.orm.em = database.orm.em.fork();
+
+  initAuth(database.orm);
 
   return {
     database,
@@ -223,4 +230,8 @@ beforeEach(async () => {
 afterAll(async () => {
   await redisConnection?.close();
   await redisServer?.stop();
+});
+
+aroundEach(async (runTest) => {
+  await withLogContext({ "riven.log.source": "core" }, runTest);
 });

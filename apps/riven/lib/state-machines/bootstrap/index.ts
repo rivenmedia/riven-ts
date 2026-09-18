@@ -5,12 +5,14 @@ import { assign, setup } from "xstate";
 import { settings } from "../../utilities/settings.ts";
 import { pluginRegistrarMachine } from "../plugin-registrar/index.ts";
 import { withLogAction } from "../utilities/with-log-action.ts";
-import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
+import { applyMockScenario } from "./actors/apply-mock-scenario.actor.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
+import { createAdminUser } from "./actors/create-admin-user.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
+import type { Services } from "../../database/database.ts";
 import type { ApolloServerContext } from "../../graphql/context.ts";
 import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
 import type {
@@ -23,12 +25,15 @@ import type {
 } from "../../types/plugins.ts";
 import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { MikroORM } from "@mikro-orm/core";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 import type { AnyActorRef } from "xstate";
 
 export interface BootstrapMachineContext {
+  orm: MikroORM | null;
+  services: Services | null;
   error?: Error;
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
@@ -42,6 +47,7 @@ export interface BootstrapMachineContext {
   publishableEvents: Set<RivenEvent["type"]>;
   pluginSettings: PluginSettings | null;
   mockScenario: MockScenario | undefined;
+  requiresAdminUserCreation: boolean;
 }
 
 export interface BootstrapMachineInput {
@@ -110,6 +116,7 @@ export const bootstrapMachine = setup({
   actors: {
     applyMockScenario,
     clearPreviousInstanceState,
+    createAdminUser,
     initialiseDatabaseConnection,
     initialiseVfs,
     pluginRegistrarMachine,
@@ -119,6 +126,8 @@ export const bootstrapMachine = setup({
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
     hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
+    requiresAdminUserCreation: ({ context: { requiresAdminUserCreation } }) =>
+      requiresAdminUserCreation,
   },
 })
   .extend(withLogAction)
@@ -126,6 +135,8 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      orm: null,
+      services: null,
       mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -136,6 +147,7 @@ export const bootstrapMachine = setup({
       publishableEvents: new Set(),
       pluginSettings: null,
       mockScenario: input.mockScenario,
+      requiresAdminUserCreation: false,
     }),
     output: ({
       context: {
@@ -179,12 +191,21 @@ export const bootstrapMachine = setup({
           src: "initialiseDatabaseConnection",
           onDone: {
             target: "Clearing previous instance state",
-            actions: {
-              type: "log",
-              params: {
-                message: "Database connection bootstrap complete.",
+            actions: [
+              {
+                type: "log",
+                params: {
+                  message: "Database connection bootstrap complete.",
+                },
               },
-            },
+              assign(
+                ({
+                  event: {
+                    output: { orm, services, requiresAdminUserCreation },
+                  },
+                }) => ({ orm, services, requiresAdminUserCreation }),
+              ),
+            ],
           },
           onError: {
             target: "#Bootstrap.Errored",
@@ -380,15 +401,25 @@ export const bootstrapMachine = setup({
                   id: "startGqlServer",
                   src: "startGqlServer",
                   input: ({
-                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                    context: {
+                      orm,
+                      mainRunnerRef,
+                      validPlugins,
+                      pluginSettings,
+                    },
                   }) => {
-                    if (!pluginSettings) {
-                      throw new Error(
-                        "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                      );
-                    }
+                    assert.ok(
+                      pluginSettings,
+                      "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
+                    );
+
+                    assert.ok(
+                      orm,
+                      "ORM not available when starting GraphQL server. Ensure the connection has been initialised first.",
+                    );
 
                     return {
+                      orm,
                       mainRunnerRef,
                       pluginSettings,
                       validPlugins,
@@ -452,7 +483,15 @@ export const bootstrapMachine = setup({
       },
       "Bootstrapping VFS": {
         initial: "Starting",
-        onDone: "Success",
+        onDone: [
+          {
+            target: "Create admin user",
+            guard: "requiresAdminUserCreation",
+          },
+          {
+            target: "Success",
+          },
+        ],
         states: {
           Starting: {
             entry: {
@@ -495,6 +534,47 @@ export const bootstrapMachine = setup({
               },
             },
             type: "final",
+          },
+        },
+      },
+      "Create admin user": {
+        onDone: "Success",
+        entry: {
+          type: "log",
+          params: {
+            message: "Creating admin account...",
+          },
+        },
+        invoke: {
+          id: "createAdminUser",
+          src: "createAdminUser",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when creating admin user. Ensure the database connection has been initialised first.",
+            );
+
+            return {
+              services,
+              username: settings.adminUserCredentials.username,
+              password: settings.adminUserCredentials.password,
+            };
+          },
+          onDone: {
+            actions: {
+              type: "log",
+              params: {
+                message: "Admin user successfully created!",
+              },
+            },
+            target: "Success",
+          },
+          onError: {
+            target: "#Bootstrap.Errored",
+            actions: {
+              type: "raiseError",
+              params: ({ event }) => event.error as Error,
+            },
           },
         },
       },

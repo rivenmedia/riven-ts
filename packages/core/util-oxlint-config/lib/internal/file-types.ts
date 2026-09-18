@@ -6,10 +6,14 @@ export const jsFiles = "**/*.{js,jsx,mjs,cjs,mjsx,cjsx}";
 
 export const jsxFiles = "**/*.{tsx,jsx,mtsx,mjsx,ctsx,cjsx}";
 
+export const storybookFiles = "**/*.stories.{ts,tsx,mts,mtsx,cts,ctsx}";
+
 export const testFiles = [
   "**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx}",
   "**/*test-context.ts",
 ] as const;
+
+export const playwrightTestFiles = ["playwright/**", "tests/**"] as const;
 
 export const entityFiles = "**/*.entity.ts";
 

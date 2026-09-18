@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "noEmit": false,
+    "composite": true,
+    "types": ["msw-storybook-addon/types"]
+  },
+  "files": [],
+  "include": [
+    ".storybook/**/*.ts",
+    ".storybook/**/*.tsx",
+    "**/*.tsx",
+    "**/*.ts"
+  ],
+  "exclude": []
+}

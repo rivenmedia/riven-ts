@@ -1,0 +1,13 @@
+{
+  "$schema": "https://www.chromatic.com/config-file.schema.json",
+  "projectId": "Project:6a89f1b892fc0f93bce20bb6",
+  "buildCommand": "pnpm turbo @repo/frontend#build-storybook -- ",
+  "outputDir": "storybook-static",
+  "storybookBaseDir": "apps/frontend",
+  "autoAcceptChanges": "main",
+  "exitOnceUploaded": true,
+  "externals": ["public/**"],
+  "onlyChanged": true,
+  "skip": "dependabot/**",
+  "zip": true
+}

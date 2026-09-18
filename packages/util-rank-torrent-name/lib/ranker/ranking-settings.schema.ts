@@ -3,99 +3,147 @@ import { z } from "zod";
 /**
  * @public
  */
-export const ResolutionConfigSchema = z.object({
-  /**
-   * @default false
-   */
-  r2160p: z.boolean().default(false),
+export const ResolutionConfigSchema = z
+  .object({
+    /**
+     * @default false
+     */
+    r2160p: z.boolean().meta({ title: "2160p" }).default(false),
 
-  /**
-   * @default true
-   */
-  r1080p: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    r1080p: z.boolean().meta({ title: "1080p" }).default(true),
 
-  /**
-   * @default true
-   */
-  r720p: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    r720p: z.boolean().meta({ title: "720p" }).default(true),
 
-  /**
-   * @default false
-   */
-  r480p: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    r480p: z.boolean().meta({ title: "480p" }).default(false),
 
-  /**
-   * @default false
-   */
-  r360p: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    r360p: z.boolean().meta({ title: "360p" }).default(false),
 
-  /**
-   * @default true
-   */
-  unknown: z.boolean().default(true),
-});
+    /**
+     * @default true
+     */
+    unknown: z.boolean().meta({ title: "Unknown" }).default(true),
+  })
+  .meta({
+    title: "Resolutions",
+    description: "Enable / disable specific resolutions",
+  });
 
 export type ResolutionConfig = z.infer<typeof ResolutionConfigSchema>;
 
 /**
  * @public
  */
-export const OptionsConfigSchema = z.object({
-  /**
-   * @default true
-   */
-  removeAllTrash: z.boolean().default(true),
+export const OptionsConfigSchema = z
+  .object({
+    /**
+     * @default true
+     */
+    removeAllTrash: z
+      .boolean()
+      .meta({ title: "Remove all trash" })
+      .default(true),
 
-  /**
-   * @default -10000
-   */
-  removeRanksUnder: z.number().default(-10_000),
+    /**
+     * @default -10000
+     */
+    removeRanksUnder: z
+      .int()
+      .multipleOf(10)
+      .meta({ title: "Remove ranks under" })
+      .default(-10_000),
 
-  /**
-   * @default false
-   */
-  removeUnknownLanguages: z.boolean().default(false),
+    /**
+     * @default false
+     */
+    removeUnknownLanguages: z
+      .boolean()
+      .meta({ title: "Remove unknown languages" })
+      .default(false),
 
-  /**
-   * @default true
-   */
-  allowEnglishInLanguages: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    allowEnglishInLanguages: z
+      .boolean()
+      .meta({ title: "Allow English in languages" })
+      .default(true),
 
-  /**
-   * @default true
-   */
-  removeAdultContent: z.boolean().default(true),
+    /**
+     * @default true
+     */
+    removeAdultContent: z
+      .boolean()
+      .meta({ title: "Remove adult content" })
+      .default(true),
 
-  /**
-   * @default 0.85
-   */
-  titleSimilarity: z.number().min(0).max(1).default(0.85),
-});
+    /**
+     * @default 0.85
+     */
+    titleSimilarity: z
+      .number()
+      .min(0)
+      .max(1)
+      .meta({ title: "Title similarity" })
+      .default(0.85),
+  })
+  .meta({
+    title: "Options",
+    description: "Configure various options for torrent ranking",
+  });
 
 /**
  * @public
  */
-export const LanguagesConfigSchema = z.object({
-  /**
-   * @default []
-   */
-  required: z.array(z.string()).default([]),
+export const LanguagesConfigSchema = z
+  .object({
+    /**
+     * @default []
+     */
+    required: z
+      .array(z.string())
+      .meta({ title: "Required languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  allowed: z.array(z.string()).default([]),
+    /**
+     * @default []
+     */
+    allowed: z
+      .array(z.string())
+      .meta({ title: "Allowed languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  exclude: z.array(z.string()).default([]),
+    /**
+     * @default []
+     */
+    exclude: z
+      .array(z.string())
+      .meta({ title: "Excluded languages" })
+      .default([]),
 
-  /**
-   * @default []
-   */
-  preferred: z.array(z.string()).default([]),
-});
+    /**
+     * @default []
+     */
+    preferred: z
+      .array(z.string())
+      .meta({ title: "Preferred languages" })
+      .default([]),
+  })
+  .meta({
+    title: "Languages",
+    description: "Configure language preferences for torrents",
+  });
 
 function compilePattern(pattern: string): RegExp {
   // Case-sensitive
@@ -112,9 +160,12 @@ function compilePatterns(patterns: string[]): RegExp[] {
 }
 
 export const SettingsSchema = z.object({
-  require: z.array(z.string()).default([]),
-  exclude: z.array(z.string()).default([]),
-  preferred: z.array(z.string()).default([]),
+  require: z.array(z.string()).meta({ title: "Required patterns" }).default([]),
+  exclude: z.array(z.string()).meta({ title: "Excluded patterns" }).default([]),
+  preferred: z
+    .array(z.string())
+    .meta({ title: "Preferred patterns" })
+    .default([]),
   resolutions: ResolutionConfigSchema.default(() =>
     ResolutionConfigSchema.parse({}),
   ),
@@ -141,83 +192,96 @@ export function createSettings(input: SettingsInput = {}): Settings {
 
 const Rank = z.int().nullable();
 
+const RankingModelSettingCategory = z.enum([
+  "quality",
+  "rips",
+  "hdr",
+  "audio",
+  "extras",
+  "trash",
+]);
+
+export const RankingModelSchemaMetadata = z.strictObject({
+  category: RankingModelSettingCategory,
+});
+
 export const RankingModelSchema = z.strictObject({
   // Quality
-  av1: Rank.default(null),
-  avc: Rank.default(null),
-  bluray: Rank.default(null),
-  dvd: Rank.default(null),
-  hdtv: Rank.default(null),
-  hevc: Rank.default(null),
-  mpeg: Rank.default(null),
-  remux: Rank.default(null),
-  vhs: Rank.default(null),
-  web: Rank.default(null),
-  webdl: Rank.default(null),
-  webmux: Rank.default(null),
-  xvid: Rank.default(null),
+  av1: Rank.default(null).meta({ category: "quality" }),
+  avc: Rank.default(null).meta({ category: "quality" }),
+  bluray: Rank.default(null).meta({ category: "quality" }),
+  dvd: Rank.default(null).meta({ category: "quality" }),
+  hdtv: Rank.default(null).meta({ category: "quality" }),
+  hevc: Rank.default(null).meta({ category: "quality" }),
+  mpeg: Rank.default(null).meta({ category: "quality" }),
+  remux: Rank.default(null).meta({ category: "quality" }),
+  vhs: Rank.default(null).meta({ category: "quality" }),
+  web: Rank.default(null).meta({ category: "quality" }),
+  webdl: Rank.default(null).meta({ category: "quality" }),
+  webmux: Rank.default(null).meta({ category: "quality" }),
+  xvid: Rank.default(null).meta({ category: "quality" }),
 
   // Rips
-  bdrip: Rank.default(null),
-  brrip: Rank.default(null),
-  dvdrip: Rank.default(null),
-  hdrip: Rank.default(null),
-  ppvrip: Rank.default(null),
-  tvrip: Rank.default(null),
-  uhdrip: Rank.default(null),
-  vhsrip: Rank.default(null),
-  webdlrip: Rank.default(null),
-  webrip: Rank.default(null),
+  bdrip: Rank.default(null).meta({ category: "rips" }),
+  brrip: Rank.default(null).meta({ category: "rips" }),
+  dvdrip: Rank.default(null).meta({ category: "rips" }),
+  hdrip: Rank.default(null).meta({ category: "rips" }),
+  ppvrip: Rank.default(null).meta({ category: "rips" }),
+  tvrip: Rank.default(null).meta({ category: "rips" }),
+  uhdrip: Rank.default(null).meta({ category: "rips" }),
+  vhsrip: Rank.default(null).meta({ category: "rips" }),
+  webdlrip: Rank.default(null).meta({ category: "rips" }),
+  webrip: Rank.default(null).meta({ category: "rips" }),
 
   // HDR
-  bit10: Rank.default(null),
-  dolbyVision: Rank.default(null),
-  hdr: Rank.default(null),
-  hdr10plus: Rank.default(null),
-  sdr: Rank.default(null),
+  bit10: Rank.default(null).meta({ category: "hdr" }),
+  dolbyVision: Rank.default(null).meta({ category: "hdr" }),
+  hdr: Rank.default(null).meta({ category: "hdr" }),
+  hdr10plus: Rank.default(null).meta({ category: "hdr" }),
+  sdr: Rank.default(null).meta({ category: "hdr" }),
 
   // Audio
-  aac: Rank.default(null),
-  atmos: Rank.default(null),
-  dolbyDigital: Rank.default(null),
-  dolbyDigitalPlus: Rank.default(null),
-  dtsLossy: Rank.default(null),
-  dtsLossless: Rank.default(null),
-  flac: Rank.default(null),
-  mono: Rank.default(null),
-  mp3: Rank.default(null),
-  stereo: Rank.default(null),
-  surround: Rank.default(null),
-  truehd: Rank.default(null),
+  aac: Rank.default(null).meta({ category: "audio" }),
+  atmos: Rank.default(null).meta({ category: "audio" }),
+  dolbyDigital: Rank.default(null).meta({ category: "audio" }),
+  dolbyDigitalPlus: Rank.default(null).meta({ category: "audio" }),
+  dtsLossy: Rank.default(null).meta({ category: "audio" }),
+  dtsLossless: Rank.default(null).meta({ category: "audio" }),
+  flac: Rank.default(null).meta({ category: "audio" }),
+  mono: Rank.default(null).meta({ category: "audio" }),
+  mp3: Rank.default(null).meta({ category: "audio" }),
+  stereo: Rank.default(null).meta({ category: "audio" }),
+  surround: Rank.default(null).meta({ category: "audio" }),
+  truehd: Rank.default(null).meta({ category: "audio" }),
 
   // Extras
-  threeD: Rank.default(null),
-  converted: Rank.default(null),
-  documentary: Rank.default(null),
-  commentary: Rank.default(null),
-  uncensored: Rank.default(null),
-  dubbed: Rank.default(null),
-  edition: Rank.default(null),
-  hardcoded: Rank.default(null),
-  network: Rank.default(null),
-  proper: Rank.default(null),
-  repack: Rank.default(null),
-  retail: Rank.default(null),
-  subbed: Rank.default(null),
-  upscaled: Rank.default(null),
-  scene: Rank.default(null),
+  threeD: Rank.default(null).meta({ category: "extras" }),
+  converted: Rank.default(null).meta({ category: "extras" }),
+  documentary: Rank.default(null).meta({ category: "extras" }),
+  commentary: Rank.default(null).meta({ category: "extras" }),
+  uncensored: Rank.default(null).meta({ category: "extras" }),
+  dubbed: Rank.default(null).meta({ category: "extras" }),
+  edition: Rank.default(null).meta({ category: "extras" }),
+  hardcoded: Rank.default(null).meta({ category: "extras" }),
+  network: Rank.default(null).meta({ category: "extras" }),
+  proper: Rank.default(null).meta({ category: "extras" }),
+  repack: Rank.default(null).meta({ category: "extras" }),
+  retail: Rank.default(null).meta({ category: "extras" }),
+  subbed: Rank.default(null).meta({ category: "extras" }),
+  upscaled: Rank.default(null).meta({ category: "extras" }),
+  scene: Rank.default(null).meta({ category: "extras" }),
 
   // Trash
-  cam: Rank.default(null),
-  cleanAudio: Rank.default(null),
-  r5: Rank.default(null),
-  pdtv: Rank.default(null),
-  satrip: Rank.default(null),
-  screener: Rank.default(null),
-  site: Rank.default(null),
-  size: Rank.default(null),
-  telecine: Rank.default(null),
-  telesync: Rank.default(null),
+  cam: Rank.default(null).meta({ category: "trash" }),
+  cleanAudio: Rank.default(null).meta({ category: "trash" }),
+  r5: Rank.default(null).meta({ category: "trash" }),
+  pdtv: Rank.default(null).meta({ category: "trash" }),
+  satrip: Rank.default(null).meta({ category: "trash" }),
+  screener: Rank.default(null).meta({ category: "trash" }),
+  site: Rank.default(null).meta({ category: "trash" }),
+  size: Rank.default(null).meta({ category: "trash" }),
+  telecine: Rank.default(null).meta({ category: "trash" }),
+  telesync: Rank.default(null).meta({ category: "trash" }),
 });
 
 export type RankingModel = z.infer<typeof RankingModelSchema>;
