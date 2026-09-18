@@ -11,7 +11,7 @@ const meta = preview.meta({
     autoplayDelay: 5000,
     data: [
       {
-        id: 603_692,
+        id: "603692",
         mediaType: "movie",
         title: "John Wick: Chapter 4",
         backdropPath:
@@ -22,9 +22,25 @@ const meta = preview.meta({
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
         genreIds: [28, 53],
+        certification: "15",
+        ratings: [
+          {
+            name: "imdb",
+            image: "imdb.svg",
+            score: "7.6",
+            url: "https://www.imdb.com/title/tt10366206/",
+          },
+          {
+            name: "rottentomatoes",
+            image: "rottentomatoes_certified_fresh.svg",
+            score: "94%",
+            url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
+          },
+        ],
+        logo: null,
       },
       {
-        id: 94_605,
+        id: "94605",
         mediaType: "tv",
         title: "Arcane",
         backdropPath:
@@ -35,9 +51,12 @@ const meta = preview.meta({
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
         genreIds: [16, 10_759],
+        certification: "12A",
+        ratings: [],
+        logo: null,
       },
       {
-        id: 94_605,
+        id: "1291595",
         mediaType: "movie",
         title: "Insidious: Out of the Further",
         backdropPath:
@@ -48,6 +67,9 @@ const meta = preview.meta({
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
         genreIds: [27],
+        certification: "18",
+        ratings: [],
+        logo: null,
       },
     ],
   },
@@ -282,3 +304,59 @@ Default.test(
     });
   },
 );
+
+export const WithLongTitle = meta.story({
+  args: {
+    data: [
+      {
+        id: "1291594",
+        mediaType: "movie",
+        title: "The Assassination of Jesse James by the Coward Robert Ford",
+        backdropPath:
+          "https://image.tmdb.org/t/p/original/5r2BZajlRZqnOc6s2BS0aiFDcne.jpg",
+        releaseDate: "2007-10-19",
+        voteAverage: 7.5,
+        originalLanguage: "en",
+        overview:
+          "Robert Ford, who has idolized Jesse James since childhood, tries hard to join the resurgent gang of the Missouri outlaw, but gradually becomes resentful of the bandit leader.",
+        genreIds: [18, 36, 53],
+        certification: "R",
+        ratings: [],
+        logo: null,
+      },
+      {
+        id: "1291593",
+        mediaType: "movie",
+        title:
+          "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
+        backdropPath:
+          "https://image.tmdb.org/t/p/original/4LmNLvXP5SZ5TrZEkNhC7dbjUNV.jpg",
+        releaseDate: "1964-01-29",
+        voteAverage: 8.3,
+        originalLanguage: "en",
+        overview:
+          "After a rogue U.S. general orders an unauthorized nuclear attack on the Soviet Union, leaders in the War Room race to prevent global catastrophe.",
+        genreIds: [18, 36, 53],
+        certification: "R",
+        ratings: [],
+        logo: null,
+      },
+      {
+        id: "1291595",
+        mediaType: "movie",
+        title: "Insidious: Out of the Further",
+        backdropPath:
+          "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
+        releaseDate: "2026-08-21",
+        voteAverage: 6.5,
+        originalLanguage: "en",
+        overview:
+          "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
+        genreIds: [27],
+        certification: "18",
+        ratings: [],
+        logo: null,
+      },
+    ],
+  },
+});

@@ -45,8 +45,15 @@ const TMDB_GENRES: Record<number, string> = {
   10_768: "War & Politics",
 };
 
+export interface RatingScore {
+  name: string;
+  image?: `${"imdb" | `rottentomatoes${"" | "_audience" | "_certified"}_fresh` | `rottentomatoes${"" | "_audience"}_rotten`}.svg`;
+  score: string;
+  url: string;
+}
+
 export interface TMDBNowPlayingItem {
-  id: number;
+  id: string;
   mediaType?: "movie" | "tv" | "person" | "company";
   title?: string;
   name?: string;
@@ -57,7 +64,9 @@ export interface TMDBNowPlayingItem {
   originalLanguage?: string;
   overview?: string;
   genreIds?: number[];
-  certification?: string;
+  certification: string;
+  ratings: RatingScore[];
+  logo: string | null;
 }
 
 export interface TmdbNowPlayingProps {
@@ -75,29 +84,15 @@ export function TmdbNowPlaying({
   heightClass = "h-[350px] md:h-[420px]",
   autoplayDelay = 5000,
 }: TmdbNowPlayingProps) {
-  const autoplayPlugin = Autoplay({
-    delay: autoplayDelay,
-    stopOnMouseEnter: true,
-  });
-
-  const fadePlugin = Fade();
+  const [autoplayPlugin, fadePlugin] = [
+    Autoplay({
+      delay: autoplayDelay,
+      stopOnMouseEnter: true,
+    }),
+    Fade(),
+  ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-
-  const [certifications, setCertifications] = useState<
-    Record<number, string | null>
-  >({});
-
-  const [ratings, setRatings] = useState<
-    Record<
-      number,
-      {
-        scores?: { name: string; image?: string; score: string; url: string }[];
-      }
-    >
-  >({});
-
-  const [logos, setLogos] = useState<Record<number, string | null>>({});
 
   const [api, setApi] = React.useState<CarouselApi>();
   const carouselRef = React.useRef<HTMLDivElement>(null);
@@ -152,7 +147,7 @@ export function TmdbNowPlaying({
       <Carousel
         setApi={setApi}
         plugins={[autoplayPlugin, fadePlugin]}
-        opts={{ duration: 40, loop: true }}
+        opts={{ duration: 40, loop: true, watchDrag: false }}
         className="relative"
         aria-label="Now playing movies carousel"
         ref={carouselRef}
@@ -162,7 +157,6 @@ export function TmdbNowPlaying({
             const isTV = item.mediaType === "tv";
             const mediaType = isTV ? "tv" : "movie";
             const displayTitle = item.title ?? item.name ?? "Untitled";
-            const logo = logos[item.id];
 
             const backgroundGradient =
               "radial-gradient(120% 160% at 0% 100%, black 0%, transparent 70%), linear-gradient(to bottom, transparent 10%, black 100%)";
@@ -187,7 +181,6 @@ export function TmdbNowPlaying({
                     fill
                   />
                 )}
-
                 <div
                   className="bg-background pointer-events-none absolute top-0 right-0 bottom-0 left-0"
                   style={{
@@ -195,7 +188,6 @@ export function TmdbNowPlaying({
                     maskImage: backgroundGradient,
                   }}
                 />
-
                 <div
                   className={cn(
                     "absolute top-0 right-0 bottom-0 left-0 z-10 flex flex-col justify-end px-8 pt-2 pb-24 md:px-32 md:pt-8 md:pb-16 lg:right-0 lg:left-0",
@@ -214,9 +206,9 @@ export function TmdbNowPlaying({
                         getAlignmentClasses(alignment, "flex"),
                       )}
                     >
-                      {logo ? (
+                      {item.logo ? (
                         <Image
-                          src={logo}
+                          src={item.logo}
                           alt={displayTitle}
                           className={cn(
                             "max-h-full max-w-[80%] object-contain drop-shadow-2xl",
@@ -230,7 +222,7 @@ export function TmdbNowPlaying({
                       ) : (
                         <h1
                           className={cn(
-                            "line-clamp-2 text-3xl font-black tracking-tighter drop-shadow-2xl md:text-5xl md:leading-[1.1] lg:text-6xl",
+                            "line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-4xl))]",
                             getAnimationClass(100),
                           )}
                         >
@@ -248,13 +240,11 @@ export function TmdbNowPlaying({
                       <span className="flex items-center justify-center rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[10px] leading-none font-bold tracking-wider uppercase backdrop-blur-md md:text-xs">
                         {isTV ? "Series" : "Movie"}
                       </span>
-                      {(certifications[item.id] ??
-                        (item.certification &&
-                          item.certification !== "N/A")) && (
+                      {item.certification && item.certification !== "N/A" && (
                         <>
                           <span className="text-white/40">|</span>
                           <span className="flex items-center justify-center rounded-sm border border-white/40 px-1.5 py-1 text-[10px] leading-none font-bold tracking-wider uppercase md:text-xs">
-                            {certifications[item.id] ?? item.certification}
+                            {item.certification}
                           </span>
                         </>
                       )}
@@ -272,9 +262,9 @@ export function TmdbNowPlaying({
                           </span>
                         </>
                       )}
-                      {ratings[item.id]?.scores?.length && (
+                      {item.ratings.length > 0 && (
                         <div className="ml-2 flex items-center gap-4">
-                          {ratings[item.id]?.scores?.map((score) => (
+                          {item.ratings.map((score) => (
                             <a
                               key={score.name}
                               href={score.url}
@@ -284,11 +274,14 @@ export function TmdbNowPlaying({
                               title={score.name}
                             >
                               {score.image && (
-                                <Image
-                                  src={`/rating-logos/${score.image}`}
-                                  alt={score.name}
-                                  className="h-4 w-auto object-contain"
-                                />
+                                <div className="relative h-8 w-8">
+                                  <Image
+                                    src={`/rating-logos/${score.image}`}
+                                    alt={score.name}
+                                    className="h-4 w-auto object-contain"
+                                    fill
+                                  />
+                                </div>
                               )}
                               <span className="text-xs font-bold text-white drop-shadow-md">
                                 {score.score}
@@ -297,17 +290,16 @@ export function TmdbNowPlaying({
                           ))}
                         </div>
                       )}
-                      {ratings[item.id]?.scores?.length === 0 &&
-                        item.voteAverage && (
-                          <>
-                            {" "}
-                            <span className="text-white/40">|</span>
-                            <span className="flex items-center font-bold text-white drop-shadow-md">
-                              <Star className="mr-1 h-3.5 w-3.5 fill-current text-yellow-500" />
-                              {item.voteAverage.toFixed(1)}
-                            </span>
-                          </>
-                        )}
+                      {item.ratings.length === 0 && item.voteAverage && (
+                        <>
+                          {" "}
+                          <span className="text-white/40">|</span>
+                          <span className="flex items-center font-bold text-white drop-shadow-md">
+                            <Star className="mr-1 h-3.5 w-3.5 fill-current text-yellow-500" />
+                            {item.voteAverage.toFixed(1)}
+                          </span>
+                        </>
+                      )}
                     </div>
                     {item.overview && (
                       <p
@@ -354,9 +346,7 @@ export function TmdbNowPlaying({
                           className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold shadow-sm transition-all hover:scale-[1.02] md:h-12 md:text-base"
                           type="button"
                         >
-                          <Link href={`/watch/${item.id.toString()}`}>
-                            Play Now
-                          </Link>
+                          <Link href={`/watch/${item.id}`}>Request</Link>
                         </Button>
                       )}
                       <Button
@@ -365,9 +355,7 @@ export function TmdbNowPlaying({
                         className="flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/10 px-8 text-sm font-bold text-white shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20 md:h-12 md:text-base"
                         type="button"
                       >
-                        <Link
-                          href={`/details/media/${item.id.toString()}/${mediaType}`}
-                        >
+                        <Link href={`/details/media/${item.id}/${mediaType}`}>
                           More Info
                         </Link>
                       </Button>
