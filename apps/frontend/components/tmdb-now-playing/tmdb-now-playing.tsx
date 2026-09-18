@@ -194,38 +194,30 @@ export function TmdbNowPlaying({
                     getAlignmentClasses(alignment, "container"),
                   )}
                 >
-                  <div
-                    className={cn(
-                      "flex w-full max-w-3xl flex-col",
-                      getAlignmentClasses(alignment, "flex"),
-                    )}
-                  >
+                  <div className="flex w-full max-w-3xl flex-col">
                     <div
                       className={cn(
-                        "mb-4 flex h-24 items-end",
-                        getAlignmentClasses(alignment, "flex"),
+                        "flex h-24 items-end",
+                        getAnimationClass(100),
                       )}
                     >
                       {item.logo ? (
-                        <Image
-                          src={item.logo}
-                          alt={displayTitle}
-                          className={cn(
-                            "max-h-full max-w-[80%] object-contain drop-shadow-2xl",
-                            alignment === "right"
-                              ? "object-bottom-right"
-                              : alignment === "center"
-                                ? "object-bottom"
-                                : "object-bottom-left",
-                          )}
-                        />
+                        <div className="mb-4 relative w-full h-16">
+                          <Image
+                            src={item.logo}
+                            alt={displayTitle}
+                            className={cn(
+                              "max-h-full max-w-[80%] drop-shadow-2xl",
+                              alignment === "left" && "object-bottom-left",
+                              alignment === "right" && "object-bottom-right",
+                              alignment === "center" && "object-bottom",
+                            )}
+                            fill
+                            objectFit="contain"
+                          />
+                        </div>
                       ) : (
-                        <h1
-                          className={cn(
-                            "line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-4xl))]",
-                            getAnimationClass(100),
-                          )}
-                        >
+                        <h1 className="line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-4xl))]">
                           {displayTitle}
                         </h1>
                       )}
@@ -240,7 +232,7 @@ export function TmdbNowPlaying({
                       <span className="flex items-center justify-center rounded-md border border-white/20 bg-white/10 px-2 py-1 text-[10px] leading-none font-bold tracking-wider uppercase backdrop-blur-md md:text-xs">
                         {isTV ? "Series" : "Movie"}
                       </span>
-                      {item.certification && item.certification !== "N/A" && (
+                      {item.certification && (
                         <>
                           <span className="text-white/40">|</span>
                           <span className="flex items-center justify-center rounded-sm border border-white/40 px-1.5 py-1 text-[10px] leading-none font-bold tracking-wider uppercase md:text-xs">
@@ -341,6 +333,7 @@ export function TmdbNowPlaying({
                     >
                       {showRequestButton && (
                         <Button
+                          asChild
                           variant="default"
                           size="lg"
                           className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold shadow-sm transition-all hover:scale-[1.02] md:h-12 md:text-base"
@@ -350,6 +343,7 @@ export function TmdbNowPlaying({
                         </Button>
                       )}
                       <Button
+                        asChild
                         variant="secondary"
                         size="lg"
                         className="flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/10 px-8 text-sm font-bold text-white shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20 md:h-12 md:text-base"
