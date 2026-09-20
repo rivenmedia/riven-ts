@@ -53,7 +53,7 @@ export function TrendingShows() {
         <TrendingItemsActions
           aria-label="Trending TV shows actions"
           setTimeWindow={setTimeWindow}
-          viewAllHref="/lists/trending/tv"
+          viewAllHref="/lists/trending/shows"
         />
       </div>
       <ErrorBoundary FallbackComponent={ListCarouselSuspenseError}>
