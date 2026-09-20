@@ -12,7 +12,7 @@ import { definePreview } from "@storybook/nextjs-vite";
 import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
 import { setupWorker } from "msw/browser";
-import { useLayoutEffect } from "react";
+import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
 import { expect } from "storybook/test";
 import { themes } from "storybook/theming";
@@ -130,7 +130,9 @@ export const preview = definePreview({
 
       return (
         <Providers>
-          <Story />
+          <Suspense>
+            <Story />
+          </Suspense>
         </Providers>
       );
     },

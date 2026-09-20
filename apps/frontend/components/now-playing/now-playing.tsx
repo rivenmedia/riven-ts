@@ -11,40 +11,10 @@ import { fly } from "../_animations/fly";
 import { Button } from "../_ui/button";
 import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
 import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
-import { TmdbNowPlayingSkeleton } from "./tmdb-now-playing-skeleton";
 
 import type { CarouselApi } from "../_ui/carousel";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { RefObject } from "react";
-
-const TMDB_GENRES: Record<number, string> = {
-  28: "Action",
-  12: "Adventure",
-  16: "Animation",
-  35: "Comedy",
-  80: "Crime",
-  99: "Documentary",
-  18: "Drama",
-  10_751: "Family",
-  14: "Fantasy",
-  36: "History",
-  27: "Horror",
-  10_402: "Music",
-  9648: "Mystery",
-  10_749: "Romance",
-  878: "Sci-Fi",
-  10_770: "TV Movie",
-  53: "Thriller",
-  10_752: "War",
-  37: "Western",
-  10_759: "Action & Adventure",
-  10_762: "Kids",
-  10_763: "News",
-  10_764: "Reality",
-  10_765: "Sci-Fi & Fantasy",
-  10_766: "Soap",
-  10_767: "Talk",
-  10_768: "War & Politics",
-};
 
 export interface RatingScore {
   name: string;
@@ -53,9 +23,9 @@ export interface RatingScore {
   url: string;
 }
 
-export interface TMDBNowPlayingItem {
+export interface NowPlayingItem {
   id: string;
-  mediaType?: "movie" | "tv" | "person" | "company";
+  mediaType?: Extract<MediaItemType, "movie" | "show">;
   title?: string;
   name?: string;
   backdropPath?: string | null;
@@ -64,27 +34,27 @@ export interface TMDBNowPlayingItem {
   voteAverage?: number | null;
   originalLanguage?: string;
   overview?: string;
-  genreIds?: number[];
+  genres?: string[];
   certification: string;
   ratings: RatingScore[];
   logo: string | null;
 }
 
-export interface TmdbNowPlayingProps {
+export interface NowPlayingProps {
+  data: NowPlayingItem[];
   autoplayDelay?: number;
-  data?: TMDBNowPlayingItem[];
   showRequestButton?: boolean;
   alignment?: "left" | "center" | "right";
   heightClass?: string;
 }
 
-export function TmdbNowPlaying({
+export function NowPlaying({
   data,
   showRequestButton = true,
   alignment = "left",
   heightClass = "h-[350px] md:h-[420px]",
   autoplayDelay = 5000,
-}: TmdbNowPlayingProps) {
+}: NowPlayingProps) {
   const [autoplayPlugin, fadePlugin] = [
     Autoplay({
       delay: autoplayDelay,
@@ -139,10 +109,6 @@ export function TmdbNowPlaying({
     });
   }, [api]);
 
-  if (!data || data.length === 0) {
-    return <TmdbNowPlayingSkeleton heightClass={heightClass} />;
-  }
-
   return (
     <div className="border-border/50 relative overflow-hidden rounded-2xl border shadow-2xl">
       <Carousel
@@ -155,7 +121,7 @@ export function TmdbNowPlaying({
       >
         <CarouselContent>
           {data.map((item, i) => {
-            const isTV = item.mediaType === "tv";
+            const isTV = item.mediaType === "show";
             const mediaType = isTV ? "tv" : "movie";
             const displayTitle = item.title ?? item.name ?? "Untitled";
 
@@ -299,7 +265,7 @@ export function TmdbNowPlaying({
                         {item.overview}
                       </p>
                     )}
-                    {item.genreIds?.length && (
+                    {item.genres?.length && (
                       <div
                         className={cn(
                           "mt-4 flex flex-wrap gap-2 md:mt-6 delay-400",
@@ -307,17 +273,14 @@ export function TmdbNowPlaying({
                           animationClass,
                         )}
                       >
-                        {item.genreIds.slice(0, 4).map(
-                          (genreId) =>
-                            TMDB_GENRES[genreId] && (
-                              <div
-                                key={genreId.toString()}
-                                className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
-                              >
-                                {TMDB_GENRES[genreId]}
-                              </div>
-                            ),
-                        )}
+                        {item.genres.slice(0, 4).map((genre) => (
+                          <div
+                            key={genre}
+                            className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
+                          >
+                            {genre}
+                          </div>
+                        ))}
                       </div>
                     )}
                     <div

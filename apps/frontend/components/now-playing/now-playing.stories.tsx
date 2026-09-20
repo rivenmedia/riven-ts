@@ -2,11 +2,17 @@ import { preview } from "@/.storybook/preview";
 
 import { expect, waitFor } from "storybook/test";
 
-import { TmdbNowPlaying } from "./tmdb-now-playing";
+import { NowPlaying } from "./now-playing";
+import { NowPlayingSkeleton } from "./now-playing-skeleton";
+
+import type { NowPlayingItem } from "./now-playing";
 
 const meta = preview.meta({
-  title: "Components / TmdbNowPlaying",
-  component: TmdbNowPlaying,
+  title: "Components / NowPlaying",
+  component: NowPlaying,
+  subcomponents: {
+    NowPlayingSkeleton,
+  },
   args: {
     autoplayDelay: 5000,
     data: [
@@ -21,7 +27,7 @@ const meta = preview.meta({
         originalLanguage: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-        genreIds: [28, 53],
+        genres: ["Action", "Thriller"],
         certification: "15",
         ratings: [
           {
@@ -41,7 +47,7 @@ const meta = preview.meta({
       },
       {
         id: "94605",
-        mediaType: "tv",
+        mediaType: "show",
         title: "Arcane",
         backdropPath:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
@@ -50,7 +56,7 @@ const meta = preview.meta({
         originalLanguage: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-        genreIds: [16, 10_759],
+        genres: ["Animation", "Action & Adventure"],
         certification: "12A",
         ratings: [],
         logo: null,
@@ -66,12 +72,12 @@ const meta = preview.meta({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genreIds: [27],
+        genres: ["Horror"],
         certification: "18",
         ratings: [],
         logo: null,
       },
-    ],
+    ] satisfies NowPlayingItem[],
   },
 });
 
@@ -319,7 +325,7 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "Robert Ford, who has idolized Jesse James since childhood, tries hard to join the resurgent gang of the Missouri outlaw, but gradually becomes resentful of the bandit leader.",
-        genreIds: [18, 36, 53],
+        genres: ["Drama", "History", "Thriller"],
         certification: "R",
         ratings: [],
         logo: null,
@@ -336,7 +342,7 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "After a rogue U.S. general orders an unauthorized nuclear attack on the Soviet Union, leaders in the War Room race to prevent global catastrophe.",
-        genreIds: [18, 36, 53],
+        genres: ["Drama", "History", "Thriller"],
         certification: "R",
         ratings: [],
         logo: null,
@@ -352,7 +358,7 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genreIds: [27],
+        genres: ["Horror"],
         certification: "18",
         ratings: [],
         logo: null,
@@ -375,7 +381,7 @@ export const WithLogos = meta.story({
         originalLanguage: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-        genreIds: [28, 53],
+        genres: ["Action", "Thriller"],
         certification: "15",
         ratings: [
           {
@@ -395,7 +401,7 @@ export const WithLogos = meta.story({
       },
       {
         id: "94605",
-        mediaType: "tv",
+        mediaType: "show",
         title: "Arcane",
         backdropPath:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
@@ -404,7 +410,7 @@ export const WithLogos = meta.story({
         originalLanguage: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-        genreIds: [16, 10_759],
+        genres: ["Animation", "Action & Adventure"],
         certification: "12A",
         ratings: [],
         logo: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
@@ -420,7 +426,7 @@ export const WithLogos = meta.story({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genreIds: [27],
+        genres: ["Horror"],
         certification: "18",
         ratings: [],
         logo: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
@@ -430,7 +436,5 @@ export const WithLogos = meta.story({
 });
 
 export const Loading = meta.story({
-  args: {
-    data: [],
-  },
+  render: () => <NowPlayingSkeleton heightClass="h-96" />,
 });

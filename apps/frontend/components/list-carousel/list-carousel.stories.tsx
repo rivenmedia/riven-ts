@@ -6,10 +6,16 @@ import { fn } from "storybook/test";
 
 import { CardSelectionProvider } from "../providers/card-selection-provider";
 import { ListCarousel } from "./list-carousel";
+import { ListCarouselSkeleton } from "./list-carousel-skeleton";
+import { ListCarouselSuspenseError } from "./list-carousel-suspense-error";
 
 const meta = preview.meta({
   title: "Components / ListCarousel",
   component: ListCarousel,
+  subcomponents: {
+    ListCarouselSkeleton,
+    ListCarouselSuspenseError,
+  },
   parameters: {
     layout: "padded",
   },
@@ -45,32 +51,26 @@ const meta = preview.meta({
 
 export const Default = meta.story({
   args: {
-    itemsPromise: Promise.resolve(
-      Array.from({ length: 10 }).map((_, i) => ({
-        id: (i + 1).toString(),
-        title: `Item ${(i + 1).toString()}`,
-        posterPath: faker.image.url(),
-        type: faker.helpers.arrayElement(["movie", "show"]),
-        year: 2021,
-      })),
-    ),
+    items: Array.from({ length: 10 }).map((_, i) => ({
+      id: (i + 1).toString(),
+      title: `Item ${(i + 1).toString()}`,
+      posterPath: faker.image.url(),
+      type: faker.helpers.arrayElement(["movie", "show"]),
+      year: 2021,
+    })),
     indexer: "tmdb",
   },
 });
 
 export const Loading = meta.story({
-  args: {
-    itemsPromise: new Promise(() => {
-      /* empty */
-    }),
-    indexer: "tmdb",
-  },
+  render: () => <ListCarouselSkeleton />,
 });
 
 export const FetchError = meta.story({
-  args: {
-    // oxlint-disable-next-line typescript/no-explicit-any
-    itemsPromise: Promise.resolve<any>("invalid data"),
-    indexer: "tmdb",
-  },
+  render: () => (
+    <ListCarouselSuspenseError
+      error={new Error("Failed to load items")}
+      resetErrorBoundary={fn()}
+    />
+  ),
 });

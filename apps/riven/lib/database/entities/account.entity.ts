@@ -54,6 +54,10 @@ export class Account {
 
   @Field()
   @Property()
+  public issuer?: string;
+
+  @Field()
+  @Property()
   public password?: string;
 
   @Field(() => Date)

@@ -1,12 +1,10 @@
 import { Skeleton } from "../_ui/skeleton";
 
-interface TmdbNowPlayingSkeletonProps {
+interface NowPlayingSkeletonProps {
   heightClass: string;
 }
 
-export function TmdbNowPlayingSkeleton({
-  heightClass,
-}: TmdbNowPlayingSkeletonProps) {
+export function NowPlayingSkeleton({ heightClass }: NowPlayingSkeletonProps) {
   return (
     <div
       className={`relative w-full overflow-hidden rounded-2xl ${heightClass}`}

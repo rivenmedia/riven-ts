@@ -2,7 +2,6 @@ import { z } from "zod";
 
 export const privateEnvironment = z
   .object({
-    AUTH_SECRET: z.string().min(1),
     DATABASE_FILE_NAME: z.string().min(1).prefault("./db.sqlite"),
     DATABASE_LOGGING: z.stringbool().default(false),
     ORIGIN: z.url().prefault("https://localhost:9000"),
