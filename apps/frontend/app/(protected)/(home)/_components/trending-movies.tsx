@@ -8,7 +8,7 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { TrendingItemsNavigation } from "./trending-items-navigation";
+import { TrendingItemsActions } from "./trending-items-actions";
 
 import type { TypedDocumentNode } from "@apollo/client";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
@@ -50,7 +50,8 @@ export function TrendingMovies() {
     <>
       <div className="mb-1 flex items-center justify-between">
         <SectionHeading title="Trending Movies" />
-        <TrendingItemsNavigation
+        <TrendingItemsActions
+          aria-label="Trending movies actions"
           setTimeWindow={setTimeWindow}
           viewAllHref="/lists/trending/movie"
         />

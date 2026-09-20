@@ -4,18 +4,23 @@ import { AnimatedToggle } from "@/components/animated-toggle/animated-toggle";
 import Link from "next/link";
 
 import type { Route } from "next";
+import type { HTMLAttributes } from "react";
 
-interface TrendingItemsNavigationProps {
+interface TrendingItemsActionsProps extends Omit<
+  HTMLAttributes<HTMLDivElement>,
+  "className"
+> {
   setTimeWindow: (newTimeWindow: string) => void;
   viewAllHref: Route;
 }
 
-export function TrendingItemsNavigation({
+export function TrendingItemsActions({
   setTimeWindow,
   viewAllHref,
-}: TrendingItemsNavigationProps) {
+  ...props
+}: TrendingItemsActionsProps) {
   return (
-    <div className="flex items-center gap-3">
+    <section className="flex items-center gap-3" {...props}>
       <AnimatedToggle
         options={[
           { label: "Today", value: "day" },
@@ -33,6 +38,6 @@ export function TrendingItemsNavigation({
       >
         <Link href={viewAllHref}>View All</Link>
       </Button>
-    </div>
+    </section>
   );
 }

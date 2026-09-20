@@ -1,6 +1,9 @@
 import { preview } from "@/.storybook/preview";
 
+import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { graphql, HttpResponse } from "msw";
+import Link from "next/link";
+import { expect, within } from "storybook/test";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing";
@@ -13,6 +16,9 @@ const meta = preview.meta({
   component: HomePage,
   parameters: {
     layout: "fullscreen",
+    chromatic: {
+      disableSnapshot: true,
+    },
   },
 });
 
@@ -164,6 +170,93 @@ export const Default = meta.story({
     );
   },
 });
+
+Default.test(
+  'Loads the correct items when the Trending Movies "This week" button is clicked',
+  async ({ canvas, userEvent, step }) => {
+    await step("View weekly trending movies", async () => {
+      const trendingMoviesActions = await canvas.findByRole("region", {
+        name: /trending movies/iu,
+      });
+
+      const thisWeekButton = await within(trendingMoviesActions).findByRole(
+        "button",
+        {
+          name: /this week/iu,
+        },
+      );
+
+      await userEvent.click(thisWeekButton);
+    });
+
+    const weeklyTrendingMovie = await canvas.findByRole("heading", {
+      name: /the odyssey/iu,
+    });
+
+    await expect(weeklyTrendingMovie).toBeInTheDocument();
+  },
+);
+
+Default.test(
+  'Navigates to the Trending Movies page when the Trending Movies "View all" button is clicked',
+  async ({ canvas }) => {
+    const trendingMoviesActions = await canvas.findByRole("region", {
+      name: /trending movies/iu,
+    });
+
+    const viewAllButton = await within(trendingMoviesActions).findByRole(
+      "link",
+      { name: /view all/iu },
+    );
+
+    await expect(viewAllButton).toHaveAttribute(
+      "href",
+      "/lists/trending/movie",
+    );
+  },
+);
+
+Default.test(
+  'Loads the correct items when the Trending Shows "This week" button is clicked',
+  async ({ canvas, userEvent, step }) => {
+    await step("View weekly trending shows", async () => {
+      const trendingShowsActions = await canvas.findByRole("region", {
+        name: /trending tv shows/iu,
+      });
+
+      const thisWeekButton = await within(trendingShowsActions).findByRole(
+        "button",
+        {
+          name: /this week/iu,
+        },
+      );
+
+      await userEvent.click(thisWeekButton);
+    });
+
+    const weeklyTrendingShow = await canvas.findByRole("heading", {
+      name: /arcane/iu,
+    });
+
+    await expect(weeklyTrendingShow).toBeInTheDocument();
+  },
+);
+
+Default.test(
+  'Navigates to the Trending Shows page when the Trending Shows "View all" button is clicked',
+  async ({ canvas }) => {
+    const trendingShowsActions = await canvas.findByRole("region", {
+      name: /trending tv shows/iu,
+    });
+
+    const viewAllButton = await within(trendingShowsActions).findByRole(
+      "link",
+      { name: /view all/iu },
+    );
+
+    await expect(viewAllButton).toHaveAttribute("href", "/lists/trending/tv");
+  },
+);
 
 export const WithRecentlyAdded = Default.extend({
   beforeEach({ msw }) {
