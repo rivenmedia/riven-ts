@@ -154,6 +154,13 @@ export const Default = meta.story({
           },
         });
       }),
+      graphql.query(GET_RECENTLY_ADDED, () =>
+        HttpResponse.json({
+          data: {
+            recentlyAdded: [],
+          },
+        }),
+      ),
     );
   },
 });
@@ -161,8 +168,8 @@ export const Default = meta.story({
 export const WithRecentlyAdded = Default.extend({
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_RECENTLY_ADDED, ({ variables }) => {
-        return HttpResponse.json({
+      graphql.query(GET_RECENTLY_ADDED, () =>
+        HttpResponse.json({
           data: {
             recentlyAdded: [
               {
@@ -175,8 +182,8 @@ export const WithRecentlyAdded = Default.extend({
               },
             ],
           },
-        });
-      }),
+        }),
+      ),
     );
   },
 });

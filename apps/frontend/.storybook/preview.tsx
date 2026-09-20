@@ -4,6 +4,7 @@ import { i18n } from "@/.storybook/i18n";
 import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
 import { Providers } from "@/components/providers";
 
+import { resetApolloClientSingletons } from "@apollo/client-integration-nextjs";
 import chromaticAddon from "@chromatic-com/storybook";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
@@ -138,6 +139,7 @@ export const preview = definePreview({
     },
   ],
   beforeEach() {
+    resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
   },
 });
