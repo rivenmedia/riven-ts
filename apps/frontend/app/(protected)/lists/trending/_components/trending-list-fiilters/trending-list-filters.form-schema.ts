@@ -14,7 +14,7 @@ const FloatRange = z
     message: "Minimum value must be less than or equal to maximum value",
   });
 
-export const FilterPopoverFormSchema = z.object({
+export const TrendingListFiltersFormSchema = z.object({
   contentRatings: z.partialRecord(MediaItemContentRating, z.boolean()),
   genres: z.record(z.int(), z.boolean()),
   language: z.string(),
@@ -25,4 +25,6 @@ export const FilterPopoverFormSchema = z.object({
   voteCount: IntRange,
 });
 
-export type FilterPopoverFormValues = z.infer<typeof FilterPopoverFormSchema>;
+export type TrendingListFiltersFormValues = z.infer<
+  typeof TrendingListFiltersFormSchema
+>;

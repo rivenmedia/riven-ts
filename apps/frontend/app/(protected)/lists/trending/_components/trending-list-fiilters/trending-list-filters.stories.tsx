@@ -2,11 +2,11 @@ import { preview } from "@/.storybook/preview";
 
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
-import { FilterPopover } from "./filter-popover";
+import { TrendingListFilters } from "./trending-list-filters";
 
 const meta = preview.meta({
-  title: "Components / FilterPopover",
-  component: FilterPopover,
+  title: "Pages / Trending / Filters",
+  component: TrendingListFilters,
   args: {
     onApply: fn(),
   },
@@ -16,6 +16,10 @@ export const Default = meta.story({
   name: "Movie Filters",
   args: {
     mediaType: "movie",
+    hasActiveFilters: false,
+    onApply: fn(),
+    onClear: fn(),
+    onSortChange: fn(),
   },
 });
 
@@ -135,7 +139,7 @@ Default.test(
   },
 );
 
-export const ShowFilters = meta.story({
+export const ShowFilters = Default.extend({
   args: {
     mediaType: "show",
   },

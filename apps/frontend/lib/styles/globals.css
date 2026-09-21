@@ -43,7 +43,7 @@
     cubic-bezier(0.25, 1, 0.5, 1);
   --animate-accordion-collapse: accordion-collapse 0.4s
     cubic-bezier(0.25, 1, 0.5, 1);
-  --animate-fly-in: fly-in var(--tw-animate-duration, 1s) easeOutCubic both;
+  --animate-fly-in: fly-in var(--tw-animate-duration, 1s) easeOutCubic backwards;
 
   @keyframes accordion-expand {
     from {

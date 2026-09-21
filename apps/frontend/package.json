@@ -62,6 +62,7 @@
     "react-error-boundary": "catalog:",
     "react-hook-form": "catalog:",
     "react-i18next": "catalog:",
+    "react-intersection-observer": "catalog:",
     "react-use": "catalog:",
     "recharts": "catalog:",
     "rxjs": "catalog:",

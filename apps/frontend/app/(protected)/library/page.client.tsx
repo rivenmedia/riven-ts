@@ -1,3 +1,4 @@
+import { fly } from "@/components/_animations/fly";
 import { Button } from "@/components/_ui/button";
 import { Input } from "@/components/_ui/input";
 import {
@@ -22,6 +23,7 @@ import { PageShell } from "@/components/page-shell/page-shell";
 import { CardSelectionProvider } from "@/components/providers/card-selection-provider";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
+import { cn } from "cn";
 import { startCase } from "es-toolkit";
 import { ListChecks, Loader2, Search, Trash } from "lucide-react";
 import Link from "next/link";
@@ -199,7 +201,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                   {items.map((item, i) => (
                     <div
                       key={item.id}
-                      className="animate-in fade-in slide-in-from-bottom-4 fill-mode-[backwards] duration-700"
+                      className={cn("duration-700", fly)}
                       style={{ animationDelay: `${(i * 30).toString()}ms` }}
                     >
                       <ListItem

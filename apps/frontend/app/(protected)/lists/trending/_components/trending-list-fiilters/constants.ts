@@ -1,3 +1,5 @@
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+
 export const LANGUAGE_OPTIONS = [
   { value: "", label: "All Languages" },
   { value: "en", label: "English" },
@@ -56,3 +58,43 @@ export const TV_GENRES = new Map([
   ["War & Politics", 10_768],
   ["Western", 37],
 ]);
+
+interface SortOption {
+  value: string;
+  label: string;
+  allowedFor: Extract<MediaItemType, "movie" | "show">[];
+}
+
+export const SORT_OPTIONS = [
+  {
+    value: "popularity.desc",
+    label: "Most Popular",
+    allowedFor: ["movie", "show"],
+  },
+  {
+    value: "popularity.asc",
+    label: "Least Popular",
+    allowedFor: ["movie", "show"],
+  },
+  {
+    value: "vote_average.desc",
+    label: "Highest Rated",
+    allowedFor: ["movie", "show"],
+  },
+  {
+    value: "vote_average.asc",
+    label: "Lowest Rated",
+    allowedFor: ["movie", "show"],
+  },
+  {
+    value: "primary_release_date.desc",
+    label: "Newest",
+    allowedFor: ["movie", "show"],
+  },
+  {
+    value: "primary_release_date.asc",
+    label: "Oldest",
+    allowedFor: ["movie", "show"],
+  },
+  { value: "revenue.desc", label: "Highest Revenue", allowedFor: ["movie"] },
+] as const satisfies SortOption[];

@@ -1,8 +1,6 @@
 import { preview } from "@/.storybook/preview";
 
-import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { graphql, HttpResponse } from "msw";
-import Link from "next/link";
 import { expect, within } from "storybook/test";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added";
