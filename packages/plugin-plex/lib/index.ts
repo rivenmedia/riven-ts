@@ -2,6 +2,7 @@ import path from "node:path";
 
 import packageJson from "../package.json" with { type: "json" };
 import { PlexDiscoverAPI } from "./datasource/plex-discover.datasource.ts";
+import { PlexRSSAPI } from "./datasource/plex-rss.datasource.ts";
 import { PlexAPI } from "./datasource/plex.datasource.ts";
 import { pluginConfig } from "./plex-plugin.config.ts";
 import { PlexSettings } from "./plex-settings.schema.ts";
@@ -14,7 +15,7 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
-  dataSources: [PlexAPI, PlexDiscoverAPI],
+  dataSources: [PlexAPI, PlexDiscoverAPI, PlexRSSAPI],
   resolvers: [PlexResolver, PlexSettingsResolver],
   hooks: {
     "riven.media-item.download.success": async ({
@@ -85,18 +86,35 @@ export const plugin: RivenPlugin = {
         };
       }
 
-      const api = dataSources.get(PlexDiscoverAPI);
-      const watchlistItems = await api.getUserWatchlist();
+      const discoverApi = dataSources.get(PlexDiscoverAPI);
+      const rssApi = dataSources.get(PlexRSSAPI);
+
+      const watchlistItems = await discoverApi.getUserWatchlist();
+      const rssItems = await rssApi.getRSSWatchlists();
 
       const movies: ContentServiceRequestedResponse["movies"] = [];
       const shows: ContentServiceRequestedResponse["shows"] = [];
 
-      for (const item of watchlistItems) {
+      const seenGuids = new Set<string>();
+
+      for (const item of [...watchlistItems, ...rssItems]) {
         const request: ContentServiceRequestedResponse[
           | "movies"
           | "shows"][number] = {};
 
+        const guidSet = new Set(
+          item.Guid.map(({ id, type }) => `${type}://${id}`),
+        );
+
+        const isDuplicateItem = guidSet.intersection(seenGuids).size > 0;
+
+        if (isDuplicateItem) {
+          continue;
+        }
+
         for (const { id, type } of item.Guid) {
+          seenGuids.add(`${type}://${id}`);
+
           if (type === "imdb") {
             request.imdbId = id;
           } else if (type === "tmdb" && item.type === "movie") {
@@ -108,7 +126,7 @@ export const plugin: RivenPlugin = {
 
         if (Object.keys(request).length === 0) {
           logger.warn(
-            `Unable to extract external IDs from ${item.title} (${item.year.toString()})`,
+            `Unable to extract external IDs from ${item.year ? `${item.title} (${item.year.toString()})` : item.title}`,
           );
 
           continue;

@@ -21,7 +21,14 @@ export const PlexSettings = z.object({
     )
     .default("/mount"),
   watchlistEnabled: z.stringbool().default(false),
-  rssUrls: z.array(z.string()).optional(),
+  rssUrls: json(
+    z.array(
+      z.url({
+        protocol: /https/u,
+        hostname: /rss.plex.tv/u,
+      }),
+    ),
+  ).optional(),
   updateIntervalSeconds: json(z.int().nonnegative().nullable())
     .nullable()
     .default(Duration.fromObject({ minutes: 1 }).as("seconds"))

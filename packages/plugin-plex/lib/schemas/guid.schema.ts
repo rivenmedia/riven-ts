@@ -1,16 +1,17 @@
 import assert from "node:assert";
 import { z } from "zod";
 
+const GuidString = z.templateLiteral([
+  z.string().min(1),
+  z.literal("://"),
+  z.string().min(1),
+]);
+
 export const Guid = z
-  .object({
-    id: z.templateLiteral([
-      z.string().min(1),
-      z.literal("://"),
-      z.string().min(1),
-    ]),
-  })
+  .union([GuidString, z.object({ id: GuidString })])
   .transform((guid) => {
-    const [type, id] = guid.id.split("://");
+    const target = typeof guid === "string" ? guid : guid.id;
+    const [type, id] = target.split("://");
 
     // This should never trigger due to the template literal validation,
     // but array destructuring requires a check to satisfy TypeScript's type system.
