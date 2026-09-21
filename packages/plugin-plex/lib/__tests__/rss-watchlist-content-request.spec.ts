@@ -96,7 +96,7 @@ it("returns watchlist content from the provided RSS URLs", async ({
   );
 });
 
-it.only("deduplicates items found in multiple RSS feeds or account watchlist", async ({
+it("deduplicates items found in multiple RSS feeds or account watchlist", async ({
   dataSourceMap,
   plugin,
   server,
