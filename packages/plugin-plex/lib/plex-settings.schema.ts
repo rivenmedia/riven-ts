@@ -1,3 +1,6 @@
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+import { json } from "@repo/util-plugin-sdk/validation";
+
 import z from "zod";
 
 export const PlexSettings = z.object({
@@ -17,6 +20,12 @@ export const PlexSettings = z.object({
       'The start of Plex library paths, e.g. "/mount" in "/mount/movies"',
     )
     .default("/mount"),
+  watchlistEnabled: z.stringbool().default(false),
+  rssUrls: z.array(z.string()).optional(),
+  updateIntervalSeconds: json(z.int().nonnegative().nullable())
+    .nullable()
+    .default(Duration.fromObject({ minutes: 1 }).as("seconds"))
+    .describe("Interval in seconds to update content."),
 });
 
 export type PlexSettings = z.infer<typeof PlexSettings>;
