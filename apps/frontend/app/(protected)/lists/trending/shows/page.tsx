@@ -1,3 +1,11 @@
+import { TrendingDiscoveryPage } from "../_components/trending-discovery-page/trending-discovery-page";
+
 export default function TrendingShowsPage() {
-  return <div>Trending Shows Page</div>;
+  return (
+    <TrendingDiscoveryPage
+      emptyMessage="No shows found"
+      mediaType="show"
+      title="Trending Shows"
+    />
+  );
 }

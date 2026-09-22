@@ -9,7 +9,7 @@ import { TrendingDiscoveryPage } from "./trending-discovery-page";
 import type { UUID } from "node:crypto";
 
 const meta = preview.meta({
-  title: "Pages / Trending / Discovery",
+  title: "Pages / Trending / Components / TrendingDiscoveryPage",
   component: TrendingDiscoveryPage,
   parameters: {
     layout: "fullscreen",

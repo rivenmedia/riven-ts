@@ -5,7 +5,7 @@ import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { TrendingListFilters } from "./trending-list-filters";
 
 const meta = preview.meta({
-  title: "Pages / Trending / Filters",
+  title: "Pages / Trending / Components / TrendingListFilters",
   component: TrendingListFilters,
   args: {
     onApply: fn(),
