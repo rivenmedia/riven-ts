@@ -15,11 +15,12 @@ import Link from "next/link";
 import { LogOutButton } from "./_components/log-out-button";
 
 import type { User } from "@/lib/auth/types";
-import type { ComponentProps, ComponentType } from "react";
+import type { LucideIcon } from "lucide-react";
+import type { ComponentProps } from "react";
 
 export interface SidebarItem {
   href: Extract<ComponentProps<typeof Link>["href"], string>;
-  icon: ComponentType<React.SVGProps<SVGSVGElement>>;
+  icon: LucideIcon;
   label: string;
 }
 
