@@ -9,6 +9,7 @@ __generated__
 coverage
 .env*
 !.env*.example
+!.envrc
 *.typegen.ts
 dist
 out
@@ -16,6 +17,7 @@ temp
 *.bundled_*.mjs
 docker-data
 *.graphql
+.direnv
 .git
 knip-report.json
 .direnv
