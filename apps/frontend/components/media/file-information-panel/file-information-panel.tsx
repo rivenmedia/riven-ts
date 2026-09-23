@@ -13,7 +13,7 @@ import type { PartialDeep } from "type-fest";
 
 export interface FileInformationPanelProps {
   entries: Omit<PartialDeep<MediaEntry>, "mediaItem">[];
-  fallbackMediaMetadata: MediaMetadata | undefined;
+  fallbackMediaMetadata: MediaMetadata | null;
   onDeleteEntry: (id: UUID, label: string) => void | Promise<void>;
 }
 

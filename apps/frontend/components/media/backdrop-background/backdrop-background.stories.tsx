@@ -21,7 +21,7 @@ const sampleImage =
 
 export const Zinc = meta.story({
   args: {
-    image: () => (
+    image: (
       <Image
         alt="backdrop"
         className="h-full w-full object-cover opacity-30 blur-3xl"
@@ -35,7 +35,7 @@ export const Zinc = meta.story({
 export const Background = meta.story({
   args: {
     tone: "background",
-    image: () => (
+    image: (
       <Image
         alt="backdrop"
         className="h-full w-full object-cover opacity-30 blur-3xl"

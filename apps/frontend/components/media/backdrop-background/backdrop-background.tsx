@@ -1,17 +1,17 @@
-import type { ComponentType } from "react";
+import type { ReactElement } from "react";
 
 export interface BackdropBackgroundProps {
   tone?: "zinc" | "background";
-  image: ComponentType;
+  image: ReactElement;
 }
 
 export function BackdropBackground({
   tone = "zinc",
-  image: Image,
+  image,
 }: BackdropBackgroundProps) {
   return (
     <div className="fixed top-0 left-0 z-0 h-screen w-full transition-opacity duration-1000">
-      <Image />
+      {image}
       <div className="bg-background/80 absolute inset-0 mix-blend-multiply" />
       {tone === "background" ? (
         <>

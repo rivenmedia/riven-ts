@@ -1,3 +1,6 @@
+import { fly } from "@/components/_animations/fly";
+
+import { cn } from "cn";
 import Image from "next/image";
 
 export interface Rating {
@@ -24,7 +27,7 @@ export function RatingsRow({ loading, scores }: RatingsRowProps) {
   }
 
   return (
-    <div className="flex items-center gap-5 animate-in starting:opacity-0 fade-in-0 duration-400 delay-300 slide-in-from-bottom-[20px] ease-[easeOutCubic]">
+    <div className={cn("flex items-center gap-5 duration-400 delay-300", fly)}>
       {scores?.map((score) => (
         <a
           key={score.name}
