@@ -40,7 +40,9 @@ function TrendingShowsInner({ timeWindow }: { timeWindow: string }) {
     variables: { timeWindow },
   });
 
-  return <ListCarousel items={data.trendingShows} indexer="tmdb" />;
+  return (
+    <ListCarousel items={data.trendingShows} indexer="tmdb" ignoreAnimation />
+  );
 }
 
 export function TrendingShows() {

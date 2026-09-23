@@ -43,7 +43,21 @@
     cubic-bezier(0.25, 1, 0.5, 1);
   --animate-accordion-collapse: accordion-collapse 0.4s
     cubic-bezier(0.25, 1, 0.5, 1);
-  --animate-fly-in: fly-in var(--tw-animate-duration, 1s) easeOutCubic backwards;
+  --animate-fly-in: fly-in var(--tw-animation-duration, 0.4s) easeOutCubic
+    backwards;
+
+  @keyframes fly-in {
+    from {
+      overflow: clip;
+      transform: translateY(20px);
+      opacity: 0;
+    }
+
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
 
   @keyframes accordion-expand {
     from {
@@ -62,18 +76,6 @@
 
     to {
       height: 0;
-    }
-  }
-
-  @keyframes fly-in {
-    from {
-      transform: translateY(20px);
-      opacity: 0;
-    }
-
-    to {
-      transform: translateY(0);
-      opacity: 1;
     }
   }
 
@@ -108,12 +110,6 @@
   body {
     @apply bg-background text-foreground;
     letter-spacing: var(--tracking-normal);
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
-  }
-
-  ::-webkit-scrollbar {
-    display: none;
   }
 
   body {
@@ -243,6 +239,10 @@
   --sidebar-ring: oklch(0.708 0 0);
 
   color-scheme: light dark;
+
+  @media (prefers-reduced-motion: reduce) {
+    --animate-fly-in: none;
+  }
 }
 
 .dark {

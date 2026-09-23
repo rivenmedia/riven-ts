@@ -45,7 +45,7 @@ export function ItemActionToolbar({
   return (
     <div
       className={cn(
-        "flex flex-wrap items-center gap-2 duration-400 delay-150",
+        "flex flex-wrap items-center gap-2 animation-duration-400 delay-150",
         fly,
       )}
     >

@@ -1,3 +1,6 @@
+import { cn } from "cn";
+
+import { fly } from "../_animations/fly";
 import {
   Carousel,
   CarouselContent,
@@ -12,9 +15,14 @@ import type { ComponentProps } from "react";
 interface ListCarouselProps {
   items: ComponentProps<typeof ListItem>["mediaItem"][];
   indexer: string | undefined;
+  ignoreAnimation?: boolean;
 }
 
-export function ListCarousel({ items, indexer }: ListCarouselProps) {
+export function ListCarousel({
+  items,
+  indexer,
+  ignoreAnimation,
+}: ListCarouselProps) {
   return (
     <Carousel
       opts={{
@@ -27,7 +35,10 @@ export function ListCarousel({ items, indexer }: ListCarouselProps) {
         {items.map((item, i) => (
           <CarouselItem
             key={item.id}
-            className="animate-in fade-in slide-in-from-bottom-8 fill-mode-[backwards] max-w-max pl-3 duration-700 basis-1/3"
+            className={cn(
+              "max-w-max pl-3 animation-duration-700 basis-1/3",
+              !ignoreAnimation && fly,
+            )}
             style={{ animationDelay: `${(i * 50).toString()}ms` }}
           >
             <ListItem

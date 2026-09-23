@@ -40,7 +40,9 @@ function TrendingMoviesInner({ timeWindow }: { timeWindow: string }) {
     variables: { timeWindow },
   });
 
-  return <ListCarousel items={data.trendingMovies} indexer="tmdb" />;
+  return (
+    <ListCarousel items={data.trendingMovies} indexer="tmdb" ignoreAnimation />
+  );
 }
 
 export function TrendingMovies() {

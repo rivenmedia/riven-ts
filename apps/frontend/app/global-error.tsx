@@ -1,8 +1,10 @@
 "use client";
 
+import { fly } from "@/components/_animations/fly";
 import { Badge } from "@/components/_ui/badge";
 import { Button } from "@/components/_ui/button";
 
+import { cn } from "cn";
 import { ArrowLeft, Home, RotateCcw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
 
@@ -64,7 +66,12 @@ export default function GlobalErrorPage({ retry, error }: ErrorInfo) {
         <div className="bg-accent/10 absolute right-0 bottom-0 h-72 w-72 rounded-full blur-[120px]" />
       </div>
 
-      <section className="mx-auto flex w-full max-w-4xl flex-col gap-8 animate-in starting:bottom-[-2] slide-in-from-bottom-3 duration-450 ease-[easeOutCubic]">
+      <section
+        className={cn(
+          "mx-auto flex w-full max-w-4xl flex-col gap-8 animation-duration-450",
+          fly,
+        )}
+      >
         <div className="flex flex-col gap-5">
           <Badge
             variant="outline"

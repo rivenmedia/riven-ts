@@ -201,7 +201,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                   {items.map((item, i) => (
                     <div
                       key={item.id}
-                      className={cn("duration-700", fly)}
+                      className={cn("animation-duration-700", fly)}
                       style={{ animationDelay: `${(i * 30).toString()}ms` }}
                     >
                       <ListItem

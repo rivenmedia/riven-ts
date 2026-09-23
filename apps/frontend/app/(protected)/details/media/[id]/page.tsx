@@ -174,10 +174,7 @@ export default function MediaDetailsPage() {
           image={
             <Image
               alt=""
-              className={cn(
-                "h-full w-full object-cover opacity-30 blur-3xl transition-opacity duration-1000",
-                fly,
-              )}
+              className="h-full w-full object-cover starting:opacity-0 opacity-30 blur-3xl transition-opacity duration-1000 ease-[easeOutCubic]"
               src={data.mediaDetails.details.backdropPath}
               loading="lazy"
               fill
@@ -197,7 +194,7 @@ export default function MediaDetailsPage() {
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr] lg:gap-6">
             <div
               className={cn(
-                "hidden lg:mx-0 lg:block delay-50 duration-400",
+                "hidden lg:mx-0 lg:block delay-50 animation-duration-400",
                 fly,
               )}
             >
@@ -211,7 +208,7 @@ export default function MediaDetailsPage() {
             <div className="flex flex-col gap-5">
               <div
                 className={cn(
-                  "flex flex-wrap items-center gap-3 delay-100 duration-400",
+                  "flex flex-wrap items-center gap-3 delay-100 animation-duration-400",
                   fly,
                 )}
               >
@@ -249,7 +246,7 @@ export default function MediaDetailsPage() {
 
               <div
                 className={cn(
-                  "text-muted-foreground flex items-center gap-x-2.5 text-sm duration-400 delay-200",
+                  "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",
                   fly,
                 )}
               >
@@ -265,7 +262,7 @@ export default function MediaDetailsPage() {
               {data.mediaDetails.details.genres.length > 0 && (
                 <div
                   className={cn(
-                    "flex flex-wrap items-center gap-2 duration-400 delay-250",
+                    "flex flex-wrap items-center gap-2 animation-duration-400 delay-250",
                     fly,
                   )}
                 >
@@ -298,7 +295,7 @@ export default function MediaDetailsPage() {
               />
               <p
                 className={cn(
-                  "text-muted-foreground max-w-4xl text-base leading-relaxed duration-400 delay-350",
+                  "text-muted-foreground max-w-4xl text-base leading-relaxed animation-duration-400 delay-350",
                   fly,
                 )}
               >
@@ -356,7 +353,10 @@ export default function MediaDetailsPage() {
             data.mediaDetails.details.seasons &&
             data.mediaDetails.details.seasons.length > 0 && (
               <section
-                className={cn("mt-8 md:mt-12 duration-400 delay-450", fly)}
+                className={cn(
+                  "mt-8 md:mt-12 animation-duration-400 delay-450",
+                  fly,
+                )}
               >
                 <SectionHeading title="Seasons" />
                 <SeasonList seasons={data.mediaDetails.details.seasons} />
@@ -381,7 +381,10 @@ export default function MediaDetailsPage() {
                 {/if} */}
           {data.mediaDetails.details.cast.length > 0 && (
             <section
-              className={cn("mt-8 md:mt-12 duration-400 delay-550", fly)}
+              className={cn(
+                "mt-8 md:mt-12 animation-duration-400 delay-550",
+                fly,
+              )}
             >
               <SectionHeading title="Cast" />
               <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
@@ -400,7 +403,12 @@ export default function MediaDetailsPage() {
               </Carousel>
             </section>
           )}
-          <section className={cn("mt-8 md:mt-12 duration-400 delay-600", fly)}>
+          <section
+            className={cn(
+              "mt-8 md:mt-12 animation-duration-400 delay-600",
+              fly,
+            )}
+          >
             <div className="flex max-w-7xl flex-col gap-8 lg:flex-row lg:gap-12">
               {/* <MoreDetailsPanel
                 budget={

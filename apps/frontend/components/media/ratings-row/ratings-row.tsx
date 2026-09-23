@@ -27,7 +27,12 @@ export function RatingsRow({ loading, scores }: RatingsRowProps) {
   }
 
   return (
-    <div className={cn("flex items-center gap-5 duration-400 delay-300", fly)}>
+    <div
+      className={cn(
+        "flex items-center gap-5 animation-duration-400 delay-300",
+        fly,
+      )}
+    >
       {scores?.map((score) => (
         <a
           key={score.name}

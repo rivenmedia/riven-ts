@@ -22,7 +22,7 @@ interface MediaCarouselProps {
 export function MediaCarousel({ items, title, delay }: MediaCarouselProps) {
   return (
     <section
-      className={cn("mt-8 md:mt-12 duration-400", fly)}
+      className={cn("mt-8 md:mt-12 animation-duration-400", fly)}
       style={{ animationDelay: `${delay.toString()}ms` }}
     >
       <SectionHeading title={title} />

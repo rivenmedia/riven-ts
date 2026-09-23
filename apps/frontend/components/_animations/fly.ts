@@ -1,1 +1,1 @@
-export const fly = "animate animate-(--animate-fly-in)";
+export const fly = "animate-in animate-(--animate-fly-in)";

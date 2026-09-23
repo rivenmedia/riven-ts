@@ -160,7 +160,7 @@ export function NowPlaying({
                   <div className="flex w-full max-w-3xl flex-col">
                     <div
                       className={cn(
-                        "flex h-24 items-end delay-100",
+                        "flex h-24 items-end delay-100 animation-duration-1000",
                         animationClass,
                       )}
                     >
@@ -186,7 +186,7 @@ export function NowPlaying({
                     </div>
                     <div
                       className={cn(
-                        "mt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-white md:mt-4 md:text-sm delay-200",
+                        "mt-2 flex flex-wrap items-center gap-4 text-xs font-medium text-white md:mt-4 md:text-sm delay-200 animation-duration-1000",
                         getAlignmentClasses(alignment, "flex"),
                         animationClass,
                       )}
@@ -258,7 +258,7 @@ export function NowPlaying({
                     {item.overview && (
                       <p
                         className={cn(
-                          "mt-3 line-clamp-2 max-w-xl text-xs leading-relaxed text-white/90 drop-shadow-md md:mt-4 md:text-base delay-300",
+                          "mt-3 line-clamp-2 max-w-xl text-xs leading-relaxed text-white/90 drop-shadow-md md:mt-4 md:text-base delay-300 animation-duration-1000",
                           animationClass,
                         )}
                       >
@@ -268,7 +268,7 @@ export function NowPlaying({
                     {item.genres?.length && (
                       <div
                         className={cn(
-                          "mt-4 flex flex-wrap gap-2 md:mt-6 delay-400",
+                          "mt-4 flex flex-wrap gap-2 md:mt-6 delay-400 animation-duration-1000",
                           getAlignmentClasses(alignment, "flex"),
                           animationClass,
                         )}
@@ -285,7 +285,7 @@ export function NowPlaying({
                     )}
                     <div
                       className={cn(
-                        "mt-6 flex flex-wrap gap-4 md:mt-8 delay-500",
+                        "mt-6 flex flex-wrap gap-4 md:mt-8 delay-500 animation-duration-1000",
                         getAlignmentClasses(alignment, "flex"),
                         animationClass,
                       )}
