@@ -5,7 +5,7 @@
     "composite": true,
     "rootDir": ".",
     "noEmit": false,
-    "types": ["@repo/util-plugin-sdk"]
+    "types": ["@repo/util-plugin-sdk/types/extend-zod-global-registry"]
   },
   "files": ["vitest.setup.ts"],
   "include": [

@@ -20,8 +20,8 @@ import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/ind
 import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
 import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
+import type { AuthContext } from "better-auth";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
-import type { SetReturnType } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
 
@@ -90,13 +90,17 @@ export const it = testBase
   })
   .extend("em", ({ orm }) => orm.em.fork())
   .extend("authHelpers", async ({ orm, em }) => {
-    const testUtilsPlugin = testUtils();
+    const testUtilsPlugin = testUtils({ captureOTP: true });
 
-    type TestUtilsInitReturn = Awaited<ReturnType<typeof testUtilsPlugin.init>>;
-
-    const fixedTestUtilsPlugin = {
+    // `testUtils().init` returns `options: T | undefined`, which is incompatible with
+    // `BetterAuthPlugin` under `exactOptionalPropertyTypes`. Omit the key when it's undefined.
+    const exactTestUtilsPlugin = {
       ...testUtilsPlugin,
-      init: testUtilsPlugin.init.bind(null),
+      init(ctx: AuthContext) {
+        const { context, options } = testUtilsPlugin.init(ctx);
+
+        return options ? { context, options } : { context };
+      },
     };
 
     // Fork the entity manager to avoid global context errors
@@ -105,7 +109,7 @@ export const it = testBase
     const instance = betterAuth({
       ...authConfig,
       database: mikroOrmAdapter(orm),
-      plugins: [fixedTestUtilsPlugin],
+      plugins: [...authConfig.plugins, exactTestUtilsPlugin],
     });
 
     const { test } = await instance.$context;

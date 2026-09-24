@@ -49,6 +49,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
         ],
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
+        "typescript/only-throw-error": "off", // @repo/util-plugin-sdk's error factory conflicts with this rule when using the built d.ts files
         "typescript/strict-boolean-expressions": "off",
       },
       env: {

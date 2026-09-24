@@ -6,7 +6,7 @@
     "rootDir": ".",
     "outDir": "dist",
     "noEmit": false,
-    "types": ["@repo/util-plugin-sdk"]
+    "types": ["@repo/util-plugin-sdk/types/extend-zod-global-registry"]
   },
   "files": [],
   "include": [

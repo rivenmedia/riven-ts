@@ -1,14 +1,7 @@
+// oxlint-disable-next-line import/no-unassigned-import
+import "./types/extend-zod-global-registry.ts";
 import z from "zod";
 import { createErrorMap } from "zod-validation-error";
-
-declare module "zod" {
-  interface GlobalMeta {
-    /**
-     * If true, the field will be rendered as a password field in the frontend settings
-     */
-    secret?: boolean;
-  }
-}
 
 // Improve Zod's error messages by including the input value in the error report
 z.config({

@@ -13,50 +13,62 @@
       "default": "./lib/index.ts"
     },
     "./types/*": {
+      "types": "./dist/types/*.d.ts",
       "production": "./dist/types/*.js",
       "default": "./lib/types/*.ts"
     },
     "./dto/entities": {
+      "types": "./dist/dto/entities/index.d.ts",
       "production": "./dist/dto/entities/index.js",
       "default": "./lib/dto/entities/index.ts"
     },
     "./dto/enums/*": {
+      "types": "./dist/dto/enums/*.d.ts",
       "production": "./dist/dto/enums/*.js",
       "default": "./lib/dto/enums/*.ts"
     },
     "./dto/repositories/*": {
+      "types": "./dist/dto/repositories/*.d.ts",
       "production": "./dist/dto/repositories/*.js",
       "default": "./lib/dto/repositories/*.ts"
     },
     "./dto/unions/*": {
+      "types": "./dist/dto/unions/*.d.ts",
       "production": "./dist/dto/unions/*.js",
       "default": "./lib/dto/unions/*.ts"
     },
     "./errors/*": {
+      "types": "./dist/errors/*.d.ts",
       "production": "./dist/errors/*.js",
       "default": "./lib/errors/*.ts"
     },
     "./events": {
+      "types": "./dist/schemas/events/index.d.ts",
       "production": "./dist/schemas/events/index.js",
       "default": "./lib/schemas/events/index.ts"
     },
     "./schemas/*": {
+      "types": "./dist/schemas/*.d.ts",
       "production": "./dist/schemas/*.js",
       "default": "./lib/schemas/*.ts"
     },
     "./helpers/*": {
+      "types": "./dist/helpers/*.d.ts",
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
     "./utilities/*": {
+      "types": "./dist/utilities/*.d.ts",
       "production": "./dist/utilities/*.js",
       "default": "./lib/utilities/*.ts"
     },
     "./validation": {
+      "types": "./dist/validation/index.d.ts",
       "production": "./dist/validation/index.js",
       "default": "./lib/validation/index.ts"
     },
     "./datasource-context": {
+      "types": "./dist/datasource/context.d.ts",
       "production": "./dist/datasource/context.js",
       "default": "./lib/datasource/context.ts"
     }
