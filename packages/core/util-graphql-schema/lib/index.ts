@@ -1,12 +1,17 @@
+import { LogLevel } from "@repo/feature-settings/enums/log-level.enum";
 import {
   CoreSettingsResolver,
   RivenSettingsResolver,
 } from "@repo/feature-settings/resolver";
 
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
-import { buildSchema as baseBuildSchema } from "type-graphql";
+import { buildSchema as baseBuildSchema, registerEnumType } from "type-graphql";
 
 import type { BuildSchemaOptions } from "type-graphql";
+
+registerEnumType(LogLevel, {
+  name: "LogLevel",
+});
 
 export const buildSchema = async (
   options: Omit<BuildSchemaOptions, "resolvers"> & {

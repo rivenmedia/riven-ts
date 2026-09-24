@@ -17,8 +17,8 @@
     "lint:fix": "pnpm lint --fix",
     "start": "next start",
     "storybook": "storybook dev -p 6006 --no-open",
-    "test": "vitest run",
-    "test:component": "vitest --project storybook",
+    "test": "vitest run --project unit",
+    "test:component": "vitest run --project storybook",
     "test:watch": "vitest watch",
     "chromatic": "pnpx chromatic",
     "msw:init": "msw init"

@@ -580,7 +580,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Field 2",
                 name: "field2",
-                registerOptions: { required: true },
+                registerOptions: {
+                  required: true,
+                  valueAsNumber: true,
+                },
                 step: 0.01,
               },
             },

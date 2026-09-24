@@ -4,7 +4,7 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
-import { defineConfig, mergeConfig } from "vitest/config";
+import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
 import type { ViteUserConfig } from "vitest/config";
 
@@ -44,6 +44,7 @@ export default defineConfig((config) => {
             name: "unit",
             environment: "jsdom",
             exclude: [
+              ...configDefaults.exclude,
               // Exclude Playwright test files
               "tests/**",
             ],
