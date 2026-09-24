@@ -29,13 +29,11 @@ export function PageWrapper({
   return (
     <div className="bg-background relative grid h-screen w-screen grid-cols-1 overflow-hidden md:grid-cols-[auto_1fr]">
       <Sidebar items={sidebarItems} currentPath={pathname} user={user} />
-      <div className="size-full">
-        <Header modifierKey={userAgentHeader?.includes("Mac") ? "⌘" : "⌃"} />
-        <PageShell>
-          <ImmersiveBackground />
-          {children}
-        </PageShell>
-      </div>
+      <Header modifierKey={userAgentHeader?.includes("Mac") ? "⌘" : "⌃"} />
+      <PageShell>
+        <ImmersiveBackground />
+        {children}
+      </PageShell>
       {/* <MobileNav /> */}
     </div>
   );

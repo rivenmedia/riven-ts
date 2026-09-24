@@ -48,7 +48,6 @@
 
   @keyframes fly-in {
     from {
-      overflow: clip;
       transform: translateY(20px);
       opacity: 0;
     }

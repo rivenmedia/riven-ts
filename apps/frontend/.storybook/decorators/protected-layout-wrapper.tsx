@@ -1,4 +1,5 @@
 import { PageWrapper } from "@/app/(protected)/_components/page-wrapper";
+import { NotificationsProvider } from "@/components/providers/notifications-provider";
 
 import {
   CalendarDays,
@@ -35,21 +36,23 @@ export const ProtectedLayoutWrapper: Decorator = (Story, { msw }) => {
   );
 
   return (
-    <PageWrapper
-      sidebarItems={[
-        { href: "/", icon: Home, label: "Home" },
-        { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-        { href: "/library", icon: Library, label: "Library" },
-        { href: "/explore", icon: Search, label: "Explore" },
-        { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-        { href: "/profile", icon: UserIcon, label: "Profile" },
-        { href: "/settings", icon: Settings, label: "Settings" },
-        { href: "/logs", icon: FileClock, label: "Logs" },
-      ]}
-      user={user}
-      userAgentHeader={null}
-    >
-      <Story />
-    </PageWrapper>
+    <NotificationsProvider>
+      <PageWrapper
+        sidebarItems={[
+          { href: "/", icon: Home, label: "Home" },
+          { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+          { href: "/library", icon: Library, label: "Library" },
+          { href: "/explore", icon: Search, label: "Explore" },
+          { href: "/calendar", icon: CalendarDays, label: "Calendar" },
+          { href: "/profile", icon: UserIcon, label: "Profile" },
+          { href: "/settings", icon: Settings, label: "Settings" },
+          { href: "/logs", icon: FileClock, label: "Logs" },
+        ]}
+        user={user}
+        userAgentHeader={null}
+      >
+        <Story />
+      </PageWrapper>
+    </NotificationsProvider>
   );
 };

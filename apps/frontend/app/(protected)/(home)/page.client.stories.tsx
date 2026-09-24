@@ -1,3 +1,4 @@
+import { ProtectedLayoutWrapper } from "@/.storybook/decorators/protected-layout-wrapper";
 import { preview } from "@/.storybook/preview";
 
 import { graphql, HttpResponse } from "msw";
@@ -18,6 +19,7 @@ const meta = preview.meta({
       disableSnapshot: true,
     },
   },
+  decorators: [ProtectedLayoutWrapper],
 });
 
 export const Default = meta.story({
