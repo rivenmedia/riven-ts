@@ -26,9 +26,6 @@ export const authClient = createAuthClient({
     passkeyClient(),
     nextCookiesClientPlugin,
   ],
-  fetchOptions: {
-    throw: true,
-  },
 });
 
 export type User = typeof authClient.$Infer.Session.user;

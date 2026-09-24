@@ -11,6 +11,7 @@ import Link from "next/link";
 import type { ErrorInfo } from "next/error";
 
 export default function GlobalErrorPage({ retry, error }: ErrorInfo) {
+  // oxlint-disable-next-line unicorn/prefer-global-this
   const isBrowser = typeof window !== "undefined";
   const message =
     (error instanceof Error && error.message) || "Something went wrong";
@@ -108,7 +109,7 @@ export default function GlobalErrorPage({ retry, error }: ErrorInfo) {
           <Button
             variant="outline"
             onClick={() => {
-              window.history.back();
+              globalThis.history.back();
             }}
             disabled={!isBrowser}
             type="button"

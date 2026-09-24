@@ -9,8 +9,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/_ui/alert-dialog";
 import { Button } from "@/components/_ui/button";
-
-import { Loader2 } from "lucide-react";
+// import { Loader2 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactElement } from "react";
@@ -76,7 +75,7 @@ export function ItemAction({
   // ids,
   variant,
   size,
-  onSuccess,
+  // onSuccess,
 }: ItemActionProps) {
   const presentationKind = presentation[kind];
 
@@ -103,7 +102,7 @@ export function ItemAction({
           <Button
             // disabled={loading}
             onClick={() => {
-              confirm();
+              // confirm();
             }}
           >
             {/* {loading && (

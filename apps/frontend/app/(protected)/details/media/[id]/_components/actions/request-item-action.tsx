@@ -10,7 +10,7 @@ import {
 } from "@/components/_ui/alert-dialog";
 import { Button } from "@/components/_ui/button";
 
-import { Loader2 } from "lucide-react";
+// import { Loader2 } from "lucide-react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { SeasonSelector } from "../season-selector";
@@ -39,16 +39,16 @@ interface RequestItemActionProps extends Pick<
 
 export function RequestItemAction({
   title,
-  ids,
+  // ids,
   mediaType,
   seasons,
   requestedSeasons,
   buttonLabel = "Request",
-  externalId,
+  // externalId,
   variant,
   size,
   className,
-  onSuccess,
+  // onSuccess,
 }: RequestItemActionProps) {
   const form = useForm({
     defaultValues: {
@@ -62,7 +62,9 @@ export function RequestItemAction({
     formState: { isSubmitting, isDirty },
   } = form;
 
-  const handleSubmit = form.handleSubmit(() => {});
+  const handleSubmit = form.handleSubmit(() => {
+    /* empty */
+  });
 
   return (
     // {#if page.data.permissions?.canRequestItems}

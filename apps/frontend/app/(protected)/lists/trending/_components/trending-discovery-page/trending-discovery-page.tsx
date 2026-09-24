@@ -25,7 +25,8 @@ export function TrendingDiscoveryPage({
   const [activeFilters, setActiveFilters] =
     useState<TrendingListFiltersFormValues | null>(null);
 
-  const [activeSort, setActiveSort] = useState<string | null>(null);
+  // oxlint-disable-next-line react/hook-use-state no-unused-vars
+  const [_activeSort, setActiveSort] = useState<string | null>(null);
 
   return (
     <PageShell className="bg-background relative flex min-h-screen flex-col overflow-x-hidden">

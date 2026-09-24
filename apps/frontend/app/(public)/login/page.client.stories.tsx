@@ -3,7 +3,7 @@ import preview from "@/.storybook/preview";
 import { redirect } from "@storybook/nextjs-vite/navigation.mock";
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
-import { expect, fn, spyOn } from "storybook/test";
+import { expect, spyOn } from "storybook/test";
 
 import { LoginPage } from "./page.client";
 

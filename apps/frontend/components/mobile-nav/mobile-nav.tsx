@@ -3,6 +3,7 @@ import { ChevronLeft, Menu, Search, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { fly } from "../_animations/fly";
 import { Button } from "../_ui/button";
 import { NotificationCenter } from "../notification-center/notification-center";
 
@@ -29,7 +30,6 @@ export function MobileNav() {
     <>
       {!isMainPage && (
         <button
-          // transition:fly={{ y: -20, duration: 400, easing: cubicOut }}
           onClick={() => {
             if (globalThis.history.length > 1) {
               router.back();
@@ -38,7 +38,11 @@ export function MobileNav() {
             }
           }}
           aria-label="Go back"
-          className="fixed top-4 left-4 z-60 flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 shadow-lg backdrop-blur-xl transition-all duration-300 hover:bg-white/10 active:scale-95 md:hidden"
+          className={cn(
+            "fixed top-4 left-4 z-60 flex h-10 w-10 items-center justify-center rounded-full border border-white/5 bg-white/5 shadow-lg backdrop-blur-xl transition-all duration-300 hover:bg-white/10 active:scale-95 md:hidden",
+            fly,
+          )}
+          type="button"
         >
           <ChevronLeft className="size-5 text-white/70" />
         </button>

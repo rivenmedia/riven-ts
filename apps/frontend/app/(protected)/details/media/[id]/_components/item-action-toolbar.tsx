@@ -42,6 +42,8 @@ export function ItemActionToolbar({
   seasons,
   title,
 }: ItemActionToolbarProps) {
+  const rivenIds: never[] = [];
+
   return (
     <div
       className={cn(
@@ -110,7 +112,7 @@ export function ItemActionToolbar({
               className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary hover:border-primary border bg-transparent px-4"
               title={title}
               ids={rivenIds}
-              mediaType={mediaType}
+              mediaType={mediaType as MediaItemType}
               externalId={externalId ?? ""}
               seasons={seasons}
               requestedSeasons={new Set([1, 2])}

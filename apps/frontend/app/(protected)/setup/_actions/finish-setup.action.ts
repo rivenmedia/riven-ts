@@ -8,8 +8,6 @@ import { SetupForm } from "../_form-schemas/setup.schema";
 
 export const finishSetup = loggedInActionClient
   .inputSchema(SetupForm)
-  .action(async ({ parsedInput }) => {
-    console.log({ parsedInput });
-
+  .action(() => {
     redirect("/");
   });

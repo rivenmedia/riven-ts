@@ -6,41 +6,43 @@ import {
   TabsTrigger,
 } from "@/components/_ui/tabs";
 import { getConnectionStatusText } from "@/components/logs-viewer/_utilities/get-connection-status-text";
-import {
-  ConnectionStatusIndicator,
-  type ConnectionStatus,
-} from "@/components/logs-viewer/connection-status-indicator/connection-status-indicator";
+import { ConnectionStatusIndicator } from "@/components/logs-viewer/connection-status-indicator/connection-status-indicator";
 import { EmptyState } from "@/components/logs-viewer/empty-state/empty-state";
 import { ErrorDisplay } from "@/components/logs-viewer/error-display/error-display";
 import { LiveLogLine } from "@/components/logs-viewer/live-log-line/live-log-line";
 import { LoadingSpinner } from "@/components/logs-viewer/loading-spinner/loading-spinner";
-import {
-  LogEntryRow,
-  type LogEntryRowProps,
-} from "@/components/logs-viewer/log-entry-row/log-entry-row";
+import { LogEntryRow } from "@/components/logs-viewer/log-entry-row/log-entry-row";
 import { LogTabButton } from "@/components/logs-viewer/log-tab-button/log-tab-button";
 import { PageShell } from "@/components/page-shell/page-shell";
 
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
+import type { ConnectionStatus } from "@/components/logs-viewer/connection-status-indicator/connection-status-indicator";
+import type { LogEntryRowProps } from "@/components/logs-viewer/log-entry-row/log-entry-row";
+
 export function LogsPage() {
   const logStore = {
-    reconnect() {},
-    fetchHistoricalLogs() {},
+    reconnect() {
+      /* empty */
+    },
+    fetchHistoricalLogs() {
+      /* empty */
+    },
   };
-  const error = "";
+  const error = "" as string;
   const connectionStatus: ConnectionStatus = "connecting";
-  const reconnectAttempts = 0;
-  const maxReconnectAttempts = 3;
+  const reconnectAttempts = 0 as number;
+  const maxReconnectAttempts = 3 as number;
   const logs: string[] = [];
   const historicalLogs: LogEntryRowProps["log"][] = [];
-  const isLoadingHistorical = false;
-  const hasConnected = false;
-  const historicalError = "";
+  const isLoadingHistorical = false as boolean;
+  const hasConnected = false as boolean;
+  const historicalError = "" as string;
 
   const [activeTab, setActiveTab] = useState<string>("live");
 
+  // oxlint-disable-next-line unicorn/consistent-function-scoping
   function handleUploadLogs() {
     // Implement the logic for uploading logs here
   }
@@ -49,12 +51,9 @@ export function LogsPage() {
     if (logs.length > 0) {
       return (
         <>
-          {logs
-            .slice()
-            .reverse()
-            .map((line, i) => (
-              <LiveLogLine key={i} line={line} />
-            ))}
+          {logs.toReversed().map((line, i) => (
+            <LiveLogLine key={`${i.toString()}:${line}`} line={line} />
+          ))}
         </>
       );
     }
@@ -80,7 +79,9 @@ export function LogsPage() {
         <div className="p-8">
           <ErrorDisplay
             errorMessage={error}
-            retryAction={() => logStore.reconnect()}
+            retryAction={() => {
+              logStore.reconnect();
+            }}
             buttonText="Reconnect"
           />
         </div>
@@ -100,7 +101,9 @@ export function LogsPage() {
         <div className="p-8">
           <ErrorDisplay
             errorMessage={historicalError}
-            retryAction={() => logStore.fetchHistoricalLogs()}
+            retryAction={() => {
+              logStore.fetchHistoricalLogs();
+            }}
           />
         </div>
       );
@@ -109,8 +112,11 @@ export function LogsPage() {
     if (historicalLogs.length > 0) {
       return (
         <>
-          {historicalLogs.toReversed().map((log, i) => (
-            <LogEntryRow key={i} log={log} />
+          {historicalLogs.toReversed().map((log) => (
+            <LogEntryRow
+              key={`${String(log.timestamp)}:${String(log.message)}`}
+              log={log}
+            />
           ))}
         </>
       );
@@ -122,6 +128,7 @@ export function LogsPage() {
   function renderContent() {
     return (
       <ErrorBoundary
+        // oxlint-disable-next-line react/no-unstable-nested-components
         fallbackRender={(props) => (
           <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-6">
             <h3 className="text-destructive mb-3 text-lg font-semibold">
@@ -132,7 +139,10 @@ export function LogsPage() {
             </pre>
             <button
               className="bg-primary hover:bg-primary/90 text-primary-foreground rounded-lg px-4 py-2 font-medium transition-colors"
-              onClick={props.resetErrorBoundary}
+              onClick={() => {
+                props.resetErrorBoundary();
+              }}
+              type="button"
             >
               Try Again
             </button>
@@ -143,7 +153,7 @@ export function LogsPage() {
           fallback={
             <div className="flex h-full flex-col items-center justify-center">
               <div className="bg-card max-w-md rounded-lg border p-8 text-center shadow-sm">
-                <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-t-transparent"></div>
+                <div className="border-primary mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-2 border-t-transparent" />
                 <h3 className="mb-2 text-lg font-semibold">
                   Connecting to Logs
                 </h3>
@@ -182,7 +192,6 @@ export function LogsPage() {
               defaultValue={activeTab}
               className="bg-card flex min-h-0 flex-1 flex-col rounded-lg border shadow-sm"
               onValueChange={(tab) => {
-                console.log(tab);
                 setActiveTab(tab);
               }}
             >
@@ -213,7 +222,10 @@ export function LogsPage() {
                       reconnectAttempts < maxReconnectAttempts && (
                         <button
                           className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 rounded border px-3 py-1 text-sm font-medium transition-colors"
-                          onClick={() => logStore.reconnect()}
+                          onClick={() => {
+                            logStore.reconnect();
+                          }}
+                          type="button"
                         >
                           Reconnect Now
                         </button>
@@ -222,8 +234,11 @@ export function LogsPage() {
                   <TabsContent value="historical">
                     <button
                       className="bg-primary/10 hover:bg-primary/20 text-primary border-primary/20 rounded border px-3 py-1 text-sm font-medium transition-colors"
-                      onClick={() => logStore.fetchHistoricalLogs()}
+                      onClick={() => {
+                        logStore.fetchHistoricalLogs();
+                      }}
                       disabled={isLoadingHistorical}
+                      type="button"
                     >
                       {isLoadingHistorical ? "Loading..." : "Refresh"}
                     </button>

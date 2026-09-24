@@ -264,7 +264,7 @@ export const WithTooltips = meta.story({
                 </InputGroupButton>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{"We'll use this to send you notifications"}</p>
+                <p>We'll use this to send you notifications</p>
               </TooltipContent>
             </Tooltip>
           </InputGroupAddon>
@@ -399,7 +399,7 @@ export const WithLabels = meta.story({
                 </InputGroupButton>
               </TooltipTrigger>
               <TooltipContent>
-                <p>{"We'll use this to send you notifications"}</p>
+                <p>We&apos;ll use this to send you notifications</p>
               </TooltipContent>
             </Tooltip>
           </InputGroupAddon>

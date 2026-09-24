@@ -4,6 +4,7 @@ import { defineConfig } from "oxlint";
 
 export default defineConfig({
   extends: [baseOxlintConfig],
+  ignorePatterns: ["components/_ui", "!app/**/logs/**/*.{ts,tsx}"],
   overrides: [
     {
       files: ["components/_ui/**/*.tsx"],

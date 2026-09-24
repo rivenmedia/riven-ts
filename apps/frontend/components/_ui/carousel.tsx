@@ -185,6 +185,7 @@ function CarouselItem({ className, ...props }: ComponentProps<"div">) {
 
   return (
     <div
+      // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
       role="group"
       aria-roledescription="slide"
       data-slot="carousel-item"

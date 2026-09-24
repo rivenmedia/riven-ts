@@ -99,6 +99,7 @@ export function Calendar({ items }: CalendarProps) {
         {dayNames.map((day) => (
           <div
             key={day}
+            // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
             role="columnheader"
             className="bg-muted/40 text-muted-foreground px-3 py-2 text-center text-xs font-bold uppercase"
           >

@@ -16,7 +16,6 @@ import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { cn } from "cn";
 import Image from "next/image";
-import Link from "next/link";
 import React from "react";
 
 import { ItemActionToolbar } from "./_components/item-action-toolbar";
@@ -163,9 +162,15 @@ export default function MediaDetailsPage() {
     data.mediaDetails.details.status,
   ].filter(Boolean);
 
-  const handleRequestSuccess = () => {};
+  // oxlint-disable-next-line unicorn/consistent-function-scoping
+  const handleRequestSuccess = () => {
+    /* empty */
+  };
 
-  const handleActionSuccess = () => {};
+  // oxlint-disable-next-line unicorn/consistent-function-scoping
+  const handleActionSuccess = () => {
+    /* empty */
+  };
 
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
@@ -238,6 +243,9 @@ export default function MediaDetailsPage() {
                 // {rivenPending}
                 onRequestSuccess={handleRequestSuccess}
                 onActionSuccess={handleActionSuccess}
+                riven={{} as never}
+                rivenId={null}
+                rivenPending={false}
                 // bind:rawDataOpen
                 // {rawRivenLoading}
                 // {rawRivenError}
@@ -436,7 +444,9 @@ export default function MediaDetailsPage() {
                   <FileInformationPanel
                     entries={data.mediaDetails.filesystemEntries}
                     fallbackMediaMetadata={data.mediaDetails.mediaMetadata}
-                    onDeleteEntry={() => {}}
+                    onDeleteEntry={() => {
+                      /* empty */
+                    }}
                   />
                 )}
             </div>

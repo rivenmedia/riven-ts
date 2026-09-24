@@ -29,9 +29,8 @@ export function SingleAccountLink({
     provider.name ?? providerId.charAt(0).toUpperCase() + providerId.slice(1);
 
   async function handleLink() {
-    // Use oauth2.link() for generic OAuth providers
-    await authClient.oauth2.link({
-      providerId,
+    await authClient.linkSocial({
+      provider: providerId,
       callbackURL: "/auth",
     });
 
@@ -39,7 +38,25 @@ export function SingleAccountLink({
   }
 
   async function handleUnlink() {
-    await authClient.unlinkAccount({ providerId });
+    const { data: accounts, error } = await authClient.listAccounts();
+
+    if (error) {
+      toast.error("Failed to fetch accounts.");
+
+      return;
+    }
+
+    const accountToUnlink = accounts.find(
+      (target) => target.providerId === providerId,
+    );
+
+    if (!accountToUnlink) {
+      toast.error("Account not found.");
+
+      return;
+    }
+
+    await authClient.unlinkAccount({ accountId: accountToUnlink.id });
 
     toast.success(`${providerId} unlinked successfully.`);
 

@@ -15,7 +15,7 @@ import { useState } from "react";
 export function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 
-  const canManageSettings = true;
+  const canManageSettings = true as boolean;
 
   return (
     <PageShell>

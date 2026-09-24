@@ -19,8 +19,8 @@ const PasskeySigninButton = dynamic(
 
 async function handleOAuthSignIn(providerId: string) {
   try {
-    await authClient.signIn.oauth2({
-      providerId,
+    await authClient.signIn.social({
+      provider: providerId,
       callbackURL: "/",
     });
   } catch {
@@ -94,7 +94,7 @@ export function OAuthProviders({
     setIsPasskeyLoading(true);
 
     try {
-      const result = await authClient.signIn.passkey({
+      await authClient.signIn.passkey({
         fetchOptions: {
           onSuccess: onSignIn,
           onError(context) {

@@ -1,6 +1,3 @@
-!app/**/logs/
-!components/**/logs/
-
 # Playwright
 test-results/
 playwright-report/

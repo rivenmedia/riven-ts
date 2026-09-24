@@ -21,6 +21,7 @@ export function DangerZone() {
   function resetLibrary() {
     setIsLoading(true);
 
+    // oxlint-disable-next-line no-console
     console.log("Resetting library...");
 
     setIsLoading(false);

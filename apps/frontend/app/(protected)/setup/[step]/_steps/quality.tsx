@@ -57,7 +57,9 @@ export function SetupQualityStep({
     },
   });
 
-  const handleSubmit = form.handleSubmit(() => {});
+  const handleSubmit = form.handleSubmit(() => {
+    /* empty */
+  });
 
   return (
     <FormProvider {...form}>

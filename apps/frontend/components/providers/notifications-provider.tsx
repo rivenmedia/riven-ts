@@ -36,11 +36,21 @@ export function NotificationsProvider({ children }: PropsWithChildren) {
   const value = useMemo<NotificationsContextValue>(
     () => ({
       notifications: [],
-      clear: () => {},
-      markAllAsRead: () => {},
-      markAsRead: () => {},
-      remove: () => {},
-      reconnect: () => {},
+      clear: () => {
+        /* empty */
+      },
+      markAllAsRead: () => {
+        /* empty */
+      },
+      markAsRead: () => {
+        /* empty */
+      },
+      remove: () => {
+        /* empty */
+      },
+      reconnect: () => {
+        /* empty */
+      },
       unreadCount: 0,
       connectionStatus: "connected",
     }),
