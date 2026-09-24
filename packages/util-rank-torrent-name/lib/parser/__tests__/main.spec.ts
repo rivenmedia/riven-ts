@@ -4,6 +4,27 @@ import { parse } from "../parse.ts";
 
 it.for([
   [
+    "M3GAN.2.0.2025.Unrated.iNTERNAL.BluRay.2160p.UHD.MULTi.REMUX.HEVC.(10bit).DV.Atmos.DTS-HD.MA.7.1-Aisha.mkv",
+    {
+      title: "M3GAN 2.0",
+      channels: ["7.1"],
+    },
+  ],
+  [
+    "M3GAN.5.0.2025.Unrated.iNTERNAL.BluRay.2160p.UHD.MULTi.REMUX.HEVC.(10bit).DV.Atmos.DTS-HD.MA.7.1-Aisha.mkv",
+    {
+      title: "M3GAN 5.0",
+      channels: ["7.1"],
+    },
+  ],
+  [
+    "M3GAN.7.1.2025.Unrated.iNTERNAL.BluRay.2160p.UHD.MULTi.REMUX.HEVC.(10bit).DV.Atmos.DTS-HD.MA.7.1-Aisha.mkv",
+    {
+      title: "M3GAN 7.1",
+      channels: ["7.1"],
+    },
+  ],
+  [
     "One Piece [ Episodes + Movies + OVAs + Specials ][Dual Audio][BD 720p & 1080p HEVC x265 10bit][Arabic & Multi-Subs]\nSpecials/One Piece - S00E03 - Adventure in the Ocean's Navel.mkv",
     {
       title: "One Piece",
