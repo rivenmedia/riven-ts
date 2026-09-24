@@ -5,7 +5,6 @@ import { createActor, createEmptyActor, fromPromise } from "xstate";
 import { it as baseIt } from "../../../../__tests__/test-context.ts";
 import { bootstrapMachine } from "../../index.ts";
 
-import type { InitialiseDatabaseConnectionOutput } from "../../actors/initialise-database-connection.actor.ts";
 import type {
   InitialiseVfsInput,
   InitialiseVfsOutput,
@@ -26,12 +25,11 @@ export const it = baseIt
     }),
   )
 
-  .extend("initialiseDatabaseConnectionActorLogic", ({ orm, services }) =>
-    fromPromise<InitialiseDatabaseConnectionOutput>(async () => ({
-      orm,
-      services,
-      requiresAdminUserCreation: false,
-    })),
+  .extend(
+    "initialiseDatabaseConnectionActorLogic",
+    fromPromise(async () => {
+      /* empty */
+    }),
   )
   .extend("startGqlServerActorLogic", ({ apolloServerInstance }) =>
     fromPromise<StartGQLServerOutput, StartGQLServerInput>(async () => ({

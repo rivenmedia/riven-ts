@@ -7,9 +7,6 @@ import { initORM } from "../../../database/database.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { settings } from "../../../utilities/settings.ts";
 
-import type { Services } from "../../../database/database.ts";
-import type { MikroORM } from "@mikro-orm/core";
-
 function createDatabaseSslOptions() {
   const {
     databaseSslRootCert: ca,
@@ -28,51 +25,36 @@ function createDatabaseSslOptions() {
   };
 }
 
-export interface InitialiseDatabaseConnectionOutput {
-  services: Services;
-  orm: MikroORM;
-  requiresAdminUserCreation: boolean;
-}
+export const initialiseDatabaseConnection = fromPromise(async () => {
+  const sslOptions = createDatabaseSslOptions();
 
-export const initialiseDatabaseConnection =
-  fromPromise<InitialiseDatabaseConnectionOutput>(
-    async (): Promise<InitialiseDatabaseConnectionOutput> => {
-      const sslOptions = createDatabaseSslOptions();
+  const databaseConfig = await createDatabaseConfig({
+    clientUrl: settings.databaseUrl,
+    debug: settings.databaseDebugLogging,
+    logger,
+    ...(sslOptions && {
+      driverOptions: {
+        ssl: sslOptions,
+      },
+    }),
+    extensions: [Migrator, SeedManager],
+  });
 
-      const databaseConfig = await createDatabaseConfig({
-        clientUrl: settings.databaseUrl,
-        debug: settings.databaseDebugLogging,
-        logger,
-        ...(sslOptions && {
-          driverOptions: {
-            ssl: sslOptions,
-          },
-        }),
-        extensions: [Migrator, SeedManager],
-      });
+  const { database } = await initORM(databaseConfig);
 
-      const { database, services } = await initORM(databaseConfig);
+  if (process.env["NODE_ENV"] === "production") {
+    const requiresMigration = await database.orm.migrator.checkSchema();
 
-      if (process.env["NODE_ENV"] === "production") {
-        const requiresMigration = await database.orm.migrator.checkSchema();
+    if (!requiresMigration) {
+      logger.info("Database is up to date, no migrations needed");
 
-        if (requiresMigration) {
-          logger.info("Running database migrations");
+      return;
+    }
 
-          await database.orm.migrator.up();
-        } else {
-          logger.info("Database is up to date, no migrations needed");
-        }
-      }
+    logger.info("Running database migrations");
 
-      await database.orm.connect();
+    await database.orm.migrator.up();
+  }
 
-      return {
-        orm: database.orm,
-        services,
-        requiresAdminUserCreation:
-          settings.unsafeWipeDatabaseOnStartup ||
-          !(await services.authService.hasExistingAdminUser()),
-      };
-    },
-  );
+  await database.orm.connect();
+});
