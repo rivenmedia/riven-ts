@@ -20,7 +20,7 @@ import { logger } from "../utilities/logger/logger.ts";
 
 import type { GenericOAuthConfig } from "better-auth/plugins";
 
-export interface PlexProfile {
+interface PlexProfile {
   id: number;
   uuid: string;
   username: string;

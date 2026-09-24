@@ -1,5 +1,5 @@
-// Provides types needed to squash portability errors from @better-auth/passkey
-// import "@simplewebauthn/server";
+// oxlint-disable-next-line import/no-unassigned-import - Provides types needed to squash portability errors from @better-auth/passkey
+import "@simplewebauthn/server";
 import { ac, admin, manager, user } from "@repo/util-auth/access-control";
 
 import { passkey } from "@better-auth/passkey";

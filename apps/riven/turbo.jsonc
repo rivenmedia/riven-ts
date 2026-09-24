@@ -36,7 +36,7 @@
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
         "schema.graphql",
-        "graphql-codegen.ts"
+        "graphql.config.ts"
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },

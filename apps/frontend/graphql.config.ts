@@ -2,7 +2,6 @@ import type { CodegenConfig } from "@graphql-codegen/cli";
 import type { TypeScriptPluginConfig } from "@graphql-codegen/typescript";
 import type { TypeScriptDocumentsPluginConfig } from "@graphql-codegen/typescript-operations";
 
-// oxlint-disable-next-line import/no-default-export
 export default {
   schema: "../riven/schema.graphql",
   documents: ["app/**/*.ts", "app/**/*.tsx", "!app/**/__generated__/**/*"],

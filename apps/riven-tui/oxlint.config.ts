@@ -6,10 +6,9 @@ export default defineConfig({
   extends: [baseOxlintConfig],
   overrides: [
     {
-      files: ["graphql-codegen.ts"],
+      files: ["graphql.config.ts"],
       plugins: ["import"],
       rules: {
-        "import/no-default-export": "off",
         "no-template-curly-in-string": "off",
       },
     },

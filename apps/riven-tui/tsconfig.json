@@ -10,7 +10,7 @@
   ],
   "files": [
     "oxlint.config.ts",
-    "graphql-codegen.ts",
+    "graphql.config.ts",
     "vitest.config.ts",
     "wiki.config.ts"
   ],

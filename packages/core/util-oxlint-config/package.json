@@ -13,6 +13,7 @@
   "dependencies": {
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
+    "eslint-plugin-playwright": "catalog:",
     "eslint-plugin-storybook": "catalog:",
     "eslint-plugin-turbo": "catalog:",
     "globals": "catalog:"
@@ -20,7 +21,6 @@
   "devDependencies": {
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
-    "eslint-plugin-playwright": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:"
   },
