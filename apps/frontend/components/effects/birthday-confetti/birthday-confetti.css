@@ -1,0 +1,54 @@
+@keyframes -global-confetti-fall-1 {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(30px) rotate(720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes -global-confetti-fall-2 {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-40px) rotate(-540deg);
+    opacity: 0;
+  }
+}
+
+@keyframes -global-confetti-fall-3 {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(50px) rotate(900deg);
+    opacity: 0;
+  }
+}
+
+@keyframes -global-confetti-fall-4 {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(-25px) rotate(-720deg);
+    opacity: 0;
+  }
+}
+
+@keyframes -global-confetti-fall-5 {
+  0% {
+    transform: translateY(-100vh) rotate(0deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translateY(100vh) translateX(15px) rotate(600deg);
+    opacity: 0;
+  }
+}

@@ -1,0 +1,36 @@
+{
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "compilerOptions": {
+    "target": "ES2017",
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "skipLibCheck": true,
+    "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "isolatedModules": true,
+    "jsx": "react-jsx",
+    "plugins": [{ "name": "next" }],
+    "paths": {
+      "@/app/*": ["./app/*"],
+      "@/components/*": ["./components/*"],
+      "@/environment/*": ["./environment/*"],
+      "@/lib/*": ["./lib/*"],
+      "@/.storybook/*": ["./.storybook/*"],
+      "@/playwright/*": ["./playwright/*"]
+    }
+  },
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    ".next/types/**/*.ts",
+    ".next/dev/types/**/*.ts",
+    "**/*.mts"
+  ],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" },
+    { "path": "./tsconfig.storybook.json" }
+  ],
+  "exclude": ["node_modules"]
+}

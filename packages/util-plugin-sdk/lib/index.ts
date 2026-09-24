@@ -1,3 +1,5 @@
+// oxlint-disable-next-line import/no-unassigned-import
+import "./types/extend-zod-global-registry.ts";
 import z from "zod";
 import { createErrorMap } from "zod-validation-error";
 

@@ -1,0 +1,15 @@
+::view-transition-old(.slide-out) {
+  animation: slide-out 0.3s easeOutCubic forwards;
+}
+
+@keyframes slide-out {
+  from {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+}
