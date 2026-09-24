@@ -1,10 +1,12 @@
-// import storybook from "eslint-plugin-storybook";
+import storybook from "eslint-plugin-storybook";
 import { defineConfig } from "oxlint";
 
 import { storybookFiles } from "../internal/file-types.ts";
 
 export const eslintPluginEslintPluginStorybookConfig = defineConfig({
   overrides: [
+    ...storybook.configs["csf-strict"].overrides,
+    ...storybook.configs.recommended.overrides,
     {
       files: [storybookFiles],
       plugins: ["react"],

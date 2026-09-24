@@ -5,7 +5,6 @@ import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
 import { MediaEntryRepository } from "../../repositories/media-entry.repository.ts";
-import { MediaMetadata } from "../../types/media-metadata.type.ts";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";
@@ -60,9 +59,9 @@ export class MediaEntry extends FileSystemEntry {
   @Property({ type: "json" })
   public libraryProfiles?: string[];
 
-  @Field(() => MediaMetadata, { nullable: true })
+  @Field(() => Object, { nullable: true })
   @Property({ type: "json" })
-  public mediaMetadata?: MediaMetadata;
+  public mediaMetadata?: object;
 
   public async getVfsFileName(): Promise<string> {
     const prettyName = await this.mediaItem.getEntity().getPrettyName();
