@@ -147,32 +147,56 @@ Desktop.test(
           {
             datetime: DateTime.fromObject({ year: 2026, month: 8 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "26",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 7,
+              day: 26,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 9 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "30",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 8,
+              day: 30,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 10 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "27",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 9,
+              day: 27,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 11 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "1",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 1,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 12 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "29",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 29,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2027, month: 1 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "27",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 12,
+              day: 27,
+            }),
           },
         ],
         expectedDayHeaders: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
@@ -183,32 +207,56 @@ Desktop.test(
           {
             datetime: DateTime.fromObject({ year: 2026, month: 8 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "27",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 7,
+              day: 27,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 9 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "31",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 8,
+              day: 31,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 10 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "28",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 9,
+              day: 28,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 11 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "26",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 10,
+              day: 26,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 12 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "30",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 30,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2027, month: 1 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "28",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 12,
+              day: 28,
+            }),
           },
         ],
         expectedDayHeaders: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
@@ -219,32 +267,56 @@ Desktop.test(
           {
             datetime: DateTime.fromObject({ year: 2026, month: 8 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "1",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 8,
+              day: 1,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 9 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "29",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 8,
+              day: 29,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 10 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "26",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 9,
+              day: 26,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 11 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "31",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 10,
+              day: 31,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2026, month: 12 }),
             expectedDayCells: 35,
-            firstDayAccessibleName: "28",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 28,
+            }),
           },
           {
             datetime: DateTime.fromObject({ year: 2027, month: 1 }),
             expectedDayCells: 42,
-            firstDayAccessibleName: "26",
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 12,
+              day: 26,
+            }),
           },
         ],
         expectedDayHeaders: [
@@ -301,7 +373,7 @@ Desktop.test(
         for (const {
           datetime,
           expectedDayCells,
-          firstDayAccessibleName,
+          firstDayDatetime,
         } of testCase.expectedMonthResults) {
           await step(
             `Verify month: ${datetime.toFormat("LLLL yyyy")}`,
@@ -315,11 +387,15 @@ Desktop.test(
                 },
               );
 
+              const expectedAccessibleName = firstDayDatetime
+                .setLocale(testCase.locale)
+                .toLocaleString(DateTime.DATE_FULL);
+
               await step(
-                `Verify the first day cell is "${firstDayAccessibleName}"`,
+                `Verify the first day cell is "${expectedAccessibleName}"`,
                 async () => {
                   await expect(dayCells[0]).toHaveAccessibleName(
-                    firstDayAccessibleName,
+                    expectedAccessibleName,
                   );
                 },
               );
@@ -359,7 +435,7 @@ Mobile.test(
     await userEvent.click(episodeFilterCheckbox);
 
     await expect(
-      canvas.queryByRole("listitem", {
+      await canvas.findByRole("listitem", {
         current: "date",
       }),
     ).toBeInTheDocument();

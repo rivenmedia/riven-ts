@@ -1,4 +1,5 @@
 import { cn } from "cn";
+import { DateTime } from "luxon";
 
 import { DayItemsList } from "../day-items-list/day-items-list";
 
@@ -13,6 +14,7 @@ export function CalendarDayCell({ day, isToday }: CalendarDayCellProps) {
   return (
     <div
       aria-current={isToday ? "date" : undefined}
+      aria-label={day.date.toLocaleString(DateTime.DATE_FULL)}
       // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
       role="gridcell"
       className={cn(
