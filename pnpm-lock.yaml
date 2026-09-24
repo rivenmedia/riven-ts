@@ -153,9 +153,6 @@ catalogs:
     '@sentry/node':
       specifier: ^10.53.1
       version: 10.53.1
-    '@simplewebauthn/server':
-      specifier: ^13.3.2
-      version: 13.3.2
     '@storybook/addon-vitest':
       specifier: ^10.4.6
       version: 10.5.9
@@ -237,9 +234,6 @@ catalogs:
     better-auth:
       specifier: ^1.6.22
       version: 1.7.1
-    better-auth-mikro-orm:
-      specifier: ^1.0.0-next.2
-      version: 1.0.0-next.2
     bullmq:
       specifier: ^5.76.10
       version: 5.76.10
@@ -889,9 +883,6 @@ importers:
       '@as-integrations/express5':
         specifier: 'catalog:'
         version: 1.1.2(@apollo/server@5.5.1(graphql@16.14.0))(express@5.2.1)
-      '@better-auth/passkey':
-        specifier: 'catalog:'
-        version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.4.3))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7))(better-call@1.4.0(zod@4.4.3))(nanostores@1.5.1)
       '@elastic/ecs-winston-format':
         specifier: 'catalog:'
         version: 1.5.3
@@ -916,15 +907,9 @@ importers:
       '@mikro-orm/seeder':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
-      '@repo/core-util-graphql-helpers':
-        specifier: workspace:^
-        version: link:../../packages/core/util-graphql-helpers
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../packages/feature-settings
       '@repo/plugin-comet':
         specifier: workspace:^
         version: link:../../packages/plugin-comet
@@ -964,9 +949,6 @@ importers:
       '@repo/riven-tui':
         specifier: workspace:^
         version: link:../riven-tui
-      '@repo/util-auth':
-        specifier: workspace:^
-        version: link:../../packages/util-auth
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
@@ -979,18 +961,9 @@ importers:
       '@sentry/node':
         specifier: 'catalog:'
         version: 10.53.1
-      '@simplewebauthn/server':
-        specifier: 'catalog:'
-        version: 13.3.2
       '@zkochan/fuse-native':
         specifier: 'catalog:'
         version: 0.1.0
-      better-auth:
-        specifier: 'catalog:'
-        version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
-      better-auth-mikro-orm:
-        specifier: 'catalog:'
-        version: 1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7))
       bullmq:
         specifier: 'catalog:'
         version: 5.76.10
@@ -8540,13 +8513,6 @@ packages:
     engines: {node: '>=6.0.0'}
     hasBin: true
 
-  better-auth-mikro-orm@1.0.0-next.2:
-    resolution: {integrity: sha512-g8Kp1eaqezmQDaLuFNaVLbh0JnUZHwq6EYCJ8C3xWG8XAu8jJKqqYQ8pUNCKu+XEo1txvq4WiNBSYsljjk2yHQ==}
-    engines: {node: '>= 22'}
-    peerDependencies:
-      '@mikro-orm/core': ^7.0.0
-      better-auth: ^1.6.0
-
   better-auth@1.7.1:
     resolution: {integrity: sha512-g8WlTQijxXWJjPVZfFu1+EJg9cwwHrKDmIkcYMzx8CzYA+tDxl6NI7qQbKkbgw5UtHILsT5VH+RMzFzwnVJqAg==}
     peerDependencies:
@@ -9330,10 +9296,6 @@ packages:
   dotenv@17.4.2:
     resolution: {integrity: sha512-nI4U3TottKAcAD9LLud4Cb7b2QztQMUEfHbvhTH09bqXTxnSie8WnjPALV/WMCrJZ6UV/qHJ6L03OqO3LcdYZw==}
     engines: {node: '>=12'}
-
-  dset@3.1.4:
-    resolution: {integrity: sha512-2QF/g9/zTaPDc3BjNcVTGoBbXBgYfMTTceLaYcFJ/W9kggFUkhxD/hMEeuLKbugyef9SqAx8cpgwlIP/jinUTA==}
-    engines: {node: '>=4'}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -14473,18 +14435,6 @@ snapshots:
       '@simplewebauthn/browser': 13.3.0
       '@simplewebauthn/server': 13.3.2
       better-auth: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
-      better-call: 1.4.0(zod@4.4.3)
-      nanostores: 1.5.1
-      zod: 4.4.3
-
-  '@better-auth/passkey@1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.4.3))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7))(better-call@1.4.0(zod@4.4.3))(nanostores@1.5.1)':
-    dependencies:
-      '@better-auth/core': 1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.4.3))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1)
-      '@better-auth/utils': 0.4.2
-      '@better-fetch/fetch': 1.3.1
-      '@simplewebauthn/browser': 13.3.0
-      '@simplewebauthn/server': 13.3.2
-      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
       better-call: 1.4.0(zod@4.4.3)
       nanostores: 1.5.1
       zod: 4.4.3
@@ -19902,12 +19852,6 @@ snapshots:
 
   baseline-browser-mapping@2.11.13: {}
 
-  better-auth-mikro-orm@1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)):
-    dependencies:
-      '@mikro-orm/core': 7.1.0(dataloader@2.2.3)
-      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
-      dset: 3.1.4
-
   better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7):
     dependencies:
       '@better-auth/core': 1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.4.3))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1)
@@ -20685,8 +20629,6 @@ snapshots:
   dotenv@16.0.3: {}
 
   dotenv@17.4.2: {}
-
-  dset@3.1.4: {}
 
   dunder-proto@1.0.1:
     dependencies:
