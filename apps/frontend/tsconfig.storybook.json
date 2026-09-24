@@ -4,8 +4,7 @@
   "compilerOptions": {
     "rootDir": ".",
     "noEmit": false,
-    "composite": true,
-    "types": ["msw-storybook-addon/types"]
+    "composite": true
   },
   "files": [],
   "include": [

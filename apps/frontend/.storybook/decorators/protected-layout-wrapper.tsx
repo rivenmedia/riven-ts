@@ -12,14 +12,11 @@ import {
 } from "lucide-react";
 import { DateTime } from "luxon";
 import { HttpResponse, http } from "msw";
-import { useParameter } from "storybook/internal/preview-api";
 
-import type { MswAddonParameters } from "../addons/msw";
 import type { User } from "@/lib/auth/types";
 import type { Decorator } from "@storybook/nextjs-vite";
 
-export const ProtectedLayoutWrapper: Decorator = (Story) => {
-  const mswParams = useParameter<MswAddonParameters>("msw");
+export const ProtectedLayoutWrapper: Decorator = (Story, { msw }) => {
   const user: User = {
     banned: false,
     createdAt: DateTime.now().toJSDate(),
@@ -31,7 +28,7 @@ export const ProtectedLayoutWrapper: Decorator = (Story) => {
     role: "admin",
   };
 
-  mswParams?.handlers?.push(
+  msw.use(
     http.get("**/api/auth/get-session", () =>
       HttpResponse.json<{ user: User }>({ user }),
     ),

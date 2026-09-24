@@ -1,3 +1,4 @@
+import "./types.d.ts";
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
 import { i18n } from "@/.storybook/i18n";
