@@ -2,7 +2,7 @@ import { preview } from "@/.storybook/preview";
 
 import { EntertainmentItem } from "./entertainment-item";
 
-import type { EntertainmentItemData } from "./entertainment-item";
+import type { EntertainmentItemData } from "../types";
 
 const meta = preview.meta({
   title: "Calendar / EntertainmentItem",
@@ -10,7 +10,7 @@ const meta = preview.meta({
 });
 
 const movie: EntertainmentItemData = {
-  itemId: 1,
+  itemId: "0000-0000-0000-0000-0000",
   tvdbId: "",
   tmdbId: "603692",
   showTitle: "John Wick: Chapter 4",
@@ -19,7 +19,7 @@ const movie: EntertainmentItemData = {
 };
 
 const episode: EntertainmentItemData = {
-  itemId: 2,
+  itemId: "0000-0000-0000-0000-0001",
   tvdbId: "121361",
   tmdbId: "1399",
   showTitle: "Game of Thrones",
@@ -30,7 +30,7 @@ const episode: EntertainmentItemData = {
 };
 
 const show: EntertainmentItemData = {
-  itemId: 3,
+  itemId: "0000-0000-0000-0000-0002",
   tvdbId: "371572",
   tmdbId: "94605",
   showTitle: "Arcane",
@@ -40,7 +40,7 @@ const show: EntertainmentItemData = {
 
 const completedEpisode: EntertainmentItemData = {
   ...episode,
-  itemId: 4,
+  itemId: "0000-0000-0000-0000-0003",
   lastState: "Completed",
 };
 
@@ -66,7 +66,7 @@ export const Compact = meta.story({
 
 export const AllTypesCompact = meta.story({
   render: () => (
-    <div class="flex w-64 flex-col gap-1.5">
+    <div className="flex w-64 flex-col gap-1.5">
       <EntertainmentItem item={movie} compact />
       <EntertainmentItem item={episode} compact />
       <EntertainmentItem item={show} compact />
