@@ -22,65 +22,15 @@ import { ItemActionToolbar } from "./_components/item-action-toolbar";
 import { MediaCarousel } from "./_components/media-carousel";
 import { SeasonList } from "./_components/season-list";
 
-import type { SeasonData } from "./_components/season-selector";
 import type {
-  MediaEntry,
-  MediaMetadata,
-} from "@/app/_types/__generated__/graphql";
+  GetMediaItemQuery,
+  GetMediaItemQueryVariables,
+} from "./page.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import type { MediaItemContentRating } from "@repo/util-plugin-sdk/dto/enums/content-ratings.enum";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 export const GET_MEDIA_ITEM: TypedDocumentNode<
-  {
-    mediaDetails: {
-      totalFileCount: number;
-      completedFileCount: number;
-      details: {
-        id: string;
-        backdropPath: string;
-        logo: string | null;
-        trailer: {
-          id?: string | number;
-          name: string;
-          site: string | null;
-          key: string;
-          url?: string | null;
-        };
-        title: string;
-        posterPath: string;
-        overview: string;
-        recommendations: Pick<
-          MediaItem,
-          "id" | "title" | "posterPath" | "type" | "year"
-        >[];
-        similar: Pick<
-          MediaItem,
-          "id" | "title" | "posterPath" | "type" | "year"
-        >[];
-        genres: { id: string; name: string }[];
-        cast: {
-          id: string;
-          name: string;
-          character: string;
-          profilePath: string;
-        }[];
-        year: number;
-        formattedRuntime: string;
-        originalLanguage: string;
-        certification: MediaItemContentRating;
-        status: string;
-        seasons: SeasonData[] | null;
-      };
-      type: MediaItemType;
-      state: MediaItemState;
-      filesystemEntries: Omit<MediaEntry, "mediaItem">[];
-      mediaMetadata: MediaMetadata | null;
-    };
-  },
-  { id: string }
+  GetMediaItemQuery,
+  GetMediaItemQueryVariables
 > = gql`
   query GetMediaItem($id: ID!) {
     mediaDetails(id: $id) {
@@ -114,8 +64,16 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
           type
           year
         }
-        genres
-        cast
+        genres {
+          id
+          name
+        }
+        cast {
+          id
+          name
+          character
+          profilePath
+        }
         year
         formattedRuntime
         originalLanguage
@@ -127,6 +85,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
           seasonNumber
           episodeCount
           completedCount
+          image
         }
       }
       type
@@ -142,7 +101,33 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
         originalFilename
         plugin
       }
-      mediaMetadata
+      mediaMetadata {
+        subtitleTracks {
+          language
+        }
+        qualitySource
+        isRemux
+        isProper
+        isRepack
+        bitRate
+        duration
+        containerFormat
+        audioTracks {
+          channels
+          codec
+        }
+        fileName
+        video {
+          resolution {
+            width
+            height
+            codec
+            bitDepth
+            hdrType
+            frameRate
+          }
+        }
+      }
     }
   }
 `;

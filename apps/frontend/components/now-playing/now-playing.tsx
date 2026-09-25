@@ -13,12 +13,13 @@ import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
 import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
 
 import type { CarouselApi } from "../_ui/carousel";
+import type { Genre } from "@/app/_types/__generated__/graphql";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { RefObject } from "react";
 
 export interface RatingScore {
   name: string;
-  image?: `${"imdb" | `rottentomatoes${"" | "_audience" | "_certified"}_fresh` | `rottentomatoes${"" | "_audience"}_rotten`}.svg`;
+  image?: string;
   score: string;
   url: string;
 }
@@ -34,7 +35,7 @@ export interface NowPlayingItem {
   voteAverage?: number | null;
   originalLanguage?: string;
   overview?: string;
-  genres?: string[];
+  genres?: Genre[];
   certification: string;
   ratings: RatingScore[];
   logo: string | null;
@@ -275,10 +276,10 @@ export function NowPlaying({
                       >
                         {item.genres.slice(0, 4).map((genre) => (
                           <div
-                            key={genre}
+                            key={genre.id}
                             className="rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-md transition-colors hover:bg-white/20"
                           >
-                            {genre}
+                            {genre.name}
                           </div>
                         ))}
                       </div>

@@ -32,6 +32,11 @@
       "production": "./dist/dto/repositories/*.js",
       "default": "./lib/dto/repositories/*.ts"
     },
+    "./dto/types/*": {
+      "types": "./dist/dto/types/*.d.ts",
+      "production": "./dist/dto/types/*.js",
+      "default": "./lib/dto/types/*.ts"
+    },
     "./dto/unions/*": {
       "types": "./dist/dto/unions/*.d.ts",
       "production": "./dist/dto/unions/*.js",

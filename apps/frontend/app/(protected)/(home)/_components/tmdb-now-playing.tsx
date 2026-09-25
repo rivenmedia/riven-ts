@@ -5,12 +5,16 @@ import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { Suspense } from "react";
 
-import type { NowPlayingItem } from "@/components/now-playing/now-playing";
+import type {
+  GetTmdbNowPlayingQuery,
+  GetTmdbNowPlayingQueryVariables,
+} from "./tmdb-now-playing.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
 
-export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<{
-  nowPlaying: NowPlayingItem[];
-}> = gql`
+export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
+  GetTmdbNowPlayingQuery,
+  GetTmdbNowPlayingQueryVariables
+> = gql`
   query GetTmdbNowPlaying {
     nowPlaying {
       id
@@ -24,9 +28,13 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<{
         name
         image
         score
+        url
       }
       logo
-      genres
+      genres {
+        id
+        name
+      }
     }
   }
 `;

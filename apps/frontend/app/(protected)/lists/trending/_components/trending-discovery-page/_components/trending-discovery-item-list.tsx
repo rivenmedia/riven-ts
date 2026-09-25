@@ -6,15 +6,16 @@ import { startTransition, useState } from "react";
 
 import { LoadMoreButton } from "./load-more-button";
 
+import type {
+  GetDiscoveryItemsQuery,
+  GetDiscoveryItemsQueryVariables,
+} from "./trending-discovery-item-list.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-export const GET_DISCOVERY_ITEMS: TypedDocumentNode<{
-  discoveryItems: Pick<
-    MediaItem,
-    "id" | "posterPath" | "title" | "type" | "year"
-  >[];
-}> = gql`
+export const GET_DISCOVERY_ITEMS: TypedDocumentNode<
+  GetDiscoveryItemsQuery,
+  GetDiscoveryItemsQueryVariables
+> = gql`
   query GetDiscoveryItems {
     discoveryItems {
       id

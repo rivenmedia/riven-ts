@@ -10,19 +10,15 @@ import { ErrorBoundary } from "react-error-boundary";
 
 import { TrendingItemsActions } from "./trending-items-actions";
 
+import type {
+  GetTrendingShowsQuery,
+  GetTrendingShowsQueryVariables,
+} from "./trending-shows.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 export const GET_TRENDING_SHOWS: TypedDocumentNode<
-  {
-    trendingShows: Pick<
-      MediaItem,
-      "id" | "title" | "posterPath" | "type" | "year"
-    >[];
-  },
-  {
-    timeWindow?: string;
-  }
+  GetTrendingShowsQuery,
+  GetTrendingShowsQueryVariables
 > = gql`
   query GetTrendingShows($timeWindow: String = "day") {
     trendingShows(timeWindow: $timeWindow) {

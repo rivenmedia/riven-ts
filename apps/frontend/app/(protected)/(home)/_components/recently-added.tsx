@@ -6,16 +6,17 @@ import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { cn } from "cn";
 
+import type {
+  GetRecentlyAddedQuery,
+  GetRecentlyAddedQueryVariables,
+} from "./recently-added.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type { HTMLAttributes } from "react";
 
-export const GET_RECENTLY_ADDED: TypedDocumentNode<{
-  recentlyAdded: Pick<
-    MediaItem,
-    "id" | "title" | "posterPath" | "type" | "year"
-  >[];
-}> = gql`
+export const GET_RECENTLY_ADDED: TypedDocumentNode<
+  GetRecentlyAddedQuery,
+  GetRecentlyAddedQueryVariables
+> = gql`
   query GetRecentlyAdded {
     recentlyAdded {
       id

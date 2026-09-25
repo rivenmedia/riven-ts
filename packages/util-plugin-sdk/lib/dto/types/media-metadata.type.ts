@@ -7,6 +7,18 @@ class Resolution {
 
   @Field(() => Number)
   public height!: number;
+
+  @Field(() => String, { nullable: true })
+  public codec?: string;
+
+  @Field(() => Number, { nullable: true })
+  public bitDepth?: number;
+
+  @Field(() => String, { nullable: true })
+  public hdrType?: string;
+
+  @Field(() => Number, { nullable: true })
+  public frameRate?: number;
 }
 
 @ObjectType()
