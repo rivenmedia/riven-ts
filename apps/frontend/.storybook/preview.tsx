@@ -1,3 +1,4 @@
+import "./import-meta-env.d.ts";
 import "./types.d.ts";
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
@@ -7,6 +8,7 @@ import { Providers } from "@/components/providers";
 
 import { resetApolloClientSingletons } from "@apollo/client-integration-nextjs";
 import chromaticAddon from "@chromatic-com/storybook";
+import { faker } from "@faker-js/faker";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
@@ -128,6 +130,16 @@ export const preview = definePreview({
   beforeEach() {
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
+
+    const fakerSeed = import.meta.env.STORYBOOK_FAKER_SEED;
+
+    if (fakerSeed) {
+      if (Number.isNaN(Number(fakerSeed))) {
+        throw new TypeError("STORYBOOK_FAKER_SEED must parse as number");
+      }
+
+      faker.seed(Number(fakerSeed));
+    }
   },
 });
 

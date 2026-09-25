@@ -20,6 +20,7 @@
       "cache": false
     },
     "storybook": {
+      "env": ["STORYBOOK_FAKER_SEED"],
       "passThroughEnv": ["MODE"],
       "dependsOn": ["msw:init"],
       "cache": false,
@@ -27,6 +28,7 @@
       "with": ["codegen:gql:watch"]
     },
     "build-storybook": {
+      "env": ["STORYBOOK_FAKER_SEED"],
       "dependsOn": ["msw:init", "codegen:gql"],
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]

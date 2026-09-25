@@ -1,5 +1,7 @@
 import { defineMain } from "@storybook/nextjs-vite/node";
 
+const fakerSeed = process.env["STORYBOOK_FAKER_SEED"];
+
 export default defineMain({
   addons: [
     "@storybook/addon-a11y",
@@ -14,4 +16,5 @@ export default defineMain({
     experimentalCodeExamples: true,
     experimentalTestSyntax: true,
   },
+  env: fakerSeed ? { STORYBOOK_FAKER_SEED: fakerSeed } : {},
 });
