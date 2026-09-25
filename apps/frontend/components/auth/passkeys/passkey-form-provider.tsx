@@ -28,7 +28,7 @@ const PasskeyFormContext = createContext<PasskeyFormContextValue | undefined>(
   undefined,
 );
 
-async function createPasskeyLoader() {
+function createPasskeyLoader() {
   return authClient.passkey.listUserPasskeys({
     fetchOptions: {
       throw: true,
@@ -37,8 +37,8 @@ async function createPasskeyLoader() {
 }
 
 export function PasskeyFormProvider({ children }: PropsWithChildren) {
-  const [loadPasskeys, setLoadPasskeys] = useState<Promise<Passkey[]>>(
-    async () => createPasskeyLoader(),
+  const [loadPasskeys, setLoadPasskeys] = useState<Promise<Passkey[]>>(() =>
+    createPasskeyLoader(),
   );
 
   const [isRegisteringPasskey, setIsRegisteringPasskey] = useState(false);

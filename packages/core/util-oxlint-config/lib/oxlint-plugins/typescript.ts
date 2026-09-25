@@ -47,6 +47,7 @@ export const oxlintPluginTypescriptConfig = defineConfig({
             allowRegExp: false,
           },
         ],
+        "typescript/promise-function-async": "allow", // Double-wrapping Promises can cause extremely subtle bugs, especially in React.
 
         // Rules that will be enabled in the future, but are currently disabled to avoid noise
         "typescript/only-throw-error": "off", // @repo/util-plugin-sdk's error factory conflicts with this rule when using the built d.ts files
