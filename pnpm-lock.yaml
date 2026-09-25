@@ -910,9 +910,6 @@ importers:
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../packages/feature-settings
       '@repo/plugin-comet':
         specifier: workspace:^
         version: link:../../packages/plugin-comet

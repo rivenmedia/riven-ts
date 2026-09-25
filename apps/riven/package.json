@@ -57,7 +57,6 @@
     "@mikro-orm/reflection": "catalog:",
     "@mikro-orm/seeder": "catalog:",
     "@repo/core-util-graphql-schema": "workspace:^",
-    "@repo/feature-settings": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",
