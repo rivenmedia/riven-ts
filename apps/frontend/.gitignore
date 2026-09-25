@@ -8,5 +8,5 @@ playwright/.auth/
 certificates/
 
 *storybook.log
-storybook-static
+storybook-static/
 public/mockServiceWorker.js

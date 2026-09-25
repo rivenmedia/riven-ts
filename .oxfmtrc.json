@@ -25,16 +25,10 @@
   ],
   "printWidth": 80,
   "ignorePatterns": [
-    "pnpm-lock.yaml",
-    "*.hbs",
-    "**/docker-data",
-    "**/.source",
-    "**/out",
-    "**/dist",
-    "**/playwright-report",
-    "**/storybook-static",
-    "**/test-results",
-    "**/.pnpm_patches"
+    "pnpm-lock.yaml", // Leave the lockfile untouched to avoid unnecessary diffs
+    "*.hbs", // Oxfmt's support for Handlebars sucks
+    "**/.pnpm_patches", // Ignore in-progress PNPM patches to avoid unnecessary diffs
+    "svelte-frontend" // TODO: Remove once frontend is integrated
   ],
   "sortPackageJson": {
     "sortScripts": true

@@ -1,20 +1,21 @@
 node_modules/
+.git/
 .turbo/
-*.tsbuildinfo
-*.log
 logs/
 .pnpm-store/
 __generated__/
 coverage/
+dist/
+temp/
+docker-data/
+
+*.tsbuildinfo
+*.log
 .env*
 !.env*.example
 *.typegen.ts
-dist/
-temp/
 *.bundled_*.mjs
-docker-data/
 *.graphql
-.git/
 knip-report.json
 .direnv
 
