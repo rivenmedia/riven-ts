@@ -17,6 +17,7 @@
       "cache": false
     },
     "storybook": {
+      "passThroughEnv": ["MODE"],
       "dependsOn": ["msw:init"],
       "cache": false,
       "persistent": true,
