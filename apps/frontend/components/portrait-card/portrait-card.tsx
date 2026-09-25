@@ -2,6 +2,8 @@ import { cn } from "cn";
 import { Check, Mountain } from "lucide-react";
 import Image from "next/image";
 
+import { Checkbox } from "../_ui/checkbox";
+
 interface PortraitCardProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
@@ -57,7 +59,7 @@ export function PortraitCard({
 
   function renderSelectButton() {
     return (
-      <button
+      <Checkbox
         onClick={(event) => {
           event.preventDefault();
           event.stopPropagation();
@@ -70,14 +72,13 @@ export function PortraitCard({
             ? "border-primary bg-primary text-primary-foreground scale-110"
             : "border-white/30 bg-black/20 opacity-0 group-hover:opacity-100 hover:border-white/50 hover:bg-black/40",
         )}
+        checked={isSelected ?? false}
         aria-label="Select item"
-        // oxlint-disable-next-line jsx-a11y/prefer-tag-over-role
-        role="checkbox"
         aria-checked={isSelected}
         type="button"
       >
         {isSelected && <Check className="h-3 w-3" strokeWidth={3} />}
-      </button>
+      </Checkbox>
     );
   }
 

@@ -1,5 +1,6 @@
 import { preview } from "@/.storybook/preview";
 
+import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { Badge } from "../_ui/badge";
@@ -85,6 +86,20 @@ export const Selectable = meta.story({
     isSelectable: true,
     title: "Dune: Part Two",
   },
+  render: (args) => {
+    const [selected, setSelected] = useState(args.isSelected ?? false);
+
+    return (
+      <PortraitCard
+        {...args}
+        isSelected={selected}
+        onSelectToggle={() => {
+          setSelected((prev) => !prev);
+          args.onSelectToggle?.();
+        }}
+      />
+    );
+  },
 });
 
 Selectable.test(
@@ -103,28 +118,28 @@ Selectable.test(
   async ({ canvasElement, args }) => {
     const canvas = within(canvasElement);
 
-    const button = await canvas.findByRole("checkbox");
+    const checkbox = await canvas.findByRole("checkbox");
 
-    await userEvent.click(button);
+    await userEvent.click(checkbox);
 
-    await expect(button).toBeChecked();
+    await expect(checkbox).toBeChecked();
     await expect(args.onSelectToggle).toBeCalledTimes(1);
 
-    await userEvent.click(button);
+    await userEvent.click(checkbox);
 
-    await expect(button).not.toBeChecked();
+    await expect(checkbox).not.toBeChecked();
     await expect(args.onSelectToggle).toBeCalledTimes(2);
   },
 );
 
 export const Selected = Selectable.extend({
   args: {
-    defaultSelected: true,
+    isSelected: true,
   },
 });
 
 Selected.test(
-  "When defaultSelected is true, the select button is checked",
+  "When isSelected is true, the select button is checked",
   async ({ canvasElement }) => {
     const canvas = within(canvasElement);
 

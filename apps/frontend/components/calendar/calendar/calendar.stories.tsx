@@ -18,7 +18,7 @@ const meta = preview.meta({
         tmdbId: "94605",
         showTitle: "Arcane",
         itemType: "episode" as const,
-        airedAt: DateTime.now().toISO(),
+        airedAt: DateTime.fromObject({ year: 2026, month: 9, day: 4 }).toISO(),
         season: 2,
         episode: 3,
         lastState: "Completed",
@@ -29,7 +29,7 @@ const meta = preview.meta({
         tmdbId: "603692",
         showTitle: "John Wick: Chapter 4",
         itemType: "movie" as const,
-        airedAt: DateTime.now().plus({ days: 2 }).toISO(),
+        airedAt: DateTime.fromObject({ year: 2026, month: 9, day: 6 }).toISO(),
         lastState: "Completed",
       },
       {
@@ -38,7 +38,7 @@ const meta = preview.meta({
         tmdbId: "1399",
         showTitle: "Game of Thrones",
         itemType: "show" as const,
-        airedAt: DateTime.now().minus({ months: 1 }).toISO(),
+        airedAt: DateTime.fromObject({ year: 2026, month: 8, day: 4 }).toISO(),
         lastState: "Completed",
       },
     ],
@@ -416,7 +416,7 @@ Desktop.test(
 export const Mobile = meta.story({
   globals: {
     viewport: {
-      value: "mobile",
+      value: "mobile1",
     },
   },
 });

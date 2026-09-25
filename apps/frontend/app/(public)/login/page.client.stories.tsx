@@ -18,11 +18,6 @@ const meta = preview.meta({
       PublicKeyCredentialMock as typeof PublicKeyCredential,
     );
   },
-  parameters: {
-    test: {
-      dangerouslyIgnoreUnhandledErrors: true,
-    },
-  },
 });
 
 export const CredentialsEnabled = meta.story({

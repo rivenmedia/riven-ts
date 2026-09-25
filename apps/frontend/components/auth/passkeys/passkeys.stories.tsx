@@ -71,11 +71,23 @@ const meta = preview.meta({
     });
 
     msw.use(
-      http.post("**/api/auth/passkey/update-passkey", async () => {
-        await delay();
+      http.post<PathParams, { id: string; name: string }>(
+        "**/api/auth/passkey/update-passkey",
+        async ({ request }) => {
+          await delay();
 
-        return HttpResponse.json();
-      }),
+          const body = await request.json();
+
+          if (!body.name) {
+            return HttpResponse.json(
+              { error: "Passkey name is required" },
+              { status: StatusCodes.BAD_REQUEST },
+            );
+          }
+
+          return HttpResponse.json();
+        },
+      ),
       http.post("**/api/auth/passkey/add-passkey", async () => {
         await delay();
 
@@ -149,23 +161,6 @@ Default.test(
               userId: "user-id-1",
             },
           ]),
-        ),
-        http.post<PathParams, { id: string; name: string }>(
-          "**/api/auth/passkey/update-passkey",
-          async ({ request }) => {
-            // await delay();
-
-            const body = await request.json();
-
-            if (!body.name) {
-              return HttpResponse.json(
-                { error: "Passkey name is required" },
-                { status: StatusCodes.BAD_REQUEST },
-              );
-            }
-
-            return HttpResponse.json();
-          },
         ),
       );
     },

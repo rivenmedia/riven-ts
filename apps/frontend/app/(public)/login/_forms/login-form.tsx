@@ -15,12 +15,14 @@ import { createScopedLogger } from "@/lib/logger";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { useEffect, useId } from "react";
+import { use, useEffect, useId } from "react";
+import { browser } from "react-dom";
 import { toast } from "sonner";
 
 import { loginUser } from "../_actions/login.action";
 import { OAuthProviders } from "../_components/oauth-providers";
 import { loginSchema } from "../_form-schemas/login.schema";
+import { browserSupportsPasskeys } from "../_utils/browser-supports-passkeys";
 
 import type { AuthProvider } from "@/app/_types/__generated__/graphql";
 
@@ -42,24 +44,24 @@ export function LoginForm({
   lastLoginMethod,
 }: LoginFormProps) {
   useEffect(() => {
+    use(browser());
+
     async function maybeAutoPasskeySignIn() {
-      if (
-        typeof globalThis.window.PublicKeyCredential
-          .isConditionalMediationAvailable === "function"
-      ) {
+      if (browserSupportsPasskeys(globalThis.window)) {
         const supportsPasskeyAutofill =
           await globalThis.window.PublicKeyCredential.isConditionalMediationAvailable();
 
         if (supportsPasskeyAutofill) {
-          void authClient.signIn.passkey({
-            autoFill: true,
-            fetchOptions: {
-              onSuccess: handleSuccessfulSignin,
-              onError(context) {
-                logger.debug("Passkey autofill failed:", context.error);
-              },
-            },
-          });
+          try {
+            await authClient.signIn.passkey({
+              autoFill: true,
+              fetchOptions: { throw: true },
+            });
+
+            handleSuccessfulSignin();
+          } catch (error) {
+            logger.debug("Passkey autofill encountered an error:", error);
+          }
         }
       }
     }
@@ -67,7 +69,7 @@ export function LoginForm({
     void maybeAutoPasskeySignIn();
   }, []);
 
-  const { form, handleSubmitWithAction } = useHookFormAction(
+  const { form, action } = useHookFormAction(
     loginUser.bind(null, { isCredentialLoginEnabled }),
     zodResolver(loginSchema),
     {
@@ -91,6 +93,11 @@ export function LoginForm({
     },
   );
 
+  const handleSubmit = form.handleSubmit((data) => {
+    // Use action.execute to prevent redirects from surfacing as uncaught exceptions
+    action.execute(data);
+  });
+
   const { errors } = form.formState;
 
   const usernameInputId = useId();
@@ -109,7 +116,7 @@ export function LoginForm({
           <>
             <form
               className="space-y-2"
-              onSubmit={(event) => void handleSubmitWithAction(event)}
+              onSubmit={(event) => void handleSubmit(event)}
             >
               <Field data-invalid={Boolean(errors.username)}>
                 <FieldLabel htmlFor={usernameInputId}>Username</FieldLabel>

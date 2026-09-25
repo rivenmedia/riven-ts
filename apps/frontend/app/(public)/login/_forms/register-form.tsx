@@ -24,7 +24,7 @@ interface RegisterFormProps {
 }
 
 export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
-  const { form, handleSubmitWithAction } = useHookFormAction(
+  const { form, action } = useHookFormAction(
     registerUser.bind(null, {
       isSignupEnabled,
     }),
@@ -52,6 +52,11 @@ export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
     },
   );
 
+  const handleSubmit = form.handleSubmit((data) => {
+    // Use action.execute to prevent redirects from surfacing as uncaught exceptions
+    action.execute(data);
+  });
+
   const { errors } = form.formState;
 
   const usernameInputId = useId();
@@ -71,7 +76,7 @@ export function RegisterForm({ isSignupEnabled }: RegisterFormProps) {
       <CardContent>
         <form
           className="space-y-2"
-          onSubmit={(event) => void handleSubmitWithAction(event)}
+          onSubmit={(event) => void handleSubmit(event)}
         >
           <Field data-invalid={Boolean(errors.username)}>
             <FieldLabel htmlFor={usernameInputId}>Username</FieldLabel>

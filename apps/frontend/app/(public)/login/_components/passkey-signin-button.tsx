@@ -3,6 +3,10 @@
 import { Button } from "@/components/_ui/button";
 
 import { Fingerprint, StarIcon } from "lucide-react";
+import { use } from "react";
+import { browser } from "react-dom";
+
+import { browserSupportsPasskeys } from "../_utils/browser-supports-passkeys";
 
 interface PasskeySigninButtonProps {
   lastLoginMethod: string | null;
@@ -15,9 +19,9 @@ export function PasskeySigninButton({
   isPasskeyLoading,
   handlePasskeySignIn,
 }: PasskeySigninButtonProps) {
-  const supportsPasskey = Boolean(globalThis.window.PublicKeyCredential);
+  use(browser());
 
-  if (!supportsPasskey) {
+  if (!browserSupportsPasskeys(globalThis.window)) {
     return null;
   }
 

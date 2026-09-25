@@ -35,6 +35,6 @@ export const registerUser = actionClient
         throw new Error(error.message ?? error.statusText, { cause: error });
       }
 
-      return redirect("/");
+      redirect("/");
     },
   );

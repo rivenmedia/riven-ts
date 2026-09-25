@@ -22,19 +22,19 @@ export const loginUser = actionClient
       }
 
       try {
-        await authClient.signIn.username({
-          username,
-          password,
-        });
-
-        return redirect("/");
+        await authClient.signIn.username(
+          {
+            username,
+            password,
+          },
+          { throw: true },
+        );
       } catch (error) {
         loginLogger.error("Error during login:", error);
 
         throw error;
       }
-    },
-    {
-      throwServerError: true,
+
+      redirect("/");
     },
   );
