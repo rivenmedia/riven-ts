@@ -22,4 +22,4 @@ runs:
     - name: Install Playwright dependencies
       if: ${{ inputs.task == 'test:component' }}
       shell: bash
-      run: pnpm dlx playwright install --with-deps
+      run: pnpm dlx playwright install chromium --with-deps

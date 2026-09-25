@@ -77,7 +77,11 @@
       ]
     },
     "lint": {
-      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
+      "dependsOn": [
+        "codegen:api-schemas",
+        "codegen:nextjs-env",
+        "transit:source-files"
+      ],
       "inputs": [
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**"
@@ -85,7 +89,11 @@
     },
     "lint:fix": {
       "cache": false,
-      "dependsOn": ["codegen:api-schemas", "transit:source-files"]
+      "dependsOn": [
+        "codegen:api-schemas",
+        "codegen:nextjs-env",
+        "transit:source-files"
+      ]
     },
     "//#lint": {
       "inputs": [
@@ -129,6 +137,10 @@
     },
     "e2e": {
       "cache": false
+    },
+    "codegen:nextjs-env": {
+      "inputs": ["**/*.{ts,tsx}"],
+      "outputs": ["next-env.d.ts"]
     }
   }
 }
