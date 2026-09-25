@@ -129,7 +129,7 @@
       "outputs": ["knip-report.json"]
     },
     "//#validate-generators": {
-      "dependsOn": ["transit:source-files"],
+      "dependsOn": ["^transit:source-files"],
       "inputs": ["turbo/generators/**", "!turbo/generators/coverage/**"]
     },
     "e2e": {
