@@ -36,7 +36,7 @@ export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
     ...(isAdmin
       ? ([
           { href: "/settings", icon: Settings, label: "Settings" },
-          { href: "/logs", icon: FileClock, label: "Logs" },
+          { href: "/view-logs", icon: FileClock, label: "Logs" },
         ] as const)
       : []),
   ];

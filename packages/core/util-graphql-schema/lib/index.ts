@@ -6,6 +6,8 @@ import {
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
+import { registerEnums } from "./register-enums.ts";
+
 import type { BuildSchemaOptions } from "type-graphql";
 
 export const buildSchema = async (
@@ -13,8 +15,10 @@ export const buildSchema = async (
     // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
     resolvers?: readonly Function[] | undefined;
   },
-) =>
-  baseBuildSchema({
+) => {
+  registerEnums();
+
+  return baseBuildSchema({
     ...options,
     resolvers: [
       CoreSettingsResolver,
@@ -27,3 +31,4 @@ export const buildSchema = async (
     ],
     validate: true,
   });
+};

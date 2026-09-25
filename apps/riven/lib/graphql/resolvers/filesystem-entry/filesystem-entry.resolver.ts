@@ -1,9 +1,9 @@
 import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
+import { FileSizeUnit } from "@repo/util-plugin-sdk/dto/enums/file-size-unit.enum";
 
 import assert from "node:assert";
 import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
 
-import { FileSizeUnit } from "./enums/file-size-unit.enum.ts";
 import { FileSize } from "./types/file-size.ts";
 
 @Resolver(() => FileSystemEntry)

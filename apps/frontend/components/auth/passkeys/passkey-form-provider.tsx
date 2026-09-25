@@ -3,6 +3,7 @@ import { authClient } from "@/lib/auth/client";
 import {
   createContext,
   startTransition,
+  useCallback,
   useContext,
   useMemo,
   useRef,
@@ -34,7 +35,7 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
   const abortController = useMemo(() => new AbortController(), []);
   const passkeyLoaderRef = useRef<Promise<Passkey[]> | null>(null);
 
-  function createPasskeyLoader() {
+  const createPasskeyLoader = useCallback(() => {
     passkeyLoaderRef.current ??= authClient.passkey
       .listUserPasskeys({
         fetchOptions: {
@@ -47,7 +48,7 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
       });
 
     return passkeyLoaderRef.current;
-  }
+  }, [abortController]);
 
   useUnmount(() => {
     abortController.abort();
@@ -62,11 +63,11 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
   const [currentlyEditingPasskey, setCurrentlyEditingPasskey] =
     useState<Passkey | null>(null);
 
-  function reloadPasskeys() {
+  const reloadPasskeys = useCallback(() => {
     startTransition(() => {
       setLoadPasskeys(createPasskeyLoader());
     });
-  }
+  }, [createPasskeyLoader]);
 
   function startEditingPasskey(passkey: Passkey) {
     setCurrentlyEditingPasskey(passkey);
@@ -76,7 +77,7 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
     setCurrentlyEditingPasskey(null);
   }
 
-  async function registerPasskey() {
+  const registerPasskey = useCallback(async () => {
     setIsRegisteringPasskey(true);
 
     try {
@@ -97,27 +98,30 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
     } finally {
       setIsRegisteringPasskey(false);
     }
-  }
+  }, [reloadPasskeys]);
 
-  async function deletePasskey(id: string) {
-    try {
-      await authClient.passkey.deletePasskey({
-        id,
-        fetchOptions: {
-          onSuccess() {
-            toast.success("Passkey deleted successfully");
+  const deletePasskey = useCallback(
+    async (id: string) => {
+      try {
+        await authClient.passkey.deletePasskey({
+          id,
+          fetchOptions: {
+            onSuccess() {
+              toast.success("Passkey deleted successfully");
 
-            reloadPasskeys();
+              reloadPasskeys();
+            },
+            onError(context) {
+              toast.error(context.error.message || "Failed to delete passkey");
+            },
           },
-          onError(context) {
-            toast.error(context.error.message || "Failed to delete passkey");
-          },
-        },
-      });
-    } catch {
-      toast.error("Failed to delete passkey");
-    }
-  }
+        });
+      } catch {
+        toast.error("Failed to delete passkey");
+      }
+    },
+    [reloadPasskeys],
+  );
 
   function clearCurrentlyEditingPasskey() {
     setCurrentlyEditingPasskey(null);
@@ -135,7 +139,14 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
       startEditingPasskey,
       clearCurrentlyEditingPasskey,
     }),
-    [loadPasskeys, currentlyEditingPasskey, isRegisteringPasskey],
+    [
+      deletePasskey,
+      registerPasskey,
+      reloadPasskeys,
+      loadPasskeys,
+      currentlyEditingPasskey,
+      isRegisteringPasskey,
+    ],
   );
 
   return (

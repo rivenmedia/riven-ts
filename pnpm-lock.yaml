@@ -1397,6 +1397,9 @@ importers:
       '@repo/feature-settings':
         specifier: workspace:^
         version: link:../../feature-settings
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../../util-plugin-sdk
       graphql:
         specifier: 'catalog:'
         version: 16.14.0
