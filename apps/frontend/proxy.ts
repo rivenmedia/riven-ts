@@ -5,7 +5,7 @@ import { getClient } from "@/lib/graphql/client";
 
 import { NextResponse } from "next/server";
 
-import type { AppRoutes, RedirectRoutes } from "./.next/dev/types/routes";
+import type { AppRoutes, RedirectRoutes } from "./.next/types/routes";
 import type { NextRequest, ProxyConfig } from "next/server";
 
 const paths = {

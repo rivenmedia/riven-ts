@@ -7,7 +7,7 @@ import { fly } from "../_animations/fly";
 import { Button } from "../_ui/button";
 import { NotificationCenter } from "../notification-center/notification-center";
 
-import type { AppRoutes } from "../../.next/dev/types/routes";
+import type { AppRoutes } from "../../.next/types/routes";
 
 const MAIN_PAGES = new Set<string>([
   "/",
@@ -16,7 +16,7 @@ const MAIN_PAGES = new Set<string>([
   "/library",
   "/settings",
   "/calendar",
-  "/logs",
+  "/view-logs",
   // "/auth",
 ] satisfies AppRoutes[]);
 

@@ -138,7 +138,7 @@
     "e2e:headless": {},
     "codegen:nextjs-env": {
       "inputs": ["**/*.{ts,tsx}"],
-      "outputs": ["next-env.d.ts"]
+      "outputs": ["next-env.d.ts", ".next/types/**"]
     }
   }
 }
