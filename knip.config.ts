@@ -39,7 +39,6 @@ export default {
     "@graphql-typed-document-node/*",
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
-
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
@@ -95,7 +94,7 @@ export default {
       ignoreDependencies: ["@repo/riven", "@swc-node/register"],
     },
     "apps/frontend": {
-      ignore: ["**/*"], // Ignore all files in the frontend workspace until it's fully integrated
+      ignore: ["**/*"], // TODO: Remove once the frontend is fully integrated
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

@@ -4,7 +4,11 @@ import { defineConfig } from "oxlint";
 
 export default defineConfig({
   extends: [baseOxlintConfig],
-  ignorePatterns: ["apps/**", "packages/**", "svelte-frontend/**"],
+  ignorePatterns: [
+    "apps/**",
+    "packages/**",
+    "svelte-frontend/**", // TODO: Remove once the frontend is fully integrated
+  ],
   overrides: [
     {
       files: ["**/**"],

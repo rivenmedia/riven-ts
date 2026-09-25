@@ -24,15 +24,18 @@ export const Movies = meta.story({
   },
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_DISCOVERY_ITEMS, () =>
+      graphql.query("GetDiscoveryItems", () =>
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
               id: faker.string.uuid() as UUID,
-              posterPath: faker.image.urlPicsumPhotos(),
+              posterPath: faker.image.urlPicsumPhotos({
+                width: 200,
+                height: 300,
+              }),
               title: faker.lorem.words(3),
               type: "movie",
-              year: 2024,
+              year: faker.date.past({ years: 10 }).getFullYear(),
             })),
           },
         }),
@@ -60,7 +63,7 @@ export const Shows = meta.story({
               }),
               title: faker.lorem.words(3),
               type: "show",
-              year: 2024,
+              year: faker.date.past({ years: 10 }).getFullYear(),
             })),
           },
         }),

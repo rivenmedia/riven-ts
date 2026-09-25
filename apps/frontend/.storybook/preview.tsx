@@ -61,11 +61,12 @@ export const preview = definePreview({
     mswAddon(async () => {
       const worker = setupWorker(
         http.get("https://picsum.photos/**", passthrough),
+        http.get("**/node_modules/**", passthrough), // Storybook accesses modules via HTTP
         http.get("**virtual:next/image**", passthrough),
       );
 
       await worker.start({
-        // onUnhandledRequest: "error", // Don't send out real requests in Storybook, they should always be mocked
+        onUnhandledRequest: "error", // Don't send out real requests in Storybook, they should always be mocked
         serviceWorker: { url: "/mockServiceWorker.js" },
       });
 

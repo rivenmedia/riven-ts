@@ -13,10 +13,6 @@
       "cache": false,
       "persistent": true
     },
-    "e2e": {
-      "passThroughEnv": ["DATABASE_FILE_NAME"]
-    },
-    "e2e:headless": {},
     "msw:init": {
       "cache": false
     },

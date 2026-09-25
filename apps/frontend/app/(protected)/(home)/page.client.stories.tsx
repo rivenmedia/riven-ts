@@ -1,6 +1,7 @@
 import { ProtectedLayoutWrapper } from "@/.storybook/decorators/protected-layout-wrapper";
 import { preview } from "@/.storybook/preview";
 
+import { DateTime } from "luxon";
 import { graphql, HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
@@ -56,7 +57,7 @@ export const Default = meta.story({
                     url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
                   },
                 ],
-                logo: null,
+                logo: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
               },
               {
                 id: "94605",
@@ -72,7 +73,12 @@ export const Default = meta.story({
                 genres: ["Animation", "Action & Adventure"],
                 certification: "12A",
                 ratings: [],
-                logo: null,
+                logo: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+                releaseDate: DateTime.fromObject({
+                  year: 2024,
+                  month: 11,
+                  day: 9,
+                }).toISO(),
               },
               {
                 id: "1291595",
@@ -80,7 +86,11 @@ export const Default = meta.story({
                 title: "Insidious: Out of the Further",
                 backdropPath:
                   "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
-                releaseDate: "2026-08-21",
+                releaseDate: DateTime.fromObject({
+                  year: 2026,
+                  month: 8,
+                  day: 21,
+                }).toISO(),
                 voteAverage: 6.5,
                 originalLanguage: "en",
                 overview:
@@ -88,7 +98,7 @@ export const Default = meta.story({
                 genres: ["Horror"],
                 certification: "18",
                 ratings: [],
-                logo: null,
+                logo: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
               },
             ],
           },

@@ -129,15 +129,13 @@
       "outputs": ["knip-report.json"]
     },
     "//#validate-generators": {
-      "inputs": [
-        "turbo/generators/**",
-        "!turbo/generators/coverage/**",
-        "transit:source-files"
-      ]
+      "dependsOn": ["transit:source-files"],
+      "inputs": ["turbo/generators/**", "!turbo/generators/coverage/**"]
     },
     "e2e": {
       "cache": false
     },
+    "e2e:headless": {},
     "codegen:nextjs-env": {
       "inputs": ["**/*.{ts,tsx}"],
       "outputs": ["next-env.d.ts"]

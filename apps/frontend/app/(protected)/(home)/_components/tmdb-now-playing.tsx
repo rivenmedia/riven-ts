@@ -15,8 +15,18 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<{
     nowPlaying {
       id
       title
-      posterPath
+      backdropPath
+      certification
+      originalLanguage
+      overview
       releaseDate
+      ratings {
+        name
+        image
+        score
+      }
+      logo
+      genres
     }
   }
 `;
