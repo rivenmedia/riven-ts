@@ -5,8 +5,7 @@ import { Field, Int, ObjectType } from "type-graphql";
 
 import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
 import { EpisodeRepository } from "../../repositories/episode.repository.ts";
-import { Show } from "./index.js";
-import { Season, ShowLikeMediaItem } from "./index.ts";
+import { Show, Season, ShowLikeMediaItem } from "./index.ts";
 
 import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
 import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
