@@ -81,7 +81,6 @@
       "dependsOn": [
         "codegen:api-schemas",
         "codegen:nextjs-env",
-        "codegen:gql",
         "transit:source-files"
       ],
       "inputs": [
@@ -94,7 +93,6 @@
       "dependsOn": [
         "codegen:api-schemas",
         "codegen:nextjs-env",
-        "codegen:gql",
         "transit:source-files"
       ]
     },
