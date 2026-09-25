@@ -132,9 +132,6 @@ Desktop.test(
 Desktop.test(
   "Adjusts the calendar based on the current locale",
   {
-    beforeEach() {
-      Settings.defaultLocale = "en-US";
-    },
     afterEach() {
       Settings.resetCaches();
     },
@@ -145,66 +142,6 @@ Desktop.test(
     });
 
     const testCases = [
-      {
-        locale: "en-US",
-        expectedMonthResults: [
-          {
-            datetime: DateTime.fromObject({ year: 2026, month: 8 }),
-            expectedDayCells: 42,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 7,
-              day: 26,
-            }),
-          },
-          {
-            datetime: DateTime.fromObject({ year: 2026, month: 9 }),
-            expectedDayCells: 35,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 8,
-              day: 30,
-            }),
-          },
-          {
-            datetime: DateTime.fromObject({ year: 2026, month: 10 }),
-            expectedDayCells: 35,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 9,
-              day: 27,
-            }),
-          },
-          {
-            datetime: DateTime.fromObject({ year: 2026, month: 11 }),
-            expectedDayCells: 35,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 11,
-              day: 1,
-            }),
-          },
-          {
-            datetime: DateTime.fromObject({ year: 2026, month: 12 }),
-            expectedDayCells: 35,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 11,
-              day: 29,
-            }),
-          },
-          {
-            datetime: DateTime.fromObject({ year: 2027, month: 1 }),
-            expectedDayCells: 42,
-            firstDayDatetime: DateTime.fromObject({
-              year: 2026,
-              month: 12,
-              day: 27,
-            }),
-          },
-        ],
-        expectedDayHeaders: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
-      },
       {
         locale: "en-GB",
         expectedMonthResults: [
@@ -264,6 +201,66 @@ Desktop.test(
           },
         ],
         expectedDayHeaders: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      },
+      {
+        locale: "en-US",
+        expectedMonthResults: [
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 8 }),
+            expectedDayCells: 42,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 7,
+              day: 26,
+            }),
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 9 }),
+            expectedDayCells: 35,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 8,
+              day: 30,
+            }),
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 10 }),
+            expectedDayCells: 35,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 9,
+              day: 27,
+            }),
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 11 }),
+            expectedDayCells: 35,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 1,
+            }),
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2026, month: 12 }),
+            expectedDayCells: 35,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 11,
+              day: 29,
+            }),
+          },
+          {
+            datetime: DateTime.fromObject({ year: 2027, month: 1 }),
+            expectedDayCells: 42,
+            firstDayDatetime: DateTime.fromObject({
+              year: 2026,
+              month: 12,
+              day: 27,
+            }),
+          },
+        ],
+        expectedDayHeaders: ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"],
       },
       {
         locale: "fa-IR",
