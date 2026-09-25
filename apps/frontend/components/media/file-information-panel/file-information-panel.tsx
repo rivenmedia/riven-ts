@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/_ui/badge";
 
 import { useState } from "react";

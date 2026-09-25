@@ -1,3 +1,5 @@
+"use client";
+
 import { Badge } from "@/components/_ui/badge";
 import { Button } from "@/components/_ui/button";
 import { Label } from "@/components/_ui/label";

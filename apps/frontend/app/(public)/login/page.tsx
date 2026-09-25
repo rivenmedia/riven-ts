@@ -15,6 +15,8 @@ import { LoginForm } from "./_forms/login-form";
 import { RegisterForm } from "./_forms/register-form";
 import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query";
 
+export const dynamic = "force-dynamic";
+
 interface TabData {
   label: string;
   component: React.ReactNode;

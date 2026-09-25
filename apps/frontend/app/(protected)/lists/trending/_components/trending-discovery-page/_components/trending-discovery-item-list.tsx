@@ -1,3 +1,5 @@
+"use client";
+
 import { ListItem } from "@/components/list-item/list-item";
 
 import { gql } from "@apollo/client";

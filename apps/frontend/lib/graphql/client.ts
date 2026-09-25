@@ -1,3 +1,5 @@
+import { privateEnvironment } from "@/environment/private-environment.schema";
+
 import { HttpLink } from "@apollo/client";
 import {
   registerApolloClient,
@@ -11,7 +13,7 @@ export const { getClient, query } = registerApolloClient(
       cache: new InMemoryCache(),
       link: new HttpLink({
         // this needs to be an absolute url, as relative urls cannot be used in SSR
-        uri: "http://example.com/api/graphql",
+        uri: `${privateEnvironment.ORIGIN}/graphql`,
         fetchOptions: {
           // you can pass additional options that should be passed to `fetch` here,
           // e.g. Next.js-related `fetch` options regarding caching and revalidation

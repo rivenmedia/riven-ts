@@ -1,3 +1,5 @@
+"use client";
+
 import { fly } from "@/components/_animations/fly";
 import { Button } from "@/components/_ui/button";
 import { Input } from "@/components/_ui/input";

@@ -1,3 +1,5 @@
+"use client";
+
 import { ImmersiveBackground } from "@/components/immersive-background/immersive-background";
 import { PageShell } from "@/components/page-shell/page-shell";
 import { PortraitCardSkeleton } from "@/components/portrait-card/portrait-card-skeleton";
