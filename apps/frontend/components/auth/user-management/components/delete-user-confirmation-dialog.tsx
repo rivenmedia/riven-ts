@@ -27,9 +27,10 @@ export function DeleteUserConfirmationDialog({
   const form = useForm();
 
   const handleSubmit = form.handleSubmit(async () => {
-    const { success } = await authClient.admin.removeUser({
-      userId: user.id,
-    });
+    const { success } = await authClient.admin.removeUser(
+      { userId: user.id },
+      { throw: true },
+    );
 
     if (success) {
       toast.success("User deleted successfully.");

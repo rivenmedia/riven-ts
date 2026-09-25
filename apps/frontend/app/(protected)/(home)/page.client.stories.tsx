@@ -211,7 +211,7 @@ Default.test(
 
     await expect(viewAllButton).toHaveAttribute(
       "href",
-      "/lists/trending/movie",
+      "/lists/trending/movies",
     );
   },
 );
@@ -254,7 +254,10 @@ Default.test(
       { name: /view all/iu },
     );
 
-    await expect(viewAllButton).toHaveAttribute("href", "/lists/trending/tv");
+    await expect(viewAllButton).toHaveAttribute(
+      "href",
+      "/lists/trending/shows",
+    );
   },
 );
 

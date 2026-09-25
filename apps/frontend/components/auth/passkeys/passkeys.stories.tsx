@@ -388,11 +388,6 @@ Default.test(
         ),
       );
     },
-    parameters: {
-      test: {
-        dangerouslyIgnoreUnhandledErrors: true,
-      },
-    },
   },
   async ({ canvas, step }) => {
     await step("Wait for the passkeys to load", async () => {

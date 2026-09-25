@@ -5,8 +5,10 @@ import {
   startTransition,
   useContext,
   useMemo,
+  useRef,
   useState,
 } from "react";
+import { useUnmount } from "react-use";
 import { toast } from "sonner";
 
 import type { Passkey } from "@better-auth/passkey/client";
@@ -28,15 +30,30 @@ const PasskeyFormContext = createContext<PasskeyFormContextValue | undefined>(
   undefined,
 );
 
-function createPasskeyLoader() {
-  return authClient.passkey.listUserPasskeys({
-    fetchOptions: {
-      throw: true,
-    },
-  });
-}
-
 export function PasskeyFormProvider({ children }: PropsWithChildren) {
+  const abortController = useMemo(() => new AbortController(), []);
+  const passkeyLoaderRef = useRef<Promise<Passkey[]> | null>(null);
+
+  function createPasskeyLoader() {
+    passkeyLoaderRef.current ??= authClient.passkey
+      .listUserPasskeys({
+        fetchOptions: {
+          signal: abortController.signal,
+          throw: true,
+        },
+      })
+      .finally(() => {
+        passkeyLoaderRef.current = null;
+      });
+
+    return passkeyLoaderRef.current;
+  }
+
+  useUnmount(() => {
+    abortController.abort();
+    passkeyLoaderRef.current = null;
+  });
+
   const [loadPasskeys, setLoadPasskeys] = useState<Promise<Passkey[]>>(() =>
     createPasskeyLoader(),
   );

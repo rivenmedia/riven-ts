@@ -111,6 +111,10 @@ Desktop.test(
       current: "date",
     });
 
+    await expect(
+      await within(currentDateCell).findAllByRole("link"),
+    ).toHaveLength(1);
+
     await userEvent.click(episodeFilterCheckbox);
 
     await expect(within(currentDateCell).queryAllByRole("link")).toHaveLength(
