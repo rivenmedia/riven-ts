@@ -1,3 +1,4 @@
+import { registerEnums } from "../register-enums.ts";
 import { EpisodeResolver } from "./episode.resolver.ts";
 import { FileSystemEntryResolver } from "./filesystem-entry/filesystem-entry.resolver.ts";
 import { ItemRequestResolver } from "./item-request.resolver.ts";
@@ -21,3 +22,5 @@ export const resolvers = [
   ShowResolver,
   VfsResolver,
 ] as const;
+
+registerEnums();

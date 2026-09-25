@@ -1,5 +1,4 @@
 import { constantCase } from "es-toolkit";
-import { registerEnumType } from "type-graphql";
 import z from "zod";
 
 export const MediaItemContentRating = z.enum([
@@ -25,12 +24,6 @@ export const MediaItemContentRatingEnum = Object.fromEntries(
   ),
 );
 
-registerEnumType(MediaItemContentRatingEnum, {
-  name: "MediaItemContentRating",
-  description:
-    "The content rating of a media item. See MovieContentRating and ShowContentRating for more specific ratings.",
-});
-
 /**
  * The content rating of a movie, based on the MPAA rating system.
  *
@@ -52,12 +45,6 @@ export const MovieContentRatingEnum = Object.fromEntries(
     ([key, value]) => [constantCase(key), value] as const,
   ),
 );
-
-registerEnumType(MovieContentRatingEnum, {
-  name: "MovieContentRating",
-  description:
-    "The content rating of a movie. See https://en.wikipedia.org/wiki/MPAA_film_rating_system for more details.",
-});
 
 /**
  * The content rating of a TV show, based on the TV Parental Guidelines.
@@ -81,9 +68,3 @@ export const ShowContentRatingEnum = Object.fromEntries(
     ([key, value]) => [constantCase(key), value] as const,
   ),
 );
-
-registerEnumType(ShowContentRatingEnum, {
-  name: "ShowContentRating",
-  description:
-    "The content rating of a TV show, based on the TV Parental Guidelines. See https://en.wikipedia.org/wiki/TV_Parental_Guidelines for more details.",
-});
