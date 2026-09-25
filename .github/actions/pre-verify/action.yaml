@@ -22,4 +22,15 @@ runs:
     - name: Install Playwright dependencies
       if: ${{ inputs.task == 'test:component' }}
       shell: bash
-      run: pnpm dlx playwright install chromium --with-deps
+      run: |
+        PLAYWRIGHT_VERSION=$(
+          pnpm -r ls playwright --json -D --depth=0 | \
+          jq -r '.[] | select(.devDependencies.playwright != null) | .devDependencies.playwright.version // empty'
+        )
+
+        if [ -z "$PLAYWRIGHT_VERSION" ]; then
+          echo "::error::Unable to determine Playwright version"
+          exit 1
+        fi
+
+        pnx playwright@$PLAYWRIGHT_VERSION install chromium --with-deps
