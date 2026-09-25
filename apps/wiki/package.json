@@ -6,9 +6,9 @@
   "scripts": {
     "build": "next build",
     "dev": "next dev --turbopack",
-    "postinstall": "fumadocs-mdx",
     "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
+    "postinstall": "fumadocs-mdx",
     "start": "next start"
   },
   "dependencies": {

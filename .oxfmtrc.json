@@ -35,5 +35,8 @@
     "**/storybook-static",
     "**/test-results",
     "**/.pnpm_patches"
-  ]
+  ],
+  "sortPackageJson": {
+    "sortScripts": true
+  }
 }
