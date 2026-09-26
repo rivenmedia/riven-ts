@@ -12,7 +12,6 @@
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
-    ".next/dev/types/**/*.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "app/**/*.mts",
