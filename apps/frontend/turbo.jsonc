@@ -20,8 +20,7 @@
       "cache": false
     },
     "storybook": {
-      "env": ["STORYBOOK_FAKER_SEED"],
-      "passThroughEnv": ["MODE"],
+      "env": ["STORYBOOK_FAKER_SEED", "STORYBOOK_EXCLUDE_TESTS"],
       "dependsOn": ["msw:init"],
       "cache": false,
       "persistent": true,

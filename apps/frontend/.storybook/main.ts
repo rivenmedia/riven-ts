@@ -17,4 +17,12 @@ export default defineMain({
     experimentalTestSyntax: true,
   },
   env: fakerSeed ? { STORYBOOK_FAKER_SEED: fakerSeed } : {},
+  tags: {
+    "test-fn": {
+      defaultFilterSelection:
+        process.env["STORYBOOK_EXCLUDE_TESTS"] === "true"
+          ? "exclude"
+          : "include",
+    },
+  },
 });
