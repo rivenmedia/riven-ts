@@ -163,13 +163,13 @@ Default.test(
 
 export const WithDefaultValue = meta.story({
   args: {
-    defaultValue: DateTime.now().toISODate(),
+    defaultValue: DateTime.now().minus({ months: 1 }).toISODate(),
   },
 });
 
 WithDefaultValue.test(
   "Displays the default value in the input field",
-  async ({ canvasElement, step }) => {
+  async ({ canvasElement, step, args }) => {
     const canvas = within(canvasElement);
 
     await step(
@@ -179,9 +179,7 @@ WithDefaultValue.test(
           name: /select a date/iu,
         });
 
-        const defaultValue = DateTime.now().toISODate();
-
-        await expect(input).toHaveValue(defaultValue);
+        await expect(input).toHaveValue(args.defaultValue);
       },
     );
   },
@@ -189,7 +187,7 @@ WithDefaultValue.test(
 
 WithDefaultValue.test(
   "Selects the correct date in the datepicker",
-  async ({ canvasElement, step }) => {
+  async ({ canvasElement, step, args }) => {
     const canvas = within(canvasElement);
 
     await step("Open the datepicker", async () => {
@@ -206,9 +204,11 @@ WithDefaultValue.test(
     await step(
       "Verify that the correct date is selected in the datepicker",
       async () => {
+        expect.assert(args.defaultValue);
+
         const selectedDateButton = await dialog.findByRole("button", {
           name: new RegExp(
-            `${DateTime.now().day.toString()}(.*)+selected`,
+            `${DateTime.fromISO(args.defaultValue).day.toString()}(.*)+selected`,
             "iu",
           ),
         });

@@ -1,6 +1,7 @@
 import { cn } from "cn";
 import { CalendarIcon } from "lucide-react";
-import { DateTime } from "luxon";
+import { DateTime, Settings } from "luxon";
+import { useState } from "react";
 import { useFormContext, useWatch } from "react-hook-form";
 import { useHookFormMask } from "use-mask-input";
 
@@ -10,6 +11,7 @@ import { Input } from "../_ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../_ui/popover";
 
 import type { ComponentProps } from "react";
+import type { IntClosedRange } from "type-fest";
 
 interface DatePickerProps extends Pick<ComponentProps<"input">, "aria-label"> {
   name: string;
@@ -46,6 +48,8 @@ export function DatePicker({
     required,
   });
 
+  const [isOpen, setIsOpen] = useState(false);
+
   return (
     <div className={cn("flex w-full items-center gap-2")}>
       <div className="relative flex-1">
@@ -67,7 +71,7 @@ export function DatePicker({
           placeholder={placeholder}
         />
       </div>
-      <Popover>
+      <Popover open={isOpen} onOpenChange={setIsOpen}>
         <Button
           asChild
           aria-label="Open datepicker"
@@ -84,6 +88,15 @@ export function DatePicker({
           align="end"
         >
           <Calendar
+            locale={{
+              code: Settings.defaultLocale,
+              options: {
+                weekStartsOn: DateTime.now()
+                  .startOf("week", { useLocaleWeeks: true })
+                  .toJSDate()
+                  .getDay() as IntClosedRange<0, 6>,
+              },
+            }}
             mode="single"
             onSelect={(date) => {
               if (!date) {
@@ -91,13 +104,18 @@ export function DatePicker({
               }
 
               setValue(name, DateTime.fromJSDate(date).toISODate());
+              setIsOpen(false);
             }}
+            today={DateTime.now().toJSDate()}
             selected={
               value
                 ? DateTime.fromFormat(value, "yyyy-MM-dd").toJSDate()
                 : undefined
             }
             captionLayout="dropdown"
+            {...(value && {
+              defaultMonth: DateTime.fromFormat(value, "yyyy-MM-dd").toJSDate(),
+            })}
             {...(minDate && { startMonth: minDate.toJSDate() })}
             {...(maxDate && { endMonth: maxDate.toJSDate() })}
           />
