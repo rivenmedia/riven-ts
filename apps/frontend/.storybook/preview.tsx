@@ -21,6 +21,8 @@ import { themes } from "storybook/theming";
 
 import { WithI18n } from "./decorators/with-i18n";
 
+import type { ChromaticTypes } from "@chromatic-com/storybook";
+
 declare module "storybook/test" {
   interface Expect {
     assert: (value: unknown, message?: string) => asserts value;
@@ -42,7 +44,7 @@ Object.assign(expect, {
 
 declare module "storybook/internal/csf" {
   interface StoryContext {
-    parameters: {
+    parameters: ChromaticTypes["parameters"] & {
       i18n: typeof i18n;
     };
     globals: {
@@ -130,7 +132,12 @@ export const preview = definePreview({
       );
     },
   ],
-  beforeEach() {
+  beforeEach({ tags, parameters }) {
+    if (tags.includes("test-fn")) {
+      parameters.chromatic ??= {};
+      parameters.chromatic.disableSnapshot = true;
+    }
+
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
 

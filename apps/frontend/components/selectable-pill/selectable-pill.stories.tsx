@@ -1,7 +1,7 @@
 import { createFormDecorator } from "@/.storybook/decorators/create-form-decorator";
 import { preview } from "@/.storybook/preview";
 
-import { expect, fn, userEvent } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import { SelectablePill } from "./selectable-pill";
 
@@ -27,14 +27,27 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("Toggles the checked state when pressed", async ({ canvas }) => {
-  const pill = await canvas.findByRole("checkbox", { name: /movies/iu });
+Default.test(
+  "Toggles the checked state when pressed",
+  async ({ canvas, userEvent }) => {
+    const pill = await canvas.findByRole("checkbox", { name: /movies/iu });
 
-  await userEvent.click(pill);
+    await userEvent.click(pill);
 
-  await expect(pill).toBeChecked();
+    await expect(pill).toBeChecked();
 
-  await userEvent.click(pill);
+    await userEvent.click(pill);
 
-  await expect(pill).not.toBeChecked();
+    await expect(pill).not.toBeChecked();
+  },
+);
+
+export const Selected = meta.story({
+  play: async ({ canvas, userEvent }) => {
+    const pill = await canvas.findByRole("checkbox", { name: /movies/iu });
+
+    await userEvent.click(pill);
+
+    await expect(pill).toBeChecked();
+  },
 });
