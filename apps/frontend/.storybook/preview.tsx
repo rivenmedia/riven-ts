@@ -1,4 +1,3 @@
-import "./import-meta-env.d.ts";
 import "./types.d.ts";
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
@@ -28,6 +27,8 @@ if (isChromatic()) {
   const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 
   Settings.now = () => baseDate.toMillis();
+
+  faker.seed(42);
 }
 
 declare module "storybook/test" {
@@ -143,16 +144,6 @@ export const preview = definePreview({
   beforeEach() {
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
-
-    const fakerSeed = import.meta.env.STORYBOOK_FAKER_SEED;
-
-    if (fakerSeed) {
-      if (Number.isNaN(Number(fakerSeed))) {
-        throw new TypeError("STORYBOOK_FAKER_SEED must parse as number");
-      }
-
-      faker.seed(Number(fakerSeed));
-    }
   },
 });
 

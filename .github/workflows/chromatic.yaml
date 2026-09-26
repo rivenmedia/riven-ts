@@ -26,7 +26,6 @@ jobs:
       - name: Run Chromatic
         run: pnpm turbo chromatic --continue
         env:
-          STORYBOOK_FAKER_SEED: 42
           CHROMATIC_PROJECT_TOKEN: ${{ secrets.CHROMATIC_PROJECT_TOKEN }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
