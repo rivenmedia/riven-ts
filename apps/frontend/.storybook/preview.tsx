@@ -88,6 +88,9 @@ export const preview = definePreview({
         method: "alphabetical",
       },
     },
+    chromatic: {
+      prefersReducedMotion: "reduce", // Helps prevent animations from causing screenshot diffs
+    },
   },
   globalTypes: {
     locale: {

@@ -85,6 +85,11 @@ const meta = preview.meta({
       },
     ] satisfies NowPlayingItem[],
   },
+  parameters: {
+    chromatic: {
+      delay: 2500, // Half way between autoplay transitions to prevent taking screenshots mid-switch
+    },
+  },
 });
 
 export const Default = meta.story();
