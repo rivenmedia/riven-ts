@@ -11,6 +11,8 @@ import { GET_TRENDING_MOVIES } from "./_components/trending-movies";
 import { GET_TRENDING_SHOWS } from "./_components/trending-shows";
 import { HomePage } from "./page.client";
 
+import type { UUID } from "node:crypto";
+
 const meta = preview.meta({
   title: "Pages / Home",
   component: HomePage,
@@ -31,7 +33,8 @@ export const Default = meta.story({
           data: {
             nowPlaying: [
               {
-                id: "603692",
+                __typename: "NowPlayingItem",
+                id: crypto.randomUUID() as UUID,
                 mediaType: "movie",
                 title: "John Wick: Chapter 4",
                 backdropPath:
@@ -41,16 +44,29 @@ export const Default = meta.story({
                 originalLanguage: "en",
                 overview:
                   "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-                genres: ["Action", "Thriller"],
+                genres: [
+                  {
+                    __typename: "Genre",
+                    id: crypto.randomUUID() as UUID,
+                    name: "Action",
+                  },
+                  {
+                    __typename: "Genre",
+                    id: crypto.randomUUID() as UUID,
+                    name: "Thriller",
+                  },
+                ],
                 certification: "15",
                 ratings: [
                   {
+                    __typename: "Rating",
                     name: "imdb",
                     image: "imdb.svg",
                     score: "7.6",
                     url: "https://www.imdb.com/title/tt10366206/",
                   },
                   {
+                    __typename: "Rating",
                     name: "rottentomatoes",
                     image: "rottentomatoes_certified_fresh.svg",
                     score: "94%",
@@ -60,28 +76,36 @@ export const Default = meta.story({
                 logo: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
               },
               {
-                id: "94605",
+                __typename: "NowPlayingItem",
+                id: crypto.randomUUID() as UUID,
                 mediaType: "show",
                 title: "Arcane",
                 backdropPath:
                   "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-                firstAirDate: "2024-11-09",
+                releaseDate: "2024-11-09",
                 voteAverage: 9.1,
                 originalLanguage: "en",
                 overview:
                   "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-                genres: ["Animation", "Action & Adventure"],
+                genres: [
+                  {
+                    __typename: "Genre",
+                    id: crypto.randomUUID() as UUID,
+                    name: "Animation",
+                  },
+                  {
+                    __typename: "Genre",
+                    id: crypto.randomUUID() as UUID,
+                    name: "Action & Adventure",
+                  },
+                ],
                 certification: "12A",
                 ratings: [],
                 logo: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
-                releaseDate: DateTime.fromObject({
-                  year: 2024,
-                  month: 11,
-                  day: 9,
-                }).toISO(),
               },
               {
-                id: "1291595",
+                __typename: "NowPlayingItem",
+                id: crypto.randomUUID() as UUID,
                 mediaType: "movie",
                 title: "Insidious: Out of the Further",
                 backdropPath:
@@ -95,7 +119,13 @@ export const Default = meta.story({
                 originalLanguage: "en",
                 overview:
                   "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-                genres: ["Horror"],
+                genres: [
+                  {
+                    __typename: "Genre",
+                    id: crypto.randomUUID() as UUID,
+                    name: "Horror",
+                  },
+                ],
                 certification: "18",
                 ratings: [],
                 logo: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
@@ -110,7 +140,8 @@ export const Default = meta.story({
             data: {
               trendingMovies: [
                 {
-                  id: "0000-0000-0000-0000-0001",
+                  __typename: "Movie",
+                  id: crypto.randomUUID() as UUID,
                   type: "movie",
                   title: "Avengers: Endgame",
                   posterPath:
@@ -126,7 +157,8 @@ export const Default = meta.story({
           data: {
             trendingMovies: [
               {
-                id: "0000-0000-0000-0000-0002",
+                __typename: "Movie",
+                id: crypto.randomUUID() as UUID,
                 type: "movie",
                 title: "The Odyssey",
                 posterPath:
@@ -143,7 +175,8 @@ export const Default = meta.story({
             data: {
               trendingShows: [
                 {
-                  id: "0000-0000-0000-0000-0003",
+                  __typename: "Show",
+                  id: crypto.randomUUID() as UUID,
                   type: "show",
                   title: "Breaking Bad",
                   posterPath:
@@ -159,7 +192,8 @@ export const Default = meta.story({
           data: {
             trendingShows: [
               {
-                id: "0000-0000-0000-0000-0004",
+                __typename: "Show",
+                id: crypto.randomUUID() as UUID,
                 type: "show",
                 title: "Arcane",
                 posterPath:
@@ -279,6 +313,7 @@ export const WithRecentlyAdded = Default.extend({
           data: {
             recentlyAdded: [
               {
+                __typename: "Show",
                 id: "0000-0000-0000-0000-0004",
                 type: "show",
                 title: "Arcane",

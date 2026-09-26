@@ -8,17 +8,15 @@ import { getTypeStyle } from "../utilities/get-type-style";
 import type { EntertainmentItemData } from "../types";
 
 function itemUrl(item: EntertainmentItemData) {
-  const mediaType = item.itemType === "movie" ? "movie" : "tv";
-
   switch (item.itemType) {
     case "movie": {
       // For movies, prefer TMDB ID
       if (item.tmdbId) {
-        return `/details/media/${item.tmdbId}/${mediaType}` as const;
+        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
       }
 
       if (item.tvdbId) {
-        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb` as const;
+        return `/details/media/${item.itemType}/${item.tvdbId}?indexer=tvdb` as const;
       }
 
       break;
@@ -28,11 +26,11 @@ function itemUrl(item: EntertainmentItemData) {
     case "episode": {
       // For TV items, prefer TVDB ID to skip TMDB→TVDB resolution
       if (item.tvdbId) {
-        return `/details/media/${item.tvdbId}/${mediaType}?indexer=tvdb` as const;
+        return `/details/media/${item.itemType}/${item.tvdbId}/?indexer=tvdb` as const;
       }
 
       if (item.tmdbId) {
-        return `/details/media/${item.tmdbId}/${mediaType}` as const;
+        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
       }
 
       break;

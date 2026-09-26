@@ -28,6 +28,7 @@ export const Movies = meta.story({
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
+              __typename: "Movie",
               id: faker.string.uuid() as UUID,
               posterPath: faker.image.urlPicsumPhotos({
                 width: 200,
@@ -56,6 +57,7 @@ export const Shows = meta.story({
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
+              __typename: "Show",
               id: faker.string.uuid() as UUID,
               posterPath: faker.image.urlPicsumPhotos({
                 height: 300,

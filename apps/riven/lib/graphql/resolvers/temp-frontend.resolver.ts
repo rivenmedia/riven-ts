@@ -6,9 +6,18 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 
-import { Arg, Field, ID, ObjectType, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Field,
+  Float,
+  ID,
+  ObjectType,
+  Query,
+  Resolver,
+} from "type-graphql";
 
 @ObjectType()
 class Genre {
@@ -37,7 +46,7 @@ class CastMember {
 @ObjectType()
 class InstanceStatus {
   @Field()
-  public setupRequired!: string;
+  public setupRequired!: boolean;
 }
 
 @ObjectType()
@@ -198,6 +207,9 @@ class NowPlayingItem {
   @Field()
   public title!: string;
 
+  @Field(() => TopLevelMediaItemType.enum)
+  public mediaType!: TopLevelMediaItemType;
+
   @Field()
   public backdropPath!: string;
 
@@ -210,8 +222,8 @@ class NowPlayingItem {
   @Field()
   public overview!: string;
 
-  @Field()
-  public releaseDate!: string;
+  @Field(() => Date)
+  public releaseDate!: Date;
 
   @Field(() => [Rating])
   public ratings!: Rating[];
@@ -221,6 +233,9 @@ class NowPlayingItem {
 
   @Field(() => [Genre])
   public genres!: Genre[];
+
+  @Field(() => Float)
+  public voteAverage!: number;
 }
 
 @Resolver()

@@ -8,7 +8,7 @@ export interface FormBaseProps extends Pick<
   "className"
 > {
   content: ReactNode;
-  description: string;
+  description?: string;
   footer?: ReactNode;
   title: string;
 }

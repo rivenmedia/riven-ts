@@ -18,12 +18,14 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
   query GetTmdbNowPlaying {
     nowPlaying {
       id
+      mediaType
       title
       backdropPath
       certification
       originalLanguage
       overview
       releaseDate
+      voteAverage
       ratings {
         name
         image

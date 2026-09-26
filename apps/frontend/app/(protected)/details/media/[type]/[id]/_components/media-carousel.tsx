@@ -32,7 +32,7 @@ export function MediaCarousel({ items, title, delay }: MediaCarouselProps) {
             <React.Fragment key={`${item.type}-${item.id}`}>
               <CarouselItem className="basis-auto pl-3">
                 <Link
-                  href={`/media/${item.id}`}
+                  href={`/details/media/${item.type}/${item.id}`}
                   className="group relative block opacity-80 transition-all duration-300 hover:opacity-100"
                 >
                   <PortraitCard

@@ -10,7 +10,7 @@ interface PortraitCardProps extends Pick<
 > {
   title: string;
   subtitle?: string | null;
-  image: string | null;
+  image: string | null | undefined;
   isSelectable?: boolean;
   isSelected?: boolean;
   onSelectToggle?: () => void;

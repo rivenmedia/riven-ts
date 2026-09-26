@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import { CalendarDayCell } from "./calendar-day-cell";
 
 import type { CalendarDay } from "../types";
+import type { UUID } from "node:crypto";
 
 const busyDay: CalendarDay = {
   date: DateTime.local(2024, 6, 12),
@@ -12,7 +13,7 @@ const busyDay: CalendarDay = {
   isCurrentMonth: true,
   items: [
     {
-      itemId: 1,
+      itemId: crypto.randomUUID() as UUID,
       tvdbId: "",
       tmdbId: "603692",
       showTitle: "John Wick: Chapter 4",
@@ -20,7 +21,7 @@ const busyDay: CalendarDay = {
       airedAt: "2024-06-12",
     },
     {
-      itemId: 2,
+      itemId: crypto.randomUUID() as UUID,
       tvdbId: "121361",
       tmdbId: "1399",
       showTitle: "Game of Thrones",
@@ -30,7 +31,7 @@ const busyDay: CalendarDay = {
       episode: 1,
     },
     {
-      itemId: 3,
+      itemId: crypto.randomUUID() as UUID,
       tvdbId: "371572",
       tmdbId: "94605",
       showTitle: "Arcane",
@@ -38,7 +39,7 @@ const busyDay: CalendarDay = {
       airedAt: "2024-06-12",
     },
     {
-      itemId: 4,
+      itemId: crypto.randomUUID() as UUID,
       tvdbId: "82856",
       tmdbId: "1418",
       showTitle: "The Big Bang Theory",

@@ -14,7 +14,7 @@ import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
 
 import type { CarouselApi } from "../_ui/carousel";
 import type { Genre } from "@/app/_types/__generated__/graphql";
-import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import type { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import type { RefObject } from "react";
 
 export interface RatingScore {
@@ -26,12 +26,11 @@ export interface RatingScore {
 
 export interface NowPlayingItem {
   id: string;
-  mediaType?: Extract<MediaItemType, "movie" | "show">;
+  mediaType: TopLevelMediaItemType;
   title?: string;
   name?: string;
   backdropPath?: string | null;
-  releaseDate?: string;
-  firstAirDate?: string;
+  releaseDate: string;
   voteAverage?: number | null;
   originalLanguage?: string;
   overview?: string;
@@ -44,14 +43,12 @@ export interface NowPlayingItem {
 export interface NowPlayingProps {
   data: NowPlayingItem[];
   autoplayDelay?: number;
-  showRequestButton?: boolean;
   alignment?: "left" | "center" | "right";
   heightClass?: string;
 }
 
 export function NowPlaying({
   data,
-  showRequestButton = true,
   alignment = "left",
   heightClass = "h-[350px] md:h-[420px]",
   autoplayDelay = 5000,
@@ -123,7 +120,6 @@ export function NowPlaying({
         <CarouselContent>
           {data.map((item, i) => {
             const isTV = item.mediaType === "show";
-            const mediaType = isTV ? "tv" : "movie";
             const displayTitle = item.title ?? item.name ?? "Untitled";
 
             const backgroundGradient =
@@ -291,25 +287,15 @@ export function NowPlaying({
                         animationClass,
                       )}
                     >
-                      {showRequestButton && (
-                        <Button
-                          asChild
-                          variant="default"
-                          size="lg"
-                          className="bg-primary text-primary-foreground hover:bg-primary/90 flex h-10 items-center justify-center rounded-md px-8 text-sm font-bold shadow-sm transition-all hover:scale-[1.02] md:h-12 md:text-base"
-                          type="button"
-                        >
-                          <Link href={`/watch/${item.id}`}>Request</Link>
-                        </Button>
-                      )}
                       <Button
                         asChild
-                        variant="secondary"
                         size="lg"
                         className="flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/10 px-8 text-sm font-bold text-white shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20 md:h-12 md:text-base"
                         type="button"
                       >
-                        <Link href={`/details/media/${item.id}/${mediaType}`}>
+                        <Link
+                          href={`/details/media/${item.mediaType}/${item.id}`}
+                        >
                           More Info
                         </Link>
                       </Button>

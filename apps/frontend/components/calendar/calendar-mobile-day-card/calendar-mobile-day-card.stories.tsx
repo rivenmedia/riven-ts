@@ -5,6 +5,7 @@ import { DateTime } from "luxon";
 import { CalendarMobileDayCard } from "./calendar-mobile-day-card";
 
 import type { CalendarDay } from "../types";
+import type { UUID } from "node:crypto";
 
 const meta = preview.meta({
   title: "Calendar / CalendarMobileDayCard",
@@ -16,7 +17,7 @@ const meta = preview.meta({
       isCurrentMonth: true,
       items: [
         {
-          itemId: 1,
+          itemId: crypto.randomUUID() as UUID,
           tvdbId: "",
           tmdbId: "603692",
           showTitle: "John Wick: Chapter 4",
@@ -24,7 +25,7 @@ const meta = preview.meta({
           airedAt: "2024-06-12",
         },
         {
-          itemId: 2,
+          itemId: crypto.randomUUID() as UUID,
           tvdbId: "121361",
           tmdbId: "1399",
           showTitle: "Game of Thrones",

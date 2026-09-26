@@ -27,7 +27,10 @@ const meta = preview.meta({
         originalLanguage: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-        genres: ["Action", "Thriller"],
+        genres: [
+          { id: "action", name: "Action" },
+          { id: "thriller", name: "Thriller" },
+        ],
         certification: "15",
         ratings: [
           {
@@ -51,12 +54,15 @@ const meta = preview.meta({
         title: "Arcane",
         backdropPath:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-        firstAirDate: "2024-11-09",
+        releaseDate: "2024-11-09",
         voteAverage: 9.1,
         originalLanguage: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-        genres: ["Animation", "Action & Adventure"],
+        genres: [
+          { id: "animation", name: "Animation" },
+          { id: "action-adventure", name: "Action & Adventure" },
+        ],
         certification: "12A",
         ratings: [],
         logo: null,
@@ -72,7 +78,7 @@ const meta = preview.meta({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genres: ["Horror"],
+        genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: [],
         logo: null,
@@ -325,7 +331,11 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "Robert Ford, who has idolized Jesse James since childhood, tries hard to join the resurgent gang of the Missouri outlaw, but gradually becomes resentful of the bandit leader.",
-        genres: ["Drama", "History", "Thriller"],
+        genres: [
+          { id: "drama", name: "Drama" },
+          { id: "history", name: "History" },
+          { id: "thriller", name: "Thriller" },
+        ],
         certification: "R",
         ratings: [],
         logo: null,
@@ -342,7 +352,11 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "After a rogue U.S. general orders an unauthorized nuclear attack on the Soviet Union, leaders in the War Room race to prevent global catastrophe.",
-        genres: ["Drama", "History", "Thriller"],
+        genres: [
+          { id: "drama", name: "Drama" },
+          { id: "history", name: "History" },
+          { id: "thriller", name: "Thriller" },
+        ],
         certification: "R",
         ratings: [],
         logo: null,
@@ -358,7 +372,7 @@ export const WithLongTitle = meta.story({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genres: ["Horror"],
+        genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: [],
         logo: null,
@@ -381,7 +395,10 @@ export const WithLogos = meta.story({
         originalLanguage: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-        genres: ["Action", "Thriller"],
+        genres: [
+          { id: "action", name: "Action" },
+          { id: "thriller", name: "Thriller" },
+        ],
         certification: "15",
         ratings: [
           {
@@ -405,12 +422,15 @@ export const WithLogos = meta.story({
         title: "Arcane",
         backdropPath:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-        firstAirDate: "2024-11-09",
+        releaseDate: "2024-11-09",
         voteAverage: 9.1,
         originalLanguage: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-        genres: ["Animation", "Action & Adventure"],
+        genres: [
+          { id: "animation", name: "Animation" },
+          { id: "action-adventure", name: "Action & Adventure" },
+        ],
         certification: "12A",
         ratings: [],
         logo: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
@@ -426,7 +446,7 @@ export const WithLogos = meta.story({
         originalLanguage: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-        genres: ["Horror"],
+        genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: [],
         logo: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",

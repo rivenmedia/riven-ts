@@ -11,6 +11,7 @@ import { ItemRequestType } from "@repo/util-plugin-sdk/dto/enums/item-request-ty
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { ShowStatus } from "@repo/util-plugin-sdk/dto/enums/show-status.enum";
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 
 import { registerEnumType } from "type-graphql";
 
@@ -66,6 +67,11 @@ export function registerEnums() {
   registerEnumType(MediaItemType.enum, {
     name: "MediaItemType",
     description: "The type of a media item",
+  });
+
+  registerEnumType(TopLevelMediaItemType.enum, {
+    name: "TopLevelMediaItemType",
+    description: "The type of a top-level media item",
   });
 
   registerEnumType(ShowStatus.enum, {
