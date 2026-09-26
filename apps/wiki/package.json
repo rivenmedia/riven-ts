@@ -24,6 +24,7 @@
   "devDependencies": {
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/frontend": "workspace:^",
     "@repo/plugin-comet": "workspace:^",
     "@repo/plugin-jellyfin": "workspace:^",
     "@repo/plugin-listrr": "workspace:^",

@@ -654,6 +654,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       better-auth:
         specifier: 'catalog:'
         version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.0(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
@@ -1273,6 +1276,9 @@ importers:
       '@repo/core-util-typescript-config':
         specifier: workspace:^
         version: link:../../packages/core/util-typescript-config
+      '@repo/frontend':
+        specifier: workspace:^
+        version: link:../frontend
       '@repo/plugin-comet':
         specifier: workspace:^
         version: link:../../packages/plugin-comet

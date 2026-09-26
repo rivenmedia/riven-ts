@@ -1,5 +1,11 @@
 {
+  "$schema": "https://www.schemastore.org/tsconfig",
   "extends": "@repo/core-util-typescript-config/base.json",
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.spec.json" },
+    { "path": "./tsconfig.storybook.json" }
+  ],
   "compilerOptions": {
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
@@ -19,12 +25,19 @@
       "@/playwright/*": ["./playwright/*"]
     }
   },
-  "files": [],
-  "include": [],
-  "references": [
-    { "path": "./tsconfig.app.json" },
-    { "path": "./tsconfig.spec.json" },
-    { "path": "./tsconfig.storybook.json" }
+  "files": [
+    "chromatic.config.json",
+    "components.json",
+    "graphql.config.ts",
+    "next-env.d.ts",
+    "next.config.ts",
+    "oxlint.config.ts",
+    "playwright.config.ts",
+    "proxy.ts",
+    "vitest.config.ts",
+    "vitest.setup.ts",
+    "wiki.config.ts"
   ],
-  "exclude": ["node_modules"]
+  "include": [],
+  "exclude": []
 }

@@ -1,3 +1,5 @@
+import { excludedWorkspaces } from "@/excluded-workspaces";
+
 import { docs } from "collections/server";
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
@@ -22,10 +24,7 @@ const workspaceImports = Object.keys({
   ...packageJson.devDependencies,
 }).filter(
   (dependency) =>
-    dependency.startsWith("@repo/plugin-") ||
-    dependency === "@repo/riven" ||
-    dependency === "@repo/riven-tui" ||
-    dependency === "@repo/util-rank-torrent-name",
+    dependency.startsWith("@repo/") && !excludedWorkspaces.has(dependency),
 );
 
 const workspaces = await Promise.all(

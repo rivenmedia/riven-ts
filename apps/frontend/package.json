@@ -2,7 +2,13 @@
   "name": "@repo/frontend",
   "version": "0.1.0",
   "private": true,
+  "files": [
+    "dist"
+  ],
   "type": "module",
+  "exports": {
+    "./wiki.config": "./wiki.config.ts"
+  },
   "scripts": {
     "auth:generate": "pnpx auth generate --config ./lib/auth.ts --output ./lib/database/schema/ba-auth.ts --yes",
     "build": "next build",
@@ -37,6 +43,7 @@
     "@repo/util-auth": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",
     "cn": "catalog:",
@@ -112,5 +119,11 @@
   },
   "msw": {
     "workerDirectory": "public"
+  },
+  "postcss": {
+    "plugins": {
+      "@tailwindcss/postcss": {},
+      "postcss-easings": {}
+    }
   }
 }

@@ -1,13 +1,11 @@
 import { defineConfig, defineDocs } from "fumadocs-mdx/config";
 
+import { excludedWorkspaces } from "./excluded-workspaces";
 import packageJson from "./package.json" with { type: "json" };
 
 const workspaceImports = Object.keys(packageJson.devDependencies).filter(
-  (dep) =>
-    dep.startsWith("@repo/plugin-") ||
-    dep === "@repo/riven" ||
-    dep === "@repo/riven-tui" ||
-    dep === "@repo/util-rank-torrent-name",
+  (dependency) =>
+    dependency.startsWith("@repo/") && !excludedWorkspaces.has(dependency),
 );
 
 interface WorkspaceConfig {
@@ -18,18 +16,27 @@ interface WorkspaceConfig {
 const workspaces = await Promise.all(
   workspaceImports.map<Promise<[string, WorkspaceConfig]>>(
     async (workspace) => {
-      const { dir, ...config } = (await import(`${workspace}/wiki.config`)) as {
-        default: Record<string, unknown>;
-        dir: string;
-      };
+      try {
+        const { dir, ...config } = (await import(
+          `${workspace}/wiki.config`
+        )) as {
+          default: Record<string, unknown>;
+          dir: string;
+        };
 
-      return [
-        workspace,
-        {
-          config,
-          dir,
-        },
-      ];
+        return [
+          workspace,
+          {
+            config,
+            dir,
+          },
+        ];
+      } catch (error) {
+        // oxlint-disable-next-line no-console
+        console.error(`Failed to load wiki.config for workspace: ${workspace}`);
+
+        throw error;
+      }
     },
   ),
 );
