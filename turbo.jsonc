@@ -127,6 +127,11 @@
     "e2e": {
       "cache": false
     },
-    "e2e:headless": {}
+    "e2e:headless": {},
+    "codegen:nextjs-types": {
+      "env": ["NODE_ENV"],
+      "inputs": ["app/**/{page,layout}.tsx"],
+      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.d.ts"]
+    }
   }
 }

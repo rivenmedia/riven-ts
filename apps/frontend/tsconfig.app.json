@@ -11,7 +11,8 @@
   "files": [],
   "include": [
     "next-env.d.ts",
-    ".next/types/**/*.ts",
+    ".next/types/*.d.ts",
+    ".next/dev/types/*.d.ts",
     "app/**/*.ts",
     "app/**/*.tsx",
     "app/**/*.mts",

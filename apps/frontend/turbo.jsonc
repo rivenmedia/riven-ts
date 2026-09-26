@@ -6,7 +6,11 @@
       "with": ["@repo/riven#dev"]
     },
     "lint": {
-      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@repo/util-plugin-sdk#build",
+        "codegen:gql"
+      ]
     },
     "codegen:gql": {
       "dependsOn": ["@repo/riven#codegen:gql-schema"]

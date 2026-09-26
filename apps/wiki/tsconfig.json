@@ -24,9 +24,9 @@
   "include": [
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".source/**/*.ts",
-    ".next/dev/types/**/*.ts"
+    ".next/types/*.d.ts",
+    ".next/dev/types/*.d.ts",
+    ".source/**/*.ts"
   ],
   "exclude": []
 }
