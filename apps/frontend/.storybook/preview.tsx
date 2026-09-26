@@ -20,6 +20,7 @@ import { expect } from "storybook/test";
 import { themes } from "storybook/theming";
 
 import { WithI18n } from "./decorators/with-i18n";
+import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
 
 declare module "storybook/test" {
   interface Expect {
@@ -109,6 +110,7 @@ export const preview = definePreview({
     },
   },
   decorators: [
+    WithReducedMotionCheck,
     WithI18n,
     (Story) => {
       useLayoutEffect(() => {

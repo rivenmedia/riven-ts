@@ -14,6 +14,9 @@ const meta = preview.meta({
       </div>
     ),
   ],
+  parameters: {
+    layout: "fullscreen",
+  },
 });
 
 const sampleImage =
