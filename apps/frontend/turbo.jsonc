@@ -9,6 +9,7 @@
       "dependsOn": [
         "$TURBO_EXTENDS$",
         "@repo/util-plugin-sdk#build",
+        "codegen:nextjs-types",
         "codegen:gql"
       ]
     },
