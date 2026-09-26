@@ -101,6 +101,7 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "4.1.7",
+    "chromatic": "catalog:",
     "http-status-codes": "catalog:",
     "i18next": "catalog:",
     "i18next-browser-languagedetector": "catalog:",

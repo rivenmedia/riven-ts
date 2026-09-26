@@ -181,6 +181,7 @@ catalog:
   embla-carousel-autoplay: ^8.6.0
   embla-carousel-fade: ^8.6.0
   react-intersection-observer: ^11.0.1
+  chromatic: ^18.9.5
 
 catalogs:
   typescript7-native:
