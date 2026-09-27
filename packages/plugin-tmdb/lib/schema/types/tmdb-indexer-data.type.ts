@@ -38,7 +38,7 @@ export class TmdbIndexerData implements IndexerData {
 
   public certification?: string | null;
 
-  public type!: Extract<MediaItemType, "movie">;
+  public type!: Extract<MediaItemType, "movie" | "show">;
 
   public imdbId?: string | null;
 }
