@@ -34,7 +34,7 @@ export const indexTMDBMediaItem: z.infer<
   const result = await api.getMovieDetails(resolvedTmdbId.toString());
   const genres: string[] = [];
 
-  for (const genre of result.genres ?? []) {
+  for (const genre of result.genres) {
     if (genre.name) {
       genres.push(genre.name);
     }

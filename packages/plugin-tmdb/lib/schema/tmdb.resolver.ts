@@ -65,6 +65,8 @@ export class TmdbResolver {
         posterUrl: movie.poster_path ?? "",
         genres: [],
         genreIds: movie.genre_ids ?? [],
+        language: movie.original_language ?? null,
+        type: "movie",
       });
     }
 

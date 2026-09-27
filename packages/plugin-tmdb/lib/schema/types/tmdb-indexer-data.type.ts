@@ -2,6 +2,7 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
 
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 
 @ObjectType({ implements: IndexerData })
@@ -36,4 +37,6 @@ export class TmdbIndexerData implements IndexerData {
   public genreIds?: number[];
 
   public certification?: string | null;
+
+  public type!: Extract<MediaItemType, "movie">;
 }
