@@ -8,8 +8,125 @@ import { CoreKey } from "../context.ts";
 import type {
   RemoveItemRequestMutation,
   RemoveItemRequestMutationVariables,
+  RequestItemMutation,
+  RequestItemMutationVariables,
 } from "./item-request.resolver.spec.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+
+describe("requestItem", () => {
+  const REQUEST_ITEM: TypedDocumentNode<
+    RequestItemMutation,
+    RequestItemMutationVariables
+  > = gql`
+    mutation RequestItem($input: RequestItemInput!) {
+      requestItem(input: $input)
+    }
+  `;
+
+  it("fires a riven-external.item-requested event with the requested item", async ({
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      RequestItemMutation,
+      RequestItemMutationVariables
+    >(
+      {
+        query: REQUEST_ITEM,
+        variables: {
+          input: {
+            type: "movie",
+            tmdbId: "12345",
+            preferences: {
+              resolutions: ["1080p"],
+              language: "en",
+            },
+          },
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(body.singleResult.errors).toBeUndefined();
+    expect(body.singleResult.data?.requestItem).toBe(true);
+    expect(gqlContext[CoreKey].sendEvent).toHaveBeenCalledWith({
+      type: "riven-external.item-requested",
+      item: {
+        type: "movie",
+        tmdbId: "12345",
+        requestedBy: null,
+        preferences: {
+          resolutions: ["1080p"],
+          language: "en",
+        },
+      },
+    });
+  });
+
+  it("fires the event for a partial show request without preferences", async ({
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      RequestItemMutation,
+      RequestItemMutationVariables
+    >(
+      {
+        query: REQUEST_ITEM,
+        variables: {
+          input: {
+            type: "show",
+            tvdbId: "361393",
+            seasons: [1, 2],
+          },
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(body.singleResult.errors).toBeUndefined();
+    expect(body.singleResult.data?.requestItem).toBe(true);
+    expect(gqlContext[CoreKey].sendEvent).toHaveBeenCalledWith({
+      type: "riven-external.item-requested",
+      item: {
+        type: "show",
+        tvdbId: "361393",
+        seasons: [1, 2],
+        requestedBy: null,
+      },
+    });
+  });
+
+  it("errors when no external ID is provided", async ({
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      RequestItemMutation,
+      RequestItemMutationVariables
+    >(
+      {
+        query: REQUEST_ITEM,
+        variables: {
+          input: {
+            type: "movie",
+          },
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(body.singleResult.errors?.[0]?.message).toContain(
+      "At least one external ID (imdbId or tmdbId) is required for movies",
+    );
+  });
+});
 
 describe("removeItemRequest", () => {
   const REMOVE_ITEM_REQUEST: TypedDocumentNode<

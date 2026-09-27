@@ -36,6 +36,7 @@ export async function persistRequestedMovie(
     imdbId: item.imdbId ?? null,
     tmdbId: item.tmdbId ?? null,
     externalRequestId: item.externalRequestId ?? null,
+    preferences: item.preferences ?? null,
   });
 
   try {

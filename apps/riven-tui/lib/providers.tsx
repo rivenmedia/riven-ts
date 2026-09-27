@@ -6,6 +6,7 @@ import { MemoryRouter } from "react-router";
 import { createGraphqlClient } from "./graphql/client.ts";
 import { settings } from "./settings.ts";
 import { ActionsMenuProvider } from "./ui/actions-menu/actions-menu-context.tsx";
+import { TextEntryProvider } from "./ui/text-entry.tsx";
 
 import type { PropsWithChildren } from "react";
 
@@ -19,7 +20,9 @@ export function Providers({ children }: PropsWithChildren) {
     <MemoryRouter initialEntries={["/library"]}>
       <ApolloProvider client={client}>
         <InkPictureProvider>
-          <ActionsMenuProvider>{children}</ActionsMenuProvider>
+          <TextEntryProvider>
+            <ActionsMenuProvider>{children}</ActionsMenuProvider>
+          </TextEntryProvider>
         </InkPictureProvider>
       </ApolloProvider>
     </MemoryRouter>

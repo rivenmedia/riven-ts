@@ -8,6 +8,7 @@ import {
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import { JSONObjectResolver } from "graphql-scalars";
 import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
@@ -17,6 +18,7 @@ import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
 
+import type { RequestPreferences } from "../../../schemas/request-preferences.schema.ts";
 import type { Hidden, Opt } from "@mikro-orm/core";
 
 @ObjectType()
@@ -74,6 +76,15 @@ export class ItemRequest {
   @Field(() => [Number], { nullable: true })
   @Property({ type: "json" })
   public seasons!: number[] | null;
+
+  /**
+   * Per-request preferences that influence scraping, ranking and downloading.
+   *
+   * @see RequestPreferencesSchema
+   */
+  @Field(() => JSONObjectResolver, { nullable: true })
+  @Property({ nullable: true, type: "json" })
+  public preferences?: RequestPreferences | null;
 
   @Property({ persist: false, hidden: true, getter: true })
   public get externalIdsLabel(): Hidden<Opt<string[]>> {

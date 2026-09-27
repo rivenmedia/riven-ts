@@ -2,6 +2,7 @@ import z from "zod";
 
 import { atLeastOnePropertyRequired } from "../../validation/refinements/at-least-one-property-required.ts";
 import { ItemRequest } from "../media/item-request.ts";
+import { RequestPreferencesSchema } from "../request-preferences.schema.ts";
 import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
 import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
 
@@ -32,14 +33,17 @@ const BaseItemRequestData = ItemRequest.pick({
 
 export const ContentServiceRequestedResponse = z.object({
   movies: z.array(
-    BaseItemRequestData.extend(ExternalIdsSchema.shape).refine(
-      (val) => atLeastOnePropertyRequired(val, ["imdbId", "tmdbId"]),
-      "At least one external ID (imdbId or tmdbId) is required for movies",
-    ),
+    BaseItemRequestData.extend(ExternalIdsSchema.shape)
+      .extend({ preferences: RequestPreferencesSchema.optional() })
+      .refine(
+        (val) => atLeastOnePropertyRequired(val, ["imdbId", "tmdbId"]),
+        "At least one external ID (imdbId or tmdbId) is required for movies",
+      ),
   ),
   shows: z.array(
     BaseItemRequestData.extend(ItemRequest.pick({ seasons: true }).shape)
       .extend(ExternalIdsSchema.shape)
+      .extend({ preferences: RequestPreferencesSchema.optional() })
       .refine(
         (val) =>
           atLeastOnePropertyRequired(val, ["imdbId", "tmdbId", "tvdbId"]),
