@@ -37,6 +37,7 @@ export class TmdbResolver {
         ? DateTime.fromISO(item.release_date).toJSDate()
         : null,
       backdropUrl: item.backdrop_path ?? "",
+      type: "movie",
     };
   }
 
