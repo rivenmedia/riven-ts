@@ -16,27 +16,38 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
   GetTmdbNowPlayingQueryVariables
 > = gql`
   query GetTmdbNowPlaying {
-    nowPlaying {
+    tmdbNowPlaying {
       id
-      mediaType
       title
-      backdropPath
-      certification
-      originalLanguage
       overview
-      releaseDate
-      voteAverage
-      ratings {
-        name
-        image
-        score
-        url
-      }
-      logo
+      backdropUrl
       genres {
         id
         name
       }
+      releaseDate
+      language
+      voteAverage
+      certification
+      logoUrl
+      ratings {
+        tmdb {
+          logo
+          score
+          url
+        }
+        imdb {
+          logo
+          score
+          url
+        }
+        rottenTomatoes {
+          logo
+          score
+          url
+        }
+      }
+      type
     }
   }
 `;
@@ -46,7 +57,7 @@ function TMDBNowPlayingInner(
 ) {
   const { data } = useSuspenseQuery(GET_TMDB_NOW_PLAYING);
 
-  return <NowPlaying {...props} data={data.nowPlaying} />;
+  return <NowPlaying {...props} data={data.tmdbNowPlaying} />;
 }
 
 export function TMDBNowPlaying(

@@ -7,6 +7,7 @@ import {
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 
 import {
@@ -18,15 +19,6 @@ import {
   Query,
   Resolver,
 } from "type-graphql";
-
-@ObjectType()
-class Genre {
-  @Field(() => ID)
-  public id!: string;
-
-  @Field()
-  public name!: string;
-}
 
 @ObjectType()
 class CastMember {
@@ -185,21 +177,6 @@ class MediaDetails {
 }
 
 @ObjectType()
-class Rating {
-  @Field()
-  public name!: string;
-
-  @Field()
-  public image!: string;
-
-  @Field()
-  public score!: string;
-
-  @Field()
-  public url!: string;
-}
-
-@ObjectType()
 class NowPlayingItem {
   @Field(() => ID)
   public id!: string;
@@ -224,9 +201,6 @@ class NowPlayingItem {
 
   @Field(() => Date)
   public releaseDate!: Date;
-
-  @Field(() => [Rating])
-  public ratings!: Rating[];
 
   @Field()
   public logo!: string;

@@ -5,7 +5,7 @@ import { expect, waitFor } from "storybook/test";
 import { NowPlaying } from "./now-playing";
 import { NowPlayingSkeleton } from "./now-playing-skeleton";
 
-import type { NowPlayingItem } from "./now-playing";
+import type { IndexerData } from "@/app/_types/__generated__/graphql";
 
 const meta = preview.meta({
   title: "Components / NowPlaying",
@@ -18,13 +18,13 @@ const meta = preview.meta({
     data: [
       {
         id: "603692",
-        mediaType: "movie",
+        type: "movie",
         title: "John Wick: Chapter 4",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg",
         releaseDate: "2023-03-24",
         voteAverage: 7.8,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
         genres: [
@@ -32,31 +32,29 @@ const meta = preview.meta({
           { id: "thriller", name: "Thriller" },
         ],
         certification: "15",
-        ratings: [
-          {
-            name: "imdb",
-            image: "imdb.svg",
+        ratings: {
+          imdb: {
+            logo: "imdb.svg",
             score: "7.6",
             url: "https://www.imdb.com/title/tt10366206/",
           },
-          {
-            name: "rottentomatoes",
-            image: "rottentomatoes_certified_fresh.svg",
+          rottenTomatoes: {
+            logo: "rottentomatoes_certified_fresh.svg",
             score: "94%",
             url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
           },
-        ],
-        logo: null,
+        },
+        logoUrl: null,
       },
       {
         id: "94605",
-        mediaType: "show",
+        type: "show",
         title: "Arcane",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
         releaseDate: "2024-11-09",
         voteAverage: 9.1,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
         genres: [
@@ -64,26 +62,26 @@ const meta = preview.meta({
           { id: "action-adventure", name: "Action & Adventure" },
         ],
         certification: "12A",
-        ratings: [],
-        logo: null,
+        ratings: {},
+        logoUrl: null,
       },
       {
         id: "1291595",
-        mediaType: "movie",
+        type: "movie",
         title: "Insidious: Out of the Further",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
         releaseDate: "2026-08-21",
         voteAverage: 6.5,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
-        ratings: [],
-        logo: null,
+        ratings: {},
+        logoUrl: null,
       },
-    ] satisfies NowPlayingItem[],
+    ] satisfies IndexerData[],
   },
   parameters: {
     chromatic: {
@@ -327,13 +325,13 @@ export const WithLongTitle = meta.story({
     data: [
       {
         id: "1291594",
-        mediaType: "movie",
+        type: "movie",
         title: "The Assassination of Jesse James by the Coward Robert Ford",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/5r2BZajlRZqnOc6s2BS0aiFDcne.jpg",
         releaseDate: "2007-10-19",
         voteAverage: 7.5,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Robert Ford, who has idolized Jesse James since childhood, tries hard to join the resurgent gang of the Missouri outlaw, but gradually becomes resentful of the bandit leader.",
         genres: [
@@ -342,19 +340,19 @@ export const WithLongTitle = meta.story({
           { id: "thriller", name: "Thriller" },
         ],
         certification: "R",
-        ratings: [],
-        logo: null,
+        ratings: {},
+        logoUrl: null,
       },
       {
         id: "1291593",
-        mediaType: "movie",
+        type: "movie",
         title:
           "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/4LmNLvXP5SZ5TrZEkNhC7dbjUNV.jpg",
         releaseDate: "1964-01-29",
         voteAverage: 8.3,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "After a rogue U.S. general orders an unauthorized nuclear attack on the Soviet Union, leaders in the War Room race to prevent global catastrophe.",
         genres: [
@@ -363,24 +361,24 @@ export const WithLongTitle = meta.story({
           { id: "thriller", name: "Thriller" },
         ],
         certification: "R",
-        ratings: [],
-        logo: null,
+        ratings: {},
+        logoUrl: null,
       },
       {
         id: "1291595",
-        mediaType: "movie",
+        type: "movie",
         title: "Insidious: Out of the Further",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
         releaseDate: "2026-08-21",
         voteAverage: 6.5,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
-        ratings: [],
-        logo: null,
+        ratings: {},
+        logoUrl: null,
       },
     ],
   },
@@ -391,13 +389,13 @@ export const WithLogos = meta.story({
     data: [
       {
         id: "603692",
-        mediaType: "movie",
+        type: "movie",
         title: "John Wick: Chapter 4",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg",
         releaseDate: "2023-03-24",
         voteAverage: 7.8,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
         genres: [
@@ -405,31 +403,30 @@ export const WithLogos = meta.story({
           { id: "thriller", name: "Thriller" },
         ],
         certification: "15",
-        ratings: [
-          {
-            name: "imdb",
-            image: "imdb.svg",
+        ratings: {
+          imdb: {
+            logo: "imdb.svg",
             score: "7.6",
             url: "https://www.imdb.com/title/tt10366206/",
           },
-          {
-            name: "rottentomatoes",
-            image: "rottentomatoes_certified_fresh.svg",
+          rottenTomatoes: {
+            logo: "rottentomatoes_certified_fresh.svg",
             score: "94%",
             url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
           },
-        ],
-        logo: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+        },
+        logoUrl:
+          "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
       },
       {
         id: "94605",
-        mediaType: "show",
+        type: "show",
         title: "Arcane",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
         releaseDate: "2024-11-09",
         voteAverage: 9.1,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
         genres: [
@@ -437,24 +434,26 @@ export const WithLogos = meta.story({
           { id: "action-adventure", name: "Action & Adventure" },
         ],
         certification: "12A",
-        ratings: [],
-        logo: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+        ratings: {},
+        logoUrl:
+          "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
       },
       {
         id: "1291595",
-        mediaType: "movie",
+        type: "movie",
         title: "Insidious: Out of the Further",
-        backdropPath:
+        backdropUrl:
           "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
         releaseDate: "2026-08-21",
         voteAverage: 6.5,
-        originalLanguage: "en",
+        language: "en",
         overview:
           "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
-        ratings: [],
-        logo: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+        ratings: {},
+        logoUrl:
+          "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
       },
     ],
   },

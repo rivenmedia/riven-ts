@@ -5486,10 +5486,12 @@
                             "default": 0
                           },
                           "name": { "type": "string", "example": "Action" }
-                        }
+                        },
+                        "required": ["id", "name"]
                       }
                     }
-                  }
+                  },
+                  "required": ["genres"]
                 }
               }
             }
@@ -5537,10 +5539,12 @@
                             "type": "string",
                             "example": "Action & Adventure"
                           }
-                        }
+                        },
+                        "required": ["id", "name"]
                       }
                     }
-                  }
+                  },
+                  "required": ["genres"]
                 }
               }
             }
@@ -7256,7 +7260,8 @@
                             "default": 0
                           },
                           "name": { "type": "string", "example": "Drama" }
-                        }
+                        },
+                        "required": ["id", "name"]
                       }
                     },
                     "homepage": {
@@ -7375,7 +7380,8 @@
                       "example": 26280,
                       "default": 0
                     }
-                  }
+                  },
+                  "required": ["genres"]
                 }
               }
             }
@@ -18538,7 +18544,8 @@
                             "type": "string",
                             "example": "Sci-Fi & Fantasy"
                           }
-                        }
+                        },
+                        "required": ["id", "name"]
                       }
                     },
                     "homepage": {
@@ -18781,7 +18788,8 @@
                       "example": 21390,
                       "default": 0
                     }
-                  }
+                  },
+                  "required": ["genres"]
                 }
               }
             }

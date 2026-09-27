@@ -13,35 +13,11 @@ import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
 import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
 
 import type { CarouselApi } from "../_ui/carousel";
-import type { Genre } from "@/app/_types/__generated__/graphql";
-import type { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+import type { IndexerData, Rating } from "@/app/_types/__generated__/graphql";
 import type { RefObject } from "react";
 
-export interface RatingScore {
-  name: string;
-  image?: string;
-  score: string;
-  url: string;
-}
-
-export interface NowPlayingItem {
-  id: string;
-  mediaType: TopLevelMediaItemType;
-  title?: string;
-  name?: string;
-  backdropPath?: string | null;
-  releaseDate: string;
-  voteAverage?: number | null;
-  originalLanguage?: string;
-  overview?: string;
-  genres?: Genre[];
-  certification: string;
-  ratings: RatingScore[];
-  logo: string | null;
-}
-
 export interface NowPlayingProps {
-  data: NowPlayingItem[];
+  data: IndexerData[];
   autoplayDelay?: number;
   alignment?: "left" | "center" | "right";
   heightClass?: string;
@@ -119,23 +95,27 @@ export function NowPlaying({
       >
         <CarouselContent>
           {data.map((item, i) => {
-            const isTV = item.mediaType === "show";
-            const displayTitle = item.title ?? item.name ?? "Untitled";
+            const isTV = item.type === "show";
 
             const backgroundGradient =
               "radial-gradient(120% 160% at 0% 100%, black 0%, transparent 70%), linear-gradient(to bottom, transparent 10%, black 100%)";
 
             const animationClass = i === currentIndex ? fly : "hidden";
 
+            const { __typename: _, ...restRatings } = item.ratings ?? {};
+            const ratings = Object.entries(restRatings).filter(
+              (entry): entry is [string, Rating] => entry[1] != null,
+            );
+
             return (
               <CarouselItem
                 key={item.id}
                 className={cn("relative w-full", heightClass)}
               >
-                {item.backdropPath && (
+                {item.backdropUrl && (
                   <Image
-                    src={item.backdropPath}
-                    alt={displayTitle}
+                    src={item.backdropUrl}
+                    alt={item.title}
                     className="absolute h-full w-full object-cover object-top select-none"
                     loading="lazy"
                     fill
@@ -161,11 +141,11 @@ export function NowPlaying({
                         animationClass,
                       )}
                     >
-                      {item.logo ? (
+                      {item.logoUrl ? (
                         <div className="mb-4 relative w-full h-[10vw] max-h-35 max-w-125">
                           <Image
-                            src={item.logo}
-                            alt={displayTitle}
+                            src={item.logoUrl}
+                            alt={item.title}
                             className={cn(
                               "max-h-full max-w-[80%] drop-shadow-2xl object-contain",
                               alignment === "left" && "object-bottom-left",
@@ -177,7 +157,7 @@ export function NowPlaying({
                         </div>
                       ) : (
                         <h1 className="line-clamp-2 font-black tracking-tighter drop-shadow-2xl md:leading-[1.1] text-[clamp(var(--text-3xl),5vw,var(--text-6xl))]">
-                          {displayTitle}
+                          {item.title}
                         </h1>
                       )}
                     </div>
@@ -205,43 +185,43 @@ export function NowPlaying({
                             item.releaseDate ?? item.firstAirDate ?? "",
                           )} */}
                       </span>
-                      {item.originalLanguage && (
+                      {item.language && (
                         <>
                           <span className="text-white/40">|</span>
                           <span className="text-white uppercase drop-shadow-md">
-                            {item.originalLanguage}
+                            {item.language}
                           </span>
                         </>
                       )}
-                      {item.ratings.length > 0 && (
+                      {ratings.length > 0 && (
                         <div className="ml-2 flex items-center gap-4">
-                          {item.ratings.map((score) => (
+                          {ratings.map(([name, rating]) => (
                             <a
-                              key={score.name}
-                              href={score.url}
+                              key={name}
+                              href={rating.url}
                               target="_blank"
                               rel="external noopener noreferrer"
                               className="flex items-center gap-1.5 transition-opacity hover:opacity-80"
-                              title={score.name}
+                              title={name}
                             >
-                              {score.image && (
+                              {rating.logo && (
                                 <div className="relative h-8 w-8">
                                   <Image
-                                    src={`/rating-logos/${score.image}`}
-                                    alt={score.name}
+                                    src={`/rating-logos/${rating.logo}`}
+                                    alt={name}
                                     className="h-4 w-auto object-contain"
                                     fill
                                   />
                                 </div>
                               )}
                               <span className="text-xs font-bold text-white drop-shadow-md">
-                                {score.score}
+                                {rating.score}
                               </span>
                             </a>
                           ))}
                         </div>
                       )}
-                      {item.ratings.length === 0 && item.voteAverage && (
+                      {ratings.length === 0 && item.voteAverage && (
                         <>
                           {" "}
                           <span className="text-white/40">|</span>
@@ -262,7 +242,7 @@ export function NowPlaying({
                         {item.overview}
                       </p>
                     )}
-                    {item.genres?.length && (
+                    {item.genres.length > 0 && (
                       <div
                         className={cn(
                           "mt-4 flex flex-wrap gap-2 md:mt-6 delay-400 animation-duration-1000",
@@ -293,9 +273,7 @@ export function NowPlaying({
                         className="flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/10 px-8 text-sm font-bold text-white shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20 md:h-12 md:text-base"
                         type="button"
                       >
-                        <Link
-                          href={`/details/media/${item.mediaType}/${item.id}`}
-                        >
+                        <Link href={`/details/media/${item.type}/${item.id}`}>
                           More Info
                         </Link>
                       </Button>

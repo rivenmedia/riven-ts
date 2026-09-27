@@ -1,7 +1,11 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
+import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
+import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
+import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
+import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
@@ -66,5 +70,38 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const response = await this.get<unknown>(`movie/${movieId}`);
 
     return movieDetails200Schema.parse(response);
+  }
+
+  public async getNowPlaying() {
+    const response = await this.get<unknown>(`movie/now_playing`);
+
+    return movieNowPlayingList200Schema.parse(response);
+  }
+
+  public async getLocalisedGenres(locale: string) {
+    const response = await this.get<unknown>(`genre/movie/list`, {
+      params: {
+        language: locale,
+      },
+    });
+
+    const { genres } = genreMovieList200Schema.parse(response);
+
+    return genres.map((genre) => ({
+      id: genre.id.toString(),
+      name: genre.name,
+    }));
+  }
+
+  public async getReleaseDates(tmdbId: string) {
+    const response = await this.get<unknown>(`movie/${tmdbId}/release_dates`);
+
+    return movieReleaseDates200Schema.parse(response);
+  }
+
+  public async getExternalIds(movieId: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/external_ids`);
+
+    return movieExternalIds200Schema.parse(response);
   }
 }
