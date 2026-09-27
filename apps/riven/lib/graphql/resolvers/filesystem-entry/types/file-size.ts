@@ -1,6 +1,6 @@
-import { Field, Float, ObjectType } from "type-graphql";
+import { FileSizeUnitShort } from "@repo/util-plugin-sdk/dto/enums/file-size-unit-short.enum";
 
-import { FileSizeUnitShort } from "../enums/file-size-unit-short.enum.ts";
+import { Field, Float, ObjectType } from "type-graphql";
 
 @ObjectType()
 export class FileSize {

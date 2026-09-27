@@ -4,6 +4,7 @@ import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
 import { flow } from "../../../message-queue/flows/producer.ts";
+import { settings } from "../../../utilities/settings.ts";
 import { it } from "./helpers/test-context.ts";
 
 it("enqueues an item processor job for each incomplete item request in the database", async ({
@@ -176,4 +177,31 @@ it('enqueues a media item processor job in the "download" step for each incomple
       );
     });
   }
+});
+
+it("schedules a retry library event at the configured interval", async ({
+  actor,
+}) => {
+  vi.useFakeTimers();
+
+  actor.start();
+
+  let retryLibraryCalls = 0;
+
+  actor.system.inspect((event) => {
+    if (
+      event.type === "@xstate.event" &&
+      event.event.type.endsWith("done.actor.retryLibrary")
+    ) {
+      retryLibraryCalls += 1;
+    }
+  });
+
+  await waitFor(actor, (state) => state.matches("Running"));
+
+  vi.advanceTimersByTime(settings.retryLibraryIntervalSeconds * 1000 + 1000);
+
+  await vi.waitFor(() => {
+    expect(retryLibraryCalls).toBe(2);
+  });
 });

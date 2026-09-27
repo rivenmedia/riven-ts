@@ -1,0 +1,44 @@
+{
+  "$schema": "https://turborepo.dev/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "dev": {
+      "with": ["@repo/riven#dev"]
+    },
+    "lint": {
+      "dependsOn": [
+        "$TURBO_EXTENDS$",
+        "@repo/util-plugin-sdk#build",
+        "codegen:nextjs-types",
+        "codegen:gql"
+      ]
+    },
+    "codegen:gql": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"]
+    },
+    "codegen:gql:watch": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"],
+      "cache": false,
+      "persistent": true
+    },
+    "msw:init": {
+      "cache": false
+    },
+    "storybook": {
+      "dependsOn": ["msw:init"],
+      "cache": false,
+      "persistent": true,
+      "with": ["codegen:gql:watch"]
+    },
+    "build-storybook": {
+      "dependsOn": ["msw:init", "codegen:gql"],
+      "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
+      "outputs": ["storybook-static"]
+    },
+    "chromatic": {
+      "passThroughEnv": ["CHROMATIC_PROJECT_TOKEN"],
+      "dependsOn": ["msw:init", "transit:source-files"],
+      "inputs": ["{app,components,lib}/**/*.{ts,tsx}"]
+    }
+  }
+}

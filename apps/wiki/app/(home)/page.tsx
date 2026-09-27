@@ -273,7 +273,7 @@ export default async function HomePage() {
                   <h3 className="mb-4 font-semibold">Quick Start</h3>
                   <pre className="max-w-full overflow-x-auto rounded-lg bg-fd-muted/50 p-4 text-sm">
                     <code className="text-fd-muted-foreground">
-                      {`docker compose up -d`}
+                      docker compose up -d
                     </code>
                   </pre>
                   <p className="mt-3 text-xs text-fd-muted-foreground">

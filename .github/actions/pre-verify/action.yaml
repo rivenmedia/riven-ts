@@ -18,3 +18,19 @@ runs:
         key: ${{ runner.os }}-knip-cache-${{ inputs.task }}-${{ hashFiles('**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,yml,yaml,.graphql,.gql}') }}
         restore-keys: |
           ${{ runner.os }}-knip-cache-${{ inputs.task }}-
+
+    - name: Install Playwright dependencies
+      if: ${{ inputs.task == 'test:component' }}
+      shell: bash
+      run: |
+        PLAYWRIGHT_VERSION=$(
+          pnpm -r ls playwright --json -D --depth=0 | \
+          jq -r '.[] | select(.devDependencies.playwright != null) | .devDependencies.playwright.version // empty'
+        )
+
+        if [ -z "$PLAYWRIGHT_VERSION" ]; then
+          echo "::error::Unable to determine Playwright version"
+          exit 1
+        fi
+
+        pnx playwright@$PLAYWRIGHT_VERSION install chromium --with-deps

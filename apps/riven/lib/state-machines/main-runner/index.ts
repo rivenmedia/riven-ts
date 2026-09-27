@@ -423,6 +423,19 @@ export const mainRunnerMachine = setup({
               pluginQueues,
             }),
           },
+          ...(settings.retryLibraryIntervalSeconds > 0
+            ? [
+                {
+                  id: "createRetryLibraryScheduler",
+                  src: "createEventScheduler",
+                  input: {
+                    event: "riven-internal.retry-library",
+                    interval: settings.retryLibraryIntervalSeconds * 1000,
+                    runImmediately: false,
+                  },
+                } as const,
+              ]
+            : []),
         ],
         always: [
           {

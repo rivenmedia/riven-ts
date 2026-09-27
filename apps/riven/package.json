@@ -27,7 +27,7 @@
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
     "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
-    "codegen:gql": "graphql-codegen --config graphql-codegen.ts",
+    "codegen:gql": "graphql-codegen --config graphql.config.ts",
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
     "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",

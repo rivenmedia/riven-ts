@@ -10,6 +10,7 @@ export const baseVitestConfig = defineConfig(() => {
     { test: configDefaults },
     defineConfig({
       test: {
+        globals: true, // Enables testing-library auto cleanup
         exclude: ignorePatterns,
         restoreMocks: true,
         coverage: {

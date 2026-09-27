@@ -68,6 +68,14 @@
       "persistent": true,
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
+    "test:component": {
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,.next,coverage,docker-data,dist}/**",
+        "!*.md"
+      ]
+    },
     "lint": {
       "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
@@ -113,11 +121,17 @@
       "outputs": ["knip-report.json"]
     },
     "//#validate-generators": {
-      "inputs": [
-        "turbo/generators/**",
-        "!turbo/generators/coverage/**",
-        "transit:source-files"
-      ]
+      "dependsOn": ["^transit:source-files"],
+      "inputs": ["turbo/generators/**", "!turbo/generators/coverage/**"]
+    },
+    "e2e": {
+      "cache": false
+    },
+    "e2e:headless": {},
+    "codegen:nextjs-types": {
+      "env": ["NODE_ENV"],
+      "inputs": ["app/**/{page,layout}.tsx"],
+      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.d.ts"]
     }
   }
 }

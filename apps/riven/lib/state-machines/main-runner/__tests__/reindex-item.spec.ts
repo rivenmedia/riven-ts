@@ -345,7 +345,7 @@ it("enqueues a job to process the latest released episodes if the item is a show
     meta: {
       type: "show",
       isAdditionalSeasonRequest: false,
-      isReindex: false,
+      isReindex: true,
     },
   });
 

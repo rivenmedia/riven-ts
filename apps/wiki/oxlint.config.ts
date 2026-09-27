@@ -1,10 +1,9 @@
 import { baseOxlintConfig } from "@repo/core-util-oxlint-config";
-import { nextJsOxlintConfig } from "@repo/core-util-oxlint-config/nextjs";
 
 import { defineConfig } from "oxlint";
 
 export default defineConfig({
-  extends: [baseOxlintConfig, nextJsOxlintConfig],
+  extends: [baseOxlintConfig],
   ignorePatterns: [".source/", "scripts/"],
   overrides: [
     {

@@ -1,4 +1,8 @@
-import { Parser, transforms } from "@viren070/parse-torrent-title";
+import {
+  Parser,
+  handlers as defaultHandlers,
+  transforms,
+} from "@viren070/parse-torrent-title";
 import { merge } from "es-toolkit";
 import z from "zod";
 
@@ -8,19 +12,55 @@ import { ParsedDataSchema } from "../schemas.ts";
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
 import type { ParsedData } from "../schemas.ts";
+import type { Handler } from "@viren070/parse-torrent-title";
+
+const yearPattern = String.raw`\b(?:19|20)\d{2}\b`;
+
+/**
+ * Restricts a channels handler to only match after the year (if the title contains one),
+ * so that titles such as "M3GAN 2.0" are not mistaken for audio channels.
+ */
+function matchChannelsAfterYear(handler: Handler): Handler {
+  if (!handler.pattern) {
+    return handler;
+  }
+
+  const { source, flags } = handler.pattern;
+
+  return {
+    ...handler,
+    pattern: new RegExp(
+      String.raw`(?<=${yearPattern}.*|^(?!.*${yearPattern}).*)(?:${source})`,
+      flags,
+    ),
+  };
+}
+
+/**
+ * The channels handlers must run before the year handlers,
+ * as the year is removed from the title once it has been parsed.
+ */
+const channelsHandlers = [
+  {
+    field: "channels",
+    pattern: /\+?2[.\s]0(?:x[2-4])?\b/iu,
+    transform: transforms.toValueSet("2.0"),
+    remove: true,
+    keepMatching: true,
+  },
+  ...defaultHandlers.filter(({ field }) => field === "channels"),
+].map(matchChannelsAfterYear);
+
+const nonChannelsDefaultHandlers = defaultHandlers.filter(
+  ({ field }) => field !== "channels",
+);
 
 const parser = new Parser()
   .addHandlers(adultHandlers)
   .addHandlers(sceneHandlers)
   .addHandlers(trashHandlers)
+  .addHandlers(channelsHandlers)
   .addHandlers([
-    {
-      field: "channels",
-      pattern: /\+?2[.\s]0(?:x[2-4])?\b/iu,
-      transform: transforms.toValueSet("2.0"),
-      remove: true,
-      keepMatching: true,
-    },
     {
       field: "complete",
       pattern:
@@ -29,7 +69,7 @@ const parser = new Parser()
       remove: true,
     },
   ])
-  .addDefaultHandlers()
+  .addHandlers(nonChannelsDefaultHandlers)
   .addHandlers([
     {
       field: "episodes",
@@ -70,13 +110,33 @@ const parser = new Parser()
     },
   ]);
 
+/**
+ * The parser replaces all dots with spaces in dot-separated titles,
+ * which breaks up version-like numbers that are part of the title (e.g. "M3GAN.2.0" becomes "M3GAN 2 0").
+ *
+ * This restores any single-digit decimals (in the style of audio channels) that appeared in the raw title.
+ */
+function restoreDecimalNumbers(title: string, rawTitle: string) {
+  return title.replaceAll(
+    /\b(?<integer>\d) (?<fraction>\d)\b/gu,
+    (match, integer: string, fraction: string) => {
+      const decimal = `${integer}.${fraction}`;
+
+      return rawTitle.includes(decimal) ? decimal : match;
+    },
+  );
+}
+
 export function parse(rawTitle: string) {
   if (!rawTitle || typeof rawTitle !== "string") {
     throw new TypeError("The input title must be a non-empty string.");
   }
 
+  const result = parser.parse(rawTitle);
+
   const parsedData = ParsedDataSchema.safeParse({
-    ...parser.parse(rawTitle),
+    ...result,
+    title: result.title && restoreDecimalNumbers(result.title, rawTitle),
     rawTitle,
   });
 

@@ -10,7 +10,7 @@
     "scripts/generate-ranking-config-json-schema.ts",
     "scripts/generate-zod-docs.ts",
     "oxlint.config.ts",
-    "graphql-codegen.ts",
+    "graphql.config.ts",
     "esbuild.config.ts",
     "vitest.d.ts",
     "vitest.config.ts",

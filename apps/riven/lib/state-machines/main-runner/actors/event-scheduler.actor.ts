@@ -1,5 +1,5 @@
 import chalk from "chalk";
-import { setInterval } from "node:timers";
+import { Duration } from "luxon";
 import { fromCallback } from "xstate";
 
 import { logger } from "../../../utilities/logger/logger.ts";
@@ -18,7 +18,7 @@ export const createEventScheduler = fromCallback<
   CreateEventSchedulerInput
 >(({ sendBack, input }) => {
   logger.verbose(
-    `Scheduling event ${chalk.blue(input.event)} to run every ${input.interval.toString()}ms`,
+    `Scheduling event ${chalk.blue(input.event)} to run every ${Duration.fromMillis(input.interval).rescale().toHuman()}`,
   );
 
   const handler = () => {

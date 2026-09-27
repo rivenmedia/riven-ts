@@ -7,6 +7,7 @@ export {
   Settings,
   SettingsSchema,
   RankingModelSchema,
+  RankingModelSchemaMetadata,
 } from "./ranker/ranking-settings.schema.ts";
 export { normaliseTitle } from "./shared/normalise.ts";
 export { getLevRatio, titleMatch } from "./ranker/lev.ts";

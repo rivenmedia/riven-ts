@@ -4,7 +4,11 @@ import { defineConfig } from "oxlint";
 
 export default defineConfig({
   extends: [baseOxlintConfig],
-  ignorePatterns: ["apps/**", "packages/**"],
+  ignorePatterns: [
+    "apps/**",
+    "packages/**",
+    "svelte-frontend/**", // TODO: Remove once the frontend is fully integrated
+  ],
   overrides: [
     {
       files: ["**/**"],
@@ -18,7 +22,6 @@ export default defineConfig({
         "typescript/no-redundant-type-constituents": "off",
         "typescript/no-base-to-string": "off",
         "typescript/no-unsafe-return": "off",
-        "typescript/no-unsafe-type-assertion": "off",
         "typescript/no-unsafe-assignment": "off",
         "typescript/consistent-return": "off",
         "import/unambiguous": "off",

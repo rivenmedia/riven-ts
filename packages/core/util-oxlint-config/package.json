@@ -4,8 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
-    ".": "./lib/base.ts",
-    "./nextjs": "./lib/nextjs.ts"
+    ".": "./lib/base.ts"
   },
   "scripts": {
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
@@ -14,6 +13,8 @@
   "dependencies": {
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
+    "eslint-plugin-playwright": "catalog:",
+    "eslint-plugin-storybook": "catalog:",
     "eslint-plugin-turbo": "catalog:",
     "globals": "catalog:"
   },

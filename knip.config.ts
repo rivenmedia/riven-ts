@@ -1,16 +1,16 @@
 import type { KnipConfiguration } from "knip";
 
 const filePatterns = {
-  sourceFiles: "**/*.ts!",
+  sourceFiles: "**/*.{ts,tsx}!",
   generatedProdFiles: "**/__generated__/zod/*.ts!",
   generatedDevFiles: "**/__generated__/{handlers,mocks}/*.ts",
   scriptFiles: "**/scripts/**/*.ts",
-  testFiles: ["!**/*.{spec,test}.ts!", "!**/__{tests,mocks}__/**!"],
+  testFiles: ["!**/*.{spec,test}.{ts,tsx}!", "!**/__{tests,mocks}__/**!"],
 
   // Tooling configs
   configFiles: "**/*.config.ts",
   setupFiles: "**/*.setup.ts",
-  graphqlCodegenConfig: "graphql-codegen.ts",
+  graphqlCodegenConfig: "graphql.config.ts",
 } as const;
 
 const defaultEntry = [
@@ -92,6 +92,9 @@ export default {
       // `@swc-node/register` is used via `--import=` in the dev/start
       // scripts, which Knip doesn't resolve from this indirection.
       ignoreDependencies: ["@repo/riven", "@swc-node/register"],
+    },
+    "apps/frontend": {
+      ignore: ["**/*"], // TODO: Remove once the frontend is fully integrated
     },
     "{packages,packages/core}/*": {
       entry: [...defaultEntry],

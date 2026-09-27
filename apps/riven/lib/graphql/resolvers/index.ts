@@ -7,6 +7,7 @@ import { MovieResolver } from "./movie.resolver.ts";
 import { SeasonResolver } from "./season.resolver.ts";
 import { ShareLogsResolver } from "./share-logs.resolver.ts";
 import { ShowResolver } from "./show.resolver.ts";
+import { _TempFrontendResolver } from "./temp-frontend.resolver.ts";
 import { VfsResolver } from "./vfs/vfs.resolver.ts";
 
 export const resolvers = [
@@ -20,4 +21,5 @@ export const resolvers = [
   ShareLogsResolver,
   ShowResolver,
   VfsResolver,
+  _TempFrontendResolver,
 ] as const;

@@ -4,7 +4,7 @@ import { HttpResponse, http } from "msw";
 import { describe, expect } from "vitest";
 
 import { it } from "../../../__tests__/stremthru.test-context.ts";
-import { Store } from "../../../schemas/store.schema.js";
+import { Store } from "../../../schemas/store.schema.ts";
 import { StremThruSettings } from "../../../stremthru-settings.schema.ts";
 import { StremThruTorzAPI } from "../../stremthru-torz.datasource.ts";
 

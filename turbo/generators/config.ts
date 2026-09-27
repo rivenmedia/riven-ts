@@ -1,3 +1,4 @@
+import { createFrontendComponentGenerator } from "./generators/frontend-component.ts";
 import { createPackageGenerator } from "./generators/package.ts";
 import { createPluginGenerator } from "./generators/plugin.ts";
 import { registerArrayHelper } from "./handlebars-helpers/array.ts";
@@ -18,6 +19,7 @@ export default function generator(plop: PlopTypes.NodePlopAPI): void {
     // Generators
     createPackageGenerator,
     createPluginGenerator,
+    createFrontendComponentGenerator,
   ]) {
     fn(plop);
   }
