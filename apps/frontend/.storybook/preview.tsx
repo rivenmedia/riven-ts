@@ -17,11 +17,13 @@ import { DateTime, Settings } from "luxon";
 import mswAddon from "msw-storybook-addon";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
-import { expect } from "storybook/test";
+import { expect, sb } from "storybook/test";
 import { themes } from "storybook/theming";
 
 import { WithI18n } from "./decorators/with-i18n";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
+
+sb.mock(import("../lib/graphql/client.ts"));
 
 if (isChromatic()) {
   const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
