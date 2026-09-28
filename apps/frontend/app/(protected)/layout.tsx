@@ -27,16 +27,16 @@ export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
   const isAdmin = authData?.user.role === "admin";
 
   const sidebarItems: SidebarItem[] = [
-    { href: "/", icon: Home, label: "Home" },
-    { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { href: "/library", icon: Library, label: "Library" },
-    { href: "/explore", icon: Search, label: "Explore" },
-    { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-    { href: "/profile", icon: User, label: "Profile" },
+    { href: "/", icon: <Home />, label: "Home" },
+    { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+    { href: "/library", icon: <Library />, label: "Library" },
+    { href: "/explore", icon: <Search />, label: "Explore" },
+    { href: "/calendar", icon: <CalendarDays />, label: "Calendar" },
+    { href: "/profile", icon: <User />, label: "Profile" },
     ...(isAdmin
       ? ([
-          { href: "/settings", icon: Settings, label: "Settings" },
-          { href: "/view-logs", icon: FileClock, label: "Logs" },
+          { href: "/settings", icon: <Settings />, label: "Settings" },
+          { href: "/view-logs", icon: <FileClock />, label: "Logs" },
         ] as const)
       : []),
   ];

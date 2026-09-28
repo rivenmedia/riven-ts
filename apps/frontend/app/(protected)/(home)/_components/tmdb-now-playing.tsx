@@ -1,3 +1,5 @@
+"use client";
+
 import { NowPlaying } from "@/components/now-playing/now-playing";
 import { NowPlayingSkeleton } from "@/components/now-playing/now-playing-skeleton";
 
@@ -15,7 +17,7 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
   GetTmdbNowPlayingQuery,
   GetTmdbNowPlayingQueryVariables
 > = gql`
-  query GetTmdbNowPlaying {
+  query GetTmdbNowPlaying($locale: String!) {
     tmdbNowPlaying {
       id
       title
@@ -28,7 +30,7 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
       releaseDate
       language
       voteAverage
-      certification
+      certification(locale: $locale)
       logoUrl
       ratings {
         tmdb {
@@ -55,7 +57,11 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
 function TMDBNowPlayingInner(
   props: Omit<React.ComponentProps<typeof NowPlaying>, "data">,
 ) {
-  const { data } = useSuspenseQuery(GET_TMDB_NOW_PLAYING);
+  const { data } = useSuspenseQuery(GET_TMDB_NOW_PLAYING, {
+    variables: {
+      locale: navigator.language,
+    },
+  });
 
   return <NowPlaying {...props} data={data.tmdbNowPlaying} />;
 }

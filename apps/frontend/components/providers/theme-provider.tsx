@@ -1,6 +1,6 @@
 "use client";
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { createThemes } from "@wrksz/themes/client";
 
 export const themes = {
   amberminimal: "Amber Minimal",
@@ -18,11 +18,20 @@ export const themes = {
   neobrutalism: "Neo Brutalism",
   solardusk: "Solar Dusk",
   "t3-chat": "T3 Chat",
-} as const;
+} as const satisfies Record<string, string>;
 
-export function ThemeProvider({
-  children,
-  ...props
-}: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
-}
+type Theme = keyof typeof themes;
+
+const themeConfig = createThemes({
+  attribute: "data-theme",
+  defaultTheme: "darkmatter",
+  themes: Object.keys(themes) as [Theme, ...Theme[]],
+});
+
+export const {
+  ThemeProvider,
+  useTheme,
+  ThemedImage,
+  useThemeEffect,
+  useThemeValue,
+} = themeConfig;

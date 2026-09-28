@@ -6,9 +6,13 @@ export default {
     testProxy: true,
     typedEnv: true,
   },
+  cacheComponents: true,
   typedRoutes: true,
   images: {
-    remotePatterns: [new URL("https://images.pexels.com/photos/**")],
+    remotePatterns: [
+      new URL("https://images.pexels.com/photos/**"),
+      new URL("https://image.tmdb.org/t/p/**"),
+    ],
   },
   typescript: {
     tsconfigPath: "tsconfig.app.json",

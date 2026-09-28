@@ -1,3 +1,5 @@
+"use client";
+
 import { ListCarousel } from "@/components/list-carousel/list-carousel";
 import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
 import { ListCarouselSuspenseError } from "@/components/list-carousel/list-carousel-suspense-error";

@@ -3,6 +3,7 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
+      "passThroughEnv": ["NEXT_RUNTIME"],
       "with": ["@repo/riven#dev"]
     },
     "lint": {

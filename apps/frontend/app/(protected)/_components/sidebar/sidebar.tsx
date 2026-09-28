@@ -11,16 +11,17 @@ import { getInitials } from "@/lib/utils";
 import { cn } from "cn";
 import { Mountain } from "lucide-react";
 import Link from "next/link";
+import { cloneElement } from "react";
 
 import { LogOutButton } from "./_components/log-out-button";
 
 import type { User } from "@/lib/auth/types";
-import type { LucideIcon } from "lucide-react";
-import type { ComponentProps } from "react";
+import type { LucideProps } from "lucide-react";
+import type { ComponentProps, ReactElement } from "react";
 
 export interface SidebarItem {
   href: Extract<ComponentProps<typeof Link>["href"], string>;
-  icon: LucideIcon;
+  icon: ReactElement<LucideProps>;
   label: string;
 }
 
@@ -43,7 +44,6 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
         aria-label="Main Navigation"
       >
         {items.map((item) => {
-          const IconComponent = item.icon;
           const isCurrentPath = currentPath === item.href;
 
           return (
@@ -58,7 +58,7 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
                   aria-label={item.label}
                   aria-current={isCurrentPath ? "page" : undefined}
                 >
-                  <IconComponent className="size-5" />
+                  {cloneElement(item.icon, { className: "size-5" })}
                 </Link>
               </TooltipTrigger>
               <TooltipContent side="right">

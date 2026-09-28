@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "cn";
 import Autoplay from "embla-carousel-autoplay";
 import Fade from "embla-carousel-fade";

@@ -13,11 +13,10 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/_ui/tooltip";
-import { themes } from "@/components/providers/theme-provider";
+import { themes, useTheme } from "@/components/providers/theme-provider";
 
 import { cn } from "cn";
 import { Check, Palette } from "lucide-react";
-import { useTheme } from "next-themes";
 
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
@@ -52,7 +51,7 @@ export function ThemeSwitcher() {
                   : "hover:bg-accent/80",
               )}
               onClick={() => {
-                setTheme(key);
+                setTheme(key as keyof typeof themes);
               }}
             >
               <span>{name}</span>

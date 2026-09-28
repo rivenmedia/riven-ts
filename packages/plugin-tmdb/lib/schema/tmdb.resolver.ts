@@ -1,6 +1,7 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
+import path from "node:path";
 import { Arg, ID, Query, Resolver } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
@@ -9,6 +10,8 @@ import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 @Resolver()
 export class TmdbResolver {
+  readonly #tmdbImageBaseUrl = "https://image.tmdb.org/t/p/original";
+
   @Query(() => Boolean)
   public tmdbIsValid(
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
@@ -36,7 +39,9 @@ export class TmdbResolver {
       releaseDate: item.release_date
         ? DateTime.fromISO(item.release_date).toJSDate()
         : null,
-      backdropUrl: item.backdrop_path ?? "",
+      backdropUrl: item.backdrop_path
+        ? path.join(this.#tmdbImageBaseUrl, item.backdrop_path)
+        : "",
       type: "movie",
     };
   }
@@ -62,7 +67,9 @@ export class TmdbResolver {
         id: movie.id.toString(),
         title: movie.title,
         overview: movie.overview,
-        backdropUrl: movie.backdrop_path ?? "",
+        backdropUrl: movie.backdrop_path
+          ? path.join(this.#tmdbImageBaseUrl, movie.backdrop_path)
+          : "",
         posterUrl: movie.poster_path ?? "",
         genres: [],
         genreIds: movie.genre_ids ?? [],

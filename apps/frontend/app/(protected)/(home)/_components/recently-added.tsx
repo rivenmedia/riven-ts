@@ -1,3 +1,5 @@
+"use client";
+
 import { fly } from "@/components/_animations/fly";
 import { ListCarousel } from "@/components/list-carousel/list-carousel";
 import { SectionHeading } from "@/components/media/section-heading/section-heading";

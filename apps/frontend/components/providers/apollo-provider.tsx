@@ -11,7 +11,7 @@ import {
 
 function makeClient() {
   const httpLink = new HttpLink({
-    uri: `${privateEnvironment.ORIGIN}/graphql`,
+    uri: `${privateEnvironment.BACKEND_URL}/graphql`,
   });
 
   return new ApolloClient({
