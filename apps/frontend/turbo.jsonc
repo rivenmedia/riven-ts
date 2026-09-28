@@ -2,6 +2,9 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tasks": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+    },
     "dev": {
       "cache": false,
       "with": ["@repo/riven#dev", "codegen:gql:watch"],
