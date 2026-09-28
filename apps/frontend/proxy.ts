@@ -16,6 +16,7 @@ import type { NextRequest, ProxyConfig } from "next/server";
 
 // const client = getClient();
 
+// oxlint-disable-next-line typescript/require-await
 export async function proxy(request: NextRequest) {
   if (
     request.nextUrl.pathname === "/graphql" ||

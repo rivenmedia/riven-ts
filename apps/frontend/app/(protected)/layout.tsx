@@ -26,7 +26,7 @@ export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
   });
   const isAdmin = authData?.user.role === "admin";
 
-  const sidebarItems: SidebarItem[] = [
+  const sidebarItems: readonly SidebarItem[] = [
     { href: "/", icon: <Home />, label: "Home" },
     { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
     { href: "/library", icon: <Library />, label: "Library" },

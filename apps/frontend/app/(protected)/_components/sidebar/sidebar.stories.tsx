@@ -21,14 +21,14 @@ const meta = preview.meta({
   args: {
     currentPath: "/",
     items: [
-      { href: "/", icon: Home, label: "Home" },
-      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-      { href: "/library", icon: Library, label: "Library" },
-      { href: "/explore", icon: Search, label: "Explore" },
-      { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-      { href: "/profile", icon: User, label: "Profile" },
-      { href: "/settings", icon: Settings, label: "Settings" },
-      { href: "/logs", icon: FileClock, label: "Logs" },
+      { href: "/", icon: <Home />, label: "Home" },
+      { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+      { href: "/library", icon: <Library />, label: "Library" },
+      { href: "/explore", icon: <Search />, label: "Explore" },
+      { href: "/calendar", icon: <CalendarDays />, label: "Calendar" },
+      { href: "/profile", icon: <User />, label: "Profile" },
+      { href: "/settings", icon: <Settings />, label: "Settings" },
+      { href: "/logs", icon: <FileClock />, label: "Logs" },
     ],
   },
   parameters: {

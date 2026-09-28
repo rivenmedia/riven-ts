@@ -15,7 +15,7 @@ import type { PropsWithChildren } from "react";
 interface PageWrapperProps {
   user: User | undefined;
   userAgentHeader: string | null;
-  sidebarItems: SidebarItem[];
+  sidebarItems: readonly SidebarItem[];
 }
 
 export function PageWrapper({

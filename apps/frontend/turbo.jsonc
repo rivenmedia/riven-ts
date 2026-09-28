@@ -3,8 +3,10 @@
   "extends": ["//"],
   "tasks": {
     "dev": {
-      "passThroughEnv": ["NEXT_RUNTIME"],
-      "with": ["@repo/riven#dev"]
+      "cache": false,
+      "with": ["@repo/riven#dev", "codegen:gql:watch"],
+      "persistent": true,
+      "passThroughEnv": ["NEXT_RUNTIME"]
     },
     "lint": {
       "dependsOn": [

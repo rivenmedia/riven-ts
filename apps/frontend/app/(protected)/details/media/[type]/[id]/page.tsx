@@ -8,8 +8,7 @@ import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client";
 export default async function MediaDetailsPage({
   params,
 }: PageProps<"/details/media/[type]/[id]">) {
-  const { id, type } = await params;
-  console.log({ id, type });
+  const { id } = await params;
   const { data } = await query({
     query: GET_MEDIA_ITEM,
     errorPolicy: "all",
@@ -17,8 +16,6 @@ export default async function MediaDetailsPage({
       id,
     },
   });
-
-  console.log(data);
 
   if (!data) {
     return notFound();

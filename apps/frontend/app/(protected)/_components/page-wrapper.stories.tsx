@@ -19,12 +19,12 @@ const meta = preview.meta({
   args: {
     children: <p>Page content</p>,
     sidebarItems: [
-      { href: "/", icon: Home, label: "Home" },
-      { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-      { href: "/library", icon: Library, label: "Library" },
-      { href: "/explore", icon: Search, label: "Explore" },
-      { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-      { href: "/profile", icon: User, label: "Profile" },
+      { href: "/", icon: <Home />, label: "Home" },
+      { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+      { href: "/library", icon: <Library />, label: "Library" },
+      { href: "/explore", icon: <Search />, label: "Explore" },
+      { href: "/calendar", icon: <CalendarDays />, label: "Calendar" },
+      { href: "/profile", icon: <User />, label: "Profile" },
     ],
     user: {
       banned: false,

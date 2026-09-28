@@ -39,14 +39,14 @@ export const ProtectedLayoutWrapper: Decorator = (Story, { msw }) => {
     <NotificationsProvider>
       <PageWrapper
         sidebarItems={[
-          { href: "/", icon: Home, label: "Home" },
-          { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-          { href: "/library", icon: Library, label: "Library" },
-          { href: "/explore", icon: Search, label: "Explore" },
-          { href: "/calendar", icon: CalendarDays, label: "Calendar" },
-          { href: "/profile", icon: UserIcon, label: "Profile" },
-          { href: "/settings", icon: Settings, label: "Settings" },
-          { href: "/logs", icon: FileClock, label: "Logs" },
+          { href: "/", icon: <Home />, label: "Home" },
+          { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+          { href: "/library", icon: <Library />, label: "Library" },
+          { href: "/explore", icon: <Search />, label: "Explore" },
+          { href: "/calendar", icon: <CalendarDays />, label: "Calendar" },
+          { href: "/profile", icon: <UserIcon />, label: "Profile" },
+          { href: "/settings", icon: <Settings />, label: "Settings" },
+          { href: "/logs", icon: <FileClock />, label: "Logs" },
         ]}
         user={user}
         userAgentHeader={null}
