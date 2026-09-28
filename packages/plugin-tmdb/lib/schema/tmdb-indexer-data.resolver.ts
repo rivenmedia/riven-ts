@@ -36,12 +36,12 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
     );
   }
 
-  @FieldResolver(() => String)
+  @FieldResolver(() => String, { nullable: true })
   public async certification(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @Arg("locale", { defaultValue: "en-US" }) locale: string,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
-  ): Promise<string> {
+  ): Promise<string | null> {
     const releaseDates = await api.getReleaseDates(tmdbIndexerData.id);
 
     if (!releaseDates.results?.length) {
@@ -95,12 +95,16 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       );
     }
 
-    const theatricalReleaseType = 3;
-    const { certification = "Unknown" } =
-      resolvedReleaseDates.find(({ type }) => type === theatricalReleaseType) ??
-      {};
+    const allowedReleaseTypes = new Set([3, 4, 5]);
+    const { certification } =
+      resolvedReleaseDates.find(
+        (releaseDate) =>
+          releaseDate.certification &&
+          releaseDate.type != null &&
+          allowedReleaseTypes.has(releaseDate.type),
+      ) ?? {};
 
-    return certification;
+    return certification ?? null;
   }
 
   @FieldResolver(() => String, { nullable: true })

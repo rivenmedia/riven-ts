@@ -3,7 +3,7 @@ import { fly } from "@/components/_animations/fly";
 import { cn } from "cn";
 
 import { RecentlyAdded } from "./_components/recently-added";
-import { TMDBNowPlaying } from "./_components/tmdb-now-playing";
+import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing";
 import { TrendingMovies } from "./_components/trending-movies";
 import { TrendingShows } from "./_components/trending-shows";
 
