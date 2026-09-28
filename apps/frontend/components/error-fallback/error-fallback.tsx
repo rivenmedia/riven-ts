@@ -5,7 +5,6 @@ import { catchError } from "next/error";
 
 import { Button } from "../_ui/button";
 
-import type { ErrorInfo } from "next/error";
 import type { HTMLAttributes } from "react";
 
 export interface ErrorFallbackProps extends Pick<
@@ -15,8 +14,8 @@ export interface ErrorFallbackProps extends Pick<
   message: string;
 }
 
-export const ErrorFallback = catchError(
-  ({ className, message }: ErrorFallbackProps, { retry }: ErrorInfo) => (
+export const ErrorFallback = catchError<ErrorFallbackProps>(
+  ({ className, message }, { retry }) => (
     <div
       className={cn(
         "bg-muted flex w-full flex-col items-center justify-center gap-4 rounded-2xl p-8",
