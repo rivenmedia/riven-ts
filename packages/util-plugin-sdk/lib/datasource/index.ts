@@ -93,6 +93,11 @@ export interface BaseDataSourceConfig<
 export abstract class BaseDataSource<
   DataSourceSettings extends Record<string, unknown>,
 > extends RESTDataSource {
+  readonly #inFlightRequests = new Map<
+    string,
+    Promise<DataSourceFetchResult<unknown>>
+  >();
+
   public abstract override readonly baseURL: string;
 
   public readonly serviceName: string;
@@ -453,17 +458,12 @@ export abstract class BaseDataSource<
     );
   }
 
-  public override async fetch<T>(
+  async #fetchViaQueue<T>(
     path: string,
-    incomingRequest?: DataSourceRequest,
+    augmentedRequest: AugmentedRequest,
+    url: URL,
+    cacheKey: string,
   ): Promise<DataSourceFetchResult<T>> {
-    const { augmentedRequest, url } = await this.#createAugmentedRequest(
-      path,
-      incomingRequest,
-    );
-
-    const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
-
     const isCached = Boolean(
       await this.#keyv.get(`${this.#keyvPrefix}${cacheKey}`),
     );
@@ -525,6 +525,46 @@ export abstract class BaseDataSource<
       parsedBody: result.parsedBody as T,
       ...commonResponseFields,
     };
+  }
+
+  public override async fetch<T>(
+    path: string,
+    incomingRequest?: DataSourceRequest,
+  ) {
+    const { augmentedRequest, url } = await this.#createAugmentedRequest(
+      path,
+      incomingRequest,
+    );
+
+    const cacheKey = this.cacheKeyFor(url, augmentedRequest as never);
+
+    const deduplicatableMethods = new Set<(typeof augmentedRequest)["method"]>([
+      "GET",
+      "HEAD",
+    ]);
+
+    if (!deduplicatableMethods.has(augmentedRequest.method ?? "GET")) {
+      return this.#fetchViaQueue<T>(path, augmentedRequest, url, cacheKey);
+    }
+
+    const inFlight = this.#inFlightRequests.get(cacheKey);
+
+    if (inFlight) {
+      return inFlight as Promise<DataSourceFetchResult<T>>;
+    }
+
+    const request = this.#fetchViaQueue<T>(
+      path,
+      augmentedRequest,
+      url,
+      cacheKey,
+    ).finally(() => {
+      this.#inFlightRequests.delete(cacheKey);
+    });
+
+    this.#inFlightRequests.set(cacheKey, request);
+
+    return request;
   }
 
   public override async throwIfResponseIsError({
