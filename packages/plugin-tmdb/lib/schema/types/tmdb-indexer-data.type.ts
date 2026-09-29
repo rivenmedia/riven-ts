@@ -19,8 +19,8 @@ export class TmdbIndexerData implements IndexerData {
   @Field(() => String, { nullable: true })
   public posterUrl?: string | null;
 
-  @Field()
-  public backdropUrl!: string;
+  @Field(() => String, { nullable: true })
+  public backdropUrl?: string | null;
 
   @Field(() => String, { nullable: true })
   public language?: string | null;

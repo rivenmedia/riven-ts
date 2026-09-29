@@ -1,17 +1,15 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
-import path from "node:path";
 import { Arg, ID, Query, Resolver } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
+import { formatImageUrl } from "../utilities/format-image-url.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 @Resolver()
 export class TmdbResolver {
-  readonly #tmdbImageBaseUrl = "https://image.tmdb.org/t/p/original";
-
   @Query(() => Boolean)
   public tmdbIsValid(
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
@@ -35,13 +33,11 @@ export class TmdbResolver {
       overview: item.overview ?? "",
       title: item.title ?? "",
       language: item.original_language ?? null,
-      posterUrl: item.poster_path ?? "",
+      posterUrl: formatImageUrl(item.poster_path, "poster"),
       releaseDate: item.release_date
         ? DateTime.fromISO(item.release_date).toJSDate()
         : null,
-      backdropUrl: item.backdrop_path
-        ? path.join(this.#tmdbImageBaseUrl, item.backdrop_path)
-        : "",
+      backdropUrl: formatImageUrl(item.backdrop_path, "backdrop"),
       type: "movie",
     };
   }
@@ -67,14 +63,15 @@ export class TmdbResolver {
         id: movie.id.toString(),
         title: movie.title,
         overview: movie.overview,
-        backdropUrl: movie.backdrop_path
-          ? path.join(this.#tmdbImageBaseUrl, movie.backdrop_path)
-          : "",
-        posterUrl: movie.poster_path ?? "",
+        backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),
+        posterUrl: formatImageUrl(movie.poster_path, "poster"),
         genres: [],
         genreIds: movie.genre_ids ?? [],
         language: movie.original_language ?? null,
         type: "movie",
+        releaseDate: movie.release_date
+          ? DateTime.fromISO(movie.release_date).toJSDate()
+          : null,
       });
     }
 

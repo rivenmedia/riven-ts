@@ -7,6 +7,6 @@ export async function register() {
   ) {
     const { server } = await import("./mocks/node");
 
-    server.listen({ onUnhandledRequest: "warn" });
+    server.listen({ onUnhandledRequest: "bypass" });
   }
 }

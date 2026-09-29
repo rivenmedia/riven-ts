@@ -13,8 +13,9 @@ async function TMDBNowPlayingLoader(
   const { data } = await query({
     query: GET_TMDB_NOW_PLAYING,
     variables: {
-      locale: navigator.language,
+      locale: "en-US",
     },
+    errorPolicy: "ignore",
   });
 
   if (!data?.tmdbNowPlaying) {
