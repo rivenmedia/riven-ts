@@ -9,7 +9,7 @@ import { GET_RECENTLY_ADDED } from "./_components/recently-added";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query";
 import { GET_TRENDING_MOVIES } from "./_components/trending-movies";
 import { GET_TRENDING_SHOWS } from "./_components/trending-shows";
-import { HomePage } from "./page.client";
+import HomePage from "./page";
 
 import type { UUID } from "node:crypto";
 
