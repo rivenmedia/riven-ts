@@ -1,5 +1,10 @@
-// oxlint-disable-next-line import/no-unassigned-import
-import "@/lib/luxon-settings";
 import { Settings } from "luxon";
 
+declare module "luxon" {
+  export interface TSSettings {
+    throwOnInvalid: true;
+  }
+}
+
+Settings.throwOnInvalid = true;
 Settings.defaultLocale = navigator.language;
