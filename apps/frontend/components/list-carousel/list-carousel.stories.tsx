@@ -54,7 +54,7 @@ export const Default = meta.story({
     items: Array.from({ length: 10 }).map((_, i) => ({
       id: (i + 1).toString(),
       title: `Item ${(i + 1).toString()}`,
-      posterPath: faker.image.url(),
+      posterUrl: faker.image.url(),
       type: faker.helpers.arrayElement(["movie", "show"]),
       year: 2021,
     })),

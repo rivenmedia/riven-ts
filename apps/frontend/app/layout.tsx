@@ -1,10 +1,6 @@
-// oxlint-disable-next-line import/no-unassigned-import
-import "@/lib/luxon-settings";
-import { Providers } from "../components/providers.tsx";
-
 import "@/lib/styles/themes/all.css";
 import "@/lib/styles/globals.css";
-
+import { Providers } from "../components/providers.tsx";
 import { fontMono, fontSansSerif, fontSerif } from "./fonts.ts";
 
 import type { Metadata } from "next";

@@ -10,11 +10,11 @@ export const GET_TMDB_TRENDING_MOVIES: TypedDocumentNode<
   GetTmdbTrendingMoviesQuery,
   GetTmdbTrendingMoviesQueryVariables
 > = gql`
-  query GetTmdbTrendingMovies($timeWindow: String = "day") {
+  query GetTmdbTrendingMovies($timeWindow: TMDBTrendingMoviesTimeWindow!) {
     tmdbTrendingMovies(timeWindow: $timeWindow) {
       id
       title
-      posterPath
+      posterUrl
       type
       year
     }

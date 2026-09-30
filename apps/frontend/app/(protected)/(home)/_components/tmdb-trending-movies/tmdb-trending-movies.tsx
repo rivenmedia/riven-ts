@@ -9,8 +9,10 @@ import { Suspense } from "react";
 import { TrendingTimeWindowSection } from "../trending-time-window-section";
 import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies";
 
+import type { TmdbTrendingMoviesTimeWindow } from "../../../../_types/__generated__/graphql";
+
 interface TMDBTrendingMoviesLoaderProps {
-  timeWindow: "day" | "week";
+  timeWindow: TmdbTrendingMoviesTimeWindow;
 }
 
 /**
@@ -34,6 +36,7 @@ async function TMDBTrendingMoviesLoader({
 
   return (
     <ListCarousel
+      key={timeWindow}
       items={data.tmdbTrendingMovies}
       indexer="tmdb"
       ignoreAnimation
@@ -41,11 +44,11 @@ async function TMDBTrendingMoviesLoader({
   );
 }
 
-function TMDBTrendingMoviesSlot({
-  timeWindow,
-}: {
-  timeWindow: "day" | "week";
-}) {
+interface TMDBTrendingMoviesSlotProps {
+  timeWindow: TmdbTrendingMoviesTimeWindow;
+}
+
+function TMDBTrendingMoviesSlot({ timeWindow }: TMDBTrendingMoviesSlotProps) {
   return (
     <ErrorFallback message="Unable to load trending movies.">
       <Suspense fallback={<ListCarouselSkeleton />}>

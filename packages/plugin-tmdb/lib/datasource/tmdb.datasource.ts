@@ -6,8 +6,10 @@ import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.t
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
+import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
 
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
+import type { TrendingMoviesPathParamsSchema } from "../__generated__/zod/trendingMoviesSchema.ts";
 import type { TmdbSettings } from "../tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
@@ -103,5 +105,13 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const response = await this.get<unknown>(`movie/${movieId}/external_ids`);
 
     return movieExternalIds200Schema.parse(response);
+  }
+
+  public async getTrendingMovies(
+    timeWindow: TrendingMoviesPathParamsSchema["time_window"],
+  ) {
+    const response = await this.get<unknown>(`trending/movie/${timeWindow}`);
+
+    return trendingMovies200Schema.parse(response);
   }
 }

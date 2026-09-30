@@ -224,13 +224,6 @@ export class _TempFrontendResolver {
     return [];
   }
 
-  @Query(() => [Movie])
-  public tmdbTrendingMovies(
-    @Arg("timeWindow", () => String) _timeWindow: string,
-  ) {
-    return [];
-  }
-
   @Query(() => [Show])
   public tvdbTrendingShows(
     @Arg("timeWindow", () => String) _timeWindow: string,

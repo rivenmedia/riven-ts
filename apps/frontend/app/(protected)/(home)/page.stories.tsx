@@ -158,11 +158,11 @@ export const Default = meta.story({
             data: {
               tmdbTrendingMovies: [
                 {
-                  __typename: "Movie",
+                  __typename: "TmdbIndexerData",
                   id: crypto.randomUUID() as UUID,
                   type: "movie",
                   title: "Avengers: Endgame",
-                  posterPath:
+                  posterUrl:
                     "https://image.tmdb.org/t/p/original/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
                   year: 2019,
                 },
@@ -175,11 +175,11 @@ export const Default = meta.story({
           data: {
             tmdbTrendingMovies: [
               {
-                __typename: "Movie",
+                __typename: "TmdbIndexerData",
                 id: crypto.randomUUID() as UUID,
                 type: "movie",
                 title: "The Odyssey",
-                posterPath:
+                posterUrl:
                   "https://image.tmdb.org/t/p/original/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
                 year: 2026,
               },
