@@ -1,6 +1,5 @@
 import {
   MediaItem,
-  Movie,
   Show,
   MediaEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
