@@ -1,7 +1,7 @@
-export async function io() {
-  /* empty */
+export function io() {
+  return Promise.resolve();
 }
 
-export async function cacheLife() {
-  /* empty */
+export function cacheLife() {
+  return Promise.resolve();
 }

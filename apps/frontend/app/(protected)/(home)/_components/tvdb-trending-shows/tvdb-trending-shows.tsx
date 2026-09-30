@@ -9,16 +9,16 @@ import { Suspense } from "react";
 import { TrendingTimeWindowSection } from "../trending-time-window-section";
 import { GET_TVDB_TRENDING_SHOWS } from "./_queries/get-tvdb-trending-shows";
 
-interface TVDBTrendingShowsLoaderProps {
+interface TVDBTrendingShowsContentProps {
   timeWindow: "day" | "week";
 }
 
 /**
  * RSC which caches the TVDB Trending Shows carousel for a given time window.
  */
-async function TVDBTrendingShowsLoader({
+async function TVDBTrendingShowsContent({
   timeWindow,
-}: TVDBTrendingShowsLoaderProps) {
+}: TVDBTrendingShowsContentProps) {
   "use cache";
 
   cacheLife("hours");
@@ -41,13 +41,19 @@ async function TVDBTrendingShowsLoader({
   );
 }
 
-async function TVDBTrendingShowsSlot({
-  timeWindow,
-}: {
+interface TVDBTrendingShowsLoaderProps {
   timeWindow: "day" | "week";
-}) {
+}
+
+async function TVDBTrendingShowsLoader({
+  timeWindow,
+}: TVDBTrendingShowsLoaderProps) {
   await io();
 
+  return <TVDBTrendingShowsContent timeWindow={timeWindow} />;
+}
+
+function TVDBTrendingShowsSlot({ timeWindow }: { timeWindow: "day" | "week" }) {
   return (
     <ErrorFallback message="Unable to load trending shows.">
       <Suspense fallback={<ListCarouselSkeleton />}>

@@ -11,16 +11,16 @@ import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies";
 
 import type { TmdbTrendingMoviesTimeWindow } from "../../../../_types/__generated__/graphql";
 
-interface TMDBTrendingMoviesLoaderProps {
+interface TMDBTrendingMoviesContentProps {
   timeWindow: TmdbTrendingMoviesTimeWindow;
 }
 
 /**
  * RSC which caches the TMDB Trending Movies carousel for a given time window.
  */
-async function TMDBTrendingMoviesLoader({
+async function TMDBTrendingMoviesContent({
   timeWindow,
-}: TMDBTrendingMoviesLoaderProps) {
+}: TMDBTrendingMoviesContentProps) {
   "use cache";
 
   cacheLife("hours");
@@ -44,15 +44,26 @@ async function TMDBTrendingMoviesLoader({
   );
 }
 
+interface TMDBTrendingMoviesLoaderProps {
+  timeWindow: TmdbTrendingMoviesTimeWindow;
+}
+
+/**
+ * RSC which caches the TMDB Trending Movies carousel for a given time window.
+ */
+async function TMDBTrendingMoviesLoader({
+  timeWindow,
+}: TMDBTrendingMoviesLoaderProps) {
+  await io();
+
+  return <TMDBTrendingMoviesContent timeWindow={timeWindow} />;
+}
+
 interface TMDBTrendingMoviesSlotProps {
   timeWindow: TmdbTrendingMoviesTimeWindow;
 }
 
-async function TMDBTrendingMoviesSlot({
-  timeWindow,
-}: TMDBTrendingMoviesSlotProps) {
-  await io();
-
+function TMDBTrendingMoviesSlot({ timeWindow }: TMDBTrendingMoviesSlotProps) {
   return (
     <ErrorFallback message="Unable to load trending movies.">
       <Suspense fallback={<ListCarouselSkeleton />}>

@@ -12,7 +12,7 @@ import { ListItem } from "../list-item/list-item";
 
 import type { ComponentProps } from "react";
 
-interface ListCarouselProps extends Pick<ComponentProps<"div">, "key"> {
+interface ListCarouselProps {
   items: ComponentProps<typeof ListItem>["mediaItem"][];
   indexer: string | undefined;
   ignoreAnimation?: boolean;
@@ -22,11 +22,9 @@ export function ListCarousel({
   items,
   indexer,
   ignoreAnimation,
-  key,
 }: ListCarouselProps) {
   return (
     <Carousel
-      key={key}
       opts={{
         dragFree: true,
         slidesToScroll: "auto",
