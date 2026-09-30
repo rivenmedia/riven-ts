@@ -12,6 +12,7 @@ import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
+import { headers } from "@storybook/nextjs-vite/headers.mock";
 import isChromatic from "chromatic/isChromatic";
 import { DateTime, Settings } from "luxon";
 import mswAddon from "msw-storybook-addon";
@@ -143,9 +144,11 @@ export const preview = definePreview({
       );
     },
   ],
-  beforeEach() {
+  beforeEach({ globals }) {
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
+
+    headers().append("accept-language", globals.locale);
   },
 });
 
