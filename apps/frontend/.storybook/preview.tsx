@@ -25,6 +25,7 @@ import { WithI18n } from "./decorators/with-i18n";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
 
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("next/cache"));
 
 if (isChromatic()) {
   const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });

@@ -3,7 +3,7 @@ import { ListCarousel } from "@/components/list-carousel/list-carousel";
 import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
 import { query } from "@/lib/graphql/client";
 
-import { cacheLife } from "next/cache";
+import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
 import { TrendingTimeWindowSection } from "../trending-time-window-section";
@@ -48,7 +48,11 @@ interface TMDBTrendingMoviesSlotProps {
   timeWindow: TmdbTrendingMoviesTimeWindow;
 }
 
-function TMDBTrendingMoviesSlot({ timeWindow }: TMDBTrendingMoviesSlotProps) {
+async function TMDBTrendingMoviesSlot({
+  timeWindow,
+}: TMDBTrendingMoviesSlotProps) {
+  await io();
+
   return (
     <ErrorFallback message="Unable to load trending movies.">
       <Suspense fallback={<ListCarouselSkeleton />}>

@@ -3,7 +3,7 @@ import { ListCarousel } from "@/components/list-carousel/list-carousel";
 import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
 import { query } from "@/lib/graphql/client";
 
-import { cacheLife } from "next/cache";
+import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
 import { TrendingTimeWindowSection } from "../trending-time-window-section";
@@ -41,7 +41,13 @@ async function TVDBTrendingShowsLoader({
   );
 }
 
-function TVDBTrendingShowsSlot({ timeWindow }: { timeWindow: "day" | "week" }) {
+async function TVDBTrendingShowsSlot({
+  timeWindow,
+}: {
+  timeWindow: "day" | "week";
+}) {
+  await io();
+
   return (
     <ErrorFallback message="Unable to load trending shows.">
       <Suspense fallback={<ListCarouselSkeleton />}>
