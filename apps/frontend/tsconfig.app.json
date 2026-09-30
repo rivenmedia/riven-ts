@@ -10,6 +10,7 @@
   },
   "files": [],
   "include": [
+    "instrumentation-client.ts",
     "next-env.d.ts",
     ".next/types/*.d.ts",
     ".next/dev/types/*.d.ts",
