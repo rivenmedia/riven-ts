@@ -7,8 +7,8 @@ import { expect, within } from "storybook/test";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query";
-import { GET_TRENDING_MOVIES } from "./_components/trending-movies";
-import { GET_TRENDING_SHOWS } from "./_components/trending-shows";
+import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies";
+import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows";
 import HomePage from "./page";
 
 import type { UUID } from "node:crypto";
@@ -152,11 +152,11 @@ export const Default = meta.story({
           },
         }),
       ),
-      graphql.query(GET_TRENDING_MOVIES, ({ variables }) => {
+      graphql.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              trendingMovies: [
+              tmdbTrendingMovies: [
                 {
                   __typename: "Movie",
                   id: crypto.randomUUID() as UUID,
@@ -173,7 +173,7 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            trendingMovies: [
+            tmdbTrendingMovies: [
               {
                 __typename: "Movie",
                 id: crypto.randomUUID() as UUID,
@@ -187,11 +187,11 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_TRENDING_SHOWS, ({ variables }) => {
+      graphql.query(GET_TVDB_TRENDING_SHOWS, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              trendingShows: [
+              tvdbTrendingShows: [
                 {
                   __typename: "Show",
                   id: crypto.randomUUID() as UUID,
@@ -208,7 +208,7 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            trendingShows: [
+            tvdbTrendingShows: [
               {
                 __typename: "Show",
                 id: crypto.randomUUID() as UUID,
