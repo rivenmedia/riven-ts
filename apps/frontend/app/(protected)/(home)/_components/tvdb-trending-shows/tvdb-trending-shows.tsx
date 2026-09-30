@@ -54,7 +54,7 @@ function TVDBTrendingShowsSlot({ timeWindow }: { timeWindow: "day" | "week" }) {
 export function TVDBTrendingShows() {
   return (
     <TrendingTimeWindowSection
-      title="Trending Shows"
+      title="Trending TV Shows"
       aria-label="Trending shows actions"
       viewAllHref="/lists/trending/shows"
       slots={{
