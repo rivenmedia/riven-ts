@@ -1,8 +1,8 @@
 name: Visual regression
 
-description: |
-  Captures a screenshot of every Storybook story and compares them against the screenshots from the pull request's merge base.
-  Runs on `main` provide the baseline, and pull request runs comment with any visual changes.
+# Captures a screenshot of every Storybook story and compares them against the screenshots from the pull request's merge base.
+# Runs on `main` provide the baseline. The results are commented on the pull request by the "Report visual regression results"
+# workflow, which runs separately so that pull requests from forks and Dependabot can be commented on.
 
 on:
   push:
@@ -29,19 +29,17 @@ jobs:
   visual-regression:
     name: Visual regression
     runs-on: ubuntu-latest
-    # Fork and Dependabot pull requests receive a read-only token, so cannot push screenshots or comment
-    if: github.event_name == 'push' ||
-      (github.event.pull_request.head.repo.full_name == github.repository &&
-      github.actor != 'dependabot[bot]')
     permissions:
-      contents: write # Pushes screenshots to the `reg_actions` branch so they can be displayed in comments
-      pull-requests: write # Comments on pull requests with the visual changes
+      contents: read
       actions: read # Downloads the baseline screenshots from the merge base's workflow run
+    env:
+      SCREENSHOTS_DIR: apps/frontend/__screenshots__
+      REPORT_DIR: visual-regression-report
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
         with:
-          fetch-depth: 0 # reg-actions uses the git history to find the merge base
+          fetch-depth: 0 # Check out the entire git history to find the merge base
           filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
 
       - name: Set up project environment
@@ -60,13 +58,20 @@ jobs:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
-      # reg-actions searches every workflow run in the repository for the baseline, which takes several minutes
-      # when there isn't one, so check that the merge base has baseline screenshots first
+      # Used as the baseline by pull requests whose merge base is this commit
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v7
+        with:
+          name: screenshots
+          path: ${{ env.SCREENSHOTS_DIR }}
+          if-no-files-found: error
+
       - name: Find baseline screenshots
         id: find-baseline
         if: github.event_name == 'pull_request'
         run: |
           merge_base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+          echo "merge-base=$merge_base" >> "$GITHUB_OUTPUT"
 
           run_ids=$(
             gh api "repos/$GITHUB_REPOSITORY/actions/workflows/visual-regression.yaml/runs?head_sha=$merge_base" \
@@ -76,47 +81,87 @@ jobs:
           for run_id in $run_ids; do
             has_baseline=$(
               gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts" \
-                --jq 'any(.artifacts[]; .name == "reg" and (.expired | not))'
+                --jq 'any(.artifacts[]; .name == "screenshots" and (.expired | not))'
             )
 
             if [ "$has_baseline" = "true" ]; then
-              echo "found=true" >> "$GITHUB_OUTPUT"
+              echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           done
 
-          echo "found=false" >> "$GITHUB_OUTPUT"
           echo "::notice::No baseline screenshots found for merge base $merge_base, skipping comparison"
         env:
           BASE_SHA: ${{ github.event.pull_request.base.sha }}
           HEAD_SHA: ${{ github.event.pull_request.head.sha }}
           GH_TOKEN: ${{ github.token }}
 
-      - name: Compare screenshots
-        if: steps.find-baseline.outputs.found != 'false'
-        uses: reg-viz/reg-actions@v3
+      - name: Download baseline screenshots
+        if: steps.find-baseline.outputs.run-id
+        uses: actions/download-artifact@v7
         with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          image-directory-path: apps/frontend/__screenshots__
-          # Ignores minor rendering noise from blurs, gradients and image decoding
-          matching-threshold: 0.1
-          threshold-pixel: 50
-          comment-report-format: summarized
-          outdated-comment-action: update
+          name: screenshots
+          path: baseline
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.find-baseline.outputs.run-id }}
 
-      # Matches the layout of the artifact uploaded by reg-actions, so that pull requests based on this one have a baseline
-      - name: Prepare screenshots artifact
-        if: steps.find-baseline.outputs.found == 'false'
+      # The matching and pixel thresholds ignore minor rendering noise from blurs, gradients and image decoding
+      - name: Compare screenshots
+        if: steps.find-baseline.outputs.run-id
         run: |
-          mkdir -p __reg__/1_actual
-          cp -r apps/frontend/__screenshots__/. __reg__/1_actual/
+          pnpm dlx reg-cli@0.18.16 "$SCREENSHOTS_DIR" baseline diff \
+            --json reg.json \
+            --ignoreChange \
+            --matchingThreshold 0.1 \
+            --thresholdPixel 50
 
-      - name: Upload screenshots artifact
-        if: steps.find-baseline.outputs.found == 'false'
+          mkdir -p "$REPORT_DIR"/{actual,expected,diff}
+
+          jq -r '.failedItems[], .newItems[]' reg.json | while read -r file; do
+            cp "$SCREENSHOTS_DIR/$file" "$REPORT_DIR/actual/"
+          done
+
+          jq -r '.failedItems[], .deletedItems[]' reg.json | while read -r file; do
+            cp "baseline/$file" "$REPORT_DIR/expected/"
+          done
+
+          jq -r '.failedItems[]' reg.json | while read -r file; do
+            cp "diff/$file" "$REPORT_DIR/diff/"
+          done
+
+          jq --arg base "$MERGE_BASE" \
+            '{base: $base, changed: .failedItems, new: .newItems, deleted: .deletedItems, unchanged: (.passedItems | length)}' \
+            reg.json > "$REPORT_DIR/results.json"
+
+          jq -r '
+            "## Visual regression\n",
+            "| Changed | New | Deleted | Unchanged |",
+            "| :-: | :-: | :-: | :-: |",
+            "| \(.changed | length) | \(.new | length) | \(.deleted | length) | \(.unchanged) |\n",
+            (.changed[] | "- Changed: `\(.)`"),
+            (.new[] | "- New: `\(.)`"),
+            (.deleted[] | "- Deleted: `\(.)`")
+          ' "$REPORT_DIR/results.json" >> "$GITHUB_STEP_SUMMARY"
+        env:
+          MERGE_BASE: ${{ steps.find-baseline.outputs.merge-base }}
+
+      # `workflow_run` events do not include the pull request number for pull requests from forks
+      - name: Save pull request number
+        if: github.event_name == 'pull_request'
+        run: |
+          mkdir -p "$REPORT_DIR"
+          echo "$PR_NUMBER" > "$REPORT_DIR/pr-number"
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+
+      - name: Upload report
+        if: github.event_name == 'pull_request'
         uses: actions/upload-artifact@v7
         with:
-          name: reg
-          path: __reg__/
+          name: visual-regression-report
+          path: ${{ env.REPORT_DIR }}
+          retention-days: 7
+          if-no-files-found: error
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()

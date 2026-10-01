@@ -1,0 +1,239 @@
+name: Report visual regression results
+
+# Comments on pull requests with the results of the "Visual regression" workflow.
+# This runs separately from that workflow so that it has write access for pull requests from forks and Dependabot.
+# It must not run any code from the pull request, and treats the downloaded report as untrusted input.
+
+on:
+  workflow_run:
+    workflows:
+      - Visual regression
+    types:
+      - completed
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  contents: read
+
+env:
+  IMAGES_BRANCH: visual-regression-images
+  COMMENT_MARKER: "<!-- visual-regression-report -->"
+
+jobs:
+  report:
+    name: Report
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_run' &&
+      github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion == 'success'
+    concurrency:
+      group: "${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}"
+    permissions:
+      actions: read # Downloads the report from the "Visual regression" workflow run
+      contents: write # Pushes screenshots to the images branch so they can be displayed in comments
+      pull-requests: write # Comments on the pull request
+    env:
+      GH_TOKEN: ${{ github.token }}
+      HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+      RUN_ID: ${{ github.event.workflow_run.id }}
+    steps:
+      - name: Download report
+        uses: actions/download-artifact@v7
+        with:
+          name: visual-regression-report
+          path: report
+          github-token: ${{ github.token }}
+          run-id: ${{ env.RUN_ID }}
+
+      - name: Validate report
+        id: validate
+        run: |
+          pr_number=$(cat report/pr-number)
+
+          if ! [[ "$pr_number" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid pull request number"
+            exit 1
+          fi
+
+          # Ensures the pull request number has not been tampered with, and skips reporting outdated results
+          pr_head_sha=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$pr_number" --jq '.head.sha')
+
+          if [ "$pr_head_sha" != "$HEAD_SHA" ]; then
+            echo "::notice::Pull request #$pr_number has been updated since this run, skipping"
+            exit 0
+          fi
+
+          echo "pr-number=$pr_number" >> "$GITHUB_OUTPUT"
+
+          if [ ! -f report/results.json ]; then
+            echo "::notice::No baseline screenshots were found for comparison, skipping"
+            exit 0
+          fi
+
+          # Screenshot names are used in file paths and markdown, so only allow story IDs
+          if ! jq -e '
+            ([.changed[], .new[], .deleted[]] | all(test("^[a-z0-9][a-z0-9_-]*--[a-z0-9_-]+\\.png$")))
+            and (.unchanged | type == "number")
+            and (.base | test("^[0-9a-f]{40}$"))
+          ' report/results.json > /dev/null; then
+            echo "::error::Invalid results"
+            exit 1
+          fi
+
+          has_changes=$(jq '[.changed[], .new[], .deleted[]] | length > 0' report/results.json)
+          echo "has-changes=$has_changes" >> "$GITHUB_OUTPUT"
+
+      - name: Publish screenshots
+        if: steps.validate.outputs.has-changes == 'true'
+        run: |
+          gh auth setup-git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          repo_url="https://github.com/$GITHUB_REPOSITORY.git"
+
+          if git ls-remote --exit-code --heads "$repo_url" "$IMAGES_BRANCH" > /dev/null; then
+            git clone --quiet --depth 1 --branch "$IMAGES_BRANCH" "$repo_url" images
+          else
+            git init --quiet --initial-branch "$IMAGES_BRANCH" images
+            git -C images remote add origin "$repo_url"
+          fi
+
+          # Only the latest screenshots for each pull request are kept
+          pr_dir="images/pr-$PR_NUMBER"
+          image_dir="$pr_dir/$RUN_ID"
+          rm -rf "$pr_dir"
+          mkdir -p "$image_dir"/{actual,expected,diff}
+
+          for type in actual expected diff; do
+            case "$type" in
+              actual) query='.changed[], .new[]' ;;
+              expected) query='.changed[], .deleted[]' ;;
+              diff) query='.changed[]' ;;
+            esac
+
+            jq -r "$query" report/results.json | while read -r file; do
+              cp "report/$type/$file" "$image_dir/$type/$file"
+            done
+          done
+
+          git -C images add --all
+          git -C images commit --quiet --message "Add screenshots for #$PR_NUMBER"
+
+          # Other pull requests may push at the same time
+          for attempt in 1 2 3 4 5; do
+            if git -C images push --quiet origin "HEAD:$IMAGES_BRANCH"; then
+              exit 0
+            fi
+
+            sleep "$attempt"
+            git -C images pull --quiet --rebase origin "$IMAGES_BRANCH" || true
+          done
+
+          echo "::error::Failed to push screenshots"
+          exit 1
+        env:
+          PR_NUMBER: ${{ steps.validate.outputs.pr-number }}
+
+      - name: Comment on pull request
+        if: steps.validate.outputs.has-changes != ''
+        run: |
+          comment_id=$(
+            gh api --paginate "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" \
+              --jq ".[] | select(.user.login == \"github-actions[bot]\" and (.body | startswith(\"$COMMENT_MARKER\"))) | .id" \
+              | head -n 1
+          )
+
+          # Only update an existing comment when there are no longer any changes, to avoid noise
+          if [ "$HAS_CHANGES" != "true" ] && [ -z "$comment_id" ]; then
+            exit 0
+          fi
+
+          jq -r \
+            --arg marker "$COMMENT_MARKER" \
+            --arg head "$HEAD_SHA" \
+            --arg commit_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/commit" \
+            --arg run_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$RUN_ID" \
+            --arg image_url "$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/raw/$IMAGES_BRANCH/pr-$PR_NUMBER/$RUN_ID" \
+            --argjson limit 30 '
+            def image($type; $file): "![\($type)](\($image_url)/\($type)/\($file))";
+            def details($summary; $rows): "<details><summary><code>\($summary)</code></summary>\n\n| | |\n| - | - |\n\($rows)\n\n</details>\n";
+
+            [
+              (.changed[] | {file: ., rows: "| Expected | \(image("expected"; .)) |\n| Actual | \(image("actual"; .)) |\n| Difference | \(image("diff"; .)) |"}),
+              (.new[] | {file: ., rows: "| New | \(image("actual"; .)) |"}),
+              (.deleted[] | {file: ., rows: "| Deleted | \(image("expected"; .)) |"})
+            ] as $items
+            | ($items | length) as $total
+            | [
+                $marker,
+                "## Visual regression\n",
+                "Compared [\($head[0:7])](\($commit_url)/\($head)) with its merge base [\(.base[0:7])](\($commit_url)/\(.base)). [View the workflow run](\($run_url)).\n",
+                if $total == 0 then
+                  "No visual changes found."
+                else
+                  "| Changed | New | Deleted | Unchanged |",
+                  "| :-: | :-: | :-: | :-: |",
+                  "| \(.changed | length) | \(.new | length) | \(.deleted | length) | \(.unchanged) |\n",
+                  ($items[:$limit][] | details(.file | rtrimstr(".png"); .rows)),
+                  if $total > $limit then
+                    "\($total - $limit) more changes are not shown. Download the `visual-regression-report` artifact from the [workflow run](\($run_url)) to see them."
+                  else empty end
+                end
+              ]
+            | join("\n")
+          ' report/results.json > comment.md
+
+          if [ -n "$comment_id" ]; then
+            gh api --method PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$comment_id" -F body=@comment.md > /dev/null
+          else
+            gh api --method POST "repos/$GITHUB_REPOSITORY/issues/$PR_NUMBER/comments" -F body=@comment.md > /dev/null
+          fi
+        env:
+          PR_NUMBER: ${{ steps.validate.outputs.pr-number }}
+          HAS_CHANGES: ${{ steps.validate.outputs.has-changes }}
+
+  clean-up:
+    name: Clean up
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    permissions:
+      contents: write # Removes the pull request's screenshots from the images branch
+    steps:
+      - name: Remove screenshots
+        run: |
+          gh auth setup-git
+          git config --global user.name "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          repo_url="https://github.com/$GITHUB_REPOSITORY.git"
+
+          if ! git ls-remote --exit-code --heads "$repo_url" "$IMAGES_BRANCH" > /dev/null; then
+            exit 0
+          fi
+
+          git clone --quiet --depth 1 --branch "$IMAGES_BRANCH" "$repo_url" images
+
+          if [ ! -d "images/pr-$PR_NUMBER" ]; then
+            exit 0
+          fi
+
+          git -C images rm --quiet -r "pr-$PR_NUMBER"
+          git -C images commit --quiet --message "Remove screenshots for #$PR_NUMBER"
+
+          for attempt in 1 2 3 4 5; do
+            if git -C images push --quiet origin "HEAD:$IMAGES_BRANCH"; then
+              exit 0
+            fi
+
+            sleep "$attempt"
+            git -C images pull --quiet --rebase origin "$IMAGES_BRANCH" || true
+          done
+
+          echo "::error::Failed to push screenshot removal"
+          exit 1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
