@@ -238,7 +238,7 @@ Default.test(
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending movies", async () => {
       const trendingMoviesActions = await canvas.findByRole("region", {
-        name: /trending movies/iu,
+        name: /trending movies actions/iu,
       });
 
       const thisWeekButton = await within(trendingMoviesActions).findByRole(
@@ -263,7 +263,7 @@ Default.test(
   'Navigates to the Trending Movies page when the Trending Movies "View all" button is clicked',
   async ({ canvas }) => {
     const trendingMoviesActions = await canvas.findByRole("region", {
-      name: /trending movies/iu,
+      name: /trending movies actions/iu,
     });
 
     const viewAllButton = await within(trendingMoviesActions).findByRole(
@@ -283,7 +283,7 @@ Default.test(
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending shows", async () => {
       const trendingShowsActions = await canvas.findByRole("region", {
-        name: /trending tv shows/iu,
+        name: /trending tv shows actions/iu,
       });
 
       const thisWeekButton = await within(trendingShowsActions).findByRole(
@@ -308,7 +308,7 @@ Default.test(
   'Navigates to the Trending Shows page when the Trending Shows "View all" button is clicked',
   async ({ canvas }) => {
     const trendingShowsActions = await canvas.findByRole("region", {
-      name: /trending tv shows/iu,
+      name: /trending tv shows actions/iu,
     });
 
     const viewAllButton = await within(trendingShowsActions).findByRole(

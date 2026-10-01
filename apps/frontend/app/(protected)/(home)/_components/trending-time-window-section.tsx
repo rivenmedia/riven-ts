@@ -13,7 +13,6 @@ type TimeWindow = "day" | "week";
 
 interface TrendingTimeWindowSectionProps {
   title: string;
-  "aria-label": string;
   viewAllHref: Route;
   slots: Record<TimeWindow, ReactNode>;
 }
@@ -24,7 +23,6 @@ interface TrendingTimeWindowSectionProps {
  */
 export function TrendingTimeWindowSection({
   title,
-  "aria-label": ariaLabel,
   viewAllHref,
   slots,
 }: TrendingTimeWindowSectionProps) {
@@ -35,7 +33,7 @@ export function TrendingTimeWindowSection({
       <div className="mb-1 flex items-center justify-between">
         <SectionHeading title={title} />
         <TrendingItemsActions
-          aria-label={ariaLabel}
+          aria-label={`${title} actions`}
           setTimeWindow={(newTimeWindow) => {
             setTimeWindow(newTimeWindow as TimeWindow);
           }}

@@ -77,7 +77,6 @@ export function TMDBTrendingMovies() {
   return (
     <TrendingTimeWindowSection
       title="Trending Movies"
-      aria-label="Trending movies actions"
       viewAllHref="/lists/trending/movies"
       slots={{
         day: <TMDBTrendingMoviesSlot timeWindow="day" />,
