@@ -60,7 +60,40 @@ jobs:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
+      # reg-actions searches every workflow run in the repository for the baseline, which takes several minutes
+      # when there isn't one, so check that the merge base has baseline screenshots first
+      - name: Find baseline screenshots
+        id: find-baseline
+        if: github.event_name == 'pull_request'
+        run: |
+          merge_base=$(git merge-base "$BASE_SHA" "$HEAD_SHA")
+
+          run_ids=$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/visual-regression.yaml/runs?head_sha=$merge_base" \
+              --jq '.workflow_runs[].id'
+          )
+
+          for run_id in $run_ids; do
+            has_baseline=$(
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts" \
+                --jq 'any(.artifacts[]; .name == "reg" and (.expired | not))'
+            )
+
+            if [ "$has_baseline" = "true" ]; then
+              echo "found=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+
+          echo "found=false" >> "$GITHUB_OUTPUT"
+          echo "::notice::No baseline screenshots found for merge base $merge_base, skipping comparison"
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          GH_TOKEN: ${{ github.token }}
+
       - name: Compare screenshots
+        if: steps.find-baseline.outputs.found != 'false'
         uses: reg-viz/reg-actions@v3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -70,6 +103,20 @@ jobs:
           threshold-pixel: 50
           comment-report-format: summarized
           outdated-comment-action: update
+
+      # Matches the layout of the artifact uploaded by reg-actions, so that pull requests based on this one have a baseline
+      - name: Prepare screenshots artifact
+        if: steps.find-baseline.outputs.found == 'false'
+        run: |
+          mkdir -p __reg__/1_actual
+          cp -r apps/frontend/__screenshots__/. __reg__/1_actual/
+
+      - name: Upload screenshots artifact
+        if: steps.find-baseline.outputs.found == 'false'
+        uses: actions/upload-artifact@v7
+        with:
+          name: reg
+          path: __reg__/
 
       - uses: charpeni/turborepo-summary-action@v1
         if: always()
