@@ -1,0 +1,144 @@
+name: Test report visual regression results (temporary)
+# Compares the screenshots from the "Visual regression" workflow against the pull request's merge base, and comments
+# with any changes. This runs separately from that workflow so that it has write access for pull requests from forks
+# and Dependabot. It must not run any code from the pull request.
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+permissions:
+  contents: read
+jobs:
+  report:
+    name: Report
+    runs-on: ubuntu-latest
+    concurrency:
+      group: "${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}"
+    permissions:
+      actions: write # Downloads the screenshots, and deletes the artifact uploaded by reg-actions
+      contents: write # reg-actions pushes screenshots to the `reg_actions` branch so they can be displayed in comments
+      pull-requests: write # reg-actions comments on the pull request
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Wait for capture run
+        id: capture-run
+        run: |
+          until id=$(gh api "repos/$GITHUB_REPOSITORY/actions/workflows/visual-regression.yaml/runs?head_sha=$HEAD_SHA" --jq ".workflow_runs[0].id // empty") && [ -n "$id" ]; do sleep 10; done
+          gh run watch "$id" --repo "$GITHUB_REPOSITORY" --exit-status > /dev/null
+          echo "RUN_ID=$id" >> "$GITHUB_ENV"
+        env:
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      - name: Simulate workflow_run event payload
+        run: |-
+          jq "{action: \"completed\", repository: .repository}" "$GITHUB_EVENT_PATH" > event.json
+          mv event.json "$GITHUB_EVENT_PATH"
+      - name: Download pull request number
+        uses: actions/download-artifact@v7
+        with:
+          name: pull-request
+          path: pull-request
+          github-token: ${{ github.token }}
+          run-id: ${{ env.RUN_ID }}
+      - name: Get pull request
+        id: pull-request
+        run: |
+          number=$(cat pull-request/number)
+
+          if ! [[ "$number" =~ ^[0-9]+$ ]]; then
+            echo "::error::Invalid pull request number"
+            exit 1
+          fi
+
+          pull_request=$(gh api "repos/$GITHUB_REPOSITORY/pulls/$number")
+          base_sha=$(jq -r '.base.sha' <<< "$pull_request")
+          head_sha=$(jq -r '.head.sha' <<< "$pull_request")
+
+          # Ensures the pull request number has not been tampered with, and skips reporting outdated results
+          if [ "$head_sha" != "$WORKFLOW_HEAD_SHA" ]; then
+            echo "::notice::Pull request #$number has been updated since this run, skipping"
+            exit 0
+          fi
+
+          merge_base=$(gh api "repos/$GITHUB_REPOSITORY/compare/$base_sha...$head_sha" --jq '.merge_base_commit.sha')
+
+          # reg-actions searches every workflow run in the repository for the baseline, which takes several minutes
+          # when there isn't one, so check that the merge base has baseline screenshots first
+          run_ids=$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/workflows/visual-regression.yaml/runs?head_sha=$merge_base" \
+              --jq '.workflow_runs[].id'
+          )
+
+          for run_id in $run_ids; do
+            has_baseline=$(
+              gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id/artifacts" \
+                --jq 'any(.artifacts[]; .name == "screenshots" and (.expired | not))'
+            )
+
+            if [ "$has_baseline" = "true" ]; then
+              {
+                echo "number=$number"
+                echo "base-sha=$base_sha"
+                echo "head-sha=$head_sha"
+                echo "merge-base=$merge_base"
+              } >> "$GITHUB_OUTPUT"
+
+              exit 0
+            fi
+          done
+
+          echo "::notice::No baseline screenshots found for merge base $merge_base, skipping comparison"
+        env:
+          WORKFLOW_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+      - name: Download screenshots
+        if: steps.pull-request.outputs.merge-base
+        uses: actions/download-artifact@v7
+        with:
+          name: screenshots
+          path: screenshots
+          github-token: ${{ github.token }}
+          run-id: ${{ env.RUN_ID }}
+      # reg-actions only supports `pull_request` events, so add the pull request to the `workflow_run` event payload
+      - name: Add pull request to event
+        if: steps.pull-request.outputs.merge-base
+        run: |
+          jq \
+            --argjson number "$PR_NUMBER" \
+            --arg base_sha "$BASE_SHA" \
+            --arg head_sha "$HEAD_SHA" \
+            '. + {number: $number, pull_request: {number: $number, base: {sha: $base_sha}, head: {sha: $head_sha}}}' \
+            "$GITHUB_EVENT_PATH" > event.json
+
+          mv event.json "$GITHUB_EVENT_PATH"
+        env:
+          PR_NUMBER: ${{ steps.pull-request.outputs.number }}
+          BASE_SHA: ${{ steps.pull-request.outputs.base-sha }}
+          HEAD_SHA: ${{ steps.pull-request.outputs.head-sha }}
+      - name: Compare screenshots
+        if: steps.pull-request.outputs.merge-base
+        uses: reg-viz/reg-actions@v3
+        with:
+          github-token: ${{ github.token }}
+          image-directory-path: screenshots/1_actual
+          artifact-name: screenshots
+          target-hash: ${{ steps.pull-request.outputs.merge-base }}
+          # Ignores minor rendering noise from blurs, gradients and image decoding
+          matching-threshold: 0.1
+          threshold-pixel: 50
+          comment-report-format: summarized
+          outdated-comment-action: update
+      # Runs of this workflow share the head commit of `main`, so the artifact uploaded by reg-actions would be
+      # found as the baseline for pull requests branched from that commit instead of the "Visual regression" run's
+      - name: Delete reg-actions artifact
+        if: always() && steps.pull-request.outputs.merge-base
+        run: |
+          artifact_ids=$(
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts" \
+              --jq '.artifacts[] | select(.name == "screenshots") | .id'
+          )
+
+          for artifact_id in $artifact_ids; do
+            gh api --method DELETE "repos/$GITHUB_REPOSITORY/actions/artifacts/$artifact_id"
+          done
