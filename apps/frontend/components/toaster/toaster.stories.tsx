@@ -9,8 +9,8 @@ const meta = preview.meta({
   title: "Components / Toaster",
   component: Toaster,
   parameters: {
-    chromatic: {
-      disableSnapshot: true,
+    screenshot: {
+      skip: true,
     },
   },
 });

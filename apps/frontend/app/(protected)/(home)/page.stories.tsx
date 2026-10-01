@@ -18,9 +18,6 @@ const meta = preview.meta({
   component: HomePage,
   parameters: {
     layout: "fullscreen",
-    chromatic: {
-      disableSnapshot: true,
-    },
   },
   decorators: [ProtectedLayoutWrapper],
 });

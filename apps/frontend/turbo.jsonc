@@ -40,6 +40,9 @@
       "dependsOn": ["msw:init", "codegen:gql"],
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
+    },
+    "test:component": {
+      "outputs": ["__screenshots__"]
     }
   }
 }
