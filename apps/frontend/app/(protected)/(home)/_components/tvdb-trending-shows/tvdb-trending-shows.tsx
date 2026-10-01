@@ -67,7 +67,6 @@ export function TVDBTrendingShows() {
   return (
     <TrendingTimeWindowSection
       title="Trending TV Shows"
-      aria-label="Trending shows actions"
       viewAllHref="/lists/trending/shows"
       slots={{
         day: <TVDBTrendingShowsSlot timeWindow="day" />,
