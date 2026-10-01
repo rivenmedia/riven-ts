@@ -30,6 +30,8 @@ const visualTestProject = {
       viewport: screenshotViewport,
       output: {
         dir: path.join(import.meta.dirname, "__screenshots__"),
+        // reg-actions flattens screenshot paths in its comments, so file names must be unique
+        file: "[id].png",
       },
     }),
   ],
