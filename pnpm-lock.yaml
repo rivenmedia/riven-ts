@@ -42,9 +42,6 @@ catalogs:
     '@bprogress/next':
       specifier: ^3.2.12
       version: 3.2.12
-    '@chromatic-com/storybook':
-      specifier: ^5.3.0
-      version: 5.3.0
     '@commitlint/cli':
       specifier: ^21.0.2
       version: 21.0.2
@@ -156,6 +153,9 @@ catalogs:
     '@storybook/addon-vitest':
       specifier: ^10.4.6
       version: 10.5.9
+    '@storycap-testrun/browser':
+      specifier: ^3.1.1
+      version: 3.1.1
     '@swc-node/register':
       specifier: ^1.11.1
       version: 1.11.1
@@ -246,9 +246,6 @@ catalogs:
     chalk:
       specifier: ^5.6.2
       version: 5.6.2
-    chromatic:
-      specifier: ^18.9.5
-      version: 18.9.5
     class-validator:
       specifier: 0.14.3
       version: 0.14.3
@@ -754,9 +751,6 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
-      '@chromatic-com/storybook':
-        specifier: 'catalog:'
-        version: 5.3.0(storybook@10.5.9(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@types/react@19.3.0)(react@19.3.0))
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
@@ -793,6 +787,9 @@ importers:
       '@storybook/nextjs-vite':
         specifier: ^10.4.6
         version: 10.5.9(@babel/core@7.29.7)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(esbuild@0.28.2)(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rollup@4.62.4)(storybook@10.5.9(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@types/react@19.3.0)(react@19.3.0))(typescript@7.0.2)(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+      '@storycap-testrun/browser':
+        specifier: 'catalog:'
+        version: 3.1.1(@vitest/browser-playwright@4.1.7)
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.0
@@ -826,9 +823,6 @@ importers:
       '@vitest/browser-playwright':
         specifier: 4.1.7
         version: 4.1.7(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(playwright@1.62.1)(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
-      chromatic:
-        specifier: 'catalog:'
-        version: 18.9.5
       http-status-codes:
         specifier: 'catalog:'
         version: 2.3.0
@@ -3139,12 +3133,6 @@ packages:
     resolution: {integrity: sha512-ctxtJ/eA+t+6q2++vj5j7FYX3nRu311q1wfYH3xjlLOsczhlhxAg2FWNUXhpGvAw3BWo1xBcvOV6/YLc2r5FJw==}
     hasBin: true
 
-  '@chromatic-com/storybook@5.3.0':
-    resolution: {integrity: sha512-gMAfVYJnF/tjdY8C3Q54KYz/low2NFjPIZMpCqSFuMUiTJ2DNWCTb7mFhuuzZ1iduWFDhewlJyilFmvKcEDYRA==}
-    engines: {node: '>=20.0.0', yarn: '>=1.22.18'}
-    peerDependencies:
-      storybook: ^0.0.0-0 || ^10.1.0 || ^10.1.0-0 || ^10.2.0-0 || ^10.3.0-0 || ^10.4.0-0 || ^10.5.0-0 || ^10.6.0-0
-
   '@clack/core@1.0.0':
     resolution: {integrity: sha512-Orf9Ltr5NeiEuVJS8Rk2XTw3IxNC2Bic3ash7GgYeA8LJ/zmSNpSQ/m5UAhe03lA6KFgklzZ5KTHs4OAMA/SAQ==}
 
@@ -4781,9 +4769,6 @@ packages:
     peerDependencies:
       '@emnapi/core': ^1.7.1
       '@emnapi/runtime': ^1.7.1
-
-  '@neoconfetti/react@1.0.0':
-    resolution: {integrity: sha512-klcSooChXXOzIm+SE5IISIAn3bYzYfPjbX7D7HoqZL84oAfgREeSg5vSIaSFH+DaGzzvImTyWe1OyrJ67vik4A==}
 
   '@next-safe-action/adapter-react-hook-form@2.1.0':
     resolution: {integrity: sha512-mnLPinCDh83nY0GUJK32IFHyHMTOMpV9bjKXlv/btqlUzp0w/VsY5k+yLYnFNhxj5OC7Cv7xnt3tLpCa7YOK0Q==}
@@ -7511,6 +7496,16 @@ packages:
       typescript:
         optional: true
 
+  '@storycap-testrun/browser@3.1.1':
+    resolution: {integrity: sha512-nv05/cHkojM/qxaBqEffTKQQHOv8IlKAyMztc6ncNWjSRR39U82Okgnl8NnAySN1emnC8KLmE4l8Fjrig32d+A==}
+    engines: {node: '>=22'}
+    peerDependencies:
+      '@vitest/browser-playwright': '*'
+
+  '@storycap-testrun/internal@3.1.1':
+    resolution: {integrity: sha512-Jb/bXgm2Q7DAeMyGbnCuknxx5ExNAclpP9rg6FtjjBmwghOPS7vg0veIFDpGW0tz7fqsagfyyz/Lk5YwjUSclQ==}
+    engines: {node: '>=22'}
+
   '@swc-node/core@1.14.1':
     resolution: {integrity: sha512-jrt5GUaZUU6cmMS+WTJEvGvaB6j1YNKPHPzC2PUi2BjaFbtxURHj6641Az6xN7b665hNniAIdvjxWcRml5yCnw==}
     engines: {node: '>= 10'}
@@ -8791,38 +8786,6 @@ packages:
   chownr@3.0.0:
     resolution: {integrity: sha512-+IxzY9BZOQd/XuYPRmrvEVjF/nqj5kgT4kEq7VofrDoM1MxoRjEWkrCC3EtLi59TVawxTAn+orJwFQcrqEN1+g==}
     engines: {node: '>=18'}
-
-  chromatic@18.5.0:
-    resolution: {integrity: sha512-3oBcGP4V+6SV0qu2NJnutnPYsrxnPpOHhtQAbzxEtIQrDJNzn1wfXtzwkEiJGQm5eANTW0AvL4WxHtz+BTJbYg==}
-    engines: {node: '>=22.0.0'}
-    hasBin: true
-    peerDependencies:
-      '@chromatic-com/cypress': ^0.*.* || ^1.0.0
-      '@chromatic-com/playwright': ^0.*.* || ^1.0.0
-      '@chromatic-com/vitest': ^0.*.* || ^1.0.0
-    peerDependenciesMeta:
-      '@chromatic-com/cypress':
-        optional: true
-      '@chromatic-com/playwright':
-        optional: true
-      '@chromatic-com/vitest':
-        optional: true
-
-  chromatic@18.9.5:
-    resolution: {integrity: sha512-PHYJ7f8j7eeautlPPgIy/FBWTaLY3H8UYavkCpRdfLP9w9wya/dJZ3tjL8RqbFb5EazUkXqg2qCuAOzUS/zTMA==}
-    engines: {node: '>=22.0.0'}
-    hasBin: true
-    peerDependencies:
-      '@chromatic-com/cypress': ^0.*.* || ^1.0.0
-      '@chromatic-com/playwright': ^0.*.* || ^1.0.0
-      '@chromatic-com/vitest': ^0.*.* || ^1.0.0
-    peerDependenciesMeta:
-      '@chromatic-com/cypress':
-        optional: true
-      '@chromatic-com/playwright':
-        optional: true
-      '@chromatic-com/vitest':
-        optional: true
 
   citty@0.1.6:
     resolution: {integrity: sha512-tskPPKEs8D2KPafUypv2gxwJP8h/OaJmC82QQGGDQcHvXX43xF2VDACcJVmZ0EuSxkpO9Kc4MlrA3q0+FG58AQ==}
@@ -14526,18 +14489,6 @@ snapshots:
     dependencies:
       css-tree: 3.2.1
 
-  '@chromatic-com/storybook@5.3.0(storybook@10.5.9(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@types/react@19.3.0)(react@19.3.0))':
-    dependencies:
-      '@neoconfetti/react': 1.0.0
-      chromatic: 18.5.0
-      jsonfile: 6.2.0
-      storybook: 10.5.9(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@types/react@19.3.0)(react@19.3.0)
-      strip-ansi: 7.1.2
-    transitivePeerDependencies:
-      - '@chromatic-com/cypress'
-      - '@chromatic-com/playwright'
-      - '@chromatic-com/vitest'
-
   '@clack/core@1.0.0':
     dependencies:
       picocolors: 1.1.1
@@ -16411,8 +16362,6 @@ snapshots:
       '@emnapi/runtime': 1.9.2
       '@tybys/wasm-util': 0.10.1
     optional: true
-
-  '@neoconfetti/react@1.0.0': {}
 
   '@next-safe-action/adapter-react-hook-form@2.1.0(@hookform/resolvers@5.9.1(@standard-schema/spec@1.1.0)(ajv-formats@2.1.1(ajv@8.20.0))(ajv@8.20.0)(class-validator@0.14.3)(react-hook-form@7.85.0(react@19.3.0))(zod@4.4.3))(next-safe-action@8.6.0(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react-hook-form@7.85.0(react@19.3.0))(react@19.3.0)':
     dependencies:
@@ -18870,6 +18819,13 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
+  '@storycap-testrun/browser@3.1.1(@vitest/browser-playwright@4.1.7)':
+    dependencies:
+      '@storycap-testrun/internal': 3.1.1
+      '@vitest/browser-playwright': 4.1.7(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(playwright@1.62.1)(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
+
+  '@storycap-testrun/internal@3.1.1': {}
+
   '@swc-node/core@1.14.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(@swc/types@0.1.26)':
     dependencies:
       '@swc/core': 1.15.40(@swc/helpers@0.5.23)
@@ -19572,9 +19528,9 @@ snapshots:
       obug: 2.1.1
       std-env: 4.0.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.7)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
+      vitest: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.7)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))
     optionalDependencies:
-      '@vitest/browser': 4.1.7(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
+      '@vitest/browser': 4.1.7(msw@2.13.2(@types/node@24.12.4)(typescript@7.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.0))(vitest@4.1.7)
 
   '@vitest/expect@3.2.4':
     dependencies:
@@ -20209,14 +20165,6 @@ snapshots:
   chownr@1.1.4: {}
 
   chownr@3.0.0: {}
-
-  chromatic@18.5.0:
-    dependencies:
-      semver: 7.8.5
-
-  chromatic@18.9.5:
-    dependencies:
-      semver: 7.8.5
 
   citty@0.1.6:
     dependencies:

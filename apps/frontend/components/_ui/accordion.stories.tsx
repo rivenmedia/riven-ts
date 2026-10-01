@@ -17,7 +17,7 @@ const meta = preview.meta({
   component: Accordion,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {
     type: {

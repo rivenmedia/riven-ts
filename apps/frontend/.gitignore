@@ -10,3 +10,6 @@ certificates/
 *storybook.log
 storybook-static/
 public/mockServiceWorker.js
+
+# Visual regression screenshots
+__screenshots__/

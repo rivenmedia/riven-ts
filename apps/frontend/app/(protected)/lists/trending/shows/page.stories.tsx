@@ -10,6 +10,11 @@ import type { UUID } from "node:crypto";
 const meta = preview.meta({
   title: "Pages / Trending / Shows",
   component: TrendingShowsPage,
+  parameters: {
+    screenshot: {
+      fullPage: false, // Infinite scrolling keeps loading more items as the page grows
+    },
+  },
   beforeEach({ msw }) {
     msw.use(
       graphql.query("GetDiscoveryItems", () =>

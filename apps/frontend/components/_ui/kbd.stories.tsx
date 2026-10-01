@@ -24,7 +24,7 @@ const meta = preview.meta({
   component: Kbd,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
 });
 

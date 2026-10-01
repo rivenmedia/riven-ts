@@ -13,6 +13,9 @@ const meta = preview.meta({
   component: TrendingDiscoveryPage,
   parameters: {
     layout: "fullscreen",
+    screenshot: {
+      fullPage: false, // Infinite scrolling keeps loading more items as the page grows
+    },
   },
 });
 

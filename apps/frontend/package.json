@@ -13,7 +13,6 @@
     "auth:generate": "pnpx auth generate --config ./lib/auth.ts --output ./lib/database/schema/ba-auth.ts --yes",
     "build": "next build",
     "build-storybook": "storybook build",
-    "chromatic": "pnpx chromatic",
     "codegen:gql": "graphql-codegen --config graphql.config.ts",
     "codegen:gql:watch": "pnpm codegen:gql --watch",
     "codegen:nextjs-types": "next typegen",
@@ -28,6 +27,7 @@
     "storybook": "storybook dev -p 6006 --no-open",
     "test": "vitest run --project unit",
     "test:component": "vitest run --project storybook",
+    "test:visual": "VISUAL_TESTS=true vitest run --project visual --coverage.enabled=false",
     "test:watch": "vitest watch"
   },
   "dependencies": {
@@ -77,7 +77,6 @@
     "zod": "catalog:"
   },
   "devDependencies": {
-    "@chromatic-com/storybook": "catalog:",
     "@faker-js/faker": "catalog:",
     "@graphql-codegen/cli": "catalog:",
     "@graphql-codegen/typescript": "catalog:",
@@ -90,6 +89,7 @@
     "@storybook/addon-docs": "^10.4.6",
     "@storybook/addon-vitest": "catalog:",
     "@storybook/nextjs-vite": "^10.4.6",
+    "@storycap-testrun/browser": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@testing-library/dom": "catalog:",
     "@testing-library/jest-dom": "catalog:",
@@ -101,7 +101,6 @@
     "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "4.1.7",
-    "chromatic": "catalog:",
     "http-status-codes": "catalog:",
     "i18next": "catalog:",
     "i18next-browser-languagedetector": "catalog:",

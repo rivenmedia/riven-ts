@@ -20,7 +20,7 @@ const meta = preview.meta({
   component: Drawer,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   args: {
     onOpenChange: fn(),

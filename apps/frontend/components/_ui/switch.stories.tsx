@@ -12,7 +12,7 @@ const meta = preview.meta({
   component: Switch,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {},
   render: (args) => (

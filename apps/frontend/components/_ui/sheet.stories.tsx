@@ -21,7 +21,7 @@ const meta = preview.meta({
   component: SheetContent,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {
     side: {

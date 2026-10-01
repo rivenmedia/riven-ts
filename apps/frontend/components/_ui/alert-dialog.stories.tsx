@@ -22,7 +22,7 @@ const meta = preview.meta({
   component: AlertDialog,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {},
   render: (args) => (

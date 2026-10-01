@@ -58,7 +58,7 @@ const meta = preview.meta({
   component: InputGroup,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
 });
 

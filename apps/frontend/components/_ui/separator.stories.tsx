@@ -9,7 +9,7 @@ const meta = preview.meta({
   component: Separator,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {},
 });

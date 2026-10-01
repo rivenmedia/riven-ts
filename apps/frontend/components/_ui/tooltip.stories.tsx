@@ -18,7 +18,7 @@ const meta = preview.meta({
   component: TooltipContent,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
     layout: "centered",
   },
   argTypes: {

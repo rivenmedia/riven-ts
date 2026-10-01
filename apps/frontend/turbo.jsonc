@@ -41,10 +41,16 @@
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
     },
-    "chromatic": {
-      "passThroughEnv": ["CHROMATIC_PROJECT_TOKEN"],
-      "dependsOn": ["msw:init", "transit:source-files"],
-      "inputs": ["{app,components,lib}/**/*.{ts,tsx}"]
+    "test:visual": {
+      "dependsOn": ["codegen:api-schemas", "transit:source-files"],
+      "env": ["VISUAL_TESTS"],
+      "inputs": [
+        "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,css}",
+        "public/**",
+        "!**/{logs,node_modules,temp,.turbo,__generated__,__screenshots__,.next,coverage,docker-data,dist}/**",
+        "!*.md"
+      ],
+      "outputs": ["__screenshots__/**"]
     }
   }
 }

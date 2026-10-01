@@ -11,7 +11,7 @@ const meta = preview.meta({
   component: Button,
   tags: ["autodocs"],
   parameters: {
-    chromatic: { disableSnapshot: true },
+    screenshot: { skip: true },
   },
   argTypes: {
     variant: {

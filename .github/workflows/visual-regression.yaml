@@ -1,0 +1,75 @@
+name: Visual regression
+
+description: |
+  Captures a screenshot of every Storybook story and compares them against the screenshots from the pull request's merge base.
+  Runs on `main` provide the baseline, and pull request runs comment with any visual changes.
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: "visual-regression-${{ github.event.pull_request.number || github.sha }}"
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  TURBO_RUN_SUMMARY: 1
+  DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
+
+permissions:
+  contents: read
+
+jobs:
+  visual-regression:
+    name: Visual regression
+    runs-on: ubuntu-latest
+    # Fork and Dependabot pull requests receive a read-only token, so cannot push screenshots or comment
+    if: github.event_name == 'push' ||
+      (github.event.pull_request.head.repo.full_name == github.repository &&
+      github.actor != 'dependabot[bot]')
+    permissions:
+      contents: write # Pushes screenshots to the `reg_actions` branch so they can be displayed in comments
+      pull-requests: write # Comments on pull requests with the visual changes
+      actions: read # Downloads the baseline screenshots from the merge base's workflow run
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0 # reg-actions uses the git history to find the merge base
+          filter: blob:none # Blobless clones omit file contents whilst maintaining commit history, resulting in much faster checkouts
+
+      - name: Set up project environment
+        uses: ./.github/actions/set-up-project-environment
+
+      - name: Pre-verification steps
+        uses: ./.github/actions/pre-verify
+        with:
+          task: test:visual
+
+      # Story failures are reported by the component tests, so capture as many screenshots as possible
+      - name: Capture screenshots
+        run: pnpm turbo @repo/frontend#test:visual
+        continue-on-error: true
+        env:
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+
+      - name: Compare screenshots
+        uses: reg-viz/reg-actions@v3
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          image-directory-path: apps/frontend/__screenshots__
+          # Ignores minor rendering noise from blurs, gradients and image decoding
+          matching-threshold: 0.1
+          threshold-pixel: 50
+          comment-report-format: summarized
+          outdated-comment-action: update
+
+      - uses: charpeni/turborepo-summary-action@v1
+        if: always()
