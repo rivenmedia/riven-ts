@@ -45,6 +45,10 @@ jobs:
             command: test:component
             concurrency: "100%"
 
+          - name: Visual tests
+            command: test:visual
+            concurrency: "100%"
+
           # Separate test jobs per-platform ensures that the project can build natively
           - name: Tests (linux-x64)
             command: test

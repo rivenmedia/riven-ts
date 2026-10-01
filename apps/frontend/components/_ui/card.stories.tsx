@@ -34,9 +34,6 @@ const meta = preview.meta({
   title: "ui/Card",
   component: Card,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   args: {
     className: "w-96",

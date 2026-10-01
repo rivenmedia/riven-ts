@@ -16,9 +16,6 @@ const meta = preview.meta({
   title: "ui/Carousel",
   component: Carousel,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   args: {
     className: "w-full max-w-xs",

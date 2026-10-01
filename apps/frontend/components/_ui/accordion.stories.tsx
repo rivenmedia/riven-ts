@@ -16,9 +16,6 @@ const meta = preview.meta({
   title: "ui/Accordion",
   component: Accordion,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     type: {
       control: "radio",

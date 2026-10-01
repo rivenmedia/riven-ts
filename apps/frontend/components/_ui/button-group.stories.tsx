@@ -56,9 +56,6 @@ const meta = preview.meta({
   title: "ui/ButtonGroup",
   component: ButtonGroup,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     orientation: {
       control: "select",

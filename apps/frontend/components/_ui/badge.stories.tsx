@@ -8,9 +8,6 @@ const meta = preview.meta({
   title: "ui/Badge",
   component: Badge,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     variant: {
       control: "select",

@@ -20,9 +20,6 @@ const meta = preview.meta({
   title: "ui/Sheet",
   component: SheetContent,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     side: {
       options: ["top", "bottom", "left", "right"],

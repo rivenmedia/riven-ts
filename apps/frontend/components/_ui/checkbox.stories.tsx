@@ -11,9 +11,6 @@ const meta = preview.meta({
   title: "ui/Checkbox",
   component: Checkbox,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   args: {
     id: "terms",

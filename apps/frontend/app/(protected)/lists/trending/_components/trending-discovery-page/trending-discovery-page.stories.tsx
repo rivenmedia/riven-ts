@@ -13,6 +13,9 @@ const meta = preview.meta({
   component: TrendingDiscoveryPage,
   parameters: {
     layout: "fullscreen",
+    screenshot: {
+      fullPage: false,
+    },
   },
 });
 

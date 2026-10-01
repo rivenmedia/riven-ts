@@ -43,9 +43,6 @@ const meta = preview.meta({
   title: "ui/Table",
   component: Table,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   render: (args) => (
     <Table {...args}>

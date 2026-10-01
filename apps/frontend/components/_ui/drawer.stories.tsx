@@ -19,9 +19,6 @@ const meta = preview.meta({
   title: "ui/Drawer",
   component: Drawer,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   args: {
     onOpenChange: fn(),
     onClose: fn(),

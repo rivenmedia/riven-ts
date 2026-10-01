@@ -8,9 +8,6 @@ const meta = preview.meta({
   title: "ui/Separator",
   component: Separator,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
 });
 

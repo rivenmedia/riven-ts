@@ -26,7 +26,6 @@
     }
   },
   "files": [
-    "chromatic.config.json",
     "components.json",
     "graphql.config.ts",
     "next-env.d.ts",

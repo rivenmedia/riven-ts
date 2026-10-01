@@ -12,9 +12,6 @@ const meta = preview.meta({
   title: "ui/Calendar",
   component: Calendar,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     mode: {
       table: {

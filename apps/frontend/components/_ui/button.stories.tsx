@@ -10,9 +10,6 @@ const meta = preview.meta({
   title: "ui/Button",
   component: Button,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     variant: {
       control: "select",
