@@ -7,6 +7,13 @@ import { ThemeSwitcher } from "./theme-switcher";
 const meta = preview.meta({
   title: "Components/Theme Switcher",
   component: ThemeSwitcher,
+  parameters: {
+    screenshot: {
+      // This causes other stories to inherit the changed theme
+      // which can lead to inconsistent visual regression results
+      skip: true,
+    },
+  },
 });
 
 export const Default = meta.story({});
