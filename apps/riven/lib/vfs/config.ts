@@ -45,6 +45,17 @@ export const config = {
   chunkTimeoutSeconds: 10,
 
   /**
+   * Timeout for the `open` operation to wait for a stream link to be
+   * generated (and health-checked) before giving up and returning EIO.
+   *
+   * Link generation is normally sub-second, but debrid providers can be slow
+   * under rate-limit backlogs; a low value here causes spurious EIO on the
+   * first open attempt even though the underlying request-stream-link job
+   * succeeds moments later (see GitHub issue #290).
+   */
+  openTimeoutSeconds: 30,
+
+  /**
    * Tolerance for detecting scan reads. Any read that jumps more than this value is considered a scan.
    */
   scanToleranceBlocks: 25,

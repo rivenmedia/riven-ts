@@ -14,6 +14,11 @@ import { storeExpiredLinkStatusCodes } from "./utilities/store-expired-link-stat
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
+// Debrid CDNs occasionally hang on the health-check HEAD request; without a
+// bound, `fetch` falls back to undici's 300s default, pinning a queue worker
+// and the VFS `open` caller far longer than either intends.
+const HEALTH_CHECK_TIMEOUT_MS = 15_000;
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -158,6 +163,16 @@ export const plugin: RivenPlugin = {
           "user-agent": `Riven StremThru/${packageJson.version}`,
           range: "bytes=0-1",
         },
+        signal: AbortSignal.timeout(HEALTH_CHECK_TIMEOUT_MS),
+      }).catch((error: unknown) => {
+        if (error instanceof Error && error.name === "TimeoutError") {
+          throw new Error(
+            `Health check for ${link} did not respond within ${(HEALTH_CHECK_TIMEOUT_MS / 1000).toString()}s`,
+            { cause: error },
+          );
+        }
+
+        throw error;
       });
 
       const deadStatusCodes = new Set<StatusCodes>([
