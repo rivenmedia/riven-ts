@@ -2,7 +2,18 @@ import { faker } from "@faker-js/faker";
 import { screenshot } from "@storycap-testrun/browser";
 import { page } from "@vitest/browser/context";
 import { DateTime, Settings } from "luxon";
-import { afterEach, vi } from "vitest";
+import { afterEach, beforeEach, vi } from "vitest";
+
+// Set by `@storybook/addon-vitest` when running stories as tests
+declare module "vitest" {
+  interface TaskMeta {
+    storyId?: string;
+  }
+
+  interface TestContext {
+    story?: { id: string };
+  }
+}
 
 const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 
@@ -45,6 +56,17 @@ for (const storage of ["localStorage", "sessionStorage"] as const) {
   vi.stubGlobal(storage, new MemoryStorage());
 }
 
+beforeEach(() => {
+  localStorage.clear();
+  sessionStorage.clear();
+});
+
 afterEach(async (context) => {
+  // Story tests created with `Story.test()` share the parent story's ID and would overwrite its screenshot.
+  // Only the story itself is captured; interaction tests are covered by the component test assertions.
+  if (context.task.meta.storyId !== context.story?.id) {
+    return;
+  }
+
   await screenshot(page, context);
 });
