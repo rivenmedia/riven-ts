@@ -22,9 +22,11 @@ export const themes = {
 
 type Theme = keyof typeof themes;
 
+export const defaultTheme = "darkmatter" satisfies Theme;
+
 const themeConfig = createThemes({
   attribute: "data-theme",
-  defaultTheme: "darkmatter",
+  defaultTheme,
   themes: Object.keys(themes) as [Theme, ...Theme[]],
 });
 
