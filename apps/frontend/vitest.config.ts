@@ -39,7 +39,7 @@ export default defineConfig((config) => {
               viewport: viewportConfig,
               output: {
                 dir: path.join(import.meta.dirname, "__screenshots__"),
-                file: path.join("[file]", "[id].png"),
+                file: "[id].png",
               },
             }),
           ],
