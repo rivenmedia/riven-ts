@@ -7,16 +7,10 @@ import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
-import type { Viewport } from "next";
 import type { ViteUserConfig } from "vitest/config";
 
 export default defineConfig((config) => {
   const baseConfig = baseVitestConfig(config);
-
-  const viewportConfig = {
-    height: 720,
-    width: 1280,
-  } as const satisfies Viewport;
 
   return mergeConfig<typeof baseConfig, ViteUserConfig>(baseConfig, {
     plugins: [react()],
@@ -36,7 +30,6 @@ export default defineConfig((config) => {
               storybookScript: "pnpm storybook --ci",
             }),
             storycap({
-              viewport: viewportConfig,
               output: {
                 dir: path.join(import.meta.dirname, "__screenshots__"),
                 file: "[id].png",
@@ -50,7 +43,6 @@ export default defineConfig((config) => {
               provider: playwright({
                 contextOptions: {
                   reducedMotion: "reduce",
-                  viewport: viewportConfig,
                 },
               }),
               headless: true,

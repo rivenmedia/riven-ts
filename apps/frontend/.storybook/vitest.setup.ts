@@ -2,19 +2,48 @@ import { faker } from "@faker-js/faker";
 import { screenshot } from "@storycap-testrun/browser";
 import { page } from "@vitest/browser/context";
 import { DateTime, Settings } from "luxon";
-import { afterEach, beforeEach } from "vitest";
+import { afterEach, vi } from "vitest";
 
 const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 
 Settings.now = () => baseDate.toMillis();
 
 faker.seed(42);
+faker.setDefaultRefDate(baseDate.toJSDate());
 
-// Sizes the iframe while the test body runs. The captured image uses the
-// storycap plugin's viewport option instead.
-beforeEach(async () => {
-  await page.viewport(1280, 720);
-});
+export class MemoryStorage implements Storage {
+  readonly #items = new Map<string, string>();
+
+  public get length() {
+    return this.#items.size;
+  }
+
+  public clear() {
+    this.#items.clear();
+  }
+
+  public getItem(key: string) {
+    return this.#items.get(key) ?? null;
+  }
+
+  public key(index: number) {
+    return [...this.#items.keys()][index] ?? null;
+  }
+
+  public removeItem(key: string) {
+    this.#items.delete(key);
+  }
+
+  public setItem(key: string, value: string) {
+    this.#items.set(key, value);
+  }
+}
+
+// Test files run concurrently in iframes on the same origin, so isolate storage to prevent
+// stories leaking state into one another (e.g. the theme switcher tests changing the persisted theme)
+for (const storage of ["localStorage", "sessionStorage"] as const) {
+  vi.stubGlobal(storage, new MemoryStorage());
+}
 
 afterEach(async (context) => {
   await screenshot(page, context);
