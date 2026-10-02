@@ -18,7 +18,7 @@ export function KpiStatTile({
         tone === "warning" && "border-red-600/30",
       )}
     >
-      <p className="text-sm font-medium text-neutral-300">{title}</p>
+      <p className="text-2xl font-bold text-neutral-300">{title}</p>
       <div
         className={cn(
           "mt-3 text-2xl font-semibold tracking-tight",

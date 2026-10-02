@@ -28,7 +28,7 @@ export function StatusBadge({
         "inline-flex items-center justify-center backdrop-blur-sm",
         sizeClasses,
         state === "completed" &&
-          "bg-violet-600/80 text-violet-50 hover:bg-violet-600/70",
+          "bg-yellow-600/80 text-yellow-50 hover:bg-yellow-600/70",
         state === "partially_completed" &&
           "bg-teal-600/80 text-teal-50 hover:bg-teal-600/70",
         state === "scraped" && "bg-sky-600/80 text-sky-50 hover:bg-sky-600/70",
