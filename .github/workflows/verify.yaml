@@ -27,7 +27,7 @@ jobs:
   verify:
     name: Verify - ${{ matrix.task.name }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       checks: write
     strategy:

@@ -83,7 +83,7 @@ jobs:
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ${{ inputs.runner }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       checks: write
     steps:
