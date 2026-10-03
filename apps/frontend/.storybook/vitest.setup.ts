@@ -52,6 +52,28 @@ export class MemoryStorage implements Storage {
   }
 }
 
+/** Waits for images in the viewport to load, as remote images may not have loaded by the time the page is stable */
+const waitForVisibleImages = async () => {
+  const pendingImages = [...document.images].filter((image) => {
+    const { bottom, right, top, left } = image.getBoundingClientRect();
+
+    return (
+      !image.complete &&
+      bottom > 0 &&
+      right > 0 &&
+      top < globalThis.innerHeight &&
+      left < globalThis.innerWidth
+    );
+  });
+
+  await Promise.race([
+    Promise.allSettled(pendingImages.map((image) => image.decode())),
+    new Promise((resolve) => {
+      setTimeout(resolve, 10_000);
+    }),
+  ]);
+};
+
 // Test files run concurrently in iframes on the same origin, so isolate storage to prevent
 // stories leaking state into one another (e.g. the theme switcher tests changing the persisted theme)
 for (const storage of ["localStorage", "sessionStorage"] as const) {
@@ -70,5 +92,10 @@ afterEach(async (context) => {
     return;
   }
 
-  await screenshot(page, context);
+  await screenshot(page, context, {
+    hooks: [
+      // Runs once the page has stabilised at the screenshot viewport size, immediately before capturing
+      { preCapture: waitForVisibleImages },
+    ],
+  });
 });
