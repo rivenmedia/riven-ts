@@ -15,6 +15,8 @@ declare module "vitest" {
   }
 }
 
+Settings.defaultLocale = "en-GB";
+
 const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 
 Settings.now = () => baseDate.toMillis();
