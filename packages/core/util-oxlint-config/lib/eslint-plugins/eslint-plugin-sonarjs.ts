@@ -17,5 +17,12 @@ export const eslintPluginEslintPluginSonarjsConfig = defineConfig({
       ],
       rules: sonarjs.configs.recommended.rules as DummyRuleMap,
     },
+    {
+      files: [tsFiles, jsFiles],
+      rules: {
+        "sonarjs/todo-tag": "warn",
+        "sonarjs/no-unused-vars": "off", // Already covered by other plugins
+      },
+    },
   ],
 });
