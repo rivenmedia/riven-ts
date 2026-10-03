@@ -1,4 +1,3 @@
-import { ProtectedLayoutWrapper } from "@/.storybook/decorators/protected-layout-wrapper";
 import { preview } from "@/.storybook/preview";
 
 import { DateTime } from "luxon";
@@ -19,7 +18,6 @@ const meta = preview.meta({
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [ProtectedLayoutWrapper],
 });
 
 export const Default = meta.story({
