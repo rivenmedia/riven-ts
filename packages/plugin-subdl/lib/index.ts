@@ -7,40 +7,10 @@ import { SubdlResolver } from "./schema/subdl.resolver.ts";
 import { pluginConfig } from "./subdl-plugin.config.ts";
 import { SubdlSettings } from "./subdl-settings.schema.ts";
 import { getItemMetadata } from "./utilities/get-item-metadata.ts";
+import { selectBestSubtitlePerLanguage } from "./utilities/select-best-subtitle-per-language.ts";
 
-import type { SubtitleResponse } from "./schemas/subtitle-response.schema.ts";
-import type { ItemMetadata } from "./utilities/get-item-metadata.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
-
-/**
- * Picks the best subtitle per language (first matching result per language)
- */
-function selectBestSubtitlePerLanguage(
-  results: SubtitleResponse[],
-  { type, seasonNumber, episodeNumber }: ItemMetadata,
-) {
-  const bestPerLanguage = new Map<string, SubtitleResponse>();
-  const isEpisodeSearch = type === "tv" && seasonNumber && episodeNumber;
-
-  for (const sub of results) {
-    const isMatchingSubtitle =
-      !isEpisodeSearch ||
-      (sub.season === seasonNumber && sub.episode === episodeNumber);
-
-    if (!isMatchingSubtitle) {
-      continue;
-    }
-
-    const subLangLower = sub.lang.toLowerCase();
-
-    if (!bestPerLanguage.has(subLangLower)) {
-      bestPerLanguage.set(subLangLower, sub);
-    }
-  }
-
-  return bestPerLanguage;
-}
 
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,

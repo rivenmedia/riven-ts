@@ -41,9 +41,9 @@ function getAliases(
       continue;
     }
 
-    const existing = aliases.get(language) ?? new Set<string>();
+    const languageAliases = aliases.get(language) ?? new Set<string>();
 
-    aliases.set(language, existing.add(name));
+    aliases.set(language, languageAliases.add(name));
   }
 
   return aliases;

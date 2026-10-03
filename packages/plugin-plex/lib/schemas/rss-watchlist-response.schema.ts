@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-import { Guid } from "./guid.schema.ts";
+import { WatchlistItem } from "./watchlist-item.schema.ts";
 
 export const RSSWatchlistResponse = z.object({
   items: z.array(
@@ -8,14 +8,16 @@ export const RSSWatchlistResponse = z.object({
       .object({
         title: z.string().min(1),
         category: z.enum(["movie", "show"]),
-        guids: z.array(Guid),
+        guids: z.array(z.string()),
       })
-      .transform(({ guids, category, title }) => ({
-        title,
-        year: null,
-        type: category,
-        Guid: guids,
-      })),
+      .transform(({ guids, category, title }) =>
+        WatchlistItem.parse({
+          title,
+          year: null,
+          type: category,
+          Guid: guids,
+        }),
+      ),
   ),
 });
 

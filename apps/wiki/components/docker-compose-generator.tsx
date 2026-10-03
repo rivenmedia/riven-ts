@@ -27,16 +27,16 @@ interface TSConfig {
   dataPath: string;
 }
 
-// Seerr is reached over the internal Docker network, which does not use TLS
+// Seerr is reached over the internal Docker network, which doesn't use TLS
 // oxlint-disable-next-line sonarjs/no-clear-text-protocols
 const DEFAULT_SEERR_URL = "http://seerr:5055";
 
-const CONTENT_SOURCE_LABELS: Record<TSConfig["contentSource"], string> = {
+const CONTENT_SOURCE_LABELS = {
   mdblist: "MDBList",
   seerr: "Seerr",
   listrr: "Listrr",
   none: "None",
-};
+} as const satisfies Record<TSConfig["contentSource"], string>;
 
 interface V1Config {
   timezone: string;
@@ -157,21 +157,21 @@ function generateSecret(
 
 // --- Riven TS Service Builders ---
 
-function getEnabledPlugins(cfg: TSConfig) {
+function getEnabledPlugins(config: TSConfig) {
   // A plugin only runs if it is listed here. `tmdb` and `tvdb` are always on.
   // Torrentio needs no configuration, so it is the default scraper.
   const enabledPlugins = ["torrentio"];
 
-  if (cfg.debridProvider !== "none" && cfg.debridApiKey) {
+  if (config.debridProvider !== "none" && config.debridApiKey) {
     enabledPlugins.push("stremthru");
   }
 
-  if (cfg.contentSource !== "none" && cfg.contentApiKey) {
-    enabledPlugins.push(cfg.contentSource);
+  if (config.contentSource !== "none" && config.contentApiKey) {
+    enabledPlugins.push(config.contentSource);
   }
 
-  if (cfg.mediaServer !== "none") {
-    enabledPlugins.push(cfg.mediaServer);
+  if (config.mediaServer !== "none") {
+    enabledPlugins.push(config.mediaServer);
   }
 
   return enabledPlugins;
@@ -183,19 +183,19 @@ function formatContentLists(contentLists: string) {
   return `[${lists.join(",")}]`;
 }
 
-function buildContentSourceEnvLines(cfg: TSConfig): string[] {
-  if (!cfg.contentApiKey) {
+function buildContentSourceEnvLines(config: TSConfig): string[] {
+  if (!config.contentApiKey) {
     return [];
   }
 
-  switch (cfg.contentSource) {
+  switch (config.contentSource) {
     case "mdblist": {
       return [
         "# MDBList",
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${cfg.contentApiKey}"`,
-        ...(cfg.contentLists
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${config.contentApiKey}"`,
+        ...(config.contentLists
           ? [
-              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=${formatContentLists(cfg.contentLists)}`,
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=${formatContentLists(config.contentLists)}`,
             ]
           : []),
         "",
@@ -204,9 +204,11 @@ function buildContentSourceEnvLines(cfg: TSConfig): string[] {
     case "seerr": {
       return [
         "# Seerr",
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${cfg.contentApiKey}"`,
-        ...(cfg.seerrUrl
-          ? [`RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="${cfg.seerrUrl}"`]
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${config.contentApiKey}"`,
+        ...(config.seerrUrl
+          ? [
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="${config.seerrUrl}"`,
+            ]
           : []),
         "",
       ];
@@ -214,10 +216,10 @@ function buildContentSourceEnvLines(cfg: TSConfig): string[] {
     case "listrr": {
       return [
         "# Listrr",
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${cfg.contentApiKey}"`,
-        ...(cfg.contentLists
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${config.contentApiKey}"`,
+        ...(config.contentLists
           ? [
-              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=${formatContentLists(cfg.contentLists)}`,
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=${formatContentLists(config.contentLists)}`,
             ]
           : []),
         "",
@@ -525,7 +527,7 @@ function CheckboxField({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium inline-block">
+      <label className="mb-2 text-sm font-medium inline-block">
         <input
           className="accent-purple-500"
           type="checkbox"

@@ -9,14 +9,11 @@ import { PlexSettings } from "./plex-settings.schema.ts";
 import { PlexSettingsResolver } from "./schema/plex-settings.resolver.ts";
 import { PlexResolver } from "./schema/plex.resolver.ts";
 
+import type { WatchlistItem } from "./schemas/watchlist-item.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
-type WatchlistItem =
-  | Awaited<ReturnType<PlexDiscoverAPI["getUserWatchlist"]>>[number]
-  | Awaited<ReturnType<PlexRSSAPI["getRSSWatchlists"]>>[number];
-
-function getExternalIds(item: WatchlistItem) {
+function getExternalIds(item: Pick<WatchlistItem, "Guid" | "type">) {
   const request: ContentServiceRequestedResponse["movies" | "shows"][number] =
     {};
 
@@ -25,7 +22,7 @@ function getExternalIds(item: WatchlistItem) {
       request.imdbId = id;
     } else if (type === "tmdb" && item.type === "movie") {
       request.tmdbId = id;
-    } else if (type === "tvdb" && item.type === "show") {
+    } else if (type === "tvdb" && item.type === "show" && "tvdbId" in request) {
       request.tvdbId = id;
     }
   }

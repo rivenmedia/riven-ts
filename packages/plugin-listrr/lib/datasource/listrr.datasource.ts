@@ -8,13 +8,12 @@ import type { ListrrSettings } from "../listrr-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
+import type { z } from "zod";
 
-interface PagedResponseSchema<T> {
-  parse: (data: unknown) => {
-    items?: T[] | null | undefined;
-    pages?: number | undefined;
-  };
-}
+type PagedResponseSchema<T> = z.ZodType<{
+  items?: T[] | null | undefined;
+  pages?: number | undefined;
+}>;
 
 export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   public override baseURL = "https://listrr.pro/api/";
@@ -141,6 +140,7 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
       const parsed = responseSchema.parse(response);
 
       totalPages = parsed.pages ?? 1;
+
       items.push(...(parsed.items ?? []));
 
       page += 1;

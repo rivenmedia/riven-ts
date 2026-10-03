@@ -21,7 +21,7 @@ import { withVfsScope } from "../utilities/with-vfs-scope.ts";
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
 /**
- * Drains any in-flight response body for the file descriptor, so the underlying connection can be released.
+ * Drains any in-flight response body for the file descriptor so the underlying connection can be released.
  */
 async function drainResponse(fd: number) {
   const response = await fdToResponsePromiseMap.get(fd);

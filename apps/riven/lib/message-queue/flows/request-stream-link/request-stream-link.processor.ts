@@ -37,12 +37,17 @@ export const requestStreamLinkProcessor =
         { populate: ["mediaItem.fullTitle"] },
       );
 
-      const context: StepContext = { job, token, mediaEntry, streamService };
+      const stepContext = {
+        job,
+        token,
+        mediaEntry,
+        streamService,
+      } as const satisfies StepContext;
 
       while (job.data.step !== "complete") {
         switch (job.data.step) {
           case "request-stream-link": {
-            const cachedStreamLink = await requestStreamLink(context);
+            const cachedStreamLink = await requestStreamLink(stepContext);
 
             if (cachedStreamLink) {
               return cachedStreamLink;
@@ -51,27 +56,27 @@ export const requestStreamLinkProcessor =
             break;
           }
           case "process-stream-link-response": {
-            await processStreamLinkResponse(context);
+            await processStreamLinkResponse(stepContext);
 
             break;
           }
           case "check-link-health": {
-            await checkLinkHealth(context);
+            await checkLinkHealth(stepContext);
 
             break;
           }
           case "process-health-check-response": {
-            await processHealthCheckResponse(context);
+            await processHealthCheckResponse(stepContext);
 
             break;
           }
           case "save-healthy-link": {
-            await saveHealthyLink(context);
+            await saveHealthyLink(stepContext);
 
             break;
           }
           case "blacklist-stream": {
-            return blacklistStream(context);
+            return blacklistStream(stepContext);
           }
         }
       }
