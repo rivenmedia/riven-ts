@@ -14,10 +14,11 @@ export async function getCachedTorrentFiles(
   parent: ParentOptions,
   provider: string | null,
 ) {
+  const providerLabel = provider ? ` on ${provider}` : "";
   const node = await flow.addPluginJob(
     MediaItemDownloadCacheCheckRequestedEvent,
     MediaItemDownloadCacheCheckRequestedResponse,
-    `Find cached torrents for ${pluginName}${provider ? ` on ${provider}` : ""}`,
+    `Find cached torrents for ${pluginName}${providerLabel}`,
     pluginName,
     { infoHashes, provider },
     {

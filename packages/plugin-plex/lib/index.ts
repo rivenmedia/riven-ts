@@ -12,6 +12,27 @@ import { PlexResolver } from "./schema/plex.resolver.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
+type WatchlistItem =
+  | Awaited<ReturnType<PlexDiscoverAPI["getUserWatchlist"]>>[number]
+  | Awaited<ReturnType<PlexRSSAPI["getRSSWatchlists"]>>[number];
+
+function getExternalIds(item: WatchlistItem) {
+  const request: ContentServiceRequestedResponse["movies" | "shows"][number] =
+    {};
+
+  for (const { id, type } of item.Guid) {
+    if (type === "imdb") {
+      request.imdbId = id;
+    } else if (type === "tmdb" && item.type === "movie") {
+      request.tmdbId = id;
+    } else if (type === "tvdb" && item.type === "show") {
+      request.tvdbId = id;
+    }
+  }
+
+  return request;
+}
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -98,10 +119,6 @@ export const plugin: RivenPlugin = {
       const seenGuids = new Set<string>();
 
       for (const item of [...watchlistItems, ...rssItems]) {
-        const request: ContentServiceRequestedResponse[
-          | "movies"
-          | "shows"][number] = {};
-
         const guidSet = new Set(
           item.Guid.map(({ id, type }) => `${type}://${id}`),
         );
@@ -112,22 +129,18 @@ export const plugin: RivenPlugin = {
           continue;
         }
 
-        for (const { id, type } of item.Guid) {
-          seenGuids.add(`${type}://${id}`);
-
-          if (type === "imdb") {
-            request.imdbId = id;
-          } else if (type === "tmdb" && item.type === "movie") {
-            request.tmdbId = id;
-          } else if (type === "tvdb" && item.type === "show") {
-            request.tvdbId = id;
-          }
+        for (const guid of guidSet) {
+          seenGuids.add(guid);
         }
 
+        const request = getExternalIds(item);
+
         if (Object.keys(request).length === 0) {
-          logger.warn(
-            `Unable to extract external IDs from ${item.year ? `${item.title} (${item.year.toString()})` : item.title}`,
-          );
+          const itemTitle = item.year
+            ? `${item.title} (${item.year.toString()})`
+            : item.title;
+
+          logger.warn(`Unable to extract external IDs from ${itemTitle}`);
 
           continue;
         }

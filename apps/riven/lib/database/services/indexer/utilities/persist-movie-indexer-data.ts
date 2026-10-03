@@ -3,10 +3,11 @@ import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-s
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
+import { validateOrReject } from "class-validator";
 import { DateTime } from "luxon";
 import assert from "node:assert";
-import z from "zod";
+
+import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedMovieResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
@@ -95,24 +96,9 @@ export async function persistMovieIndexerData(
       isReindex: Boolean(existingMovie),
     };
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 }

@@ -16,6 +16,32 @@ export interface SelectListProps<T> {
   loop?: boolean;
 }
 
+function getPreviousIndex(
+  current: number,
+  jumpCount: number,
+  lastIndex: number,
+  loop: boolean,
+) {
+  if (current > 0) {
+    return current - jumpCount;
+  }
+
+  return loop ? lastIndex : 0;
+}
+
+function getNextIndex(
+  current: number,
+  jumpCount: number,
+  lastIndex: number,
+  loop: boolean,
+) {
+  if (current < lastIndex) {
+    return current + jumpCount;
+  }
+
+  return loop ? 0 : lastIndex;
+}
+
 export function SelectList<T>({
   items,
   getKey,
@@ -47,8 +73,12 @@ export function SelectList<T>({
       if (key.upArrow || input.toLowerCase() === "k") {
         setSelectedIndex((current) => {
           const jumpCount = key.shift ? (scrollAreaContext?.height ?? 1) : 1;
-          const nextIndex =
-            current <= 0 ? (loop ? lastIndex : 0) : current - jumpCount;
+          const nextIndex = getPreviousIndex(
+            current,
+            jumpCount,
+            lastIndex,
+            loop,
+          );
 
           return Math.max(0, Math.min(nextIndex, lastIndex));
         });
@@ -59,8 +89,7 @@ export function SelectList<T>({
       if (key.downArrow || input.toLowerCase() === "j") {
         setSelectedIndex((current) => {
           const jumpCount = key.shift ? (scrollAreaContext?.height ?? 1) : 1;
-          const nextIndex =
-            current >= lastIndex ? (loop ? 0 : lastIndex) : current + jumpCount;
+          const nextIndex = getNextIndex(current, jumpCount, lastIndex, loop);
 
           return Math.max(0, Math.min(nextIndex, lastIndex));
         });

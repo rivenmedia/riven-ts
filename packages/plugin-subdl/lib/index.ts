@@ -9,8 +9,38 @@ import { SubdlSettings } from "./subdl-settings.schema.ts";
 import { getItemMetadata } from "./utilities/get-item-metadata.ts";
 
 import type { SubtitleResponse } from "./schemas/subtitle-response.schema.ts";
+import type { ItemMetadata } from "./utilities/get-item-metadata.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
+
+/**
+ * Picks the best subtitle per language (first matching result per language)
+ */
+function selectBestSubtitlePerLanguage(
+  results: SubtitleResponse[],
+  { type, seasonNumber, episodeNumber }: ItemMetadata,
+) {
+  const bestPerLanguage = new Map<string, SubtitleResponse>();
+  const isEpisodeSearch = type === "tv" && seasonNumber && episodeNumber;
+
+  for (const sub of results) {
+    const isMatchingSubtitle =
+      !isEpisodeSearch ||
+      (sub.season === seasonNumber && sub.episode === episodeNumber);
+
+    if (!isMatchingSubtitle) {
+      continue;
+    }
+
+    const subLangLower = sub.lang.toLowerCase();
+
+    if (!bestPerLanguage.has(subLangLower)) {
+      bestPerLanguage.set(subLangLower, sub);
+    }
+  }
+
+  return bestPerLanguage;
+}
 
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
@@ -62,25 +92,7 @@ export const plugin: RivenPlugin = {
         return { subtitles: [] };
       }
 
-      // Pick the best subtitle per language (first result per language)
-      const bestPerLanguage = new Map<string, SubtitleResponse>();
-
-      for (const sub of results) {
-        const isMatchingSubtitle =
-          type === "tv" && seasonNumber && episodeNumber
-            ? sub.season === seasonNumber && sub.episode === episodeNumber
-            : true;
-
-        if (!isMatchingSubtitle) {
-          continue;
-        }
-
-        const subLangLower = sub.lang.toLowerCase();
-
-        if (!bestPerLanguage.has(subLangLower)) {
-          bestPerLanguage.set(subLangLower, sub);
-        }
-      }
+      const bestPerLanguage = selectBestSubtitlePerLanguage(results, meta);
 
       const subtitles: SubtitleData[] = [];
 
@@ -100,6 +112,7 @@ export const plugin: RivenPlugin = {
             language,
             content,
             fileSize: Buffer.byteLength(content, "utf8"),
+            // oxlint-disable-next-line sonarjs/hashing -- MD5 is only used as a content checksum, not for security
             fileHash: createHash("md5").update(content).digest("hex"),
             sourceProvider: "subdl",
             sourceId: sub.url,

@@ -22,6 +22,7 @@ export const eslintPluginEslintPluginSonarjsConfig = defineConfig({
       rules: {
         "sonarjs/todo-tag": "warn",
         "sonarjs/no-unused-vars": "off", // Already covered by other plugins
+        "sonarjs/no-redundant-optional": "off", // `?: T | undefined` is not redundant with `exactOptionalPropertyTypes` enabled
       },
     },
   ],

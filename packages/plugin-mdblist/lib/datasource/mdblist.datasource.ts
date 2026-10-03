@@ -8,6 +8,9 @@ import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.ty
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type z from "zod";
+
+type ListItemsResponse = z.infer<typeof getListItemsByName200Schema>;
 
 class MdblistAPIError extends Error {
   public override name = "MdblistAPIError";
@@ -72,55 +75,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     const showIdsMap = new Map<number, MdbListExternalIds>();
 
     for (const listName of contentLists) {
-      let hasMoreItems = true;
-      let offset = 0;
-
-      while (hasMoreItems) {
-        const response = await this.fetch<unknown>(`lists/${listName}/items`, {
-          params: {
-            offset: offset.toString(),
-          },
-        });
-
-        const parsed = getListItemsByName200Schema.parse(response.parsedBody);
-
-        let pageItemCount = 0;
-
-        if (parsed.movies) {
-          for (const item of parsed.movies) {
-            if (item.id) {
-              pageItemCount += 1;
-
-              if (!this.#seenMovieIds.has(item.id)) {
-                movieIdsMap.set(item.id, {
-                  imdbId: item.ids.imdb,
-                  tmdbId: item.ids.tmdb?.toString(),
-                  externalRequestId: item.ids.mdblist,
-                  tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
-                });
-              }
-            }
-          }
-        }
-
-        if (parsed.shows) {
-          for (const item of parsed.shows) {
-            if (item.id) {
-              pageItemCount += 1;
-
-              if (!this.#seenShowIds.has(item.id)) {
-                showIdsMap.set(item.id, {
-                  imdbId: item.imdb_id ?? undefined,
-                  tvdbId: item.tvdb_id?.toString(),
-                });
-              }
-            }
-          }
-        }
-
-        offset += pageItemCount;
-        hasMoreItems = response.response.headers.get("X-Has-More") === "true";
-      }
+      await this.#fetchListItems(listName, movieIdsMap, showIdsMap);
     }
 
     for (const id of movieIdsMap.keys()) {
@@ -134,5 +89,97 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
       movies: [...movieIdsMap.values()],
       shows: [...showIdsMap.values()],
     };
+  }
+
+  /**
+   * Fetches every page of items in a list, adding any unseen items to the given maps.
+   */
+  async #fetchListItems(
+    listName: string,
+    movieIdsMap: Map<number, MdbListExternalIds>,
+    showIdsMap: Map<number, MdbListExternalIds>,
+  ) {
+    let hasMoreItems = true;
+    let offset = 0;
+
+    while (hasMoreItems) {
+      const response = await this.fetch<unknown>(`lists/${listName}/items`, {
+        params: {
+          offset: offset.toString(),
+        },
+      });
+
+      const parsed = getListItemsByName200Schema.parse(response.parsedBody);
+
+      offset +=
+        this.#collectMovies(parsed.movies ?? [], movieIdsMap) +
+        this.#collectShows(parsed.shows ?? [], showIdsMap);
+
+      hasMoreItems = response.response.headers.get("X-Has-More") === "true";
+    }
+  }
+
+  /**
+   * Adds any unseen movies to the given map.
+   *
+   * @returns The number of valid movies in the page
+   */
+  #collectMovies(
+    movies: NonNullable<ListItemsResponse["movies"]>,
+    movieIdsMap: Map<number, MdbListExternalIds>,
+  ) {
+    let pageItemCount = 0;
+
+    for (const item of movies) {
+      if (!item.id) {
+        continue;
+      }
+
+      pageItemCount += 1;
+
+      if (this.#seenMovieIds.has(item.id)) {
+        continue;
+      }
+
+      movieIdsMap.set(item.id, {
+        imdbId: item.ids.imdb,
+        tmdbId: item.ids.tmdb?.toString(),
+        externalRequestId: item.ids.mdblist,
+        tvdbId: item.ids.tvdb ? String(item.ids.tvdb) : undefined,
+      });
+    }
+
+    return pageItemCount;
+  }
+
+  /**
+   * Adds any unseen shows to the given map.
+   *
+   * @returns The number of valid shows in the page
+   */
+  #collectShows(
+    shows: NonNullable<ListItemsResponse["shows"]>,
+    showIdsMap: Map<number, MdbListExternalIds>,
+  ) {
+    let pageItemCount = 0;
+
+    for (const item of shows) {
+      if (!item.id) {
+        continue;
+      }
+
+      pageItemCount += 1;
+
+      if (this.#seenShowIds.has(item.id)) {
+        continue;
+      }
+
+      showIdsMap.set(item.id, {
+        imdbId: item.imdb_id ?? undefined,
+        tvdbId: item.tvdb_id?.toString(),
+      });
+    }
+
+    return pageItemCount;
   }
 }

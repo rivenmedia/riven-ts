@@ -11,9 +11,10 @@ import { MediaItemDownloadError } from "@repo/util-plugin-sdk/schemas/events/med
 import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.download.incorrect-state.event";
 
 import { NotFoundError, ref } from "@mikro-orm/core";
-import { ValidationError, validateOrReject } from "class-validator";
+import { validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
+
+import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
 
 import type { ValidTorrent } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
@@ -153,24 +154,9 @@ export async function persistDownloadResults(
 
     return existingItem;
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new MediaItemDownloadError({
       item: existingItem,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 }

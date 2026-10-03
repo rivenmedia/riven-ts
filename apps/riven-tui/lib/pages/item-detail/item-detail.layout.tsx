@@ -161,10 +161,12 @@ export function ItemDetailPageLayout() {
     type: item.__typename,
   } satisfies ActionTarget;
 
+  const yearLabel = item.year ? ` (${item.year.toString()})` : "";
+
   return (
     <PageWrapper
       header={{
-        title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
+        title: `${item.fullTitle}${yearLabel} · ${item.__typename}`,
         content: <MediaItemStateBadge state={item.state} />,
       }}
       footer={<Text dimColor>[a]ctions · [r]efresh · [esc] back · [q]uit</Text>}

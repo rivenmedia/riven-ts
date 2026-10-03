@@ -356,8 +356,10 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       issues.push(z.prettifyError(payloadValidationError));
     }
 
+    const issueList = issues.map((issue) => `- ${issue}`).join("\n");
+
     throw new FatalValidationError(
-      `Invalid Seerr webhook settings:\n${issues.map((issue) => `- ${issue}`).join("\n")}.\nFix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "autofixWebhookBody" option in the plugin settings to have this automatically fixed by the plugin.`,
+      `Invalid Seerr webhook settings:\n${issueList}.\nFix these in the webhook settings at ${this.settings.url}/settings/webhooks or enable the "autofixWebhookBody" option in the plugin settings to have this automatically fixed by the plugin.`,
     );
   }
 }

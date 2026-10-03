@@ -518,6 +518,7 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
   }
 });
 
+// Skipped: dubbed anime filtering is handled by the rank-streams step, not during torrent validation
 it.skip('throws for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
   em,
   indexedMovieContext: { indexedMovie },
@@ -549,6 +550,7 @@ it.skip('throws for torrents that are not dubbed if the media item is anime and 
   );
 });
 
+// Skipped: dubbed anime filtering is handled by the rank-streams step, not during torrent validation
 it.skip('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
   em,
   indexedMovieContext: { indexedMovie },

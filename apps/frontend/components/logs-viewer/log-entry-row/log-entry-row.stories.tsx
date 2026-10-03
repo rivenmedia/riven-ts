@@ -18,7 +18,8 @@ export const Info = meta.story({
   },
 });
 
-export const Error = meta.story({
+export const ErrorLevel = meta.story({
+  name: "Error",
   args: {
     log: {
       timestamp: "2024-06-12 10:32:05",

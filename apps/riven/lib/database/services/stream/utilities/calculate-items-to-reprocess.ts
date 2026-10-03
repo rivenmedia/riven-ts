@@ -7,6 +7,39 @@ import {
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
+async function getItemToReprocess(
+  item: MediaItem,
+  mediaItems: Set<MediaItem>,
+): Promise<MediaItem | undefined> {
+  if (item instanceof Movie) {
+    return item;
+  }
+
+  if (item instanceof ShowLikeMediaItem) {
+    const show = await item.getShow();
+
+    if (mediaItems.has(show)) {
+      return show;
+    }
+  }
+
+  if (item instanceof Season) {
+    const episodes = await item.episodes.loadItems();
+
+    if (episodes.every((episode) => mediaItems.has(episode))) {
+      return item;
+    }
+  }
+
+  if (item instanceof Episode) {
+    const season = await item.season.loadOrFail();
+
+    return mediaItems.has(season) ? season : item;
+  }
+
+  return undefined;
+}
+
 export async function calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
   if (mediaItems.size === 0) {
     throw new Error(
@@ -17,35 +50,10 @@ export async function calculateItemsToReprocess(mediaItems: Set<MediaItem>) {
   const itemsToReprocess = new Set<MediaItem>();
 
   for (const item of mediaItems) {
-    if (item instanceof Movie) {
-      itemsToReprocess.add(item);
-    }
+    const itemToReprocess = await getItemToReprocess(item, mediaItems);
 
-    if (item instanceof ShowLikeMediaItem) {
-      const show = await item.getShow();
-
-      if (mediaItems.has(show)) {
-        itemsToReprocess.add(show);
-
-        continue;
-      }
-    }
-
-    if (item instanceof Season) {
-      const episodes = await item.episodes.loadItems();
-
-      if (episodes.every((episode) => mediaItems.has(episode))) {
-        itemsToReprocess.add(item);
-
-        continue;
-      }
-    }
-
-    if (item instanceof Episode) {
-      const season = await item.season.loadOrFail();
-      const itemToAdd = mediaItems.has(season) ? season : item;
-
-      itemsToReprocess.add(itemToAdd);
+    if (itemToReprocess) {
+      itemsToReprocess.add(itemToReprocess);
     }
   }
 

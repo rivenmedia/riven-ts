@@ -9,15 +9,120 @@ import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
+import { validateOrReject } from "class-validator";
 import assert from "node:assert";
-import z from "zod";
+
+import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 export type ShowIndexData =
   NonNullable<MediaItemIndexRequestedShowResponse>["item"];
+
+interface PersistSeasonOptions {
+  show: Show;
+  season: ShowIndexData["seasons"][number];
+  existingSeason: Season | undefined;
+  itemRequest: ItemRequest;
+  indexedAt: Date;
+}
+
+async function persistSeason(
+  em: EntityManager,
+  {
+    show,
+    season,
+    existingSeason,
+    itemRequest,
+    indexedAt,
+  }: PersistSeasonOptions,
+) {
+  const seasonTitle = [
+    `Season ${season.number.toString().padStart(2, "0")}`,
+    season.title,
+  ]
+    .filter(Boolean)
+    .join(" - ");
+
+  const seasonEntry = em.create(Season, {
+    title: seasonTitle,
+    fullTitle: `${show.title} - S${season.number.toString().padStart(2, "0")}`,
+    number: season.number,
+    tvdbId: show.tvdbId,
+    imdbId: show.imdbId ?? null,
+    /**
+     * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
+     *
+     * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
+     */
+    isRequested: itemRequest.seasons
+      ? itemRequest.seasons.includes(season.number)
+      : season.number > 0,
+    itemRequest,
+    indexedAt,
+    episodes: [],
+  });
+
+  if (existingSeason) {
+    seasonEntry.id = existingSeason.id;
+  }
+
+  show.seasons.add(seasonEntry);
+
+  await em.upsert(Season, seasonEntry, {
+    onConflictExcludeFields: [
+      "createdAt",
+      "failedScrapeAttempts",
+      "indexedAt",
+      "scrapedAt",
+      "scrapedTimes",
+      "state",
+    ],
+  });
+
+  for (const episode of season.episodes) {
+    const existingEpisode = existingSeason?.episodes.find(
+      ({ number }) => number === episode.number,
+    );
+
+    const episodeEntry = em.create(Episode, {
+      title: episode.title,
+      fullTitle: `${seasonEntry.fullTitle}E${episode.number.toString().padStart(2, "0")} - ${episode.title}`,
+      number: episode.number,
+      absoluteNumber: episode.absoluteNumber,
+      contentRating: episode.contentRating,
+      runtime: episode.runtime,
+      releaseDate: episode.airedAt
+        ? DateTime.fromISO(episode.airedAt).toJSDate()
+        : null,
+      tvdbId: seasonEntry.tvdbId,
+      imdbId: seasonEntry.imdbId ?? null,
+      isRequested: seasonEntry.isRequested,
+      itemRequest,
+      indexedAt,
+      isSpecial: seasonEntry.isSpecial,
+    });
+
+    if (existingEpisode) {
+      episodeEntry.id = existingEpisode.id;
+    }
+
+    seasonEntry.episodes.add(episodeEntry);
+    show.episodes.add(episodeEntry);
+
+    await em.upsert(Episode, episodeEntry, {
+      onConflictExcludeFields: [
+        "createdAt",
+        "failedScrapeAttempts",
+        "indexedAt",
+        "scrapedAt",
+        "scrapedTimes",
+        "state",
+      ],
+    });
+  }
+}
 
 export async function persistShowIndexerData(
   em: EntityManager,
@@ -120,94 +225,15 @@ export async function persistShowIndexerData(
     });
 
     for (const season of Object.values(item.seasons)) {
-      const existingSeason = existingShow?.seasons.find(
-        ({ number }) => number === season.number,
-      );
-
-      const seasonTitle = [
-        `Season ${season.number.toString().padStart(2, "0")}`,
-        season.title,
-      ]
-        .filter(Boolean)
-        .join(" - ");
-
-      const seasonEntry = em.create(Season, {
-        title: seasonTitle,
-        fullTitle: `${show.title} - S${season.number.toString().padStart(2, "0")}`,
-        number: season.number,
-        tvdbId: show.tvdbId,
-        imdbId: show.imdbId ?? null,
-        /**
-         * If the item request has specific seasons requested, only mark this season as requested if it's included in that list.
-         *
-         * Otherwise, request all non-special seasons. This is the default behaviour of list ingestion.
-         */
-        isRequested: itemRequest.seasons
-          ? itemRequest.seasons.includes(season.number)
-          : season.number > 0,
+      await persistSeason(em, {
+        show,
+        season,
+        existingSeason: existingShow?.seasons.find(
+          ({ number }) => number === season.number,
+        ),
         itemRequest,
         indexedAt,
-        episodes: [],
       });
-
-      if (existingSeason) {
-        seasonEntry.id = existingSeason.id;
-      }
-
-      show.seasons.add(seasonEntry);
-
-      await em.upsert(Season, seasonEntry, {
-        onConflictExcludeFields: [
-          "createdAt",
-          "failedScrapeAttempts",
-          "indexedAt",
-          "scrapedAt",
-          "scrapedTimes",
-          "state",
-        ],
-      });
-
-      for (const episode of season.episodes) {
-        const existingEpisode = existingSeason?.episodes.find(
-          ({ number }) => number === episode.number,
-        );
-
-        const episodeEntry = em.create(Episode, {
-          title: episode.title,
-          fullTitle: `${seasonEntry.fullTitle}E${episode.number.toString().padStart(2, "0")} - ${episode.title}`,
-          number: episode.number,
-          absoluteNumber: episode.absoluteNumber,
-          contentRating: episode.contentRating,
-          runtime: episode.runtime,
-          releaseDate: episode.airedAt
-            ? DateTime.fromISO(episode.airedAt).toJSDate()
-            : null,
-          tvdbId: seasonEntry.tvdbId,
-          imdbId: seasonEntry.imdbId ?? null,
-          isRequested: seasonEntry.isRequested,
-          itemRequest,
-          indexedAt,
-          isSpecial: seasonEntry.isSpecial,
-        });
-
-        if (existingEpisode) {
-          episodeEntry.id = existingEpisode.id;
-        }
-
-        seasonEntry.episodes.add(episodeEntry);
-        show.episodes.add(episodeEntry);
-
-        await em.upsert(Episode, episodeEntry, {
-          onConflictExcludeFields: [
-            "createdAt",
-            "failedScrapeAttempts",
-            "indexedAt",
-            "scrapedAt",
-            "scrapedTimes",
-            "state",
-          ],
-        });
-      }
     }
 
     // Re-upsert to compute dynamic properties (e.g. nextAirDate) on the show
@@ -248,24 +274,9 @@ export async function persistShowIndexerData(
       isAdditionalSeasonRequest,
     };
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new MediaItemIndexError({
       item: itemRequest,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 }

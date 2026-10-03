@@ -30,7 +30,6 @@ try {
   await fs.mkdir(destinationDir, { recursive: true });
 
   // Arrays to collect all directories and directories with coverage.json
-  const allDirectories = [];
   const directoriesWithCoverage = [];
 
   // Process each pattern
@@ -45,7 +44,6 @@ try {
       const stats = await fs.stat(match);
 
       if (stats.isDirectory()) {
-        allDirectories.push(match);
         const coverageFilePath = path.join(
           match,
           "coverage/coverage-final.json",

@@ -4,6 +4,7 @@ import { expect } from "vitest";
 import { it } from "../../__tests__/tmdb.test-context.ts";
 import { TmdbAPI } from "../tmdb.datasource.ts";
 
+// Skipped: TmdbAPI.validate() does not make a request, and always returns true
 it.skip("returns false if the request fails", ({ server, dataSourceMap }) => {
   server.use(
     http.get("**/validate", () => HttpResponse.json(null, { status: 401 })),

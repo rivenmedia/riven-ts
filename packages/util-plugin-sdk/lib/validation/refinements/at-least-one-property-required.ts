@@ -1,30 +1,32 @@
+/**
+ * Whether a value should be considered "present" for the purposes of `atLeastOnePropertyRequired`.
+ *
+ * Nullish values, blank strings, zero and empty arrays are all considered empty.
+ */
+const hasValue = (value: unknown) => {
+  if (value == null) {
+    return false;
+  }
+
+  if (typeof value === "string") {
+    return value.trim() !== "";
+  }
+
+  if (typeof value === "number") {
+    return value !== 0;
+  }
+
+  if (Array.isArray(value)) {
+    return value.length > 0;
+  }
+
+  return true;
+};
+
 export const atLeastOnePropertyRequired = <T extends Record<string, unknown>>(
   obj: T,
   fields?: (keyof T)[],
-) => {
-  const entries = Object.entries(obj);
-
-  for (const [key, value] of entries) {
-    if (fields && !fields.includes(key)) {
-      continue;
-    }
-
-    if (value != null) {
-      if (typeof value === "string" && value.trim() === "") {
-        continue;
-      }
-
-      if (typeof value === "number" && value === 0) {
-        continue;
-      }
-
-      if (Array.isArray(value) && value.length === 0) {
-        continue;
-      }
-
-      return true;
-    }
-  }
-
-  return false;
-};
+) =>
+  Object.entries(obj).some(
+    ([key, value]) => (!fields || fields.includes(key)) && hasValue(value),
+  );

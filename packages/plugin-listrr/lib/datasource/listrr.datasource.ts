@@ -9,6 +9,13 @@ import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
+interface PagedResponseSchema<T> {
+  parse: (data: unknown) => {
+    items?: T[] | null | undefined;
+    pages?: number | undefined;
+  };
+}
+
 export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   public override baseURL = "https://listrr.pro/api/";
   public override serviceName = "Listrr";
@@ -42,49 +49,25 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * @param contentLists
    */
   public async getShows(contentLists: Set<string>): Promise<ExternalIds[]> {
-    if (contentLists.size === 0) {
-      return [];
-    }
-
     const idsMap = new Map<string, ExternalIds>();
 
-    for (const listId of contentLists) {
-      if (listId.length !== 24) {
-        this.logger.warn(`Skipping invalid list ID: ${listId}`);
+    for (const listId of this.#getValidListIds(contentLists)) {
+      const items = await this.#fetchAllListItems(
+        listId,
+        "Shows",
+        getShowsResponseSchema,
+      );
 
-        continue;
-      }
-
-      let page = 1;
-      let totalPages = 1;
-
-      while (page <= totalPages) {
-        const response = await this.get<unknown>(
-          `List/Shows/${listId}/ReleaseDate/Descending/${page.toString()}`,
-          {
-            cacheOptions: {
-              ttl: 60 * 2,
-            },
-          },
-        );
-
-        const parsed = getShowsResponseSchema.parse(response);
-
-        totalPages = parsed.pages ?? 1;
-
-        if (parsed.items) {
-          for (const item of parsed.items) {
-            if (item.id) {
-              idsMap.set(item.id, {
-                imdbId: item.imDbId ?? undefined,
-                tvdbId: item.tvDbId?.toString(),
-                tmdbId: item.tmDbId?.toString(),
-              });
-            }
-          }
+      for (const item of items) {
+        if (!item.id) {
+          continue;
         }
 
-        page += 1;
+        idsMap.set(item.id, {
+          imdbId: item.imDbId ?? undefined,
+          tvdbId: item.tvDbId?.toString(),
+          tmdbId: item.tmDbId?.toString(),
+        });
       }
     }
 
@@ -96,53 +79,73 @@ export class ListrrAPI extends BaseDataSource<ListrrSettings> {
    * @param contentLists
    */
   public async getMovies(contentLists: Set<string>): Promise<ExternalIds[]> {
-    if (contentLists.size === 0) {
-      return [];
-    }
-
     const idsMap = new Map<string, ExternalIds>();
 
-    for (const listId of contentLists) {
-      if (listId.length !== 24) {
-        this.logger.warn(`Skipping invalid list ID: ${listId}`);
+    for (const listId of this.#getValidListIds(contentLists)) {
+      const items = await this.#fetchAllListItems(
+        listId,
+        "Movies",
+        getMoviesResponseSchema,
+      );
 
-        continue;
-      }
-
-      let page = 1;
-      let totalPages = 1;
-
-      while (page <= totalPages) {
-        const response = await this.get<unknown>(
-          `List/Movies/${listId}/ReleaseDate/Descending/${page.toString()}`,
-          {
-            cacheOptions: {
-              ttl: 60 * 2,
-            },
-          },
-        );
-
-        const parsed = getMoviesResponseSchema.parse(response);
-
-        totalPages = parsed.pages ?? 1;
-
-        if (parsed.items) {
-          for (const item of parsed.items) {
-            if (!item.id) {
-              continue;
-            }
-
-            idsMap.set(item.id, {
-              imdbId: item.imDbId ?? undefined,
-              tmdbId: item.tmDbId?.toString(),
-            });
-          }
+      for (const item of items) {
+        if (!item.id) {
+          continue;
         }
 
-        page += 1;
+        idsMap.set(item.id, {
+          imdbId: item.imDbId ?? undefined,
+          tmdbId: item.tmDbId?.toString(),
+        });
       }
     }
 
     return [...idsMap.values()];
+  }
+
+  #getValidListIds(contentLists: Set<string>) {
+    return [...contentLists].filter((listId) => {
+      const isValid = listId.length === 24;
+
+      if (!isValid) {
+        this.logger.warn(`Skipping invalid list ID: ${listId}`);
+      }
+
+      return isValid;
+    });
+  }
+
+  /**
+   * Fetch every page of items in a Listrr list
+   */
+  async #fetchAllListItems<T>(
+    listId: string,
+    mediaType: "Movies" | "Shows",
+    responseSchema: PagedResponseSchema<T>,
+  ) {
+    const items: T[] = [];
+
+    let page = 1;
+    let totalPages = 1;
+
+    while (page <= totalPages) {
+      const response = await this.get<unknown>(
+        `List/${mediaType}/${listId}/ReleaseDate/Descending/${page.toString()}`,
+        {
+          cacheOptions: {
+            ttl: 60 * 2,
+          },
+        },
+      );
+
+      const parsed = responseSchema.parse(response);
+
+      totalPages = parsed.pages ?? 1;
+      items.push(...(parsed.items ?? []));
+
+      page += 1;
+    }
+
+    return items;
   }
 }

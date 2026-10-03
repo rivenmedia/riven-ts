@@ -37,7 +37,7 @@ export function initApolloClient(uri: URL, signal?: AbortSignal) {
     return client;
   }
 
-  return (client = new ApolloClient({
+  client = new ApolloClient({
     cache: new InMemoryCache({
       possibleTypes: {
         MediaItem: ["Movie", "Show", "Season", "Episode"],
@@ -51,5 +51,7 @@ export function initApolloClient(uri: URL, signal?: AbortSignal) {
         signal: signal ?? null,
       },
     }),
-  }));
+  });
+
+  return client;
 }

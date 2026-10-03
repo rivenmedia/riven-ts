@@ -40,89 +40,140 @@ function buildCommonConfig(
   };
 }
 
+type SettingEntry = [name: string, setting: SettingFieldProps];
+
+function buildStringSetting(
+  schema: $ZodType,
+  key: string | undefined,
+  required: boolean,
+): SettingEntry {
+  const { minLength, maxLength } = schema as ZodString;
+  const commonConfig = buildCommonConfig(schema, key);
+
+  if (getSchemaMetadata(schema).secret) {
+    return [
+      commonConfig.name,
+      {
+        type: "secret",
+        config: {
+          ...commonConfig,
+          registerOptions: { required },
+        },
+      },
+    ];
+  }
+
+  return [
+    commonConfig.name,
+    {
+      type: "text",
+      config: {
+        ...commonConfig,
+        registerOptions: {
+          ...(minLength == null ? {} : { minLength }),
+          ...(maxLength == null ? {} : { maxLength }),
+          required,
+        },
+      },
+    },
+  ];
+}
+
+function buildBooleanSetting(
+  schema: $ZodType,
+  key: string | undefined,
+  required: boolean,
+): SettingEntry {
+  const commonConfig = buildCommonConfig(schema, key);
+
+  if (!required) {
+    return [
+      commonConfig.name,
+      {
+        type: "nullable_boolean",
+        config: {
+          ...commonConfig,
+          registerOptions: { required: true },
+        },
+      },
+    ];
+  }
+
+  return [
+    commonConfig.name,
+    {
+      type: "boolean",
+      config: {
+        ...commonConfig,
+        registerOptions: { required: true },
+      },
+    },
+  ];
+}
+
+function getNumberStep(multipleOf: unknown, isInt: boolean) {
+  if (typeof multipleOf === "number" && Number.isFinite(multipleOf)) {
+    return multipleOf;
+  }
+
+  return isInt ? 1 : 0.01;
+}
+
+function buildNumberSetting(
+  schema: $ZodType,
+  key: string | undefined,
+  required: boolean,
+): SettingEntry {
+  const commonConfig = buildCommonConfig(schema, key);
+
+  const { minValue, maxValue, format, _zod } = schema as ZodNumber;
+  const hasMinConstraint = minValue != null && Number.isFinite(minValue);
+  const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
+
+  const { multipleOf } = _zod.bag;
+
+  return [
+    commonConfig.name,
+    {
+      type: "number",
+      config: {
+        ...commonConfig,
+        registerOptions: {
+          ...(hasMinConstraint ? { min: minValue } : {}),
+          ...(hasMaxConstraint ? { max: maxValue } : {}),
+          required,
+          valueAsNumber: true,
+        },
+        step: getNumberStep(multipleOf, format === "safeint"),
+      },
+    },
+  ];
+}
+
 export function buildSettingsConfigFromZodSchema(
   schema: $ZodType,
   key?: string,
   required = true,
-) {
+): Map<string, SettingFieldProps> {
   const settings = new Map<string, SettingFieldProps>();
   const meta = getSchemaMetadata(schema);
 
   switch (schema._zod.def.type) {
     case "string": {
-      const { minLength, maxLength } = schema as ZodString;
-      const commonConfig = buildCommonConfig(schema, key);
+      const [name, setting] = buildStringSetting(schema, key, required);
 
-      if (meta.secret) {
-        return settings.set(commonConfig.name, {
-          type: "secret",
-          config: {
-            ...commonConfig,
-            registerOptions: { required },
-          },
-        });
-      }
-
-      return settings.set(commonConfig.name, {
-        type: "text",
-        config: {
-          ...commonConfig,
-          registerOptions: {
-            ...(minLength == null ? {} : { minLength }),
-            ...(maxLength == null ? {} : { maxLength }),
-            required,
-          },
-        },
-      });
+      return settings.set(name, setting);
     }
     case "boolean": {
-      const commonConfig = buildCommonConfig(schema, key);
+      const [name, setting] = buildBooleanSetting(schema, key, required);
 
-      if (!required) {
-        return settings.set(commonConfig.name, {
-          type: "nullable_boolean",
-          config: {
-            ...commonConfig,
-            registerOptions: { required: true },
-          },
-        });
-      }
-
-      return settings.set(commonConfig.name, {
-        type: "boolean",
-        config: {
-          ...commonConfig,
-          registerOptions: { required: true },
-        },
-      });
+      return settings.set(name, setting);
     }
     case "int":
     case "number": {
-      const commonConfig = buildCommonConfig(schema, key);
+      const [name, setting] = buildNumberSetting(schema, key, required);
 
-      const { minValue, maxValue, format, _zod } = schema as ZodNumber;
-      const hasMinConstraint = minValue != null && Number.isFinite(minValue);
-      const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
-
-      const { multipleOf } = _zod.bag;
-      const hasStepConstraint =
-        typeof multipleOf === "number" && Number.isFinite(multipleOf);
-
-      const isInt = format === "safeint";
-
-      return settings.set(commonConfig.name, {
-        type: "number",
-        config: {
-          ...commonConfig,
-          registerOptions: {
-            ...(hasMinConstraint ? { min: minValue } : {}),
-            ...(hasMaxConstraint ? { max: maxValue } : {}),
-            required,
-            valueAsNumber: true,
-          },
-          step: hasStepConstraint ? multipleOf : isInt ? 1 : 0.01,
-        },
-      });
+      return settings.set(name, setting);
     }
     case "enum": {
       const commonConfig = buildCommonConfig(schema, key);
@@ -184,21 +235,19 @@ export function buildSettingsConfigFromZodSchema(
       });
     }
     case "object": {
-      const nestedSettings = new Map<string, SettingFieldProps>();
-
       const { shape } = schema as ZodObject<Record<string, ZodType>>;
 
-      for (const [fieldKey, fieldSchema] of Object.entries(shape)) {
-        const setting = buildSettingsConfigFromZodSchema(
-          fieldSchema,
-          [key, fieldKey].filter(Boolean).join("."),
-          required,
-        );
-
-        for (const [nestedKey, nestedSetting] of setting) {
-          nestedSettings.set(nestedKey, nestedSetting);
-        }
-      }
+      const nestedSettings = new Map<string, SettingFieldProps>(
+        Object.entries(shape).flatMap(([fieldKey, fieldSchema]) =>
+          buildSettingsConfigFromZodSchema(
+            fieldSchema,
+            [key, fieldKey].filter(Boolean).join("."),
+            required,
+          )
+            .entries()
+            .toArray(),
+        ),
+      );
 
       // A key means this object is nested within a parent schema, so it's
       // rendered as its own group rather than flattened into the parent.
@@ -213,11 +262,7 @@ export function buildSettingsConfigFromZodSchema(
         });
       }
 
-      for (const [nestedKey, nestedSetting] of nestedSettings) {
-        settings.set(nestedKey, nestedSetting);
-      }
-
-      return settings;
+      return nestedSettings;
     }
     case "default": {
       const innerSchema = (schema as ZodDefault).unwrap();
