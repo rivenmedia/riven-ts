@@ -1,21 +1,25 @@
 import preview from "@/.storybook/preview";
 
-import { expect, userEvent, waitFor, within } from "storybook/test";
+import { expect, waitFor, within } from "storybook/test";
 
+import { defaultTheme } from "../providers/theme-provider";
 import { ThemeSwitcher } from "./theme-switcher";
 
 const meta = preview.meta({
   title: "Components/Theme Switcher",
   component: ThemeSwitcher,
+  beforeEach() {
+    return () => {
+      localStorage.setItem("theme", defaultTheme);
+    };
+  },
 });
 
 export const Default = meta.story({});
 
 Default.test(
   "Switches the theme when a selection is made",
-  async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
+  async ({ canvas, canvasElement, userEvent }) => {
     const testCases = [
       [/amber minimal/iu, "amberminimal"],
       [/amethyst haze/iu, "amethysthaze"],

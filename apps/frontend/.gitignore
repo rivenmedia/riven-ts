@@ -10,3 +10,4 @@ certificates/
 *storybook.log
 storybook-static/
 public/mockServiceWorker.js
+__screenshots__

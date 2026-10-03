@@ -20,7 +20,7 @@ runs:
           ${{ runner.os }}-knip-cache-${{ inputs.task }}-
 
     - name: Install Playwright dependencies
-      if: ${{ inputs.task == 'test:component' }}
+      if: ${{ contains(fromJSON('["test:component", "test:visual"]'), inputs.task) }}
       shell: bash
       run: |
         PLAYWRIGHT_VERSION=$(

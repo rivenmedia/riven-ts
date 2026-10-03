@@ -16,9 +16,6 @@ const meta = preview.meta({
   title: "ui/Pagination",
   component: Pagination,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   render: (args) => (
     <Pagination {...args}>

@@ -33,9 +33,6 @@ const meta = preview.meta({
   title: "ui/Field",
   component: Field,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {
     orientation: {
       control: "select",

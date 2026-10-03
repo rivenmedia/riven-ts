@@ -83,7 +83,7 @@ jobs:
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ${{ inputs.runner }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       checks: write
     steps:
@@ -134,7 +134,7 @@ jobs:
       - name: Post-verification steps
         if: always()
         uses: ./.github/actions/post-verify
-        timeout-minutes: 5
+        timeout-minutes: 10
         with:
           task: ${{ inputs.task }}
           success: ${{ steps.run-task.outcome == 'success' }}

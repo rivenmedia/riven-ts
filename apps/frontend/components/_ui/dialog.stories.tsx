@@ -20,9 +20,6 @@ const meta = preview.meta({
   title: "ui/Dialog",
   component: Dialog,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   render: (args) => (
     <Dialog {...args}>

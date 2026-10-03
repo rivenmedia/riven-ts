@@ -25,3 +25,14 @@ runs:
         path: knip-report.json
         retention-days: 1
         if-no-files-found: error
+
+    - name: Compare screenshots
+      if: ${{ inputs.task == 'test:component' }}
+      uses: reg-viz/reg-actions@v3
+      with:
+        github-token: ${{ github.token }}
+        image-directory-path: apps/frontend/__screenshots__
+        artifact-name: screenshots
+        threshold-pixel: 50
+        outdated-comment-action: update
+        matching-threshold: 0.1 # Ignores minor rendering noise from blurs, gradients and image decoding

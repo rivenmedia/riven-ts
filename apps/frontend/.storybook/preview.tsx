@@ -6,15 +6,11 @@ import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
 import { Providers } from "@/components/providers";
 
 import { resetApolloClientSingletons } from "@apollo/client-integration-nextjs";
-import chromaticAddon from "@chromatic-com/storybook";
-import { faker } from "@faker-js/faker";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { headers } from "@storybook/nextjs-vite/headers.mock";
-import isChromatic from "chromatic/isChromatic";
-import { DateTime, Settings } from "luxon";
 import mswAddon from "msw-storybook-addon";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
@@ -24,15 +20,15 @@ import { themes } from "storybook/theming";
 import { WithI18n } from "./decorators/with-i18n";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
 
+import type { ScreenshotParameters } from "@storycap-testrun/browser";
+
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
 
-if (isChromatic()) {
-  const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
-
-  Settings.now = () => baseDate.toMillis();
-
-  faker.seed(42);
+declare module "@storybook/nextjs-vite" {
+  interface Parameters {
+    screenshot?: ScreenshotParameters;
+  }
 }
 
 declare module "storybook/test" {
@@ -67,13 +63,7 @@ declare module "storybook/internal/csf" {
 
 export const preview = definePreview({
   tags: ["autodocs"],
-  addons: [
-    addonA11y(),
-    addonDocs(),
-    addonVitest(),
-    chromaticAddon(),
-    mswAddon(),
-  ],
+  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon()],
   parameters: {
     i18n,
     controls: {
@@ -101,9 +91,6 @@ export const preview = definePreview({
       storySort: {
         method: "alphabetical",
       },
-    },
-    chromatic: {
-      prefersReducedMotion: "reduce", // Helps prevent animations from causing screenshot diffs
     },
   },
   globalTypes: {

@@ -84,7 +84,7 @@ const meta = preview.meta({
     ] satisfies IndexerData[],
   },
   parameters: {
-    chromatic: {
+    screenshot: {
       delay: 2500, // Half way between autoplay transitions to prevent taking screenshots mid-switch
     },
   },
@@ -96,8 +96,8 @@ Default.test(
   "Navigates to the next slide when the next button is clicked",
   {
     parameters: {
-      chromatic: {
-        disableSnapshot: true,
+      screenshot: {
+        skip: true,
       },
     },
   },
@@ -136,8 +136,8 @@ Default.test(
   "Navigates to the previous slide when the previous button is clicked",
   {
     parameters: {
-      chromatic: {
-        disableSnapshot: true,
+      screenshot: {
+        skip: true,
       },
     },
   },
@@ -181,8 +181,8 @@ Default.test(
       autoplayDelay: 1000,
     },
     parameters: {
-      chromatic: {
-        disableSnapshot: true,
+      screenshot: {
+        skip: true,
       },
     },
   },
@@ -231,8 +231,8 @@ Default.test(
       autoplayDelay: 1000,
     },
     parameters: {
-      chromatic: {
-        disableSnapshot: true,
+      screenshot: {
+        skip: true,
       },
     },
   },
@@ -264,8 +264,8 @@ Default.test(
       autoplayDelay: 5000,
     },
     parameters: {
-      chromatic: {
-        disableSnapshot: true,
+      screenshot: {
+        skip: true,
       },
     },
   },

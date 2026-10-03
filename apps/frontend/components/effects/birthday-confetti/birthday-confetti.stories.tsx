@@ -7,7 +7,9 @@ const meta = preview.meta({
   component: BirthdayConfetti,
   parameters: {
     layout: "fullscreen",
-    chromatic: { disableSnapshot: true },
+    screenshot: {
+      skip: true,
+    },
   },
 });
 

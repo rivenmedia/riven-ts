@@ -8,9 +8,6 @@ const meta = preview.meta({
   title: "ui/Skeleton",
   component: Skeleton,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
 });
 

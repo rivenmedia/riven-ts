@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "msw": {
+      "source": "anivar/msw-skill",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "789904de007a528cb6f198cf32c9a9e3aba73149a8eb3365310672edc09abd18"
+    },
     "safe-action-advanced": {
       "source": "next-safe-action/skills",
       "sourceType": "github",

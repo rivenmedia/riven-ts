@@ -30,6 +30,11 @@ const meta = preview.meta({
       ),
     );
   },
+  parameters: {
+    screenshot: {
+      fullPage: false,
+    },
+  },
 });
 
 export const Default = meta.story();

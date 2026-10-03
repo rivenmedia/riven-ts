@@ -10,9 +10,10 @@ permissions:
   contents: read
 
 on:
-  pull_request:
+  push:
     branches:
       - main
+  pull_request:
     types:
       - opened
       - reopened
@@ -26,7 +27,7 @@ jobs:
   verify:
     name: Verify - ${{ matrix.task.name }}
     permissions:
-      contents: read
+      contents: write
       pull-requests: write
       checks: write
     strategy:

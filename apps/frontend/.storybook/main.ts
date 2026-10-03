@@ -5,7 +5,6 @@ export default defineMain({
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
-    "@chromatic-com/storybook",
   ],
   stories: ["../{app,components,lib}/**/*.stories.@(js|jsx|mjs|ts|tsx)"],
   framework: "@storybook/nextjs-vite",

@@ -12,9 +12,6 @@ const meta = preview.meta({
   title: "ui/Input",
   component: Input,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   args: {
     className: "w-96",

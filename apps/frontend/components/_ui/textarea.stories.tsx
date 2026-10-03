@@ -10,9 +10,6 @@ const meta = preview.meta({
   title: "ui/Textarea",
   component: Textarea,
   tags: ["autodocs"],
-  parameters: {
-    chromatic: { disableSnapshot: true },
-  },
   argTypes: {},
   args: {
     placeholder: "Type your message here.",
