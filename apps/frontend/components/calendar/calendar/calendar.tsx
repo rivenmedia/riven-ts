@@ -49,11 +49,9 @@ export function Calendar({ items }: CalendarProps) {
       }
 
       const dateKey = DateTime.fromISO(item.airedAt).startOf("day").toISO();
-
-      const dayItems = result[dateKey] ?? [];
+      const dayItems = (result[dateKey] ??= []);
 
       dayItems.push(item);
-      result[dateKey] = dayItems;
     }
 
     return result;

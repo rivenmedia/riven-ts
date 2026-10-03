@@ -10,7 +10,7 @@ const sceneWebReleasePattern = String.raw`^(?=.*\b\d{3,4}p\b.*[_. ]WEB[_. ](?!DL
 /**
  * Release groups that are known to publish scene releases
  */
-const sceneReleaseGroups = [
+const sceneReleaseGroups = new Set([
   "CAKES",
   "GGEZ",
   "GGWP",
@@ -33,9 +33,9 @@ const sceneReleaseGroups = [
   "NHTFS",
   "SURCODE",
   "B0MBARDIERS",
-];
+]);
 
-const sceneReleaseGroupPattern = String.raw`\b-(?:${sceneReleaseGroups.join("|")})`;
+const sceneReleaseGroupPattern = String.raw`\b-(?:${[...sceneReleaseGroups].join("|")})`;
 
 export const sceneHandlers: Handler[] = [
   {

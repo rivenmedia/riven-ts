@@ -1,5 +1,5 @@
 /**
- * Whether a value should be considered "present" for the purposes of `atLeastOnePropertyRequired`.
+ * Whether a value should be considered "present" for the purposes of the refinement.
  *
  * Nullish values, blank strings, zero and empty arrays are all considered empty.
  */

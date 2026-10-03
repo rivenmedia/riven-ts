@@ -62,17 +62,17 @@ function getStepProgress(
   return isCompleted ? "completed" : "upcoming";
 }
 
-const stepButtonClassNames: Record<StepProgress, string> = {
+const stepButtonClassNames = {
   active: "border-white/14 bg-white/6 hover:bg-white/6",
   completed: "bg-background/40 hover:bg-background/55 border-white/12",
   upcoming: "bg-background/20 hover:bg-background/30 border-white/10",
-};
+} as const satisfies Record<StepProgress, string>;
 
-const stepNumberClassNames: Record<StepProgress, string> = {
+const stepNumberClassNames = {
   active: "text-foreground border-white/16 bg-white/10",
   completed: "text-foreground border-white/14 bg-white/6",
   upcoming: "text-muted-foreground border-white/10",
-};
+} as const satisfies Record<StepProgress, string>;
 
 export default function SetupStepPage() {
   const { step } = useParams<ParamsOf<"/setup/[step]">>();
