@@ -10,4 +10,9 @@ certificates/
 *storybook.log
 storybook-static/
 public/mockServiceWorker.js
-__screenshots__
+
+# Visual testing - only the container-rendered baselines are committed
+__vis__/local/
+__vis__/**/__results__/
+__vis__/**/__diffs__/
+.vis-report/

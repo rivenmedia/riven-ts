@@ -42,7 +42,16 @@
       "outputs": ["storybook-static"]
     },
     "test:component": {
-      "outputs": ["__screenshots__"]
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        // Changes to styles, static assets or baselines all affect the visual snapshots
+        "**/*.css",
+        "public/**",
+        "__vis__/docker/__baselines__/**"
+      ],
+      "outputs": ["__vis__/**/__results__/**", "__vis__/**/__diffs__/**"],
+      // Switches to the containerised browser. Not part of the hash, as the endpoint's port changes on every run.
+      "passThroughEnv": ["VIS_BROWSER_WS_ENDPOINT"]
     }
   }
 }

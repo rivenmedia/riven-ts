@@ -26,13 +26,35 @@ runs:
         retention-days: 1
         if-no-files-found: error
 
-    - name: Compare screenshots
+    - name: Generate visual report
+      id: visual-report
       if: ${{ inputs.task == 'test:component' }}
-      uses: reg-viz/reg-actions@v3
+      shell: bash
+      working-directory: apps/frontend
+      run: node scripts/vis-report.ts generate --root __vis__/docker --head-sha "$HEAD_SHA" --pr-number "$PR_NUMBER"
+      env:
+        # `github.sha` is the merge commit for pull requests, but approvals are made against the head commit
+        HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
+
+    # Consumed by the "Report visual results" and "Approve visual changes" workflows
+    - name: Upload visual results
+      if: ${{ steps.visual-report.outcome == 'success' }}
+      uses: actions/upload-artifact@v7
       with:
-        github-token: ${{ github.token }}
-        image-directory-path: apps/frontend/__screenshots__
-        artifact-name: screenshots
-        threshold-pixel: 50
-        outdated-comment-action: update
-        matching-threshold: 0.1 # Ignores minor rendering noise from blurs, gradients and image decoding
+        name: vis-results
+        path: |
+          apps/frontend/.vis-report/manifest.json
+          apps/frontend/.vis-report/images/
+        retention-days: 14
+        if-no-files-found: error
+
+    # Unzipped, so GitHub serves the report directly in the browser
+    - name: Upload visual report
+      if: ${{ steps.visual-report.outcome == 'success' }}
+      uses: actions/upload-artifact@v7
+      with:
+        path: apps/frontend/.vis-report/visual-report.html
+        archive: false
+        retention-days: 14
+        if-no-files-found: error

@@ -1,0 +1,218 @@
+name: Report visual results
+
+description: |
+  Posts the visual regression results from the Verify workflow as a pull request comment.
+
+  Runs from the default branch with write permissions, so it only reads the results of the (untrusted) pull request run
+  and never executes its code.
+
+on:
+  workflow_run:
+    workflows:
+      - Verify
+    types:
+      - completed
+
+permissions: {}
+
+jobs:
+  report:
+    name: Report visual results
+    if: github.event.workflow_run.event == 'pull_request' &&
+      github.event.workflow_run.conclusion != 'cancelled'
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: write # Publishes the images to the `vis-assets` branch
+      pull-requests: write
+    concurrency:
+      group: report-visual-results-${{ github.event.workflow_run.head_branch }}
+      cancel-in-progress: true
+    env:
+      ASSETS_BRANCH: vis-assets
+      RUN_ID: ${{ github.event.workflow_run.id }}
+    steps:
+      - name: Find pull request
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const run = context.payload.workflow_run;
+
+            // `pull_requests` is empty for pull requests from forks, so fall back to searching by branch
+            let number = run.pull_requests[0]?.number;
+
+            if (!number) {
+              const pulls = await github.paginate(github.rest.pulls.list, {
+                ...context.repo,
+                state: "open",
+                head: `${run.head_repository.owner.login}:${run.head_branch}`,
+              });
+
+              number = pulls.find((pull) => pull.head.sha === run.head_sha)?.number;
+            }
+
+            if (!number) {
+              core.notice(`No open pull request found for ${run.head_sha}`);
+            }
+
+            core.setOutput("number", number ?? "");
+
+      - name: Check out report scripts
+        if: steps.pr.outputs.number
+        uses: actions/checkout@v6
+        with:
+          # The default branch, as `workflow_run` is trusted
+          sparse-checkout: |
+            apps/frontend/scripts/vis-report.ts
+            apps/frontend/.storybook/vis-paths.ts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        if: steps.pr.outputs.number
+        with:
+          node-version-file: .node-version
+
+      - name: Download visual results
+        id: download
+        if: steps.pr.outputs.number
+        continue-on-error: true # Not uploaded when the component tests were skipped as unaffected
+        uses: actions/download-artifact@v7
+        with:
+          name: vis-results
+          path: ${{ runner.temp }}/vis-results
+          github-token: ${{ github.token }}
+          run-id: ${{ env.RUN_ID }}
+
+      - name: Check results match the run
+        id: results
+        if: steps.download.outcome == 'success'
+        env:
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          MANIFEST: ${{ runner.temp }}/vis-results/manifest.json
+        run: |
+          if [ "$(jq -r '.headSha' "$MANIFEST")" != "$HEAD_SHA" ]; then
+            echo "::error::Visual results are for a different commit than $HEAD_SHA"
+            exit 1
+          fi
+
+          echo "entries=$(jq '.entries | length' "$MANIFEST")" >> "$GITHUB_OUTPUT"
+
+      - name: Publish images
+        if: steps.results.outputs.entries > 0
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          RESULTS: ${{ runner.temp }}/vis-results
+          ASSETS: ${{ runner.temp }}/vis-assets
+        run: |
+          # Only validated PNGs listed in the manifest are copied from the untrusted results
+          node apps/frontend/scripts/vis-report.ts stage-images \
+            --manifest "$RESULTS/manifest.json" \
+            --images "$RESULTS/images" \
+            --to "$ASSETS/pr-$PR_NUMBER/$RUN_ID"
+
+          cd "$ASSETS"
+          git init --quiet
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+          git add --all
+          git commit --quiet --message "chore: add visual results for #$PR_NUMBER (run $RUN_ID)"
+
+          # Retries in case another pull request's report was pushed in the meantime
+          for attempt in 1 2 3; do
+            if git fetch --quiet --depth=1 origin "$ASSETS_BRANCH"; then
+              git rebase --quiet FETCH_HEAD
+            fi
+
+            git push --quiet origin "HEAD:refs/heads/$ASSETS_BRANCH" && exit 0
+
+            sleep $((attempt * 5))
+          done
+
+          exit 1
+
+      - name: Build comment
+        id: comment
+        if: steps.pr.outputs.number
+        uses: actions/github-script@v8
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          RESULTS: ${{ runner.temp }}/vis-results
+          HAS_RESULTS: ${{ steps.results.outcome == 'success' }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        with:
+          script: |
+            const { execFileSync } = require("node:child_process");
+            const { HAS_RESULTS, PR_NUMBER, RESULTS, RUN_ID, RUN_URL, ASSETS_BRANCH } = process.env;
+
+            if (HAS_RESULTS !== "true") {
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, {
+                ...context.repo,
+                run_id: Number(RUN_ID),
+              });
+
+              const componentTests = jobs.find(
+                (job) => job.name.startsWith("Verify - Component tests") && job.name.includes("Run "),
+              );
+
+              const message =
+                componentTests && componentTests.conclusion !== "skipped"
+                  ? "⚠️ The component tests didn't produce any visual results - check the workflow run."
+                  : "✅ No visual changes detected - the component tests weren't affected by this change.";
+
+              core.setOutput("body", [
+                "<!-- vis-report -->",
+                "## Visual changes",
+                "",
+                `${message} [Workflow run](${RUN_URL})`,
+              ].join("\n"));
+
+              return;
+            }
+
+            const artifacts = await github.paginate(github.rest.actions.listWorkflowRunArtifacts, {
+              ...context.repo,
+              run_id: Number(RUN_ID),
+            });
+
+            const report = artifacts.find((artifact) => artifact.name === "visual-report.html");
+
+            const body = execFileSync("node", [
+              "apps/frontend/scripts/vis-report.ts",
+              "comment",
+              "--manifest", `${RESULTS}/manifest.json`,
+              "--image-base", `https://raw.githubusercontent.com/${context.repo.owner}/${context.repo.repo}/${ASSETS_BRANCH}/pr-${PR_NUMBER}/${RUN_ID}`,
+              "--run-url", RUN_URL,
+              ...(report ? ["--report-url", `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${RUN_ID}/artifacts/${report.id}`] : []),
+            ], { encoding: "utf8" });
+
+            core.setOutput("body", body);
+
+      - name: Post comment
+        if: steps.comment.outputs.body
+        uses: actions/github-script@v8
+        env:
+          PR_NUMBER: ${{ steps.pr.outputs.number }}
+          BODY: ${{ steps.comment.outputs.body }}
+        with:
+          script: |
+            const { PR_NUMBER, BODY } = process.env;
+            const issue_number = Number(PR_NUMBER);
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...context.repo,
+              issue_number,
+            });
+
+            const existing = comments.find(
+              (comment) => comment.user.type === "Bot" && comment.body.startsWith("<!-- vis-report -->"),
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body: BODY });
+            } else {
+              await github.rest.issues.createComment({ ...context.repo, issue_number, body: BODY });
+            }

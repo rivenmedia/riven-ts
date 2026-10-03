@@ -19,18 +19,9 @@ runs:
         restore-keys: |
           ${{ runner.os }}-knip-cache-${{ inputs.task }}-
 
-    - name: Install Playwright dependencies
-      if: ${{ contains(fromJSON('["test:component", "test:visual"]'), inputs.task) }}
+    # Visual tests connect to a browser in the pinned Playwright container, so they render identically to local runs of `test:component:docker`
+    - name: Start Playwright server
+      if: ${{ inputs.task == 'test:component' }}
       shell: bash
-      run: |
-        PLAYWRIGHT_VERSION=$(
-          pnpm -r ls playwright --json -D --depth=0 | \
-          jq -r '.[] | select(.devDependencies.playwright != null) | .devDependencies.playwright.version // empty'
-        )
-
-        if [ -z "$PLAYWRIGHT_VERSION" ]; then
-          echo "::error::Unable to determine Playwright version"
-          exit 1
-        fi
-
-        pnx playwright@$PLAYWRIGHT_VERSION install chromium --with-deps
+      working-directory: apps/frontend
+      run: node scripts/playwright-server.ts start >> "$GITHUB_ENV"

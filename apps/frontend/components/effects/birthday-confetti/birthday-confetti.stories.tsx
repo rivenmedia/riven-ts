@@ -7,10 +7,8 @@ const meta = preview.meta({
   component: BirthdayConfetti,
   parameters: {
     layout: "fullscreen",
-    screenshot: {
-      skip: true,
-    },
   },
+  tags: ["!snapshot"],
 });
 
 export const Active = meta.story({

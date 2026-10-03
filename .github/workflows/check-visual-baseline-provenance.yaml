@@ -1,0 +1,88 @@
+name: Check visual baseline provenance
+
+description: |
+  Ensures every visual baseline changed by a pull request was committed by the GitHub App through
+  `/approve-visuals`, rather than by hand.
+
+  Uses `pull_request_target` so the check runs from the default branch and can't be changed by the pull request.
+  It only reads commit metadata from the API and never checks out or runs the pull request's code.
+
+on:
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+permissions: {}
+
+concurrency:
+  group: check-visual-baseline-provenance-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    name: Check visual baseline provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    steps:
+      - name: Check baselines were committed by the GitHub App
+        uses: actions/github-script@v8
+        env:
+          BASELINES_PATH: apps/frontend/__vis__/docker/__baselines__/
+          APP_SLUG: ${{ vars.VIS_APP_SLUG }}
+        with:
+          script: |
+            const { BASELINES_PATH, APP_SLUG } = process.env;
+            const pull_number = context.payload.pull_request.number;
+
+            const files = await github.paginate(github.rest.pulls.listFiles, { ...context.repo, pull_number });
+            const baselines = files.filter((file) => file.filename.startsWith(BASELINES_PATH));
+
+            if (baselines.length === 0) {
+              core.info("No visual baselines changed");
+              return;
+            }
+
+            if (!APP_SLUG) {
+              core.setFailed("The VIS_APP_SLUG repository variable must be set to check visual baselines");
+              return;
+            }
+
+            // Collect every file version written by a signed commit from the App. Comparing blob SHAs, rather than
+            // checking each commit's author, means merging the base branch in doesn't produce false positives
+            // and a hand-edited baseline can't hide in a merge commit.
+            const commits = await github.paginate(github.rest.pulls.listCommits, { ...context.repo, pull_number });
+            const approved = new Set();
+
+            for (const commit of commits) {
+              if (commit.author?.login !== `${APP_SLUG}[bot]` || !commit.commit.verification?.verified) {
+                continue;
+              }
+
+              const { data } = await github.rest.repos.getCommit({ ...context.repo, ref: commit.sha });
+
+              for (const file of data.files ?? []) {
+                approved.add(file.status === "removed" ? `${file.filename}:removed` : `${file.filename}:${file.sha}`);
+              }
+            }
+
+            const unapproved = baselines.filter((file) =>
+              !approved.has(file.status === "removed" ? `${file.filename}:removed` : `${file.filename}:${file.sha}`),
+            );
+
+            if (unapproved.length > 0) {
+              core.setFailed(
+                [
+                  `${unapproved.length} visual baseline(s) were not committed by /approve-visuals:`,
+                  ...unapproved.map((file) => `  - ${file.filename}`),
+                  "",
+                  "Remove these changes from the branch, then comment /approve-visuals on the pull request to update the baselines.",
+                ].join("\n"),
+              );
+              return;
+            }
+
+            core.info(`All ${baselines.length} changed visual baseline(s) were committed by /approve-visuals`);

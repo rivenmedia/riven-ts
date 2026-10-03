@@ -1,0 +1,55 @@
+name: Clean up visual results
+
+description: |
+  Removes a closed pull request's images from the `vis-assets` branch.
+
+  The branch is squashed to a single commit each time, so its history doesn't grow with every report.
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+permissions: {}
+
+concurrency:
+  group: vis-assets
+  cancel-in-progress: false
+
+jobs:
+  clean-up:
+    name: Clean up visual results
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      ASSETS_BRANCH: vis-assets
+      PR_NUMBER: ${{ github.event.pull_request.number }}
+    steps:
+      - name: Remove images
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git init --quiet assets && cd assets
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+
+          if ! git fetch --quiet --depth=1 origin "$ASSETS_BRANCH"; then
+            echo "No $ASSETS_BRANCH branch"
+            exit 0
+          fi
+
+          git checkout --quiet FETCH_HEAD
+
+          if [ ! -d "pr-$PR_NUMBER" ]; then
+            echo "No images for #$PR_NUMBER"
+            exit 0
+          fi
+
+          git rm --quiet -r "pr-$PR_NUMBER"
+          git checkout --quiet --orphan squashed
+          git commit --quiet --allow-empty --message "chore: visual results for open pull requests"
+
+          # Leaves the branch alone if a report was pushed since it was fetched - the next clean-up will catch up
+          git push --quiet --force-with-lease="$ASSETS_BRANCH:$(git rev-parse FETCH_HEAD)" origin "HEAD:refs/heads/$ASSETS_BRANCH"
