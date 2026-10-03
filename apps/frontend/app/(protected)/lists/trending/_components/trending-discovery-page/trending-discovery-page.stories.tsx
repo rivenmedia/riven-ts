@@ -27,7 +27,7 @@ export const Movies = meta.story({
   },
   beforeEach({ msw }) {
     msw.use(
-      graphql.query("GetDiscoveryItems", () =>
+      graphql.query(GET_DISCOVERY_ITEMS, () =>
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
