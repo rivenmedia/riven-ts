@@ -27,7 +27,9 @@
     "storybook": "storybook dev -p 6006 --no-open",
     "test": "vitest run --project unit",
     "test:component": "vitest run --project storybook",
-    "test:watch": "vitest watch"
+    "test:component:docker": "node scripts/playwright-server.ts run -- vitest run --project storybook",
+    "test:watch": "vitest watch",
+    "vis:report": "node scripts/vis-report.ts generate"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
@@ -88,7 +90,6 @@
     "@storybook/addon-docs": "^10.4.6",
     "@storybook/addon-vitest": "catalog:",
     "@storybook/nextjs-vite": "^10.4.6",
-    "@storycap-testrun/browser": "catalog:",
     "@tailwindcss/postcss": "catalog:",
     "@testing-library/dom": "catalog:",
     "@testing-library/jest-dom": "catalog:",
@@ -111,6 +112,7 @@
     "react-i18next": "catalog:",
     "recharts": "catalog:",
     "storybook": "^10.4.6",
+    "storybook-addon-vis": "catalog:",
     "typescript": "catalog:typescript7-native",
     "vaul": "catalog:",
     "vite": "^8.1.3",

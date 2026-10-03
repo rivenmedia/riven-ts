@@ -8,11 +8,7 @@ import { Toaster } from "./toaster";
 const meta = preview.meta({
   title: "Components / Toaster",
   component: Toaster,
-  parameters: {
-    screenshot: {
-      skip: true,
-    },
-  },
+  tags: ["!snapshot"],
 });
 
 export const Default = meta.story({

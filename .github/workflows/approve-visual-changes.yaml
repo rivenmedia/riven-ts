@@ -1,0 +1,257 @@
+name: Approve visual changes
+
+description: |
+  Commits the visual results of a pull request's latest Verify run as the new baselines when a maintainer comments
+  `/approve-visuals` (or `/approve-visuals prune` to also delete baselines that are no longer captured).
+
+  `issue_comment` always runs this file from the default branch, so pull requests can't change who may approve.
+  The commit is made by the GitHub App via the API, so it is signed, re-triggers Verify, and passes the
+  "Check visual baseline provenance" check.
+
+on:
+  issue_comment:
+    types:
+      - created
+
+permissions: {}
+
+jobs:
+  approve:
+    name: Approve visual changes
+    if: github.event.issue.pull_request &&
+      startsWith(github.event.comment.body, '/approve-visuals')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    concurrency:
+      group: approve-visual-changes-${{ github.event.issue.number }}
+    env:
+      BASELINES_PATH: apps/frontend/__vis__/docker/__baselines__
+    steps:
+      - name: Acknowledge comment
+        uses: actions/github-script@v8
+        with:
+          script: |
+            await github.rest.reactions.createForIssueComment({
+              ...context.repo,
+              comment_id: context.payload.comment.id,
+              content: "eyes",
+            });
+
+      - name: Check permissions and find results
+        id: pr
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const { comment } = context.payload;
+            const issue_number = context.issue.number;
+
+            const reject = async (message) => {
+              await github.rest.issues.createComment({
+                ...context.repo,
+                issue_number,
+                body: `@${comment.user.login} ${message}`,
+              });
+
+              core.setFailed(message);
+            };
+
+            const {
+              data: { permission },
+            } = await github.rest.repos.getCollaboratorPermissionLevel({
+              ...context.repo,
+              username: comment.user.login,
+            });
+
+            // `maintain` is reported as `write`
+            if (!["admin", "write"].includes(permission)) {
+              return reject("only maintainers with write access can approve visual changes.");
+            }
+
+            const { data: pr } = await github.rest.pulls.get({ ...context.repo, pull_number: issue_number });
+
+            if (pr.head.repo?.full_name !== `${context.repo.owner}/${context.repo.repo}`) {
+              return reject(
+                "visual changes can't be approved on pull requests from forks, as the baselines can't be pushed to the fork. " +
+                  "A maintainer can push this branch to the main repository and approve the changes there.",
+              );
+            }
+
+            const {
+              data: { workflow_runs: runs },
+            } = await github.rest.actions.listWorkflowRuns({
+              ...context.repo,
+              workflow_id: "verify.yaml",
+              head_sha: pr.head.sha,
+              event: "pull_request",
+            });
+
+            const run = runs.find((run) => run.status === "completed");
+
+            if (!run) {
+              return reject(`Verify hasn't finished for ${pr.head.sha.slice(0, 7)} yet - try again once it has.`);
+            }
+
+            core.setOutput("head-sha", pr.head.sha);
+            core.setOutput("head-ref", pr.head.ref);
+            core.setOutput("run-id", run.id);
+            core.setOutput("prune", /^\/approve-visuals\s+prune\b/u.test(comment.body));
+
+      - name: Download visual results
+        uses: actions/download-artifact@v7
+        with:
+          name: vis-results
+          path: ${{ runner.temp }}/vis-results
+          github-token: ${{ github.token }}
+          run-id: ${{ steps.pr.outputs.run-id }}
+
+      - name: Check out report scripts
+        uses: actions/checkout@v6
+        with:
+          # The default branch, as `issue_comment` is trusted
+          sparse-checkout: |
+            apps/frontend/scripts/vis-report.ts
+            apps/frontend/.storybook/vis-paths.ts
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      - name: Prepare baseline changes
+        id: changes
+        env:
+          HEAD_SHA: ${{ steps.pr.outputs.head-sha }}
+          PRUNE: ${{ steps.pr.outputs.prune }}
+          RESULTS: ${{ runner.temp }}/vis-results
+          CHANGES: ${{ runner.temp }}/baseline-changes.json
+        run: |
+          # Only validated PNGs listed in the manifest are used from the untrusted results
+          node apps/frontend/scripts/vis-report.ts baseline-changes \
+            --manifest "$RESULTS/manifest.json" \
+            --images "$RESULTS/images" \
+            --baselines "$BASELINES_PATH" \
+            $([ "$PRUNE" = "true" ] && echo "--prune") > "$CHANGES"
+
+          # Approvals apply to the results that were reviewed, so refuse if the branch has moved on since
+          if [ "$(jq -r '.headSha' "$CHANGES")" != "$HEAD_SHA" ]; then
+            echo "::error::Visual results are not for the pull request's head commit $HEAD_SHA"
+            exit 1
+          fi
+
+          echo "count=$(jq '(.additions | length) + (.deletions | length)' "$CHANGES")" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub App token
+        id: app-token
+        if: steps.changes.outputs.count > 0
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.VIS_APP_ID }}
+          private-key: ${{ secrets.VIS_APP_PRIVATE_KEY }}
+          permission-contents: write
+
+      - name: Commit baselines
+        id: commit
+        if: steps.changes.outputs.count > 0
+        uses: actions/github-script@v8
+        env:
+          HEAD_SHA: ${{ steps.pr.outputs.head-sha }}
+          HEAD_REF: ${{ steps.pr.outputs.head-ref }}
+          CHANGES: ${{ runner.temp }}/baseline-changes.json
+        with:
+          github-token: ${{ steps.app-token.outputs.token }}
+          script: |
+            const { readFileSync } = require("node:fs");
+            const { HEAD_SHA, HEAD_REF, CHANGES } = process.env;
+            const { additions, deletions } = JSON.parse(readFileSync(CHANGES, "utf8"));
+            const { user } = context.payload.comment;
+
+            // Keeps each request and commit to a manageable size
+            const chunkSize = 100;
+            const changes = [
+              ...additions.map((addition) => ({ additions: [addition] })),
+              ...deletions.map((deletion) => ({ deletions: [deletion] })),
+            ];
+            const chunks = Array.from({ length: Math.ceil(changes.length / chunkSize) }, (_, index) =>
+              changes.slice(index * chunkSize, (index + 1) * chunkSize),
+            );
+
+            let expectedHeadOid = HEAD_SHA;
+
+            for (const [index, chunk] of chunks.entries()) {
+              const suffix = chunks.length > 1 ? ` (${index + 1}/${chunks.length})` : "";
+
+              const { createCommitOnBranch } = await github.graphql(
+                `mutation ($input: CreateCommitOnBranchInput!) {
+                  createCommitOnBranch(input: $input) {
+                    commit { oid }
+                  }
+                }`,
+                {
+                  input: {
+                    branch: {
+                      repositoryNameWithOwner: `${context.repo.owner}/${context.repo.repo}`,
+                      branchName: HEAD_REF,
+                    },
+                    // Fails if anything was pushed since the results were generated
+                    expectedHeadOid,
+                    message: {
+                      headline: `chore(frontend): update visual baselines${suffix}`,
+                      body: [
+                        `Approved by @${user.login} in #${context.issue.number} for ${HEAD_SHA}.`,
+                        "",
+                        `Co-authored-by: ${user.login} <${user.id}+${user.login}@users.noreply.github.com>`,
+                      ].join("\n"),
+                    },
+                    fileChanges: {
+                      additions: chunk.flatMap((change) => change.additions ?? []),
+                      deletions: chunk.flatMap((change) => change.deletions ?? []),
+                    },
+                  },
+                },
+              );
+
+              expectedHeadOid = createCommitOnBranch.commit.oid;
+            }
+
+            core.setOutput("oid", expectedHeadOid);
+
+      - name: Report outcome
+        if: always()
+        uses: actions/github-script@v8
+        env:
+          OUTCOME: ${{ job.status }}
+          COUNT: ${{ steps.changes.outputs.count }}
+          COMMIT: ${{ steps.commit.outputs.oid }}
+          PERMISSION_OUTCOME: ${{ steps.pr.outcome }}
+        with:
+          script: |
+            const { OUTCOME, COUNT, COMMIT, PERMISSION_OUTCOME } = process.env;
+            const { comment } = context.payload;
+            const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+
+            // Rejections have already been explained
+            if (PERMISSION_OUTCOME === "failure") {
+              await github.rest.reactions.createForIssueComment({ ...context.repo, comment_id: comment.id, content: "-1" });
+              return;
+            }
+
+            let body;
+
+            if (OUTCOME !== "success") {
+              body = `@${comment.user.login} the visual changes couldn't be approved - see the [workflow run](${runUrl}).`;
+            } else if (COUNT === "0") {
+              body = `@${comment.user.login} there are no visual changes to approve.`;
+            } else {
+              body = `@${comment.user.login} approved ${COUNT} visual change(s) in ${COMMIT}. Verify will now re-run against the new baselines.`;
+            }
+
+            await github.rest.issues.createComment({ ...context.repo, issue_number: context.issue.number, body });
+            await github.rest.reactions.createForIssueComment({
+              ...context.repo,
+              comment_id: comment.id,
+              content: OUTCOME === "success" ? "rocket" : "confused",
+            });
