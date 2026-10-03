@@ -61,7 +61,9 @@ export async function processHealthCheckResponse(context: StepContext) {
 
       break;
     }
-    case "dead":
+    case "dead": {
+      break;
+    }
   }
 
   await job.updateData({
