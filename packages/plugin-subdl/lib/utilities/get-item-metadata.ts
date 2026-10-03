@@ -2,7 +2,7 @@ import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
-interface ItemMetadata {
+export interface ItemMetadata {
   type: "movie" | "tv";
   tmdbId: string | undefined;
   imdbId: string | undefined;

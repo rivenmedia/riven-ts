@@ -10,6 +10,14 @@ export interface CalendarDayCellProps {
   isToday: boolean;
 }
 
+function getDayNumberClassName(isToday: boolean, isCurrentMonth: boolean) {
+  if (isToday) {
+    return "bg-primary text-primary-foreground";
+  }
+
+  return isCurrentMonth ? "text-foreground" : "text-muted-foreground/70";
+}
+
 export function CalendarDayCell({ day, isToday }: CalendarDayCellProps) {
   return (
     <div
@@ -30,11 +38,7 @@ export function CalendarDayCell({ day, isToday }: CalendarDayCellProps) {
         <div
           className={cn(
             "flex size-7 items-center justify-center rounded-md text-sm font-semibold",
-            isToday
-              ? "bg-primary text-primary-foreground"
-              : day.isCurrentMonth
-                ? "text-foreground"
-                : "text-muted-foreground/70",
+            getDayNumberClassName(isToday, day.isCurrentMonth),
           )}
         >
           {day.date.day}

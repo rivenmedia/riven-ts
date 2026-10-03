@@ -16,8 +16,9 @@ const extractPart = (
 
   const { dir, base } = path.parse(entry.path);
   const [showName, seasonName] = dir.split(path.sep);
+  const seasonPart = season ? base : seasonName;
 
-  return tvdbId ? (season ? base : seasonName) : showName;
+  return tvdbId ? seasonPart : showName;
 };
 
 export const getShowsDirectoryEntries = async (

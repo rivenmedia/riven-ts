@@ -256,3 +256,15 @@ it("handles foreign language shows with aliases correctly", async ({
     }),
   ]);
 });
+
+it.todo(
+  'includes non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is disabled',
+);
+
+it.todo(
+  'does not include non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
+);
+
+it.todo(
+  'includes dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
+);

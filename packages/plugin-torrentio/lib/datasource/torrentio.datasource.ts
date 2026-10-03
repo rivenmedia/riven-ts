@@ -19,7 +19,7 @@ class TorrentioAPIError extends Error {
 }
 
 export class TorrentioAPI extends BaseDataSource<TorrentioSettings> {
-  public override baseURL = "http://torrentio.strem.fun/";
+  public override baseURL = "https://torrentio.strem.fun/";
   public override serviceName = "Torrent.io";
 
   get #filter() {

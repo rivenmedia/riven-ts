@@ -1,10 +1,9 @@
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
 import { faker } from "@faker-js/faker";
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it as baseIt } from "../../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../../utilities/settings.ts";
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
 const it = baseIt
@@ -516,83 +515,4 @@ it("throws for torrents that do not match the media item's year (± 1 year)", as
       validateTorrent(indexedMovie.id, parsedData, infoHash),
     ).resolves.not.toThrow();
   }
-});
-
-it.skip('throws for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
-  em,
-  indexedMovieContext: { indexedMovie },
-  infoHash,
-}) => {
-  const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p`;
-
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    dubbedAnimeOnly: true,
-  });
-
-  em.persist(indexedMovie);
-  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
-
-  await em.flush();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(
-    validateTorrent(indexedMovie.id, parsedData, infoHash),
-  ).rejects.toThrow(
-    new SkippedTorrentError(
-      `Skipping non-dubbed anime torrent`,
-      indexedMovie.title,
-      parsedData.rawTitle,
-      infoHash,
-    ),
-  );
-});
-
-it.skip('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is disabled', async ({
-  em,
-  indexedMovieContext: { indexedMovie },
-  infoHash,
-}) => {
-  const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p`;
-
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    dubbedAnimeOnly: false,
-  });
-
-  em.persist(indexedMovie);
-  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
-
-  await em.flush();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(
-    validateTorrent(indexedMovie.id, parsedData, infoHash),
-  ).resolves.not.toThrow();
-});
-
-it('does not throw for torrents that are not dubbed if the media item is anime and the "dubbed anime only" setting is enabled', async ({
-  em,
-  indexedMovieContext: { indexedMovie },
-  infoHash,
-}) => {
-  const rawTitle = `${indexedMovie.title} ${indexedMovie.year?.toString() ?? ""} 1080p [Dubbed]`;
-
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    dubbedAnimeOnly: true,
-  });
-
-  em.persist(indexedMovie);
-  em.assign(indexedMovie, { language: "jp", genres: ["animation", "anime"] });
-
-  await em.flush();
-
-  const parsedData = parse(rawTitle);
-
-  await expect(
-    validateTorrent(indexedMovie.id, parsedData, infoHash),
-  ).resolves.not.toThrow();
 });

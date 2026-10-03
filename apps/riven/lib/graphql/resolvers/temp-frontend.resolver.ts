@@ -213,7 +213,7 @@ class NowPlayingItem {
 }
 
 @Resolver()
-export class _TempFrontendResolver {
+export class TempFrontendResolver {
   @Query(() => [MediaItem])
   public recentlyAdded() {
     return [];

@@ -181,6 +181,7 @@ catalog:
   react-intersection-observer: ^11.0.1
   "@wrksz/themes": ^2.0.2
   "@storycap-testrun/browser": ^3.1.1
+  eslint-plugin-sonarjs: ^4.2.2
 
 catalogs:
   typescript7-native:

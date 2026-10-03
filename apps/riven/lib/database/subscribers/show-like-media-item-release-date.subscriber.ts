@@ -8,7 +8,19 @@ import type {
   EventArgs,
   EventSubscriber,
   FlushEventArgs,
+  UnitOfWork,
 } from "@mikro-orm/core";
+
+type TrackedEntityMap<T extends object> = Map<
+  Partial<T>,
+  ChangeSet<Partial<T>> | undefined
+>;
+
+interface TrackedEntities {
+  episodes: TrackedEntityMap<Episode>;
+  seasons: TrackedEntityMap<Season>;
+  shows: TrackedEntityMap<Show>;
+}
 
 export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber<Show> {
   public getSubscribedEntities() {
@@ -42,109 +54,123 @@ export class ShowLikeMediaItemReleaseDateSubscriber implements EventSubscriber<S
   }
 
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    const trackedEpisodes = new Map<
-      Partial<Episode>,
-      ChangeSet<Partial<Episode>> | undefined
-    >();
+    const trackedEntities = this.#collectTrackedEntities(uow);
 
-    const trackedSeasons = new Map<
-      Partial<Season>,
-      ChangeSet<Partial<Season>> | undefined
-    >();
+    for (const [episode, changeSet] of trackedEntities.episodes) {
+      episode.year = episode.releaseDate
+        ? DateTime.fromJSDate(episode.releaseDate).year
+        : null;
 
-    const trackedShows = new Map<
-      Partial<Show>,
-      ChangeSet<Partial<Show>> | undefined
-    >();
+      this.#computeChangeSet(uow, episode, changeSet);
+
+      if (episode.number === 1) {
+        await this.#cascadeReleaseDate(uow, episode, trackedEntities);
+      }
+    }
+  }
+
+  #collectTrackedEntities(uow: UnitOfWork): TrackedEntities {
+    const trackedEntities: TrackedEntities = {
+      episodes: new Map(),
+      seasons: new Map(),
+      shows: new Map(),
+    };
 
     for (const changeSet of uow.getChangeSets()) {
       if (changeSet.entity instanceof Episode) {
-        trackedEpisodes.set(changeSet.entity, changeSet);
+        trackedEntities.episodes.set(changeSet.entity, changeSet);
       }
 
       if (changeSet.entity instanceof Season) {
-        trackedSeasons.set(changeSet.entity, changeSet);
+        trackedEntities.seasons.set(changeSet.entity, changeSet);
       }
 
       if (changeSet.entity instanceof Show) {
-        trackedShows.set(changeSet.entity, changeSet);
+        trackedEntities.shows.set(changeSet.entity, changeSet);
       }
     }
 
     for (const collectionUpdate of uow.getCollectionUpdates()) {
       if (collectionUpdate.owner instanceof Season) {
-        const collectionEpisodes = collectionUpdate.filter(
-          (episode): episode is Partial<Episode> => episode instanceof Episode,
+        this.#trackCollectionItems(
+          trackedEntities.episodes,
+          collectionUpdate.filter(
+            (episode): episode is Partial<Episode> =>
+              episode instanceof Episode,
+          ),
         );
-
-        for (const episode of collectionEpisodes) {
-          trackedEpisodes.set(episode, trackedEpisodes.get(episode));
-        }
       }
 
       if (collectionUpdate.owner instanceof Show) {
-        const collectionSeasons = collectionUpdate.filter(
-          (season): season is Partial<Season> => season instanceof Season,
+        this.#trackCollectionItems(
+          trackedEntities.seasons,
+          collectionUpdate.filter(
+            (season): season is Partial<Season> => season instanceof Season,
+          ),
         );
-
-        for (const season of collectionSeasons) {
-          trackedSeasons.set(season, trackedSeasons.get(season));
-        }
       }
     }
 
-    for (const [episode, changeSet] of trackedEpisodes) {
-      episode.year = episode.releaseDate
-        ? DateTime.fromJSDate(episode.releaseDate).year
-        : null;
+    return trackedEntities;
+  }
 
-      if (changeSet) {
-        uow.recomputeSingleChangeSet(episode);
-      } else {
-        uow.computeChangeSet(episode);
-      }
+  #trackCollectionItems<T extends object>(
+    trackedItems: TrackedEntityMap<T>,
+    items: T[],
+  ) {
+    for (const item of items) {
+      trackedItems.set(item, trackedItems.get(item));
+    }
+  }
 
-      if (episode.number !== 1) {
-        continue;
-      }
+  /**
+   * Cascades the release date of a season's first episode up to the season,
+   * and from the first season up to the show.
+   */
+  async #cascadeReleaseDate(
+    uow: UnitOfWork,
+    episode: Partial<Episode>,
+    trackedEntities: TrackedEntities,
+  ) {
+    const episodeReleaseDate = episode.releaseDate ?? null;
 
-      const episodeReleaseDate = episode.releaseDate ?? null;
+    assert.ok(
+      episode.season,
+      "Episode must have a season to cascade release date",
+    );
 
-      assert.ok(
-        episode.season,
-        "Episode must have a season to cascade release date",
-      );
+    const season = await episode.season.loadOrFail();
 
-      const season = await episode.season.loadOrFail();
+    if (Number(season.releaseDate) === Number(episodeReleaseDate)) {
+      return;
+    }
 
-      if (Number(season.releaseDate) === Number(episodeReleaseDate)) {
-        continue;
-      }
+    season.releaseDate = episodeReleaseDate;
+    season.year = episode.year ?? null;
 
-      const seasonChangeSet = trackedSeasons.get(season);
+    this.#computeChangeSet(uow, season, trackedEntities.seasons.get(season));
 
-      season.releaseDate = episodeReleaseDate;
-      season.year = episode.year;
+    if (season.number !== 1) {
+      return;
+    }
 
-      if (seasonChangeSet) {
-        uow.recomputeSingleChangeSet(season);
-      } else {
-        uow.computeChangeSet(season);
-      }
+    const show = await season.show.loadOrFail();
 
-      if (season.number === 1) {
-        const show = await season.show.loadOrFail();
-        const showChangeSet = trackedShows.get(show);
+    show.releaseDate = season.releaseDate;
+    show.year = season.year;
 
-        show.releaseDate = season.releaseDate;
-        show.year = season.year;
+    this.#computeChangeSet(uow, show, trackedEntities.shows.get(show));
+  }
 
-        if (showChangeSet) {
-          uow.recomputeSingleChangeSet(show);
-        } else {
-          uow.computeChangeSet(show);
-        }
-      }
+  #computeChangeSet(
+    uow: UnitOfWork,
+    entity: object,
+    changeSet: ChangeSet<object> | undefined,
+  ) {
+    if (changeSet) {
+      uow.recomputeSingleChangeSet(entity);
+    } else {
+      uow.computeChangeSet(entity);
     }
   }
 }

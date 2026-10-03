@@ -516,10 +516,20 @@ export const mainRunnerMachine = setup({
             actions: [
               {
                 type: "log",
-                params: ({ event: { item } }) => ({
-                  message: `Skipping existing item request: ${chalk.bold([item.imdbId && `IMDB: ${item.imdbId}`, item.tmdbId && `TMDB: ${item.tmdbId}`, item.tvdbId && `TVDB: ${item.tvdbId}`].filter(Boolean).join(" | "))}`,
-                  level: "verbose",
-                }),
+                params: ({ event: { item } }) => {
+                  const externalIdsLabel = [
+                    item.imdbId && `IMDB: ${item.imdbId}`,
+                    item.tmdbId && `TMDB: ${item.tmdbId}`,
+                    item.tvdbId && `TVDB: ${item.tvdbId}`,
+                  ]
+                    .filter(Boolean)
+                    .join(" | ");
+
+                  return {
+                    message: `Skipping existing item request: ${chalk.bold(externalIdsLabel)}`,
+                    level: "verbose",
+                  };
+                },
               },
             ],
           },

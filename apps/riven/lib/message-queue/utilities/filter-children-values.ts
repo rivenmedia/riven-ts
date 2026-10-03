@@ -65,8 +65,9 @@ export function filterChildrenValues<T extends string | undefined>(
     ] as ExpectedValue;
   }
 
+  const pluginNamePattern = String.raw`[\w\-$]+`;
   const pattern = new RegExp(
-    `${childJobKey(queueName, pluginName)}${String.raw`[\w\-$]+`}`,
+    `${childJobKey(queueName, pluginName)}${pluginNamePattern}`,
     "u",
   );
   const entries = Object.fromEntries(

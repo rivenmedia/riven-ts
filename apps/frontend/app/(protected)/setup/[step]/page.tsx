@@ -49,6 +49,31 @@ const steps = [
   },
 ] as const satisfies readonly Step[];
 
+type StepProgress = "active" | "completed" | "upcoming";
+
+function getStepProgress(
+  isActive: boolean,
+  isCompleted: boolean,
+): StepProgress {
+  if (isActive) {
+    return "active";
+  }
+
+  return isCompleted ? "completed" : "upcoming";
+}
+
+const stepButtonClassNames = {
+  active: "border-white/14 bg-white/6 hover:bg-white/6",
+  completed: "bg-background/40 hover:bg-background/55 border-white/12",
+  upcoming: "bg-background/20 hover:bg-background/30 border-white/10",
+} as const satisfies Record<StepProgress, string>;
+
+const stepNumberClassNames = {
+  active: "text-foreground border-white/16 bg-white/10",
+  completed: "text-foreground border-white/14 bg-white/6",
+  upcoming: "text-muted-foreground border-white/10",
+} as const satisfies Record<StepProgress, string>;
+
 export default function SetupStepPage() {
   const { step } = useParams<ParamsOf<"/setup/[step]">>();
 
@@ -72,22 +97,21 @@ export default function SetupStepPage() {
               variant="ghost"
               className={cn(
                 "group relative h-auto min-w-28 justify-start gap-2 rounded-none border px-3 py-3 text-left first:rounded-l-xl first:border-r-0 last:rounded-r-xl sm:min-w-33",
-                id === step
-                  ? "border-white/14 bg-white/6 hover:bg-white/6"
-                  : index < activeStepIndex
-                    ? "bg-background/40 hover:bg-background/55 border-white/12"
-                    : "bg-background/20 hover:bg-background/30 border-white/10",
+                stepButtonClassNames[
+                  getStepProgress(id === step, index < activeStepIndex)
+                ],
               )}
             >
               <Link href={`/setup/${id}`}>
                 <span
                   className={cn(
                     "flex size-7 items-center justify-center rounded-full border text-[11px] font-semibold",
-                    index === activeStepIndex
-                      ? "text-foreground border-white/16 bg-white/10"
-                      : index < activeStepIndex
-                        ? "text-foreground border-white/14 bg-white/6"
-                        : "text-muted-foreground border-white/10",
+                    stepNumberClassNames[
+                      getStepProgress(
+                        index === activeStepIndex,
+                        index < activeStepIndex,
+                      )
+                    ],
                   )}
                 >
                   {index + 1}

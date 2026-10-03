@@ -7,6 +7,16 @@ import { getTypeStyle } from "../utilities/get-type-style";
 
 import type { EntertainmentItemData } from "../types";
 
+function formatEpisodeLabel({ season, episode }: EntertainmentItemData) {
+  if (!season) {
+    return "";
+  }
+
+  const episodeLabel = episode ? `E${episode.toString()}` : "";
+
+  return ` S${season.toString()}${episodeLabel}`;
+}
+
 function itemUrl(item: EntertainmentItemData) {
   switch (item.itemType) {
     case "movie": {
@@ -100,7 +110,7 @@ export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
   );
 
   const title = compact
-    ? `${item.showTitle} ${item.season ? ` S${item.season.toString()}${item.episode ? `E${item.episode.toString()}` : ""}` : ""}`
+    ? `${item.showTitle} ${formatEpisodeLabel(item)}`
     : undefined;
 
   if (href) {

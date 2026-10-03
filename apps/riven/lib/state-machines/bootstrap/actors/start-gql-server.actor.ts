@@ -48,6 +48,9 @@ export const startGqlServer = fromPromise<
     .toArray();
 
   const app = express();
+
+  app.disable("x-powered-by");
+
   const httpServer = createServer((...args) => {
     app(...args);
   });

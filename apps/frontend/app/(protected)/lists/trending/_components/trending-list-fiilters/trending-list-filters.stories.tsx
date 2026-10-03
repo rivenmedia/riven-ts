@@ -55,13 +55,17 @@ Default.test(
     await userEvent.type(releaseDateFromInput, "2020-01-01");
     await userEvent.type(releaseDateToInput, "2020-12-31");
 
-    await assertFilterCount((appliedFilterCount += 1));
+    appliedFilterCount += 1;
+
+    await assertFilterCount(appliedFilterCount);
 
     const genreButton = dialog.getByRole("checkbox", { name: /action/iu });
 
     await userEvent.click(genreButton);
 
-    await assertFilterCount((appliedFilterCount += 1));
+    appliedFilterCount += 1;
+
+    await assertFilterCount(appliedFilterCount);
 
     const languageSelect = dialog.getByRole("combobox", {
       name: /language/iu,
@@ -69,7 +73,9 @@ Default.test(
 
     await userEvent.type(languageSelect, "english{Enter}");
 
-    await assertFilterCount((appliedFilterCount += 1));
+    appliedFilterCount += 1;
+
+    await assertFilterCount(appliedFilterCount);
 
     const contentRatingButton = dialog.getByRole("checkbox", {
       name: /pg-13/iu,
@@ -77,7 +83,9 @@ Default.test(
 
     await userEvent.click(contentRatingButton);
 
-    await assertFilterCount((appliedFilterCount += 1));
+    appliedFilterCount += 1;
+
+    await assertFilterCount(appliedFilterCount);
 
     const sliders = [/runtime/iu, /vote average/iu, /vote count/iu] as const;
 
@@ -95,7 +103,9 @@ Default.test(
         "{ArrowRight}{ArrowRight}{ArrowRight}",
       );
 
-      await assertFilterCount((appliedFilterCount += 1));
+      appliedFilterCount += 1;
+
+      await assertFilterCount(appliedFilterCount);
     }
   },
 );

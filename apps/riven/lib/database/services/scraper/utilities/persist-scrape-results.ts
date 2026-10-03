@@ -1,8 +1,9 @@
 import { Stream } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape.error.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
+import { validateOrReject } from "class-validator";
+
+import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
@@ -27,24 +28,9 @@ export async function persistScrapeResults(
   try {
     await validateOrReject(item);
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new MediaItemScrapeError({
       item,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 

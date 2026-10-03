@@ -61,7 +61,7 @@ const dataSourceSchema = z.custom<
 export const RivenPlugin = z.object({
   version: z.string().regex(
     // https://regex101.com/r/vkijKf/1/
-    // oxlint-disable-next-line prefer-named-capture-group
+    // oxlint-disable-next-line prefer-named-capture-group, sonarjs/regex-complexity -- Official semver.org regex
     /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+([0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/u,
     "Invalid version format",
   ),

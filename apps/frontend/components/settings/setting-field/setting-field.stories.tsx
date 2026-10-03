@@ -80,7 +80,8 @@ Secret.test(
   },
 );
 
-export const Number = meta.story({
+export const NumberField = meta.story({
+  name: "Number",
   args: {
     type: "number",
     config: {
@@ -97,7 +98,7 @@ export const Number = meta.story({
   ],
 });
 
-Number.test("Typing updates the input value", async ({ canvas }) => {
+NumberField.test("Typing updates the input value", async ({ canvas }) => {
   const input = canvas.getByRole("spinbutton", { name: /max workers/iu });
 
   await userEvent.clear(input);
@@ -106,7 +107,8 @@ Number.test("Typing updates the input value", async ({ canvas }) => {
   await expect(input).toHaveValue(8);
 });
 
-export const Boolean = meta.story({
+export const BooleanField = meta.story({
+  name: "Boolean",
   args: {
     type: "boolean",
     config: {
@@ -122,7 +124,7 @@ export const Boolean = meta.story({
   ],
 });
 
-Boolean.test(
+BooleanField.test(
   "Clicking the switch toggles it off and on",
   async ({ canvas, step }) => {
     const toggle = canvas.getByRole("switch", {

@@ -1,20 +1,30 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { NotFoundError, ValidationError } from "@mikro-orm/core";
-import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
+import { ValidationError } from "@mikro-orm/core";
+import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
-import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
+import { formatJobDuration } from "../../utilities/format-job-duration.ts";
+import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
+import { logShowCompletion } from "./steps/complete/log-show-completion.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
+import { validateDownload } from "./steps/validate-download/validate-download.ts";
+import { assertScrapeSucceeded } from "./steps/validate-scrape/assert-scrape-succeeded.ts";
+import { assertMediaItemExists } from "./utilities/assert-media-item-exists.ts";
 
+import type { ProcessMediaItemFlow } from "./process-media-item.schema.ts";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+
+export type ProcessMediaItemJob = Parameters<
+  ProcessMediaItemFlow["processor"]
+>[0]["job"];
 
 export const processMediaItemProcessor =
   processMediaItemProcessorSchema.implementAsync(
@@ -31,17 +41,7 @@ export const processMediaItemProcessor =
         plugins,
       },
     ) => {
-      try {
-        await mediaItemService.getMediaItemById(job.data.mediaItem.id);
-      } catch (error) {
-        if (error instanceof NotFoundError) {
-          throw new UnrecoverableError(
-            `Media item with ID ${job.data.mediaItem.id} not found`,
-          );
-        }
-
-        throw error;
-      }
+      await assertMediaItemExists(mediaItemService, job.data.mediaItem.id);
 
       assert.ok(token, "Job token is required");
 
@@ -77,31 +77,12 @@ export const processMediaItemProcessor =
                 step: "validate-scrape",
               });
 
-              if (await job.moveToWaitingChildren(token)) {
-                throw new WaitingChildrenError();
-              }
+              await maybeWaitForChildren(job, token);
 
               break;
             }
             case "validate-scrape": {
-              const { ignored = 0 } = await job.getDependenciesCount({
-                ignored: true,
-              });
-
-              if (ignored > 0) {
-                if (job.data.isRootItem) {
-                  // If the root item got to this point, it has exhausted all scraping attempts.
-                  throw new UnrecoverableError(
-                    `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape after all attempts`,
-                  );
-                }
-
-                // For child items, we only try once, as they are enqueued as part of a fan-out process.
-                // If they fail, the parent will retry in the future and recreate the child attempts.
-                throw new UnrecoverableError(
-                  `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape`,
-                );
-              }
+              await assertScrapeSucceeded(job);
 
               await job.updateData({
                 ...job.data,
@@ -125,45 +106,12 @@ export const processMediaItemProcessor =
                 step: "validate-download",
               });
 
-              if (await job.moveToWaitingChildren(token)) {
-                throw new WaitingChildrenError();
-              }
+              await maybeWaitForChildren(job, token);
 
               break;
             }
             case "validate-download": {
-              const { ignored = 0 } = await job.getDependenciesCount({
-                ignored: true,
-              });
-
-              if (ignored > 0) {
-                const nextScrapeAttemptTimestamp = DateTime.utc().plus({
-                  minutes: 30,
-                });
-
-                logger.info(
-                  `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.fullTitle)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
-                );
-
-                await job.log("Scheduling re-scrape due to download failure");
-
-                await job.updateData({
-                  ...job.data,
-                  step: "scrape",
-                });
-
-                await job.moveToDelayed(
-                  nextScrapeAttemptTimestamp.toMillis(),
-                  token,
-                );
-
-                throw new DelayedError();
-              } else {
-                await job.updateData({
-                  ...job.data,
-                  step: "complete",
-                });
-              }
+              await validateDownload(job, token);
 
               break;
             }
@@ -188,52 +136,15 @@ export const processMediaItemProcessor =
         const incompleteItems = await item.getIncompleteItems();
 
         if (incompleteItems.length === 0) {
-          const duration = DateTime.fromMillis(job.timestamp)
-            .diffNow(["seconds", "minutes", "hours", "days", "weeks"])
-            .rescale()
-            .negate()
-            .toHuman({
-              showZeros: false,
-              maximumFractionDigits: 0,
-              unitDisplay: "narrow",
-            });
-
           logger.info(
             chalk.greenBright(
-              `${chalk.bold(item.fullTitle)} downloaded in ${chalk.bold(duration)}`,
+              `${chalk.bold(item.fullTitle)} downloaded in ${chalk.bold(formatJobDuration(job.timestamp))}`,
             ),
           );
         }
 
         if (item instanceof Season || item instanceof Episode) {
-          const show = await item.getShow();
-          const showIncompleteItems = await show.getIncompleteItems();
-
-          if (showIncompleteItems.length === 0) {
-            const showUnrequestedItems = await show.getUnrequestedItems();
-            const hasUnrequestedItems = showUnrequestedItems.length > 0;
-
-            if (show.status === "continuing") {
-              const { reindexTime } =
-                await indexerService.calculateReindexTime(show);
-
-              const nextAirDateMessage = show.nextAirDate
-                ? `New episodes will ${hasUnrequestedItems ? "be indexed" : "attempt to be downloaded"} at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
-                : "";
-
-              logger.info(
-                chalk.greenBright(
-                  `${chalk.bold(show.fullTitle)} downloaded all ${hasUnrequestedItems ? "requested" : "available"} episodes. ${nextAirDateMessage}`.trim(),
-                ),
-              );
-            } else {
-              logger.info(
-                chalk.greenBright(
-                  `${chalk.bold(show.fullTitle)} successfully downloaded${hasUnrequestedItems ? " all requested episodes" : ""}.`,
-                ),
-              );
-            }
-          }
+          await logShowCompletion(await item.getShow(), indexerService);
         }
 
         if (postProcessingService.itemRequiresPostProcessing(item, plugins)) {

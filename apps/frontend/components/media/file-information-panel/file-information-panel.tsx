@@ -13,6 +13,22 @@ import type {
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";
 
+function formatAudioChannels(channels: number | null | undefined) {
+  if (!channels) {
+    return "";
+  }
+
+  if (channels === 8) {
+    return " 7.1";
+  }
+
+  if (channels === 6) {
+    return " 5.1";
+  }
+
+  return ` ${channels.toString()}ch`;
+}
+
 export interface FileInformationPanelProps {
   entries: Omit<PartialDeep<MediaEntry>, "mediaItem">[];
   fallbackMediaMetadata: MediaMetadata | null;
@@ -129,13 +145,7 @@ export function FileInformationPanel({
                   className="text-muted-foreground border border-white/10 bg-white/5 font-mono text-xs backdrop-blur-sm"
                 >
                   {track.codec}
-                  {track.channels
-                    ? track.channels === 8
-                      ? " 7.1"
-                      : track.channels === 6
-                        ? " 5.1"
-                        : ` ${track.channels.toString()}ch`
-                    : ""}
+                  {formatAudioChannels(track.channels)}
                   {track.language ? ` (${track.language.toUpperCase()})` : ""}
                 </Badge>
               ))}
