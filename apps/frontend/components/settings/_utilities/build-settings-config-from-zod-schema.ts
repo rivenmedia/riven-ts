@@ -1,18 +1,22 @@
-import { ZodString, ZodType } from "zod";
+import {
+  ZodArray,
+  ZodString,
+  ZodType,
+  ZodEnum,
+  ZodNumber,
+  ZodObject,
+  ZodRecord,
+  ZodDefault,
+  ZodOptional,
+  ZodNullable,
+  ZodBoolean,
+} from "zod";
 
 import type {
   CommonSettingFieldProps,
   SettingFieldProps,
 } from "../setting-field/setting-field";
-import type {
-  ZodArray,
-  ZodEnum,
-  ZodNumber,
-  ZodOptional,
-  ZodRecord,
-  ZodObject,
-  ZodDefault,
-} from "zod";
+import type { Constructor } from "type-fest";
 import type { $ZodType } from "zod/v4/core";
 
 function getSchemaMetadata(schema: $ZodType) {
@@ -42,12 +46,23 @@ function buildCommonConfig(
 
 type SettingEntry = [name: string, setting: SettingFieldProps];
 
-function buildStringSetting(
+function assertSchemaType<T extends $ZodType>(
   schema: $ZodType,
+  expectedType: Constructor<T>,
+): asserts schema is T {
+  if (!(schema instanceof expectedType)) {
+    throw new Error(
+      `Expected a ${expectedType.name} schema, got ${schema.constructor.name}`,
+    );
+  }
+}
+
+function buildStringSetting(
+  schema: ZodString,
   key: string | undefined,
   required: boolean,
 ): SettingEntry {
-  const { minLength, maxLength } = schema as ZodString;
+  const { minLength, maxLength } = schema;
   const commonConfig = buildCommonConfig(schema, key);
 
   if (getSchemaMetadata(schema).secret) {
@@ -80,7 +95,7 @@ function buildStringSetting(
 }
 
 function buildBooleanSetting(
-  schema: $ZodType,
+  schema: ZodBoolean,
   key: string | undefined,
   required: boolean,
 ): SettingEntry {
@@ -111,6 +126,54 @@ function buildBooleanSetting(
   ];
 }
 
+function buildEnumSetting(
+  schema: ZodEnum,
+  key: string | undefined,
+  required: boolean,
+): SettingEntry {
+  const commonConfig = buildCommonConfig(schema, key);
+  const { enum: enumValues } = schema;
+
+  return [
+    commonConfig.name,
+    {
+      type: "select",
+      config: {
+        ...commonConfig,
+        registerOptions: { required },
+        options: Object.entries(enumValues).map(([enumKey, enumValue]) => ({
+          value: enumValue.toString(),
+          label: enumKey,
+        })),
+      },
+    },
+  ];
+}
+
+function buildArraySetting(
+  schema: ZodArray,
+  key: string | undefined,
+  required: boolean,
+): SettingEntry {
+  const commonConfig = buildCommonConfig(schema, key);
+  const { element } = schema;
+
+  if (element instanceof ZodString) {
+    return [
+      commonConfig.name,
+      {
+        type: "string_array",
+        config: {
+          ...commonConfig,
+          registerOptions: { required },
+        },
+      },
+    ];
+  }
+
+  throw new Error(`Unsupported array element type: ${element._zod.def.type}`);
+}
+
 function getNumberStep(multipleOf: unknown, isInt: boolean) {
   if (typeof multipleOf === "number" && Number.isFinite(multipleOf)) {
     return multipleOf;
@@ -120,13 +183,13 @@ function getNumberStep(multipleOf: unknown, isInt: boolean) {
 }
 
 function buildNumberSetting(
-  schema: $ZodType,
+  schema: ZodNumber,
   key: string | undefined,
   required: boolean,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(schema, key);
 
-  const { minValue, maxValue, format, _zod } = schema as ZodNumber;
+  const { minValue, maxValue, format, _zod } = schema;
   const hasMinConstraint = minValue != null && Number.isFinite(minValue);
   const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
 
@@ -160,56 +223,46 @@ export function buildSettingsConfigFromZodSchema(
 
   switch (schema._zod.def.type) {
     case "string": {
+      assertSchemaType(schema, ZodString);
+
       const [name, setting] = buildStringSetting(schema, key, required);
 
       return settings.set(name, setting);
     }
     case "boolean": {
+      assertSchemaType(schema, ZodBoolean);
+
       const [name, setting] = buildBooleanSetting(schema, key, required);
 
       return settings.set(name, setting);
     }
     case "int":
     case "number": {
+      assertSchemaType(schema, ZodNumber);
+
       const [name, setting] = buildNumberSetting(schema, key, required);
 
       return settings.set(name, setting);
     }
     case "enum": {
-      const commonConfig = buildCommonConfig(schema, key);
-      const { enum: enumValues } = schema as ZodEnum;
+      assertSchemaType(schema, ZodEnum);
 
-      return settings.set(commonConfig.name, {
-        type: "select",
-        config: {
-          ...commonConfig,
-          registerOptions: { required },
-          options: Object.entries(enumValues).map(([enumKey, enumValue]) => ({
-            value: enumValue.toString(),
-            label: enumKey,
-          })),
-        },
-      });
+      const [name, setting] = buildEnumSetting(schema, key, required);
+
+      return settings.set(name, setting);
     }
     case "array": {
-      const commonConfig = buildCommonConfig(schema, key);
-      const { element } = schema as ZodArray;
+      assertSchemaType(schema, ZodArray);
 
-      if (element instanceof ZodString) {
-        return settings.set(commonConfig.name, {
-          type: "string_array",
-          config: {
-            ...commonConfig,
-            registerOptions: { required },
-          },
-        });
-      }
+      const [name, setting] = buildArraySetting(schema, key, required);
 
-      return settings;
+      return settings.set(name, setting);
     }
     case "record": {
+      assertSchemaType(schema, ZodRecord);
+
       const commonConfig = buildCommonConfig(schema, key);
-      const { keyType, valueType } = schema as ZodRecord;
+      const { keyType, valueType } = schema;
 
       if (!(keyType instanceof ZodString)) {
         throw new Error("Only string keys are supported for record schemas");
@@ -235,6 +288,8 @@ export function buildSettingsConfigFromZodSchema(
       });
     }
     case "object": {
+      assertSchemaType(schema, ZodObject);
+
       const { shape } = schema as ZodObject<Record<string, ZodType>>;
 
       const nestedSettings = new Map<string, SettingFieldProps>(
@@ -265,13 +320,23 @@ export function buildSettingsConfigFromZodSchema(
       return nestedSettings;
     }
     case "default": {
-      const innerSchema = (schema as ZodDefault).unwrap();
+      assertSchemaType(schema, ZodDefault);
+
+      const innerSchema = schema.unwrap();
 
       return buildSettingsConfigFromZodSchema(innerSchema, key, required);
     }
-    case "optional":
+    case "optional": {
+      assertSchemaType(schema, ZodOptional);
+
+      const innerSchema = schema.unwrap();
+
+      return buildSettingsConfigFromZodSchema(innerSchema, key, false);
+    }
     case "nullable": {
-      const innerSchema = (schema as ZodOptional).unwrap();
+      assertSchemaType(schema, ZodNullable);
+
+      const innerSchema = schema.unwrap();
 
       return buildSettingsConfigFromZodSchema(innerSchema, key, false);
     }
