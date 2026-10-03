@@ -17,7 +17,7 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { clearDeduplicationJob } from "../../utilities/clear-deduplication-job.ts";
 import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
-import { waitForChildren } from "../../utilities/wait-for-children.ts";
+import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { flow } from "../producer.ts";
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
@@ -26,10 +26,6 @@ import type {
   MediaItemIndexRequestedMovieResponse,
   MediaItemIndexRequestedShowResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-
-type IndexedItem = NonNullable<
-  MediaItemIndexRequestedMovieResponse | MediaItemIndexRequestedShowResponse
->["item"];
 
 /**
  * Merges the indexed item data returned by each indexer plugin into a single item.
@@ -41,6 +37,10 @@ function mergeIndexerResults(
     | undefined
   )[],
 ) {
+  type IndexedItem = NonNullable<
+    MediaItemIndexRequestedMovieResponse | MediaItemIndexRequestedShowResponse
+  >["item"];
+
   const item = {} as IndexedItem;
 
   for (const value of results) {
@@ -129,7 +129,7 @@ export const processItemRequestProcessor =
             step: "process",
           });
 
-          await waitForChildren(job, token);
+          await maybeWaitForChildren(job, token);
 
           break;
         }

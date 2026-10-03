@@ -73,14 +73,14 @@ export function SelectList<T>({
       if (key.upArrow || input.toLowerCase() === "k") {
         setSelectedIndex((current) => {
           const jumpCount = key.shift ? (scrollAreaContext?.height ?? 1) : 1;
-          const nextIndex = getPreviousIndex(
+          const previousIndex = getPreviousIndex(
             current,
             jumpCount,
             lastIndex,
             loop,
           );
 
-          return Math.max(0, Math.min(nextIndex, lastIndex));
+          return Math.max(0, Math.min(previousIndex, lastIndex));
         });
 
         return;

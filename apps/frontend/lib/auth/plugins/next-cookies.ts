@@ -30,7 +30,7 @@ async function setResponseCookies(
     try {
       cookieStore.set(key, value.value, toCookieOptions(value));
     } catch {
-      /* empty */
+      continue;
     }
   }
 }

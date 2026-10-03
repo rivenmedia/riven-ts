@@ -10,7 +10,7 @@ import { getPluginEventSubscribers } from "../../../state-machines/main-runner/u
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { formatJobDuration } from "../../utilities/format-job-duration.ts";
-import { waitForChildren } from "../../utilities/wait-for-children.ts";
+import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
@@ -195,7 +195,7 @@ export const processMediaItemProcessor =
                 step: "validate-scrape",
               });
 
-              await waitForChildren(job, token);
+              await maybeWaitForChildren(job, token);
 
               break;
             }
@@ -224,7 +224,7 @@ export const processMediaItemProcessor =
                 step: "validate-download",
               });
 
-              await waitForChildren(job, token);
+              await maybeWaitForChildren(job, token);
 
               break;
             }

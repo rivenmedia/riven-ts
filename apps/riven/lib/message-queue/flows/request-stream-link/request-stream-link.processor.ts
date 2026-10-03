@@ -17,7 +17,7 @@ import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { filterChildrenFailure } from "../../utilities/filter-children-failure.ts";
 import { filterChildrenValues } from "../../utilities/filter-children-values.ts";
-import { waitForChildren } from "../../utilities/wait-for-children.ts";
+import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { enqueueProcessMediaItem } from "../process-media-item/enqueue-process-media-item.ts";
 import { flow } from "../producer.ts";
 import { requestStreamLinkProcessorSchema } from "./request-stream-link.schema.ts";
@@ -96,7 +96,7 @@ async function requestStreamLink({
     streamLinkRequestedJobId: streamLinkRequestedNode.job.id,
   });
 
-  await waitForChildren(job, token);
+  await maybeWaitForChildren(job, token);
 
   return null;
 }
@@ -188,7 +188,7 @@ async function checkLinkHealth({ job, token, mediaEntry }: StepContext) {
     healthCheckJobId: healthCheckJobNode.job.id,
   });
 
-  await waitForChildren(job, token);
+  await maybeWaitForChildren(job, token);
 }
 
 async function handleExpiredLink(

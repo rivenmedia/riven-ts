@@ -7,19 +7,19 @@ import { getPluginEventSubscribers } from "../../../state-machines/main-runner/u
 import { logger } from "../../../utilities/logger/logger.ts";
 import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
 import { formatJobDuration } from "../../utilities/format-job-duration.ts";
-import { waitForChildren } from "../../utilities/wait-for-children.ts";
+import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { postProcessMediaItemProcessorSchema } from "./post-process-media-item.schema.ts";
 import { enqueueRequestSubtitles } from "./steps/request-subtitles/enqueue-request-subtitles.ts";
 
 import type { SubtitlesService } from "../../../database/services/subtitles/subtitles.service.ts";
-import type { ValidPlugin } from "../../../types/plugins.ts";
+import type { ValidPluginMap } from "../../../types/plugins.ts";
 import type { ParentOptions } from "bullmq";
 import type { UUID } from "node:crypto";
 
-async function enqueueSubtitleRequests(
+async function maybeEnqueueSubtitleRequests(
   mediaItemId: UUID,
   subtitlesService: SubtitlesService,
-  plugins: Map<symbol, ValidPlugin>,
+  plugins: ValidPluginMap,
   parent: ParentOptions,
 ) {
   const subtitlesSubscribers = getPluginEventSubscribers(
@@ -58,7 +58,7 @@ export const postProcessItemProcessor =
                 `Post-processing ${chalk.bold(job.data.mediaItem.fullTitle)}`,
               );
 
-              await enqueueSubtitleRequests(
+              await maybeEnqueueSubtitleRequests(
                 job.data.mediaItem.id,
                 subtitlesService,
                 plugins,
@@ -70,7 +70,7 @@ export const postProcessItemProcessor =
                 step: "validate-post-process",
               });
 
-              await waitForChildren(job, token);
+              await maybeWaitForChildren(job, token);
 
               break;
             }
