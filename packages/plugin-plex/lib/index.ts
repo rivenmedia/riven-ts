@@ -22,7 +22,7 @@ function getExternalIds(item: Pick<WatchlistItem, "Guid" | "type">) {
       request.imdbId = id;
     } else if (type === "tmdb" && item.type === "movie") {
       request.tmdbId = id;
-    } else if (type === "tvdb" && item.type === "show" && "tvdbId" in request) {
+    } else if (type === "tvdb" && item.type === "show") {
       request.tvdbId = id;
     }
   }
