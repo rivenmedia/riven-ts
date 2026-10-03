@@ -1,4 +1,4 @@
-import sonarjs from "eslint-plugin-sonarjs";
+import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
 import { defineConfig } from "oxlint";
 
 import { tsFiles, jsFiles } from "../internal/file-types.ts";
@@ -15,7 +15,7 @@ export const eslintPluginEslintPluginSonarjsConfig = defineConfig({
           specifier: import.meta.resolve("eslint-plugin-sonarjs"),
         },
       ],
-      rules: sonarjs.configs.recommended.rules as DummyRuleMap,
+      rules: sonarjsConfigs.recommended.rules as DummyRuleMap,
     },
     {
       files: [tsFiles, jsFiles],
