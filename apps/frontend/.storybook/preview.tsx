@@ -23,6 +23,7 @@ import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.t
 import type { ScreenshotParameters } from "@storycap-testrun/browser";
 
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("next/cache"));
 
 declare module "@storybook/nextjs-vite" {
   interface Parameters {

@@ -1,12 +1,4 @@
-"use client";
-
-import {
-  createContext,
-  startTransition,
-  useContext,
-  useMemo,
-  useState,
-} from "react";
+import { createContext, startTransition, use, useMemo, useState } from "react";
 
 import { SelectionActionBar } from "../selection-action-bar/selection-action-bar";
 
@@ -80,5 +72,5 @@ export function CardSelectionProvider({
 }
 
 export function useCardSelection() {
-  return useContext(CardSelectionContext);
+  return use(CardSelectionContext);
 }

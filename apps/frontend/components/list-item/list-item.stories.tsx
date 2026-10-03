@@ -45,7 +45,7 @@ export const Default = meta.story({
     mediaItem: {
       id: "1",
       title: "The Matrix",
-      posterPath: faker.image.url(),
+      posterUrl: faker.image.url(),
       type: "movie",
       year: 1999,
     },
@@ -58,7 +58,7 @@ export const WithBadge = meta.story({
     mediaItem: {
       id: "1",
       title: "The Matrix",
-      posterPath: faker.image.url(),
+      posterUrl: faker.image.url(),
       type: "movie",
       year: 1999,
     },
@@ -75,7 +75,7 @@ export const Selectable = meta.story({
     mediaItem: {
       id: "1",
       title: "The Matrix",
-      posterPath: faker.image.url(),
+      posterUrl: faker.image.url(),
       type: "movie",
       year: 1999,
     },

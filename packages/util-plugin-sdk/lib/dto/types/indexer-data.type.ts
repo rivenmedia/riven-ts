@@ -1,4 +1,4 @@
-import { Field, Float, ID, InterfaceType } from "type-graphql";
+import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
 import { Genre } from "./genre.type.ts";
@@ -94,4 +94,7 @@ export abstract class IndexerData {
 
   @Field(() => MediaItemType.enum)
   public type!: MediaItemType;
+
+  @Field(() => Int, { nullable: true })
+  public year?: number | null;
 }

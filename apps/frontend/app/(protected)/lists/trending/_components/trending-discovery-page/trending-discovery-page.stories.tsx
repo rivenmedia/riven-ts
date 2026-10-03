@@ -27,13 +27,13 @@ export const Movies = meta.story({
   },
   beforeEach({ msw }) {
     msw.use(
-      graphql.query("GetDiscoveryItems", () =>
+      graphql.query(GET_DISCOVERY_ITEMS, () =>
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
-              __typename: "Movie",
+              __typename: "TmdbIndexerData",
               id: faker.string.uuid() as UUID,
-              posterPath: faker.image.urlPicsumPhotos({
+              posterUrl: faker.image.urlPicsumPhotos({
                 width: 200,
                 height: 300,
               }),
@@ -60,9 +60,9 @@ export const Shows = meta.story({
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
-              __typename: "Show",
+              __typename: "TmdbIndexerData",
               id: faker.string.uuid() as UUID,
-              posterPath: faker.image.urlPicsumPhotos({
+              posterUrl: faker.image.urlPicsumPhotos({
                 height: 300,
                 width: 200,
               }),

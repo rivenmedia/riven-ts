@@ -7,3 +7,4 @@ declare module "luxon" {
 }
 
 Settings.throwOnInvalid = true;
+Settings.defaultLocale = navigator.language;
