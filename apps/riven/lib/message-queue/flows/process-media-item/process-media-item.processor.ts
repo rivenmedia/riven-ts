@@ -1,9 +1,8 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { NotFoundError, ValidationError } from "@mikro-orm/core";
-import { DelayedError, UnrecoverableError } from "bullmq";
+import { ValidationError } from "@mikro-orm/core";
+import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
-import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
@@ -13,136 +12,19 @@ import { formatJobDuration } from "../../utilities/format-job-duration.ts";
 import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
 import { enqueuePostProcessMediaItem } from "../post-process-media-item/enqueue-post-process-media-item.ts";
 import { processMediaItemProcessorSchema } from "./process-media-item.schema.ts";
+import { logShowCompletion } from "./steps/complete/log-show-completion.ts";
 import { enqueueDownloadItem } from "./steps/download/enqueue-download-item.ts";
 import { enqueueScrapeItem } from "./steps/scrape/enqueue-scrape-item.ts";
+import { validateDownload } from "./steps/validate-download/validate-download.ts";
+import { assertScrapeSucceeded } from "./steps/validate-scrape/assert-scrape-succeeded.ts";
+import { assertMediaItemExists } from "./utilities/assert-media-item-exists.ts";
 
-import type { IndexerService } from "../../../database/services/indexer/indexer.service.ts";
-import type { MediaItemService } from "../../../database/services/media-item/media-item.service.ts";
 import type { ProcessMediaItemFlow } from "./process-media-item.schema.ts";
-import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-import type { UUID } from "node:crypto";
 
-type ProcessMediaItemJob = Parameters<
+export type ProcessMediaItemJob = Parameters<
   ProcessMediaItemFlow["processor"]
 >[0]["job"];
-
-async function assertMediaItemExists(
-  mediaItemService: MediaItemService,
-  id: UUID,
-) {
-  try {
-    await mediaItemService.getMediaItemById(id);
-  } catch (error) {
-    if (error instanceof NotFoundError) {
-      throw new UnrecoverableError(`Media item with ID ${id} not found`);
-    }
-
-    throw error;
-  }
-}
-
-async function assertScrapeSucceeded(job: ProcessMediaItemJob) {
-  const { ignored = 0 } = await job.getDependenciesCount({
-    ignored: true,
-  });
-
-  if (ignored === 0) {
-    return;
-  }
-
-  if (job.data.isRootItem) {
-    // If the root item got to this point, it has exhausted all scraping attempts.
-    throw new UnrecoverableError(
-      `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape after all attempts`,
-    );
-  }
-
-  // For child items, we only try once, as they are enqueued as part of a fan-out process.
-  // If they fail, the parent will retry in the future and recreate the child attempts.
-  throw new UnrecoverableError(
-    `${chalk.bold(job.data.mediaItem.fullTitle)} failed to scrape`,
-  );
-}
-
-async function validateDownload(job: ProcessMediaItemJob, token: string) {
-  const { ignored = 0 } = await job.getDependenciesCount({
-    ignored: true,
-  });
-
-  if (ignored === 0) {
-    await job.updateData({
-      ...job.data,
-      step: "complete",
-    });
-
-    return;
-  }
-
-  const nextScrapeAttemptTimestamp = DateTime.utc().plus({
-    minutes: 30,
-  });
-
-  logger.info(
-    `Scheduling re-scrape for ${chalk.bold(job.data.mediaItem.fullTitle)} in ${nextScrapeAttemptTimestamp.diffNow("minutes").toHuman()}`,
-  );
-
-  await job.log("Scheduling re-scrape due to download failure");
-
-  await job.updateData({
-    ...job.data,
-    step: "scrape",
-  });
-
-  await job.moveToDelayed(nextScrapeAttemptTimestamp.toMillis(), token);
-
-  throw new DelayedError();
-}
-
-async function logShowCompletion(show: Show, indexerService: IndexerService) {
-  const showIncompleteItems = await show.getIncompleteItems();
-
-  if (showIncompleteItems.length > 0) {
-    return;
-  }
-
-  const showUnrequestedItems = await show.getUnrequestedItems();
-  const hasUnrequestedItems = showUnrequestedItems.length > 0;
-
-  if (show.status !== "continuing") {
-    const requestedEpisodesLabel = hasUnrequestedItems
-      ? " all requested episodes"
-      : "";
-
-    logger.info(
-      chalk.greenBright(
-        `${chalk.bold(show.fullTitle)} successfully downloaded${requestedEpisodesLabel}.`,
-      ),
-    );
-
-    return;
-  }
-
-  const { reindexTime } = await indexerService.calculateReindexTime(show);
-
-  const futureEpisodeActionLabel = hasUnrequestedItems
-    ? "be indexed"
-    : "attempt to be downloaded";
-
-  const nextAirDateMessage = show.nextAirDate
-    ? `New episodes will ${futureEpisodeActionLabel} at ${chalk.bold(reindexTime.toLocaleString(DateTime.DATETIME_SHORT))}.`
-    : "";
-
-  const downloadedEpisodesLabel = hasUnrequestedItems
-    ? "requested"
-    : "available";
-
-  logger.info(
-    chalk.greenBright(
-      `${chalk.bold(show.fullTitle)} downloaded all ${downloadedEpisodesLabel} episodes. ${nextAirDateMessage}`.trim(),
-    ),
-  );
-}
 
 export const processMediaItemProcessor =
   processMediaItemProcessorSchema.implementAsync(
