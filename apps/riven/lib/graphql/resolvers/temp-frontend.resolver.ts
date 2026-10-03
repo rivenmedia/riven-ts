@@ -7,6 +7,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 
 import {
@@ -235,7 +236,7 @@ export class _TempFrontendResolver {
     return {};
   }
 
-  @Query(() => [MediaItem])
+  @Query(() => [IndexerData])
   public discoveryItems() {
     return [];
   }
