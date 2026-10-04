@@ -7,7 +7,7 @@ import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 @ObjectType({ implements: IndexerData })
-export class TmdbIndexerData implements Omit<IndexerData, "runtime"> {
+export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   @Field(() => ID)
   public id!: string;
 

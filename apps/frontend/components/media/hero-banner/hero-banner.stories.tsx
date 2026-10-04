@@ -8,7 +8,7 @@ const meta = preview.meta({
   title: "Media / HeroBanner",
   component: HeroBanner,
   args: {
-    backdropPath:
+    backdropUrl:
       "https://image.tmdb.org/t/p/w1920/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
     logo: "https://image.tmdb.org/t/p/w500/nxUlI9IPiieWnzHviapG0akZkz8.png",
     trailer: null,
@@ -19,7 +19,13 @@ export const Default = meta.story();
 
 export const WithTrailer = meta.story({
   args: {
-    trailer: { name: "Official Trailer", site: "YouTube", key: "dQw4w9WgXcQ" },
+    trailer: {
+      id: "",
+      url: "",
+      name: "Official Trailer",
+      site: "YouTube",
+      key: "dQw4w9WgXcQ",
+    },
   },
 });
 
@@ -64,7 +70,7 @@ export const NoLogo = meta.story({
 
 export const Empty = meta.story({
   args: {
-    backdropPath: null,
+    backdropUrl: null,
     logo: null,
     trailer: null,
   },
