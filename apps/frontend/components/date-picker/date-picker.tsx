@@ -40,6 +40,9 @@ export function DatePicker({
     unknown,
     DateTime | null
   >({
+    defaultValue: {
+      [name]: defaultValue ?? "",
+    },
     compute(data) {
       const fieldValue = data[name];
 
@@ -54,6 +57,7 @@ export function DatePicker({
       }
     },
   });
+
   const maskFormat = "YYYY-MM-DD" as const;
 
   const field = registerWithMask(name, "datetime", {
