@@ -9,6 +9,7 @@ import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
+import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
 import {
   Arg,
@@ -57,24 +58,6 @@ class AuthProvider {
 
   @Field({ nullable: true })
   public name?: string;
-}
-
-@ObjectType()
-class Trailer {
-  @Field(() => ID)
-  public id!: string;
-
-  @Field()
-  public name!: string;
-
-  @Field()
-  public site!: string;
-
-  @Field()
-  public key!: string;
-
-  @Field()
-  public url!: string;
 }
 
 @ObjectType()

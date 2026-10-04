@@ -3,6 +3,7 @@ import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
 import { Genre } from "./genre.type.ts";
 import { Ratings } from "./ratings.type.ts";
+import { Trailer } from "./trailer.type.js";
 
 /**
  * Represents a media item returned from an indexer.
@@ -97,4 +98,13 @@ export abstract class IndexerData {
 
   @Field(() => Int, { nullable: true })
   public year?: number | null;
+
+  @Field(() => Trailer, { nullable: true })
+  public trailer?: Trailer | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public recommendations?: IndexerData[] | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public similar?: IndexerData[] | null;
 }

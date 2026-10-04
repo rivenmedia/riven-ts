@@ -1,5 +1,6 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
 import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
 
@@ -119,5 +120,101 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
     const externalIds = await api.getExternalIds(tmdbIndexerData.id);
 
     return externalIds.imdb_id ?? null;
+  }
+
+  @FieldResolver(() => Trailer, { nullable: true })
+  public async trailer(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+    @Arg("language", () => String, { nullable: true, defaultValue: "en-US" })
+    language: string,
+  ): Promise<Trailer | null> {
+    const { results: videos } = await api.getVideos(
+      tmdbIndexerData.id,
+      language,
+    );
+
+    if (videos.length === 0) {
+      return null;
+    }
+
+    const { language: iso_639_1 } = new Intl.Locale(language);
+
+    const officialTrailers = videos.filter(
+      (video) =>
+        video.type === "Trailer" &&
+        video.official &&
+        video.iso_639_1 === iso_639_1,
+    );
+
+    if (officialTrailers.length === 0) {
+      return null;
+    }
+
+    const [highestResolutionTrailer] = officialTrailers.toSorted(
+      (a, b) => b.size - a.size,
+    );
+
+    if (!highestResolutionTrailer) {
+      return null;
+    }
+
+    return {
+      id: highestResolutionTrailer.id,
+      key: highestResolutionTrailer.key,
+      name: highestResolutionTrailer.name,
+      site: highestResolutionTrailer.site,
+      url: `https://www.youtube.com/watch?v=${highestResolutionTrailer.key}`,
+    };
+  }
+
+  @FieldResolver(() => [TmdbIndexerData], { nullable: true })
+  public async recommendations(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<TmdbIndexerData[] | null> {
+    const { results: recommendations } = await api.getRecommendations(
+      tmdbIndexerData.id,
+    );
+
+    if (recommendations.length === 0) {
+      return null;
+    }
+
+    return recommendations.map((recommendation) => ({
+      id: recommendation.id.toString(),
+      overview: recommendation.overview,
+      title: recommendation.title,
+      type: "movie",
+      backdropUrl: recommendation.backdrop_path,
+      posterUrl: recommendation.poster_path,
+      genreIds: recommendation.genre_ids,
+      genres: [],
+    }));
+  }
+
+  @FieldResolver(() => [TmdbIndexerData], { nullable: true })
+  public async similarItems(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<TmdbIndexerData[] | null> {
+    const { results: similarItems } = await api.getSimilarItems(
+      tmdbIndexerData.id,
+    );
+
+    if (similarItems.length === 0) {
+      return null;
+    }
+
+    return similarItems.map((item) => ({
+      id: item.id.toString(),
+      overview: item.overview,
+      title: item.title,
+      type: "movie",
+      backdropUrl: item.backdrop_path,
+      posterUrl: item.poster_path,
+      genreIds: item.genre_ids,
+      genres: [],
+    }));
   }
 }
