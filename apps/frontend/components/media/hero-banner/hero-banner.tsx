@@ -7,17 +7,12 @@ import { Play, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
-export interface Trailer {
-  id?: string | number;
-  name: string;
-  site: string | null;
-  key: string;
-  url?: string | null;
-}
+import type { Trailer } from "@/app/_types/__generated__/graphql";
+import type { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
 
 export interface HeroBannerProps {
   backdropUrl: string | null | undefined;
-  logo: string | null | undefined;
+  logo: ItemImage | null;
   trailer: Trailer | null | undefined;
 }
 
@@ -42,7 +37,6 @@ export function HeroBanner({ backdropUrl, logo, trailer }: HeroBannerProps) {
       >
         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />
         <div className="border-border/10 pointer-events-none absolute inset-0 rounded-2xl border" />
-
         {showTrailer ? (
           <>
             <iframe
@@ -68,19 +62,23 @@ export function HeroBanner({ backdropUrl, logo, trailer }: HeroBannerProps) {
             </Button>
           </>
         ) : (
-          <div className="relative z-10 flex w-full items-end justify-between">
-            {logo && (
-              <Image
-                alt="Logo"
-                className="max-h-16 max-w-[60%] object-contain drop-shadow-2xl md:max-h-28 lg:max-h-36"
-                src={logo}
-                loading="lazy"
-                width={48}
-                height={48}
-              />
-            )}
+          <div className="z-10 flex w-full justify-between">
+            <div
+              className="max-h-16 md:max-h-28 lg:max-h-36 max-w-[60%] drop-shadow-2xl"
+              style={{ aspectRatio: logo?.aspectRatio }}
+            >
+              {logo && (
+                <Image
+                  alt="Logo"
+                  src={logo.url}
+                  height={logo.height}
+                  width={logo.width}
+                  loading="eager"
+                />
+              )}
+            </div>
 
-            <div className="flex gap-2 md:gap-4">
+            <div className="flex gap-2 md:gap-4 items-end">
               {trailer && (
                 <Button
                   variant="secondary"

@@ -1,16 +1,21 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
 import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
-import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
+import { Arg, FieldResolver, Float, Int, Resolver, Root } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
 import { formatImageUrl } from "../utilities/format-image-url.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
+import type { MovieImage } from "../schemas/movie-image.schema.ts";
 import type { ResolverInterface } from "type-graphql";
+
+const byRating = (a: MovieImage, b: MovieImage) =>
+  b.vote_average - a.vote_average || b.vote_count - a.vote_count;
 
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
@@ -247,5 +252,123 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       character: member.character,
       profileUrl: formatImageUrl(member.profile_path, "profile", "w185"),
     }));
+  }
+
+  @FieldResolver(() => ItemImage, { nullable: true })
+  public async logo(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @Arg("width", () => Int, {
+      defaultValue: null,
+      nullable: true,
+    })
+    width: number | null,
+    @Arg("aspectRatio", () => Float, {
+      defaultValue: null,
+      nullable: true,
+    })
+    aspectRatio: number | null,
+    @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<ItemImage | null> {
+    const { logos = [] } = await api.getLocalisedImages(
+      tmdbIndexerData.id,
+      language,
+    );
+
+    const { language: iso_639_1 } = new Intl.Locale(language);
+
+    // Language-neutral logos (no iso_639_1) are kept, as they are usable in any locale
+    const candidates = logos.flatMap<MovieImage>((logo) =>
+      logo.file_path && (!logo.iso_639_1 || logo.iso_639_1 === iso_639_1)
+        ? {
+            file_path: logo.file_path,
+            width: logo.width ?? 0,
+            aspect_ratio: logo.aspect_ratio ?? 0,
+            vote_average: logo.vote_average ?? 0,
+            vote_count: logo.vote_count ?? 0,
+            height: logo.height ?? 0,
+            iso_639_1: logo.iso_639_1 ?? null,
+          }
+        : [],
+    );
+
+    if (candidates.length === 0) {
+      return null;
+    }
+
+    if (width === null && aspectRatio === null) {
+      const [highestRatedLogo] = candidates.toSorted(byRating);
+
+      if (!highestRatedLogo?.file_path) {
+        return null;
+      }
+
+      const imageUrl = formatImageUrl(
+        highestRatedLogo.file_path,
+        "logo",
+        "original",
+      );
+
+      if (!imageUrl) {
+        return null;
+      }
+
+      return {
+        url: imageUrl,
+        height: highestRatedLogo.height,
+        width: highestRatedLogo.width,
+        aspectRatio: highestRatedLogo.aspect_ratio,
+      };
+    }
+
+    // Prefer logos that are at least as wide as requested to avoid upscaling,
+    // falling back to all candidates if none are large enough
+    const largeEnoughLogos =
+      width === null
+        ? candidates
+        : candidates.filter((logo) => logo.width >= width);
+
+    const sizedCandidates =
+      largeEnoughLogos.length > 0 ? largeEnoughLogos : candidates;
+
+    const [closestLogo] = sizedCandidates.toSorted((a, b) => {
+      if (aspectRatio !== null) {
+        const aspectRatioDelta =
+          Math.abs(a.aspect_ratio - aspectRatio) -
+          Math.abs(b.aspect_ratio - aspectRatio);
+
+        if (aspectRatioDelta !== 0) {
+          return aspectRatioDelta;
+        }
+      }
+
+      if (width !== null) {
+        const widthDelta =
+          Math.abs(a.width - width) - Math.abs(b.width - width);
+
+        if (widthDelta !== 0) {
+          return widthDelta;
+        }
+      }
+
+      return byRating(a, b);
+    });
+
+    if (!closestLogo?.file_path) {
+      return null;
+    }
+
+    const imageUrl = formatImageUrl(closestLogo.file_path, "logo", "original");
+
+    if (!imageUrl) {
+      return null;
+    }
+
+    return {
+      url: imageUrl,
+      height: closestLogo.height,
+      width: closestLogo.width,
+      aspectRatio: closestLogo.aspect_ratio,
+    };
   }
 }

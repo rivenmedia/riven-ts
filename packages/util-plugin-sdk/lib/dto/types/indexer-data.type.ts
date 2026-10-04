@@ -3,8 +3,9 @@ import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
+import { ItemImage } from "./item-image.type.ts";
 import { Ratings } from "./ratings.type.ts";
-import { Trailer } from "./trailer.type.js";
+import { Trailer } from "./trailer.type.ts";
 
 import type { Duration } from "luxon";
 
@@ -59,8 +60,8 @@ export abstract class IndexerData {
   /**
    * The URL of the logo image for the media item.
    */
-  @Field(() => String, { nullable: true })
-  public logoUrl?: string | null;
+  @Field(() => ItemImage, { nullable: true })
+  public logo?: ItemImage | null;
 
   /**
    * The language of the media item.

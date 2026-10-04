@@ -29,7 +29,7 @@ export const Default = meta.story({
             tmdbNowPlaying: [
               {
                 __typename: "TmdbIndexerData",
-                id: crypto.randomUUID() as UUID,
+                id: crypto.randomUUID(),
                 type: "movie",
                 title: "John Wick: Chapter 4",
                 backdropUrl:
@@ -42,12 +42,12 @@ export const Default = meta.story({
                 genres: [
                   {
                     __typename: "Genre",
-                    id: crypto.randomUUID() as UUID,
+                    id: crypto.randomUUID(),
                     name: "Action",
                   },
                   {
                     __typename: "Genre",
-                    id: crypto.randomUUID() as UUID,
+                    id: crypto.randomUUID(),
                     name: "Thriller",
                   },
                 ],
@@ -73,12 +73,16 @@ export const Default = meta.story({
                     url: "https://www.themoviedb.org/movie/603692-john-wick-chapter-4",
                   },
                 },
-                logoUrl:
-                  "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+                logo: {
+                  __typename: "ItemImage",
+                  height: 600,
+                  width: 400,
+                  url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+                },
               },
               {
                 __typename: "TmdbIndexerData",
-                id: crypto.randomUUID() as UUID,
+                id: crypto.randomUUID(),
                 type: "show",
                 title: "Arcane",
                 backdropUrl:
@@ -91,12 +95,12 @@ export const Default = meta.story({
                 genres: [
                   {
                     __typename: "Genre",
-                    id: crypto.randomUUID() as UUID,
+                    id: crypto.randomUUID(),
                     name: "Animation",
                   },
                   {
                     __typename: "Genre",
-                    id: crypto.randomUUID() as UUID,
+                    id: crypto.randomUUID(),
                     name: "Action & Adventure",
                   },
                 ],
@@ -107,12 +111,16 @@ export const Default = meta.story({
                   rottenTomatoes: null,
                   tmdb: null,
                 },
-                logoUrl:
-                  "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+                logo: {
+                  __typename: "ItemImage",
+                  height: 600,
+                  width: 400,
+                  url: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+                },
               },
               {
                 __typename: "TmdbIndexerData",
-                id: crypto.randomUUID() as UUID,
+                id: crypto.randomUUID(),
                 type: "movie",
                 title: "Insidious: Out of the Further",
                 backdropUrl:
@@ -129,7 +137,7 @@ export const Default = meta.story({
                 genres: [
                   {
                     __typename: "Genre",
-                    id: crypto.randomUUID() as UUID,
+                    id: crypto.randomUUID(),
                     name: "Horror",
                   },
                 ],
@@ -140,8 +148,12 @@ export const Default = meta.story({
                   rottenTomatoes: null,
                   tmdb: null,
                 },
-                logoUrl:
-                  "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+                logo: {
+                  __typename: "ItemImage",
+                  height: 600,
+                  width: 400,
+                  url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+                },
               },
             ],
           },
@@ -154,7 +166,7 @@ export const Default = meta.story({
               tmdbTrendingMovies: [
                 {
                   __typename: "TmdbIndexerData",
-                  id: crypto.randomUUID() as UUID,
+                  id: crypto.randomUUID(),
                   type: "movie",
                   title: "Avengers: Endgame",
                   posterUrl:
@@ -171,7 +183,7 @@ export const Default = meta.story({
             tmdbTrendingMovies: [
               {
                 __typename: "TmdbIndexerData",
-                id: crypto.randomUUID() as UUID,
+                id: crypto.randomUUID(),
                 type: "movie",
                 title: "The Odyssey",
                 posterUrl:
@@ -189,7 +201,7 @@ export const Default = meta.story({
               tvdbTrendingShows: [
                 {
                   __typename: "Show",
-                  id: crypto.randomUUID() as UUID,
+                  id: crypto.randomUUID(),
                   type: "show",
                   title: "Breaking Bad",
                   posterPath:
@@ -206,7 +218,7 @@ export const Default = meta.story({
             tvdbTrendingShows: [
               {
                 __typename: "Show",
-                id: crypto.randomUUID() as UUID,
+                id: crypto.randomUUID(),
                 type: "show",
                 title: "Arcane",
                 posterPath:

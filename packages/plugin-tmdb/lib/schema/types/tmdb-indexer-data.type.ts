@@ -23,6 +23,8 @@ export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   @Field(() => String, { nullable: true })
   public backdropUrl?: string | null;
 
+  public logoUrl?: string | null;
+
   @Field(() => String, { nullable: true })
   public language?: string | null;
 

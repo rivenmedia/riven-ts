@@ -14,7 +14,12 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
     tmdbItem(id: $id) {
       id
       backdropUrl
-      # logo
+      logo(width: 750) {
+        aspectRatio
+        url
+        height
+        width
+      }
       trailer {
         id
         name

@@ -4,6 +4,7 @@ import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
+import { movieImages200Schema } from "../__generated__/zod/movieImagesSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
@@ -151,5 +152,15 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     });
 
     return MovieCredits.parse(response);
+  }
+
+  public async getLocalisedImages(movieId: string, language: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/images`, {
+      params: {
+        language,
+      },
+    });
+
+    return movieImages200Schema.parse(response);
   }
 }

@@ -34,7 +34,7 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
       <div className="z-10 mx-auto flex h-full w-full max-w-600 flex-col">
         <HeroBanner
           backdropUrl={data.backdropUrl}
-          logo={data.logoUrl}
+          logo={data.logo ?? null}
           trailer={data.trailer}
         />
 
