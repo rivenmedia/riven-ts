@@ -1,6 +1,7 @@
 import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
+import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
 import { Ratings } from "./ratings.type.ts";
 import { Trailer } from "./trailer.type.js";
@@ -107,4 +108,7 @@ export abstract class IndexerData {
 
   @Field(() => [IndexerData], { nullable: true })
   public similar?: IndexerData[] | null;
+
+  @Field(() => [CastMember], { nullable: true })
+  public cast?: CastMember[] | null;
 }

@@ -1,4 +1,5 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
@@ -215,6 +216,26 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       posterUrl: item.poster_path,
       genreIds: item.genre_ids,
       genres: [],
+    }));
+  }
+
+  @FieldResolver(() => [CastMember], { nullable: true })
+  public async cast(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+    @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
+  ): Promise<CastMember[] | null> {
+    const { cast } = await api.getCredits(tmdbIndexerData.id, language);
+
+    if (cast.length === 0) {
+      return null;
+    }
+
+    return cast.map((member) => ({
+      id: member.id.toString(),
+      name: member.name,
+      character: member.character,
+      profilePath: member.profile_path,
     }));
   }
 }

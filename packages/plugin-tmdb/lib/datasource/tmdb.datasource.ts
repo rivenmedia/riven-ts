@@ -7,6 +7,7 @@ import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIds
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
+import { MovieCredits } from "../schemas/movie-credits.schema.ts";
 import { MovieRecommendations } from "../schemas/movie-recommendations.schema.ts";
 import { MovieSimilarItems } from "../schemas/movie-similar-items.schema.ts";
 import { MovieVideos } from "../schemas/movie-videos.schema.ts";
@@ -140,5 +141,15 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const response = await this.get<unknown>(`movie/${movieId}/similar`);
 
     return MovieSimilarItems.parse(response);
+  }
+
+  public async getCredits(movieId: string, language: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/credits`, {
+      params: {
+        language,
+      },
+    });
+
+    return MovieCredits.parse(response);
   }
 }
