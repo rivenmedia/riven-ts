@@ -42,6 +42,21 @@
       "outputs": ["storybook-static"]
     },
     "test:component": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        // Ignore unrelated NextJS files
+        "!{proxy,instrumentation,instrumentation-client}.ts",
+        // Ignore E2E code
+        "!playwright/**",
+        // Ignore unrelated config files
+        "!**/*.config.ts",
+        // Component tests are ran via Vitest, so explicitly include its config
+        "vitest.config.ts",
+        // Ignore generated types, these are missing on a fresh checkout and cause cache misses
+        "!**/*.typegen.ts",
+        "!**/next-env.d.ts",
+        "!**/public/mockServiceWorker.js"
+      ],
       "outputs": ["__screenshots__"]
     }
   }
