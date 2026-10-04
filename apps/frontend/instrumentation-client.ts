@@ -1,10 +1,3 @@
-import { Settings } from "luxon";
+import { configureLocale } from "./lib/utils/configure-luxon";
 
-declare module "luxon" {
-  export interface TSSettings {
-    throwOnInvalid: true;
-  }
-}
-
-Settings.throwOnInvalid = true;
-Settings.defaultLocale = navigator.language;
+configureLocale();

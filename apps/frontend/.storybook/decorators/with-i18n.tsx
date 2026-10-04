@@ -1,6 +1,6 @@
 import { i18n } from "@/.storybook/i18n";
+import { configureLocale } from "@/lib/utils/configure-luxon";
 
-import { Settings } from "luxon";
 import { useEffect, useState } from "react";
 import { I18nextProvider } from "react-i18next";
 
@@ -13,7 +13,7 @@ export const WithI18n: Decorator = (Story, { globals }) => {
     // Persist locale to state to force re-render after a change.
     // This ensures Luxon instances receive the new Settings.defaultLocale.
     setActiveLocale(() => {
-      Settings.defaultLocale = locale;
+      configureLocale(locale);
 
       document.dir = i18n.dir(locale);
 

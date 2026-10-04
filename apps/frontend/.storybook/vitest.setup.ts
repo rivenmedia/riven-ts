@@ -1,3 +1,5 @@
+import { configureLocale } from "@/lib/utils/configure-luxon";
+
 import { faker } from "@faker-js/faker";
 import { screenshot } from "@storycap-testrun/browser";
 import { page } from "@vitest/browser/context";
@@ -15,7 +17,7 @@ declare module "vitest" {
   }
 }
 
-Settings.defaultLocale = "en-GB";
+configureLocale("en-GB");
 
 const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 
