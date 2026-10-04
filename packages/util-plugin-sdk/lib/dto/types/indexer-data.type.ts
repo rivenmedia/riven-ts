@@ -6,6 +6,8 @@ import { Genre } from "./genre.type.ts";
 import { Ratings } from "./ratings.type.ts";
 import { Trailer } from "./trailer.type.js";
 
+import type { Duration } from "luxon";
+
 /**
  * Represents a media item returned from an indexer.
  *
@@ -98,7 +100,13 @@ export abstract class IndexerData {
   public type!: MediaItemType;
 
   @Field(() => Int, { nullable: true })
-  public year?: number | null;
+  public get year() {
+    if (!this.releaseDate) {
+      return null;
+    }
+
+    return this.releaseDate.getFullYear();
+  }
 
   @Field(() => Trailer, { nullable: true })
   public trailer?: Trailer | null;
@@ -107,8 +115,24 @@ export abstract class IndexerData {
   public recommendations?: IndexerData[] | null;
 
   @Field(() => [IndexerData], { nullable: true })
-  public similar?: IndexerData[] | null;
+  public similarItems?: IndexerData[] | null;
 
   @Field(() => [CastMember], { nullable: true })
   public cast?: CastMember[] | null;
+
+  /**
+   * Used to calculate the formatted runtime
+   *
+   * @internal
+   */
+  public rawRuntime?: Duration | null;
+
+  @Field(() => String, { nullable: true })
+  public get runtime() {
+    if (!this.rawRuntime) {
+      return null;
+    }
+
+    return this.rawRuntime.toHuman();
+  }
 }

@@ -119,7 +119,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return trendingMovies200Schema.parse(response);
   }
 
-  public async getVideos(movieId: string, locale?: string) {
+  public async getLocalisedVideos(movieId: string, locale?: string) {
     const response = await this.get<unknown>(`movie/${movieId}/videos`, {
       params: {
         language: locale,
@@ -143,7 +143,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return MovieSimilarItems.parse(response);
   }
 
-  public async getCredits(movieId: string, language: string) {
+  public async getLocalisedCredits(movieId: string, language: string) {
     const response = await this.get<unknown>(`movie/${movieId}/credits`, {
       params: {
         language,

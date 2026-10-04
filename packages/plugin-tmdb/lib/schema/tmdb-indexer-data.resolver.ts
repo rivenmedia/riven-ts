@@ -7,6 +7,7 @@ import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
+import { formatImageUrl } from "../utilities/format-image-url.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 import type { ResolverInterface } from "type-graphql";
@@ -130,7 +131,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
     @Arg("language", () => String, { nullable: true, defaultValue: "en-US" })
     language: string,
   ): Promise<Trailer | null> {
-    const { results: videos } = await api.getVideos(
+    const { results: videos } = await api.getLocalisedVideos(
       tmdbIndexerData.id,
       language,
     );
@@ -187,10 +188,15 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       overview: recommendation.overview,
       title: recommendation.title,
       type: "movie",
-      backdropUrl: recommendation.backdrop_path,
-      posterUrl: recommendation.poster_path,
+      backdropUrl: formatImageUrl(
+        recommendation.backdrop_path,
+        "backdrop",
+        "original",
+      ),
+      posterUrl: formatImageUrl(recommendation.poster_path, "poster", "w185"),
       genreIds: recommendation.genre_ids,
       genres: [],
+      rawRuntime: null,
     }));
   }
 
@@ -212,10 +218,11 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       overview: item.overview,
       title: item.title,
       type: "movie",
-      backdropUrl: item.backdrop_path,
-      posterUrl: item.poster_path,
+      backdropUrl: formatImageUrl(item.backdrop_path, "backdrop", "w780"),
+      posterUrl: formatImageUrl(item.poster_path, "poster", "w185"),
       genreIds: item.genre_ids,
       genres: [],
+      rawRuntime: null,
     }));
   }
 
@@ -225,7 +232,10 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
     @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
   ): Promise<CastMember[] | null> {
-    const { cast } = await api.getCredits(tmdbIndexerData.id, language);
+    const { cast } = await api.getLocalisedCredits(
+      tmdbIndexerData.id,
+      language,
+    );
 
     if (cast.length === 0) {
       return null;
@@ -235,7 +245,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       id: member.id.toString(),
       name: member.name,
       character: member.character,
-      profilePath: member.profile_path,
+      profileUrl: formatImageUrl(member.profile_path, "profile", "w185"),
     }));
   }
 }

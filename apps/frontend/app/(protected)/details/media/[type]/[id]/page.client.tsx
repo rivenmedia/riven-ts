@@ -1,33 +1,29 @@
-import { fly } from "@/components/_animations/fly";
 import { BackdropBackground } from "@/components/media/backdrop-background/backdrop-background";
 import { HeroBanner } from "@/components/media/hero-banner/hero-banner";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
 
-import { cn } from "cn";
 import Image from "next/image";
 
-import { ItemCast } from "./_components/item-cast";
-import { ItemMetadata } from "./_components/item-metadata";
+import { ItemCast } from "./_components/item-cast/item-cast";
 import { ItemOverview } from "./_components/item-overview";
-import { MediaCarousel } from "./_components/media-carousel";
-import { SeasonList } from "./_components/season-list";
+import { ItemRecommendations } from "./_components/item-recommendations/item-recommendations";
+import { SimilarItems } from "./_components/similar-items/similar-items";
 
-import type { GetMediaItemQuery } from "./_queries/get-media-item.query.typegen";
+import type { IndexerData } from "@/app/_types/__generated__/graphql";
 
 interface MediaDetailsPageProps {
-  data: GetMediaItemQuery;
+  data: IndexerData;
 }
 
 export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
   return (
-    <div className="relative flex min-h-screen flex-col overflow-x-hidden">
-      {data.mediaDetails.details.backdropPath && (
+    <div className="relative flex min-h-screen flex-col overflow-x-clip">
+      {data.backdropUrl && (
         <BackdropBackground
           image={
             <Image
               alt=""
               className="h-full w-full object-cover starting:opacity-0 opacity-30 blur-3xl transition-opacity duration-1000 ease-[easeOutCubic]"
-              src={data.mediaDetails.details.backdropPath}
+              src={data.backdropUrl}
               loading="lazy"
               fill
             />
@@ -37,9 +33,9 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
 
       <div className="z-10 mx-auto flex h-full w-full max-w-600 flex-col">
         <HeroBanner
-          backdropPath={data.mediaDetails.details.backdropPath}
-          logo={data.mediaDetails.details.logo}
-          trailer={data.mediaDetails.details.trailer}
+          backdropUrl={data.backdropUrl}
+          logo={data.logoUrl}
+          trailer={data.trailer}
         />
 
         <div className="px-8 pb-24 md:px-20 lg:px-24">
@@ -90,19 +86,17 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
                         </section>
                     {/if} */}
           {/* {/if} */}
-          {data.mediaDetails.type !== "movie" &&
-            data.mediaDetails.details.seasons &&
-            data.mediaDetails.details.seasons.length > 0 && (
-              <section
-                className={cn(
-                  "mt-8 md:mt-12 animation-duration-400 delay-450",
-                  fly,
-                )}
-              >
-                <SectionHeading title="Seasons" />
-                <SeasonList seasons={data.mediaDetails.details.seasons} />
-              </section>
-            )}
+          {/* {data.type !== "movie" && data.seasons && data.seasons.length > 0 && (
+            <section
+              className={cn(
+                "mt-8 md:mt-12 animation-duration-400 delay-450",
+                fly,
+              )}
+            >
+              <SectionHeading title="Seasons" />
+              <SeasonList seasons={data.seasons} />
+            </section>
+          )} */}
           {/* {#if data.mediaDetails?.type === "tv" && data.mediaDetails?.details.episodes}
                     <section
                         className="mt-8 md:mt-12"
@@ -120,24 +114,10 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
                             onDeleteFilesystemEntry={deleteFilesystemEntry} />
                     </section>
                 {/if} */}
-          {data.mediaDetails.details.cast.length > 0 && (
-            <ItemCast data={data} />
-          )}
-          <ItemMetadata data={data} />
-          {data.mediaDetails.details.recommendations.length > 0 && (
-            <MediaCarousel
-              items={data.mediaDetails.details.recommendations}
-              title="Recommendations"
-              delay={600}
-            />
-          )}
-          {data.mediaDetails.details.similar.length > 0 && (
-            <MediaCarousel
-              items={data.mediaDetails.details.similar}
-              title="Similar"
-              delay={650}
-            />
-          )}
+          <ItemCast id={data.id} />
+          {/* <ItemMetadata data={data} /> */}
+          <ItemRecommendations id={data.id} />
+          <SimilarItems id={data.id} />
           {/* {#if data.mediaDetails?.details.trakt_recommendations?.length}{@render mediaCarousel(
                         data.mediaDetails.details.trakt_recommendations,
                         "More Like This",

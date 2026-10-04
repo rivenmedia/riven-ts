@@ -16,16 +16,16 @@ export interface Trailer {
 }
 
 export interface HeroBannerProps {
-  backdropPath: string | null | undefined;
+  backdropUrl: string | null | undefined;
   logo: string | null | undefined;
   trailer: Trailer | null | undefined;
 }
 
-export function HeroBanner({ backdropPath, logo, trailer }: HeroBannerProps) {
+export function HeroBanner({ backdropUrl, logo, trailer }: HeroBannerProps) {
   const [isTrailerVisible, setIsTrailerVisible] = useState(false);
   const showTrailer = trailer && isTrailerVisible;
 
-  if (!backdropPath && !trailer) {
+  if (!backdropUrl && !trailer) {
     return null;
   }
 
@@ -37,7 +37,7 @@ export function HeroBanner({ backdropPath, logo, trailer }: HeroBannerProps) {
           !showTrailer && "p-6 md:p-12",
         )}
         style={{
-          backgroundImage: backdropPath ? `url('${backdropPath}')` : undefined,
+          backgroundImage: backdropUrl ? `url('${backdropUrl}')` : undefined,
         }}
       >
         <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent" />

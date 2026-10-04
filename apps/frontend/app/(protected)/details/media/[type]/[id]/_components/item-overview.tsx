@@ -8,19 +8,19 @@ import React from "react";
 
 import { ItemActionToolbar } from "./item-action-toolbar";
 
-import type { GetMediaItemQuery } from "../_queries/get-media-item.query.typegen";
+import type { IndexerData } from "@/app/_types/__generated__/graphql";
 
 interface ItemOverviewProps {
-  data: GetMediaItemQuery;
+  data: IndexerData;
 }
 
 export function ItemOverview({ data }: ItemOverviewProps) {
   const details = [
-    data.mediaDetails.details.year,
-    data.mediaDetails.details.formattedRuntime,
-    data.mediaDetails.details.originalLanguage.toUpperCase(),
-    data.mediaDetails.details.certification,
-    data.mediaDetails.details.status,
+    data.year,
+    data.runtime,
+    data.language?.toUpperCase(),
+    data.certification,
+    // data.status,
   ].filter(Boolean);
 
   // oxlint-disable-next-line unicorn/consistent-function-scoping
@@ -42,8 +42,8 @@ export function ItemOverview({ data }: ItemOverviewProps) {
         )}
       >
         <PortraitCard
-          title={data.mediaDetails.details.title}
-          image={data.mediaDetails.details.posterPath}
+          title={data.title}
+          image={data.posterUrl}
           className="group w-48 rounded-xl shadow-2xl lg:w-64"
           showContent={false}
         />
@@ -56,9 +56,9 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           )}
         >
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
-            {data.mediaDetails.details.title}
+            {data.title}
           </h1>
-          <StatusBadge
+          {/* <StatusBadge
             className="px-3 py-1.5 text-sm font-medium inline-block h-8"
             state={data.mediaDetails.state}
             large
@@ -68,14 +68,15 @@ export function ItemOverview({ data }: ItemOverviewProps) {
               {data.mediaDetails.completedFileCount}/
               {data.mediaDetails.totalFileCount} files
             </span>
-          )}
+          )} */}
         </div>
 
         <ItemActionToolbar
-          title={data.mediaDetails.details.title}
-          mediaType={data.mediaDetails.type}
-          externalId={data.mediaDetails.details.id}
-          seasons={data.mediaDetails.details.seasons}
+          title={data.title}
+          mediaType={data.type}
+          externalId={data.id}
+          // seasons={data.seasons}
+          seasons={[]}
           // {riven}
           // {rivenId}
           // {rivenPending}
@@ -103,14 +104,14 @@ export function ItemOverview({ data }: ItemOverviewProps) {
             </React.Fragment>
           ))}
         </div>
-        {data.mediaDetails.details.genres.length > 0 && (
+        {data.genres.length > 0 && (
           <div
             className={cn(
               "flex flex-wrap items-center gap-2 animation-duration-400 delay-250",
               fly,
             )}
           >
-            {data.mediaDetails.details.genres.map((genre) => (
+            {data.genres.map((genre) => (
               <span
                 key={genre.id}
                 className="border-border bg-muted/50 text-muted-foreground rounded-xl border px-3 py-1 text-sm"
@@ -143,7 +144,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
             fly,
           )}
         >
-          {data.mediaDetails.details.overview}
+          {data.overview}
         </p>
       </div>
     </div>

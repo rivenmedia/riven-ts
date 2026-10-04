@@ -4,9 +4,10 @@ import { Field, ID, ObjectType } from "type-graphql";
 
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 @ObjectType({ implements: IndexerData })
-export class TmdbIndexerData implements IndexerData {
+export class TmdbIndexerData implements Omit<IndexerData, "runtime"> {
   @Field(() => ID)
   public id!: string;
 
@@ -41,4 +42,6 @@ export class TmdbIndexerData implements IndexerData {
   public type!: Extract<MediaItemType, "movie" | "show">;
 
   public imdbId?: string | null;
+
+  public rawRuntime!: Duration | null;
 }

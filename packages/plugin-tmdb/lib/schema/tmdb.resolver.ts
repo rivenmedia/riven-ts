@@ -1,5 +1,5 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
-import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+import { DateTime, Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { Arg, ID, Query, Resolver } from "type-graphql";
 
@@ -40,6 +40,9 @@ export class TmdbResolver {
         : null,
       backdropUrl: formatImageUrl(item.backdrop_path, "backdrop"),
       type: "movie",
+      rawRuntime: item.runtime
+        ? Duration.fromObject({ minutes: item.runtime })
+        : null,
     };
   }
 
@@ -73,6 +76,7 @@ export class TmdbResolver {
         releaseDate: movie.release_date
           ? DateTime.fromISO(movie.release_date).toJSDate()
           : null,
+        rawRuntime: null,
       });
     }
 
@@ -112,6 +116,7 @@ export class TmdbResolver {
         releaseDate: movie.release_date
           ? DateTime.fromISO(movie.release_date).toJSDate()
           : null,
+        rawRuntime: null,
       });
     }
 

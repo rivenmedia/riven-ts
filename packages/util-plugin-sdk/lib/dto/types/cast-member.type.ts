@@ -8,9 +8,9 @@ export class CastMember {
   @Field(() => String)
   public name!: string;
 
-  @Field(() => String, { nullable: true })
-  public character?: string | null;
+  @Field(() => String)
+  public character!: string;
 
   @Field(() => String, { nullable: true })
-  public profilePath?: string | null;
+  public profileUrl?: string | null;
 }

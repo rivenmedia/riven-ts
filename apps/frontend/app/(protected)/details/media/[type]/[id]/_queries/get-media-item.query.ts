@@ -11,101 +11,79 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
   GetMediaItemQueryVariables
 > = gql`
   query GetMediaItem($id: ID!) {
-    mediaDetails(id: $id) {
-      totalFileCount
-      completedFileCount
-      details {
+    tmdbItem(id: $id) {
+      id
+      backdropUrl
+      # logo
+      trailer {
         id
-        backdropPath
-        logo
-        trailer {
-          id
-          name
-          site
-          key
-          url
-        }
-        title
-        posterPath
-        overview
-        recommendations {
-          id
-          title
-          posterPath
-          type
-          year
-        }
-        similar {
-          id
-          title
-          posterPath
-          type
-          year
-        }
-        genres {
-          id
-          name
-        }
-        cast {
-          id
-          name
-          character
-          profilePath
-        }
-        year
-        formattedRuntime
-        originalLanguage
-        certification
-        status
-        seasons {
-          id
-          name
-          seasonNumber
-          episodeCount
-          completedCount
-          image
-        }
+        name
+        site
+        key
+        url
       }
+      title
+      posterUrl
+      overview
+      genres {
+        id
+        name
+      }
+      year
+      runtime
+      language
+      certification
+      # status
+      # seasons {
+      #   id
+      #   name
+      #   seasonNumber
+      #   episodeCount
+      #   completedCount
+      #   image
+      # }
+      # totalFileCount
+      # completedFileCount
       type
-      state
-      filesystemEntries {
-        id
-        fileSize {
-          size
-          units
-        }
-        createdAt
-        type
-        originalFilename
-        plugin
-      }
-      mediaMetadata {
-        subtitleTracks {
-          language
-        }
-        qualitySource
-        isRemux
-        isProper
-        isRepack
-        bitRate
-        duration
-        containerFormat
-        audioTracks {
-          channels
-          codec
-        }
-        fileName
-        video {
-          resolution {
-            width
-            height
-            codec
-            bitDepth
-            hdrType
-            frameRate
-          }
-        }
-      }
+      # state
+      # filesystemEntries {
+      #   id
+      #   fileSize {
+      #     size
+      #     units
+      #   }
+      #   createdAt
+      #   type
+      #   originalFilename
+      #   plugin
+      # }
+      # mediaMetadata {
+      #   subtitleTracks {
+      #     language
+      #   }
+      #   qualitySource
+      #   isRemux
+      #   isProper
+      #   isRepack
+      #   bitRate
+      #   duration
+      #   containerFormat
+      #   audioTracks {
+      #     channels
+      #     codec
+      #   }
+      #   fileName
+      #   video {
+      #     resolution {
+      #       width
+      #       height
+      #       codec
+      #       bitDepth
+      #       hdrType
+      #       frameRate
+      #     }
+      #   }
+      # }
     }
   }
 `;
