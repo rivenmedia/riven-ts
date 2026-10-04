@@ -4,12 +4,14 @@ import { SectionHeading } from "@/components/media/section-heading/section-headi
 
 import { useState } from "react";
 
-import { TrendingItemsActions } from "./trending-items-actions";
+import {
+  TRENDING_TIME_OPTIONS,
+  TrendingItemsActions,
+} from "./trending-items-actions";
 
+import type { TimeWindow } from "./trending-items-actions";
 import type { Route } from "next";
 import type { ReactNode } from "react";
-
-type TimeWindow = "day" | "week";
 
 interface TrendingTimeWindowSectionProps {
   title: string;
@@ -26,7 +28,9 @@ export function TrendingTimeWindowSection({
   viewAllHref,
   slots,
 }: TrendingTimeWindowSectionProps) {
-  const [timeWindow, setTimeWindow] = useState<TimeWindow>("day");
+  const [timeWindow, setTimeWindow] = useState<TimeWindow>(
+    TRENDING_TIME_OPTIONS[0].value,
+  );
 
   return (
     <>
@@ -35,7 +39,7 @@ export function TrendingTimeWindowSection({
         <TrendingItemsActions
           aria-label={`${title} actions`}
           setTimeWindow={(newTimeWindow) => {
-            setTimeWindow(newTimeWindow as TimeWindow);
+            setTimeWindow(newTimeWindow);
           }}
           viewAllHref={viewAllHref}
         />

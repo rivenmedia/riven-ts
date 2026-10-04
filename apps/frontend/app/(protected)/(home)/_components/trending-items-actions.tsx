@@ -3,14 +3,28 @@ import { AnimatedToggle } from "@/components/animated-toggle/animated-toggle";
 
 import Link from "next/link";
 
+import type { ToggleOption } from "@/components/animated-toggle/animated-toggle";
 import type { Route } from "next";
 import type { HTMLAttributes } from "react";
+
+export const TRENDING_TIME_OPTIONS = [
+  {
+    label: "Today",
+    value: "day",
+  },
+  {
+    label: "This Week",
+    value: "week",
+  },
+] as const satisfies readonly ToggleOption[];
+
+export type TimeWindow = (typeof TRENDING_TIME_OPTIONS)[number]["value"];
 
 interface TrendingItemsActionsProps extends Omit<
   HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  setTimeWindow: (newTimeWindow: string) => void;
+  setTimeWindow: (newTimeWindow: TimeWindow) => void;
   viewAllHref: Route;
 }
 
@@ -22,10 +36,7 @@ export function TrendingItemsActions({
   return (
     <section className="flex items-center gap-3" {...props}>
       <AnimatedToggle
-        options={[
-          { label: "Today", value: "day" },
-          { label: "This Week", value: "week" },
-        ]}
+        options={TRENDING_TIME_OPTIONS}
         onChange={(newTimeWindow) => {
           setTimeWindow(newTimeWindow);
         }}
