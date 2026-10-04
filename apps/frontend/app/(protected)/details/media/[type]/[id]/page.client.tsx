@@ -1,22 +1,14 @@
 import { fly } from "@/components/_animations/fly";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/_ui/carousel";
 import { BackdropBackground } from "@/components/media/backdrop-background/backdrop-background";
-import { FileInformationPanel } from "@/components/media/file-information-panel/file-information-panel";
 import { HeroBanner } from "@/components/media/hero-banner/hero-banner";
-import { RatingsRow } from "@/components/media/ratings-row/ratings-row";
 import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { StatusBadge } from "@/components/media/status-badge/status-badge";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
 
 import { cn } from "cn";
 import Image from "next/image";
-import React from "react";
 
-import { ItemActionToolbar } from "./_components/item-action-toolbar";
+import { ItemCast } from "./_components/item-cast";
+import { ItemMetadata } from "./_components/item-metadata";
+import { ItemOverview } from "./_components/item-overview";
 import { MediaCarousel } from "./_components/media-carousel";
 import { SeasonList } from "./_components/season-list";
 
@@ -27,24 +19,6 @@ interface MediaDetailsPageProps {
 }
 
 export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
-  const details = [
-    data.mediaDetails.details.year,
-    data.mediaDetails.details.formattedRuntime,
-    data.mediaDetails.details.originalLanguage.toUpperCase(),
-    data.mediaDetails.details.certification,
-    data.mediaDetails.details.status,
-  ].filter(Boolean);
-
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleRequestSuccess = () => {
-    /* empty */
-  };
-
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleActionSuccess = () => {
-    /* empty */
-  };
-
   return (
     <div className="relative flex min-h-screen flex-col overflow-x-hidden">
       {data.mediaDetails.details.backdropPath && (
@@ -69,121 +43,7 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
         />
 
         <div className="px-8 pb-24 md:px-20 lg:px-24">
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr] lg:gap-6">
-            <div
-              className={cn(
-                "hidden lg:mx-0 lg:block delay-50 animation-duration-400",
-                fly,
-              )}
-            >
-              <PortraitCard
-                title={data.mediaDetails.details.title}
-                image={data.mediaDetails.details.posterPath}
-                className="group w-48 rounded-xl shadow-2xl lg:w-64"
-                showContent={false}
-              />
-            </div>
-            <div className="flex flex-col gap-5">
-              <div
-                className={cn(
-                  "flex flex-wrap items-center gap-3 delay-100 animation-duration-400",
-                  fly,
-                )}
-              >
-                <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
-                  {data.mediaDetails.details.title}
-                </h1>
-                <StatusBadge
-                  className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-                  state={data.mediaDetails.state}
-                  large
-                />
-                {data.mediaDetails.totalFileCount > 0 && (
-                  <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
-                    {data.mediaDetails.completedFileCount}/
-                    {data.mediaDetails.totalFileCount} files
-                  </span>
-                )}
-              </div>
-
-              <ItemActionToolbar
-                title={data.mediaDetails.details.title}
-                mediaType={data.mediaDetails.type}
-                externalId={data.mediaDetails.details.id}
-                seasons={data.mediaDetails.details.seasons}
-                // {riven}
-                // {rivenId}
-                // {rivenPending}
-                onRequestSuccess={handleRequestSuccess}
-                onActionSuccess={handleActionSuccess}
-                riven={{} as never}
-                rivenId={null}
-                rivenPending={false}
-                // bind:rawDataOpen
-                // {rawRivenLoading}
-                // {rawRivenError}
-                // {rawRivenJson}
-              />
-
-              <div
-                className={cn(
-                  "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",
-                  fly,
-                )}
-              >
-                {details.map((detail, i) => (
-                  <React.Fragment key={detail}>
-                    <span>{detail}</span>
-                    {i < details.length - 1 && (
-                      <span className="text-border">•</span>
-                    )}
-                  </React.Fragment>
-                ))}
-              </div>
-              {data.mediaDetails.details.genres.length > 0 && (
-                <div
-                  className={cn(
-                    "flex flex-wrap items-center gap-2 animation-duration-400 delay-250",
-                    fly,
-                  )}
-                >
-                  {data.mediaDetails.details.genres.map((genre) => (
-                    <span
-                      key={genre.id}
-                      className="border-border bg-muted/50 text-muted-foreground rounded-xl border px-3 py-1 text-sm"
-                    >
-                      {genre.name}
-                    </span>
-                  ))}
-                </div>
-              )}
-              <RatingsRow
-                scores={[
-                  {
-                    name: "IMDb",
-                    image: "imdb.svg",
-                    score: "7.6",
-                    url: "",
-                  },
-                  {
-                    name: "TMDb",
-                    image: "tmdb.svg",
-                    score: "9.2",
-                    url: "",
-                  },
-                ]}
-                loading={false}
-              />
-              <p
-                className={cn(
-                  "text-muted-foreground max-w-4xl text-base leading-relaxed animation-duration-400 delay-350",
-                  fly,
-                )}
-              >
-                {data.mediaDetails.details.overview}
-              </p>
-            </div>
-          </div>
+          <ItemOverview data={data} />
           {/* {#if data.mediaDetails?.type === "movie"}
                     {/* {@const movieDetails = data.mediaDetails.details} */}
           {/* {#if movieDetails.collection}
@@ -261,69 +121,9 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
                     </section>
                 {/if} */}
           {data.mediaDetails.details.cast.length > 0 && (
-            <section
-              className={cn(
-                "mt-8 md:mt-12 animation-duration-400 delay-550",
-                fly,
-              )}
-            >
-              <SectionHeading title="Cast" />
-              <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
-                <CarouselContent className="-ml-3">
-                  {data.mediaDetails.details.cast.map((member) => (
-                    <CarouselItem key={member.id} className="basis-auto pl-3">
-                      <PortraitCard
-                        title={member.name}
-                        subtitle={member.character}
-                        image={member.profilePath}
-                        className="w-32 md:w-36 lg:w-40"
-                      />
-                    </CarouselItem>
-                  ))}
-                </CarouselContent>
-              </Carousel>
-            </section>
+            <ItemCast data={data} />
           )}
-          <section
-            className={cn(
-              "mt-8 md:mt-12 animation-duration-400 delay-600",
-              fly,
-            )}
-          >
-            <div className="flex max-w-7xl flex-col gap-8 lg:flex-row lg:gap-12">
-              {/* <MoreDetailsPanel
-                budget={
-                  data.mediaDetails?.type === "movie"
-                    ? data.mediaDetails.details.budget
-                    : undefined
-                }
-                revenue={
-                  data.mediaDetails?.type === "movie"
-                    ? data.mediaDetails.details.revenue
-                    : undefined
-                }
-                originCountry={data.mediaDetails?.details.origin_country}
-                spokenLanguages={data.mediaDetails?.details.spoken_languages}
-                productionCompanies={
-                  data.mediaDetails?.details.production_companies
-                }
-                homepage={data.mediaDetails?.details.homepage}
-                imdbId={data.mediaDetails?.details.imdb_id}
-                // {externalLinks}
-              /> */}
-
-              {data.mediaDetails.type === "movie" &&
-                data.mediaDetails.filesystemEntries.length > 0 && (
-                  <FileInformationPanel
-                    entries={data.mediaDetails.filesystemEntries}
-                    fallbackMediaMetadata={data.mediaDetails.mediaMetadata}
-                    onDeleteEntry={() => {
-                      /* empty */
-                    }}
-                  />
-                )}
-            </div>
-          </section>
+          <ItemMetadata data={data} />
           {data.mediaDetails.details.recommendations.length > 0 && (
             <MediaCarousel
               items={data.mediaDetails.details.recommendations}
