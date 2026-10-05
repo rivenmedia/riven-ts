@@ -4,6 +4,7 @@ import { RatingsRow } from "@/components/media/ratings-row/ratings-row";
 import { PortraitCard } from "@/components/portrait-card/portrait-card";
 
 import { cn } from "cn";
+import { startCase } from "es-toolkit";
 import React from "react";
 
 import { ItemActionToolbar } from "./item-action-toolbar";
@@ -20,7 +21,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
     data.runtime,
     data.language?.toUpperCase(),
     data.certification,
-    // data.status,
+    startCase(data.status),
   ].filter(Boolean);
 
   // oxlint-disable-next-line unicorn/consistent-function-scoping

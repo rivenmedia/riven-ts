@@ -202,6 +202,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       genreIds: recommendation.genre_ids,
       genres: [],
       rawRuntime: null,
+      status: "unknown",
     }));
   }
 
@@ -228,6 +229,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       genreIds: item.genre_ids,
       genres: [],
       rawRuntime: null,
+      status: "unknown",
     }));
   }
 

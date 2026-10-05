@@ -1,5 +1,6 @@
 import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 
+import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
@@ -136,4 +137,7 @@ export abstract class IndexerData {
 
     return this.rawRuntime.toHuman();
   }
+
+  @Field(() => IndexerDataStatus.out.unwrap().enum)
+  public status!: IndexerDataStatus;
 }

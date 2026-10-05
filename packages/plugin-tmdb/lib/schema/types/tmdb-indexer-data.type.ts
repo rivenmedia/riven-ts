@@ -2,6 +2,7 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
 
+import type { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
@@ -46,4 +47,6 @@ export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   public imdbId?: string | null;
 
   public rawRuntime!: Duration | null;
+
+  public status!: IndexerDataStatus;
 }

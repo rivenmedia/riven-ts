@@ -38,7 +38,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       runtime
       language
       certification
-      # status
+      status
       # seasons {
       #   id
       #   name
