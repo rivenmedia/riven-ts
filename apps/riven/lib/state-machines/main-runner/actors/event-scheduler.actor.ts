@@ -2,10 +2,10 @@ import chalk from "chalk";
 import { Duration } from "luxon";
 import { fromCallback } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { RivenInternalEvent } from "../../../message-queue/events/index.ts";
-import type { MainRunnerMachineEvent } from "../index.ts";
+import type { RivenInternalEvent } from "#message-queue/events/index.ts";
+import type { MainRunnerMachineEvent } from "#state-machines/main-runner/index.ts";
 
 export interface CreateEventSchedulerInput {
   interval: number;

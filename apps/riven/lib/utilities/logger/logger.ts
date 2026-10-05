@@ -3,7 +3,8 @@ import path from "node:path";
 import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
-import { settings } from "../settings.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { consoleFormat } from "./formatters/console.format.ts";
 import { ecsFileFormat } from "./formatters/ecs-file.format.ts";
 import { fileFormat } from "./formatters/file.format.ts";

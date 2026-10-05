@@ -2,7 +2,7 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";

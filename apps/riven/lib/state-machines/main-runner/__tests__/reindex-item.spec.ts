@@ -1,9 +1,10 @@
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { flow } from "../../../message-queue/flows/producer.ts";
-import { clearDeduplicationJob } from "../../../message-queue/utilities/clear-deduplication-job.ts";
-import * as settingsModule from "../../../utilities/settings.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
+import * as settingsModule from "#utilities/settings.ts";
+
 import { it } from "./helpers/test-context.ts";
 
 it("enqueues a job to reindex the item after the next episode air date if the item is a show", async ({

@@ -1,4 +1,4 @@
-import type { RawRankingConfig } from "../ranking-config.schema.ts";
+import type { RawRankingConfig } from "#ranking-config/ranking-config.schema.ts";
 import type { PartialDeep } from "type-fest";
 
 export const defaultPreset =

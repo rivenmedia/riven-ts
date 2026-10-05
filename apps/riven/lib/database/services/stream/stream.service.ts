@@ -10,8 +10,9 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import assert from "node:assert";
 
-import { redisCache } from "../../../utilities/redis-cache.ts";
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+import { redisCache } from "#utilities/redis-cache.ts";
+
 import { blacklistStream } from "./utilities/blacklist-stream.ts";
 import { calculateItemsToReprocess } from "./utilities/calculate-items-to-reprocess.ts";
 import { isFatalStatusCode } from "./utilities/is-fatal-status-code.ts";

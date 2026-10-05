@@ -1,8 +1,8 @@
-import { getPluginEventSubscribers } from "../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { enqueueRequestSubtitles } from "../steps/request-subtitles/enqueue-request-subtitles.ts";
+import { enqueueRequestSubtitles } from "#message-queue/flows/post-process-media-item/steps/request-subtitles/enqueue-request-subtitles.ts";
+import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 
-import type { SubtitlesService } from "../../../../database/services/subtitles/subtitles.service.ts";
-import type { ValidPluginMap } from "../../../../types/plugins.ts";
+import type { SubtitlesService } from "#database/services/subtitles/subtitles.service.ts";
+import type { ValidPluginMap } from "#types/plugins.ts";
 import type { ParentOptions } from "bullmq";
 import type { UUID } from "node:crypto";
 

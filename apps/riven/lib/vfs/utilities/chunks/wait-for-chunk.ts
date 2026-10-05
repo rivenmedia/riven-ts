@@ -2,14 +2,14 @@ import Fuse from "@zkochan/fuse-native";
 import assert from "node:assert";
 import { setTimeout as sleep } from "node:timers/promises";
 
-import { config } from "../../config.ts";
-import { FuseError } from "../../errors/fuse-error.ts";
-import { SeekDetectedError } from "../../errors/seek-detected.ts";
-import { chunkCache } from "../chunk-cache.ts";
-import { fdToCurrentStreamPositionMap } from "../file-handle-map.ts";
-import { getVfsOperationContext } from "../vfs-operation-context.ts";
+import { config } from "#vfs/config.ts";
+import { FuseError } from "#vfs/errors/fuse-error.ts";
+import { SeekDetectedError } from "#vfs/errors/seek-detected.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+import { fdToCurrentStreamPositionMap } from "#vfs/utilities/file-handle-map.ts";
+import { getVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
-import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
+import type { ChunkMetadata } from "#vfs/schemas/chunk.schema.ts";
 import type { Buffer } from "node:buffer";
 import type BodyReadable from "undici/types/readable.ts";
 

@@ -3,7 +3,8 @@ import { parse } from "@repo/util-rank-torrent-name/parser";
 import { faker } from "@faker-js/faker";
 import { expect } from "vitest";
 
-import { it as baseIt } from "../../../../../__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+
 import { SkippedTorrentError, validateTorrent } from "./validate-torrent.ts";
 
 const it = baseIt

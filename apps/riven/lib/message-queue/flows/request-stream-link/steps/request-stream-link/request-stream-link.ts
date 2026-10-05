@@ -5,12 +5,12 @@ import {
 
 import chalk from "chalk";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { createJobParentConfig } from "../../../../utilities/create-job-parent-config.ts";
-import { maybeWaitForChildren } from "../../../../utilities/maybe-wait-for-children.ts";
-import { flow } from "../../../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 /**
  * Requests a new stream link from the plugin, unless a cached link or permalink is available.

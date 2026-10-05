@@ -4,10 +4,10 @@ import { benchmark } from "@repo/util-plugin-sdk/helpers/benchmark";
 import { setTimeout } from "node:timers/promises";
 import { fromCallback } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { RegisteredPlugin } from "../../../types/plugins.ts";
-import type { PluginRegistrarMachineEvent } from "../index.ts";
+import type { PluginRegistrarMachineEvent } from "#state-machines/plugin-registrar/index.ts";
+import type { RegisteredPlugin } from "#types/plugins.ts";
 import type { DataSourceMap } from "@repo/util-plugin-sdk";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 

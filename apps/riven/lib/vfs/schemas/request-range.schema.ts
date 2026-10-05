@@ -1,7 +1,8 @@
 import z from "zod";
 
-import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
-import { fileNameToFileChunkCalculationsMap } from "../utilities/file-handle-map.ts";
+import { createChunkRangeLabel } from "#vfs/utilities/chunks/create-chunk-range-label.ts";
+import { fileNameToFileChunkCalculationsMap } from "#vfs/utilities/file-handle-map.ts";
+
 import { ChunkMetadata } from "./chunk.schema.ts";
 
 import type { FileChunkCalculations } from "./file-chunk-calculations.schema.ts";

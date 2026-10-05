@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
 
-import { client } from "../../../../../graphql/apollo-client.ts";
+import { client } from "#graphql/apollo-client.ts";
 
 import type {
   EpisodeFieldsFragment,

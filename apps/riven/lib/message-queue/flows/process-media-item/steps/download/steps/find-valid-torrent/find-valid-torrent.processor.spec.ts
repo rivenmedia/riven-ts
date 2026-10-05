@@ -9,9 +9,10 @@ import {
 import { UnrecoverableError } from "bullmq";
 import { expect, vi } from "vitest";
 
-import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
-import { MapItemsToFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
-import { ValidateTorrentFilesSandboxedJob } from "../../../../../../sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+import { ValidateTorrentFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.schema.ts";
+
 import { findValidTorrentProcessor } from "./find-valid-torrent.processor.ts";
 import { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 

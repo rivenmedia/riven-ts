@@ -2,17 +2,19 @@ import chalk from "chalk";
 import assert from "node:assert";
 import { assign, setup } from "xstate";
 
-import { settings } from "../../utilities/settings.ts";
-import { pluginRegistrarMachine } from "../plugin-registrar/index.ts";
-import { withLogAction } from "../utilities/with-log-action.ts";
+import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
+import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
-import type { ApolloServerContext } from "../../graphql/context.ts";
-import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
+import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
+import type { PluginRegistrarMachineOutput } from "#state-machines/plugin-registrar/index.ts";
 import type {
   InvalidPluginMap,
   PluginQueueMap,
@@ -20,8 +22,7 @@ import type {
   RegisteredPluginMap,
   ValidPlugin,
   ValidPluginMap,
-} from "../../types/plugins.ts";
-import type { PluginRegistrarMachineOutput } from "../plugin-registrar/index.ts";
+} from "#types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";

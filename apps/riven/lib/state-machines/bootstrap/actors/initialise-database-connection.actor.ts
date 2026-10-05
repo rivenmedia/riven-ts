@@ -2,10 +2,10 @@ import { Migrator } from "@mikro-orm/migrations";
 import { SeedManager } from "@mikro-orm/seeder";
 import { fromPromise } from "xstate";
 
-import { createDatabaseConfig } from "../../../database/config.ts";
-import { initORM } from "../../../database/database.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
+import { createDatabaseConfig } from "#database/config.ts";
+import { initORM } from "#database/database.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
 
 function createDatabaseSslOptions() {
   const {

@@ -1,6 +1,7 @@
 import { UnrecoverableError } from "bullmq";
 
-import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
+import { createSandboxedJobProcessor } from "#message-queue/sandboxed-jobs/utilities/create-sandboxed-job.processor.ts";
+
 import {
   InvalidTorrentError,
   validateTorrentFiles,

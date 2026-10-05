@@ -11,9 +11,10 @@ import {
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
-import { settings } from "../../../utilities/settings.ts";
-import { services } from "../../database.ts";
-import { BaseService } from "../core/base-service.ts";
+import { services } from "#database/database.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
@@ -87,7 +88,7 @@ export class MediaItemService extends BaseService {
 
       return [item];
     } catch (error) {
-      const { logger } = await import("../../../utilities/logger/logger.ts");
+      const { logger } = await import("#utilities/logger/logger.ts");
 
       logger.error("Unable to determine media items to process", {
         err: error,

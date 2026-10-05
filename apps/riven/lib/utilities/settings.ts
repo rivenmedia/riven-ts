@@ -4,7 +4,8 @@ import {
   setEnvironmentData,
 } from "node:worker_threads";
 
-import { RivenSettings } from "../riven-settings.schema.ts";
+import { RivenSettings } from "#riven-settings.schema.ts";
+
 import { deepFreeze } from "./deep-freeze.ts";
 
 import type { ReadonlyDeep } from "type-fest";

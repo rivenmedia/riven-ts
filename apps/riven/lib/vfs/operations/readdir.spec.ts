@@ -2,7 +2,8 @@ import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, vi } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
+
 import { readDirSync } from "./readdir.ts";
 
 type ReadDirCallback = Parameters<typeof readDirSync>[1];

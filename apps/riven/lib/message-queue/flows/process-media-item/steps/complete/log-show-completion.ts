@@ -1,9 +1,9 @@
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { IndexerService } from "../../../../../database/services/indexer/indexer.service.ts";
+import type { IndexerService } from "#database/services/indexer/indexer.service.ts";
 import type { Show } from "@repo/util-plugin-sdk/dto/entities";
 
 export async function logShowCompletion(

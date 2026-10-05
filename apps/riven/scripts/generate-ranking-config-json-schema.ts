@@ -4,7 +4,7 @@ import chalk from "chalk";
 import { writeFileSync } from "node:fs";
 import z from "zod";
 
-import { RankingConfig } from "../lib/ranking-config/ranking-config.schema.ts";
+import { RankingConfig } from "#ranking-config/ranking-config.schema.ts";
 
 const filePath = `${process.cwd()}/ranking-config.schema.json`;
 const jsonSchema = z.toJSONSchema(RankingConfig, {

@@ -1,15 +1,16 @@
 import chalk from "chalk";
 import { z, ZodError } from "zod";
 
-import { logger } from "../../../../../../../../utilities/logger/logger.ts";
-import { InvalidTorrentError } from "../../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { InvalidTorrentError } from "#message-queue/sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { checkCachedFiles } from "./check-cached-files.ts";
 import { describeProvider } from "./describe-provider.ts";
 import { getPluginDownloadResult } from "./get-plugin-download-result.ts";
 import { getValidTorrentFiles } from "./get-valid-torrent-files.ts";
 
-import type { FindValidTorrentContext } from "../find-valid-torrent.processor.ts";
-import type { ValidTorrent } from "../find-valid-torrent.schema.ts";
+import type { FindValidTorrentContext } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
+import type { ValidTorrent } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 /**

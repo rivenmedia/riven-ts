@@ -2,7 +2,8 @@ import { FileSystemEntryUnion } from "@repo/util-plugin-sdk/dto/unions/filesyste
 
 import { Arg, Query, Resolver } from "type-graphql";
 
-import { CoreContext } from "../../decorators/core-context.ts";
+import { CoreContext } from "#graphql/decorators/core-context.ts";
+
 import { VfsEntryStat } from "./types/vfs-entry-stat.type.ts";
 
 @Resolver()

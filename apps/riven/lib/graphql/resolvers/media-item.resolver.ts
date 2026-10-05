@@ -28,13 +28,13 @@ import {
   Root,
 } from "type-graphql";
 
-import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
-import { queueRegistry } from "../../message-queue/utilities/queue-registry.ts";
-import { PaginationArgs } from "../args/pagination.args.ts";
-import { CoreContext } from "../decorators/core-context.ts";
-import { createCursorType } from "../types/create-cursor-type.ts";
+import { PaginationArgs } from "#graphql/args/pagination.args.ts";
+import { CoreContext } from "#graphql/decorators/core-context.ts";
+import { createCursorType } from "#graphql/types/create-cursor-type.ts";
+import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
+import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 
-import type { ApolloServerContext } from "../context.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
 import type { UUID } from "node:crypto";
 
 const MediaItemCursor = createCursorType<MediaItem>(
@@ -99,7 +99,7 @@ export class MediaItemResolver {
     const resetItems = await mediaItemService.resetMediaItem(item);
 
     const { enqueueProcessMediaItem } =
-      await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
+      await import("#message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
     await clearDeduplicationJob(
       "process-media-item",
@@ -154,7 +154,7 @@ export class MediaItemResolver {
     );
 
     const { enqueueProcessMediaItem } =
-      await import("../../message-queue/flows/process-media-item/enqueue-process-media-item.ts");
+      await import("#message-queue/flows/process-media-item/enqueue-process-media-item.ts");
 
     for (const { id, type } of itemsToReprocess) {
       await clearDeduplicationJob(
@@ -280,7 +280,7 @@ export class MediaItemResolver {
 
   @FieldResolver(() => Date, { nullable: true })
   public async nextScrapeAttemptAt(@Root() mediaItem: MediaItem) {
-    const { flow } = await import("../../message-queue/flows/producer.ts");
+    const { flow } = await import("#message-queue/flows/producer.ts");
     const processorJobId = await this.processorJobId(mediaItem);
 
     if (!processorJobId) {

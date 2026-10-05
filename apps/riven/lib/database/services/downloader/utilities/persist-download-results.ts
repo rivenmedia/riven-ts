@@ -14,9 +14,9 @@ import { NotFoundError, ref } from "@mikro-orm/core";
 import { validateOrReject } from "class-validator";
 import assert from "node:assert";
 
-import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
 
-import type { ValidTorrent } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { ValidTorrent } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
@@ -124,8 +124,7 @@ export async function persistDownloadResults(
         );
 
         if (!processableItemStates.safeParse(episode.state).success) {
-          const { logger } =
-            await import("../../../../utilities/logger/logger.ts");
+          const { logger } = await import("#utilities/logger/logger.ts");
 
           logger.debug(
             `Skipping media entry creation for ${episode.fullTitle} due to "${episode.state}" state`,

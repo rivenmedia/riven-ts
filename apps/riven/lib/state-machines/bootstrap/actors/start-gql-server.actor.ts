@@ -10,19 +10,19 @@ import { createServer } from "node:http";
 import { URL } from "node:url";
 import { fromPromise } from "xstate";
 
-import { initApolloClient } from "../../../graphql/apollo-client.ts";
-import { buildContextFunction } from "../../../graphql/build-context-function.ts";
-import { resolvers } from "../../../graphql/resolvers/index.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { redisCache } from "../../../utilities/redis-cache.ts";
-import { settings } from "../../../utilities/settings.ts";
+import { initApolloClient } from "#graphql/apollo-client.ts";
+import { buildContextFunction } from "#graphql/build-context-function.ts";
+import { resolvers } from "#graphql/resolvers/index.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { redisCache } from "#utilities/redis-cache.ts";
+import { settings } from "#utilities/settings.ts";
 
-import type { ApolloServerContext } from "../../../graphql/context.ts";
-import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
 import type {
   mainRunnerMachine,
   MainRunnerMachineIntake,
-} from "../../main-runner/index.ts";
+} from "#state-machines/main-runner/index.ts";
+import type { ValidPluginMap } from "#types/plugins.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { ActorRefFromLogic } from "xstate";

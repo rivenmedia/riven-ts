@@ -3,11 +3,11 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 import { fromPromise } from "xstate";
 
-import { services } from "../../../database/database.ts";
-import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
-import { queueRegistry } from "../../../message-queue/utilities/queue-registry.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
+import { services } from "#database/database.ts";
+import { enqueueProcessItemRequest } from "#message-queue/flows/process-item-request/enqueue-process-item-request.ts";
+import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
 
 import type { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 

@@ -5,7 +5,8 @@ import { expect, it, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 import z from "zod";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { collectPluginsForRegistration } from "./collect-plugins-for-registration.actor.ts";
 
 import type { ParsedPlugins } from "./collect-plugins-for-registration.actor.ts";

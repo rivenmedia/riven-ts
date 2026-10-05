@@ -7,7 +7,11 @@
   ],
   "type": "module",
   "imports": {
-    "#*.ts": "./lib/*.js"
+    "#*.ts": {
+      "production": "./lib/*.js",
+      "default": "./lib/*.ts"
+    },
+    "#*.json": "./*.json"
   },
   "exports": {
     "./workers/map-items-to-files": {

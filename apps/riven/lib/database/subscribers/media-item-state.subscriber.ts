@@ -40,7 +40,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   }
 
   public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
-    const { logger } = await import("../../utilities/logger/logger.ts");
+    const { logger } = await import("#utilities/logger/logger.ts");
 
     for (const changeSet of uow.getChangeSets()) {
       if (
@@ -379,7 +379,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       return item.state;
     }
 
-    const { settings } = await import("../../utilities/settings.ts");
+    const { settings } = await import("#utilities/settings.ts");
 
     if (item.failedScrapeAttempts >= settings.maximumFailedAttempts) {
       return "failed";

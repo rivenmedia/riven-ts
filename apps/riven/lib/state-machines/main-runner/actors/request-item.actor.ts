@@ -3,9 +3,9 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 
 import { fromPromise } from "xstate";
 
-import { services } from "../../../database/database.ts";
+import { services } from "#database/database.ts";
 
-import type { MainRunnerMachineEvent } from "../index.ts";
+import type { MainRunnerMachineEvent } from "#state-machines/main-runner/index.ts";
 import type { ItemRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/item-requested.event";
 import type { ActorRef, Snapshot } from "xstate";
 

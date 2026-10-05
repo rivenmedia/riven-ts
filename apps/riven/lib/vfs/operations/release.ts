@@ -1,8 +1,8 @@
 import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { isFuseError } from "../errors/fuse-error.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { isFuseError } from "#vfs/errors/fuse-error.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
@@ -11,12 +11,12 @@ import {
   fileNameIsFetchingLinkMap,
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
-} from "../utilities/file-handle-map.ts";
+} from "#vfs/utilities/file-handle-map.ts";
 import {
   getVfsOperationContext,
   withVfsOperationContext,
-} from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+} from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 

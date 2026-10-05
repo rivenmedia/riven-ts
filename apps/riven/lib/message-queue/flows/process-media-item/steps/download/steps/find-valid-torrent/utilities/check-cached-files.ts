@@ -1,12 +1,13 @@
 import chalk from "chalk";
 
-import { logger } from "../../../../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../../../../utilities/settings.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { describeProvider } from "./describe-provider.ts";
 import { getCachedTorrentFiles } from "./get-cached-torrent-files.ts";
 import { getValidTorrentFiles } from "./get-valid-torrent-files.ts";
 
-import type { FindValidTorrentContext } from "../find-valid-torrent.processor.ts";
+import type { FindValidTorrentContext } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
 
 /**
  * Checks whether the plugin has the torrent cached on the given provider, validating any cached files.

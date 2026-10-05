@@ -1,8 +1,9 @@
 import { toMerged } from "es-toolkit";
 
-import { services } from "../../../database/database.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { flow } from "../producer.ts";
+import { services } from "#database/database.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { createProcessMediaItemJob } from "./process-media-item.schema.ts";
 
 import type { ProcessMediaItemFlow } from "./process-media-item.schema.ts";
