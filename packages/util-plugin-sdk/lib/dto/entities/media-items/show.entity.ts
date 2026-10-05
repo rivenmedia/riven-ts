@@ -64,7 +64,7 @@ export class Show extends ShowLikeMediaItem {
   public nextAirDate!: Date | null;
 
   public getPrettyName(): string {
-    return `${this.title.replaceAll(".", "")} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
+    return `${this.sanitisedTitle} (${this.year?.toString() ?? "Unknown"}) {tvdb-${this.tvdbId}}`;
   }
 
   public getShow() {
