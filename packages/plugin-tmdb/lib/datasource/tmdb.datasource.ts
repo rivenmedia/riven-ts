@@ -4,11 +4,11 @@ import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
-import { movieImages200Schema } from "../__generated__/zod/movieImagesSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
 import { MovieCredits } from "../schemas/movie-credits.schema.ts";
+import { MovieImages } from "../schemas/movie-images.schema.ts";
 import { MovieRecommendations } from "../schemas/movie-recommendations.schema.ts";
 import { MovieSimilarItems } from "../schemas/movie-similar-items.schema.ts";
 import { MovieVideos } from "../schemas/movie-videos.schema.ts";
@@ -161,6 +161,6 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
       },
     });
 
-    return movieImages200Schema.parse(response);
+    return MovieImages.parse(response);
   }
 }
