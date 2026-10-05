@@ -194,7 +194,12 @@ it('does not return entries for the "all movies" path when a movie does not have
 });
 
 it.for([
-  { label: "slashes", unsanitisedTitle: "V/F/S", sanitisedTitle: "VFS" },
+  { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
+  {
+    label: "slashes",
+    unsanitisedTitle: "V/H/S: Viral",
+    sanitisedTitle: "VHS: Viral",
+  },
   {
     label: "periods",
     unsanitisedTitle: "Mr. Robot",
@@ -231,7 +236,7 @@ it.for([
 );
 
 it.for([
-  { label: "slashes", unsanitisedTitle: "V/F/S", sanitisedTitle: "VFS" },
+  { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
   {
     label: "periods",
     unsanitisedTitle: "Mr. Robot",
