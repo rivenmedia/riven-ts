@@ -6,6 +6,9 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.ts": "./lib/*.js"
+  },
   "exports": {
     "./workers/map-items-to-files": {
       "production": "./workers/map-items-to-files/map-items-to-files.processor.js",
