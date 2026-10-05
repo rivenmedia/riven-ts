@@ -194,6 +194,16 @@ it('does not return entries for the "all movies" path when a movie does not have
 });
 
 it.for([
+  {
+    label: "special characters",
+    unsanitisedTitle: "100% Awesome",
+    sanitisedTitle: "100 Awesome",
+  },
+  {
+    label: "underscores",
+    unsanitisedTitle: "The_Best_Movie",
+    sanitisedTitle: "TheBestMovie",
+  },
   { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
   {
     label: "slashes",
@@ -206,7 +216,7 @@ it.for([
     sanitisedTitle: "Mr Robot",
   },
 ] as const)(
-  "does not include $label in movie titles",
+  "does not include $label in movie titles ($unsanitisedTitle > $sanitisedTitle)",
   async (
     { unsanitisedTitle, sanitisedTitle },
     { em, completedMovieContext: { completedMovie } },
@@ -236,14 +246,29 @@ it.for([
 );
 
 it.for([
+  {
+    label: "special characters",
+    unsanitisedTitle: "100% Awesome",
+    sanitisedTitle: "100 Awesome",
+  },
+  {
+    label: "underscores",
+    unsanitisedTitle: "The_Best_Movie",
+    sanitisedTitle: "TheBestMovie",
+  },
   { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
+  {
+    label: "slashes",
+    unsanitisedTitle: "V/H/S: Viral",
+    sanitisedTitle: "VHS: Viral",
+  },
   {
     label: "periods",
     unsanitisedTitle: "Mr. Robot",
     sanitisedTitle: "Mr Robot",
   },
 ] as const)(
-  "does not include $label in show titles",
+  "does not include $label in show titles ($unsanitisedTitle > $sanitisedTitle)",
   async (
     { unsanitisedTitle, sanitisedTitle },
     { em, completedShowContext: { completedShow } },

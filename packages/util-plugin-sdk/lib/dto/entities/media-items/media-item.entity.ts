@@ -225,7 +225,7 @@ export abstract class MediaItem {
    * Returns a version of the media item's title with certain characters removed for use in file paths.
    */
   protected get sanitisedTitle() {
-    return this.title.replaceAll(/[./]/giu, "");
+    return this.title.replaceAll(/[./%_]/gu, "");
   }
 
   /**
