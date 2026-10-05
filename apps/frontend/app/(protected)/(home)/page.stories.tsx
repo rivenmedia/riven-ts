@@ -10,8 +10,6 @@ import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_qu
 import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows";
 import HomePage from "./page";
 
-import type { UUID } from "node:crypto";
-
 const meta = preview.meta({
   title: "Pages / Home",
   component: HomePage,
@@ -75,6 +73,7 @@ export const Default = meta.story({
                 },
                 logo: {
                   __typename: "ItemImage",
+                  aspectRatio: 2 / 3,
                   height: 600,
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
@@ -113,6 +112,7 @@ export const Default = meta.story({
                 },
                 logo: {
                   __typename: "ItemImage",
+                  aspectRatio: 2 / 3,
                   height: 600,
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
@@ -150,6 +150,7 @@ export const Default = meta.story({
                 },
                 logo: {
                   __typename: "ItemImage",
+                  aspectRatio: 2 / 3,
                   height: 600,
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",

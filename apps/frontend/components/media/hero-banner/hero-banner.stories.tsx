@@ -10,7 +10,12 @@ const meta = preview.meta({
   args: {
     backdropUrl:
       "https://image.tmdb.org/t/p/w1920/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
-    logo: "https://image.tmdb.org/t/p/w500/nxUlI9IPiieWnzHviapG0akZkz8.png",
+    logo: {
+      aspectRatio: 2 / 3,
+      height: 600,
+      width: 400,
+      url: "https://image.tmdb.org/t/p/w500/nxUlI9IPiieWnzHviapG0akZkz8.png",
+    },
     trailer: null,
   },
 });
