@@ -1,6 +1,6 @@
 import { fly } from "@/components/_animations/fly";
 import { RatingsRow } from "@/components/media/ratings-row/ratings-row";
-import { StatusBadge } from "@/components/media/status-badge/status-badge";
+// import { StatusBadge } from "@/components/media/status-badge/status-badge";
 import { PortraitCard } from "@/components/portrait-card/portrait-card";
 
 import { cn } from "cn";

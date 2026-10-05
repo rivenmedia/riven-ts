@@ -44,7 +44,7 @@ const meta = preview.meta({
             url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
           },
         },
-        logoUrl: null,
+        logo: null,
       },
       {
         id: "94605",
@@ -63,7 +63,7 @@ const meta = preview.meta({
         ],
         certification: "12A",
         ratings: {},
-        logoUrl: null,
+        logo: null,
       },
       {
         id: "1291595",
@@ -79,7 +79,7 @@ const meta = preview.meta({
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: {},
-        logoUrl: null,
+        logo: null,
       },
     ] satisfies IndexerData[],
   },

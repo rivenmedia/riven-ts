@@ -270,7 +270,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
     @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<ItemImage | null> {
-    const { logos = [] } = await api.getLocalisedImages(
+    const { logos } = await api.getLocalisedImages(
       tmdbIndexerData.id,
       language,
     );
@@ -282,11 +282,11 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
       logo.file_path && (!logo.iso_639_1 || logo.iso_639_1 === iso_639_1)
         ? {
             file_path: logo.file_path,
-            width: logo.width ?? 0,
-            aspect_ratio: logo.aspect_ratio ?? 0,
-            vote_average: logo.vote_average ?? 0,
-            vote_count: logo.vote_count ?? 0,
-            height: logo.height ?? 0,
+            width: logo.width,
+            aspect_ratio: logo.aspect_ratio,
+            vote_average: logo.vote_average,
+            vote_count: logo.vote_count,
+            height: logo.height,
             iso_639_1: logo.iso_639_1 ?? null,
           }
         : [],

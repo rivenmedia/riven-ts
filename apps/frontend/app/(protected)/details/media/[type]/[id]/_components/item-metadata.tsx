@@ -1,5 +1,5 @@
 import { fly } from "@/components/_animations/fly";
-import { FileInformationPanel } from "@/components/media/file-information-panel/file-information-panel";
+// import { FileInformationPanel } from "@/components/media/file-information-panel/file-information-panel";
 
 import { cn } from "cn";
 
@@ -9,7 +9,7 @@ interface ItemMetadataProps {
   data: GetMediaItemQuery;
 }
 
-export function ItemMetadata({ data }: ItemMetadataProps) {
+export function ItemMetadata({ data: _data }: ItemMetadataProps) {
   return (
     <section
       className={cn("mt-8 md:mt-12 animation-duration-400 delay-600", fly)}
@@ -36,16 +36,18 @@ export function ItemMetadata({ data }: ItemMetadataProps) {
                 // {externalLinks}
               /> */}
 
-        {data.mediaDetails.type === "movie" &&
-          data.mediaDetails.filesystemEntries.length > 0 && (
-            <FileInformationPanel
-              entries={data.mediaDetails.filesystemEntries}
-              fallbackMediaMetadata={data.mediaDetails.mediaMetadata}
-              onDeleteEntry={() => {
-                /* empty */
-              }}
-            />
-          )}
+        {
+          // data.mediaDetails.type === "movie" &&
+          //   data.mediaDetails.filesystemEntries.length > 0 && (
+          //     <FileInformationPanel
+          //       entries={data.mediaDetails.filesystemEntries}
+          //       fallbackMediaMetadata={data.mediaDetails.mediaMetadata}
+          //       onDeleteEntry={() => {
+          //         /* empty */
+          //       }}
+          //     />
+          //   )
+        }
       </div>
     </section>
   );
