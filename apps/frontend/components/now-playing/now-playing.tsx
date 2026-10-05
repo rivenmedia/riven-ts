@@ -19,7 +19,20 @@ import type { IndexerData, Rating } from "@/app/_types/__generated__/graphql";
 import type { RefObject } from "react";
 
 export interface NowPlayingProps {
-  data: IndexerData[];
+  data: Pick<
+    IndexerData,
+    | "id"
+    | "title"
+    | "backdropUrl"
+    | "type"
+    | "ratings"
+    | "logo"
+    | "certification"
+    | "language"
+    | "voteAverage"
+    | "overview"
+    | "genres"
+  >[];
   autoplayDelay?: number;
   alignment?: "left" | "center" | "right";
   heightClass?: string;

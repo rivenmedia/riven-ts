@@ -109,7 +109,7 @@ export const UnrequestedMovie = meta.story({
         },
       ],
       ratings: {},
-      // status: "Released",
+      status: "released",
 
       // seasons: null,
       // type: "movie",
