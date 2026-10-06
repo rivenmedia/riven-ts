@@ -1,10 +1,6 @@
 import "./types.d.ts";
-import "@/lib/styles/themes/all.css";
-import "@/lib/styles/globals.css";
-import { i18n } from "@/.storybook/i18n";
-import { fontMono, fontSansSerif, fontSerif } from "@/app/fonts";
-import { Providers } from "@/components/providers";
-
+import "#lib/styles/themes/all.css";
+import "#lib/styles/globals.css";
 import { resetApolloClientSingletons } from "@apollo/client-integration-nextjs";
 import addonA11y from "@storybook/addon-a11y";
 import addonDocs from "@storybook/addon-docs";
@@ -17,11 +13,16 @@ import { toast } from "sonner";
 import { expect, sb } from "storybook/test";
 import { themes } from "storybook/theming";
 
-import { WithI18n } from "./decorators/with-i18n";
+import { i18n } from "#.storybook/i18n.ts";
+import { fontMono, fontSansSerif, fontSerif } from "#app/fonts.ts";
+import { Providers } from "#components/providers.tsx";
+
+import { WithI18n } from "./decorators/with-i18n.tsx";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
 
 import type { ScreenshotParameters } from "@storycap-testrun/browser";
 
+// Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
 

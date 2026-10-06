@@ -1,6 +1,3 @@
-import { PageWrapper } from "@/app/(protected)/_components/page-wrapper";
-import { NotificationsProvider } from "@/components/providers/notifications-provider";
-
 import {
   CalendarDays,
   FileClock,
@@ -14,7 +11,10 @@ import {
 import { DateTime } from "luxon";
 import { HttpResponse, http } from "msw";
 
-import type { User } from "@/lib/auth/types";
+import { PageWrapper } from "#app/(protected)/_components/page-wrapper.tsx";
+import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
+
+import type { User } from "#lib/auth/types.ts";
 import type { Decorator } from "@storybook/nextjs-vite";
 
 export const ProtectedLayoutWrapper: Decorator = (Story, { msw }) => {

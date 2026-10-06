@@ -1,8 +1,8 @@
 import { useFormContext, useWatch } from "react-hook-form";
 
-import { Checkbox } from "../_ui/checkbox";
-import { Label } from "../_ui/label";
-import { Toggle } from "../_ui/toggle";
+import { Checkbox } from "#components/_ui/checkbox.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { Toggle } from "#components/_ui/toggle.tsx";
 
 export interface SelectablePillProps {
   label: string;

@@ -3,8 +3,8 @@ import { createSafeActionClient } from "next-safe-action";
 import {
   PermissionMetadata,
   checkPermissionMiddleware,
-} from "./middlewares/check-permission.middleware";
-import { checkSessionMiddleware } from "./middlewares/check-session.middleware";
+} from "./middlewares/check-permission.middleware.ts";
+import { checkSessionMiddleware } from "./middlewares/check-session.middleware.ts";
 
 export const actionClient = createSafeActionClient();
 

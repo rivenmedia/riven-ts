@@ -1,8 +1,9 @@
-import { authClient } from "@/lib/auth/client";
 import { ItemPermission } from "@repo/util-auth/access-control";
 
 import { createMiddleware } from "next-safe-action";
 import z from "zod";
+
+import { authClient } from "#lib/auth/client.ts";
 
 export const PermissionMetadata = z.object({
   permissions: z.object({

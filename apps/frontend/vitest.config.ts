@@ -14,9 +14,6 @@ export default defineConfig((config) => {
 
   return mergeConfig<typeof baseConfig, ViteUserConfig>(baseConfig, {
     plugins: [react()],
-    resolve: {
-      tsconfigPaths: true,
-    },
     test: {
       coverage: {
         exclude: [".next/**", "playwright/**", "playwright-report/**"],

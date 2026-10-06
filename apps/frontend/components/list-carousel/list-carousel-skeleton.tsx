@@ -1,4 +1,4 @@
-import { PortraitCardSkeleton } from "../portrait-card/portrait-card-skeleton";
+import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-skeleton.tsx";
 
 export function ListCarouselSkeleton() {
   return (

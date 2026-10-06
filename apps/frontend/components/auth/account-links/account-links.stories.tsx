@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 
-import { AccountLinks } from "./account-links";
+import { preview } from "#.storybook/preview.tsx";
+
+import { AccountLinks } from "./account-links.tsx";
 
 const meta = preview.meta({
   title: "Auth / AccountLinks",

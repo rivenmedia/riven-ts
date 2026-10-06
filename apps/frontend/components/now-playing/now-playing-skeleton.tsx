@@ -1,4 +1,4 @@
-import { Skeleton } from "../_ui/skeleton";
+import { Skeleton } from "#components/_ui/skeleton.tsx";
 
 interface NowPlayingSkeletonProps {
   heightClass: string;

@@ -5,12 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/_ui/dialog";
+} from "#components/_ui/dialog.tsx";
+import { EntertainmentItem } from "#components/calendar/entertainment-item/entertainment-item.tsx";
+import { formatDayTitle } from "#components/calendar/utilities/format-day-title.ts";
 
-import { EntertainmentItem } from "../entertainment-item/entertainment-item";
-import { formatDayTitle } from "../utilities/format-day-title";
-
-import type { CalendarDay } from "../types";
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 
 export interface DayItemsListProps {
   day: CalendarDay;

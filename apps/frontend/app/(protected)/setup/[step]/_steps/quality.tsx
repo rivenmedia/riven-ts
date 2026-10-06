@@ -1,25 +1,25 @@
+import { zodResolver } from "@hookform/resolvers/zod";
+import { FormProvider, useForm } from "react-hook-form";
+import { z } from "zod";
+
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/_ui/accordion";
-import { Button } from "@/components/_ui/button";
+} from "#components/_ui/accordion.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import {
   Field,
   FieldContent,
   FieldDescription,
   FieldLabel,
   FieldTitle,
-} from "@/components/_ui/field";
-import { RadioGroup, RadioGroupItem } from "@/components/_ui/radio-group";
-import { SettingField } from "@/components/settings/setting-field/setting-field";
+} from "#components/_ui/field.tsx";
+import { RadioGroup, RadioGroupItem } from "#components/_ui/radio-group.tsx";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { FormProvider, useForm } from "react-hook-form";
-import { z } from "zod";
-
-import type { SettingFieldProps } from "@/components/settings/setting-field/setting-field";
+import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export interface Profile {
   id: string;

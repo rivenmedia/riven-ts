@@ -1,19 +1,19 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { useMemo } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
+import { preview } from "#.storybook/preview.tsx";
 import {
   NotificationsContext,
   NotificationsProvider,
-} from "../providers/notifications-provider";
-import { NotificationCenter } from "./notification-center";
+} from "#components/providers/notifications-provider.tsx";
+
+import { NotificationCenter } from "./notification-center.tsx";
 
 import type {
   NotificationsContextValue,
   Notification,
-} from "../providers/notifications-provider";
+} from "#components/providers/notifications-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / NotificationCenter",

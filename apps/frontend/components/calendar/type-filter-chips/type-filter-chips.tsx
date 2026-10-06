@@ -1,11 +1,10 @@
-import { Checkbox } from "@/components/_ui/checkbox";
-import { Label } from "@/components/_ui/label";
-
 import { cn } from "cn";
 
-import { getTypeStyle } from "../utilities/get-type-style";
+import { Checkbox } from "#components/_ui/checkbox.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { getTypeStyle } from "#components/calendar/utilities/get-type-style.ts";
 
-import type { FilterOption } from "../types";
+import type { FilterOption } from "#components/calendar/types.d.ts";
 
 export interface TypeFilterChipsProps {
   options: readonly FilterOption[];

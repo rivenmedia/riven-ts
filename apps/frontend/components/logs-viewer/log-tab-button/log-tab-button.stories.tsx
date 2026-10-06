@@ -1,9 +1,9 @@
-import { preview } from "@/.storybook/preview";
-import { Tabs, TabsList, TabsTrigger } from "@/components/_ui/tabs";
-
 import { fn } from "storybook/test";
 
-import { LogTabButton } from "./log-tab-button";
+import { preview } from "#.storybook/preview.tsx";
+import { Tabs, TabsList, TabsTrigger } from "#components/_ui/tabs.tsx";
+
+import { LogTabButton } from "./log-tab-button.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / LogTabButton",

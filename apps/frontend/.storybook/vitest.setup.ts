@@ -1,10 +1,10 @@
-import { configureLocale } from "@/lib/utils/configure-luxon";
-
 import { faker } from "@faker-js/faker";
 import { screenshot } from "@storycap-testrun/browser";
 import { page } from "@vitest/browser/context";
 import { DateTime, Settings } from "luxon";
 import { afterEach, beforeEach, vi } from "vitest";
+
+import { configureLocale } from "#lib/utils/configure-luxon.ts";
 
 // Set by `@storybook/addon-vitest` when running stories as tests
 declare module "vitest" {

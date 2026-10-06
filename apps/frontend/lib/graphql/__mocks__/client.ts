@@ -1,7 +1,7 @@
-import { privateEnvironment } from "@/environment/private-environment.schema";
-
 import { HttpLink } from "@apollo/client";
 import { ApolloClient, InMemoryCache } from "@apollo/client-integration-nextjs";
+
+import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
 const httpLink = new HttpLink({
   uri: new URL("/graphql", privateEnvironment.BACKEND_URL).toString(),

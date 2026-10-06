@@ -1,42 +1,3 @@
-import { preview } from "@/.storybook/preview";
-import { Button } from "@/components/_ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupSeparator,
-} from "@/components/_ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/_ui/dropdown-menu";
-import { Input } from "@/components/_ui/input";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "@/components/_ui/input-group";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/_ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/_ui/select";
-import { Separator } from "@/components/_ui/separator";
-import { Textarea } from "@/components/_ui/textarea";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-
 import {
   ArrowLeftIcon,
   ArrowRightIcon,
@@ -48,6 +9,45 @@ import {
   SearchIcon,
 } from "lucide-react";
 import { useState } from "react";
+
+import { preview } from "#.storybook/preview.tsx";
+import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "#components/_ui/button-group.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "#components/_ui/dropdown-menu.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "#components/_ui/input-group.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "#components/_ui/popover.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "#components/_ui/select.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
+import { Textarea } from "#components/_ui/textarea.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
 
 /**
  * A container that groups related buttons together with consistent styling.

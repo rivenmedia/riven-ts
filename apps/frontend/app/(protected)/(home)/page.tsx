@@ -1,11 +1,11 @@
-import { fly } from "@/components/_animations/fly";
-
 import { cn } from "cn";
 
-import { RecentlyAdded } from "./_components/recently-added";
-import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing";
-import { TMDBTrendingMovies } from "./_components/tmdb-trending-movies/tmdb-trending-movies";
-import { TVDBTrendingShows } from "./_components/tvdb-trending-shows/tvdb-trending-shows";
+import { fly } from "#components/_animations/fly.ts";
+
+import { RecentlyAdded } from "./_components/recently-added.tsx";
+import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing.tsx";
+import { TMDBTrendingMovies } from "./_components/tmdb-trending-movies/tmdb-trending-movies.tsx";
+import { TVDBTrendingShows } from "./_components/tvdb-trending-shows/tvdb-trending-shows.tsx";
 
 export default function HomePage() {
   return (

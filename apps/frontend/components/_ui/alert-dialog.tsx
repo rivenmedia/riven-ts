@@ -1,9 +1,9 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
+
+import { Button } from "#components/_ui/button.tsx";
 
 function AlertDialog({
   ...props

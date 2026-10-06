@@ -1,5 +1,9 @@
 "use client";
 
+// import { Loader2 } from "lucide-react";
+import { FormProvider, useForm } from "react-hook-form";
+
+import { SeasonSelector } from "#app/(protected)/details/media/[type]/[id]/_components/season-selector.tsx";
 import {
   AlertDialog,
   AlertDialogCancel,
@@ -9,16 +13,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/_ui/alert-dialog";
-import { Button } from "@/components/_ui/button";
+} from "#components/_ui/alert-dialog.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
-// import { Loader2 } from "lucide-react";
-import { FormProvider, useForm } from "react-hook-form";
-
-import { SeasonSelector } from "../season-selector";
-
-import type { SeasonData } from "../season-selector";
-import type { MediaItemType } from "@/app/_types/__generated__/graphql";
+import type { SeasonData } from "#app/(protected)/details/media/[type]/[id]/_components/season-selector.tsx";
+import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactElement } from "react";
 

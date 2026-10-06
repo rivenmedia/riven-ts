@@ -1,9 +1,9 @@
-import { query } from "@/lib/graphql/client";
-
 import { notFound } from "next/navigation";
 
-import { GET_MEDIA_ITEM } from "./_queries/get-media-item.query";
-import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client";
+import { query } from "#lib/graphql/client.ts";
+
+import { GET_MEDIA_ITEM } from "./_queries/get-media-item.query.ts";
+import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client.tsx";
 
 export default async function MediaDetailsPage({
   params,

@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { fly } from "../_animations/fly";
+import { fly } from "#components/_animations/fly.ts";
 
 import type { HTMLAttributes } from "react";
 

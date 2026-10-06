@@ -1,7 +1,8 @@
-import { FormBase } from "../form-base/form-base";
-import { SingleAccountLink } from "./single-account-link";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import type { Account, Provider } from "./types";
+import { SingleAccountLink } from "./single-account-link.tsx";
+
+import type { Account, Provider } from "./types.d.ts";
 
 export interface AccountLinksProps {
   accounts: Account[];

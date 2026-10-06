@@ -1,18 +1,18 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/_ui/input-group";
-import { Kbd } from "@/components/_ui/kbd";
-
 import { Menu, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
+
+import { Button } from "#components/_ui/button.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "#components/_ui/input-group.tsx";
+import { Kbd } from "#components/_ui/kbd.tsx";
 
 import type { RedirectType } from "next/dist/client/components/redirect-error";
 

@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { expect } from "storybook/test";
 
-import { HeroBanner } from "./hero-banner";
+import { preview } from "#.storybook/preview.tsx";
+
+import { HeroBanner } from "./hero-banner.tsx";
 
 const meta = preview.meta({
   title: "Media / HeroBanner",

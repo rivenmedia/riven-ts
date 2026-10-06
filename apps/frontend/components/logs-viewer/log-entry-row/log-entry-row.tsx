@@ -1,4 +1,4 @@
-import type { LogLevel } from "@/app/_types/__generated__/graphql";
+import type { LogLevel } from "#app/_types/__generated__/graphql.ts";
 
 export interface LogEntryRowProps {
   log: {

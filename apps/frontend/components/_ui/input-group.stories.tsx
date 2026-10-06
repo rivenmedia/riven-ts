@@ -1,33 +1,3 @@
-import preview from "@/.storybook/preview";
-import { ButtonGroup, ButtonGroupText } from "@/components/_ui/button-group";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/_ui/dropdown-menu";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  InputGroupText,
-  InputGroupTextarea,
-} from "@/components/_ui/input-group";
-import { Label } from "@/components/_ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/_ui/popover";
-import { Spinner } from "@/components/_ui/spinner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-
 import {
   Check,
   CheckIcon,
@@ -49,6 +19,36 @@ import {
   StarIcon,
 } from "lucide-react";
 import { useState } from "react";
+
+import preview from "#.storybook/preview.tsx";
+import { ButtonGroup, ButtonGroupText } from "#components/_ui/button-group.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "#components/_ui/dropdown-menu.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  InputGroupText,
+  InputGroupTextarea,
+} from "#components/_ui/input-group.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "#components/_ui/popover.tsx";
+import { Spinner } from "#components/_ui/spinner.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
 
 /**
  * Display additional information or actions to an input or textarea.
