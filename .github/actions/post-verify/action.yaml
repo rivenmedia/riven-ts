@@ -35,3 +35,4 @@ runs:
           **/__vis__/**
         retention-days: 1
         if-no-files-found: error
+        compression-level: 0
