@@ -6,7 +6,6 @@ export default defineMain({
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
-    // Shows the baseline, result and diff for each story in the "Vis" panel
     defineStorybookVis(),
   ],
   stories: ["../{app,components,lib}/**/*.stories.@(js|jsx|mjs|ts|tsx)"],

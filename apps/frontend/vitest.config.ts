@@ -4,9 +4,10 @@ import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
+import { storybookVis } from "storybook-addon-vis/vitest-plugin";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
-import type { ViteUserConfig } from "vitest/config";
+import type { Plugin, ViteUserConfig } from "vitest/config";
 
 export default defineConfig((config) => {
   const baseConfig = baseVitestConfig(config);
@@ -28,6 +29,7 @@ export default defineConfig((config) => {
               configDir: path.join(import.meta.dirname, ".storybook"),
               storybookScript: "pnpm storybook --ci",
             }),
+            storybookVis() as Plugin,
           ],
           test: {
             name: "storybook",
