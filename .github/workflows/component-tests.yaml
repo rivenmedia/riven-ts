@@ -23,7 +23,9 @@ jobs:
   component-tests:
     name: Component tests (${{ matrix.os }})
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
+      checks: write
     strategy:
       fail-fast: false
       matrix:
