@@ -1,0 +1,38 @@
+name: Component Tests
+
+description: |
+  This workflow runs component tests on pull requests.
+
+run-name: "Component Tests: ${{ github.event.pull_request.title }} (#${{
+  github.event.pull_request.number }})"
+
+permissions: {}
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+
+concurrency:
+  group: "component-tests-${{ github.event.pull_request.number }}"
+  cancel-in-progress: true
+
+jobs:
+  component-tests:
+    name: Component tests (${{ matrix.os }})
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        os:
+          - ubuntu-latest
+          - windows-latest
+    uses: ./.github/workflows/run-turbo-task.yaml
+    with:
+      runner: ${{ matrix.os }}
+      task: test:component
+      concurrency: 100%
+    secrets: inherit

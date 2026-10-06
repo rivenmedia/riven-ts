@@ -1,0 +1,45 @@
+name: Report Visual Regression results
+
+on:
+  workflow_run:
+    workflows:
+      - Component Tests
+    types:
+      - completed
+
+jobs:
+  report:
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      pull-requests: write
+    steps:
+      - name: Download visual regression report
+        uses: actions/download-artifact@v8
+        id: download-visual-regression-report
+        with:
+          name: vis-results
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Check for visual regression diffs
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          base: HEAD
+          filters: |
+            diffs:
+              - 'vis-results/**/__diffs__/**'
+
+      - name: Report visual regression diffs
+        uses: mshick/add-pr-comment@v3
+        with:
+          status: ${{ steps.changes.outputs.diffs == 'true' && 'failure' || 'success' }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-owner: ${{ github.event.workflow_run.repository.owner.login }}
+          repo-name: ${{ github.event.workflow_run.repository.name }}
+          message-id: visual-regression-diffs
+          message-failure: |
+            **Visual regression diffs found.**
+          message-success: |
+            **No visual regression diffs found.**
