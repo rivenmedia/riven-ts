@@ -4,14 +4,14 @@ import Link from "ink-link";
 import Image from "ink-picture";
 import { DateTime } from "luxon";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
-import { DetailRow } from "../components/detail-row.tsx";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_OVERVIEW } from "../queries/get-media-item-overview.query.ts";
-import { formatDate } from "../utilities/format-date.ts";
-import { formatList } from "../utilities/format-list.ts";
-import { getContentRating } from "../utilities/get-content-rating.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { DetailRow } from "#pages/item-detail/components/detail-row.tsx";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_OVERVIEW } from "#pages/item-detail/queries/get-media-item-overview.query.ts";
+import { formatDate } from "#pages/item-detail/utilities/format-date.ts";
+import { formatList } from "#pages/item-detail/utilities/format-list.ts";
+import { getContentRating } from "#pages/item-detail/utilities/get-content-rating.ts";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
 
 export function ItemDetailOverviewTab() {
   const id = useItemId();

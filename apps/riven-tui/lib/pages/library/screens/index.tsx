@@ -3,12 +3,12 @@ import { Box, Text, useInput } from "ink";
 import { startTransition, useState } from "react";
 import { useNavigate, useParams } from "react-router";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
-import { SelectList } from "../../../ui/select-list.tsx";
-import { GET_LIBRARY_ITEMS } from "../queries/get-library-items.query.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { GET_LIBRARY_ITEMS } from "#pages/library/queries/get-library-items.query.ts";
+import { MediaItemStateBadge } from "#ui/media-item-state-badge.tsx";
+import { SelectList } from "#ui/select-list.tsx";
 
-import type { MediaItemType } from "../../../types/__generated__/graphql.ts";
+import type { MediaItemType } from "#types/__generated__/graphql.ts";
 
 export function LibraryScreenIndexScreen() {
   const params = useParams<{

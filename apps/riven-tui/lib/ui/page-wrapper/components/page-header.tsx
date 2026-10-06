@@ -1,7 +1,7 @@
 import { TitledBox } from "@mishieck/ink-titled-box";
 import { useLocation } from "react-router";
 
-import { settings } from "../../../settings.ts";
+import { settings } from "#settings.ts";
 
 import type { PropsWithChildren } from "react";
 
