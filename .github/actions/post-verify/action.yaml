@@ -25,3 +25,13 @@ runs:
         path: knip-report.json
         retention-days: 1
         if-no-files-found: error
+
+    - name: Upload visual regression report
+      if: ${{ inputs.task == 'test:component' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: vis-results
+        path: |
+          **/__vis__/**
+        retention-days: 1
+        if-no-files-found: error
