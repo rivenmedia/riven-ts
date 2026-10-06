@@ -1,6 +1,6 @@
-import { getPlugins } from "@/lib/plugins";
-
 import { Card, Cards } from "fumadocs-ui/components/card";
+
+import { getPlugins } from "#lib/plugins.ts";
 
 export function PluginCards() {
   return (
