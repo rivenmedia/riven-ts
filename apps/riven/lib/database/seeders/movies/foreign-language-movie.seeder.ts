@@ -1,4 +1,5 @@
-import { BaseSeeder } from "../base.seeder.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+
 import { IndexedMovieSeeder } from "./indexed-movie.seeder.ts";
 
 import type { IndexedMovieSeederContext } from "./indexed-movie.seeder.ts";

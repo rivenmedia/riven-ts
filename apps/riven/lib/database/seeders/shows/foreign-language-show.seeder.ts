@@ -1,4 +1,5 @@
-import { BaseSeeder } from "../base.seeder.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+
 import { IndexedShowSeeder } from "./indexed-show.seeder.ts";
 
 import type { IndexedShowSeederContext } from "./indexed-show.seeder.ts";

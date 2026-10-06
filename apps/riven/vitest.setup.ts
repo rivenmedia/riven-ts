@@ -16,8 +16,8 @@ import {
 } from "vitest";
 import z from "zod";
 
-import { queueRegistry } from "./lib/message-queue/utilities/queue-registry.ts";
-import { withLogContext } from "./lib/utilities/logger/log-context.ts";
+import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RedisClient } from "bullmq";
@@ -87,9 +87,9 @@ vi.mock(import("@repo/plugin-test"), () => {
   };
 });
 
-vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
+vi.mock(import("#database/database.ts"), async (importOriginal) => {
   const { initORM } = await importOriginal();
-  const { createDatabaseConfig } = await import("./lib/database/config.ts");
+  const { createDatabaseConfig } = await import("#database/config.ts");
   const { SeedManager } = await import("@mikro-orm/seeder");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
   const databaseConfig = await createDatabaseConfig();
@@ -141,7 +141,7 @@ let redisServer: RedisMemoryServer | null = null;
 let redisConnection: RedisConnection | null = null;
 let redisClient: RedisClient | null = null;
 
-vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
+vi.doMock(import("#utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");
   const { exec } = await import("node:child_process");
   const { promisify } = await import("node:util");
@@ -206,7 +206,7 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  const { database } = await import("./lib/database/database.ts");
+  const { database } = await import("#database/database.ts");
 
   for (const queue of queueRegistry.values()) {
     await queue.disconnect();

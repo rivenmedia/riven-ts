@@ -2,7 +2,7 @@ import { SPLAT } from "triple-beam";
 import { format } from "winston";
 import z from "zod";
 
-import { ErrorSplat } from "../schemas/error-splat.schema.ts";
+import { ErrorSplat } from "#utilities/logger/schemas/error-splat.schema.ts";
 
 export const validationErrorMetaFormat = format((info) => {
   const parsedSplat = Array.isArray(info[SPLAT])

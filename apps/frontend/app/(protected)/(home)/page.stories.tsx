@@ -1,4 +1,3 @@
-import { ProtectedLayoutWrapper } from "@/.storybook/decorators/protected-layout-wrapper";
 import { preview } from "@/.storybook/preview";
 
 import { DateTime } from "luxon";
@@ -7,8 +6,8 @@ import { expect, within } from "storybook/test";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query";
-import { GET_TRENDING_MOVIES } from "./_components/trending-movies";
-import { GET_TRENDING_SHOWS } from "./_components/trending-shows";
+import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies";
+import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows";
 import HomePage from "./page";
 
 import type { UUID } from "node:crypto";
@@ -19,7 +18,6 @@ const meta = preview.meta({
   parameters: {
     layout: "fullscreen",
   },
-  decorators: [ProtectedLayoutWrapper],
 });
 
 export const Default = meta.story({
@@ -149,17 +147,17 @@ export const Default = meta.story({
           },
         }),
       ),
-      graphql.query(GET_TRENDING_MOVIES, ({ variables }) => {
+      graphql.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              trendingMovies: [
+              tmdbTrendingMovies: [
                 {
-                  __typename: "Movie",
+                  __typename: "TmdbIndexerData",
                   id: crypto.randomUUID() as UUID,
                   type: "movie",
                   title: "Avengers: Endgame",
-                  posterPath:
+                  posterUrl:
                     "https://image.tmdb.org/t/p/original/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
                   year: 2019,
                 },
@@ -170,13 +168,13 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            trendingMovies: [
+            tmdbTrendingMovies: [
               {
-                __typename: "Movie",
+                __typename: "TmdbIndexerData",
                 id: crypto.randomUUID() as UUID,
                 type: "movie",
                 title: "The Odyssey",
-                posterPath:
+                posterUrl:
                   "https://image.tmdb.org/t/p/original/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
                 year: 2026,
               },
@@ -184,11 +182,11 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_TRENDING_SHOWS, ({ variables }) => {
+      graphql.query(GET_TVDB_TRENDING_SHOWS, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              trendingShows: [
+              tvdbTrendingShows: [
                 {
                   __typename: "Show",
                   id: crypto.randomUUID() as UUID,
@@ -205,7 +203,7 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            trendingShows: [
+            tvdbTrendingShows: [
               {
                 __typename: "Show",
                 id: crypto.randomUUID() as UUID,
@@ -235,7 +233,7 @@ Default.test(
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending movies", async () => {
       const trendingMoviesActions = await canvas.findByRole("region", {
-        name: /trending movies/iu,
+        name: /trending movies actions/iu,
       });
 
       const thisWeekButton = await within(trendingMoviesActions).findByRole(
@@ -260,7 +258,7 @@ Default.test(
   'Navigates to the Trending Movies page when the Trending Movies "View all" button is clicked',
   async ({ canvas }) => {
     const trendingMoviesActions = await canvas.findByRole("region", {
-      name: /trending movies/iu,
+      name: /trending movies actions/iu,
     });
 
     const viewAllButton = await within(trendingMoviesActions).findByRole(
@@ -280,7 +278,7 @@ Default.test(
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending shows", async () => {
       const trendingShowsActions = await canvas.findByRole("region", {
-        name: /trending tv shows/iu,
+        name: /trending tv shows actions/iu,
       });
 
       const thisWeekButton = await within(trendingShowsActions).findByRole(
@@ -305,7 +303,7 @@ Default.test(
   'Navigates to the Trending Shows page when the Trending Shows "View all" button is clicked',
   async ({ canvas }) => {
     const trendingShowsActions = await canvas.findByRole("region", {
-      name: /trending tv shows/iu,
+      name: /trending tv shows actions/iu,
     });
 
     const viewAllButton = await within(trendingShowsActions).findByRole(

@@ -4,14 +4,15 @@ import { TitledBox } from "@mishieck/ink-titled-box";
 import { Box, Text, useInput } from "ink";
 import { useState } from "react";
 
-import { LoadingIndicator } from "../loading-indicator.tsx";
-import { SelectList } from "../select-list.tsx";
-import { SelectableRow } from "../selectable-row.tsx";
+import { LoadingIndicator } from "#ui/loading-indicator.tsx";
+import { SelectList } from "#ui/select-list.tsx";
+import { SelectableRow } from "#ui/selectable-row.tsx";
+
 import { ActionResult } from "./action-result.tsx";
 import { useActionsMenuContext } from "./actions-menu-context.tsx";
 import { ConfirmAction } from "./confirm-action.tsx";
 
-import type { ActionTarget, ItemAction } from "../../types/actions.ts";
+import type { ActionTarget, ItemAction } from "#types/actions.ts";
 import type { ApolloClient } from "@apollo/client";
 
 export interface ActionsMenuProps {

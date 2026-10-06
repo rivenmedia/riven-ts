@@ -19,6 +19,12 @@ interface MediaCarouselProps {
   delay: number;
 }
 
+function formatSubtitle({ type, year }: Pick<MediaItem, "type" | "year">) {
+  const typeLabel = type === "movie" ? "Movie" : "TV";
+
+  return year ? `${typeLabel} • ${year.toString()}` : typeLabel;
+}
+
 export function MediaCarousel({ items, title, delay }: MediaCarouselProps) {
   return (
     <section
@@ -37,7 +43,7 @@ export function MediaCarousel({ items, title, delay }: MediaCarouselProps) {
                 >
                   <PortraitCard
                     title={item.title}
-                    subtitle={`${item.type === "movie" ? "Movie" : "TV"}${item.year ? ` • ${item.year.toString()}` : ""}`}
+                    subtitle={formatSubtitle(item)}
                     image={item.posterPath}
                     className="w-36 md:w-44 lg:w-48"
                   />

@@ -1,8 +1,10 @@
+import { configureLocale } from "@/lib/utils/configure-luxon";
+
 import { faker } from "@faker-js/faker";
 import { DateTime, Settings } from "luxon";
 import { beforeEach, vi } from "vitest";
 
-Settings.defaultLocale = "en-GB";
+configureLocale("en-GB");
 
 const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
 

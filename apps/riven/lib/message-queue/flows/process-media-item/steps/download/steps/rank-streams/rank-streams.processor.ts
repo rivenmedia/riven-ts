@@ -4,10 +4,11 @@ import { GarbageTorrentError } from "@repo/util-rank-torrent-name";
 import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
-import { rtnInstance } from "../../../../../../../ranking-config/ranking-config.ts";
-import { logger } from "../../../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../../../utilities/settings.ts";
-import { SkippedTorrentError } from "../../../../../../sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
+import { SkippedTorrentError } from "#message-queue/sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
+import { rtnInstance } from "#ranking-config/ranking-config.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
 

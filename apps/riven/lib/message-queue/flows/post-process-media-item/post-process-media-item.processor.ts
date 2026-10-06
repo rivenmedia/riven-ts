@@ -1,14 +1,15 @@
 import { ValidationError } from "@mikro-orm/core";
-import { UnrecoverableError, WaitingChildrenError } from "bullmq";
+import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
-import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { formatJobDuration } from "#message-queue/utilities/format-job-duration.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { postProcessMediaItemProcessorSchema } from "./post-process-media-item.schema.ts";
-import { enqueueRequestSubtitles } from "./steps/request-subtitles/enqueue-request-subtitles.ts";
+import { maybeEnqueueSubtitleRequests } from "./utilities/maybe-enqueue-subtitle-requests.ts";
 
 export const postProcessItemProcessor =
   postProcessMediaItemProcessorSchema.implementAsync(
@@ -25,34 +26,19 @@ export const postProcessItemProcessor =
                 `Post-processing ${chalk.bold(job.data.mediaItem.fullTitle)}`,
               );
 
-              const subtitlesSubscribers = getPluginEventSubscribers(
-                "riven.media-item.subtitle.requested",
+              await maybeEnqueueSubtitleRequests(
+                job.data.mediaItem.id,
+                subtitlesService,
                 plugins,
+                parent,
               );
-
-              if (subtitlesSubscribers.length > 0) {
-                const items =
-                  await subtitlesService.getItemsForSubtitlesProcessing(
-                    job.data.mediaItem.id,
-                  );
-
-                for (const item of items) {
-                  await enqueueRequestSubtitles({
-                    item,
-                    subscribers: subtitlesSubscribers,
-                    parent,
-                  });
-                }
-              }
 
               await job.updateData({
                 ...job.data,
                 step: "validate-post-process",
               });
 
-              if (await job.moveToWaitingChildren(token)) {
-                throw new WaitingChildrenError();
-              }
+              await maybeWaitForChildren(job, token);
 
               break;
             }
@@ -75,15 +61,7 @@ export const postProcessItemProcessor =
           }
         }
 
-        const duration = DateTime.fromMillis(job.timestamp)
-          .diffNow(["seconds", "minutes", "hours", "days", "weeks"])
-          .rescale()
-          .negate()
-          .toHuman({
-            showZeros: false,
-            maximumFractionDigits: 0,
-            unitDisplay: "narrow",
-          });
+        const duration = formatJobDuration(job.timestamp);
 
         logger.info(
           chalk.greenBright(

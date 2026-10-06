@@ -1,9 +1,9 @@
 import { gql } from "@apollo/client";
 import { describe, expect, vi } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
-import { createQueue } from "../../message-queue/utilities/create-queue.ts";
-import { CoreKey } from "../context.ts";
+import { it } from "#__tests__/test-context.ts";
+import { CoreKey } from "#graphql/context.ts";
+import { createQueue } from "#message-queue/utilities/create-queue.ts";
 
 import type {
   RemoveItemRequestMutation,

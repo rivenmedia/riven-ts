@@ -1,8 +1,8 @@
 import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { isFuseError } from "../errors/fuse-error.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { isFuseError } from "#vfs/errors/fuse-error.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
@@ -11,33 +11,67 @@ import {
   fileNameIsFetchingLinkMap,
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
-} from "../utilities/file-handle-map.ts";
+} from "#vfs/utilities/file-handle-map.ts";
 import {
   getVfsOperationContext,
   withVfsOperationContext,
-} from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+} from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 
-async function release() {
-  const { fd } = getVfsOperationContext("release");
+/**
+ * Drains any in-flight response body for the file descriptor so the underlying connection can be released.
+ */
+async function drainResponse(fd: number) {
   const response = await fdToResponsePromiseMap.get(fd);
 
-  if (response) {
-    try {
-      await response.body.dump();
-    } catch (error) {
-      if (error instanceof Undici.errors.RequestAbortedError) {
-        /*
-         * Intentionally squash AbortError exceptions as they are
-         * expected to occur when aborting an in-flight request.
-         */
-      } else {
-        throw error;
-      }
+  if (!response) {
+    return;
+  }
+
+  try {
+    await response.body.dump();
+  } catch (error) {
+    /*
+     * Intentionally squash AbortError exceptions as they are
+     * expected to occur when aborting an in-flight request.
+     */
+    if (!(error instanceof Undici.errors.RequestAbortedError)) {
+      throw error;
     }
   }
+}
+
+/**
+ * Decrements the file descriptor count for a file,
+ * cleaning up the file-name based mappings once no file descriptors reference it.
+ */
+function releaseFileName(originalFileName: string) {
+  const nextFdCount = (fileNameToFdCountMap.get(originalFileName) ?? 1) - 1;
+
+  if (nextFdCount > 0) {
+    fileNameToFdCountMap.set(originalFileName, nextFdCount);
+
+    return;
+  }
+
+  fileNameToFdCountMap.delete(originalFileName);
+
+  // If there are no more file descriptors referencing this file,
+  // we can clean up the file-name based mappings as well to free up memory.
+  for (const map of [
+    fileNameToFileChunkCalculationsMap,
+    fileNameIsFetchingLinkMap,
+  ]) {
+    map.delete(originalFileName);
+  }
+}
+
+async function release() {
+  const { fd } = getVfsOperationContext("release");
+
+  await drainResponse(fd);
 
   const fileHandleMeta = fdToFileHandleMeta.get(fd);
 
@@ -63,23 +97,7 @@ async function release() {
 
   // Subtitle file handles don't use the file-name based maps
   if (fileHandleMeta.type === "media") {
-    const nextFdCount =
-      (fileNameToFdCountMap.get(fileHandleMeta.originalFileName) ?? 1) - 1;
-
-    if (nextFdCount > 0) {
-      fileNameToFdCountMap.set(fileHandleMeta.originalFileName, nextFdCount);
-    } else {
-      fileNameToFdCountMap.delete(fileHandleMeta.originalFileName);
-
-      // If there are no more file descriptors referencing this file,
-      // we can clean up the file-name based mappings as well to free up memory.
-      for (const map of [
-        fileNameToFileChunkCalculationsMap,
-        fileNameIsFetchingLinkMap,
-      ]) {
-        map.delete(fileHandleMeta.originalFileName);
-      }
-    }
+    releaseFileName(fileHandleMeta.originalFileName);
   }
 
   logger.verbose(

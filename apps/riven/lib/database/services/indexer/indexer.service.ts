@@ -7,7 +7,8 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { DateTime } from "luxon";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+
 import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
 import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
@@ -65,7 +66,7 @@ export class IndexerService extends BaseService {
       | { isReleaseDateInPast: boolean; isReleaseDateKnown: true }
     )
   > {
-    const { settings } = await import("../../../utilities/settings.ts");
+    const { settings } = await import("#utilities/settings.ts");
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 

@@ -6,22 +6,22 @@ import { useEvent, useMount } from "react-use";
 
 import { Button } from "../_ui/button";
 
-export interface ToggleOption {
+export interface ToggleOption<T extends string = string> {
   label: string;
-  value: string;
+  value: T;
 }
 
-interface AnimatedToggleProps {
-  defaultValue?: string;
-  options: [ToggleOption, ...ToggleOption[]];
-  onChange: (selectedItem: string) => void;
+interface AnimatedToggleProps<T extends string = string> {
+  defaultValue?: ToggleOption<T>["value"];
+  options: readonly [ToggleOption<T>, ...ToggleOption<T>[]];
+  onChange: (selectedItem: T) => void;
 }
 
-export function AnimatedToggle({
+export function AnimatedToggle<T extends string = string>({
   options,
   defaultValue = options[0].value,
   onChange,
-}: AnimatedToggleProps) {
+}: AnimatedToggleProps<T>) {
   const [activeValue, setActiveValue] = useState(defaultValue);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -47,13 +47,13 @@ export function AnimatedToggle({
   }, [options]);
 
   const updatePosition = useCallback(
-    (value: string, immediate = false) => {
+    (value: ToggleOption<T>["value"], immediate = false) => {
       if (!value || elements.current.size === 0) {
         return;
       }
 
       const index = options.findIndex(
-        ({ value: optionValue }: ToggleOption) => optionValue === value,
+        ({ value: optionValue }: ToggleOption<T>) => optionValue === value,
       );
 
       if (index === -1) {
@@ -94,7 +94,7 @@ export function AnimatedToggle({
     updatePosition(activeValue);
   }, [activeValue, updatePosition]);
 
-  function handleChange(value: string) {
+  function handleChange(value: ToggleOption<T>["value"]) {
     setActiveValue(value);
     onChange(value);
   }

@@ -3,14 +3,14 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { vi } from "vitest";
 import { createActor, fromPromise } from "xstate";
 
-import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { SessionID } from "../../../../utilities/logger/session-id.ts";
-import { bootstrapMachine } from "../../../bootstrap/index.ts";
-import { rivenMachine } from "../../index.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { bootstrapMachine } from "#state-machines/bootstrap/index.ts";
+import { rivenMachine } from "#state-machines/program/index.ts";
+import { SessionID } from "#utilities/logger/session-id.ts";
 
-import type { ValidPlugin } from "../../../../types/plugins.ts";
-import type { BootstrapMachineOutput } from "../../../bootstrap/index.ts";
-import type { RivenMachineInput } from "../../index.ts";
+import type { BootstrapMachineOutput } from "#state-machines/bootstrap/index.ts";
+import type { RivenMachineInput } from "#state-machines/program/index.ts";
+import type { ValidPlugin } from "#types/plugins.ts";
 
 export const it = baseIt
   .extend(

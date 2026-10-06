@@ -22,6 +22,70 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
   return translation?.name ?? null;
 }
 
+/**
+ * Collects the non-English aliases for a series, keyed by language.
+ */
+function getAliases(
+  series: SeriesExtendedRecordSchema,
+  slug: string,
+  title: string,
+) {
+  const aliases = new Map<string, Set<string>>([["eng", new Set([slug])]]);
+
+  for (const { language, name } of series.translations?.nameTranslations ??
+    []) {
+    // Ignore english translations, we already have the English show title.
+    // Also ignore translations that are identical to the main show title;
+    // these add no value to the list.
+    if (!name || !language || language === "eng" || name === title) {
+      continue;
+    }
+
+    const languageAliases = aliases.get(language) ?? new Set<string>();
+
+    aliases.set(language, languageAliases.add(name));
+  }
+
+  return aliases;
+}
+
+/**
+ * Removes a trailing parenthetical from a title, e.g. "Show (2024)" becomes "Show".
+ */
+function removeTrailingParenthetical(title: string) {
+  const trimmedTitle = title.trimEnd();
+  const openingParenthesisIndex = trimmedTitle.indexOf("(");
+
+  if (!trimmedTitle.endsWith(")") || openingParenthesisIndex === -1) {
+    return title;
+  }
+
+  return trimmedTitle.slice(0, openingParenthesisIndex).trimEnd();
+}
+
+function getEpisodeAiredAtUtc(
+  episode: EpisodeBaseRecordSchema,
+  airsDateTime: DateTime,
+  originalReleaseTimezone: TimezoneName | undefined,
+) {
+  if (!episode.aired) {
+    return null;
+  }
+
+  const episodeAiredDate = DateTime.fromISO(episode.aired);
+
+  return DateTime.fromObject(
+    {
+      year: episodeAiredDate.year,
+      month: episodeAiredDate.month,
+      day: episodeAiredDate.day,
+      hour: airsDateTime.hour,
+      minute: airsDateTime.minute,
+    },
+    { zone: originalReleaseTimezone },
+  ).toUTC();
+}
+
 export const transformSeries = (
   itemRequest: ItemRequest,
   series: SeriesExtendedRecordSchema,
@@ -48,41 +112,13 @@ export const transformSeries = (
   const network =
     series.latestNetwork?.name ?? series.originalNetwork?.name ?? null;
 
-  const aliases = new Map<string, Set<string>>([["eng", new Set([slug])]]);
+  const aliases = getAliases(series, slug, title);
 
-  for (const { language, name } of series.translations?.nameTranslations ??
-    []) {
-    if (!name || !language) {
-      continue;
-    }
+  const genres = (series.genres ?? []).flatMap(({ name }) =>
+    name ? [name] : [],
+  );
 
-    // Ignore english translations, we already have the English show title
-    if (language === "eng") {
-      continue;
-    }
-
-    // Ignore translations that are identical to the main show title;
-    // these add no value to the list.
-    if (name === title) {
-      continue;
-    }
-
-    const existing = aliases.get(language) ?? new Set<string>();
-
-    aliases.set(language, existing.add(name));
-  }
-
-  const genres: string[] = [];
-
-  if (series.genres) {
-    for (const genre of series.genres) {
-      if (genre.name) {
-        genres.push(genre.name);
-      }
-    }
-  }
-
-  const sanitisedTitle = title.replaceAll(/\s*\(.*\)\s*$/gu, "");
+  const sanitisedTitle = removeTrailingParenthetical(title);
 
   const contentRating = z
     .string()
@@ -107,22 +143,11 @@ export const transformSeries = (
       continue;
     }
 
-    const episodeAiredDate = episode.aired
-      ? DateTime.fromISO(episode.aired)
-      : null;
-
-    const episodeAiredAtUtc = episodeAiredDate
-      ? DateTime.fromObject(
-          {
-            year: episodeAiredDate.year,
-            month: episodeAiredDate.month,
-            day: episodeAiredDate.day,
-            hour: airsDateTime.hour,
-            minute: airsDateTime.minute,
-          },
-          { zone: originalReleaseTimezone },
-        ).toUTC()
-      : null;
+    const episodeAiredAtUtc = getEpisodeAiredAtUtc(
+      episode,
+      airsDateTime,
+      originalReleaseTimezone,
+    );
 
     seasons[seasonNumber] ??= {
       number: seasonNumber,

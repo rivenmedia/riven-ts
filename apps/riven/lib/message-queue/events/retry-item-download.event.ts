@@ -2,7 +2,7 @@ import { MediaItemInstance } from "@repo/util-plugin-sdk/schemas/media/media-ite
 
 import z from "zod";
 
-import { createInternalEventSchema } from "../utilities/create-internal-event-schema.ts";
+import { createInternalEventSchema } from "#message-queue/utilities/create-internal-event-schema.ts";
 
 export const RetryItemDownload = createInternalEventSchema(
   "retry-item-download",

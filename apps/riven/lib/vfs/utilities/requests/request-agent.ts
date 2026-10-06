@@ -1,6 +1,6 @@
 import { Agent, interceptors, setGlobalDispatcher } from "undici";
 
-import { config } from "../../config.ts";
+import { config } from "#vfs/config.ts";
 
 const requestAgent = new Agent({
   keepAliveMaxTimeout: config.activityTimeoutSeconds * 1000,

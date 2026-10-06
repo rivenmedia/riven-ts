@@ -1,4 +1,4 @@
-import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
+import type { BaseSeeder } from "#database/seeders/base.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 import type { AnyHandler } from "msw";
 import type { Constructor } from "type-fest";

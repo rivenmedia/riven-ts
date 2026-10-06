@@ -4,12 +4,13 @@ import chalk from "chalk";
 import { assign, enqueueActions, setup } from "xstate";
 import { ZodError } from "zod";
 
-import packageJson from "../../../package.json" with { type: "json" };
-import { logger } from "../../utilities/logger/logger.ts";
-import { redisCache } from "../../utilities/redis-cache.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
-import { withLogAction } from "../utilities/with-log-action.ts";
+import packageJson from "#package.json" with { type: "json" };
+import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { redisCache } from "#utilities/redis-cache.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
+
 import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 import { registerPluginHookWorkers } from "./utilities/register-plugin-hook-workers.ts";
@@ -24,7 +25,7 @@ import type {
   PublishableEventSet,
   ValidPlugin,
   ValidPluginMap,
-} from "../../types/plugins.ts";
+} from "#types/plugins.ts";
 import type { ParsedPlugins } from "./actors/collect-plugins-for-registration.actor.ts";
 import type { RegisterPluginHookWorkersOutput } from "./utilities/register-plugin-hook-workers.ts";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
@@ -60,6 +61,80 @@ export type PluginRegistrarMachineEvent =
   | { type: "riven.plugin-valid"; plugin: ValidPlugin }
   | { type: "riven.plugin-invalid"; plugin: InvalidPlugin };
 
+type ParsedPlugin = ParsedPlugins["validPlugins"][number];
+
+/**
+ * Registers a plugin's settings schema against its config prefix.
+ *
+ * @returns Whether the settings were registered successfully
+ */
+function registerPluginSettings(
+  plugin: ParsedPlugin,
+  pluginConfigPrefixMap: ParsedPlugins["pluginConfigPrefixMap"],
+  pluginSettings: PluginSettings,
+) {
+  const pluginName = plugin.name.description ?? "unknown";
+
+  try {
+    const pluginConfigPrefix = pluginConfigPrefixMap.get(plugin.name);
+
+    if (!pluginConfigPrefix) {
+      throw new Error(
+        `No config prefix found for plugin "${String(plugin.name)}"`,
+      );
+    }
+
+    pluginSettings.set(pluginConfigPrefix, plugin.settingsSchema);
+
+    return true;
+  } catch (error) {
+    if (error instanceof ZodError) {
+      logger.error(`Invalid settings provided for plugin ${pluginName}`, {
+        err: error,
+      });
+    } else {
+      logger.error(`Failed to set settings for plugin ${pluginName}`, {
+        err: error,
+      });
+    }
+
+    return false;
+  }
+}
+
+function createPluginDataSources(
+  plugin: ParsedPlugin,
+  pluginSettings: PluginSettings,
+) {
+  const dataSources = new DataSourceMap();
+  const pluginName = plugin.name.description ?? "unknown";
+
+  for (const DataSource of plugin.dataSources ?? []) {
+    try {
+      const instance = new DataSource({
+        pluginSymbol: plugin.name,
+        cache: redisCache,
+        logger,
+        connection: {
+          url: settings.redisUrl,
+        },
+        settings: pluginSettings.get(plugin.settingsSchema),
+        telemetry,
+        userAgent: `Riven/${packageJson.version} (${pluginName})`,
+      });
+
+      dataSources.set(DataSource, instance);
+    } catch (error) {
+      logger.error(
+        `Failed to construct data source ${DataSource.name} for ${pluginName}`,
+        { err: error },
+      );
+    }
+  }
+
+  return dataSources;
+}
+
 export const pluginRegistrarMachine = setup({
   types: {
     context: {} as PluginRegistrarMachineContext,
@@ -80,58 +155,17 @@ export const pluginRegistrarMachine = setup({
         const pluginMap = new Map<symbol, PendingPlugin>();
 
         for (const plugin of validPlugins) {
-          const dataSources = new DataSourceMap();
-          const pluginName = plugin.name.description ?? "unknown";
+          const didRegisterSettings = registerPluginSettings(
+            plugin,
+            pluginConfigPrefixMap,
+            pluginSettings,
+          );
 
-          try {
-            const pluginConfigPrefix = pluginConfigPrefixMap.get(plugin.name);
-
-            if (!pluginConfigPrefix) {
-              throw new Error(
-                `No config prefix found for plugin "${String(plugin.name)}"`,
-              );
-            }
-
-            pluginSettings.set(pluginConfigPrefix, plugin.settingsSchema);
-          } catch (error) {
-            if (error instanceof ZodError) {
-              logger.error(
-                `Invalid settings provided for plugin ${pluginName}`,
-                { err: error },
-              );
-            } else {
-              logger.error(`Failed to set settings for plugin ${pluginName}`, {
-                err: error,
-              });
-            }
-
+          if (!didRegisterSettings) {
             continue;
           }
 
-          if (plugin.dataSources) {
-            for (const DataSource of plugin.dataSources) {
-              try {
-                const instance = new DataSource({
-                  pluginSymbol: plugin.name,
-                  cache: redisCache,
-                  logger,
-                  connection: {
-                    url: settings.redisUrl,
-                  },
-                  settings: pluginSettings.get(plugin.settingsSchema),
-                  telemetry,
-                  userAgent: `Riven/${packageJson.version} (${pluginName})`,
-                });
-
-                dataSources.set(DataSource, instance);
-              } catch (error) {
-                logger.error(
-                  `Failed to construct data source ${DataSource.name} for ${pluginName}`,
-                  { err: error },
-                );
-              }
-            }
-          }
+          const dataSources = createPluginDataSources(plugin, pluginSettings);
 
           pluginMap.set(plugin.name, {
             status: "registered",

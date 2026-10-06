@@ -1,8 +1,8 @@
 import { fromPromise } from "xstate";
 
-import { database } from "../../../database/database.ts";
+import { database } from "#database/database.ts";
 
-import type { MockScenario } from "../../../mocks/utilities/mock-scenario.ts";
+import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 
 export interface ApplyMockScenarioInput {
   mockScenario: MockScenario;

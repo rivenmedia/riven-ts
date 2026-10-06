@@ -7,23 +7,68 @@ import {
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
 
 import { NotFoundError } from "@mikro-orm/core";
-import { DelayedError, UnrecoverableError, WaitingChildrenError } from "bullmq";
+import { DelayedError, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { clearDeduplicationJob } from "../../utilities/clear-deduplication-job.ts";
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
-import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
+import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
+import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import type {
   MediaItemIndexRequestedMovieResponse,
   MediaItemIndexRequestedShowResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
+
+/**
+ * Merges the indexed item data returned by each indexer plugin into a single item.
+ */
+function mergeIndexerResults(
+  results: (
+    | MediaItemIndexRequestedMovieResponse
+    | MediaItemIndexRequestedShowResponse
+    | undefined
+  )[],
+) {
+  type IndexedItem = NonNullable<
+    MediaItemIndexRequestedMovieResponse | MediaItemIndexRequestedShowResponse
+  >["item"];
+
+  const item = {} as IndexedItem;
+
+  for (const value of results) {
+    if (!value?.item) {
+      continue;
+    }
+
+    Object.assign(item, value.item);
+  }
+
+  return item;
+}
+
+async function clearProcessingJobs(items: MediaItem[]) {
+  for (const item of items) {
+    const wasCleared = await clearDeduplicationJob(
+      "process-media-item",
+      `process-${item.type}-${item.id}`,
+    );
+
+    if (wasCleared) {
+      logger.silly(
+        `Removed existing media item processing job for ${item.fullTitle}`,
+      );
+    }
+  }
+}
 
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
@@ -85,9 +130,7 @@ export const processItemRequestProcessor =
             step: "process",
           });
 
-          if (await job.moveToWaitingChildren(token)) {
-            throw new WaitingChildrenError();
-          }
+          await maybeWaitForChildren(job, token);
 
           break;
         }
@@ -108,18 +151,7 @@ export const processItemRequestProcessor =
             );
           }
 
-          const item = {} as NonNullable<
-            | MediaItemIndexRequestedMovieResponse
-            | MediaItemIndexRequestedShowResponse
-          >["item"];
-
-          for (const value of Object.values(data)) {
-            if (!value?.item) {
-              continue;
-            }
-
-            Object.assign(item, value.item);
-          }
+          const item = mergeIndexerResults(Object.values(data));
 
           try {
             const {
@@ -132,18 +164,7 @@ export const processItemRequestProcessor =
               updatedItem.id,
             );
 
-            for (const itemToProcess of itemsToProcess) {
-              if (
-                await clearDeduplicationJob(
-                  "process-media-item",
-                  `process-${itemToProcess.type}-${itemToProcess.id}`,
-                )
-              ) {
-                logger.silly(
-                  `Removed existing media item processing job for ${itemToProcess.fullTitle}`,
-                );
-              }
-            }
+            await clearProcessingJobs(itemsToProcess);
 
             sendEvent({
               type: "riven.media-item.index.success",

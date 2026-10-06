@@ -3,19 +3,20 @@ import { Text, useInput } from "ink";
 import { Outlet, useNavigate, useParams } from "react-router";
 import { z } from "zod";
 
-import { useActionsMenuContext } from "../../ui/actions-menu/actions-menu-context.tsx";
-import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
-import { MediaItemStateBadge } from "../../ui/media-item-state-badge.tsx";
-import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
-import { SuspenseBoundary } from "../../ui/suspense-boundary.tsx";
-import { createAction } from "../../utilities/create-action.ts";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
+import { ActionsMenu } from "#ui/actions-menu/actions-menu.tsx";
+import { MediaItemStateBadge } from "#ui/media-item-state-badge.tsx";
+import { PageWrapper } from "#ui/page-wrapper/page-wrapper.tsx";
+import { SuspenseBoundary } from "#ui/suspense-boundary.tsx";
+import { createAction } from "#utilities/create-action.ts";
+
 import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
 import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
 import { REMOVE_ITEM_REQUEST } from "./queries/remove-item-request.mutation.ts";
 import { RESET_MEDIA_ITEM } from "./queries/reset-media-item.mutation.ts";
 import { getActionsFor } from "./utilities/get-actions-for.ts";
 
-import type { ActionTarget, ItemAction } from "../../types/actions.ts";
+import type { ActionTarget, ItemAction } from "#types/actions.ts";
 
 export function ItemDetailPageLayout() {
   const params = useParams<"id">();
@@ -161,10 +162,12 @@ export function ItemDetailPageLayout() {
     type: item.__typename,
   } satisfies ActionTarget;
 
+  const yearLabel = item.year ? ` (${item.year.toString()})` : "";
+
   return (
     <PageWrapper
       header={{
-        title: `${item.fullTitle}${item.year ? ` (${item.year.toString()})` : ""} · ${item.__typename}`,
+        title: `${item.fullTitle}${yearLabel} · ${item.__typename}`,
         content: <MediaItemStateBadge state={item.state} />,
       }}
       footer={<Text dimColor>[a]ctions · [r]efresh · [esc] back · [q]uit</Text>}

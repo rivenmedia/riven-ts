@@ -6,6 +6,13 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.ts": {
+      "production": "./lib/*.js",
+      "default": "./lib/*.ts"
+    },
+    "#*.json": "./*.json"
+  },
   "exports": {
     "./workers/map-items-to-files": {
       "production": "./workers/map-items-to-files/map-items-to-files.processor.js",

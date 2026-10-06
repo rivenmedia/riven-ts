@@ -2,13 +2,52 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
+import { validateOrReject } from "class-validator";
 
-import { RequestType } from "../../../../message-queue/flows/request-content-service/request-content-service.schema.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
+import { RequestType } from "#message-queue/flows/request-content-service/request-content-service.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+
+function mergeRequestedSeasons(
+  existingSeasons: number[] | null | undefined,
+  requestedSeasons: number[] | null | undefined,
+) {
+  if (existingSeasons?.length && requestedSeasons) {
+    return new Set([...existingSeasons, ...requestedSeasons])
+      .values()
+      .toArray()
+      .toSorted((a, b) => a - b);
+  }
+
+  return requestedSeasons ?? existingSeasons ?? null;
+}
+
+async function markSeasonsAsRequested(
+  em: EntityManager,
+  itemRequest: ItemRequest,
+  seasonNumbers: number[],
+) {
+  const linkedItemsToProcess = await itemRequest.seasonItems.matching({
+    where: {
+      isRequested: false,
+      number: {
+        $in: seasonNumbers,
+      },
+    },
+  });
+
+  for (const linkedItem of linkedItemsToProcess) {
+    em.assign(linkedItem, { isRequested: true });
+
+    const episodes = await linkedItem.episodes.loadItems();
+
+    for (const episode of episodes) {
+      em.assign(episode, { isRequested: true });
+    }
+  }
+}
 
 export async function persistRequestedShow(
   em: EntityManager,
@@ -28,24 +67,23 @@ export async function persistRequestedShow(
     existingItemSeasonsSet,
   );
 
-  if (existingItem) {
-    if (
-      existingItem.seasons &&
-      item.seasons &&
-      requestedSeasonsDifference.size === 0
-    ) {
-      // If the existing item is a partial request,
-      // throw if the new request has no new requested seasons
-      throw new ItemRequestCreateErrorConflict({
-        item: existingItem,
-      });
-    } else if (!existingItem.seasons && !item.seasons) {
-      // If the existing item is a complete request,
-      // throw if the new request is also a complete request
-      throw new ItemRequestCreateErrorConflict({
-        item: existingItem,
-      });
-    }
+  const isIdenticalPartialRequest = Boolean(
+    existingItem?.seasons &&
+    item.seasons &&
+    requestedSeasonsDifference.size === 0,
+  );
+
+  const isIdenticalCompleteRequest = Boolean(
+    existingItem && !existingItem.seasons && !item.seasons,
+  );
+
+  if (
+    existingItem &&
+    (isIdenticalPartialRequest || isIdenticalCompleteRequest)
+  ) {
+    throw new ItemRequestCreateErrorConflict({
+      item: existingItem,
+    });
   }
 
   const itemRequest =
@@ -60,37 +98,17 @@ export async function persistRequestedShow(
       externalRequestId: item.externalRequestId ?? null,
     });
 
-  itemRequest.seasons =
-    existingItem?.seasons?.length && item.seasons
-      ? new Set([...existingItem.seasons, ...item.seasons])
-          .values()
-          .toArray()
-          .toSorted((a, b) => a - b)
-      : (item.seasons ?? existingItem?.seasons ?? null);
+  itemRequest.seasons = mergeRequestedSeasons(
+    existingItem?.seasons,
+    item.seasons,
+  );
 
   if (
     existingItem &&
     itemRequest.seasons &&
     requestedSeasonsDifference.size > 0
   ) {
-    const linkedItemsToProcess = await existingItem.seasonItems.matching({
-      where: {
-        isRequested: false,
-        number: {
-          $in: itemRequest.seasons,
-        },
-      },
-    });
-
-    for (const linkedItem of linkedItemsToProcess) {
-      em.assign(linkedItem, { isRequested: true });
-
-      const episodes = await linkedItem.episodes.loadItems();
-
-      for (const episode of episodes) {
-        em.assign(episode, { isRequested: true });
-      }
-    }
+    await markSeasonsAsRequested(em, existingItem, itemRequest.seasons);
   }
 
   em.persist(itemRequest);
@@ -105,24 +123,9 @@ export async function persistRequestedShow(
       item: itemRequest,
     };
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new ItemRequestCreateError({
       item: itemRequest,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 }

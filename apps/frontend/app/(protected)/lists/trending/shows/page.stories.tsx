@@ -3,6 +3,7 @@ import preview from "@/.storybook/preview";
 import { faker } from "@faker-js/faker";
 import { graphql, HttpResponse } from "msw";
 
+import { GET_DISCOVERY_ITEMS } from "../_components/trending-discovery-page/_components/trending-discovery-item-list";
 import TrendingShowsPage from "./page";
 
 import type { UUID } from "node:crypto";
@@ -12,12 +13,13 @@ const meta = preview.meta({
   component: TrendingShowsPage,
   beforeEach({ msw }) {
     msw.use(
-      graphql.query("GetDiscoveryItems", () =>
+      graphql.query(GET_DISCOVERY_ITEMS, () =>
         HttpResponse.json({
           data: {
             discoveryItems: Array.from({ length: 50 }).map(() => ({
+              __typename: "TmdbIndexerData",
               id: faker.string.uuid() as UUID,
-              posterPath: faker.image.urlPicsumPhotos({
+              posterUrl: faker.image.urlPicsumPhotos({
                 width: 200,
                 height: 300,
               }),

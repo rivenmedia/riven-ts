@@ -1,5 +1,6 @@
-import { PathInfo } from "../schemas/path-info.schema.ts";
-import { PersistentDirectory } from "../schemas/persistent-directory.schema.ts";
+import { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
+import { PersistentDirectory } from "#database/services/vfs/schemas/persistent-directory.schema.ts";
+
 import { getMoviesDirectoryEntries } from "./get-movies-directory-entries.ts";
 import { getShowsDirectoryEntries } from "./get-shows-directory-entries.ts";
 

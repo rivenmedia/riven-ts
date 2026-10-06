@@ -41,17 +41,49 @@
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
     },
+    "test": {
+      "inputs": [
+        "$TURBO_EXTENDS$",
+        // Ignore unrelated NextJS files
+        "!{proxy,instrumentation,instrumentation-client}.ts",
+        // Ignore E2E code
+        "!playwright/**",
+        "!tests/**",
+        // Ignore unrelated config files
+        "!**/*.config.ts",
+        // Component tests are ran via Vitest, so explicitly include its config
+        "vitest.config.ts",
+        // Ignore stories for unit tests
+        "!**/*.stories.tsx",
+        // Ignore generated types, these are missing on a fresh checkout and cause cache misses
+        "!**/*.typegen.ts",
+        "!**/next-env.d.ts",
+        "!**/public/mockServiceWorker.js"
+      ],
+      "outputs": ["__screenshots__"]
+    },
     "test:component": {
       "inputs": [
         "$TURBO_EXTENDS$",
         // Changes to styles, static assets or baselines all affect the visual snapshots
         "**/*.css",
         "public/**",
-        "__vis__/docker/__baselines__/**"
+        "__vis__/docker/__baselines__/**",
+        // Ignore unrelated NextJS files
+        "!{proxy,instrumentation,instrumentation-client}.ts",
+        // Ignore E2E code
+        "!playwright/**",
+        "!tests/**",
+        // Ignore unrelated config files
+        "!**/*.config.ts",
+        // Component tests are ran via Vitest, so explicitly include its config
+        "vitest.config.ts",
+        // Ignore generated types, these are missing on a fresh checkout and cause cache misses
+        "!**/*.typegen.ts",
+        "!**/next-env.d.ts",
+        "!**/public/mockServiceWorker.js"
       ],
-      "outputs": ["__vis__/**/__results__/**", "__vis__/**/__diffs__/**"],
-      // Switches to the containerised browser. Not part of the hash, as the endpoint's port changes on every run.
-      "passThroughEnv": ["VIS_BROWSER_WS_ENDPOINT"]
+      "outputs": ["__vis__/**/__results__/**", "__vis__/**/__diffs__/**"]
     }
   }
 }

@@ -2,7 +2,8 @@ import { Box, useFocus, useInput, useBoxMetrics } from "ink";
 import { useEffect, useReducer, useRef } from "react";
 import { useLocation } from "react-router";
 
-import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
+
 import { ScrollAreaProvider } from "./scroll-area-context.tsx";
 import { scrollAreaReducer } from "./scroll-area.reducer.ts";
 

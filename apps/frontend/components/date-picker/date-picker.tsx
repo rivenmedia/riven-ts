@@ -10,7 +10,7 @@ import { Calendar } from "../_ui/calendar";
 import { Input } from "../_ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../_ui/popover";
 
-import type { ComponentProps } from "react";
+import type { ChangeEvent, ComponentProps } from "react";
 import type { IntClosedRange } from "type-fest";
 
 interface DatePickerProps extends Pick<ComponentProps<"input">, "aria-label"> {
@@ -31,12 +31,33 @@ export function DatePicker({
   required = false,
   "aria-label": ariaLabel = "Select a date",
 }: DatePickerProps) {
+  const dateTimeFormat = "yyyy-MM-dd";
   const { register, setValue } = useFormContext();
   const registerWithMask = useHookFormMask(register);
-  const value = useWatch<Partial<Record<string, string>>>({
-    name,
-    defaultValue: defaultValue ?? "",
+  const [rawInputValue, setRawInputValue] = useState("");
+  const datetimeValue = useWatch<
+    Partial<Record<string, string>>,
+    unknown,
+    DateTime | null
+  >({
+    defaultValue: {
+      [name]: defaultValue ?? "",
+    },
+    compute(data) {
+      const fieldValue = data[name];
+
+      if (!fieldValue) {
+        return null;
+      }
+
+      try {
+        return DateTime.fromFormat(fieldValue, dateTimeFormat);
+      } catch {
+        return null;
+      }
+    },
   });
+
   const maskFormat = "YYYY-MM-DD" as const;
 
   const field = registerWithMask(name, "datetime", {
@@ -46,6 +67,9 @@ export function DatePicker({
     showMaskOnHover: false,
     showMaskOnFocus: false,
     required,
+    onChange(event: ChangeEvent<HTMLInputElement>) {
+      setRawInputValue(event.target.value);
+    },
   });
 
   const [isOpen, setIsOpen] = useState(false);
@@ -54,11 +78,11 @@ export function DatePicker({
     <div className={cn("flex w-full items-center gap-2")}>
       <div className="relative flex-1">
         {/* <!-- Ghost text for "YYYY-MM-DD" mask. Only show when user is typing (value exists) to avoid overlap with placeholder --> */}
-        {value && (
+        {rawInputValue && (
           <div className="pointer-events-none absolute inset-0 flex items-center px-3 font-mono text-sm tracking-normal">
-            <span className="opacity-0">{value}</span>
+            <span className="opacity-0">{rawInputValue}</span>
             <span className="text-muted-foreground/50">
-              {maskFormat.slice(value.trim().length)}
+              {maskFormat.slice(rawInputValue.trim().length)}
             </span>
           </div>
         )}
@@ -77,7 +101,10 @@ export function DatePicker({
           aria-label="Open datepicker"
           variant="outline"
           size="icon"
-          className={cn("aspect-square", !value && "text-muted-foreground")}
+          className={cn(
+            "aspect-square",
+            !datetimeValue && "text-muted-foreground",
+          )}
         >
           <PopoverTrigger>
             <CalendarIcon className="size-4" />
@@ -107,14 +134,10 @@ export function DatePicker({
               setIsOpen(false);
             }}
             today={DateTime.now().toJSDate()}
-            selected={
-              value
-                ? DateTime.fromFormat(value, "yyyy-MM-dd").toJSDate()
-                : undefined
-            }
+            selected={datetimeValue?.toJSDate()}
             captionLayout="dropdown"
-            {...(value && {
-              defaultMonth: DateTime.fromFormat(value, "yyyy-MM-dd").toJSDate(),
+            {...(datetimeValue && {
+              defaultMonth: datetimeValue.toJSDate(),
             })}
             {...(minDate && { startMonth: minDate.toJSDate() })}
             {...(maxDate && { endMonth: maxDate.toJSDate() })}

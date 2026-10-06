@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 it("blacklists a stream for a media item", async ({
   services: { streamService },

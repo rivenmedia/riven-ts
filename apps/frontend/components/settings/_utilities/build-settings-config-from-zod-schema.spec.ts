@@ -520,6 +520,14 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
+    it("throws an error for unsupported array element types", () => {
+      const schema = z.number().array().meta({ title: "Number Array Field" });
+
+      expect(() =>
+        buildSettingsConfigFromZodSchema(schema, "numberArrayField"),
+      ).toThrow(/unsupported array element type: number/iu);
+    });
+
     it("unwraps optional schemas correctly", () => {
       const schema = z
         .string()

@@ -6,12 +6,13 @@ import { UnrecoverableError } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../../utilities/settings.ts";
-import { settings } from "../../../../../utilities/settings.ts";
+import { it } from "#__tests__/test-context.ts";
+import * as settingsModule from "#utilities/settings.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
 it("throws an UnrecoverableError if the item cannot be found", async ({
   createMockJob,

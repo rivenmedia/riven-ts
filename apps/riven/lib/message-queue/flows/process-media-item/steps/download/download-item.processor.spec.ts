@@ -3,10 +3,11 @@ import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
+
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
   scrapedMovieContext: { scrapedMovie },

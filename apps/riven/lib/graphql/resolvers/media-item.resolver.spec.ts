@@ -3,8 +3,8 @@ import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 import { gql } from "@apollo/client";
 import { describe, expect } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
-import { createQueue } from "../../message-queue/utilities/create-queue.ts";
+import { it } from "#__tests__/test-context.ts";
+import { createQueue } from "#message-queue/utilities/create-queue.ts";
 
 import type {
   BlacklistActiveStreamMutation,

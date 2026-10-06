@@ -14,6 +14,7 @@
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
     "eslint-plugin-playwright": "catalog:",
+    "eslint-plugin-sonarjs": "catalog:",
     "eslint-plugin-storybook": "catalog:",
     "eslint-plugin-turbo": "catalog:",
     "globals": "catalog:"

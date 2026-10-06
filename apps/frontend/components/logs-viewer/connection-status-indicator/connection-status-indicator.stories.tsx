@@ -27,4 +27,7 @@ export const Disconnected = meta.story({
   args: { connectionStatus: "disconnected" },
 });
 
-export const Error = meta.story({ args: { connectionStatus: "error" } });
+export const ErrorStatus = meta.story({
+  name: "Error",
+  args: { connectionStatus: "error" },
+});

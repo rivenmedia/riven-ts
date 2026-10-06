@@ -5,7 +5,8 @@ import assert from "node:assert";
 import { expect, vi } from "vitest";
 import { waitFor } from "xstate";
 
-import { flow } from "../../../message-queue/flows/producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+
 import { it } from "./helpers/test-context.ts";
 
 const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);

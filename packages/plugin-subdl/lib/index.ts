@@ -7,8 +7,8 @@ import { SubdlResolver } from "./schema/subdl.resolver.ts";
 import { pluginConfig } from "./subdl-plugin.config.ts";
 import { SubdlSettings } from "./subdl-settings.schema.ts";
 import { getItemMetadata } from "./utilities/get-item-metadata.ts";
+import { selectBestSubtitlePerLanguage } from "./utilities/select-best-subtitle-per-language.ts";
 
-import type { SubtitleResponse } from "./schemas/subtitle-response.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
@@ -62,25 +62,7 @@ export const plugin: RivenPlugin = {
         return { subtitles: [] };
       }
 
-      // Pick the best subtitle per language (first result per language)
-      const bestPerLanguage = new Map<string, SubtitleResponse>();
-
-      for (const sub of results) {
-        const isMatchingSubtitle =
-          type === "tv" && seasonNumber && episodeNumber
-            ? sub.season === seasonNumber && sub.episode === episodeNumber
-            : true;
-
-        if (!isMatchingSubtitle) {
-          continue;
-        }
-
-        const subLangLower = sub.lang.toLowerCase();
-
-        if (!bestPerLanguage.has(subLangLower)) {
-          bestPerLanguage.set(subLangLower, sub);
-        }
-      }
+      const bestPerLanguage = selectBestSubtitlePerLanguage(results, meta);
 
       const subtitles: SubtitleData[] = [];
 
@@ -100,6 +82,7 @@ export const plugin: RivenPlugin = {
             language,
             content,
             fileSize: Buffer.byteLength(content, "utf8"),
+            // oxlint-disable-next-line sonarjs/hashing -- MD5 is only used as a content checksum, not for security
             fileHash: createHash("md5").update(content).digest("hex"),
             sourceProvider: "subdl",
             sourceId: sub.url,

@@ -6,11 +6,11 @@ import { constantCase } from "es-toolkit";
 import { fromPromise } from "xstate";
 import z from "zod";
 
-import { CorePlugins } from "../../../schemas/core-plugins.schema.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
+import { CorePlugins } from "#schemas/core-plugins.schema.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
 
-import type { CorePluginName } from "../../../schemas/core-plugins.schema.ts";
+import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { PackageJson } from "type-fest";
 

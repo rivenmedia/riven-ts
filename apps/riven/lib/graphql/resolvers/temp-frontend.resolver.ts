@@ -1,6 +1,5 @@
 import {
   MediaItem,
-  Movie,
   Show,
   MediaEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
@@ -8,6 +7,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 
 import {
@@ -213,7 +213,7 @@ class NowPlayingItem {
 }
 
 @Resolver()
-export class _TempFrontendResolver {
+export class TempFrontendResolver {
   @Query(() => [MediaItem])
   public recentlyAdded() {
     return [];
@@ -224,13 +224,10 @@ export class _TempFrontendResolver {
     return [];
   }
 
-  @Query(() => [Movie])
-  public trendingMovies(@Arg("timeWindow", () => String) _timeWindow: string) {
-    return [];
-  }
-
   @Query(() => [Show])
-  public trendingShows(@Arg("timeWindow", () => String) _timeWindow: string) {
+  public tvdbTrendingShows(
+    @Arg("timeWindow", () => String) _timeWindow: string,
+  ) {
     return [];
   }
 
@@ -239,7 +236,7 @@ export class _TempFrontendResolver {
     return {};
   }
 
-  @Query(() => [MediaItem])
+  @Query(() => [IndexerData])
   public discoveryItems() {
     return [];
   }

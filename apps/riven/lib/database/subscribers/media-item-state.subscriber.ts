@@ -21,6 +21,10 @@ import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<UUID, MediaItemState>;
+type TrackedItemsMap = Map<
+  MediaItem,
+  ChangeSet<Partial<MediaItem>> | undefined
+>;
 
 export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   public getSubscribedEntities() {
@@ -36,7 +40,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   }
 
   public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
-    const { logger } = await import("../../utilities/logger/logger.ts");
+    const { logger } = await import("#utilities/logger/logger.ts");
 
     for (const changeSet of uow.getChangeSets()) {
       if (
@@ -55,44 +59,11 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
   }
 
   public async onFlush({ uow }: FlushEventArgs): Promise<void> {
-    const trackedItems = new Map<
-      MediaItem,
-      ChangeSet<Partial<MediaItem>> | undefined
-    >();
-
-    for (const changeSet of uow.getChangeSets()) {
-      if (changeSet.entity instanceof MediaItem) {
-        const wrappedEntity = wrap(changeSet.entity);
-        const entity = wrappedEntity.isInitialized()
-          ? changeSet.entity
-          : await wrappedEntity.init();
-
-        if (entity) {
-          trackedItems.set(entity, changeSet);
-        }
-      }
-    }
-
-    const episodesAwaitingUpdate = new Set<Episode>();
-
-    for (const collection of uow.getCollectionUpdates()) {
-      if (
-        collection.owner instanceof MediaItem &&
-        !trackedItems.has(collection.owner)
-      ) {
-        trackedItems.set(collection.owner, undefined);
-      }
-
-      if (collection.owner instanceof Season) {
-        for (const episode of collection) {
-          if (!(episode instanceof Episode)) {
-            continue;
-          }
-
-          episodesAwaitingUpdate.add(episode);
-        }
-      }
-    }
+    const trackedItems = await this.#collectTrackedItems(uow);
+    const episodesAwaitingUpdate = this.#collectCollectionUpdates(
+      uow,
+      trackedItems,
+    );
 
     const seasonsAwaitingUpdate = new Set<Season>();
     const showsAwaitingUpdate = new Set<Show>();
@@ -106,19 +77,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
         changeSet?.originalEntity?.isRequested === false;
 
       if (isNewlyRequestedSeason) {
-        const updatedShow = await item.show.loadOrFail({
-          populate: ["requestedSeasons"],
-        });
-
-        updatedShow.requestedSeasons.add(item);
-
-        updatedShow.state = await this.#computeStateWithChildren(
-          updatedShow,
-          updatedShow.requestedSeasons.getItems(),
-          nextStatesMap,
-        );
-
-        uow.computeChangeSet(updatedShow);
+        await this.#addRequestedSeasonToShow(item, uow, nextStatesMap);
 
         continue;
       }
@@ -130,29 +89,29 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
         nextStatesMap,
       );
 
-      if (!stateChanged) {
-        continue;
-      }
-
-      if (item instanceof Season) {
-        showsAwaitingUpdate.add(await item.show.loadOrFail());
-      }
-
-      if (item instanceof Episode) {
-        seasonsAwaitingUpdate.add(await item.season.loadOrFail());
+      if (stateChanged) {
+        await this.#queueParentUpdate(
+          item,
+          seasonsAwaitingUpdate,
+          showsAwaitingUpdate,
+        );
       }
     }
 
     for (const episode of episodesAwaitingUpdate) {
       const stateChanged = await this.#maybeUpdateState(
         episode,
-        trackedItems.get(episode) ?? undefined,
+        trackedItems.get(episode),
         uow,
         nextStatesMap,
       );
 
       if (stateChanged) {
-        seasonsAwaitingUpdate.add(await episode.season.loadOrFail());
+        await this.#queueParentUpdate(
+          episode,
+          seasonsAwaitingUpdate,
+          showsAwaitingUpdate,
+        );
       }
     }
 
@@ -160,13 +119,17 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
     for (const season of seasonsAwaitingUpdate) {
       const stateChanged = await this.#maybeUpdateState(
         season,
-        trackedItems.get(season) ?? undefined,
+        trackedItems.get(season),
         uow,
         nextStatesMap,
       );
 
       if (stateChanged) {
-        showsAwaitingUpdate.add(await season.show.loadOrFail());
+        await this.#queueParentUpdate(
+          season,
+          seasonsAwaitingUpdate,
+          showsAwaitingUpdate,
+        );
       }
     }
 
@@ -174,10 +137,98 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
     for (const show of showsAwaitingUpdate) {
       await this.#maybeUpdateState(
         show,
-        trackedItems.get(show) ?? undefined,
+        trackedItems.get(show),
         uow,
         nextStatesMap,
       );
+    }
+  }
+
+  async #collectTrackedItems(uow: UnitOfWork): Promise<TrackedItemsMap> {
+    const trackedItems: TrackedItemsMap = new Map();
+
+    for (const changeSet of uow.getChangeSets()) {
+      if (!(changeSet.entity instanceof MediaItem)) {
+        continue;
+      }
+
+      const wrappedEntity = wrap(changeSet.entity);
+      const entity = wrappedEntity.isInitialized()
+        ? changeSet.entity
+        : await wrappedEntity.init();
+
+      if (entity) {
+        trackedItems.set(entity, changeSet);
+      }
+    }
+
+    return trackedItems;
+  }
+
+  /**
+   * Tracks media items whose collections have changed, and returns
+   * any episodes belonging to updated season collections.
+   */
+  #collectCollectionUpdates(uow: UnitOfWork, trackedItems: TrackedItemsMap) {
+    const episodesAwaitingUpdate = new Set<Episode>();
+
+    for (const collection of uow.getCollectionUpdates()) {
+      if (
+        collection.owner instanceof MediaItem &&
+        !trackedItems.has(collection.owner)
+      ) {
+        trackedItems.set(collection.owner, undefined);
+      }
+
+      if (!(collection.owner instanceof Season)) {
+        continue;
+      }
+
+      for (const episode of collection) {
+        if (episode instanceof Episode) {
+          episodesAwaitingUpdate.add(episode);
+        }
+      }
+    }
+
+    return episodesAwaitingUpdate;
+  }
+
+  async #addRequestedSeasonToShow(
+    season: Season,
+    uow: UnitOfWork,
+    nextStatesMap: NextStatesMap,
+  ) {
+    const updatedShow = await season.show.loadOrFail({
+      populate: ["requestedSeasons"],
+    });
+
+    updatedShow.requestedSeasons.add(season);
+
+    updatedShow.state = await this.#computeStateWithChildren(
+      updatedShow,
+      updatedShow.requestedSeasons.getItems(),
+      nextStatesMap,
+    );
+
+    uow.computeChangeSet(updatedShow);
+  }
+
+  /**
+   * Queues the parent of a media item for a state update,
+   * so that state changes propagate up the hierarchy.
+   */
+  async #queueParentUpdate(
+    item: MediaItem,
+    seasonsAwaitingUpdate: Set<Season>,
+    showsAwaitingUpdate: Set<Show>,
+  ) {
+    if (item instanceof Season) {
+      showsAwaitingUpdate.add(await item.show.loadOrFail());
+    }
+
+    if (item instanceof Episode) {
+      seasonsAwaitingUpdate.add(await item.season.loadOrFail());
     }
   }
 
@@ -328,7 +379,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       return item.state;
     }
 
-    const { settings } = await import("../../utilities/settings.ts");
+    const { settings } = await import("#utilities/settings.ts");
 
     if (item.failedScrapeAttempts >= settings.maximumFailedAttempts) {
       return "failed";

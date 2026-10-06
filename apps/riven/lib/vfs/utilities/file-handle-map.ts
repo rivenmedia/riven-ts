@@ -1,4 +1,4 @@
-import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
+import type { FileChunkCalculations } from "#vfs/schemas/file-chunk-calculations.schema.ts";
 import type { Dispatcher } from "undici";
 
 interface FileHandleMetadataBase {

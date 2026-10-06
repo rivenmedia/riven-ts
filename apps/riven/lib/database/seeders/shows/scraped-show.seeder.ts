@@ -1,10 +1,11 @@
 import assert from "node:assert";
 
-import { BaseSeeder } from "../base.seeder.ts";
-import { StreamsSeeder } from "../streams/streams.seeder.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+import { StreamsSeeder } from "#database/seeders/streams/streams.seeder.ts";
+
 import { IndexedShowSeeder } from "./indexed-show.seeder.ts";
 
-import type { StreamsSeederContext } from "../streams/streams.seeder.ts";
+import type { StreamsSeederContext } from "#database/seeders/streams/streams.seeder.ts";
 import type { IndexedShowSeederContext } from "./indexed-show.seeder.ts";
 import type { EntityManager } from "@mikro-orm/core";
 

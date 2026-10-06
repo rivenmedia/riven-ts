@@ -27,6 +27,17 @@ interface TSConfig {
   dataPath: string;
 }
 
+// Seerr is reached over the internal Docker network, which doesn't use TLS
+// oxlint-disable-next-line sonarjs/no-clear-text-protocols
+const DEFAULT_SEERR_URL = "http://seerr:5055";
+
+const CONTENT_SOURCE_LABELS = {
+  mdblist: "MDBList",
+  seerr: "Seerr",
+  listrr: "Listrr",
+  none: "None",
+} as const satisfies Record<TSConfig["contentSource"], string>;
+
 interface V1Config {
   timezone: string;
   puid: string;
@@ -146,6 +157,80 @@ function generateSecret(
 
 // --- Riven TS Service Builders ---
 
+function getEnabledPlugins(config: TSConfig) {
+  // A plugin only runs if it is listed here. `tmdb` and `tvdb` are always on.
+  // Torrentio needs no configuration, so it is the default scraper.
+  const enabledPlugins = ["torrentio"];
+
+  if (config.debridProvider !== "none" && config.debridApiKey) {
+    enabledPlugins.push("stremthru");
+  }
+
+  if (config.contentSource !== "none" && config.contentApiKey) {
+    enabledPlugins.push(config.contentSource);
+  }
+
+  if (config.mediaServer !== "none") {
+    enabledPlugins.push(config.mediaServer);
+  }
+
+  return enabledPlugins;
+}
+
+function formatContentLists(contentLists: string) {
+  const lists = contentLists.split(",").map((list) => `"${list.trim()}"`);
+
+  return `[${lists.join(",")}]`;
+}
+
+function buildContentSourceEnvLines(config: TSConfig): string[] {
+  if (!config.contentApiKey) {
+    return [];
+  }
+
+  switch (config.contentSource) {
+    case "mdblist": {
+      return [
+        "# MDBList",
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${config.contentApiKey}"`,
+        ...(config.contentLists
+          ? [
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=${formatContentLists(config.contentLists)}`,
+            ]
+          : []),
+        "",
+      ];
+    }
+    case "seerr": {
+      return [
+        "# Seerr",
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${config.contentApiKey}"`,
+        ...(config.seerrUrl
+          ? [
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="${config.seerrUrl}"`,
+            ]
+          : []),
+        "",
+      ];
+    }
+    case "listrr": {
+      return [
+        "# Listrr",
+        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${config.contentApiKey}"`,
+        ...(config.contentLists
+          ? [
+              `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=${formatContentLists(config.contentLists)}`,
+            ]
+          : []),
+        "",
+      ];
+    }
+    case "none": {
+      return [];
+    }
+  }
+}
+
 function buildTSCompose(cfg: TSConfig): {
   compose: string;
   env: string;
@@ -256,21 +341,7 @@ function buildTSCompose(cfg: TSConfig): {
 
   const composeStr = stringify(compose, { lineWidth: 0, nullStr: "" });
 
-  // A plugin only runs if it is listed here. `tmdb` and `tvdb` are always on.
-  // Torrentio needs no configuration, so it is the default scraper.
-  const enabledPlugins = ["torrentio"];
-
-  if (cfg.debridProvider !== "none" && cfg.debridApiKey) {
-    enabledPlugins.push("stremthru");
-  }
-
-  if (cfg.contentSource !== "none" && cfg.contentApiKey) {
-    enabledPlugins.push(cfg.contentSource);
-  }
-
-  if (cfg.mediaServer !== "none") {
-    enabledPlugins.push(cfg.mediaServer);
-  }
+  const enabledPlugins = getEnabledPlugins(cfg);
 
   // .env file
   const envLines: string[] = [
@@ -306,52 +377,7 @@ function buildTSCompose(cfg: TSConfig): {
     );
   }
 
-  if (cfg.contentSource === "mdblist" && cfg.contentApiKey) {
-    envLines.push(
-      "# MDBList",
-      `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__apiKey="${cfg.contentApiKey}"`,
-    );
-
-    if (cfg.contentLists) {
-      const lists = cfg.contentLists
-        .split(",")
-        .map((list) => `"${list.trim()}"`);
-      envLines.push(
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MDBLIST__lists=[${lists.join(",")}]`,
-      );
-    }
-
-    envLines.push("");
-  } else if (cfg.contentSource === "seerr" && cfg.contentApiKey) {
-    envLines.push(
-      "# Seerr",
-      `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__apiKey="${cfg.contentApiKey}"`,
-    );
-
-    if (cfg.seerrUrl) {
-      envLines.push(
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__url="${cfg.seerrUrl}"`,
-      );
-    }
-
-    envLines.push("");
-  } else if (cfg.contentSource === "listrr" && cfg.contentApiKey) {
-    envLines.push(
-      "# Listrr",
-      `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__apiKey="${cfg.contentApiKey}"`,
-    );
-
-    if (cfg.contentLists) {
-      const lists = cfg.contentLists
-        .split(",")
-        .map((list) => `"${list.trim()}"`);
-      envLines.push(
-        `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_LISTRR__movieLists=[${lists.join(",")}]`,
-      );
-    }
-
-    envLines.push("");
-  }
+  envLines.push(...buildContentSourceEnvLines(cfg));
 
   const envStr = envLines.join("\n");
 
@@ -501,7 +527,7 @@ function CheckboxField({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium inline-block">
+      <label className="mb-2 text-sm font-medium inline-block">
         <input
           className="accent-purple-500"
           type="checkbox"
@@ -767,18 +793,15 @@ function TSConfigForm({
         onChange={(value) => {
           update("contentSource", value as TSConfig["contentSource"]);
         }}
-        options={[
-          { value: "mdblist", label: "MDBList" },
-          { value: "seerr", label: "Seerr" },
-          { value: "listrr", label: "Listrr" },
-          { value: "none", label: "None" },
-        ]}
+        options={Object.entries(CONTENT_SOURCE_LABELS).map(
+          ([value, label]) => ({ value, label }),
+        )}
       />
 
       {config.contentSource !== "none" && (
         <>
           <InputField
-            label={`${config.contentSource === "mdblist" ? "MDBList" : config.contentSource === "seerr" ? "Seerr" : "Listrr"} API Key`}
+            label={`${CONTENT_SOURCE_LABELS[config.contentSource]} API Key`}
             value={config.contentApiKey}
             onChange={(value) => {
               update("contentApiKey", value);
@@ -793,7 +816,7 @@ function TSConfigForm({
               onChange={(value) => {
                 update("seerrUrl", value);
               }}
-              placeholder="http://seerr:5055"
+              placeholder={DEFAULT_SEERR_URL}
             />
           )}
           {(config.contentSource === "mdblist" ||
@@ -1147,7 +1170,7 @@ export default function DockerComposeGenerator() {
     contentSource: "mdblist",
     contentApiKey: "",
     contentLists: "",
-    seerrUrl: "http://seerr:5055",
+    seerrUrl: DEFAULT_SEERR_URL,
     addAnalyticsServices: false,
   });
 

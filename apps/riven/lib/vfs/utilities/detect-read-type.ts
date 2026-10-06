@@ -1,8 +1,9 @@
-import { config } from "../config.ts";
+import { config } from "#vfs/config.ts";
+
 import { chunkCache } from "./chunk-cache.ts";
 
-import type { ChunkMetadata } from "../schemas/chunk.schema.ts";
-import type { FileChunkCalculations } from "../schemas/file-chunk-calculations.schema.ts";
+import type { ChunkMetadata } from "#vfs/schemas/chunk.schema.ts";
+import type { FileChunkCalculations } from "#vfs/schemas/file-chunk-calculations.schema.ts";
 
 export type ReadType =
   | "header-scan"

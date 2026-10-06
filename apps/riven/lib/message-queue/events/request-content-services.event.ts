@@ -1,4 +1,4 @@
-import { createInternalEventSchema } from "../utilities/create-internal-event-schema.ts";
+import { createInternalEventSchema } from "#message-queue/utilities/create-internal-event-schema.ts";
 
 import type z from "zod";
 

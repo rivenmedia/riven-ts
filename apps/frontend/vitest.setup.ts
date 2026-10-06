@@ -1,9 +1,10 @@
 // oxlint-disable-next-line import/no-unassigned-import
 import "@testing-library/jest-dom/vitest";
-import { Settings } from "luxon";
 import { vi } from "vitest";
 
-Settings.defaultLocale = "en-GB";
+import { configureLocale } from "./lib/utils/configure-luxon";
+
+configureLocale("en-GB");
 
 Object.defineProperty(globalThis.window, "matchMedia", {
   writable: true,

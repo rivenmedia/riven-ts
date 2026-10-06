@@ -4,16 +4,17 @@ import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
-import { withLogContext } from "../../utilities/logger/log-context.ts";
-import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
+
 import { createQueue } from "./create-queue.ts";
 import { normaliseConcurrency } from "./normalise-concurrency.ts";
 
-import type { MainRunnerMachineIntake } from "../../state-machines/main-runner/index.ts";
-import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { Flow, FlowHandlers } from "../flows/index.ts";
+import type { Flow, FlowHandlers } from "#message-queue/flows/index.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
+import type { ValidPluginMap } from "#types/plugins.ts";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";
 
@@ -68,7 +69,7 @@ export function createFlowWorker<
           },
           async (scope) => {
             try {
-              const { services } = await import("../../database/database.ts");
+              const { services } = await import("#database/database.ts");
 
               return await processor(
                 {

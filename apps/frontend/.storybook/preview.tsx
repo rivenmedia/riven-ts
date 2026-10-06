@@ -25,6 +25,7 @@ import { prepareAutoSnapshot, resetAutoSnapshot } from "./visual-testing.ts";
 import type { SnapshotParameters } from "./visual-testing.ts";
 
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("next/cache"));
 
 declare module "@storybook/nextjs-vite" {
   interface Parameters {

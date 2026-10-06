@@ -1,9 +1,9 @@
 import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
 
-import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
-import { CoreContext } from "../decorators/core-context.ts";
+import { CoreContext } from "#graphql/decorators/core-context.ts";
+import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
-import type { ApolloServerContext } from "../context.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
 import type { UUID } from "node:crypto";
 
 @Resolver()

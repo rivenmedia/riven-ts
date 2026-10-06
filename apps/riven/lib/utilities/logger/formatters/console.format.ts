@@ -8,8 +8,8 @@ import { SPLAT } from "triple-beam";
 import { format } from "winston";
 import z, { ZodError } from "zod";
 
-import { settings } from "../../settings.ts";
-import { ErrorSplat } from "../schemas/error-splat.schema.ts";
+import { ErrorSplat } from "#utilities/logger/schemas/error-splat.schema.ts";
+import { settings } from "#utilities/settings.ts";
 
 import type { TransformableInfo } from "logform";
 

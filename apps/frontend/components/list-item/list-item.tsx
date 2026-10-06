@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "cn";
 import { useMemo } from "react";
 
@@ -5,13 +7,13 @@ import { Badge } from "../_ui/badge";
 import { PortraitCard } from "../portrait-card/portrait-card";
 import { useCardSelection } from "../providers/card-selection-provider";
 
-import type { MediaItem } from "@/app/_types/__generated__/graphql";
+import type { IndexerData } from "@/app/_types/__generated__/graphql";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  mediaItem: Pick<MediaItem, "id" | "title" | "posterPath" | "type" | "year">;
+  mediaItem: Pick<IndexerData, "id" | "title" | "posterUrl" | "type" | "year">;
   badge?: {
     text: string;
     variant: string;
@@ -83,7 +85,7 @@ export function ListItem({
       <PortraitCard
         title={mediaItem.title}
         subtitle={subtitle}
-        image={mediaItem.posterPath ?? null}
+        image={mediaItem.posterUrl ?? null}
         {...(isSelectable &&
           cardSelectionContext && {
             isSelectable: true,

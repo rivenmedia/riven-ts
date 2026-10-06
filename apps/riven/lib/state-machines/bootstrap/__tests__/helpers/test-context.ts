@@ -2,18 +2,18 @@
 import Fuse from "@zkochan/fuse-native";
 import { createActor, createEmptyActor, fromPromise } from "xstate";
 
-import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { bootstrapMachine } from "../../index.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { bootstrapMachine } from "#state-machines/bootstrap/index.ts";
 
 import type {
   InitialiseVfsInput,
   InitialiseVfsOutput,
-} from "../../actors/initialise-vfs.actor.ts";
+} from "#state-machines/bootstrap/actors/initialise-vfs.actor.ts";
 import type {
   StartGQLServerInput,
   StartGQLServerOutput,
-} from "../../actors/start-gql-server.actor.ts";
-import type { BootstrapMachineInput } from "../../index.ts";
+} from "#state-machines/bootstrap/actors/start-gql-server.actor.ts";
+import type { BootstrapMachineInput } from "#state-machines/bootstrap/index.ts";
 
 export const it = baseIt
   .extend(

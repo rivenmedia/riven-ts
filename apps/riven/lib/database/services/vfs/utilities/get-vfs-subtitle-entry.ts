@@ -1,6 +1,6 @@
 import { SubtitleEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-import type { PathInfo } from "../schemas/path-info.schema.ts";
+import type { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export async function getVfsSubtitleEntry(

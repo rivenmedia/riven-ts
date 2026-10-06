@@ -1,0 +1,29 @@
+import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
+import { defineConfig } from "oxlint";
+
+import { tsFiles, jsFiles } from "../internal/file-types.ts";
+
+import type { DummyRuleMap } from "oxlint";
+
+export const eslintPluginEslintPluginSonarjsConfig = defineConfig({
+  overrides: [
+    {
+      files: [tsFiles, jsFiles],
+      jsPlugins: [
+        {
+          name: "sonarjs",
+          specifier: import.meta.resolve("eslint-plugin-sonarjs"),
+        },
+      ],
+      rules: sonarjsConfigs.recommended.rules as DummyRuleMap,
+    },
+    {
+      files: [tsFiles, jsFiles],
+      rules: {
+        "sonarjs/todo-tag": "warn",
+        "sonarjs/no-unused-vars": "off", // Already covered by other plugins
+        "sonarjs/no-redundant-optional": "off", // `?: T | undefined` is not redundant with `exactOptionalPropertyTypes` enabled
+      },
+    },
+  ],
+});

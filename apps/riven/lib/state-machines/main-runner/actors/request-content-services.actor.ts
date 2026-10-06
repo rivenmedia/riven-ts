@@ -1,9 +1,9 @@
 import { fromPromise } from "xstate";
 
-import { enqueueRequestContentService } from "../../../message-queue/flows/request-content-service/enqueue-request-content-service.ts";
-import { getPluginEventSubscribers } from "../utilities/get-plugin-event-subscribers.ts";
+import { enqueueRequestContentService } from "#message-queue/flows/request-content-service/enqueue-request-content-service.ts";
+import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
 
-import type { ValidPluginMap } from "../../../types/plugins.ts";
+import type { ValidPluginMap } from "#types/plugins.ts";
 
 export interface RequestContentServicesInput {
   plugins: ValidPluginMap;

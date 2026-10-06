@@ -1,10 +1,10 @@
 import Fuse from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 
-import { FuseError } from "../../errors/fuse-error.ts";
-import { chunkCache } from "../chunk-cache.ts";
+import { FuseError } from "#vfs/errors/fuse-error.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
 
-import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
+import type { ChunkMetadata } from "#vfs/schemas/chunk.schema.ts";
 
 /**
  * When a read request can be fully satisfied from the chunk cache,

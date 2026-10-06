@@ -1,4 +1,4 @@
-import type { ItemAction } from "../types/actions.ts";
+import type { ItemAction } from "#types/actions.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 // oxlint-disable-next-line typescript/no-explicit-any

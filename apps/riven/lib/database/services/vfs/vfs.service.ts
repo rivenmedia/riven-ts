@@ -3,7 +3,8 @@ import {
   EnsureRequestContext,
 } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+
 import { PathInfo } from "./schemas/path-info.schema.ts";
 import { getVfsDirectoryEntryPaths } from "./utilities/get-vfs-directory-entry-paths.ts";
 import { getVfsEntryStat } from "./utilities/get-vfs-entry-stat.ts";

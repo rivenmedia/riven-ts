@@ -222,6 +222,13 @@ export abstract class MediaItem {
   }
 
   /**
+   * Returns a version of the media item's title with certain characters removed for use in file paths.
+   */
+  protected get sanitisedTitle() {
+    return this.title.replaceAll(/[./%_]/gu, "");
+  }
+
+  /**
    * A pretty name for the media item to be used in VFS paths.
    *
    * @example "Inception (2010) {tmdb-27205}"

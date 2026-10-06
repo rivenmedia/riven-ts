@@ -2,10 +2,10 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import { ValidationError, validateOrReject } from "class-validator";
-import z from "zod";
+import { validateOrReject } from "class-validator";
 
-import { RequestType } from "../../../../message-queue/flows/request-content-service/request-content-service.schema.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
+import { RequestType } from "#message-queue/flows/request-content-service/request-content-service.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
@@ -46,24 +46,9 @@ export async function persistRequestedMovie(
       item: itemRequest,
     };
   } catch (error) {
-    const errorMessage = z
-      .union([z.instanceof(Error), z.array(z.instanceof(ValidationError))])
-      .transform((rawError) => {
-        if (Array.isArray(rawError)) {
-          return rawError
-            .map((err) =>
-              err.constraints ? Object.values(err.constraints).join("; ") : "",
-            )
-            .join("; ");
-        }
-
-        return rawError.message;
-      })
-      .parse(error);
-
     throw new ItemRequestCreateError({
       item: itemRequest,
-      error: errorMessage,
+      error: getValidationErrorMessage(error),
     });
   }
 }

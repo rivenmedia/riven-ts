@@ -2,7 +2,7 @@ import { FileSystemEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import path from "node:path";
 
-import type { PathInfo } from "../schemas/path-info.schema.ts";
+import type { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 const extractPart = (
@@ -16,8 +16,9 @@ const extractPart = (
 
   const { dir, base } = path.parse(entry.path);
   const [showName, seasonName] = dir.split(path.sep);
+  const seasonPart = season ? base : seasonName;
 
-  return tvdbId ? (season ? base : seasonName) : showName;
+  return tvdbId ? seasonPart : showName;
 };
 
 export const getShowsDirectoryEntries = async (

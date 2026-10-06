@@ -5,10 +5,11 @@ import { NotFoundError } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../__tests__/test-context.ts";
-import { runSingleJob } from "../../utilities/run-single-job.ts";
-import { ProcessMediaItemFlow } from "../process-media-item/process-media-item.schema.ts";
-import { flow } from "../producer.ts";
+import { it } from "#__tests__/test-context.ts";
+import { ProcessMediaItemFlow } from "#message-queue/flows/process-media-item/process-media-item.schema.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
+
 import { enqueueRequestStreamLink } from "./enqueue-request-stream-link.ts";
 import { requestStreamLinkProcessor } from "./request-stream-link.processor.ts";
 import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";

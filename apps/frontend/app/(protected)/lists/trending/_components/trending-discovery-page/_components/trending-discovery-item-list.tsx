@@ -21,7 +21,7 @@ export const GET_DISCOVERY_ITEMS: TypedDocumentNode<
   query GetDiscoveryItems {
     discoveryItems {
       id
-      posterPath
+      posterUrl
       title
       type
       year

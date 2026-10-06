@@ -1,6 +1,6 @@
-import { logger } from "../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { LogLevel } from "../../utilities/logger/log-levels.ts";
+import type { LogLevel } from "#utilities/logger/log-levels.ts";
 
 export const withLogAction = {
   actions: {

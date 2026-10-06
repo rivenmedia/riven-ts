@@ -1,9 +1,10 @@
 import { expect, it } from "vitest";
 
-import { withLogContext } from "../log-context.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
+
 import { sentryMetaFormat } from "./sentry-meta.format.ts";
 
-import type { SessionID } from "../session-id.ts";
+import type { SessionID } from "#utilities/logger/session-id.ts";
 import type { TransformableInfo } from "logform";
 
 it("does not throw without an active log context", () => {

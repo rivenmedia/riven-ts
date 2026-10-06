@@ -3,8 +3,8 @@ import {
   MediaItemDownloadProviderListRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.download.provider-list-requested.event";
 
-import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
-import { flow } from "../../../../../../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
 
 export async function getPluginProviderList(pluginName: string) {
   const pluginProviderListNode = await flow.addPluginJob(
