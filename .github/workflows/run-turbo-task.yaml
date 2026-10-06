@@ -19,10 +19,12 @@ on:
         description: A list of requirements for the verification runner
         type: string
         required: false
+        default: "[]"
       env:
         description: Environment variables to set when running the turbo task
         type: string
         required: false
+        default: "{}"
 
 permissions:
   contents: read
