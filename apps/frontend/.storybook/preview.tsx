@@ -21,16 +21,8 @@ import { themes } from "storybook/theming";
 import { WithI18n } from "./decorators/with-i18n";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
 
-import type { ScreenshotParameters } from "@storycap-testrun/browser";
-
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
-
-declare module "@storybook/nextjs-vite" {
-  interface Parameters {
-    screenshot?: ScreenshotParameters;
-  }
-}
 
 declare module "storybook/test" {
   interface Expect {
