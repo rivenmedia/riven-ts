@@ -1,0 +1,19 @@
+name: Upload Visual Regression Report
+
+description: Uploads the visual regression report after tests have been run
+
+runs:
+  using: composite
+  steps:
+    - name: Prepare artefact
+      shell: bash
+      run: zip -r visual-regression-report.zip **/__vis__/**
+
+    - name: Upload artefact
+      uses: actions/upload-artifact@v7
+      with:
+        name: vis-results
+        path: visual-regression-report.zip
+        retention-days: 1
+        if-no-files-found: error
+        archive: false

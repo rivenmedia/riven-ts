@@ -28,11 +28,4 @@ runs:
 
     - name: Upload visual regression report
       if: ${{ inputs.task == 'test:component' }}
-      uses: actions/upload-artifact@v7
-      with:
-        name: vis-results
-        path: |
-          **/__vis__/**
-        retention-days: 1
-        if-no-files-found: error
-        compression-level: 0
+      uses: ./.github/actions/upload-visual-regression-report
