@@ -61,7 +61,7 @@ export const preview = definePreview({
     addonDocs(),
     addonVitest(),
     mswAddon(),
-    addonVis({ auto: true }),
+    addonVis({ auto: true, createMissingBaseline: true }),
   ],
   parameters: {
     i18n,
