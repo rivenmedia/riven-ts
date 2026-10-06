@@ -1,7 +1,6 @@
 import { baseVitestConfig } from "@repo/core-util-vitest-config/base";
 
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
-import storycap from "@storycap-testrun/browser/vitest-plugin";
 import react from "@vitejs/plugin-react";
 import { playwright } from "@vitest/browser-playwright";
 import path from "node:path";
@@ -28,12 +27,6 @@ export default defineConfig((config) => {
             storybookTest({
               configDir: path.join(import.meta.dirname, ".storybook"),
               storybookScript: "pnpm storybook --ci",
-            }),
-            storycap({
-              output: {
-                dir: path.join(import.meta.dirname, "__screenshots__"),
-                file: "[id].png",
-              },
             }),
           ],
           test: {

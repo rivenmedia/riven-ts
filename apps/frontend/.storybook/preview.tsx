@@ -14,6 +14,7 @@ import { headers } from "@storybook/nextjs-vite/headers.mock";
 import mswAddon from "msw-storybook-addon";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
+import addonVis from "storybook-addon-vis";
 import { expect, sb } from "storybook/test";
 import { themes } from "storybook/theming";
 
@@ -63,7 +64,13 @@ declare module "storybook/internal/csf" {
 
 export const preview = definePreview({
   tags: ["autodocs"],
-  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon()],
+  addons: [
+    addonA11y(),
+    addonDocs(),
+    addonVitest(),
+    mswAddon(),
+    addonVis({ auto: true }),
+  ],
   parameters: {
     i18n,
     controls: {
