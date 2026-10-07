@@ -1,4 +1,4 @@
-name: Update Visual Regression Baselines
+name: Inspect Visual Regression Report
 
 on:
   workflow_run:
@@ -11,9 +11,6 @@ on:
       workflow-run-id:
         description: Workflow run ID containing the visual regression report
         required: true
-      ref:
-        description: Branch to commit the updated visual regression baselines to
-        required: true
 
 jobs:
   check-for-diffs:
@@ -22,7 +19,10 @@ jobs:
     permissions:
       actions: read
     outputs:
-      has-diffs: ${{ steps.changes.outputs.diffs == 'true' }}
+      requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.new-baselines == 'true' }}
+      diffs-count: ${{ steps.changes.outputs.diffs_count }}
+      new-baselines-count: ${{ steps.changes.outputs.new-baselines_count }}
+      workflow-run-id: ${{ github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -34,46 +34,67 @@ jobs:
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          path: ${{ github.workspace }}
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
+
+      - name: Stage files
+        run: git add .
 
       - name: Check for visual regression diffs
         uses: dorny/paths-filter@v4
         id: changes
         with:
+          base: HEAD
           filters: |
             diffs:
               - '{apps,packages}/*/__vis__/**/__diffs__/**'
-            newBaselines:
+            new-baselines:
               - added: '{apps,packages}/*/__vis__/**/__baselines__/**'
+
+  post-pr-comment:
+    name: Post PR comment
+    needs: check-for-diffs
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Report visual regression diffs
+        uses: mshick/add-pr-comment@v3
+        with:
+          status: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && 'failure' || 'success' }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-owner: ${{ github.event.workflow_run.repository.owner.login }}
+          repo-name: ${{ github.event.workflow_run.repository.name }}
+          message-id: visual-regression-diffs
+          message-failure: |
+            **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
+            **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines added.**
+          message-success: |
+            **No visual regressions found!**
 
   update-baseline-snapshots:
     name: Update baseline snapshots
     needs: check-for-diffs
-    if: ${{ needs.check-for-diffs.outputs.has-diffs == 'true' }}
+    if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    environment:
-      name: update-visual-regression-baselines
-      deployment: false
+    environment: update-visual-regression-baselines
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.event.workflow_run.head_branch }}
+          ref: main
 
       - name: Download visual regression report
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          path: ${{ github.workspace }}
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
 
       - uses: EndBug/add-and-commit@v10
         with:

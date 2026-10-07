@@ -18,6 +18,8 @@ on:
       - opened
       - reopened
       - synchronize
+    paths-ignore:
+      - "**/__vis__/**/__baselines__/**"
 
 concurrency:
   group: "verify-${{ github.event.pull_request.number }}"
