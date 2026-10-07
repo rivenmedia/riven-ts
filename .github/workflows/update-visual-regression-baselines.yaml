@@ -23,6 +23,7 @@ jobs:
       actions: read
     outputs:
       requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.newBaselines == 'true' }}
+      workflow-run-id: ${{ github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -71,10 +72,9 @@ jobs:
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          path: ${{ github.workspace }}
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event.workflow_run.id }}
+          run-id: ${{ needs.check-for-diffs.outputs.workflow-run-id }}
 
       - uses: EndBug/add-and-commit@v10
         with:
