@@ -1,0 +1,63 @@
+name: Update Visual Regression Baselines
+
+on:
+  workflow_run:
+    workflows:
+      - Component Tests
+    types:
+      - completed
+
+jobs:
+  check-for-diffs:
+    name: Check for diffs
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+    outputs:
+      has-diffs: ${{ steps.changes.outputs.diffs == 'true' }}
+    steps:
+      - name: Download visual regression report
+        uses: actions/download-artifact@v8
+        id: download-visual-regression-report
+        with:
+          path: ${{ github.workspace }}
+          name: visual-regression-report.zip
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Check for visual regression diffs
+        uses: dorny/paths-filter@v4
+        id: changes
+        with:
+          filters: |
+            diffs:
+              - '{apps,packages}/*/__vis__/**/__diffs__/**'
+            newBaselines:
+              - added: '{apps,packages}/*/__vis__/**/__baselines__/**'
+
+  update-baseline-snapshots:
+    name: Update baseline snapshots
+    needs: check-for-diffs
+    if: ${{ needs.check-for-diffs.outputs.has-diffs == 'true' }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    environment:
+      name: update-visual-regression-baselines
+      deployment: false
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Download visual regression report
+        uses: actions/download-artifact@v8
+        id: download-visual-regression-report
+        with:
+          path: ${{ github.workspace }}
+          name: visual-regression-report.zip
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - uses: EndBug/add-and-commit@v10
+        with:
+          message: "chore: update visual regression baseline snapshots"
