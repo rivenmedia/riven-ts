@@ -74,7 +74,7 @@ jobs:
         with:
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ needs.check-for-diffs.outputs.workflow-run-id }}
+          run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
 
       - uses: EndBug/add-and-commit@v10
         with:
