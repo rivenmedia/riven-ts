@@ -6,7 +6,7 @@ runs:
   using: composite
   steps:
     - shell: bash
-      run: ls "**/__vis__/**"
+      run: ls "apps/frontend/**"
 
     - name: Prepare artefact
       shell: bash

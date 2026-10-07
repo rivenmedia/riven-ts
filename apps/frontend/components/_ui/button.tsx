@@ -61,7 +61,7 @@ function Button({
       data-size={size}
       className={cn(
         buttonVariants({ variant, size, className }),
-        "uppercase capitalize",
+        "uppercase capitalize bg-red-200",
       )}
       type={type}
       {...props}
