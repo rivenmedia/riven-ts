@@ -1,21 +1,8 @@
 import { configureLocale } from "@/lib/utils/configure-luxon";
 
 import { faker } from "@faker-js/faker";
-import { screenshot } from "@storycap-testrun/browser";
-import { page } from "@vitest/browser/context";
 import { DateTime, Settings } from "luxon";
-import { afterEach, beforeEach, vi } from "vitest";
-
-// Set by `@storybook/addon-vitest` when running stories as tests
-declare module "vitest" {
-  interface TaskMeta {
-    storyId?: string;
-  }
-
-  interface TestContext {
-    story?: { id: string };
-  }
-}
+import { beforeEach, vi } from "vitest";
 
 configureLocale("en-GB");
 
@@ -54,28 +41,6 @@ export class MemoryStorage implements Storage {
   }
 }
 
-/** Waits for images in the viewport to load, as remote images may not have loaded by the time the page is stable */
-const waitForVisibleImages = async () => {
-  const pendingImages = [...document.images].filter((image) => {
-    const { bottom, right, top, left } = image.getBoundingClientRect();
-
-    return (
-      !image.complete &&
-      bottom > 0 &&
-      right > 0 &&
-      top < globalThis.innerHeight &&
-      left < globalThis.innerWidth
-    );
-  });
-
-  await Promise.race([
-    Promise.allSettled(pendingImages.map((image) => image.decode())),
-    new Promise((resolve) => {
-      setTimeout(resolve, 10_000);
-    }),
-  ]);
-};
-
 // Test files run concurrently in iframes on the same origin, so isolate storage to prevent
 // stories leaking state into one another (e.g. the theme switcher tests changing the persisted theme)
 for (const storage of ["localStorage", "sessionStorage"] as const) {
@@ -85,19 +50,4 @@ for (const storage of ["localStorage", "sessionStorage"] as const) {
 beforeEach(() => {
   localStorage.clear();
   sessionStorage.clear();
-});
-
-afterEach(async (context) => {
-  // Story tests created with `Story.test()` share the parent story's ID and would overwrite its screenshot.
-  // Only the story itself is captured; interaction tests are covered by the component test assertions.
-  if (context.task.meta.storyId !== context.story?.id) {
-    return;
-  }
-
-  await screenshot(page, context, {
-    hooks: [
-      // Runs once the page has stabilised at the screenshot viewport size, immediately before capturing
-      { preCapture: waitForVisibleImages },
-    ],
-  });
 });

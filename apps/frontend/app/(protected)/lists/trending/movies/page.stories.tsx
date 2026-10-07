@@ -33,7 +33,7 @@ const meta = preview.meta({
     );
   },
   parameters: {
-    screenshot: {
+    snapshot: {
       fullPage: false,
     },
   },
