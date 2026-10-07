@@ -41,6 +41,7 @@ jobs:
           repo-name: ${{ github.event.workflow_run.repository.name }}
           message-id: visual-regression-diffs
           message-failure: |
-            **Visual regression diffs found.**
+            **${{ steps.changes.outputs.diffs_count }} visual regressions found.**
+            **${{ steps.changes.outputs.newBaselines_count }} new baselines added.**
           message-success: |
-            **No visual regression diffs found.**
+            **No visual regressions found!**
