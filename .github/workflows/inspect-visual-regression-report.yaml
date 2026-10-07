@@ -6,11 +6,6 @@ on:
       - Component Tests
     types:
       - completed
-  workflow_dispatch:
-    inputs:
-      workflow-run-id:
-        description: Workflow run ID containing the visual regression report
-        required: true
 
 jobs:
   check-for-diffs:
@@ -22,7 +17,7 @@ jobs:
       requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.new-baselines == 'true' }}
       diffs-count: ${{ steps.changes.outputs.diffs_count }}
       new-baselines-count: ${{ steps.changes.outputs.new-baselines_count }}
-      workflow-run-id: ${{ github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
+      workflow-run-id: ${{ github.event.workflow_run.id }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -36,7 +31,7 @@ jobs:
         with:
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - name: Stage files
         run: git add .
@@ -101,7 +96,7 @@ jobs:
         with:
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
+          run-id: ${{ github.event.workflow_run.id }}
 
       - uses: EndBug/add-and-commit@v10
         with:
