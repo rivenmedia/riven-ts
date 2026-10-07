@@ -44,9 +44,7 @@ jobs:
         uses: dorny/paths-filter@v4
         id: changes
         with:
-          base: main
-          ref: HEAD
-          token: ${{ secrets.GITHUB_TOKEN }}
+          base: HEAD
           filters: |
             diffs:
               - '{apps,packages}/*/__vis__/**/__diffs__/**'
