@@ -59,13 +59,20 @@ jobs:
     permissions:
       pull-requests: write
     steps:
+      - uses: 8BitJonny/gh-get-current-pr@4.0.0
+        id: pr
+        with:
+          sha: ${{ github.event.workflow_run.head_sha }}
+          filterOutClosed: true
+          filterOutDraft: true
+
       - name: Report visual regression diffs
         uses: mshick/add-pr-comment@v3
+        if: steps.pr.outputs.number
         with:
           status: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && 'failure' || 'success' }}
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          repo-owner: ${{ github.event.workflow_run.repository.owner.login }}
-          repo-name: ${{ github.event.workflow_run.repository.name }}
+          issue: ${{ steps.pr.outputs.number }}
           message-id: visual-regression-diffs
           message-failure: |
             **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
