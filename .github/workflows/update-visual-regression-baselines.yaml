@@ -40,6 +40,9 @@ jobs:
 
       - run: ls ${{ github.workspace }}/apps/*/__vis__
 
+      - name: Stage files
+        run: git add .
+
       - name: Check for visual regression diffs
         uses: dorny/paths-filter@v4
         id: changes
