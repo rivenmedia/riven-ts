@@ -34,10 +34,11 @@ jobs:
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          path: ${{ github.workspace }}
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
+
+      - run: ls ${{ github.workspace }}
 
       - name: Check for visual regression diffs
         uses: dorny/paths-filter@v4
