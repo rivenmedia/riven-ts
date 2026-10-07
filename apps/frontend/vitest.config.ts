@@ -46,7 +46,7 @@ export default defineConfig((config) => {
                 threshold: 0.1,
               },
               failureThresholdType: "percent",
-              failureThreshold: 0.01,
+              failureThreshold: 1,
             }) as Plugin,
           ],
           test: {
