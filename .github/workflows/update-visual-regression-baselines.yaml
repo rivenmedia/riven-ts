@@ -59,9 +59,7 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: write
-    environment:
-      name: update-visual-regression-baselines
-      deployment: false
+    environment: update-visual-regression-baselines
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
