@@ -26,10 +26,11 @@ jobs:
         uses: dorny/paths-filter@v4
         id: changes
         with:
-          base: HEAD
           filters: |
             diffs:
-              - 'visual-regression-report/**/__diffs__/**'
+              - '{apps,packages}/*/__vis__/**/__diffs__/**'
+            newBaselines:
+              - added: '{apps,packages}/*/__vis__/**/__baselines__/**'
 
       - name: Report visual regression diffs
         uses: mshick/add-pr-comment@v3
