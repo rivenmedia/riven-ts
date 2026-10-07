@@ -14,6 +14,8 @@ on:
       - opened
       - reopened
       - synchronize
+    paths-ignore:
+      - "**/__vis__/**/__baselines__/**"
 
 concurrency:
   group: "component-tests-${{ github.event.pull_request.number }}"
