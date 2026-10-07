@@ -18,7 +18,8 @@ jobs:
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          name: visual-regression-report
+          path: ${{ github.workspace }}
+          name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
