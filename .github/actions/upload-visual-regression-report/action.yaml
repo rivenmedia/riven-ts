@@ -11,12 +11,26 @@ runs:
       run: |
         shopt -s nullglob
 
-        zip -r visual-regression-report.zip {apps,packages}/*/__vis__
+        zip -r "visual-regression-report-$RUNNER_OS.zip" {apps,packages}/*/__vis__
 
     - name: Upload artefact
       uses: actions/upload-artifact@v7
       with:
-        path: visual-regression-report.zip
+        path: visual-regression-report-${{ runner.os }}.zip
         retention-days: 1
         if-no-files-found: error
         archive: false
+
+    - name: Save PR number
+      shell: bash
+      run: echo "${{ github.event.pull_request.number }}" > pr-number.txt
+
+    - name: Upload PR number
+      uses: actions/upload-artifact@v7
+      with:
+        path: pr-number.txt
+        retention-days: 1
+        if-no-files-found: error
+        archive: false
+        # Every matrix job uploads the same PR number
+        overwrite: true
