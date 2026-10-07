@@ -26,7 +26,7 @@
     "start": "next start",
     "storybook": "storybook dev -p 6006 --no-open",
     "test": "vitest run --project unit",
-    "test:component": "vitest run --project storybook",
+    "test:component": "vitest run --project storybook \"app/(protected)/(home)/page.stories.tsx\"",
     "test:watch": "vitest watch"
   },
   "dependencies": {
