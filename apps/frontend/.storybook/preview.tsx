@@ -20,9 +20,21 @@ import { themes } from "storybook/theming";
 
 import { WithI18n } from "./decorators/with-i18n";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
+import {
+  prepareAutoSnapshot,
+  resetAutoSnapshot,
+} from "./test-utils/visual-testing.ts";
+
+import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
+
+declare module "@storybook/nextjs-vite" {
+  interface Parameters {
+    snapshot?: SnapshotParameters;
+  }
+}
 
 declare module "storybook/test" {
   interface Expect {
@@ -55,13 +67,16 @@ declare module "storybook/internal/csf" {
 }
 
 export const preview = definePreview({
-  tags: ["autodocs"],
+  tags: ["autodocs", "snapshot"],
   addons: [
     addonA11y(),
     addonDocs(),
     addonVitest(),
     mswAddon(),
-    addonVis({ auto: true, createMissingBaseline: true }),
+    addonVis({
+      auto: prepareAutoSnapshot,
+      createMissingBaseline: true,
+    }),
   ],
   parameters: {
     i18n,
@@ -132,6 +147,7 @@ export const preview = definePreview({
     },
   ],
   beforeEach({ globals }) {
+    resetAutoSnapshot();
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
 
