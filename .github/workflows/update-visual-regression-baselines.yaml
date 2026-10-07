@@ -45,6 +45,7 @@ jobs:
         id: changes
         with:
           base: main
+          ref: HEAD
           token: ${{ secrets.GITHUB_TOKEN }}
           filters: |
             diffs:
