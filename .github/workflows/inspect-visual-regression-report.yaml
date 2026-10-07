@@ -1,4 +1,4 @@
-name: Update Visual Regression Baselines
+name: Inspect Visual Regression Report
 
 on:
   workflow_run:
@@ -11,9 +11,6 @@ on:
       workflow-run-id:
         description: Workflow run ID containing the visual regression report
         required: true
-      ref:
-        description: Branch to commit the updated visual regression baselines to
-        required: true
 
 jobs:
   check-for-diffs:
@@ -22,9 +19,9 @@ jobs:
     permissions:
       actions: read
     outputs:
-      requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.newBaselines == 'true' }}
+      requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.new-baselines == 'true' }}
       diffs-count: ${{ steps.changes.outputs.diffs_count }}
-      newBaselines-count: ${{ steps.changes.outputs.newBaselines_count }}
+      new-baselines-count: ${{ steps.changes.outputs.new-baselines_count }}
       workflow-run-id: ${{ github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
     steps:
       - name: Checkout repository
@@ -52,13 +49,15 @@ jobs:
           filters: |
             diffs:
               - '{apps,packages}/*/__vis__/**/__diffs__/**'
-            newBaselines:
+            new-baselines:
               - added: '{apps,packages}/*/__vis__/**/__baselines__/**'
 
   post-pr-comment:
     name: Post PR comment
     needs: check-for-diffs
     runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
     steps:
       - name: Report visual regression diffs
         uses: mshick/add-pr-comment@v3
@@ -70,7 +69,7 @@ jobs:
           message-id: visual-regression-diffs
           message-failure: |
             **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
-            **${{ needs.check-for-diffs.outputs.newBaselines-count }} new baselines added.**
+            **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines added.**
           message-success: |
             **No visual regressions found!**
 
@@ -87,7 +86,7 @@ jobs:
         uses: actions/checkout@v7
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          ref: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.ref || github.event.workflow_run.head_branch }}
+          ref: main
 
       - name: Download visual regression report
         uses: actions/download-artifact@v8
