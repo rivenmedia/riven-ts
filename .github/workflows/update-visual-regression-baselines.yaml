@@ -22,7 +22,7 @@ jobs:
     permissions:
       actions: read
     outputs:
-      has-diffs: ${{ steps.changes.outputs.diffs == 'true' }}
+      requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.newBaselines == 'true' }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v7
@@ -37,8 +37,6 @@ jobs:
           name: visual-regression-report.zip
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
-
-      - run: ls ${{ github.workspace }}/apps/*/__vis__
 
       - name: Stage files
         run: git add .
@@ -57,7 +55,7 @@ jobs:
   update-baseline-snapshots:
     name: Update baseline snapshots
     needs: check-for-diffs
-    if: ${{ needs.check-for-diffs.outputs.has-diffs == 'true' }}
+    if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
