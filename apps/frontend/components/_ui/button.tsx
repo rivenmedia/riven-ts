@@ -59,10 +59,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(
-        buttonVariants({ variant, size, className }),
-        "uppercase lowercase",
-      )}
+      className={cn(buttonVariants({ variant, size, className }), "uppercase")}
       type={type}
       {...props}
     />

@@ -5,9 +5,12 @@ description: Uploads the visual regression report after tests have been run
 runs:
   using: composite
   steps:
+    - shell: bash
+      run: ls "**/__vis__/**"
+
     - name: Prepare artefact
       shell: bash
-      run: zip -r visual-regression-report.zip **/__vis__/**
+      run: zip -r visual-regression-report.zip "**/__vis__/**"
 
     - name: Upload artefact
       uses: actions/upload-artifact@v7
