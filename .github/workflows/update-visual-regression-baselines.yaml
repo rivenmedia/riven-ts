@@ -38,7 +38,7 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
 
-      - run: ls ${{ github.workspace }}
+      - run: ls ${{ github.workspace }}/apps/*/__vis__
 
       - name: Check for visual regression diffs
         uses: dorny/paths-filter@v4
