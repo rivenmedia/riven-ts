@@ -5,19 +5,11 @@ description: Uploads the visual regression report after tests have been run
 runs:
   using: composite
   steps:
-    - name: Prepare artefact
-      shell: bash
-      working-directory: ${{ github.workspace }}
-      run: |
-        shopt -s nullglob
-
-        zip -r visual-regression-report.zip {apps,packages}/*/__vis__
-
     - name: Upload artefact
       uses: actions/upload-artifact@v7
       with:
-        name: vis-results
-        path: visual-regression-report.zip
+        name: visual-regression-report
+        path: |
+          {apps,packages}/*/__vis__
         retention-days: 1
         if-no-files-found: error
-        archive: false

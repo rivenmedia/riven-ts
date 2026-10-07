@@ -18,7 +18,7 @@ jobs:
         uses: actions/download-artifact@v8
         id: download-visual-regression-report
         with:
-          name: vis-results
+          name: visual-regression-report
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ github.event.workflow_run.id }}
 
@@ -29,7 +29,7 @@ jobs:
           base: HEAD
           filters: |
             diffs:
-              - 'vis-results/**/__diffs__/**'
+              - 'visual-regression-report/**/__diffs__/**'
 
       - name: Report visual regression diffs
         uses: mshick/add-pr-comment@v3
