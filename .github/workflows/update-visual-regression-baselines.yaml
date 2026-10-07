@@ -23,6 +23,8 @@ jobs:
       actions: read
     outputs:
       requires-update: ${{ steps.changes.outputs.diffs == 'true' || steps.changes.outputs.newBaselines == 'true' }}
+      diffs-count: ${{ steps.changes.outputs.diffs_count }}
+      newBaselines-count: ${{ steps.changes.outputs.newBaselines_count }}
       workflow-run-id: ${{ github.event.inputs.workflow-run-id || github.event.workflow_run.id }}
     steps:
       - name: Checkout repository
@@ -52,6 +54,25 @@ jobs:
               - '{apps,packages}/*/__vis__/**/__diffs__/**'
             newBaselines:
               - added: '{apps,packages}/*/__vis__/**/__baselines__/**'
+
+  post-pr-comment:
+    name: Post PR comment
+    needs: check-for-diffs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Report visual regression diffs
+        uses: mshick/add-pr-comment@v3
+        with:
+          status: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && 'failure' || 'success' }}
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          repo-owner: ${{ github.event.workflow_run.repository.owner.login }}
+          repo-name: ${{ github.event.workflow_run.repository.name }}
+          message-id: visual-regression-diffs
+          message-failure: |
+            **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
+            **${{ needs.check-for-diffs.outputs.newBaselines-count }} new baselines added.**
+          message-success: |
+            **No visual regressions found!**
 
   update-baseline-snapshots:
     name: Update baseline snapshots
