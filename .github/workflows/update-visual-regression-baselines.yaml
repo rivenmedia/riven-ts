@@ -6,6 +6,7 @@ on:
       - Component Tests
     types:
       - completed
+  workflow_dispatch:
 
 jobs:
   check-for-diffs:
