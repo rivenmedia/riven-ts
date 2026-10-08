@@ -25,23 +25,37 @@ on:
         required: true
     outputs:
       requires-update:
-        description: Whether the baselines do not match the component test results, or empty if they could not be checked
+        description: Whether the baselines do not match the component test results or were changed outside of the deployment, or empty if they could not be checked
         value: ${{ jobs.check-for-diffs.outputs.requires-update }}
 
 permissions: {}
 
 jobs:
+  check-baseline-provenance:
+    name: Check baseline provenance
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: read
+    uses: ./.github/workflows/check-visual-regression-baseline-provenance.yaml
+    with:
+      pr-number: ${{ inputs.pr-number }}
+      head-sha: ${{ inputs.head-sha }}
+      report-only: true
+
   check-for-diffs:
     name: Check for diffs
+    needs: check-baseline-provenance
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
     outputs:
       has-report: ${{ steps.artifacts.outputs.has-report }}
-      requires-update: ${{ steps.changes.outputs.requires-update || steps.artifacts.outputs.requires-update }}
-      diffs-count: ${{ steps.changes.outputs.diffs-count }}
-      new-baselines-count: ${{ steps.changes.outputs.new-baselines-count }}
+      requires-update: ${{ steps.requires-update.outputs.requires-update }}
+      diffs-count: ${{ steps.changes.outputs.diffs-count || 0 }}
+      new-baselines-count: ${{ steps.changes.outputs.new-baselines-count || 0 }}
+      unattested-baselines-count: ${{ steps.requires-update.outputs.unattested-baselines-count }}
     steps:
       # Component tests are skipped on a Turborepo cache hit, so no report is uploaded
       - name: Check for visual regression report
@@ -57,7 +71,6 @@ jobs:
           else
             echo "::notice::No visual regression report was uploaded by run $RUN_ID"
             echo "has-report=false" >> $GITHUB_OUTPUT
-            echo "requires-update=false" >> $GITHUB_OUTPUT
           fi
 
       # Only used to check which baselines exist, as it may come from an untrusted fork
@@ -102,21 +115,32 @@ jobs:
           echo "New baselines (${#NEW_BASELINES[@]}):"
           printf '  %s\n' "${NEW_BASELINES[@]}"
 
-          if (( ${#DIFFS[@]} + ${#NEW_BASELINES[@]} > 0 )); then
+          echo "diffs-count=${#DIFFS[@]}" >> $GITHUB_OUTPUT
+          echo "new-baselines-count=${#NEW_BASELINES[@]}" >> $GITHUB_OUTPUT
+
+      - name: Check if an update is required
+        id: requires-update
+        env:
+          DIFFS_COUNT: ${{ steps.changes.outputs.diffs-count || 0 }}
+          NEW_BASELINES_COUNT: ${{ steps.changes.outputs.new-baselines-count || 0 }}
+          UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
+        run: |
+          UNATTESTED_BASELINES_COUNT=$(jq length <<< "$UNATTESTED_BASELINES")
+
+          if (( DIFFS_COUNT + NEW_BASELINES_COUNT + UNATTESTED_BASELINES_COUNT > 0 )); then
             REQUIRES_UPDATE=true
           else
             REQUIRES_UPDATE=false
           fi
 
-          echo "diffs-count=${#DIFFS[@]}" >> $GITHUB_OUTPUT
-          echo "new-baselines-count=${#NEW_BASELINES[@]}" >> $GITHUB_OUTPUT
+          echo "unattested-baselines-count=$UNATTESTED_BASELINES_COUNT" >> $GITHUB_OUTPUT
           echo "requires-update=$REQUIRES_UPDATE" >> $GITHUB_OUTPUT
 
   post-pr-comment:
     name: Post PR comment
     needs: check-for-diffs
     # Fork PRs get a read-only token, so they are commented on by the "Inspect Visual Regression report from fork" workflow
-    if: ${{ needs.check-for-diffs.outputs.has-report == 'true' && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
+    if: ${{ (needs.check-for-diffs.outputs.has-report == 'true' || needs.check-for-diffs.outputs.requires-update == 'true') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -131,6 +155,7 @@ jobs:
           message-failure: |
             **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
             **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines found.**
+            **${{ needs.check-for-diffs.outputs.unattested-baselines-count }} baselines changed outside of the `update-visual-regression-baselines` deployment.**
 
             ${{ inputs.head-repository == github.repository && 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' || 'Baselines for pull requests from forks are updated by a maintainer once the changes have been reviewed.' }}
           message-success: |
@@ -138,7 +163,9 @@ jobs:
 
   update-baseline-snapshots:
     name: Update baseline snapshots
-    needs: check-for-diffs
+    needs:
+      - check-baseline-provenance
+      - check-for-diffs
     # The app can only push to branches in the original repository, and reports from forks are untrusted
     if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && inputs.head-repository == github.repository }}
     runs-on: ubuntu-latest
@@ -153,6 +180,7 @@ jobs:
           client-id: ${{ vars.VR_APP_CLIENT_ID }}
           private-key: ${{ secrets.VR_APP_PRIVATE_KEY }}
           permission-contents: write
+          permission-statuses: write
 
       - name: Get GitHub App user
         id: app-user
@@ -181,7 +209,9 @@ jobs:
             exit 1
           }
 
+      # Component tests are skipped on a Turborepo cache hit, in which case the approved baselines are attested as they are
       - name: Download visual regression report
+        if: ${{ needs.check-for-diffs.outputs.has-report == 'true' }}
         uses: actions/download-artifact@v8
         with:
           pattern: visual-regression-report-*.zip
@@ -191,7 +221,10 @@ jobs:
           run-id: ${{ inputs.run-id }}
 
       - name: Update baselines
+        if: ${{ needs.check-for-diffs.outputs.has-report == 'true' }}
         working-directory: ${{ runner.temp }}/visual-regression-report
+        env:
+          UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
         run: |
           shopt -s globstar nullglob
 
@@ -212,9 +245,34 @@ jobs:
             cp "$RESULT" "$GITHUB_WORKSPACE/$BASELINE"
           done
 
+          # Baselines changed outside of this deployment are replaced with the test result, or removed if no longer used
+          jq -r '.[]' <<< "$UNATTESTED_BASELINES" | while read -r BASELINE; do
+            RESULT="${BASELINE/\/__baselines__\///__results__/}"
+
+            if [[ -f "$RESULT" ]]; then
+              cp "$RESULT" "$GITHUB_WORKSPACE/$BASELINE"
+            else
+              rm "$GITHUB_WORKSPACE/$BASELINE"
+            fi
+          done
+
       - uses: EndBug/add-and-commit@v10
+        id: commit
         with:
           add: ":(glob)*/*/__vis__/*/__baselines__/**"
           author_name: ${{ steps.app-user.outputs.name }}
           author_email: ${{ steps.app-user.outputs.email }}
           message: "chore: update visual regression baseline snapshots"
+
+      # Checked by the "Check baseline provenance" workflow, as only this app can create it
+      - name: Attest baselines
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          SHA: ${{ steps.commit.outputs.commit_long_sha || inputs.head-sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          gh api "repos/$GITHUB_REPOSITORY/statuses/$SHA" \
+            -f state=success \
+            -f context=visual-regression-baselines \
+            -f description="Baselines approved by the update-visual-regression-baselines deployment" \
+            -f target_url="$RUN_URL" > /dev/null

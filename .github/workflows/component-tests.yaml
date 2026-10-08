@@ -47,6 +47,7 @@ jobs:
       actions: read
       contents: read
       pull-requests: write
+      statuses: read
     uses: ./.github/workflows/check-for-visual-regressions.yaml
     with:
       run-id: ${{ github.run_id }}
@@ -66,7 +67,7 @@ jobs:
           REQUIRES_UPDATE: ${{ needs.check-for-visual-regressions.outputs.requires-update }}
         run: |
           case "$REQUIRES_UPDATE" in
-            false) echo "The baselines match the component test results" ;;
-            true) echo "::error::The baselines do not match the component test results"; exit 1 ;;
+            false) echo "The baselines match the component test results and were committed by the update-visual-regression-baselines deployment" ;;
+            true) echo "::error::The baselines do not match the component test results, or were changed outside of the update-visual-regression-baselines deployment"; exit 1 ;;
             *) echo "::error::The baselines could not be checked"; exit 1 ;;
           esac
