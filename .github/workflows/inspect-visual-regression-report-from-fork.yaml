@@ -1,7 +1,7 @@
 name: Inspect Visual Regression report from fork
 
-# Fork PRs cannot comment from their own workflow run, so they are reported on here.
-# PRs from this repository are handled by the Component Tests workflow.
+description: |
+  Handles visual regression checks for PRs from forked repos
 
 on:
   workflow_run:
