@@ -125,7 +125,7 @@ jobs:
         with:
           task: ${{ inputs.task }}
 
-      - name: Run ${{ inputs.task }}
+      - name: Run ${{ inputs.task }} ${{ inputs.args }}
         id: run-task
         run: |
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
