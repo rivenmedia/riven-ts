@@ -86,7 +86,7 @@ jobs:
           echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
 
   run-turbo-task:
-    name: Run ${{ inputs.task }}
+    name: Run ${{ inputs.task }} ${{ inputs.args }}
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ${{ inputs.runner }}
