@@ -21,22 +21,63 @@ export interface SnapshotParameters
   fullPage?: boolean;
 }
 
+const isInViewport = (element: Element) => {
+  const { bottom, right, top, left } = element.getBoundingClientRect();
+
+  return (
+    bottom > 0 &&
+    right > 0 &&
+    top < globalThis.innerHeight &&
+    left < globalThis.innerWidth
+  );
+};
+
+/** Matches each `url("...")` in a computed `background-image`, which Chromium always serialises with double quotes */
+const BACKGROUND_IMAGE_URL_PATTERN = /url\("[^"]+"\)/gu;
+
+/**
+ * Loads the CSS background images in the viewport (e.g. `style={{ backgroundImage }}`), as they aren't in `document.images`.
+ *
+ * They are loaded through a separate image, which shares the browser cache, so the background can be painted once it resolves.
+ */
+const loadVisibleBackgroundImages = () => {
+  const urls = new Set<string>();
+
+  for (const element of document.body.querySelectorAll("*")) {
+    const { backgroundImage } = getComputedStyle(element);
+
+    if (!backgroundImage.includes("url(") || !isInViewport(element)) {
+      continue;
+    }
+
+    for (const [match] of backgroundImage.matchAll(
+      BACKGROUND_IMAGE_URL_PATTERN,
+    )) {
+      // Strips the surrounding `url("` and `")`
+      urls.add(match.slice(5, -2));
+    }
+  }
+
+  return [...urls].map(async (url) => {
+    const image = new Image();
+
+    image.src = url;
+
+    await image.decode();
+  });
+};
+
 /** Waits for images in the viewport to load, as remote images may not have loaded by the time the page is stable */
 const waitForVisibleImages = async () => {
-  const pendingImages = [...document.images].filter((image) => {
-    const { bottom, right, top, left } = image.getBoundingClientRect();
-
-    return (
-      !image.complete &&
-      bottom > 0 &&
-      right > 0 &&
-      top < globalThis.innerHeight &&
-      left < globalThis.innerWidth
-    );
-  });
+  const pendingImages = [...document.images].filter(
+    (image) => !image.complete && isInViewport(image),
+  );
 
   await Promise.race([
-    Promise.allSettled(pendingImages.map((image) => image.decode())),
+    Promise.allSettled([
+      ...pendingImages.map((image) => image.decode()),
+      ...loadVisibleBackgroundImages(),
+    ]),
     new Promise((resolve) => {
       setTimeout(resolve, 10_000);
     }),
