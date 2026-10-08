@@ -23,6 +23,10 @@ on:
         description: The commit the visual regression report was generated from
         type: string
         required: true
+      draft:
+        description: Whether the pull request is a draft, in which case the baselines are not updated
+        type: boolean
+        default: false
     outputs:
       requires-update:
         description: Whether the baselines do not match the component test results or were changed outside of the deployment, or empty if they could not be checked
@@ -157,7 +161,7 @@ jobs:
             **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines found.**
             **${{ needs.check-for-diffs.outputs.unattested-baselines-count }} baselines changed outside of the `update-visual-regression-baselines` deployment.**
 
-            ${{ inputs.head-repository == github.repository && 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' || 'Baselines for pull requests from forks are updated by a maintainer once the changes have been reviewed.' }}
+            ${{ inputs.head-repository != github.repository && 'Baselines for pull requests from forks are updated by a maintainer once the changes have been reviewed.' || inputs.draft && 'Mark this PR as ready for review to request the `update-visual-regression-baselines` deployment, which commits the updated baselines to this branch.' || 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' }}
           message-success: |
             **No visual regressions found!**
 
@@ -167,7 +171,8 @@ jobs:
       - check-baseline-provenance
       - check-for-diffs
     # The app can only push to branches in the original repository, and reports from forks are untrusted
-    if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && inputs.head-repository == github.repository }}
+    # Drafts are still changing, so they are only updated once they are ready for review
+    if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && inputs.head-repository == github.repository && !inputs.draft }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
