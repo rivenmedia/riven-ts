@@ -59,8 +59,7 @@
         "!**/*.typegen.ts",
         "!**/next-env.d.ts",
         "!**/public/mockServiceWorker.js"
-      ],
-      "outputs": ["__screenshots__"]
+      ]
     },
     "test:component": {
       "inputs": [
@@ -78,8 +77,7 @@
         "!**/*.typegen.ts",
         "!**/next-env.d.ts",
         "!**/public/mockServiceWorker.js"
-      ],
-      "outputs": ["__screenshots__"]
+      ]
     }
   }
 }
