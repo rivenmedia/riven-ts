@@ -61,7 +61,7 @@ function Button({
       data-size={size}
       className={cn(
         buttonVariants({ variant, size, className }),
-        "bg-sidebar-accent-foreground",
+        "bg-sidebar-accent-foreground from-emerald-200",
       )}
       type={type}
       {...props}
