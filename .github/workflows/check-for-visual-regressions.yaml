@@ -56,12 +56,14 @@ jobs:
       contents: read
     outputs:
       has-report: ${{ steps.artifacts.outputs.has-report }}
+      has-complete-report: ${{ steps.artifacts.outputs.has-complete-report }}
       requires-update: ${{ steps.requires-update.outputs.requires-update }}
       diffs-count: ${{ steps.changes.outputs.diffs-count || 0 }}
       new-baselines-count: ${{ steps.changes.outputs.new-baselines-count || 0 }}
       unattested-baselines-count: ${{ steps.requires-update.outputs.unattested-baselines-count }}
     steps:
-      # Component tests are skipped on a Turborepo cache hit, so no report is uploaded
+      # Component test shards are skipped on a Turborepo cache hit, so they upload no report
+      # Failing shards are never cached, so a partial report still contains every diff and new baseline
       - name: Check for visual regression report
         id: artifacts
         env:
@@ -70,12 +72,27 @@ jobs:
         run: |
           ARTIFACTS=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --paginate --jq '.artifacts[].name')
 
-          if grep -qx 'visual-regression-report-.*\.zip' <<< "$ARTIFACTS"; then
-            echo "has-report=true" >> $GITHUB_OUTPUT
-          else
+          mapfile -t REPORTS < <(grep -x 'visual-regression-report-.*\.zip' <<< "$ARTIFACTS")
+
+          if (( ${#REPORTS[@]} == 0 )); then
             echo "::notice::No visual regression report was uploaded by run $RUN_ID"
             echo "has-report=false" >> $GITHUB_OUTPUT
+            echo "has-complete-report=false" >> $GITHUB_OUTPUT
+            exit 0
           fi
+
+          # Reports are named visual-regression-report-<os>-<shard>-of-<shard count>.zip
+          SHARD_COUNT=$(printf '%s\n' "${REPORTS[@]}" | sed -nE 's/^.*-[0-9]+-of-([0-9]+)\.zip$/\1/p' | sort -u)
+
+          if [[ "$SHARD_COUNT" =~ ^[0-9]+$ ]] && (( ${#REPORTS[@]} == SHARD_COUNT )); then
+            HAS_COMPLETE_REPORT=true
+          else
+            echo "::notice::Only ${#REPORTS[@]} of ${SHARD_COUNT:-an unknown number of} visual regression reports were uploaded by run $RUN_ID"
+            HAS_COMPLETE_REPORT=false
+          fi
+
+          echo "has-report=true" >> $GITHUB_OUTPUT
+          echo "has-complete-report=$HAS_COMPLETE_REPORT" >> $GITHUB_OUTPUT
 
       # Only used to check which baselines exist, as it may come from an untrusted fork
       - name: Checkout pull request
@@ -230,6 +247,7 @@ jobs:
         working-directory: ${{ runner.temp }}/visual-regression-report
         env:
           UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
+          HAS_COMPLETE_REPORT: ${{ needs.check-for-diffs.outputs.has-complete-report }}
         run: |
           shopt -s globstar nullglob
 
@@ -251,13 +269,16 @@ jobs:
           done
 
           # Baselines changed outside of this deployment are replaced with the test result, or removed if no longer used
+          # A partial report omits cached shards, which passed against their baselines, so those are kept as they are
           jq -r '.[]' <<< "$UNATTESTED_BASELINES" | while read -r BASELINE; do
             RESULT="${BASELINE/\/__baselines__\///__results__/}"
 
             if [[ -f "$RESULT" ]]; then
               cp "$RESULT" "$GITHUB_WORKSPACE/$BASELINE"
-            else
+            elif [[ "$HAS_COMPLETE_REPORT" == "true" ]]; then
               rm "$GITHUB_WORKSPACE/$BASELINE"
+            else
+              echo "::warning::Keeping $BASELINE, as its shard was cached and uploaded no result"
             fi
           done
 

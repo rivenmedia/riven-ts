@@ -45,7 +45,7 @@ jobs:
       task: test:component
       args: --shard=${{ matrix.shard }}/4
       concurrency: 100%
-      env: '{ "COMPONENT_TEST_SHARD": "${{ matrix.shard }}" }'
+      env: '{ "COMPONENT_TEST_SHARD": "${{ matrix.shard }}-of-4" }'
     secrets: inherit
 
   component-tests:
