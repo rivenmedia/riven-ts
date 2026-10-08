@@ -166,8 +166,24 @@ export const prepareAutoSnapshot: Extract<
   return true;
 };
 
+/**
+ * Removes the style Storybook adds to pause animations while `afterEach` hooks run.
+ *
+ * Storybook only removes it once the hooks succeed, so a failed snapshot leaves animations paused for the test's retries.
+ * Elements that unmount once their exit animation ends (e.g. a closing accordion item) then never unmount.
+ */
+const removeLeakedAnimationPause = () => {
+  for (const style of document.head.querySelectorAll("style:not([id])")) {
+    if (style.textContent.includes("animation-play-state: paused !important")) {
+      style.remove();
+    }
+  }
+};
+
 /** Undoes any page changes made by {@link prepareAutoSnapshot}, as stories in the same file share a document */
 export const resetAutoSnapshot = () => {
   document.body.style.removeProperty("height");
   document.body.style.removeProperty("overflow");
+
+  removeLeakedAnimationPause();
 };
