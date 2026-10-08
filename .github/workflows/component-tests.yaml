@@ -39,3 +39,22 @@ jobs:
       task: test:component
       concurrency: 100%
     secrets: inherit
+
+  # Fork PRs cannot comment or access secrets, instead they are
+  # checked by the "Inspect Visual Regression report from fork" workflow
+  check-for-visual-regressions:
+    name: Check for visual regressions
+    needs: component-tests
+    # Visual regressions fail the component tests, so this runs regardless of their result
+    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/check-for-visual-regressions.yaml
+    with:
+      run-id: ${{ github.run_id }}
+      pr-number: ${{ github.event.pull_request.number }}
+      head-repository: ${{ github.event.pull_request.head.repo.full_name }}
+      head-branch: ${{ github.head_ref }}
+      head-sha: ${{ github.event.pull_request.head.sha }}

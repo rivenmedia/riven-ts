@@ -1,0 +1,101 @@
+name: Inspect Visual Regression report from fork
+
+# Fork PRs cannot comment from their own workflow run, so they are reported on here.
+# PRs from this repository are handled by the Component Tests workflow.
+
+on:
+  workflow_run:
+    workflows:
+      - Component Tests
+    types:
+      - completed
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: true
+
+jobs:
+  inspect-pull-request:
+    name: Inspect Pull Request
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.head_repository.full_name != github.repository }}
+    permissions:
+      actions: read
+      pull-requests: read
+    outputs:
+      pr-number: ${{ steps.pr-number.outputs.pr-number }}
+      should-inspect: ${{ steps.pr-state.outputs.should-inspect }}
+    steps:
+      # Component tests are skipped on a Turborepo cache hit, so no PR number is uploaded
+      - name: Check for PR number
+        id: artifacts
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+        run: |
+          ARTIFACTS=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --paginate --jq '.artifacts[].name')
+
+          if grep -qx 'pr-number.txt' <<< "$ARTIFACTS"; then
+            echo "has-pr-number=true" >> $GITHUB_OUTPUT
+          else
+            echo "::notice::No PR number was uploaded by run $RUN_ID"
+            echo "has-pr-number=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Download PR number
+        uses: actions/download-artifact@v8
+        id: download-pr-number
+        if: ${{ steps.artifacts.outputs.has-pr-number == 'true' }}
+        with:
+          name: pr-number.txt
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ github.event.workflow_run.id }}
+
+      - name: Set PR number output
+        id: pr-number
+        if: ${{ steps.artifacts.outputs.has-pr-number == 'true' }}
+        run: |
+          PR_NUMBER=$(cat pr-number.txt)
+
+          [[ "$PR_NUMBER" =~ ^[0-9]+$ ]] || { echo "Invalid PR number: $PR_NUMBER"; exit 1; }
+
+          echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+
+      # The PR number is uploaded by the PR's own workflow run, so it is only trusted if that PR's head is the tested commit
+      - name: Check PR state
+        id: pr-state
+        if: ${{ steps.artifacts.outputs.has-pr-number == 'true' }}
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.pr-number.outputs.pr-number }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          read -r PR_STATE PR_HEAD_SHA < <(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json state,headRefOid --jq '"\(.state) \(.headRefOid)"')
+
+          echo "PR #$PR_NUMBER is $PR_STATE at $PR_HEAD_SHA"
+
+          if [[ "$PR_STATE" != "OPEN" ]]; then
+            echo "::notice::PR #$PR_NUMBER is not open"
+            echo "should-inspect=false" >> $GITHUB_OUTPUT
+          elif [[ "$PR_HEAD_SHA" != "$HEAD_SHA" ]]; then
+            echo "::notice::PR #$PR_NUMBER head ($PR_HEAD_SHA) does not match the tested commit ($HEAD_SHA)"
+            echo "should-inspect=false" >> $GITHUB_OUTPUT
+          else
+            echo "should-inspect=true" >> $GITHUB_OUTPUT
+          fi
+
+  check-for-visual-regressions:
+    name: Check for visual regressions
+    needs: inspect-pull-request
+    if: ${{ needs.inspect-pull-request.outputs.should-inspect == 'true' }}
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    uses: ./.github/workflows/check-for-visual-regressions.yaml
+    with:
+      run-id: ${{ github.event.workflow_run.id }}
+      pr-number: ${{ needs.inspect-pull-request.outputs.pr-number }}
+      head-repository: ${{ github.event.workflow_run.head_repository.full_name }}
+      head-branch: ${{ github.event.workflow_run.head_branch }}
+      head-sha: ${{ github.event.workflow_run.head_sha }}
