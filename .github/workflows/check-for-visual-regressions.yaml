@@ -90,7 +90,10 @@ jobs:
           DIFFS=({apps,packages}/*/__vis__/*/__diffs__/**/*.png)
           NEW_BASELINES=()
 
-          for BASELINE in {apps,packages}/*/__vis__/*/__baselines__/**/*.png; do
+          # CI fails on missing baselines rather than creating them, so these are the results without one
+          for RESULT in {apps,packages}/*/__vis__/*/__results__/**/*.png; do
+            BASELINE="${RESULT/\/__results__\///__baselines__/}"
+
             [[ -e "$GITHUB_WORKSPACE/$BASELINE" ]] || NEW_BASELINES+=("$BASELINE")
           done
 
@@ -192,9 +195,11 @@ jobs:
         run: |
           shopt -s globstar nullglob
 
-          # Baselines created during the test run
-          for BASELINE in {apps,packages}/*/__vis__/*/__baselines__/**/*.png; do
-            [[ -e "$GITHUB_WORKSPACE/$BASELINE" ]] || cp --parents "$BASELINE" "$GITHUB_WORKSPACE"
+          # Snapshots without a baseline, as CI fails on them rather than creating one
+          for RESULT in {apps,packages}/*/__vis__/*/__results__/**/*.png; do
+            BASELINE="${RESULT/\/__results__\///__baselines__/}"
+
+            [[ -e "$GITHUB_WORKSPACE/$BASELINE" ]] || install -D -m 644 "$RESULT" "$GITHUB_WORKSPACE/$BASELINE"
           done
 
           # Mismatched snapshots keep their old baseline, so accept the test result in its place
