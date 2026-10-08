@@ -69,6 +69,9 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "test:component": {
+      "env": [
+        "CI" // Baseline screenshots aren't updated in CI
+      ],
       "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
         "**/__baselines__/**",
