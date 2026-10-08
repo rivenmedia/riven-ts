@@ -52,6 +52,7 @@ jobs:
       pull-requests: write
       statuses: read
     uses: ./.github/workflows/check-for-visual-regressions.yaml
+    secrets: inherit
     with:
       run-id: ${{ github.run_id }}
       pr-number: ${{ github.event.pull_request.number }}
