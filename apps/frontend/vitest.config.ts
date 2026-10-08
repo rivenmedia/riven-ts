@@ -36,6 +36,9 @@ export default defineConfig((config) => {
       projects: [
         {
           extends: true,
+          define: {
+            "import.meta.env.CI": JSON.stringify(process.env["CI"] ?? ""),
+          },
           plugins: [
             storybookTest({
               configDir: path.join(import.meta.dirname, ".storybook"),
