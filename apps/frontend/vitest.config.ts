@@ -73,6 +73,7 @@ export default defineConfig((config) => {
               headless: true,
               instances: [{ browser: "chromium" }],
             },
+            retry: 0, // Prefer to fail for component tests as flakiness causes baseline regeneration
             setupFiles: ["./.storybook/vitest.setup.ts"],
             testTimeout: 30_000,
           },
