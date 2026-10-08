@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Visual regression report</title>
+    <link rel="stylesheet" href="report.css" />
+    <script type="module" src="report.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <div class="masthead-title">
+        <h1 id="title">Visual regression report</h1>
+        <p id="summary" class="muted"></p>
+      </div>
+
+      <div class="toolbar">
+        <input
+          id="filter"
+          type="search"
+          placeholder="Filter snapshots…"
+          aria-label="Filter snapshots"
+          autocomplete="off"
+        />
+
+        <div class="segmented" role="group" aria-label="Status">
+          <button type="button" data-status="all" aria-pressed="true">
+            All
+          </button>
+          <button type="button" data-status="changed" aria-pressed="false">
+            Changed
+          </button>
+          <button type="button" data-status="new" aria-pressed="false">
+            New
+          </button>
+        </div>
+
+        <div class="segmented" role="group" aria-label="View">
+          <button
+            type="button"
+            data-mode="side-by-side"
+            aria-pressed="true"
+            title="Side by side (1)"
+          >
+            Side by side
+          </button>
+          <button
+            type="button"
+            data-mode="swipe"
+            aria-pressed="false"
+            title="Swipe (2)"
+          >
+            Swipe
+          </button>
+          <button
+            type="button"
+            data-mode="onion"
+            aria-pressed="false"
+            title="Onion skin (3)"
+          >
+            Onion skin
+          </button>
+          <button
+            type="button"
+            data-mode="diff"
+            aria-pressed="false"
+            title="Diff (4)"
+          >
+            Diff
+          </button>
+        </div>
+
+        <div class="segmented" role="group" aria-label="Image background">
+          <button
+            type="button"
+            data-background="checker"
+            aria-pressed="true"
+            title="Checkerboard background"
+          >
+            ▦
+          </button>
+          <button
+            type="button"
+            data-background="light"
+            aria-pressed="false"
+            title="Light background"
+          >
+            ☀
+          </button>
+          <button
+            type="button"
+            data-background="dark"
+            aria-pressed="false"
+            title="Dark background"
+          >
+            ☾
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav id="nav" aria-label="Snapshots"></nav>
+
+      <main>
+        <p id="empty" class="empty" hidden></p>
+        <div id="snapshots"></div>
+        <p class="muted hint">
+          <kbd>j</kbd>/<kbd>k</kbd> next/previous snapshot · <kbd>1</kbd>–<kbd
+            >4</kbd
+          >
+          change view · <kbd>/</kbd> filter
+        </p>
+      </main>
+    </div>
+  </body>
+</html>

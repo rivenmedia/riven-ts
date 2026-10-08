@@ -229,11 +229,90 @@ jobs:
             fi
           } >> $GITHUB_STEP_SUMMARY
 
+  publish-report:
+    name: Publish visual regression report
+    needs: check-for-diffs
+    # Fork PRs have no access to secrets, so their report is published by the "Inspect Visual Regression report from fork" workflow
+    if: ${{ (needs.check-for-diffs.outputs.diffs-count != '0' || needs.check-for-diffs.outputs.new-baselines-count != '0') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+    environment:
+      name: publish-visual-regression-report
+      url: ${{ steps.deploy.outputs.url }}
+    outputs:
+      url: ${{ steps.deploy.outputs.url }}
+    steps:
+      # The report generator is checked out from this repository rather than the pull request, as the report may come from an untrusted fork
+      - name: Checkout report generator
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            .github/scripts/visual-regression-report
+            .node-version
+          sparse-checkout-cone-mode: false
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version-file: .node-version
+
+      - name: Download visual regression report
+        uses: actions/download-artifact@v8
+        with:
+          pattern: visual-regression-report-*.zip
+          merge-multiple: true
+          path: ${{ runner.temp }}/visual-regression-report
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          run-id: ${{ inputs.run-id }}
+
+      # Written in the Build Output API format, so it is deployed as-is without a build on Vercel
+      - name: Build report
+        env:
+          OUTPUT_DIR: ${{ runner.temp }}/vercel/.vercel/output
+          REPORT_DIR: ${{ runner.temp }}/visual-regression-report
+          PR_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr-number }}
+          COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr-number }}/commits/${{ inputs.head-sha }}
+          RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run-id }}
+          HEAD_SHA: ${{ inputs.head-sha }}
+        run: |
+          node --disable-warning=ExperimentalWarning .github/scripts/visual-regression-report/build-report.ts \
+            --report-dir "$REPORT_DIR" \
+            --out-dir "$OUTPUT_DIR/static" \
+            --pr-url "$PR_URL" \
+            --commit-url "$COMMIT_URL" \
+            --run-url "$RUN_URL" \
+            --head-sha "$HEAD_SHA"
+
+          echo '{ "version": 3 }' > "$OUTPUT_DIR/config.json"
+
+      - name: Deploy report
+        id: deploy
+        working-directory: ${{ runner.temp }}/vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          URL=$(npx --yes vercel@63.1.0 deploy --prebuilt --yes)
+
+          echo "url=$URL" >> $GITHUB_OUTPUT
+
+          {
+            echo "## Visual regression report"
+            echo
+            echo "[View the visual regression report]($URL)"
+          } >> $GITHUB_STEP_SUMMARY
+
   post-pr-comment:
     name: Post PR comment
-    needs: check-for-diffs
+    needs:
+      - check-for-diffs
+      - publish-report
     # Fork PRs get a read-only token, so they are commented on by the "Inspect Visual Regression report from fork" workflow
-    if: ${{ (needs.check-for-diffs.outputs.has-report == 'true' || needs.check-for-diffs.outputs.requires-update == 'true') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
+    # The report is optional, so the comment is still posted if it could not be published
+    if: ${{ !cancelled() && (needs.check-for-diffs.outputs.has-report == 'true' || needs.check-for-diffs.outputs.requires-update == 'true') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -250,6 +329,8 @@ jobs:
             **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines found.**
             **${{ needs.check-for-diffs.outputs.unattested-baselines-count }} baselines changed outside of the `update-visual-regression-baselines` deployment.**
 
+            ${{ needs.publish-report.outputs.url && format('[View the visual regression report]({0})', needs.publish-report.outputs.url) || '' }}
+
             ${{ needs.check-for-diffs.outputs.update-instructions }}
           message-success: |
             **No visual regressions found!**
@@ -259,9 +340,11 @@ jobs:
     needs:
       - check-baseline-provenance
       - check-for-diffs
+      - publish-report
     # The app can only push to branches in the original repository, and reports from forks are untrusted
     # Drafts are still changing, so they are only updated once they are ready for review
-    if: ${{ needs.check-for-diffs.outputs.requires-update == 'true' && inputs.head-repository == github.repository && !inputs.draft }}
+    # Waits for the report so it can be reviewed before approving, but the update does not depend on it
+    if: ${{ !cancelled() && needs.check-for-diffs.outputs.requires-update == 'true' && inputs.head-repository == github.repository && !inputs.draft }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
