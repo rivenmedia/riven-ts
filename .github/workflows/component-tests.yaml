@@ -14,8 +14,6 @@ on:
       - opened
       - reopened
       - synchronize
-    paths-ignore:
-      - "**/__vis__/**/__baselines__/**"
 
 concurrency:
   group: "component-tests-${{ github.event.pull_request.number }}"
@@ -40,13 +38,11 @@ jobs:
       concurrency: 100%
     secrets: inherit
 
-  # Fork PRs cannot comment or access secrets, instead they are
-  # checked by the "Inspect Visual Regression report from fork" workflow
   check-for-visual-regressions:
     name: Check for visual regressions
     needs: component-tests
     # Visual regressions fail the component tests, so this runs regardless of their result
-    if: ${{ !cancelled() && github.event.pull_request.head.repo.full_name == github.repository }}
+    if: ${{ !cancelled() }}
     permissions:
       actions: read
       contents: read
@@ -58,3 +54,19 @@ jobs:
       head-repository: ${{ github.event.pull_request.head.repo.full_name }}
       head-branch: ${{ github.head_ref }}
       head-sha: ${{ github.event.pull_request.head.sha }}
+
+  visual-regressions:
+    name: Visual regressions
+    needs: check-for-visual-regressions
+    if: ${{ always() }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check baselines are up to date
+        env:
+          REQUIRES_UPDATE: ${{ needs.check-for-visual-regressions.outputs.requires-update }}
+        run: |
+          case "$REQUIRES_UPDATE" in
+            false) echo "The baselines match the component test results" ;;
+            true) echo "::error::The baselines do not match the component test results"; exit 1 ;;
+            *) echo "::error::The baselines could not be checked"; exit 1 ;;
+          esac

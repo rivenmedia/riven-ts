@@ -23,6 +23,10 @@ on:
         description: The commit the visual regression report was generated from
         type: string
         required: true
+    outputs:
+      requires-update:
+        description: Whether the baselines do not match the component test results, or empty if they could not be checked
+        value: ${{ jobs.check-for-diffs.outputs.requires-update }}
 
 permissions: {}
 
@@ -35,7 +39,7 @@ jobs:
       contents: read
     outputs:
       has-report: ${{ steps.artifacts.outputs.has-report }}
-      requires-update: ${{ steps.changes.outputs.requires-update }}
+      requires-update: ${{ steps.changes.outputs.requires-update || steps.artifacts.outputs.requires-update }}
       diffs-count: ${{ steps.changes.outputs.diffs-count }}
       new-baselines-count: ${{ steps.changes.outputs.new-baselines-count }}
     steps:
@@ -53,6 +57,7 @@ jobs:
           else
             echo "::notice::No visual regression report was uploaded by run $RUN_ID"
             echo "has-report=false" >> $GITHUB_OUTPUT
+            echo "requires-update=false" >> $GITHUB_OUTPUT
           fi
 
       # Only used to check which baselines exist, as it may come from an untrusted fork
@@ -107,7 +112,8 @@ jobs:
   post-pr-comment:
     name: Post PR comment
     needs: check-for-diffs
-    if: ${{ needs.check-for-diffs.outputs.has-report == 'true' }}
+    # Fork PRs get a read-only token, so they are commented on by the "Inspect Visual Regression report from fork" workflow
+    if: ${{ needs.check-for-diffs.outputs.has-report == 'true' && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       pull-requests: write
@@ -123,7 +129,7 @@ jobs:
             **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
             **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines found.**
 
-            ${{ inputs.head-repository == github.repository && 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' || 'Baselines for pull requests from forks must be updated manually.' }}
+            ${{ inputs.head-repository == github.repository && 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' || 'Baselines for pull requests from forks are updated by a maintainer once the changes have been reviewed.' }}
           message-success: |
             **No visual regressions found!**
 
