@@ -1,2 +1,2 @@
-# Visual baselines are committed by the "Approve visual changes" workflow and need a frontend review
+# Visual baselines are committed by the update-visual-regression-baselines deployment and need a frontend review
 /apps/frontend/__vis__/ @rivenmedia/frontend

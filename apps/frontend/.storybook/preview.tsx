@@ -75,7 +75,7 @@ export const preview = definePreview({
     mswAddon(),
     addonVis({
       auto: prepareAutoSnapshot,
-      createMissingBaseline: true,
+      createMissingBaseline: !import.meta.env.CI,
     }),
   ],
   parameters: {
