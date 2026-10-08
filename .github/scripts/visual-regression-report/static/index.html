@@ -6,6 +6,16 @@
     <meta name="robots" content="noindex" />
     <title>Visual regression report</title>
     <link rel="stylesheet" href="report.css" />
+    <!-- Applies the saved theme before the page is painted, as report.js only runs once it has loaded -->
+    <script>
+      try {
+        const theme = localStorage.getItem("visual-regression-report:theme");
+
+        if (theme === "light" || theme === "dark") {
+          document.documentElement.dataset.theme = theme;
+        }
+      } catch {}
+    </script>
     <script type="module" src="report.js"></script>
   </head>
   <body>
@@ -71,30 +81,30 @@
           </button>
         </div>
 
-        <div class="segmented" role="group" aria-label="Image background">
+        <div class="segmented" role="group" aria-label="Theme">
           <button
             type="button"
-            data-background="checker"
+            data-theme="auto"
             aria-pressed="true"
-            title="Checkerboard background"
+            title="Match the system theme"
           >
-            ▦
+            Auto
           </button>
           <button
             type="button"
-            data-background="light"
+            data-theme="light"
             aria-pressed="false"
-            title="Light background"
+            title="Light theme"
           >
-            ☀
+            Light
           </button>
           <button
             type="button"
-            data-background="dark"
+            data-theme="dark"
             aria-pressed="false"
-            title="Dark background"
+            title="Dark theme"
           >
-            ☾
+            Dark
           </button>
         </div>
       </div>

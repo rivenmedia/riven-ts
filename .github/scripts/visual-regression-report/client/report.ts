@@ -13,7 +13,7 @@ import type {
 
 const MODES = ["side-by-side", "swipe", "onion", "diff"] as const;
 
-const BACKGROUNDS = ["checker", "light", "dark"] as const;
+const THEMES = ["auto", "light", "dark"] as const;
 
 const STATUS_FILTERS = ["all", "changed", "new"] as const;
 
@@ -48,7 +48,7 @@ const writePreference = (key: string, value: string) => {
 
 const state = {
   mode: readPreference("mode", MODES, "side-by-side"),
-  background: readPreference("background", BACKGROUNDS, "checker"),
+  theme: readPreference("theme", THEMES, "auto"),
   status: "all" as (typeof STATUS_FILTERS)[number],
   query: "",
 };
@@ -336,11 +336,16 @@ const setMode = (mode: Mode, snapshots: Snapshot[]) => {
   }
 };
 
-const setBackground = (background: (typeof BACKGROUNDS)[number]) => {
-  state.background = background;
-  writePreference("background", background);
-  setPressed("background", background);
-  document.body.dataset["background"] = background;
+const setTheme = (theme: (typeof THEMES)[number]) => {
+  state.theme = theme;
+  writePreference("theme", theme);
+  setPressed("theme", theme);
+
+  if (theme === "auto") {
+    delete document.documentElement.dataset["theme"];
+  } else {
+    document.documentElement.dataset["theme"] = theme;
+  }
 };
 
 /** The height covered by the masthead, which only sticks to the top on wide screens */
@@ -408,7 +413,7 @@ const main = async () => {
   const { snapshots } = manifest;
 
   renderSummary(manifest);
-  setBackground(state.background);
+  setTheme(state.theme);
   setPressed("mode", state.mode);
 
   query("#nav").append(...renderNav(snapshots));
@@ -443,17 +448,15 @@ const main = async () => {
         : null;
 
     const mode = MODES.find((option) => option === button?.dataset["mode"]);
-    const background = BACKGROUNDS.find(
-      (option) => option === button?.dataset["background"],
-    );
+    const theme = THEMES.find((option) => option === button?.dataset["theme"]);
     const status = STATUS_FILTERS.find(
       (option) => option === button?.dataset["status"],
     );
 
     if (mode) {
       setMode(mode, snapshots);
-    } else if (background) {
-      setBackground(background);
+    } else if (theme) {
+      setTheme(theme);
     } else if (status) {
       state.status = status;
       setPressed("status", status);

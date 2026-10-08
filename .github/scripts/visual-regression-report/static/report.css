@@ -13,14 +13,13 @@
   --new-bg: #e3f5ea;
   --checker-a: #ffffff;
   --checker-b: #e7e9ed;
-  --well-light: #ffffff;
-  --well-dark: #15181c;
   --radius: 8px;
   --mono: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 }
 
+/* Follows the system theme unless one is chosen with the theme toggle */
 @media (prefers-color-scheme: dark) {
-  :root {
+  :root:not([data-theme="light"]) {
     color-scheme: dark;
     --bg: #111317;
     --surface: #1a1d22;
@@ -36,6 +35,23 @@
     --checker-a: #23272e;
     --checker-b: #1c1f25;
   }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #111317;
+  --surface: #1a1d22;
+  --border: #2e333b;
+  --text: #e6e9ee;
+  --muted: #9aa3af;
+  --accent: #5b8ff0;
+  --accent-text: #0d1117;
+  --changed: #f29c62;
+  --changed-bg: #3a2416;
+  --new: #6fd39a;
+  --new-bg: #16301f;
+  --checker-a: #23272e;
+  --checker-b: #1c1f25;
 }
 
 * {
@@ -333,14 +349,6 @@ figcaption {
     8px -8px,
     -8px 0;
   background-size: 16px 16px;
-}
-
-[data-background="light"] .well {
-  background: var(--well-light);
-}
-
-[data-background="dark"] .well {
-  background: var(--well-dark);
 }
 
 .well img {
