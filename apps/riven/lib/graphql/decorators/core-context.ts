@@ -1,8 +1,8 @@
 import { createParameterDecorator } from "type-graphql";
 
-import { CoreKey } from "../context.ts";
+import { CoreKey } from "#graphql/context.ts";
 
-import type { ApolloServerContext } from "../context.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
 
 /**
  * Parameter decorator used to inject the core context.

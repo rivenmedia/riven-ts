@@ -1,21 +1,21 @@
 import { assert } from "vitest";
 
-import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
-import { ForeignLanguageMovieSeeder } from "../../database/seeders/movies/foreign-language-movie.seeder.ts";
-import { IndexedMovieSeeder } from "../../database/seeders/movies/indexed-movie.seeder.ts";
-import { ScrapedMovieSeeder } from "../../database/seeders/movies/scraped-movie.seeder.ts";
-import { UnreleasedMovieSeeder } from "../../database/seeders/movies/unreleased-movie.seeder.ts";
-import { CompletedOngoingShowSeeder } from "../../database/seeders/shows/completed-ongoing-show.seeder.ts";
-import { CompletedShowSeeder } from "../../database/seeders/shows/completed-show.seeder.ts";
-import { ForeignLanguageShowSeeder } from "../../database/seeders/shows/foreign-language-show.seeder.ts";
-import { IndexedShowSeeder } from "../../database/seeders/shows/indexed-show.seeder.ts";
-import { OngoingShowSeeder } from "../../database/seeders/shows/ongoing-show.seeder.ts";
-import { PartiallyCompletedShowSeeder } from "../../database/seeders/shows/partially-completed-show.seeder.ts";
-import { PartiallyRequestedShowSeeder } from "../../database/seeders/shows/partially-requested-show.seeder.ts";
-import { ScrapedShowSeeder } from "../../database/seeders/shows/scraped-show.seeder.ts";
-import { UnreleasedShowSeeder } from "../../database/seeders/shows/unreleased-show.seeder.ts";
+import { CompletedMovieSeeder } from "#database/seeders/movies/completed-movie.seeder.ts";
+import { ForeignLanguageMovieSeeder } from "#database/seeders/movies/foreign-language-movie.seeder.ts";
+import { IndexedMovieSeeder } from "#database/seeders/movies/indexed-movie.seeder.ts";
+import { ScrapedMovieSeeder } from "#database/seeders/movies/scraped-movie.seeder.ts";
+import { UnreleasedMovieSeeder } from "#database/seeders/movies/unreleased-movie.seeder.ts";
+import { CompletedOngoingShowSeeder } from "#database/seeders/shows/completed-ongoing-show.seeder.ts";
+import { CompletedShowSeeder } from "#database/seeders/shows/completed-show.seeder.ts";
+import { ForeignLanguageShowSeeder } from "#database/seeders/shows/foreign-language-show.seeder.ts";
+import { IndexedShowSeeder } from "#database/seeders/shows/indexed-show.seeder.ts";
+import { OngoingShowSeeder } from "#database/seeders/shows/ongoing-show.seeder.ts";
+import { PartiallyCompletedShowSeeder } from "#database/seeders/shows/partially-completed-show.seeder.ts";
+import { PartiallyRequestedShowSeeder } from "#database/seeders/shows/partially-requested-show.seeder.ts";
+import { ScrapedShowSeeder } from "#database/seeders/shows/scraped-show.seeder.ts";
+import { UnreleasedShowSeeder } from "#database/seeders/shows/unreleased-show.seeder.ts";
 
-import type { BaseSeeder } from "../../database/seeders/base.seeder.ts";
+import type { BaseSeeder } from "#database/seeders/base.seeder.ts";
 import type { Constructor, Dictionary, EntityManager } from "@mikro-orm/core";
 
 type SeederResult<T extends Dictionary, C extends number> = C extends 0

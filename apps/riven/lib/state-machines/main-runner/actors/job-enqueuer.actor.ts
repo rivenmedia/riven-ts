@@ -1,12 +1,12 @@
 import chalk from "chalk";
 import { fromCallback } from "xstate";
 
-import { flow } from "../../../message-queue/flows/producer.ts";
-import { extractPluginNameFromJobId } from "../../../message-queue/utilities/extract-plugin-name-from-job-id.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { serialiseEventData } from "../../../utilities/serialisers/serialise-event-data.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { extractPluginNameFromJobId } from "#message-queue/utilities/extract-plugin-name-from-job-id.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { serialiseEventData } from "#utilities/serialisers/serialise-event-data.ts";
 
-import type { PluginQueueMap, ValidPluginMap } from "../../../types/plugins.ts";
+import type { PluginQueueMap, ValidPluginMap } from "#types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { FlowJob } from "bullmq";
 

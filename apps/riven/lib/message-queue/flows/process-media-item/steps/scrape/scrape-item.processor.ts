@@ -5,8 +5,9 @@ import { MediaItemScrapeErrorNoStreamsFound } from "@repo/util-plugin-sdk/schema
 import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
-import { settings } from "../../../../../utilities/settings.ts";
-import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";

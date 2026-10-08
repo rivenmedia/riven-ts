@@ -1,7 +1,8 @@
 import { QueueEvents } from "bullmq";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+
 import { queueEventsRegistry } from "./queue-events-registry.ts";
 
 import type { QueueOptions } from "bullmq";

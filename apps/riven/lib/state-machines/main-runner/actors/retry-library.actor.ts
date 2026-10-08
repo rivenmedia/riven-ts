@@ -2,12 +2,12 @@ import { Episode, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { fromPromise } from "xstate";
 
-import { services } from "../../../database/database.ts";
-import { enqueueProcessItemRequest } from "../../../message-queue/flows/process-item-request/enqueue-process-item-request.ts";
-import { enqueueProcessMediaItem } from "../../../message-queue/flows/process-media-item/enqueue-process-media-item.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
+import { services } from "#database/database.ts";
+import { enqueueProcessItemRequest } from "#message-queue/flows/process-item-request/enqueue-process-item-request.ts";
+import { enqueueProcessMediaItem } from "#message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { ProcessMediaItemFlow } from "../../../message-queue/flows/process-media-item/process-media-item.schema.ts";
+import type { ProcessMediaItemFlow } from "#message-queue/flows/process-media-item/process-media-item.schema.ts";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 function getMediaItemStep(

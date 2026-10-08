@@ -9,6 +9,16 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.ts": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.ts"
+    },
+    "#*.tsx": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.tsx"
+    }
+  },
   "exports": {
     "./wiki.config": "./wiki.config.ts"
   },

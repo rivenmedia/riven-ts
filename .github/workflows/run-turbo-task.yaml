@@ -18,21 +18,18 @@ on:
       runner-requirements:
         description: A list of requirements for the verification runner
         type: string
-        required: true
+        required: false
+        default: "[]"
       env:
         description: Environment variables to set when running the turbo task
         type: string
-        required: true
-      force:
-        description: Whether to force task execution
-        type: boolean
-        required: true
+        required: false
+        default: "{}"
 
 permissions:
   contents: read
 
 env:
-  TURBO_FORCE: ${{ inputs.force }}
   TURBO_RUN_SUMMARY: 1
   DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
 

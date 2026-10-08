@@ -2,14 +2,14 @@ import { NotFoundError } from "@mikro-orm/core";
 import Fuse from "@zkochan/fuse-native";
 import { isZodErrorLike } from "zod-validation-error";
 
-import { services } from "../../database/database.ts";
-import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { attrCache } from "../utilities/attr-cache.ts";
-import { isHiddenPath } from "../utilities/is-hidden-path.ts";
-import { isSupportedExtension } from "../utilities/is-supported-extension.ts";
-import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+import { services } from "#database/database.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { FuseError, isFuseError } from "#vfs/errors/fuse-error.ts";
+import { attrCache } from "#vfs/utilities/attr-cache.ts";
+import { isHiddenPath } from "#vfs/utilities/is-hidden-path.ts";
+import { isSupportedExtension } from "#vfs/utilities/is-supported-extension.ts";
+import { withVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 

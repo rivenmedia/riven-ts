@@ -4,12 +4,13 @@ import chalk from "chalk";
 import { assign, enqueueActions, setup } from "xstate";
 import { ZodError } from "zod";
 
-import packageJson from "../../../package.json" with { type: "json" };
-import { logger } from "../../utilities/logger/logger.ts";
-import { redisCache } from "../../utilities/redis-cache.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
-import { withLogAction } from "../utilities/with-log-action.ts";
+import packageJson from "#package.json" with { type: "json" };
+import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { redisCache } from "#utilities/redis-cache.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
+
 import { collectPluginsForRegistration } from "./actors/collect-plugins-for-registration.actor.ts";
 import { validatePlugin } from "./actors/validate-plugin.actor.ts";
 import { registerPluginHookWorkers } from "./utilities/register-plugin-hook-workers.ts";
@@ -24,7 +25,7 @@ import type {
   PublishableEventSet,
   ValidPlugin,
   ValidPluginMap,
-} from "../../types/plugins.ts";
+} from "#types/plugins.ts";
 import type { ParsedPlugins } from "./actors/collect-plugins-for-registration.actor.ts";
 import type { RegisterPluginHookWorkersOutput } from "./utilities/register-plugin-hook-workers.ts";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";

@@ -2,9 +2,9 @@ import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { Mutation, Resolver } from "type-graphql";
 
-import { getSessionId } from "../../utilities/logger/session-id.ts";
+import { getSessionId } from "#utilities/logger/session-id.ts";
 
-import type { SessionID } from "../../utilities/logger/session-id.ts";
+import type { SessionID } from "#utilities/logger/session-id.ts";
 import type { TransformableInfo } from "logform";
 
 const ELASTICSEARCH_URL = "https://elastic.dev.riven.tv";
@@ -18,13 +18,13 @@ export class ShareLogsResolver {
       "Uploads the last 24 hours of ECS logs to Elasticsearch and returns the session ID for lookup.",
   })
   public async shareLogs(): Promise<SessionID> {
-    const { settings } = await import("../../utilities/settings.ts");
+    const { settings } = await import("#utilities/settings.ts");
 
     if (!settings.loggingEnabled) {
       throw new Error("Logging is disabled; cannot share logs.");
     }
 
-    const { ecsSymlinkPath } = await import("../../utilities/logger/logger.ts");
+    const { ecsSymlinkPath } = await import("#utilities/logger/logger.ts");
 
     const logFileLines = this.#readLogFileLines(ecsSymlinkPath);
     const action = JSON.stringify({ index: { _index: INDEX_NAME } });

@@ -6,7 +6,7 @@ import { getAvailableProviders } from "./get-available-providers.ts";
 import type {
   FindValidTorrentContext,
   InfoHashAttemptState,
-} from "../find-valid-torrent.processor.ts";
+} from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 
 /**

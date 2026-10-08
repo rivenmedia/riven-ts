@@ -1,7 +1,7 @@
 import { createActor, createEmptyActor } from "xstate";
 
-import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { pluginRegistrarMachine } from "../../index.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 
 export const it = baseIt
   .extend("input", () => ({

@@ -3,10 +3,11 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
-import { formatJobDuration } from "../../utilities/format-job-duration.ts";
-import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { formatJobDuration } from "#message-queue/utilities/format-job-duration.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { postProcessMediaItemProcessorSchema } from "./post-process-media-item.schema.ts";
 import { maybeEnqueueSubtitleRequests } from "./utilities/maybe-enqueue-subtitle-requests.ts";
 

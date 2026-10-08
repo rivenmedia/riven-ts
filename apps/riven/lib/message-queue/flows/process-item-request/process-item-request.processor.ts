@@ -12,13 +12,14 @@ import chalk from "chalk";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { clearDeduplicationJob } from "../../utilities/clear-deduplication-job.ts";
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
-import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
-import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
+import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";

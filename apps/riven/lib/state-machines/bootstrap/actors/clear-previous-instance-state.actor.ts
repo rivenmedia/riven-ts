@@ -1,8 +1,8 @@
 import { fromPromise } from "xstate";
 
-import { database } from "../../../database/database.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
+import { database } from "#database/database.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
 
 export interface ClearPreviousInstanceStateInput {
   wipeRedis: boolean;

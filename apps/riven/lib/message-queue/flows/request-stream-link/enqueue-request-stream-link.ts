@@ -1,4 +1,5 @@
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+
 import { createRequestStreamLinkJob } from "./request-stream-link.schema.ts";
 
 import type { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";

@@ -4,12 +4,12 @@ import { gql } from "@apollo/client";
 import chalk from "chalk";
 import assert, { AssertionError } from "node:assert";
 
-import { client } from "../../../../../graphql/apollo-client.ts";
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../utilities/settings.ts";
-import { MatchedFile } from "../../../../flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { client } from "#graphql/apollo-client.ts";
+import { MatchedFile } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
 
-import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import type {
   GetValidateTorrentFilesEpisodeQuery,
   GetValidateTorrentFilesEpisodeQueryVariables,

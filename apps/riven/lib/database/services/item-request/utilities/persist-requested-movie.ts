@@ -4,8 +4,8 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 
 import { validateOrReject } from "class-validator";
 
-import { RequestType } from "../../../../message-queue/flows/request-content-service/request-content-service.schema.ts";
-import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
+import { RequestType } from "#message-queue/flows/request-content-service/request-content-service.schema.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";

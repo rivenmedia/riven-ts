@@ -1,4 +1,4 @@
-import { it } from "../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 it.todo('enqueues item scraping if the step is "scrape"');
 

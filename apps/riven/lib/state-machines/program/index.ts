@@ -1,17 +1,18 @@
 import { createActor, enqueueActions, setup } from "xstate";
 
-import { bootstrapMachine } from "../bootstrap/index.ts";
-import { mainRunnerMachine } from "../main-runner/index.ts";
-import { withLogAction } from "../utilities/with-log-action.ts";
+import { bootstrapMachine } from "#state-machines/bootstrap/index.ts";
+import { mainRunnerMachine } from "#state-machines/main-runner/index.ts";
+import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
+
 import { shutdown } from "./actors/shutdown.actor.ts";
 import { stopGqlServer } from "./actors/stop-gql-server.actor.ts";
 import { unmountVfs } from "./actors/unmount-vfs.actor.ts";
 
-import type { ApolloServerContext } from "../../graphql/context.ts";
-import type { MockScenario } from "../../mocks/utilities/mock-scenario.ts";
-import type { ValidPluginMap } from "../../types/plugins.ts";
-import type { SessionID } from "../../utilities/logger/session-id.ts";
-import type { BootstrapMachineOutput } from "../bootstrap/index.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
+import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
+import type { BootstrapMachineOutput } from "#state-machines/bootstrap/index.ts";
+import type { ValidPluginMap } from "#types/plugins.ts";
+import type { SessionID } from "#utilities/logger/session-id.ts";
 import type { ApolloServer } from "@apollo/server";
 import type { CoreShutdownEvent } from "@repo/util-plugin-sdk/schemas/events/core.shutdown.event";
 import type Fuse from "@zkochan/fuse-native";

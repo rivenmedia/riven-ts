@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { describe, expect } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 const indexedAt = DateTime.utc().toJSDate();
 

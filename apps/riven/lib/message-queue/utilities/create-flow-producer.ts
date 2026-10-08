@@ -1,12 +1,13 @@
 import { FlowProducer } from "bullmq";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
+
 import { createPluginFlowJob } from "./create-flow-plugin-job.ts";
 import { queueRegistry } from "./queue-registry.ts";
 
-import type { Flow } from "../flows/index.ts";
+import type { Flow } from "#message-queue/flows/index.ts";
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type {

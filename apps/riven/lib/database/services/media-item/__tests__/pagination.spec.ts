@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 function sortByTitleAndState(items: { fullTitle: string; state: string }[]) {
   return items.toSorted((a, b) => {

@@ -1,11 +1,12 @@
-import { logger } from "../../../../../../../../utilities/logger/logger.ts";
-import { InvalidTorrentError } from "../../../../../../../sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { InvalidTorrentError } from "#message-queue/sandboxed-jobs/jobs/validate-torrent-files/utilities/validate-torrent-files.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { attemptPluginDownload } from "./attempt-plugin-download.ts";
 
 import type {
   FindValidTorrentContext,
   InfoHashAttemptState,
-} from "../find-valid-torrent.processor.ts";
+} from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
 
 /**
  * Attempts to download and validate a torrent from each of the available downloader plugins.

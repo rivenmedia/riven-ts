@@ -1,10 +1,10 @@
 import chalk from "chalk";
 
-import { logger } from "../../../../../../utilities/logger/logger.ts";
-import { MAX_HEALTH_CHECK_ATTEMPTS } from "../../../constants.ts";
+import { MAX_HEALTH_CHECK_ATTEMPTS } from "#message-queue/flows/request-stream-link/constants.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { StepContext } from "../../../request-stream-link.processor.ts";
-import type { getHealthCheckNextStep } from "../../../utilities/get-health-check-next-step.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
+import type { getHealthCheckNextStep } from "#message-queue/flows/request-stream-link/utilities/get-health-check-next-step.ts";
 
 export async function handleExpiredLink(
   { job, mediaEntry, streamService }: StepContext,

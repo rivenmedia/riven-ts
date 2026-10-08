@@ -3,8 +3,8 @@ import {
   MediaItemDownloadCacheCheckRequestedResponse,
 } from "@repo/util-plugin-sdk/schemas/events/media-item.download.cache-check-requested.event";
 
-import { runSingleJob } from "../../../../../../../utilities/run-single-job.ts";
-import { flow } from "../../../../../../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
 
 import type { ParentOptions } from "bullmq";
 

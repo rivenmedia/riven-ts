@@ -6,11 +6,12 @@ import {
 
 import { expect, vi } from "vitest";
 
-import { it as baseIt } from "../../../../../../../__tests__/test-context.ts";
-import * as rankingConfigModule from "../../../../../../../ranking-config/ranking-config.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import * as rankingConfigModule from "#ranking-config/ranking-config.ts";
+
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../../../../state-machines/main-runner/index.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
 const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
   streamFactory.create(6),

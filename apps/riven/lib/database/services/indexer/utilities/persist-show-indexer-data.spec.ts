@@ -5,7 +5,7 @@ import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";

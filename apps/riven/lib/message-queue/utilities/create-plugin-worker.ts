@@ -5,10 +5,11 @@ import { Worker } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 
-import { withLogContext } from "../../utilities/logger/log-context.ts";
-import { logger } from "../../utilities/logger/logger.ts";
-import { settings } from "../../utilities/settings.ts";
-import { telemetry } from "../../utilities/telemetry.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
+
 import { createQueue } from "./create-queue.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";

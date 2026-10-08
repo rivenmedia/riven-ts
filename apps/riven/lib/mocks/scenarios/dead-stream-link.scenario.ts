@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { URL } from "node:url";
 
-import { CompletedMovieSeeder } from "../../database/seeders/movies/completed-movie.seeder.ts";
-import { MockScenario } from "../utilities/mock-scenario.ts";
+import { CompletedMovieSeeder } from "#database/seeders/movies/completed-movie.seeder.ts";
+import { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 

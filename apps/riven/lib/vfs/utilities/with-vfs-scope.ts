@@ -1,4 +1,4 @@
-import { withLogContext } from "../../utilities/logger/log-context.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
 
 /**
  * Wraps a VFS operation handler with a Sentry scope to provide extra log metadata.

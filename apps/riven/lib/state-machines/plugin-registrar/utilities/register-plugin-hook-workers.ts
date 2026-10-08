@@ -1,15 +1,15 @@
 import chalk from "chalk";
 
-import { createPluginWorker } from "../../../message-queue/utilities/create-plugin-worker.ts";
-import { logger } from "../../../utilities/logger/logger.ts";
-import { eventSerialiserSchemaMap } from "../../../utilities/serialisers/event-serialiser-schemas.ts";
+import { createPluginWorker } from "#message-queue/utilities/create-plugin-worker.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { eventSerialiserSchemaMap } from "#utilities/serialisers/event-serialiser-schemas.ts";
 
 import type {
   PluginQueueMap,
   PluginWorkerMap,
   PublishableEventSet,
   ValidPluginMap,
-} from "../../../types/plugins.ts";
+} from "#types/plugins.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { Worker, Queue } from "bullmq";

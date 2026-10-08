@@ -1,5 +1,6 @@
-import { flow } from "../../../flows/producer.ts";
-import { createMapItemsToFilesJob } from "../map-items-to-files/map-items-to-files.schema.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { createMapItemsToFilesJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
+
 import { createValidateTorrentFilesJob } from "./validate-torrent-files.schema.ts";
 
 import type { ValidateTorrentFilesSandboxedJob } from "./validate-torrent-files.schema.ts";
