@@ -92,6 +92,7 @@ jobs:
       actions: read
       contents: read
       pull-requests: write
+      statuses: read
     uses: ./.github/workflows/check-for-visual-regressions.yaml
     with:
       run-id: ${{ github.event.workflow_run.id }}
