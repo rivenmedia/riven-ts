@@ -25,6 +25,11 @@ on:
         type: string
         required: false
         default: "{}"
+      args:
+        description: Arguments to pass to the turbo task
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
@@ -70,6 +75,7 @@ jobs:
         uses: ./.github/actions/filter-cached-turbo-tasks
         with:
           tasks: '[ "${{ inputs.task }}" ]'
+          args: ${{ inputs.args }}
           turbo-version: ${{ steps.get-turbo-version.outputs.result }}
         env:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -127,7 +133,7 @@ jobs:
             exit 1
           }
 
-          pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency "$CONCURRENCY"
+          pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency "$CONCURRENCY" -- ${{ inputs.args }}
         env:
           CONCURRENCY: ${{ inputs.concurrency }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}

@@ -23,7 +23,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  component-tests:
+  component-tests-matrix:
     name: Component tests (${{ matrix.os }})
     permissions:
       contents: write
@@ -34,12 +34,28 @@ jobs:
       matrix:
         os:
           - ubuntu-latest
+        shard:
+          - 1
+          - 2
+          - 3
+          - 4
     uses: ./.github/workflows/run-turbo-task.yaml
     with:
       runner: ${{ matrix.os }}
       task: test:component
+      args: --shard=${{ matrix.shard }}/4
       concurrency: 100%
     secrets: inherit
+
+  component-tests:
+    name: Component tests
+    needs: component-tests-matrix
+    if: always()
+    runs-on: ubuntu-latest
+    steps:
+      - name: Component tests failed
+        if: contains(fromJson('["failure", "cancelled"]'), needs.component-tests-matrix.result)
+        run: exit 1
 
   check-for-visual-regressions:
     name: Check for visual regressions
