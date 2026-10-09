@@ -1,17 +1,4 @@
-import { configureLocale } from "@/lib/utils/configure-luxon";
-
-import { faker } from "@faker-js/faker";
-import { DateTime, Settings } from "luxon";
 import { beforeEach, vi } from "vitest";
-
-configureLocale("en-GB");
-
-const baseDate = DateTime.fromObject({ year: 2026, month: 8, day: 26 });
-
-Settings.now = () => baseDate.toMillis();
-
-faker.seed(42);
-faker.setDefaultRefDate(baseDate.toJSDate());
 
 export class MemoryStorage implements Storage {
   readonly #items = new Map<string, string>();

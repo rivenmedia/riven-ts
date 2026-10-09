@@ -6,6 +6,10 @@ inputs:
   tasks:
     description: A JSON array of Turbo tasks to check
     required: true
+  args:
+    description: Arguments to pass to the Turbo tasks
+    required: false
+    default: ""
   turbo-version:
     description: The version of Turbo to use; will use the locally installed version if not provided
     required: false
@@ -24,6 +28,7 @@ runs:
       id: filter-cached-tasks
       env:
         TASKS: ${{ inputs.tasks }}
+        ARGS: ${{ inputs.args }}
         TURBO_VERSION: ${{ inputs.turbo-version }}
       run: |
         if ! jq -e 'type == "array" and all(.[]; type == "string")' <<< "$TASKS" > /dev/null; then
@@ -55,7 +60,7 @@ runs:
           exit 0
         fi
 
-        DRY_RUN_OUTPUT=$($TURBO_COMMAND --dry=json --affected "${TASK_LIST[@]}")
+        DRY_RUN_OUTPUT=$($TURBO_COMMAND --dry=json --affected "${TASK_LIST[@]}" -- $ARGS)
         REQUIRED_TASKS=$(jq -c --argjson tasks "$TASKS" '[.tasks[] | select(.cache.status == "MISS" and .command != "<NONEXISTENT>" and (.task as $task | ($tasks | index($task)) or (.taskId as $taskId | ($tasks | index($taskId))))) | .taskId]' <<< "$DRY_RUN_OUTPUT")
 
         echo "required-tasks=$REQUIRED_TASKS" >> "$GITHUB_OUTPUT"
