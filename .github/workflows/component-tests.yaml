@@ -62,7 +62,7 @@ jobs:
     name: Check for visual regressions
     needs: component-tests
     # Visual regressions fail the component tests, so this runs regardless of their result
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     permissions:
       actions: read
       contents: read
