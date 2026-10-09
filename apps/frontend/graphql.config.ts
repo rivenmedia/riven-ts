@@ -27,8 +27,7 @@ export default {
       // Note: these config options moved from the other generated file config
       config: {
         scalars: {
-          // oxlint-disable-next-line no-template-curly-in-string
-          ID: "`${string}-${string}-${string}-${string}-${string}`",
+          ID: "string",
           BigInt: "number",
           DateTimeISO: "string",
           JSONObject: "Record<string, unknown>",

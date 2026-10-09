@@ -1,8 +1,14 @@
 import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 
+import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
 import { MediaItemType } from "../enums/media-item-type.enum.ts";
+import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
+import { ItemImage } from "./item-image.type.ts";
 import { Ratings } from "./ratings.type.ts";
+import { Trailer } from "./trailer.type.ts";
+
+import type { Duration } from "luxon";
 
 /**
  * Represents a media item returned from an indexer.
@@ -55,8 +61,8 @@ export abstract class IndexerData {
   /**
    * The URL of the logo image for the media item.
    */
-  @Field(() => String, { nullable: true })
-  public logoUrl?: string | null;
+  @Field(() => ItemImage, { nullable: true })
+  public logo?: ItemImage | null;
 
   /**
    * The language of the media item.
@@ -96,5 +102,42 @@ export abstract class IndexerData {
   public type!: MediaItemType;
 
   @Field(() => Int, { nullable: true })
-  public year?: number | null;
+  public get year() {
+    if (!this.releaseDate) {
+      return null;
+    }
+
+    return this.releaseDate.getFullYear();
+  }
+
+  @Field(() => Trailer, { nullable: true })
+  public trailer?: Trailer | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public recommendations?: IndexerData[] | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public similarItems?: IndexerData[] | null;
+
+  @Field(() => [CastMember], { nullable: true })
+  public cast?: CastMember[] | null;
+
+  /**
+   * Used to calculate the formatted runtime
+   *
+   * @internal
+   */
+  public rawRuntime?: Duration | null;
+
+  @Field(() => String, { nullable: true })
+  public get runtime() {
+    if (!this.rawRuntime) {
+      return null;
+    }
+
+    return this.rawRuntime.toHuman();
+  }
+
+  @Field(() => IndexerDataStatus.out.unwrap().enum)
+  public status!: IndexerDataStatus;
 }

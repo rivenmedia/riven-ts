@@ -2,11 +2,13 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
 
+import type { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 @ObjectType({ implements: IndexerData })
-export class TmdbIndexerData implements IndexerData {
+export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   @Field(() => ID)
   public id!: string;
 
@@ -21,6 +23,8 @@ export class TmdbIndexerData implements IndexerData {
 
   @Field(() => String, { nullable: true })
   public backdropUrl?: string | null;
+
+  public logoUrl?: string | null;
 
   @Field(() => String, { nullable: true })
   public language?: string | null;
@@ -41,4 +45,8 @@ export class TmdbIndexerData implements IndexerData {
   public type!: Extract<MediaItemType, "movie" | "show">;
 
   public imdbId?: string | null;
+
+  public rawRuntime!: Duration | null;
+
+  public status!: IndexerDataStatus;
 }

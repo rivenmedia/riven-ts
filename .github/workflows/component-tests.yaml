@@ -81,7 +81,7 @@ jobs:
   visual-regressions:
     name: Visual regressions
     needs: check-for-visual-regressions
-    if: ${{ always() }}
+    if: always()
     runs-on: ubuntu-latest
     steps:
       - name: Check baselines are up to date

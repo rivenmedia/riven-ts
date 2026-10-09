@@ -21,5 +21,5 @@ export default async function MediaDetailsPage({
     return notFound();
   }
 
-  return <MediaDetailsPageClient data={data} />;
+  return <MediaDetailsPageClient data={data.tmdbItem} />;
 }

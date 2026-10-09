@@ -174,7 +174,7 @@ jobs:
       - build
       - merge
     runs-on: ubuntu-latest
-    if: always()
+    if: !cancelled()
     steps:
       - name: Build failed
         if: >-

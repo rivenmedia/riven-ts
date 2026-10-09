@@ -7,6 +7,11 @@ import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIds
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
+import { MovieCredits } from "../schemas/movie-credits.schema.ts";
+import { MovieImages } from "../schemas/movie-images.schema.ts";
+import { MovieRecommendations } from "../schemas/movie-recommendations.schema.ts";
+import { MovieSimilarItems } from "../schemas/movie-similar-items.schema.ts";
+import { MovieVideos } from "../schemas/movie-videos.schema.ts";
 
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TrendingMoviesPathParamsSchema } from "../__generated__/zod/trendingMoviesSchema.ts";
@@ -113,5 +118,49 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const response = await this.get<unknown>(`trending/movie/${timeWindow}`);
 
     return trendingMovies200Schema.parse(response);
+  }
+
+  public async getLocalisedVideos(movieId: string, locale?: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/videos`, {
+      params: {
+        language: locale,
+      },
+    });
+
+    return MovieVideos.parse(response);
+  }
+
+  public async getRecommendations(movieId: string) {
+    const response = await this.get<unknown>(
+      `movie/${movieId}/recommendations`,
+    );
+
+    return MovieRecommendations.parse(response);
+  }
+
+  public async getSimilarItems(movieId: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/similar`);
+
+    return MovieSimilarItems.parse(response);
+  }
+
+  public async getLocalisedCredits(movieId: string, language: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/credits`, {
+      params: {
+        language,
+      },
+    });
+
+    return MovieCredits.parse(response);
+  }
+
+  public async getLocalisedImages(movieId: string, language: string) {
+    const response = await this.get<unknown>(`movie/${movieId}/images`, {
+      params: {
+        language,
+      },
+    });
+
+    return MovieImages.parse(response);
   }
 }

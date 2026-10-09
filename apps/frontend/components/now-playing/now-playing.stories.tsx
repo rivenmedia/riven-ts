@@ -44,7 +44,8 @@ const meta = preview.meta({
             url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
           },
         },
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
       {
         id: "94605",
@@ -63,7 +64,8 @@ const meta = preview.meta({
         ],
         certification: "12A",
         ratings: {},
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
       {
         id: "1291595",
@@ -79,7 +81,8 @@ const meta = preview.meta({
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: {},
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
     ] satisfies IndexerData[],
   },
@@ -313,7 +316,8 @@ export const WithLongTitle = meta.story({
         ],
         certification: "R",
         ratings: {},
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
       {
         id: "1291593",
@@ -334,7 +338,8 @@ export const WithLongTitle = meta.story({
         ],
         certification: "R",
         ratings: {},
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
       {
         id: "1291595",
@@ -350,7 +355,8 @@ export const WithLongTitle = meta.story({
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: {},
-        logoUrl: null,
+        logo: null,
+        status: "released",
       },
     ],
   },
@@ -387,8 +393,13 @@ export const WithLogos = meta.story({
             url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
           },
         },
-        logoUrl:
-          "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+        logo: {
+          url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+          aspectRatio: 1.5,
+          height: 200,
+          width: 300,
+        },
+        status: "released",
       },
       {
         id: "94605",
@@ -407,8 +418,13 @@ export const WithLogos = meta.story({
         ],
         certification: "12A",
         ratings: {},
-        logoUrl:
-          "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+        logo: {
+          url: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
+          aspectRatio: 1.5,
+          height: 200,
+          width: 300,
+        },
+        status: "released",
       },
       {
         id: "1291595",
@@ -424,8 +440,13 @@ export const WithLogos = meta.story({
         genres: [{ id: "horror", name: "Horror" }],
         certification: "18",
         ratings: {},
-        logoUrl:
-          "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+        logo: {
+          url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+          aspectRatio: 1.5,
+          height: 200,
+          width: 300,
+        },
+        status: "released",
       },
     ],
   },

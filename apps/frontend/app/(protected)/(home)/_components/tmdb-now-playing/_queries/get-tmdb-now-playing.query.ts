@@ -24,7 +24,12 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
       language
       voteAverage
       certification(locale: $locale)
-      logoUrl
+      logo(width: 500) {
+        aspectRatio
+        height
+        width
+        url
+      }
       ratings {
         tmdb {
           logo

@@ -1,5 +1,6 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
-import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
+import { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
+import { DateTime, Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { Arg, ID, Query, Resolver } from "type-graphql";
 
@@ -40,6 +41,10 @@ export class TmdbResolver {
         : null,
       backdropUrl: formatImageUrl(item.backdrop_path, "backdrop"),
       type: "movie",
+      rawRuntime: item.runtime
+        ? Duration.fromObject({ minutes: item.runtime })
+        : null,
+      status: IndexerDataStatus.parse(item.status),
     };
   }
 
@@ -73,6 +78,8 @@ export class TmdbResolver {
         releaseDate: movie.release_date
           ? DateTime.fromISO(movie.release_date).toJSDate()
           : null,
+        rawRuntime: null,
+        status: "unknown",
       });
     }
 
@@ -112,6 +119,8 @@ export class TmdbResolver {
         releaseDate: movie.release_date
           ? DateTime.fromISO(movie.release_date).toJSDate()
           : null,
+        rawRuntime: null,
+        status: "unknown",
       });
     }
 
