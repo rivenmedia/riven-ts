@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import { source } from "@/lib/source";
+import { source } from "#lib/source.ts";
 
 import type { MetadataRoute } from "next";
 

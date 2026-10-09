@@ -10,15 +10,9 @@
     "isolatedModules": true,
     "jsx": "react-jsx",
     "exactOptionalPropertyTypes": false,
-    "plugins": [
-      {
-        "name": "next"
-      }
-    ],
-    "paths": {
-      "@/*": ["./*"],
-      "collections/*": ["./.source/*"]
-    }
+    "rewriteRelativeImportExtensions": false,
+    "allowImportingTsExtensions": true,
+    "plugins": [{ "name": "next" }]
   },
   "files": ["next-env.d.ts"],
   "include": [

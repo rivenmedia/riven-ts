@@ -140,7 +140,7 @@
     "codegen:nextjs-types": {
       "env": ["NODE_ENV"],
       "inputs": ["app/**/{page,layout}.tsx"],
-      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.d.ts"]
+      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.ts"]
     }
   }
 }
