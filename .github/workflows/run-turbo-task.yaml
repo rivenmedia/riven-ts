@@ -140,7 +140,7 @@ jobs:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - name: Post-verification steps
-        if: !cancelled()
+        if: ${{ !cancelled() }}
         uses: ./.github/actions/post-verify
         timeout-minutes: 10
         with:
@@ -148,7 +148,7 @@ jobs:
           success: ${{ steps.run-task.outcome == 'success' }}
 
       - uses: charpeni/turborepo-summary-action@v1
-        if: !cancelled()
+        if: ${{ !cancelled() }}
 
   success:
     name: Success
@@ -156,7 +156,7 @@ jobs:
       - get-required-tasks
       - run-turbo-task
     runs-on: ubuntu-latest
-    if: !cancelled()
+    if: ${{ !cancelled() }}
     steps:
       - name: Verification failed
         if: needs.get-required-tasks.result != 'success' ||
