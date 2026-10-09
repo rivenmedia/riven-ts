@@ -1,1 +1,10 @@
+# Baselines are committed by the update-visual-regression-baselines deployment, which attests them
+BASELINES=$(git diff --cached --name-only --no-renames --diff-filter=AM -- ':(glob)**/__vis__/*/__baselines__/**')
+
+if [ -n "$BASELINES" ]; then
+  echo "Visual regression baselines are committed by the update-visual-regression-baselines deployment. Unstage these files:" >&2
+  echo "$BASELINES" >&2
+  exit 1
+fi
+
 pnpm lint-staged

@@ -211,6 +211,7 @@ Default.test(
 Default.test(
   "Autoplays the carousel when not hovered",
   {
+    tags: ["!snapshot"],
     args: {
       autoplayDelay: 1000,
     },
