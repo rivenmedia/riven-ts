@@ -69,8 +69,15 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "test:component": {
+      "env": [
+        "CI" // Baseline screenshots aren't updated in CI
+      ],
       "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
+        "**/__baselines__/**",
+        "!**/__vis__/local/**",
+        "**/public/**",
+        "**/*.css",
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}", // Component tests use Storybook stories, not test files
         "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}", // Component tests use Storybook stories, not test files

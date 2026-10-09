@@ -10,4 +10,8 @@ certificates/
 *storybook.log
 storybook-static/
 public/mockServiceWorker.js
-__screenshots__
+
+# Visual regression snapshots
+**/__vis__/**/__diffs__
+**/__vis__/**/__results__
+**/__vis__/local

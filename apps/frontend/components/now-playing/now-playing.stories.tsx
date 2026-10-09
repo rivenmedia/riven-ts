@@ -84,7 +84,7 @@ const meta = preview.meta({
     ] satisfies IndexerData[],
   },
   parameters: {
-    screenshot: {
+    snapshot: {
       delay: 2500, // Half way between autoplay transitions to prevent taking screenshots mid-switch
     },
   },
@@ -94,13 +94,6 @@ export const Default = meta.story();
 
 Default.test(
   "Navigates to the next slide when the next button is clicked",
-  {
-    parameters: {
-      screenshot: {
-        skip: true,
-      },
-    },
-  },
   async ({ canvas, userEvent, step }) => {
     const firstSlideTitle = await canvas.findByRole("heading", {
       name: /john wick: chapter 4/iu,
@@ -134,13 +127,6 @@ Default.test(
 
 Default.test(
   "Navigates to the previous slide when the previous button is clicked",
-  {
-    parameters: {
-      screenshot: {
-        skip: true,
-      },
-    },
-  },
   async ({ canvas, userEvent, step }) => {
     const firstSlideTitle = await canvas.findByRole("heading", {
       name: /john wick: chapter 4/iu,
@@ -179,11 +165,6 @@ Default.test(
   {
     args: {
       autoplayDelay: 1000,
-    },
-    parameters: {
-      screenshot: {
-        skip: true,
-      },
     },
   },
   async ({ args, canvas, userEvent, step }) => {
@@ -227,13 +208,9 @@ Default.test(
 Default.test(
   "Autoplays the carousel when not hovered",
   {
+    tags: ["!snapshot"],
     args: {
       autoplayDelay: 1000,
-    },
-    parameters: {
-      screenshot: {
-        skip: true,
-      },
     },
   },
   async ({ args, canvas, step }) => {
@@ -262,11 +239,6 @@ Default.test(
   {
     args: {
       autoplayDelay: 5000,
-    },
-    parameters: {
-      screenshot: {
-        skip: true,
-      },
     },
   },
   async ({ args, canvas, userEvent, step }) => {

@@ -1,6 +1,6 @@
 import { Text } from "ink";
 
-import type { MediaItemState } from "../types/__generated__/graphql.ts";
+import type { MediaItemState } from "#types/__generated__/graphql.ts";
 import type { TextProps } from "ink";
 
 const STATE_LABELS = {

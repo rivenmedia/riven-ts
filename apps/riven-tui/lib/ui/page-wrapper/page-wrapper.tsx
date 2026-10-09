@@ -1,13 +1,14 @@
 import { Box } from "ink";
 import { useLocation, useNavigate } from "react-router";
 
-import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
-import { ScrollArea } from "../scroll-area/scroll-area.tsx";
-import { TabBar } from "../tab-bar/tab-bar.tsx";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
+import { ScrollArea } from "#ui/scroll-area/scroll-area.tsx";
+import { TabBar } from "#ui/tab-bar/tab-bar.tsx";
+
 import { PageFooter } from "./components/page-footer.tsx";
 import { PageHeader } from "./components/page-header.tsx";
 
-import type { TabBarProps } from "../tab-bar/tab-bar.tsx";
+import type { TabBarProps } from "#ui/tab-bar/tab-bar.tsx";
 import type { PropsWithChildren, ReactNode } from "react";
 
 interface PageWrapperProps {

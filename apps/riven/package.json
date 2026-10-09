@@ -47,7 +47,7 @@
     "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "tui": "riven-tui"
+    "tui": "NODE_ENV=production NODE_OPTIONS=--conditions=production riven-tui"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
