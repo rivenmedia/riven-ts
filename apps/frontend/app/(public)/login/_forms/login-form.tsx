@@ -1,30 +1,29 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/_ui/card";
-import { Field, FieldError, FieldLabel } from "@/components/_ui/field";
-import { Input } from "@/components/_ui/input";
-import { authClient } from "@/lib/auth/client";
-import { createScopedLogger } from "@/lib/logger";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { use, useEffect, useId } from "react";
 import { browser } from "react-dom";
 import { toast } from "sonner";
 
-import { loginUser } from "../_actions/login.action";
-import { OAuthProviders } from "../_components/oauth-providers";
-import { loginSchema } from "../_form-schemas/login.schema";
-import { browserSupportsPasskeys } from "../_utils/browser-supports-passkeys";
+import { loginUser } from "#app/(public)/login/_actions/login.action.ts";
+import { OAuthProviders } from "#app/(public)/login/_components/oauth-providers.tsx";
+import { loginSchema } from "#app/(public)/login/_form-schemas/login.schema.ts";
+import { browserSupportsPasskeys } from "#app/(public)/login/_utils/browser-supports-passkeys.ts";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "#components/_ui/card.tsx";
+import { Field, FieldError, FieldLabel } from "#components/_ui/field.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { authClient } from "#lib/auth/client.ts";
+import { createScopedLogger } from "#lib/logger.ts";
 
-import type { AuthProvider } from "@/app/_types/__generated__/graphql";
+import type { AuthProvider } from "#app/_types/__generated__/graphql.ts";
 
 const logger = createScopedLogger("login");
 

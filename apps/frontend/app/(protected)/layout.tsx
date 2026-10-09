@@ -1,5 +1,3 @@
-import { authClient } from "@/lib/auth/client";
-
 import {
   CalendarDays,
   FileClock,
@@ -12,9 +10,11 @@ import {
 } from "lucide-react";
 import { headers } from "next/headers";
 
-import { PageWrapper } from "./_components/page-wrapper";
+import { authClient } from "#lib/auth/client.ts";
 
-import type { SidebarItem } from "./_components/sidebar/sidebar";
+import { PageWrapper } from "./_components/page-wrapper.tsx";
+
+import type { SidebarItem } from "./_components/sidebar/sidebar.tsx";
 
 export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
   const headersList = await headers();

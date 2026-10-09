@@ -1,8 +1,3 @@
-import { Button } from "@/components/_ui/button";
-import { ButtonGroup } from "@/components/_ui/button-group";
-import { Field, FieldError, FieldLabel } from "@/components/_ui/field";
-import { Input } from "@/components/_ui/input";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { delay } from "es-toolkit";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
@@ -10,10 +5,15 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { FormBase } from "../form-base/form-base";
-import { SetPasswordFormSchema } from "./set-password.form-schema";
+import { ButtonGroup } from "#components/_ui/button-group.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { Field, FieldError, FieldLabel } from "#components/_ui/field.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import type { SetPasswordFormValues } from "./set-password.form-schema";
+import { SetPasswordFormSchema } from "./set-password.form-schema.ts";
+
+import type { SetPasswordFormValues } from "./set-password.form-schema.ts";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export function SetPasswordForm() {

@@ -1,11 +1,11 @@
-import preview from "@/.storybook/preview";
-
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
 import { fn } from "storybook/test";
 
-import { CardSelectionProvider } from "../providers/card-selection-provider";
-import { ListItem } from "./list-item";
+import preview from "#.storybook/preview.tsx";
+import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
+
+import { ListItem } from "./list-item.tsx";
 
 const meta = preview.meta({
   title: "Components / List Item",

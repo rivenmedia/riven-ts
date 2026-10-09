@@ -1,5 +1,5 @@
-import { preview } from "@/.storybook/preview";
-import { Skeleton } from "@/components/_ui/skeleton";
+import { preview } from "#.storybook/preview.tsx";
+import { Skeleton } from "#components/_ui/skeleton.tsx";
 
 /**
  * Use to show a placeholder while content is loading.

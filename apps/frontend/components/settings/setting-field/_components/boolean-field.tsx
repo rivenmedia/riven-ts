@@ -1,10 +1,10 @@
-import { Label } from "@/components/_ui/label";
-import { Switch } from "@/components/_ui/switch";
-
 import { useId, useMemo } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { CommonSettingFieldProps } from "../setting-field";
+import { Label } from "#components/_ui/label.tsx";
+import { Switch } from "#components/_ui/switch.tsx";
+
+import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";
 
 export interface SettingsBooleanFieldProps extends CommonSettingFieldProps {

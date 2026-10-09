@@ -1,14 +1,15 @@
-import { Button } from "@/components/_ui/button";
 import { RankingModelSchemaMetadata } from "@repo/util-rank-torrent-name";
 
 import { FormProvider, useForm } from "react-hook-form";
 
-import { SettingField } from "../../setting-field/setting-field";
-import { RankingModelSchema } from "../ranking-tab.form-schema";
-import { RankingProfileCard } from "./ranking-profile-card";
+import { Button } from "#components/_ui/button.tsx";
+import { RankingModelSchema } from "#components/settings/ranking-tab/ranking-tab.form-schema.ts";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
-import type { SettingFieldProps } from "../../setting-field/setting-field";
-import type { RankingModel } from "../ranking-tab.form-schema";
+import { RankingProfileCard } from "./ranking-profile-card.tsx";
+
+import type { RankingModel } from "#components/settings/ranking-tab/ranking-tab.form-schema.ts";
+import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export interface RankingProfilesTabProps {
   selectedProfile: string;

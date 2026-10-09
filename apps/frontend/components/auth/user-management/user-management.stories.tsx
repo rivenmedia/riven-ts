@@ -1,10 +1,10 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { http, HttpResponse } from "msw";
 import { expect, waitFor, within } from "storybook/test";
 
-import { UserManagement } from "./user-management";
+import { preview } from "#.storybook/preview.tsx";
+
+import { UserManagement } from "./user-management.tsx";
 
 const meta = preview.meta({
   title: "Auth / UserManagement",

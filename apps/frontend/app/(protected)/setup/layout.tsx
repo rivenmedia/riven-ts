@@ -5,7 +5,7 @@ import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hoo
 import { FormProvider } from "react-hook-form";
 import z from "zod";
 
-import { finishSetup } from "./_actions/finish-setup.action";
+import { finishSetup } from "./_actions/finish-setup.action.ts";
 
 const formSchema = z.object({
   test: z.string().optional(),

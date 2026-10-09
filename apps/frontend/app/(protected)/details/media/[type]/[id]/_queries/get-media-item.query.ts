@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 import type {
   GetMediaItemQuery,
   GetMediaItemQueryVariables,
-} from "./get-media-item.query.typegen";
+} from "./get-media-item.query.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_MEDIA_ITEM: TypedDocumentNode<

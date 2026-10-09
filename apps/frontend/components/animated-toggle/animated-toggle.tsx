@@ -4,7 +4,7 @@ import { animated, useSpring } from "@react-spring/web";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEvent, useMount } from "react-use";
 
-import { Button } from "../_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 
 export interface ToggleOption<T extends string = string> {
   label: string;

@@ -1,9 +1,9 @@
 import { cn } from "cn";
 import { DateTime } from "luxon";
 
-import { DayItemsList } from "../day-items-list/day-items-list";
+import { DayItemsList } from "#components/calendar/day-items-list/day-items-list.tsx";
 
-import type { CalendarDay } from "../types";
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 
 export interface CalendarDayCellProps {
   day: CalendarDay;

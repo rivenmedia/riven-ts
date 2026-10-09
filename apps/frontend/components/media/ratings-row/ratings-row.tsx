@@ -1,7 +1,7 @@
-import { fly } from "@/components/_animations/fly";
-
 import { cn } from "cn";
 import Image from "next/image";
+
+import { fly } from "#components/_animations/fly.ts";
 
 export interface Rating {
   name: string;

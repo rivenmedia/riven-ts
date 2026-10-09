@@ -1,14 +1,15 @@
-import { Button } from "@/components/_ui/button";
 import { LogLevel } from "@repo/feature-settings/enums/log-level.enum";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startCase } from "es-toolkit";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { SettingField } from "../setting-field/setting-field";
-import { GeneralTabFormSchema } from "./general-tab.form-schema";
+import { Button } from "#components/_ui/button.tsx";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
-import type { GeneralTabFormValues } from "./general-tab.form-schema";
+import { GeneralTabFormSchema } from "./general-tab.form-schema.ts";
+
+import type { GeneralTabFormValues } from "./general-tab.form-schema.ts";
 
 export interface GeneralTabProps {
   data: GeneralTabFormValues;

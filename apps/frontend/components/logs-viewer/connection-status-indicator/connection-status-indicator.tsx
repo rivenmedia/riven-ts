@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { getConnectionStatusText } from "../_utilities/get-connection-status-text";
+import { getConnectionStatusText } from "#components/logs-viewer/_utilities/get-connection-status-text.ts";
 
 export type ConnectionStatus =
   | "connecting"

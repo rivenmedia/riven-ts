@@ -8,7 +8,7 @@ import {
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
-import { nextCookiesClientPlugin } from "./plugins/next-cookies";
+import { nextCookiesClientPlugin } from "./plugins/next-cookies.ts";
 
 export const authClient = createAuthClient({
   baseURL: "https://localhost:9000",

@@ -1,21 +1,21 @@
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import { Spinner } from "@/components/_ui/spinner";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-import { authClient } from "@/lib/auth/client";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, Fingerprint, Pencil, X } from "lucide-react";
 import { DateTime } from "luxon";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { usePasskeyForm } from "./passkey-form-provider";
-import { PasskeyFormSchema } from "./passkey.form-schema";
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Spinner } from "#components/_ui/spinner.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
+import { authClient } from "#lib/auth/client.ts";
+
+import { usePasskeyForm } from "./passkey-form-provider.tsx";
+import { PasskeyFormSchema } from "./passkey.form-schema.ts";
 
 import type { Passkey } from "@better-auth/passkey/client";
 

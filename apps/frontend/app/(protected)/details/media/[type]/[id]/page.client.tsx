@@ -1,26 +1,26 @@
-import { fly } from "@/components/_animations/fly";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/_ui/carousel";
-import { BackdropBackground } from "@/components/media/backdrop-background/backdrop-background";
-import { FileInformationPanel } from "@/components/media/file-information-panel/file-information-panel";
-import { HeroBanner } from "@/components/media/hero-banner/hero-banner";
-import { RatingsRow } from "@/components/media/ratings-row/ratings-row";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { StatusBadge } from "@/components/media/status-badge/status-badge";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
-
 import { cn } from "cn";
 import Image from "next/image";
 import React from "react";
 
-import { ItemActionToolbar } from "./_components/item-action-toolbar";
-import { MediaCarousel } from "./_components/media-carousel";
-import { SeasonList } from "./_components/season-list";
+import { fly } from "#components/_animations/fly.ts";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "#components/_ui/carousel.tsx";
+import { BackdropBackground } from "#components/media/backdrop-background/backdrop-background.tsx";
+import { FileInformationPanel } from "#components/media/file-information-panel/file-information-panel.tsx";
+import { HeroBanner } from "#components/media/hero-banner/hero-banner.tsx";
+import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import type { GetMediaItemQuery } from "./_queries/get-media-item.query.typegen";
+import { ItemActionToolbar } from "./_components/item-action-toolbar.tsx";
+import { MediaCarousel } from "./_components/media-carousel.tsx";
+import { SeasonList } from "./_components/season-list.tsx";
+
+import type { GetMediaItemQuery } from "./_queries/get-media-item.query.typegen.ts";
 
 interface MediaDetailsPageProps {
   data: GetMediaItemQuery;

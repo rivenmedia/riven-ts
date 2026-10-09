@@ -1,14 +1,14 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { graphql, HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
-import { GET_RECENTLY_ADDED } from "./_components/recently-added";
-import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query";
-import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies";
-import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows";
-import HomePage from "./page";
+import { preview } from "#.storybook/preview.tsx";
+
+import { GET_RECENTLY_ADDED } from "./_components/recently-added.tsx";
+import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
+import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies.ts";
+import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows.ts";
+import HomePage from "./page.tsx";
 
 import type { UUID } from "node:crypto";
 

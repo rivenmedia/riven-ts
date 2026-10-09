@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-import { Label } from "@/components/_ui/label";
-import { Switch } from "@/components/_ui/switch";
-
 import { expect, userEvent } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { Switch } from "#components/_ui/switch.tsx";
 
 /**
  * A control that allows the user to toggle between checked and not checked.

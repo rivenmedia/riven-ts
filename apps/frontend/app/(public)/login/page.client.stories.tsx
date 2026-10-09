@@ -1,11 +1,11 @@
-import preview from "@/.storybook/preview";
-
 import { redirect } from "@storybook/nextjs-vite/navigation.mock";
 import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { expect, spyOn } from "storybook/test";
 
-import { LoginPage } from "./page.client";
+import preview from "#.storybook/preview.tsx";
+
+import { LoginPage } from "./page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Login",

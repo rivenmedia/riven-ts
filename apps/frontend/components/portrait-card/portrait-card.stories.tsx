@@ -1,10 +1,10 @@
-import { preview } from "@/.storybook/preview";
-
 import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
-import { Badge } from "../_ui/badge";
-import { PortraitCard } from "./portrait-card";
+import { preview } from "#.storybook/preview.tsx";
+import { Badge } from "#components/_ui/badge.tsx";
+
+import { PortraitCard } from "./portrait-card.tsx";
 
 const meta = preview.meta({
   title: "Components / PortraitCard",

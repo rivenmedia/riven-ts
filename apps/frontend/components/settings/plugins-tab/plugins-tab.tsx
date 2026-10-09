@@ -1,14 +1,14 @@
-import { Button } from "@/components/_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/_ui/tabs";
+} from "#components/_ui/tabs.tsx";
 
-import { SinglePluginTab } from "./_components/single-plugin-tab";
+import { SinglePluginTab } from "./_components/single-plugin-tab.tsx";
 
-import type { SettingFieldProps } from "../setting-field/setting-field";
+import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export interface PluginTab {
   title: string;

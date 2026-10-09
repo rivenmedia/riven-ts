@@ -1,10 +1,10 @@
 "use client";
 
-import { Badge } from "@/components/_ui/badge";
-import { Button } from "@/components/_ui/button";
-
 import { ArrowLeft, Home, TriangleAlert } from "lucide-react";
 import Link from "next/link";
+
+import { Badge } from "#components/_ui/badge.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 export default function NotFoundPage() {
   return (

@@ -1,15 +1,15 @@
 import { cn } from "cn";
 
-import { SettingsBooleanField } from "./_components/boolean-field";
-import { SettingsCustomRankField } from "./_components/custom-rank-field";
-import { SettingsDictionaryField } from "./_components/dictionary-field";
-import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field";
-import { SettingsNumberField } from "./_components/number-field";
-import { SettingsSecretField } from "./_components/secret-field";
-import { SettingsSelectField } from "./_components/select-field";
-import { SettingGroup } from "./_components/setting-group";
-import { SettingsStringArrayField } from "./_components/string-array-field";
-import { SettingsTextField } from "./_components/text-field";
+import { SettingsBooleanField } from "./_components/boolean-field.tsx";
+import { SettingsCustomRankField } from "./_components/custom-rank-field.tsx";
+import { SettingsDictionaryField } from "./_components/dictionary-field.tsx";
+import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field.tsx";
+import { SettingsNumberField } from "./_components/number-field.tsx";
+import { SettingsSecretField } from "./_components/secret-field.tsx";
+import { SettingsSelectField } from "./_components/select-field.tsx";
+import { SettingGroup } from "./_components/setting-group.tsx";
+import { SettingsStringArrayField } from "./_components/string-array-field.tsx";
+import { SettingsTextField } from "./_components/text-field.tsx";
 
 import type { ComponentProps, ComponentType } from "react";
 

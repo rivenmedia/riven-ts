@@ -1,9 +1,9 @@
-import { SettingField } from "../setting-field";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import type {
   CommonSettingFieldProps,
   SettingFieldProps,
-} from "../setting-field";
+} from "#components/settings/setting-field/setting-field.tsx";
 
 export interface SettingGroupProps extends Omit<
   CommonSettingFieldProps,

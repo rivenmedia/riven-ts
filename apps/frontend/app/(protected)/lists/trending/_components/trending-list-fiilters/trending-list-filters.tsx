@@ -1,24 +1,5 @@
 "use client";
 
-import { Badge } from "@/components/_ui/badge";
-import { Button } from "@/components/_ui/button";
-import { Label } from "@/components/_ui/label";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/_ui/popover";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/_ui/select";
-import { Separator } from "@/components/_ui/separator";
-import { Slider } from "@/components/_ui/slider";
-import { DatePicker } from "@/components/date-picker/date-picker";
-import { SelectablePill } from "@/components/selectable-pill/selectable-pill";
 import {
   MovieContentRating,
   ShowContentRating,
@@ -29,15 +10,35 @@ import { ArrowUpDownIcon, FilterIcon, XIcon } from "lucide-react";
 import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
+import { Badge } from "#components/_ui/badge.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "#components/_ui/popover.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#components/_ui/select.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
+import { Slider } from "#components/_ui/slider.tsx";
+import { DatePicker } from "#components/date-picker/date-picker.tsx";
+import { SelectablePill } from "#components/selectable-pill/selectable-pill.tsx";
+
 import {
   LANGUAGE_OPTIONS,
   MOVIE_GENRES,
   SORT_OPTIONS,
   TV_GENRES,
-} from "./constants";
-import { TrendingListFiltersFormSchema } from "./trending-list-filters.form-schema";
+} from "./constants.ts";
+import { TrendingListFiltersFormSchema } from "./trending-list-filters.form-schema.ts";
 
-import type { TrendingListFiltersFormValues } from "./trending-list-filters.form-schema";
+import type { TrendingListFiltersFormValues } from "./trending-list-filters.form-schema.ts";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 export interface TrendingListFiltersProps {
