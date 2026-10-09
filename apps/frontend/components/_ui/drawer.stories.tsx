@@ -1,4 +1,6 @@
-import preview from "@/.storybook/preview";
+import { expect, fn, userEvent, within } from "storybook/test";
+
+import preview from "#.storybook/preview.tsx";
 import {
   Drawer,
   DrawerClose,
@@ -8,9 +10,7 @@ import {
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
-} from "@/components/_ui/drawer";
-
-import { expect, fn, userEvent, within } from "storybook/test";
+} from "#components/_ui/drawer.tsx";
 
 /**
  * A drawer component for React.

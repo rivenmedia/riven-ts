@@ -1,13 +1,13 @@
-import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
+import assert from "node:assert";
+
+import { GET_AUTH_PROVIDERS } from "#app/(public)/login/_queries/get-auth-providers.query.ts";
 import {
   HttpResponse,
   expect,
   graphql,
   http,
   test,
-} from "@/playwright/fixtures";
-
-import assert from "node:assert";
+} from "#playwright/fixtures.ts";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 

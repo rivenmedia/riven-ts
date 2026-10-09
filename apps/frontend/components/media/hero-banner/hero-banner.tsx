@@ -1,11 +1,11 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import { Play, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+
+import { Button } from "#components/_ui/button.tsx";
 
 export interface Trailer {
   id?: string | number;

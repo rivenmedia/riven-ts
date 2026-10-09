@@ -3,11 +3,11 @@
 import { cn } from "cn";
 import { useMemo } from "react";
 
-import { Badge } from "../_ui/badge";
-import { PortraitCard } from "../portrait-card/portrait-card";
-import { useCardSelection } from "../providers/card-selection-provider";
+import { Badge } from "#components/_ui/badge.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
+import { useCardSelection } from "#components/providers/card-selection-provider.tsx";
 
-import type { IndexerData } from "@/app/_types/__generated__/graphql";
+import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,

@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { LogEntryRow } from "./log-entry-row";
+import { LogEntryRow } from "./log-entry-row.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / LogEntryRow",

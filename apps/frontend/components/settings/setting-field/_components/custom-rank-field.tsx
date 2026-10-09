@@ -1,11 +1,11 @@
-import { Input } from "@/components/_ui/input";
-import { Label } from "@/components/_ui/label";
-import { Switch } from "@/components/_ui/switch";
-
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { CommonSettingFieldProps } from "../setting-field";
+import { Input } from "#components/_ui/input.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { Switch } from "#components/_ui/switch.tsx";
+
+import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export function SettingsCustomRankField({
   name,

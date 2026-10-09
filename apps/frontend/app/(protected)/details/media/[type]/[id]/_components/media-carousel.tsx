@@ -1,15 +1,15 @@
-import { fly } from "@/components/_animations/fly";
+import { cn } from "cn";
+import Link from "next/link";
+import React from "react";
+
+import { fly } from "#components/_animations/fly.ts";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/_ui/carousel";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
-
-import { cn } from "cn";
-import Link from "next/link";
-import React from "react";
+} from "#components/_ui/carousel.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 

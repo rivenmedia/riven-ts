@@ -1,20 +1,24 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-import { NotificationCenter } from "@/components/notification-center/notification-center";
-import { ThemeSwitcher } from "@/components/theme-switcher/theme-switcher";
-import { getInitials } from "@/lib/utils";
-
 import { cn } from "cn";
 import { Mountain } from "lucide-react";
 import Link from "next/link";
 
-import { LogOutButton } from "./_components/log-out-button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#components/_ui/avatar.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
+import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
+import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
+import { getInitials } from "#lib/utils.ts";
 
-import type { User } from "@/lib/auth/types";
+import { LogOutButton } from "./_components/log-out-button.tsx";
+
+import type { User } from "#lib/auth/types.ts";
 import type { ComponentProps, ReactNode } from "react";
 
 export interface SidebarItem {

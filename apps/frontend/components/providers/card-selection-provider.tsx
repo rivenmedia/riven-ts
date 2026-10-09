@@ -1,8 +1,8 @@
 import { createContext, startTransition, use, useMemo, useState } from "react";
 
-import { SelectionActionBar } from "../selection-action-bar/selection-action-bar";
+import { SelectionActionBar } from "#components/selection-action-bar/selection-action-bar.tsx";
 
-import type { SelectionAction } from "../selection-action-bar/selection-action-bar";
+import type { SelectionAction } from "#components/selection-action-bar/selection-action-bar.tsx";
 import type { PropsWithChildren } from "react";
 
 interface CardSelectionContextValue {

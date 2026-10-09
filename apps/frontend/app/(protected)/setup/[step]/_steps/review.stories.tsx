@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { SetupReviewStep } from "./review";
+import { SetupReviewStep } from "./review.tsx";
 
 const meta = preview.meta({
   title: "Setup / Review",

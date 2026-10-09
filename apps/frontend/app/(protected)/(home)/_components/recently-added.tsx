@@ -1,17 +1,17 @@
 "use client";
 
-import { fly } from "@/components/_animations/fly";
-import { ListCarousel } from "@/components/list-carousel/list-carousel";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { cn } from "cn";
 
+import { fly } from "#components/_animations/fly.ts";
+import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+
 import type {
   GetRecentlyAddedQuery,
   GetRecentlyAddedQueryVariables,
-} from "./recently-added.typegen";
+} from "./recently-added.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 import type { HTMLAttributes } from "react";
 

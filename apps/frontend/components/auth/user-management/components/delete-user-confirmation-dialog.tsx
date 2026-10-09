@@ -1,3 +1,6 @@
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -8,14 +11,11 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "@/components/_ui/alert-dialog";
-import { Button } from "@/components/_ui/button";
-import { authClient } from "@/lib/auth/client";
+} from "#components/_ui/alert-dialog.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { authClient } from "#lib/auth/client.ts";
 
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import type { User } from "@/lib/auth/client";
+import type { User } from "#lib/auth/client.ts";
 
 interface DeleteUserConfirmationDialogProps {
   user: User;

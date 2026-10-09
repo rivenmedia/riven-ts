@@ -2,10 +2,10 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/_ui/carousel";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
+} from "#components/_ui/carousel.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import type { SeasonData } from "./season-selector";
+import type { SeasonData } from "./season-selector.tsx";
 
 interface SeasonListProps {
   seasons: SeasonData[];

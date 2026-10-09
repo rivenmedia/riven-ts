@@ -1,8 +1,8 @@
-import preview from "@/.storybook/preview";
+import preview from "#.storybook/preview.tsx";
 
-import { LibraryPage } from "./page.client";
+import { LibraryPage } from "./page.client.tsx";
 
-import type { MediaItem } from "@/app/_types/__generated__/graphql";
+import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 
 const meta = preview.meta({
   title: "Pages / Library",

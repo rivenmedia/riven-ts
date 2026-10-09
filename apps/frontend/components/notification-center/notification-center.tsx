@@ -1,20 +1,24 @@
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/_ui/popover";
-
 import { cn } from "cn";
 import { Bell, BellRing, Check, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
-import { Badge } from "../_ui/badge";
-import { Button } from "../_ui/button";
-import { Separator } from "../_ui/separator";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../_ui/tooltip";
-import { useNotificationsContext } from "../providers/notifications-provider";
-import { formatTimestamp } from "./utilities/format-timestamp";
-import { getTypeColor } from "./utilities/get-type-color";
+import { Badge } from "#components/_ui/badge.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "#components/_ui/popover.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
+import { useNotificationsContext } from "#components/providers/notifications-provider.tsx";
+
+import { formatTimestamp } from "./utilities/format-timestamp.ts";
+import { getTypeColor } from "./utilities/get-type-color.ts";
 
 import type { ComponentProps } from "react";
 

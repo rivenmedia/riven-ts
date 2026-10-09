@@ -1,8 +1,8 @@
-import { Checkbox } from "@/components/_ui/checkbox";
-import { Field, FieldGroup, FieldLabel } from "@/components/_ui/field";
-
 import { cn } from "cn";
 import { useFormContext } from "react-hook-form";
+
+import { Checkbox } from "#components/_ui/checkbox.tsx";
+import { Field, FieldGroup, FieldLabel } from "#components/_ui/field.tsx";
 
 import type { HTMLAttributes } from "react";
 

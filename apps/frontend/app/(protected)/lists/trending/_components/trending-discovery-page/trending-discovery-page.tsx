@@ -1,16 +1,16 @@
 "use client";
 
-import { ImmersiveBackground } from "@/components/immersive-background/immersive-background";
-import { PageShell } from "@/components/page-shell/page-shell";
-import { PortraitCardSkeleton } from "@/components/portrait-card/portrait-card-skeleton";
-
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { TrendingListFilters } from "../trending-list-fiilters/trending-list-filters";
-import { TrendingDiscoveryItemList } from "./_components/trending-discovery-item-list";
+import { TrendingListFilters } from "#app/(protected)/lists/trending/_components/trending-list-fiilters/trending-list-filters.tsx";
+import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-skeleton.tsx";
 
-import type { TrendingListFiltersFormValues } from "../trending-list-fiilters/trending-list-filters.form-schema";
+import { TrendingDiscoveryItemList } from "./_components/trending-discovery-item-list.tsx";
+
+import type { TrendingListFiltersFormValues } from "#app/(protected)/lists/trending/_components/trending-list-fiilters/trending-list-filters.form-schema.ts";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
 export interface TrendingDiscoveryPageProps {

@@ -2,7 +2,7 @@ import { cn } from "cn";
 import { Check, Mountain } from "lucide-react";
 import Image from "next/image";
 
-import { Checkbox } from "../_ui/checkbox";
+import { Checkbox } from "#components/_ui/checkbox.tsx";
 
 interface PortraitCardProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,

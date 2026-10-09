@@ -1,3 +1,3 @@
-import { configureLocale } from "./lib/utils/configure-luxon";
+import { configureLocale } from "#lib/utils/configure-luxon.ts";
 
 configureLocale();

@@ -6,6 +6,11 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.css": "./*.css",
+    "#*.ts": "./*.ts",
+    "#*.tsx": "./*.tsx"
+  },
   "exports": {
     "./wiki.config": "./wiki.config.ts"
   },

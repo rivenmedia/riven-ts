@@ -1,11 +1,11 @@
 "use client";
 
-import { Label } from "@/components/_ui/label";
-import { Separator } from "@/components/_ui/separator";
-
 import { cva } from "class-variance-authority";
 import { cn } from "cn";
 import { useMemo } from "react";
+
+import { Label } from "#components/_ui/label.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
 
 import type { VariantProps } from "class-variance-authority";
 

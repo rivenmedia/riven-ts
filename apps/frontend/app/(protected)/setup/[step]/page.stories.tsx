@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import SetupStepPage from "./page";
+import SetupStepPage from "./page.tsx";
 
 const meta = preview.meta({
   title: "Pages / Setup",

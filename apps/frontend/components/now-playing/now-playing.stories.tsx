@@ -1,11 +1,11 @@
-import { preview } from "@/.storybook/preview";
-
 import { expect, waitFor } from "storybook/test";
 
-import { NowPlaying } from "./now-playing";
-import { NowPlayingSkeleton } from "./now-playing-skeleton";
+import { preview } from "#.storybook/preview.tsx";
 
-import type { IndexerData } from "@/app/_types/__generated__/graphql";
+import { NowPlayingSkeleton } from "./now-playing-skeleton.tsx";
+import { NowPlaying } from "./now-playing.tsx";
+
+import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 const meta = preview.meta({
   title: "Components / NowPlaying",
