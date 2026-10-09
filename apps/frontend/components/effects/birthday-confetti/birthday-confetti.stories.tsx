@@ -4,12 +4,10 @@ import { BirthdayConfetti } from "./birthday-confetti.tsx";
 
 const meta = preview.meta({
   title: "Effects / BirthdayConfetti",
+  tags: ["!snapshot"],
   component: BirthdayConfetti,
   parameters: {
     layout: "fullscreen",
-    screenshot: {
-      skip: true,
-    },
   },
 });
 

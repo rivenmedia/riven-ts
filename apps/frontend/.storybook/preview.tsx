@@ -10,6 +10,7 @@ import { headers } from "@storybook/nextjs-vite/headers.mock";
 import mswAddon from "msw-storybook-addon";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
+import addonVis from "storybook-addon-vis";
 import { expect, sb } from "storybook/test";
 import { themes } from "storybook/theming";
 
@@ -19,16 +20,23 @@ import { Providers } from "#components/providers.tsx";
 
 import { WithI18n } from "./decorators/with-i18n.tsx";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
+import { normaliseEnvironment } from "./test-utils/normalise-environment.ts";
+import {
+  prepareAutoSnapshot,
+  resetAutoSnapshot,
+} from "./test-utils/visual-testing.ts";
 
-import type { ScreenshotParameters } from "@storycap-testrun/browser";
+import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 // Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
 
+normaliseEnvironment();
+
 declare module "@storybook/nextjs-vite" {
   interface Parameters {
-    screenshot?: ScreenshotParameters;
+    snapshot?: SnapshotParameters;
   }
 }
 
@@ -63,8 +71,17 @@ declare module "storybook/internal/csf" {
 }
 
 export const preview = definePreview({
-  tags: ["autodocs"],
-  addons: [addonA11y(), addonDocs(), addonVitest(), mswAddon()],
+  tags: ["autodocs", "snapshot"],
+  addons: [
+    addonA11y(),
+    addonDocs(),
+    addonVitest(),
+    mswAddon(),
+    addonVis({
+      auto: prepareAutoSnapshot,
+      createMissingBaseline: !import.meta.env.CI,
+    }),
+  ],
   parameters: {
     i18n,
     controls: {
@@ -134,6 +151,7 @@ export const preview = definePreview({
     },
   ],
   beforeEach({ globals }) {
+    resetAutoSnapshot();
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
 

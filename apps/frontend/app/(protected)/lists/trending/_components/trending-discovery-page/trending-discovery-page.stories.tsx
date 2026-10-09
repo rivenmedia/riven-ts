@@ -13,7 +13,7 @@ const meta = preview.meta({
   component: TrendingDiscoveryPage,
   parameters: {
     layout: "fullscreen",
-    screenshot: {
+    snapshot: {
       fullPage: false,
     },
   },

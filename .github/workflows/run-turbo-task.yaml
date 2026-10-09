@@ -18,21 +18,23 @@ on:
       runner-requirements:
         description: A list of requirements for the verification runner
         type: string
-        required: true
+        required: false
+        default: "[]"
       env:
         description: Environment variables to set when running the turbo task
         type: string
-        required: true
-      force:
-        description: Whether to force task execution
-        type: boolean
-        required: true
+        required: false
+        default: "{}"
+      args:
+        description: Arguments to pass to the turbo task
+        type: string
+        required: false
+        default: ""
 
 permissions:
   contents: read
 
 env:
-  TURBO_FORCE: ${{ inputs.force }}
   TURBO_RUN_SUMMARY: 1
   DO_NOT_TRACK: true # Disable Turborepo telemetry - https://turborepo.dev/docs/telemetry
 
@@ -73,6 +75,7 @@ jobs:
         uses: ./.github/actions/filter-cached-turbo-tasks
         with:
           tasks: '[ "${{ inputs.task }}" ]'
+          args: ${{ inputs.args }}
           turbo-version: ${{ steps.get-turbo-version.outputs.result }}
         env:
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}
@@ -83,7 +86,7 @@ jobs:
           echo "Required tasks: ${{ steps.get-required-tasks.outputs.required-tasks }}"
 
   run-turbo-task:
-    name: Run ${{ inputs.task }}
+    name: Run ${{ inputs.task }} ${{ inputs.args }}
     needs: get-required-tasks
     if: needs.get-required-tasks.outputs.required-tasks != '[]'
     runs-on: ${{ inputs.runner }}
@@ -122,7 +125,7 @@ jobs:
         with:
           task: ${{ inputs.task }}
 
-      - name: Run ${{ inputs.task }}
+      - name: Run ${{ inputs.task }} ${{ inputs.args }}
         id: run-task
         run: |
           [[ "$CONCURRENCY" =~ ^[0-9]+%?$ ]] || {
@@ -130,7 +133,7 @@ jobs:
             exit 1
           }
 
-          pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency "$CONCURRENCY"
+          pnpm turbo ${{ join(fromJson(needs.get-required-tasks.outputs.required-tasks), ' ') }} --continue --concurrency "$CONCURRENCY" -- ${{ inputs.args }}
         env:
           CONCURRENCY: ${{ inputs.concurrency }}
           TURBO_TEAM: ${{ vars.TURBO_TEAM }}

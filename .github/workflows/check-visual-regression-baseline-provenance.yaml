@@ -1,0 +1,127 @@
+name: Check visual regression baseline provenance
+
+description: |
+  Asserts that all visual regression baselines changed in a pull request
+  were modified by the update-visual-regression-baselines deployment
+
+on:
+  # `pull_request_target` runs from the base branch,
+  # so a malicious pull request cannot bypass the checks
+  pull_request_target:
+    types:
+      - opened
+      - reopened
+      - synchronize
+  workflow_call:
+    inputs:
+      pr-number:
+        description: The number of the pull request to check
+        type: string
+        required: true
+      head-sha:
+        description: The pull request commit to check
+        type: string
+        required: true
+      report-only:
+        description: Whether to report baselines changed outside of the deployment without failing
+        type: boolean
+        default: false
+    outputs:
+      unattested-baselines:
+        description: A JSON array of the baselines changed outside of the deployment
+        value: ${{ jobs.baseline-provenance.outputs.unattested-baselines }}
+
+permissions: {}
+
+jobs:
+  baseline-provenance:
+    name: Baseline provenance
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+      statuses: read
+    outputs:
+      unattested-baselines: ${{ steps.provenance.outputs.unattested-baselines }}
+    env:
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      PR_NUMBER: ${{ inputs.pr-number || github.event.pull_request.number }}
+      HEAD_SHA: ${{ inputs.head-sha || github.event.pull_request.head.sha }}
+      ATTESTATION_CONTEXT: visual-regression-baselines
+      # The bot user of the GitHub App used by the update-visual-regression-baselines deployment
+      ATTESTATION_CREATOR: riven-ts-visual-regression-updater[bot]
+    steps:
+      - name: Fetch pull request history
+        run: |
+          BASE_SHA=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json baseRefOid --jq .baseRefOid)
+
+          gh auth setup-git
+          git init -q
+          git fetch -q --filter=blob:none --no-tags "https://github.com/$GITHUB_REPOSITORY" "$BASE_SHA" "$HEAD_SHA"
+
+          echo "MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")" >> $GITHUB_ENV
+
+      - name: Check baselines were changed by the deployment
+        id: provenance
+        env:
+          REPORT_ONLY: ${{ inputs.report-only }}
+        run: |
+          # Removed baselines are not checked, as a removed baseline that is still needed fails the component tests
+          CHANGED_BASELINES=$(git diff --name-only --no-renames --diff-filter=d "$MERGE_BASE" "$HEAD_SHA" -- ':(glob)**/__vis__/*/__baselines__/**')
+
+          mapfile -t CHANGED < <(grep . <<< "$CHANGED_BASELINES" || true)
+
+          is_attested() {
+            local ATTESTATIONS
+
+            ATTESTATIONS=$(gh api "repos/$GITHUB_REPOSITORY/commits/$1/statuses?per_page=100" \
+              --jq '[.[] | select(.context == env.ATTESTATION_CONTEXT and .state == "success" and .creator.login == env.ATTESTATION_CREATOR)] | length')
+
+            (( ATTESTATIONS > 0 ))
+          }
+
+          # The baselines in the most recently attested commit were all accepted by the deployment
+          ATTESTED=""
+
+          if (( ${#CHANGED[@]} > 0 )); then
+            for COMMIT in $(git rev-list "$MERGE_BASE..$HEAD_SHA"); do
+              if is_attested "$COMMIT"; then
+                ATTESTED="$COMMIT"
+                break
+              fi
+            done
+
+            # The deployment attests its commit just after pushing it, so wait when the head claims to be from it
+            if [[ "$ATTESTED" != "$HEAD_SHA" && "$(git log -1 --format=%an "$HEAD_SHA")" == "$ATTESTATION_CREATOR" ]]; then
+              for _ in {1..12}; do
+                sleep 10
+
+                if is_attested "$HEAD_SHA"; then
+                  ATTESTED="$HEAD_SHA"
+                  break
+                fi
+              done
+            fi
+          fi
+
+          echo "Most recently attested commit: ${ATTESTED:-none}"
+
+          UNATTESTED=()
+
+          for BASELINE in "${CHANGED[@]}"; do
+            if [[ -n "$ATTESTED" && "$(git rev-parse "$HEAD_SHA:$BASELINE")" == "$(git rev-parse -q --verify "$ATTESTED:$BASELINE" || true)" ]]; then
+              continue
+            fi
+
+            UNATTESTED+=("$BASELINE")
+          done
+
+          echo "Baselines changed outside of the deployment (${#UNATTESTED[@]}):"
+          printf '  %s\n' "${UNATTESTED[@]}"
+
+          echo "unattested-baselines=$(printf '%s\n' "${UNATTESTED[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> $GITHUB_OUTPUT
+
+          if (( ${#UNATTESTED[@]} > 0 )) && [[ "$REPORT_ONLY" != "true" ]]; then
+            echo "::error::${#UNATTESTED[@]} baselines were changed outside of the update-visual-regression-baselines deployment. Revert them, and the deployment will commit the baselines once a maintainer approves it."
+            exit 1
+          fi

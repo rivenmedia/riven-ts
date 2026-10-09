@@ -1,0 +1,230 @@
+import type {
+  ImageSnapshotSubjectOptions,
+  SetupVisOptions,
+  ToMatchImageSnapshotOptions,
+} from "storybook-addon-vis";
+
+declare module "vitest/browser" {
+  interface BrowserCommands {
+    setBrowserViewport: (width: number, height: number) => Promise<void>;
+  }
+}
+
+/**
+ * Options for the automatic snapshot taken at the end of each story test, set via `parameters.snapshot`
+ */
+export interface SnapshotParameters
+  extends ToMatchImageSnapshotOptions, ImageSnapshotSubjectOptions {
+  /** Milliseconds to wait before capturing, e.g. to avoid capturing a carousel mid-transition */
+  delay?: number;
+  /** Set to `false` to capture only the viewport, for pages that render long or infinite lists */
+  fullPage?: boolean;
+}
+
+const isInViewport = (element: Element) => {
+  const { bottom, right, top, left } = element.getBoundingClientRect();
+
+  return (
+    bottom > 0 &&
+    right > 0 &&
+    top < globalThis.innerHeight &&
+    left < globalThis.innerWidth
+  );
+};
+
+/** Matches each `url("...")` in a computed `background-image`, which Chromium always serialises with double quotes */
+const BACKGROUND_IMAGE_URL_PATTERN = /url\("[^"]+"\)/gu;
+
+/**
+ * Loads the CSS background images in the viewport (e.g. `style={{ backgroundImage }}`), as they aren't in `document.images`.
+ *
+ * They are loaded through a separate image, which shares the browser cache, so the background can be painted once it resolves.
+ */
+const loadVisibleBackgroundImages = () => {
+  const urls = new Set<string>();
+
+  for (const element of document.body.querySelectorAll("*")) {
+    const { backgroundImage } = getComputedStyle(element);
+
+    if (!backgroundImage.includes("url(") || !isInViewport(element)) {
+      continue;
+    }
+
+    for (const [match] of backgroundImage.matchAll(
+      BACKGROUND_IMAGE_URL_PATTERN,
+    )) {
+      // Strips the surrounding `url("` and `")`
+      urls.add(match.slice(5, -2));
+    }
+  }
+
+  return [...urls].map(async (url) => {
+    const image = new Image();
+
+    image.src = url;
+
+    await image.decode();
+  });
+};
+
+/** Waits for images in the viewport to load, as remote images may not have loaded by the time the page is stable */
+const waitForVisibleImages = async () => {
+  const pendingImages = [...document.images].filter(
+    (image) => !image.complete && isInViewport(image),
+  );
+
+  await Promise.race([
+    Promise.allSettled([
+      ...pendingImages.map((image) => image.decode()),
+      ...loadVisibleBackgroundImages(),
+    ]),
+    new Promise((resolve) => {
+      setTimeout(resolve, 10_000);
+    }),
+  ]);
+};
+
+/**
+ * Waits until the DOM hasn't changed for a while, so states that settle shortly after the story renders
+ * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently
+ */
+const waitForStableDom = async ({ quietMs = 500, timeoutMs = 10_000 } = {}) => {
+  const startedAt = performance.now();
+  let lastMutationAt = startedAt;
+
+  const observer = new MutationObserver(() => {
+    lastMutationAt = performance.now();
+  });
+
+  observer.observe(document.body, {
+    attributes: true,
+    characterData: true,
+    childList: true,
+    subtree: true,
+  });
+
+  try {
+    while (
+      performance.now() - lastMutationAt < quietMs &&
+      performance.now() - startedAt < timeoutMs
+    ) {
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    }
+  } finally {
+    observer.disconnect();
+  }
+};
+
+/** Snapshots capture the body element, so this clips it to the viewport */
+const clipBodyToViewport = () => {
+  Object.assign(document.body.style, {
+    height: "100vh",
+    overflow: "hidden",
+  });
+};
+
+/** Rounds up, as a fractional height would otherwise leave the last row of pixels outside the iframe */
+const getContentHeight = () =>
+  Math.ceil(
+    Math.max(
+      document.documentElement.scrollHeight,
+      document.body.getBoundingClientRect().bottom,
+    ),
+  );
+
+/**
+ * Grows the test iframe to fit the page's content, as the snapshot is clipped to the iframe.
+ *
+ * Elements sized relative to the viewport (e.g. `h-[50vh]`) grow along with it, so this repeats until the height settles.
+ * Storybook resets the viewport before each story, so this doesn't need undoing.
+ */
+const fitViewportToContent = async ({ maxAttempts = 10 } = {}) => {
+  // Imported lazily, as this module is also loaded by the Storybook UI, outside of Vitest
+  const { commands, page } = await import("vitest/browser");
+
+  for (let attempt = 0; attempt < maxAttempts; attempt++) {
+    const width = globalThis.innerWidth;
+    const height = getContentHeight();
+
+    if (height <= globalThis.innerHeight) {
+      return;
+    }
+
+    // Vitest scales the iframe down to fit the page, so the page must be at least as large
+    await commands.setBrowserViewport(width, height);
+    await page.viewport(width, height);
+  }
+
+  // Content can grow with the viewport indefinitely (e.g. `h-screen` alongside other content),
+  // so cut off the overflow rather than capturing the blank space below the iframe
+  if (getContentHeight() > globalThis.innerHeight) {
+    clipBodyToViewport();
+  }
+};
+
+const waitForNextFrame = () =>
+  new Promise((resolve) => {
+    requestAnimationFrame(() => {
+      requestAnimationFrame(resolve);
+    });
+  });
+
+/**
+ * Runs immediately before each automatic snapshot.
+ *
+ * Returning `false` skips the snapshot.
+ */
+export const prepareAutoSnapshot: Extract<
+  SetupVisOptions<SnapshotParameters>["auto"],
+  // oxlint-disable-next-line typescript/no-unsafe-function-type
+  Function
+> = async ({ delay, fullPage }) => {
+  if (fullPage === false) {
+    clipBodyToViewport();
+  }
+
+  // Fonts use `display: swap`, so the fallback font may still be showing
+  await document.fonts.ready;
+
+  await waitForStableDom();
+  await waitForVisibleImages();
+
+  if (fullPage !== false) {
+    // Content may have grown while loading
+    await fitViewportToContent();
+  }
+
+  await waitForNextFrame();
+
+  if (delay) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, delay);
+    });
+  }
+
+  return true;
+};
+
+/**
+ * Removes the style Storybook adds to pause animations while `afterEach` hooks run.
+ *
+ * Storybook only removes it once the hooks succeed, so a failed snapshot leaves animations paused for the test's retries.
+ * Elements that unmount once their exit animation ends (e.g. a closing accordion item) then never unmount.
+ */
+const removeLeakedAnimationPause = () => {
+  for (const style of document.head.querySelectorAll("style:not([id])")) {
+    if (style.textContent.includes("animation-play-state: paused !important")) {
+      style.remove();
+    }
+  }
+};
+
+/** Undoes any page changes made by {@link prepareAutoSnapshot}, as stories in the same file share a document */
+export const resetAutoSnapshot = () => {
+  document.body.style.removeProperty("height");
+  document.body.style.removeProperty("overflow");
+
+  removeLeakedAnimationPause();
+};
