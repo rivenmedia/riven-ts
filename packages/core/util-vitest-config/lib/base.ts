@@ -2,6 +2,8 @@ import { fileURLToPath } from "node:url";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
+import { sourceConditionsConfig } from "./source-conditions.ts";
+
 export const baseVitestConfig = defineConfig(() => {
   const isWatch = process.argv.includes("--watch");
   const ignorePatterns = ["**/{__generated__,docker-data,.next,.turbo}/**"];
@@ -25,6 +27,7 @@ export const baseVitestConfig = defineConfig(() => {
         retry: process.env["CI"] ? 2 : 0,
         hookTimeout: 30_000,
       },
+      ...sourceConditionsConfig,
       plugins: [swc.vite()],
       server: {
         watch: {

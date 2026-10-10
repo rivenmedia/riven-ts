@@ -8,16 +8,16 @@
   "type": "module",
   "exports": {
     "./resolver": {
-      "production": "./dist/schema/settings.resolver.js",
-      "default": "./lib/schema/settings.resolver.ts"
+      "@repo/source": "./lib/schema/settings.resolver.ts",
+      "default": "./dist/schema/settings.resolver.js"
     },
     "./settings.type": {
-      "production": "./dist/schema/types/settings.type.js",
-      "default": "./lib/schema/types/settings.type.ts"
+      "@repo/source": "./lib/schema/types/settings.type.ts",
+      "default": "./dist/schema/types/settings.type.js"
     },
     "./enums/log-level.enum": {
-      "production": "./dist/schema/enums/log-level.enum.js",
-      "default": "./lib/schema/enums/log-level.enum.ts"
+      "@repo/source": "./lib/schema/enums/log-level.enum.ts",
+      "default": "./dist/schema/enums/log-level.enum.js"
     }
   },
   "scripts": {

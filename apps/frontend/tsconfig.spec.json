@@ -5,9 +5,9 @@
     "composite": true,
     "rootDir": ".",
     "noEmit": false,
-    "types": ["@repo/util-plugin-sdk/types/extend-zod-global-registry"]
+    "types": []
   },
-  "files": ["vitest.setup.ts"],
+  "files": ["vitest.setup.ts", "extend-zod-global-registry.d.ts"],
   "include": [
     "next-env.d.ts",
     ".next/types/*.d.ts",

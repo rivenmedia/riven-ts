@@ -92,6 +92,33 @@ The base config (`@repo/core-util-typescript-config/base.json`) extends
   `no-duplicate-imports` (with `allowSeparateTypeImports: true`) and sorted
   last by Oxfmt.
 
+## Workspace package exports
+
+Built packages expose their TypeScript sources behind the custom
+`@repo/source` export condition, with `default` pointing at the compiled
+output:
+
+```json
+"exports": {
+  ".": {
+    "@repo/source": "./lib/index.ts",
+    "default": "./dist/index.js"
+  }
+}
+```
+
+The same applies to apps' `imports` (`#*.ts`). `@repo/source` must come first.
+
+- Development tooling resolves `@repo/source`, so dependencies never need
+  building first: TypeScript via `customConditions` in the base tsconfig,
+  Vitest via `@repo/core-util-vitest-config`, Node scripts via
+  `--conditions=@repo/source` (or `NODE_OPTIONS` where worker threads or
+  third-party CLIs are involved), esbuild via `conditions`, and Next.js via
+  generated Turbopack aliases in `apps/frontend/next.config.ts`.
+- Production resolves `default` and needs no flags.
+- Don't use `development`/`production` for this: bundlers enable those
+  automatically based on build mode.
+
 ## Linting conventions (Oxlint)
 
 All rule categories are set to error: `correctness`, `suspicious`,

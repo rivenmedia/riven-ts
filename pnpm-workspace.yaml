@@ -151,6 +151,7 @@ catalog:
   undici: ^7.29.0
   unplugin-swc: ^1.5.9
   vaul: ^1.1.2
+  vite: ^8.1.3
   vitest: ^4.1.7
   winston: ^3.19.0
   winston-daily-rotate-file: ^5.0.0

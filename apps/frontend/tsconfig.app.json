@@ -6,9 +6,9 @@
     "rootDir": ".",
     "outDir": "dist",
     "noEmit": false,
-    "types": ["@repo/util-plugin-sdk/types/extend-zod-global-registry"]
+    "types": []
   },
-  "files": [],
+  "files": ["extend-zod-global-registry.d.ts"],
   "include": [
     "instrumentation-client.ts",
     "next-env.d.ts",

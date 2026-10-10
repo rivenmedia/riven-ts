@@ -516,6 +516,9 @@ catalogs:
     vaul:
       specifier: ^1.1.2
       version: 1.1.2
+    vite:
+      specifier: ^8.1.3
+      version: 8.2.1
     vitest:
       specifier: ^4.1.7
       version: 4.1.7
@@ -866,7 +869,7 @@ importers:
         specifier: 'catalog:'
         version: 1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       vite:
-        specifier: ^8.1.3
+        specifier: 'catalog:'
         version: 8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
       vitest:
         specifier: 'catalog:'
@@ -1593,6 +1596,9 @@ importers:
       unplugin-swc:
         specifier: 'catalog:'
         version: 1.5.9(@swc/core@1.15.40(@swc/helpers@0.5.23))(rollup@4.62.4)
+      vite:
+        specifier: 'catalog:'
+        version: 8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
     devDependencies:
       '@repo/core-util-oxlint-config':
         specifier: workspace:^
@@ -19129,7 +19135,7 @@ snapshots:
     dependencies:
       minimatch: 10.2.5
       path-browserify: 1.0.1
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
 
   '@tsconfig/node-ts@23.6.4': {}
 
@@ -23554,7 +23560,7 @@ snapshots:
       proc-log: 6.1.0
       semver: 7.8.5
       tar: 7.5.22
-      tinyglobby: 0.2.16
+      tinyglobby: 0.2.17
       which: 6.0.0
     transitivePeerDependencies:
       - supports-color

@@ -1,4 +1,5 @@
 import { baseVitestConfig } from "@repo/core-util-vitest-config/base";
+import { sourceConditionsConfig } from "@repo/core-util-vitest-config/source-conditions";
 
 import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
 import react from "@vitejs/plugin-react";
@@ -76,6 +77,7 @@ export default defineConfig((config) => {
           },
         },
         {
+          ...sourceConditionsConfig,
           test: {
             name: "unit",
             environment: "jsdom",

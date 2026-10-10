@@ -8,6 +8,7 @@
   ],
   "compilerOptions": {
     "types": ["node"],
+    "customConditions": ["@repo/source"],
     "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "emitDecoratorMetadata": true,
     "experimentalDecorators": true

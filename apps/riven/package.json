@@ -8,23 +8,23 @@
   "type": "module",
   "imports": {
     "#*.ts": {
-      "production": "./lib/*.js",
-      "default": "./lib/*.ts"
+      "@repo/source": "./lib/*.ts",
+      "default": "./lib/*.js"
     },
     "#*.json": "./*.json"
   },
   "exports": {
     "./workers/map-items-to-files": {
-      "production": "./workers/map-items-to-files/map-items-to-files.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts"
+      "@repo/source": "./lib/message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.processor.ts",
+      "default": "./workers/map-items-to-files/map-items-to-files.processor.js"
     },
     "./workers/parse-scrape-results": {
-      "production": "./workers/parse-scrape-results/parse-scrape-results.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts"
+      "@repo/source": "./lib/message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.processor.ts",
+      "default": "./workers/parse-scrape-results/parse-scrape-results.processor.js"
     },
     "./workers/validate-torrent-files": {
-      "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
-      "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
+      "@repo/source": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts",
+      "default": "./workers/validate-torrent-files/validate-torrent-files.processor.js"
     },
     "./database-metadata-cache": "./temp/metadata.json",
     "./wiki.config": "./wiki.config.ts"
@@ -33,21 +33,21 @@
     "build": "pnpm build:program",
     "build:program": "tsc --build tsconfig.app.json",
     "build:workers": "rm -rf dist/workers && pnpm node esbuild.config.ts",
-    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
+    "codegen:config-docs": "pnpm node --conditions=@repo/source scripts/generate-zod-docs.ts",
     "codegen:gql": "graphql-codegen --config graphql.config.ts",
-    "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
-    "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
-    "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
-    "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
+    "codegen:gql-schema": "node --conditions=@repo/source --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
+    "codegen:ranking-config-json-schema": "pnpm node --conditions=@repo/source scripts/generate-ranking-config-json-schema.ts",
+    "database:cache:generate": "NODE_OPTIONS=--conditions=@repo/source mikro-orm cache:generate --combined --contextName slim",
+    "dev": "NODE_ENV=development NODE_OPTIONS=--conditions=@repo/source pnpm node --watch --env-file-if-exists=.env.riven --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
-    "migration:check": "mikro-orm migration:check",
-    "migration:create": "mikro-orm migration:create",
-    "mikro-orm": "mikro-orm",
-    "start": "NODE_ENV=production pnpm node --conditions=production --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
+    "migration:check": "NODE_OPTIONS=--conditions=@repo/source mikro-orm migration:check",
+    "migration:create": "NODE_OPTIONS=--conditions=@repo/source mikro-orm migration:create",
+    "mikro-orm": "NODE_OPTIONS=--conditions=@repo/source mikro-orm",
+    "start": "NODE_ENV=production pnpm node --env-file-if-exists=.env.riven --enable-source-maps dist/lib/index.js",
     "test": "vitest run",
     "test:watch": "vitest",
-    "tui": "NODE_ENV=production NODE_OPTIONS=--conditions=production riven-tui"
+    "tui": "NODE_ENV=production riven-tui"
   },
   "dependencies": {
     "@apollo/client": "catalog:",
