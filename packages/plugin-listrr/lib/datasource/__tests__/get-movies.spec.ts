@@ -1,14 +1,14 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { getApiListMoviesIdSortbySortbydirectionPageHandler } from "../../__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
-import { createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/mocks/createGetApiListMoviesIdSortbySortbydirectionPage.ts";
-import { createListrrContractsModelsAPIMovieDto } from "../../__generated__/mocks/listrr/contracts/models/API/createMovieDto.ts";
-import { it } from "../../__tests__/listrr.test-context.ts";
-import { ListrrAPI } from "../listrr.datasource.ts";
+import { getApiListMoviesIdSortbySortbydirectionPageHandler } from "#__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
+import { createGetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "#__generated__/mocks/createGetApiListMoviesIdSortbySortbydirectionPage.ts";
+import { createListrrContractsModelsAPIMovieDto } from "#__generated__/mocks/listrr/contracts/models/API/createMovieDto.ts";
+import { it } from "#__tests__/listrr.test-context.ts";
+import { ListrrAPI } from "#datasource/listrr.datasource.ts";
 
-import type { GetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "../../__generated__/types/GetApiListMoviesIdSortbySortbydirectionPage.ts";
-import type { ListrrContractsModelsAPIMovieDto } from "../../__generated__/types/index.ts";
+import type { GetApiListMoviesIdSortbySortbydirectionPageQueryResponse } from "#__generated__/types/GetApiListMoviesIdSortbySortbydirectionPage.ts";
+import type { ListrrContractsModelsAPIMovieDto } from "#__generated__/types/index.ts";
 
 it("returns an empty array if no content lists are provided", async ({
   dataSourceMap,

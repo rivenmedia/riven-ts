@@ -1,6 +1,6 @@
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
-import type { Store } from "../schemas/store.schema.ts";
+import type { Store } from "#schemas/store.schema.ts";
 
 /**
  * Returns a set of status codes that are considered to indicate an expired link for the given store.

@@ -3,12 +3,13 @@ import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { IsNumberString } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import { MovieContentRatingEnum } from "../../enums/content-ratings.enum.ts";
-import { MovieRepository } from "../../repositories/movie.repository.ts";
+import { MovieContentRatingEnum } from "#dto/enums/content-ratings.enum.ts";
+import { MovieRepository } from "#dto/repositories/movie.repository.ts";
+
 import { MediaItem } from "./index.ts";
 
-import type { MovieContentRating } from "../../enums/content-ratings.enum.ts";
-import type { MediaEntry } from "../filesystem/index.ts";
+import type { MediaEntry } from "#dto/entities/filesystem/index.ts";
+import type { MovieContentRating } from "#dto/enums/content-ratings.enum.ts";
 import type { Opt } from "@mikro-orm/core";
 
 @ObjectType({ implements: MediaItem })

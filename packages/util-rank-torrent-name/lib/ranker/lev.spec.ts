@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 
-import { parse } from "../parser/parse.ts";
+import { parse } from "#parser/parse.ts";
+
 import { getLevRatio, titleMatch } from "./lev.ts";
 
 describe(titleMatch, () => {

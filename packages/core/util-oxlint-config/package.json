@@ -3,6 +3,9 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#*.ts": "./lib/*.ts"
+  },
   "exports": {
     ".": "./lib/base.ts"
   },

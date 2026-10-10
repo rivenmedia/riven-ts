@@ -2,13 +2,14 @@ import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 import z from "zod";
 
-import { it } from "../../../__tests__/notifications.test-context.ts";
-import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
-import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
+import { it } from "#__tests__/notifications.test-context.ts";
+import { NotificationsAPI } from "#datasource/notifications.datasource.ts";
+import { notificationPayloadFixture } from "#services/__tests__/payload.fixture.ts";
+
 import { discordDispatcher } from "./discord.dispatcher.ts";
 import { buildEmbed } from "./utilities/build-embed.ts";
 
-import type { DiscordService } from "../../parse-notification-url.ts";
+import type { DiscordService } from "#services/parse-notification-url.ts";
 
 const mockService = {
   webhookId: "webhook-id",

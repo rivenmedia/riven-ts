@@ -3,8 +3,9 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Args, Query, Resolver } from "type-graphql";
 
-import { MdblistAPI } from "../datasource/mdblist.datasource.ts";
-import { pluginConfig } from "../mdblist-plugin.config.ts";
+import { MdblistAPI } from "#datasource/mdblist.datasource.ts";
+import { pluginConfig } from "#mdblist-plugin.config.ts";
+
 import { ListNamesArguments } from "./arguments/list-names.arguments.ts";
 import { MdblistContentServiceResponse } from "./types/mdblist-response.type.ts";
 

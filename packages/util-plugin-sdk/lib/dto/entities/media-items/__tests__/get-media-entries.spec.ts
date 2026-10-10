@@ -1,9 +1,15 @@
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
-import { Episode, ItemRequest, MediaEntry, Season, Show } from "../../index.ts";
-import { Movie } from "../movie.entity.ts";
+import { it } from "#__tests__/test-context.ts";
+import {
+  Episode,
+  ItemRequest,
+  MediaEntry,
+  Season,
+  Show,
+} from "#dto/entities/index.ts";
+import { Movie } from "#dto/entities/media-items/movie.entity.ts";
 
 it("getMediaEntries() returns the associated media entry for a Movie media item", async ({
   em,

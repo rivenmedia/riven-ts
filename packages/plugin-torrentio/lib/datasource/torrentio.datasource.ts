@@ -1,7 +1,7 @@
 import { BaseDataSource, getStremioScrapeConfig } from "@repo/util-plugin-sdk";
 import { z } from "@repo/util-plugin-sdk/validation";
 
-import type { TorrentioSettings } from "../torrentio-settings.schema.ts";
+import type { TorrentioSettings } from "#torrentio-settings.schema.ts";
 import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 

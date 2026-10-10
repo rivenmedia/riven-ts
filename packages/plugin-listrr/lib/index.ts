@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { ListrrAPI } from "./datasource/listrr.datasource.ts";
 import { pluginConfig } from "./listrr-plugin.config.ts";
 import { ListrrSettings } from "./listrr-settings.schema.ts";

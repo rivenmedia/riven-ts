@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/torrentio.test-context.ts";
-import { TorrentioAPI } from "../torrentio.datasource.ts";
+import { it } from "#__tests__/torrentio.test-context.ts";
+import { TorrentioAPI } from "#datasource/torrentio.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(

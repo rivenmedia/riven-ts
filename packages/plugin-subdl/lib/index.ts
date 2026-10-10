@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { SubdlAPI } from "./datasource/subdl.datasource.ts";
 import { SubdlSettingsResolver } from "./schema/subdl-settings.resolver.ts";
 import { SubdlResolver } from "./schema/subdl.resolver.ts";

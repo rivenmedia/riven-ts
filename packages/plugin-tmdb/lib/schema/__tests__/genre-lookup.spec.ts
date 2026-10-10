@@ -2,10 +2,10 @@ import { http, HttpResponse } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/tmdb.test-context.ts";
+import { it } from "#__tests__/tmdb.test-context.ts";
 
-import type { MovieDetails200Schema } from "../../__generated__/zod/movieDetailsSchema.ts";
-import type { MovieNowPlayingListQueryResponseSchema } from "../../__generated__/zod/movieNowPlayingListSchema.ts";
+import type { MovieDetails200Schema } from "#__generated__/zod/movieDetailsSchema.ts";
+import type { MovieNowPlayingListQueryResponseSchema } from "#__generated__/zod/movieNowPlayingListSchema.ts";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 
 it("resolves localised genres from their TMDB IDs", async ({

@@ -6,7 +6,7 @@ import {
   jsFiles,
   testFiles,
   tsFiles,
-} from "../internal/file-types.ts";
+} from "#internal/file-types.ts";
 
 export const banDateConstructor = defineConfig({
   overrides: [

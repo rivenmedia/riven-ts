@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { MediaEntry } from "../../dto/entities/index.ts";
+import { MediaEntry } from "#dto/entities/index.ts";
 
 export const MediaEntryInstance = z.instanceof(MediaEntry);
 

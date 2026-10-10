@@ -2,7 +2,8 @@ import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
 import { expect } from "vitest";
 
-import { notificationPayloadFixture } from "../../../__tests__/payload.fixture.ts";
+import { notificationPayloadFixture } from "#services/__tests__/payload.fixture.ts";
+
 import { buildEmbed } from "./build-embed.ts";
 
 it("includes the thumbnail when posterPath is provided", () => {

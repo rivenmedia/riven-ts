@@ -1,6 +1,6 @@
 import { Field, ObjectType } from "type-graphql";
 
-import { LogLevel } from "../enums/log-level.enum.ts";
+import { LogLevel } from "#schema/enums/log-level.enum.ts";
 
 @ObjectType()
 export class RivenSettings {

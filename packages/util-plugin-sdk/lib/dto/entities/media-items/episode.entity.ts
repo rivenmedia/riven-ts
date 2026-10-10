@@ -3,12 +3,13 @@ import { Entity, ManyToOne, Property } from "@mikro-orm/decorators/legacy";
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
-import { EpisodeRepository } from "../../repositories/episode.repository.ts";
+import { ShowContentRatingEnum } from "#dto/enums/content-ratings.enum.ts";
+import { EpisodeRepository } from "#dto/repositories/episode.repository.ts";
+
 import { Show, Season, ShowLikeMediaItem } from "./index.ts";
 
-import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
-import type { MediaEntry } from "../filesystem/media-entry.entity.ts";
+import type { MediaEntry } from "#dto/entities/filesystem/media-entry.entity.ts";
+import type { ShowContentRating } from "#dto/enums/content-ratings.enum.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })

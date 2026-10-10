@@ -8,10 +8,11 @@ import {
 import { Min } from "class-validator";
 import { Field, Int, ObjectType } from "type-graphql";
 
-import { SeasonRepository } from "../../repositories/season.repository.ts";
+import { SeasonRepository } from "#dto/repositories/season.repository.ts";
+
 import { Episode, Show, ShowLikeMediaItem } from "./index.ts";
 
-import type { MediaEntry } from "../filesystem/index.ts";
+import type { MediaEntry } from "#dto/entities/filesystem/index.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })

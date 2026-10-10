@@ -1,11 +1,6 @@
 import { defineConfig } from "oxlint";
 
-import {
-  jsFiles,
-  jsxFiles,
-  testFiles,
-  tsFiles,
-} from "../internal/file-types.ts";
+import { jsFiles, jsxFiles, testFiles, tsFiles } from "#internal/file-types.ts";
 
 export const oxlintPluginEslintConfig = defineConfig({
   overrides: [

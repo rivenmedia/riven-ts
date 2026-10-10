@@ -6,12 +6,13 @@ import {
 import { merge } from "es-toolkit";
 import z from "zod";
 
-import { sceneHandlers } from "../parser/handlers/scene.handlers.ts";
-import { trashHandlers } from "../parser/handlers/trash.handlers.ts";
-import { ParsedDataSchema } from "../schemas.ts";
+import { sceneHandlers } from "#parser/handlers/scene.handlers.ts";
+import { trashHandlers } from "#parser/handlers/trash.handlers.ts";
+import { ParsedDataSchema } from "#schemas.ts";
+
 import { adultHandlers } from "./handlers/adult.handlers.ts";
 
-import type { ParsedData } from "../schemas.ts";
+import type { ParsedData } from "#schemas.ts";
 import type { Handler } from "@viren070/parse-torrent-title";
 
 const yearPattern = String.raw`\b(?:19|20)\d{2}\b`;

@@ -3,16 +3,16 @@ import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { TTLCache } from "@isaacs/ttlcache";
 
-import { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
-import { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
-import { DeleteTorrentResponse } from "../schemas/delete-torrent-response.schema.ts";
-import { GenerateLinkResponse } from "../schemas/generate-link-response.schema.ts";
-import { GetTorrentResponse } from "../schemas/get-torrent-response.schema.ts";
-import { ItemStatus } from "../schemas/item-status.schema.ts";
-import { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
-import { Store } from "../schemas/store.schema.ts";
+import { AddTorrentResponse } from "#schemas/add-torrent-response.schema.ts";
+import { CacheCheckResponse } from "#schemas/cache-check-response.schema.ts";
+import { DeleteTorrentResponse } from "#schemas/delete-torrent-response.schema.ts";
+import { GenerateLinkResponse } from "#schemas/generate-link-response.schema.ts";
+import { GetTorrentResponse } from "#schemas/get-torrent-response.schema.ts";
+import { ItemStatus } from "#schemas/item-status.schema.ts";
+import { StoreUserResponse } from "#schemas/store-user-response.schema.ts";
+import { Store } from "#schemas/store.schema.ts";
 
-import type { StremThruSettings } from "../stremthru-settings.schema.ts";
+import type { StremThruSettings } from "#stremthru-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type {
   DataSourceFetchResult,

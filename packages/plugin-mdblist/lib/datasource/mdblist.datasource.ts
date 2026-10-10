@@ -1,11 +1,11 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import { getListItemsByName200Schema } from "../__generated__/zod/getListItemsByNameSchema.ts";
-import { MdbListName } from "../schemas/mdblist-name.schema.ts";
+import { getListItemsByName200Schema } from "#__generated__/zod/getListItemsByNameSchema.ts";
+import { MdbListName } from "#schemas/mdblist-name.schema.ts";
 
-import type { GetListItemsByName200Schema as ListItemsResponse } from "../__generated__/zod/getListItemsByNameSchema.ts";
-import type { MdbListSettings } from "../mdblist-settings.schema.ts";
-import type { MdbListExternalIds } from "../schema/types/mdblist-external-ids.type.ts";
+import type { GetListItemsByName200Schema as ListItemsResponse } from "#__generated__/zod/getListItemsByNameSchema.ts";
+import type { MdbListSettings } from "#mdblist-settings.schema.ts";
+import type { MdbListExternalIds } from "#schema/types/mdblist-external-ids.type.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";

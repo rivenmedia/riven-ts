@@ -2,8 +2,8 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
-import { JellyfinAPI } from "../datasource/jellyfin.datasource.ts";
-import { pluginConfig } from "../jellyfin-plugin.config.ts";
+import { JellyfinAPI } from "#datasource/jellyfin.datasource.ts";
+import { pluginConfig } from "#jellyfin-plugin.config.ts";
 
 @Resolver()
 export class JellyfinResolver {

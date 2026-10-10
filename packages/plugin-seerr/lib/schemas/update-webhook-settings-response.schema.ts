@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
+import { webhookSettingsSchema } from "#__generated__/zod/webhookSettingsSchema.ts";
 
 export const UpdateWebhookSettingsResponse = webhookSettingsSchema.extend({
   options: webhookSettingsSchema.shape.options.unwrap().extend({

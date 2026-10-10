@@ -2,10 +2,11 @@ import { Entity, Property } from "@mikro-orm/decorators/legacy";
 import { IsNumberString } from "class-validator";
 import { Field, InterfaceType } from "type-graphql";
 
-import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
+import { ShowContentRatingEnum } from "#dto/enums/content-ratings.enum.ts";
+
 import { MediaItem } from "./index.ts";
 
-import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
+import type { ShowContentRating } from "#dto/enums/content-ratings.enum.ts";
 import type { Show } from "./show.entity.ts";
 import type { Promisable } from "type-fest";
 

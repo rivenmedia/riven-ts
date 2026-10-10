@@ -1,6 +1,6 @@
 import { EntityRepository } from "@mikro-orm/core";
 
-import type { MediaEntry } from "../entities/index.ts";
+import type { MediaEntry } from "#dto/entities/index.ts";
 import type { UUID } from "node:crypto";
 
 export class MediaEntryRepository extends EntityRepository<MediaEntry> {

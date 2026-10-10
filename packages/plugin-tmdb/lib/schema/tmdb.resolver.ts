@@ -3,9 +3,10 @@ import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { Arg, ID, Query, Resolver } from "type-graphql";
 
-import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
-import { pluginConfig } from "../tmdb-plugin.config.ts";
-import { formatImageUrl } from "../utilities/format-image-url.ts";
+import { TmdbAPI } from "#datasource/tmdb.datasource.ts";
+import { pluginConfig } from "#tmdb-plugin.config.ts";
+import { formatImageUrl } from "#utilities/format-image-url.ts";
+
 import { TmdbTrendingMoviesTimeWindow } from "./enums/trending-time-window.enum.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 

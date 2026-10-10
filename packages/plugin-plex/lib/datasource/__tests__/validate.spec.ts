@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/plex.test-context.ts";
-import { PlexAPI } from "../plex.datasource.ts";
+import { it } from "#__tests__/plex.test-context.ts";
+import { PlexAPI } from "#datasource/plex.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(

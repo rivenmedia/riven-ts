@@ -13,7 +13,7 @@ import path from "node:path";
 import { Field, ID, InterfaceType } from "type-graphql";
 import z from "zod";
 
-import { Episode, MediaItem, Movie } from "../media-items/index.ts";
+import { Episode, MediaItem, Movie } from "#dto/entities/media-items/index.ts";
 
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { Promisable } from "type-fest";

@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { TvdbAPI } from "./datasource/tvdb.datasource.ts";
 import { TvMazeAPI } from "./datasource/tvmaze.datasource.ts";
 import { indexTVDBMediaItem } from "./hooks/index-tvdb-media-item.ts";

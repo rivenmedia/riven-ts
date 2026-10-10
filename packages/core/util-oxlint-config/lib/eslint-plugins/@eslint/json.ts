@@ -1,7 +1,7 @@
 import json from "@eslint/json";
 import { defineConfig } from "oxlint";
 
-import { jsonFiles } from "../../internal/file-types.ts";
+import { jsonFiles } from "#internal/file-types.ts";
 
 export const eslintPluginEslintJsonConfig = defineConfig({
   overrides: [

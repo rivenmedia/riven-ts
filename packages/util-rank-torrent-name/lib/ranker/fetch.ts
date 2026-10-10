@@ -8,11 +8,12 @@ import {
   RESOLUTION_MAP,
   RESOLUTION_SETTINGS_MAP,
   TRASH_QUALITIES,
-} from "../shared/mappings.ts";
+} from "#shared/mappings.ts";
+
 import { isFetchEnabled } from "./ranking-settings.schema.ts";
 
-import type { ParsedData } from "../schemas.ts";
-import type { FetchResult } from "../types.ts";
+import type { ParsedData } from "#schemas.ts";
+import type { FetchResult } from "#types.ts";
 import type { RankingModel, Settings } from "./ranking-settings.schema.ts";
 
 /**

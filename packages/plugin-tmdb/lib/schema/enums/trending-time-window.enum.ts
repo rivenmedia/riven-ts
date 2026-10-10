@@ -1,6 +1,6 @@
 import { registerEnumType } from "type-graphql";
 
-import { trendingMoviesPathParamsSchema } from "../../__generated__/zod/trendingMoviesSchema.ts";
+import { trendingMoviesPathParamsSchema } from "#__generated__/zod/trendingMoviesSchema.ts";
 
 import type { z } from "zod";
 

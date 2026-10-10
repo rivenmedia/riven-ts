@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { librarySectionSchema } from "../__generated__/zod/librarySectionSchema.ts";
+import { librarySectionSchema } from "#__generated__/zod/librarySectionSchema.ts";
 
 export const LibrarySectionsResponse = z.object({
   MediaContainer: z

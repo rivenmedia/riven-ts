@@ -7,7 +7,7 @@ import { fly } from "#components/_animations/fly.ts";
 import { Button } from "#components/_ui/button.tsx";
 import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 
-import type { AppRoutes } from "../../.next/types/routes";
+import type { AppRoutes } from "#.next/types/routes.d.ts";
 
 const MAIN_PAGES = new Set<string>([
   "/",

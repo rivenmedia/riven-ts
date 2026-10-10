@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { TorrentioAPI } from "./datasource/torrentio.datasource.ts";
 import { TorrentioSettingsResolver } from "./schema/torrentio-settings.resolver.ts";
 import { TorrentioResolver } from "./schema/torrentio.resolver.ts";

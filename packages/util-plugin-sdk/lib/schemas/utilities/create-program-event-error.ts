@@ -1,7 +1,7 @@
 import assert from "node:assert";
 
-import type { ParamsFor } from "../../types/events.ts";
-import type { RivenEvent } from "../events/index.ts";
+import type { RivenEvent } from "#schemas/events/index.ts";
+import type { ParamsFor } from "#types/events.ts";
 import type z from "zod";
 import type { ZodLiteral, ZodObject, ZodUnknown } from "zod";
 

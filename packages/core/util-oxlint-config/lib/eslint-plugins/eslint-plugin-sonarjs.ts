@@ -1,7 +1,7 @@
 import { configs as sonarjsConfigs } from "eslint-plugin-sonarjs";
 import { defineConfig } from "oxlint";
 
-import { tsFiles, jsFiles } from "../internal/file-types.ts";
+import { tsFiles, jsFiles } from "#internal/file-types.ts";
 
 import type { DummyRuleMap } from "oxlint";
 

@@ -1,5 +1,5 @@
-import type { BaseDataSource } from "../datasource/index.ts";
-import type { DataSourceConstructor } from "../schemas/index.ts";
+import type { BaseDataSource } from "#datasource/index.ts";
+import type { DataSourceConstructor } from "#schemas/index.ts";
 
 export class DataSourceMap extends Map<
   DataSourceConstructor,

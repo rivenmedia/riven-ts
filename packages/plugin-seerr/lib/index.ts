@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { SeerrAPI } from "./datasource/seerr.datasource.ts";
 import { SeerrSettingsResolver } from "./schema/seerr-settings.resolver.ts";
 import { SeerrResolver } from "./schema/seerr.resolver.ts";

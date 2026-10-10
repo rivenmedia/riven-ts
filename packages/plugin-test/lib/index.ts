@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { TestAPI } from "./datasource/test.datasource.ts";
 import { TestSettingsResolver } from "./schema/test-settings.resolver.ts";
 import { TestResolver } from "./schema/test.resolver.ts";

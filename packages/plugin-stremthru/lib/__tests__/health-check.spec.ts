@@ -4,8 +4,9 @@ import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { Store } from "../schemas/store.schema.ts";
-import { storeExpiredLinkStatusCodes } from "../utilities/store-expired-link-status-codes.ts";
+import { Store } from "#schemas/store.schema.ts";
+import { storeExpiredLinkStatusCodes } from "#utilities/store-expired-link-status-codes.ts";
+
 import { it } from "./stremthru.test-context.ts";
 
 const link = "https://example.com/stream-link";

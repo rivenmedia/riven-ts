@@ -6,6 +6,12 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.ts": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.ts"
+    }
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

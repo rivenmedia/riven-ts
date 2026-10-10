@@ -1,5 +1,5 @@
-import type { JsonWebhookService } from "../../parse-notification-url.ts";
-import type { NotificationDispatcher } from "../notification-dispatcher.ts";
+import type { NotificationDispatcher } from "#services/dispatchers/notification-dispatcher.ts";
+import type { JsonWebhookService } from "#services/parse-notification-url.ts";
 
 export const jsonWebhookDispatcher: NotificationDispatcher<JsonWebhookService> =
   {

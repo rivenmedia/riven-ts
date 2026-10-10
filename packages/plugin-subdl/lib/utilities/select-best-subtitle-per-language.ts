@@ -1,4 +1,4 @@
-import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
+import type { SubtitleResponse } from "#schemas/subtitle-response.schema.ts";
 import type { ItemMetadata } from "./get-item-metadata.ts";
 
 /**

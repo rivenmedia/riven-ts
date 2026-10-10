@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-import { testFiles } from "../internal/file-types.ts";
+import { testFiles } from "#internal/file-types.ts";
 
 export const oxlintPluginVitestConfig = defineConfig({
   overrides: [

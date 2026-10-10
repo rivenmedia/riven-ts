@@ -8,15 +8,16 @@ import {
 import { reduceAsync } from "es-toolkit";
 import { Field, ObjectType } from "type-graphql";
 
-import { ShowContentRatingEnum } from "../../enums/content-ratings.enum.ts";
-import { MediaItemState } from "../../enums/media-item-state.enum.ts";
-import { ShowStatus } from "../../enums/show-status.enum.ts";
-import { ShowRepository } from "../../repositories/show.repository.ts";
+import { ShowContentRatingEnum } from "#dto/enums/content-ratings.enum.ts";
+import { MediaItemState } from "#dto/enums/media-item-state.enum.ts";
+import { ShowStatus } from "#dto/enums/show-status.enum.ts";
+import { ShowRepository } from "#dto/repositories/show.repository.ts";
+
 import { Episode, Season, ShowLikeMediaItem } from "./index.ts";
 
-import type { ShowContentRating } from "../../enums/content-ratings.enum.ts";
-import type { MediaEntry } from "../filesystem/index.ts";
-import type { ItemRequest } from "../requests/item-request.entity.ts";
+import type { MediaEntry } from "#dto/entities/filesystem/index.ts";
+import type { ItemRequest } from "#dto/entities/requests/item-request.entity.ts";
+import type { ShowContentRating } from "#dto/enums/content-ratings.enum.ts";
 import type { Opt, Ref } from "@mikro-orm/core";
 
 @ObjectType({ implements: ShowLikeMediaItem })

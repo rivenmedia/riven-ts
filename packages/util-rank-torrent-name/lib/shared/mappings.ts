@@ -8,8 +8,8 @@ import {
 import type {
   RankingModel,
   ResolutionConfig,
-} from "../ranker/ranking-settings.schema.ts";
-import type { Resolution } from "../schemas.ts";
+} from "#ranker/ranking-settings.schema.ts";
+import type { Resolution } from "#schemas.ts";
 
 export const QUALITY_MAP = new Map<string, keyof RankingModel>([
   // Quality

@@ -1,8 +1,9 @@
 import z from "zod";
 
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventErrorSchema } from "../utilities/create-program-event-error-schema.ts";
-import { createProgramEventError } from "../utilities/create-program-event-error.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventErrorSchema } from "#schemas/utilities/create-program-event-error-schema.ts";
+import { createProgramEventError } from "#schemas/utilities/create-program-event-error.ts";
+
 import { MediaItemScrapeRequestedEvent } from "./media-item.scrape-requested.event.ts";
 
 /**

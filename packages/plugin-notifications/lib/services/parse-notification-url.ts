@@ -1,6 +1,6 @@
 import { fromError } from "zod-validation-error";
 
-import { NotificationScheme } from "../schemas/notification-scheme.schema.ts";
+import { NotificationScheme } from "#schemas/notification-scheme.schema.ts";
 
 export interface DiscordService {
   type: typeof NotificationScheme.enum.discord;

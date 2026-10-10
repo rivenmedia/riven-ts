@@ -1,6 +1,6 @@
 import { distance } from "fastest-levenshtein";
 
-import { normaliseTitle } from "../shared/normalise.ts";
+import { normaliseTitle } from "#shared/normalise.ts";
 
 export type Aliases = Record<string, string[]>;
 

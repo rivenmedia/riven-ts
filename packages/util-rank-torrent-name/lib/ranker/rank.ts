@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { parse } from "../parser/parse.ts";
+import { parse } from "#parser/parse.ts";
 import {
   AUDIO_MAP,
   CHANNEL_MAP,
@@ -8,7 +8,8 @@ import {
   FLAG_MAP,
   HDR_MAP,
   QUALITY_MAP,
-} from "../shared/mappings.ts";
+} from "#shared/mappings.ts";
+
 import {
   FetchChecksFailedError,
   InvalidHashError,
@@ -18,8 +19,8 @@ import {
 import { checkFetch } from "./fetch.ts";
 import { getLevRatio } from "./lev.ts";
 
-import type { ParsedData } from "../schemas.ts";
-import type { RankResult, RankedResult } from "../types.ts";
+import type { ParsedData } from "#schemas.ts";
+import type { RankResult, RankedResult } from "#types.ts";
 import type { Aliases } from "./lev.ts";
 import type { RankingModel, Settings } from "./ranking-settings.schema.ts";
 

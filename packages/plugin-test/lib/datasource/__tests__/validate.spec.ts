@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/test.test-context.ts";
-import { TestAPI } from "../test.datasource.ts";
+import { it } from "#__tests__/test.test-context.ts";
+import { TestAPI } from "#datasource/test.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(

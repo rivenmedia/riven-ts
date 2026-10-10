@@ -3,12 +3,12 @@ import z from "zod";
 import {
   MovieContentRating,
   ShowContentRating,
-} from "../../dto/enums/content-ratings.enum.ts";
-import { ShowStatus } from "../../dto/enums/show-status.enum.ts";
-import { ItemRequestInstance } from "../media/item-request-instance.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
-import { UUID } from "../utilities/uuid.schema.ts";
+} from "#dto/enums/content-ratings.enum.ts";
+import { ShowStatus } from "#dto/enums/show-status.enum.ts";
+import { ItemRequestInstance } from "#schemas/media/item-request-instance.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
+import { UUID } from "#schemas/utilities/uuid.schema.ts";
 
 /**
  * Event emitted when an index has been requested for a newly created movie.

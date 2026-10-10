@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, testFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, testFiles, tsFiles } from "#internal/file-types.ts";
 
 export const oxlintPluginUnicornConfig = defineConfig({
   overrides: [

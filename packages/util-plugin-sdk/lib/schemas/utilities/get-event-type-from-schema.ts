@@ -1,4 +1,4 @@
-import type { RivenEvent } from "../events/index.ts";
+import type { RivenEvent } from "#schemas/events/index.ts";
 import type { ZodLiteral, ZodObject } from "zod";
 
 export const getEventTypeFromSchema = <Type extends RivenEvent["type"]>(

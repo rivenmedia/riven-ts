@@ -3,8 +3,9 @@ import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 
 import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
 
-import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
-import { pluginConfig } from "../tmdb-plugin.config.ts";
+import { TmdbAPI } from "#datasource/tmdb.datasource.ts";
+import { pluginConfig } from "#tmdb-plugin.config.ts";
+
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 import type { ResolverInterface } from "type-graphql";

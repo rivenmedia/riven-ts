@@ -1,10 +1,10 @@
 import { HttpResponse } from "msw";
 import { expect } from "vitest";
 
-import { getApiListMyPageHandler } from "../../__generated__/handlers/getApiListMyPageHandler.ts";
-import { createGetApiListMyPageQueryResponse } from "../../__generated__/mocks/createGetApiListMyPage.ts";
-import { it } from "../../__tests__/listrr.test-context.ts";
-import { ListrrAPI } from "../listrr.datasource.ts";
+import { getApiListMyPageHandler } from "#__generated__/handlers/getApiListMyPageHandler.ts";
+import { createGetApiListMyPageQueryResponse } from "#__generated__/mocks/createGetApiListMyPage.ts";
+import { it } from "#__tests__/listrr.test-context.ts";
+import { ListrrAPI } from "#datasource/listrr.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(getApiListMyPageHandler(() => HttpResponse.error()));

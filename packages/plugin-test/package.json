@@ -3,6 +3,13 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
+  "imports": {
+    "#package.json": "./package.json",
+    "#*.ts": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.ts"
+    }
+  },
   "exports": {
     ".": "./lib/index.ts"
   },
