@@ -118,7 +118,7 @@
     "storybook-addon-vis": "catalog:",
     "typescript": "catalog:typescript7-native",
     "vaul": "catalog:",
-    "vite": "^8.1.3",
+    "vite": "catalog:",
     "vitest": "catalog:"
   },
   "msw": {

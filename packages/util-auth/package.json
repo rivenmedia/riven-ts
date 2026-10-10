@@ -8,8 +8,8 @@
   "type": "module",
   "exports": {
     "./access-control": {
-      "production": "./dist/access-control.js",
-      "default": "./lib/access-control.ts"
+      "@repo/source": "./lib/access-control.ts",
+      "default": "./dist/access-control.js"
     }
   },
   "scripts": {

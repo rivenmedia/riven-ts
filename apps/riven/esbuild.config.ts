@@ -6,6 +6,7 @@ await build({
   outdir: "dist/workers",
   bundle: true,
   platform: "node",
+  conditions: ["@repo/source"],
   splitting: true,
   format: "esm",
   sourcemap: true,

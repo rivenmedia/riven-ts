@@ -8,8 +8,8 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "@repo/source": "./lib/index.ts",
+      "default": "./dist/index.js"
     }
   },
   "scripts": {

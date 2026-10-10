@@ -12,12 +12,7 @@
       "passThroughEnv": ["NEXT_RUNTIME"]
     },
     "lint": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@repo/util-plugin-sdk#build",
-        "codegen:nextjs-types",
-        "codegen:gql"
-      ]
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:nextjs-types", "codegen:gql"]
     },
     "codegen:gql": {
       "dependsOn": ["@repo/riven#codegen:gql-schema"],

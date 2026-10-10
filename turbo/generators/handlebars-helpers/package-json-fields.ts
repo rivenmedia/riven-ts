@@ -19,8 +19,8 @@ const packageTypeFields: Partial<
   "*": {
     exports: {
       ".": {
-        production: "./dist/index.js",
-        default: "./lib/index.ts",
+        "@repo/source": "./lib/index.ts",
+        default: "./dist/index.js",
       },
     },
     files: ["dist"],
@@ -46,7 +46,8 @@ const packageTypeFields: Partial<
       "./wiki.config": "./wiki.config.ts",
     },
     scripts: {
-      "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
+      "codegen:config-docs":
+        "pnpm node --conditions=@repo/source scripts/generate-zod-docs.ts",
     },
     dependencies: {
       "@repo/util-plugin-sdk": "workspace:^",

@@ -5,7 +5,8 @@
   "type": "module",
   "exports": {
     ".": "./lib/index.ts",
-    "./base": "./lib/base.ts"
+    "./base": "./lib/base.ts",
+    "./source-conditions": "./lib/source-conditions.ts"
   },
   "scripts": {
     "collect-json-reports": "pnpm node lib/scripts/collect-json-outputs.ts",
@@ -18,7 +19,8 @@
   },
   "dependencies": {
     "@swc/core": "catalog:",
-    "unplugin-swc": "catalog:"
+    "unplugin-swc": "catalog:",
+    "vite": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-oxlint-config": "workspace:^",

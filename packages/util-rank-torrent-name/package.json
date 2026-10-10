@@ -8,18 +8,18 @@
   "type": "module",
   "exports": {
     ".": {
-      "production": "./dist/index.js",
-      "default": "./lib/index.ts"
+      "@repo/source": "./lib/index.ts",
+      "default": "./dist/index.js"
     },
     "./parser": {
-      "production": "./dist/parser/parse.js",
-      "default": "./lib/parser/parse.ts"
+      "@repo/source": "./lib/parser/parse.ts",
+      "default": "./dist/parser/parse.js"
     },
     "./wiki.config": "./wiki.config.ts"
   },
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
-    "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
+    "codegen:config-docs": "pnpm node --conditions=@repo/source scripts/generate-zod-docs.ts",
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
