@@ -4,8 +4,9 @@ import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
-import { MediaEntryRepository } from "../../repositories/media-entry.repository.ts";
-import { MediaMetadata } from "../../types/media-metadata.type.ts";
+import { MediaEntryRepository } from "#dto/repositories/media-entry.repository.ts";
+import { MediaMetadata } from "#dto/types/media-metadata.type.ts";
+
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
 
 import type { Opt } from "@mikro-orm/core";

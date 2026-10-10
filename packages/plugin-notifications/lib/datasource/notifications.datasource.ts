@@ -1,6 +1,6 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import type { NotificationsSettings } from "../notifications-settings.schema.ts";
+import type { NotificationsSettings } from "#notifications-settings.schema.ts";
 
 export class NotificationsAPI extends BaseDataSource<NotificationsSettings> {
   public override baseURL = "https://notifications.internal/";

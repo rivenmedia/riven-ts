@@ -1,14 +1,14 @@
 import { it as baseIt, expect } from "vitest";
 
-import { parse } from "../../parser/parse.ts";
-import { RTN } from "../../rtn.ts";
-import { normaliseTitle } from "../../shared/normalise.ts";
-import { adultHandler, languageHandler, trashHandler } from "../fetch.ts";
-import { getLevRatio, titleMatch } from "../lev.ts";
+import { parse } from "#parser/parse.ts";
+import { adultHandler, languageHandler, trashHandler } from "#ranker/fetch.ts";
+import { getLevRatio, titleMatch } from "#ranker/lev.ts";
 import {
   createRankingModel,
   createSettings,
-} from "../ranking-settings.schema.ts";
+} from "#ranker/ranking-settings.schema.ts";
+import { RTN } from "#rtn.ts";
+import { normaliseTitle } from "#shared/normalise.ts";
 
 const it = baseIt.extend("rankingConfig", () =>
   createRankingModel({

@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { MediaEntryInstance } from "../media/media-entry-instance.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { MediaEntryInstance } from "#schemas/media/media-entry-instance.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a stream link health check has been requested for a media item.

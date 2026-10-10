@@ -1,7 +1,7 @@
 import turbo from "eslint-plugin-turbo";
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, tsFiles } from "#internal/file-types.ts";
 
 import type { DummyRule } from "oxlint";
 

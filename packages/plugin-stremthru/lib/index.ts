@@ -2,7 +2,8 @@ import { DataSourceHTTPError } from "@repo/util-plugin-sdk";
 import { DateTime } from "@repo/util-plugin-sdk/helpers/dates";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
 import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.ts";

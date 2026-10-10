@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/listrr.test-context.ts";
-import { ListrrAPI } from "../listrr.datasource.ts";
+import { it } from "#__tests__/listrr.test-context.ts";
+import { ListrrAPI } from "#datasource/listrr.datasource.ts";
 
 it('assigns the API key to the "x-api-key" header', async ({
   server,

@@ -1,6 +1,7 @@
 import path from "node:path";
 
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { PlexDiscoverAPI } from "./datasource/plex-discover.datasource.ts";
 import { PlexRSSAPI } from "./datasource/plex-rss.datasource.ts";
 import { PlexAPI } from "./datasource/plex.datasource.ts";

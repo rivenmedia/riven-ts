@@ -1,7 +1,7 @@
 import { buildEmbed } from "./utilities/build-embed.ts";
 
-import type { DiscordService } from "../../parse-notification-url.ts";
-import type { NotificationDispatcher } from "../notification-dispatcher.ts";
+import type { NotificationDispatcher } from "#services/dispatchers/notification-dispatcher.ts";
+import type { DiscordService } from "#services/parse-notification-url.ts";
 import type { RESTPostAPIWebhookWithTokenJSONBody } from "discord-api-types/v10";
 
 const DISCORD_WEBHOOK_BASE = "https://discord.com/api/webhooks";

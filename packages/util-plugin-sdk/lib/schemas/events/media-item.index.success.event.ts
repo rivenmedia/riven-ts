@@ -1,9 +1,9 @@
 import z from "zod";
 
-import { MovieInstance } from "../media/movie-instance.ts";
-import { ShowInstance } from "../media/show-instance.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { MovieInstance } from "#schemas/media/movie-instance.ts";
+import { ShowInstance } from "#schemas/media/show-instance.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a media item has been successfully indexed.

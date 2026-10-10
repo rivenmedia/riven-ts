@@ -1,7 +1,7 @@
 import storybook from "eslint-plugin-storybook";
 import { defineConfig } from "oxlint";
 
-import { storybookFiles } from "../internal/file-types.ts";
+import { storybookFiles } from "#internal/file-types.ts";
 
 export const eslintPluginEslintPluginStorybookConfig = defineConfig({
   overrides: [

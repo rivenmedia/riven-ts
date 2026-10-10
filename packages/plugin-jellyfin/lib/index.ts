@@ -1,6 +1,7 @@
 import path from "node:path";
 
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { JellyfinAPI } from "./datasource/jellyfin.datasource.ts";
 import { pluginConfig } from "./jellyfin-plugin.config.ts";
 import { JellyfinSettings } from "./jellyfin-settings.schema.ts";

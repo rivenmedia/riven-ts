@@ -2,8 +2,8 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
-import { TestAPI } from "../datasource/test.datasource.ts";
-import { pluginConfig } from "../test-plugin.config.ts";
+import { TestAPI } from "#datasource/test.datasource.ts";
+import { pluginConfig } from "#test-plugin.config.ts";
 
 @Resolver()
 export class TestResolver {

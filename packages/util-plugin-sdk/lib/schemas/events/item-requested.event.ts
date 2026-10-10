@@ -1,7 +1,8 @@
 import z from "zod";
 
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createExternalEventSchema } from "../utilities/create-external-event-schema.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createExternalEventSchema } from "#schemas/utilities/create-external-event-schema.ts";
+
 import { ContentServiceRequestedResponse } from "./content-service-requested.event.ts";
 
 /**

@@ -1,7 +1,7 @@
-import { RESOLUTION_MAP } from "../shared/mappings.ts";
+import { RESOLUTION_MAP } from "#shared/mappings.ts";
 
-import type { Resolution } from "../schemas.ts";
-import type { RankedResult } from "../types.ts";
+import type { Resolution } from "#schemas.ts";
+import type { RankedResult } from "#types.ts";
 
 export function sortTorrents(
   torrents: RankedResult[],

@@ -2,7 +2,8 @@ import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-
 
 import { expect } from "vitest";
 
-import { PlexSettings } from "../plex-settings.schema.ts";
+import { PlexSettings } from "#plex-settings.schema.ts";
+
 import { it } from "./plex.test-context.ts";
 
 it.override("settings", () =>

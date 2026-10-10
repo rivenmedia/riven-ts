@@ -5,7 +5,7 @@ import { NextResponse } from "next/server";
 // import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
-// import type { AppRoutes, RedirectRoutes } from "./.next/types/routes";
+// import type { AppRoutes, RedirectRoutes } from "#.next/types/routes.d.ts";
 import type { NextRequest, ProxyConfig } from "next/server";
 
 // const paths = {

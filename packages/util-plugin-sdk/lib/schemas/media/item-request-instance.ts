@@ -1,6 +1,6 @@
 import z from "zod";
 
-import { ItemRequest } from "../../dto/entities/index.ts";
+import { ItemRequest } from "#dto/entities/index.ts";
 
 export const ItemRequestInstance = z.instanceof(ItemRequest);
 

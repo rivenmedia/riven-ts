@@ -1,7 +1,7 @@
 import z from "zod";
 
-import { ItemRequestType } from "../../dto/enums/item-request-type.enum.ts";
-import { UUID } from "../utilities/uuid.schema.ts";
+import { ItemRequestType } from "#dto/enums/item-request-type.enum.ts";
+import { UUID } from "#schemas/utilities/uuid.schema.ts";
 
 export const ItemRequest = z.object({
   id: UUID,

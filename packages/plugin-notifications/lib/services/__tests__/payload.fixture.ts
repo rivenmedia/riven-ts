@@ -1,6 +1,6 @@
 import { DateTime } from "luxon";
 
-import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
+import type { NotificationPayload } from "#schemas/notification-payload.schema.ts";
 
 export const notificationPayloadFixture = {
   event: "riven.media-item.download.success",

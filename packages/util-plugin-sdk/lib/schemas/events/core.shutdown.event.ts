@@ -1,5 +1,5 @@
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
 
 import type z from "zod";
 

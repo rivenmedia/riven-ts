@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/jellyfin.test-context.ts";
-import { JellyfinAPI } from "../jellyfin.datasource.ts";
+import { it } from "#__tests__/jellyfin.test-context.ts";
+import { JellyfinAPI } from "#datasource/jellyfin.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(

@@ -1,9 +1,10 @@
-import { parseNotificationUrl } from "../parse-notification-url.ts";
+import { parseNotificationUrl } from "#services/parse-notification-url.ts";
+
 import { discordDispatcher } from "./discord/discord.dispatcher.ts";
 import { jsonWebhookDispatcher } from "./json-webhook/json-webhook.dispatcher.ts";
 
-import type { NotificationsAPI } from "../../datasource/notifications.datasource.ts";
-import type { NotificationPayload } from "../../schemas/notification-payload.schema.ts";
+import type { NotificationsAPI } from "#datasource/notifications.datasource.ts";
+import type { NotificationPayload } from "#schemas/notification-payload.schema.ts";
 
 export async function sendNotification(
   rawUrl: string,

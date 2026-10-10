@@ -6,7 +6,7 @@ import {
   testFiles,
   tsFiles,
   tsDefinitionFiles,
-} from "../internal/file-types.ts";
+} from "#internal/file-types.ts";
 
 export const oxlintPluginTypescriptConfig = defineConfig({
   overrides: [

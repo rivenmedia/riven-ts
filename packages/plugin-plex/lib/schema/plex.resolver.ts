@@ -2,8 +2,8 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 
 import { Query, Resolver } from "type-graphql";
 
-import { PlexAPI } from "../datasource/plex.datasource.ts";
-import { pluginConfig } from "../plex-plugin.config.ts";
+import { PlexAPI } from "#datasource/plex.datasource.ts";
+import { pluginConfig } from "#plex-plugin.config.ts";
 
 @Resolver()
 export class PlexResolver {

@@ -1,6 +1,6 @@
 import { Duration } from "luxon";
 
-import type { NotificationPayload } from "../../../../schemas/notification-payload.schema.ts";
+import type { NotificationPayload } from "#schemas/notification-payload.schema.ts";
 import type { APIEmbed } from "discord-api-types/v10";
 
 const EMBED_COLOR_SUCCESS = 0x2e_cc_71; // Green

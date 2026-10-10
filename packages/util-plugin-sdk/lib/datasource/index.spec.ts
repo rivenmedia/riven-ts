@@ -4,7 +4,8 @@ import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
-import { it as baseIt } from "../__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+
 import { BaseDataSource, DataSourceHTTPError } from "./index.ts";
 
 import type { BaseDataSourceConfig } from "./index.ts";

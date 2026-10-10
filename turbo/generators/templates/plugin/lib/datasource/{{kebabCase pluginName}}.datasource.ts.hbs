@@ -1,6 +1,6 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import type { {{pascalCase pluginName}}Settings } from "../{{kebabCase pluginName}}-settings.schema.ts";
+import type { {{pascalCase pluginName}}Settings } from "#{{kebabCase pluginName}}-settings.schema.ts";
 
 class {{pascalCase pluginName}}APIError extends Error {
   public override name = "{{pascalCase pluginName}}APIError";

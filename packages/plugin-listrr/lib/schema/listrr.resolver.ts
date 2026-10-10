@@ -4,8 +4,9 @@ import { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
 import { Args, Query, Resolver } from "type-graphql";
 
-import { ListrrAPI } from "../datasource/listrr.datasource.ts";
-import { pluginConfig } from "../listrr-plugin.config.ts";
+import { ListrrAPI } from "#datasource/listrr.datasource.ts";
+import { pluginConfig } from "#listrr-plugin.config.ts";
+
 import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 
 @Resolver()

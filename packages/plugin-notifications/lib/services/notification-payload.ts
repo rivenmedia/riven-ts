@@ -2,7 +2,7 @@ import { Movie, ShowLikeMediaItem } from "@repo/util-plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
 
-import { NotificationPayload } from "../schemas/notification-payload.schema.ts";
+import { NotificationPayload } from "#schemas/notification-payload.schema.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";
 import type { MediaItemDownloadSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.success.event";

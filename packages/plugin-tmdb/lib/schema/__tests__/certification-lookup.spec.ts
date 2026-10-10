@@ -1,9 +1,9 @@
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { movieNowPlayingListHandler } from "../../__generated__/handlers/movieNowPlayingListHandler.js";
-import { movieReleaseDatesHandler } from "../../__generated__/handlers/movieReleaseDatesHandler.ts";
-import { it } from "../../__tests__/tmdb.test-context.ts";
+import { movieNowPlayingListHandler } from "#__generated__/handlers/movieNowPlayingListHandler.ts";
+import { movieReleaseDatesHandler } from "#__generated__/handlers/movieReleaseDatesHandler.ts";
+import { it } from "#__tests__/tmdb.test-context.ts";
 
 it("returns the localised certification of the media item", async ({
   gqlContext,

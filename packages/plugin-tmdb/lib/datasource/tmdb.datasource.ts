@@ -1,16 +1,16 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
 
-import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
-import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
-import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
-import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
-import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
-import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
-import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
+import { findById200Schema } from "#__generated__/zod/findByIdSchema.ts";
+import { genreMovieList200Schema } from "#__generated__/zod/genreMovieListSchema.ts";
+import { movieDetails200Schema } from "#__generated__/zod/movieDetailsSchema.ts";
+import { movieExternalIds200Schema } from "#__generated__/zod/movieExternalIdsSchema.ts";
+import { movieNowPlayingList200Schema } from "#__generated__/zod/movieNowPlayingListSchema.ts";
+import { movieReleaseDates200Schema } from "#__generated__/zod/movieReleaseDatesSchema.ts";
+import { trendingMovies200Schema } from "#__generated__/zod/trendingMoviesSchema.ts";
 
-import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
-import type { TrendingMoviesPathParamsSchema } from "../__generated__/zod/trendingMoviesSchema.ts";
-import type { TmdbSettings } from "../tmdb-settings.schema.ts";
+import type { FindByIdQueryParams } from "#__generated__/types/FindById.ts";
+import type { TrendingMoviesPathParamsSchema } from "#__generated__/zod/trendingMoviesSchema.ts";
+import type { TmdbSettings } from "#tmdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 

@@ -3,10 +3,11 @@ import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-
 import { http, HttpResponse } from "msw";
 import { expect } from "vitest";
 
-import { PlexSettings } from "../plex-settings.schema.ts";
+import { PlexSettings } from "#plex-settings.schema.ts";
+
 import { it } from "./plex.test-context.ts";
 
-import type { UserWatchlistResponse } from "../schemas/user-watchlist-response.schema.ts";
+import type { UserWatchlistResponse } from "#schemas/user-watchlist-response.schema.ts";
 import type { z } from "zod";
 
 it.override("settings", () =>

@@ -15,14 +15,17 @@ import { DateTime } from "luxon";
 import { randomUUID } from "node:crypto";
 import { Field, ID, InterfaceType } from "type-graphql";
 
-import { MediaItemContentRating } from "../../enums/content-ratings.enum.ts";
-import { MediaItemState } from "../../enums/media-item-state.enum.ts";
-import { MediaItemType } from "../../enums/media-item-type.enum.ts";
-import { FileSystemEntry, SubtitleEntry } from "../filesystem/index.ts";
-import { BlacklistedStream, ItemRequest } from "../index.ts";
-import { Stream } from "../streams/stream.entity.ts";
+import {
+  FileSystemEntry,
+  SubtitleEntry,
+} from "#dto/entities/filesystem/index.ts";
+import { BlacklistedStream, ItemRequest } from "#dto/entities/index.ts";
+import { Stream } from "#dto/entities/streams/stream.entity.ts";
+import { MediaItemContentRating } from "#dto/enums/content-ratings.enum.ts";
+import { MediaItemState } from "#dto/enums/media-item-state.enum.ts";
+import { MediaItemType } from "#dto/enums/media-item-type.enum.ts";
 
-import type { MediaEntry } from "../index.ts";
+import type { MediaEntry } from "#dto/entities/index.ts";
 import type { Hidden, Opt, Ref } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";

@@ -2,9 +2,9 @@ import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import path from "node:path";
 
-import { LibrarySectionsResponse } from "../schemas/library-sections-response.schema.ts";
+import { LibrarySectionsResponse } from "#schemas/library-sections-response.schema.ts";
 
-import type { PlexSettings } from "../plex-settings.schema.ts";
+import type { PlexSettings } from "#plex-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { ValueOrPromise } from "@apollo/datasource-rest/dist/RESTDataSource.js";
 

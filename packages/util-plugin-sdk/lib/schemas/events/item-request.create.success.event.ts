@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { ItemRequestInstance } from "../media/item-request-instance.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { ItemRequestInstance } from "#schemas/media/item-request-instance.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a new media item has been created from a requested item.

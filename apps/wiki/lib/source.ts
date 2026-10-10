@@ -3,8 +3,7 @@ import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
 
 import { docs } from "#collections/server.ts";
 import { excludedWorkspaces } from "#excluded-workspaces.ts";
-
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
 
 import type { PageData } from "fumadocs-core/source";
 import type { DocsCollectionEntry } from "fumadocs-mdx/runtime/server";
@@ -30,7 +29,7 @@ const workspaceImports = Object.keys({
 const workspaces = await Promise.all(
   workspaceImports.map(async (workspace) => {
     const { docs: workspaceDocs } = (await import(
-      `../.source/${workspace}/server`
+      `#collections/${workspace}/server`
     )) as {
       docs: WorkspaceEntry;
     };

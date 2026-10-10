@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { DebridFile } from "../torrents/debrid-file.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventSchema } from "../utilities/create-program-event-schema.ts";
+import { DebridFile } from "#schemas/torrents/debrid-file.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventSchema } from "#schemas/utilities/create-program-event-schema.ts";
 
 /**
  * Event emitted when a cache check has been requested for an infohash before attempting a download.

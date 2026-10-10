@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/comet.test-context.ts";
-import { CometAPI } from "../comet.datasource.ts";
+import { it } from "#__tests__/comet.test-context.ts";
+import { CometAPI } from "#datasource/comet.datasource.ts";
 
 it("returns false if the request fails", async ({ server, dataSourceMap }) => {
   server.use(

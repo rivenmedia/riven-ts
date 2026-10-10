@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { NotificationsAPI } from "./datasource/notifications.datasource.ts";
 import { pluginConfig } from "./notifications-plugin.config.ts";
 import { NotificationsSettings } from "./notifications-settings.schema.ts";

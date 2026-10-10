@@ -13,8 +13,8 @@ import {
 import { JSONObjectResolver } from "graphql-scalars";
 import { Field, ID, ObjectType } from "type-graphql";
 
-import { StreamRepository } from "../../repositories/stream.repository.ts";
-import { MediaItem } from "../media-items/media-item.entity.ts";
+import { MediaItem } from "#dto/entities/media-items/media-item.entity.ts";
+import { StreamRepository } from "#dto/repositories/stream.repository.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 

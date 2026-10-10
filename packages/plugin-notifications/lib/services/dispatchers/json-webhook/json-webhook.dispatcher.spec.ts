@@ -1,10 +1,10 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../../__tests__/notifications.test-context.ts";
-import { NotificationsAPI } from "../../../datasource/notifications.datasource.ts";
-import { notificationPayloadFixture } from "../../__tests__/payload.fixture.ts";
-import { sendNotification } from "../send-notification.ts";
+import { it } from "#__tests__/notifications.test-context.ts";
+import { NotificationsAPI } from "#datasource/notifications.datasource.ts";
+import { notificationPayloadFixture } from "#services/__tests__/payload.fixture.ts";
+import { sendNotification } from "#services/dispatchers/send-notification.ts";
 
 it("sends the expected payload to the configured HTTP URL when using json:// scheme", async ({
   server,

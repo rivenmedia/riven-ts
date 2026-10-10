@@ -1,6 +1,6 @@
 import { defineConfig } from "oxlint";
 
-import { jsFiles, tsFiles } from "../internal/file-types.ts";
+import { jsFiles, tsFiles } from "#internal/file-types.ts";
 
 export const allowConstantLoopConditions = defineConfig({
   overrides: [

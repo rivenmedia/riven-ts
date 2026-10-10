@@ -1,6 +1,7 @@
 import { it as baseIt, expect } from "vitest";
 
-import { parse } from "../parser/parse.ts";
+import { parse } from "#parser/parse.ts";
+
 import { rank } from "./rank.ts";
 import {
   createRankingModel,

@@ -1,9 +1,9 @@
 import z from "zod";
 
-import { MediaItemInstance } from "../media/media-item-instance.ts";
-import { createEventHandlerSchema } from "../utilities/create-event-handler-schema.ts";
-import { createProgramEventErrorSchema } from "../utilities/create-program-event-error-schema.ts";
-import { createProgramEventError } from "../utilities/create-program-event-error.ts";
+import { MediaItemInstance } from "#schemas/media/media-item-instance.ts";
+import { createEventHandlerSchema } from "#schemas/utilities/create-event-handler-schema.ts";
+import { createProgramEventErrorSchema } from "#schemas/utilities/create-program-event-error-schema.ts";
+import { createProgramEventError } from "#schemas/utilities/create-program-event-error.ts";
 
 /**
  * Event emitted when a media item being downloaded has already been downloaded.

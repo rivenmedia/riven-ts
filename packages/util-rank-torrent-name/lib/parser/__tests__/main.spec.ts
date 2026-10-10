@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { parse } from "../parse.ts";
+import { parse } from "#parser/parse.ts";
 
 it.for([
   [

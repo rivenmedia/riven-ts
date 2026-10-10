@@ -11,11 +11,11 @@ import { IsNumberString, IsOptional, Matches } from "class-validator";
 import { randomUUID } from "node:crypto";
 import { Field, ID, ObjectType } from "type-graphql";
 
-import { DateTime } from "../../../helpers/dates.ts";
-import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
-import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
-import { MediaItem } from "../media-items/media-item.entity.ts";
-import { Season } from "../media-items/season.entity.ts";
+import { MediaItem } from "#dto/entities/media-items/media-item.entity.ts";
+import { Season } from "#dto/entities/media-items/season.entity.ts";
+import { ItemRequestState } from "#dto/enums/item-request-state.enum.ts";
+import { ItemRequestType } from "#dto/enums/item-request-type.enum.ts";
+import { DateTime } from "#helpers/dates.ts";
 
 import type { Hidden, Opt } from "@mikro-orm/core";
 

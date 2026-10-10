@@ -2,7 +2,7 @@ import { HttpResponse, http } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/torrentio.test-context.ts";
+import { it } from "#__tests__/torrentio.test-context.ts";
 
 it('returns the validation status when calling "torrentioIsValid" query', async ({
   gqlContext,

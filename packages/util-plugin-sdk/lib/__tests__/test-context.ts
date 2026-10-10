@@ -49,7 +49,7 @@ export const it = baseIt
         Show,
         SubtitleEntry,
         Stream,
-      } = await import("../dto/entities/index.ts");
+      } = await import("#dto/entities/index.ts");
 
       const entities = [
         FileSystemEntry,

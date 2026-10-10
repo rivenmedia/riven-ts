@@ -3,11 +3,12 @@ import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-
 import { HttpResponse, http } from "msw";
 import { expect, vi } from "vitest";
 
-import { StremThruTorzAPI } from "../datasource/stremthru-torz.datasource.ts";
-import { StremThruSettings } from "../stremthru-settings.schema.ts";
+import { StremThruTorzAPI } from "#datasource/stremthru-torz.datasource.ts";
+import { StremThruSettings } from "#stremthru-settings.schema.ts";
+
 import { it } from "./stremthru.test-context.ts";
 
-import type { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
+import type { StoreUserResponse } from "#schemas/store-user-response.schema.ts";
 
 it.override(
   "settings",

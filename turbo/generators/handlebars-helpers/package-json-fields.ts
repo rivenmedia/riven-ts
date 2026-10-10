@@ -7,6 +7,7 @@ type PackageType = "plugin" | "util" | "domain";
 interface PackageJsonDefinition {
   scripts?: Record<string, string | null>;
   exports?: Record<string, string | Record<string, string | null> | null>;
+  imports?: Record<string, string | Record<string, string | null> | null>;
   devDependencies?: Record<string, string | null>;
   dependencies?: Record<string, string | null>;
   peerDependencies?: Record<string, string | null>;
@@ -21,6 +22,12 @@ const packageTypeFields: Partial<
       ".": {
         production: "./dist/index.js",
         default: "./lib/index.ts",
+      },
+    },
+    imports: {
+      "#*.ts": {
+        production: "./dist/*.js",
+        default: "./lib/*.ts",
       },
     },
     files: ["dist"],
@@ -44,6 +51,9 @@ const packageTypeFields: Partial<
   plugin: {
     exports: {
       "./wiki.config": "./wiki.config.ts",
+    },
+    imports: {
+      "#package.json": "./package.json",
     },
     scripts: {
       "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",

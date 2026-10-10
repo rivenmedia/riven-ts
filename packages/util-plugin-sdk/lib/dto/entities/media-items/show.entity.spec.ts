@@ -1,8 +1,8 @@
 import { DateTime } from "luxon";
 import { expect } from "vitest";
 
-import { it as baseIt } from "../../../__tests__/test-context.ts";
-import { Episode, ItemRequest, Season, Show } from "../index.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { Episode, ItemRequest, Season, Show } from "#dto/entities/index.ts";
 
 const test = baseIt
   .extend("itemRequest", ({ em }) =>

@@ -7,7 +7,7 @@ import {
   parse,
   rank,
   rankTorrent,
-} from "../../index.ts";
+} from "#index.ts";
 
 const it = baseIt.extend("rankingConfig", () =>
   createRankingModel({

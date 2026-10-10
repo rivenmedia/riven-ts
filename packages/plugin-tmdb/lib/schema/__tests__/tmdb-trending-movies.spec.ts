@@ -2,11 +2,11 @@ import { http, HttpResponse } from "msw";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { trendingMoviesHandler } from "../../__generated__/handlers/trendingMoviesHandler.ts";
-import { it } from "../../__tests__/tmdb.test-context.ts";
+import { trendingMoviesHandler } from "#__generated__/handlers/trendingMoviesHandler.ts";
+import { it } from "#__tests__/tmdb.test-context.ts";
 
-import type { TrendingMoviesQueryResponseSchema } from "../../__generated__/zod/trendingMoviesSchema.ts";
-import type { TmdbIndexerData } from "../types/tmdb-indexer-data.type.ts";
+import type { TrendingMoviesQueryResponseSchema } from "#__generated__/zod/trendingMoviesSchema.ts";
+import type { TmdbIndexerData } from "#schema/types/tmdb-indexer-data.type.ts";
 
 const trendingMoviesQuery = `
   query TmdbTrendingMovies($timeWindow: TMDBTrendingMoviesTimeWindow!) {

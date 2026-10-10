@@ -5,9 +5,9 @@ import {
   ShowLikeMediaItem,
 } from "@repo/util-plugin-sdk/dto/entities";
 
-import { TorznabResponse } from "../schemas/torznab-response.schema.ts";
+import { TorznabResponse } from "#schemas/torznab-response.schema.ts";
 
-import type { StremThruSettings } from "../stremthru-settings.schema.ts";
+import type { StremThruSettings } from "#stremthru-settings.schema.ts";
 import type { ParamsFor, RateLimiterOptions } from "@repo/util-plugin-sdk";
 import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.scrape-requested.event";
 

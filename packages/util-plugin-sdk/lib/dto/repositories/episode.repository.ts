@@ -1,6 +1,6 @@
 import { MediaItemRepository } from "./media-item.repository.ts";
 
-import type { Episode } from "../entities/index.ts";
+import type { Episode } from "#dto/entities/index.ts";
 import type { FilterQuery } from "@mikro-orm/core";
 
 export class EpisodeRepository extends MediaItemRepository<Episode> {

@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { MdblistAPI } from "./datasource/mdblist.datasource.ts";
 import { pluginConfig } from "./mdblist-plugin.config.ts";
 import { MdbListSettings } from "./mdblist-settings.schema.ts";

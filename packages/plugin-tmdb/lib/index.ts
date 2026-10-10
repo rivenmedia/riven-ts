@@ -1,4 +1,5 @@
-import packageJson from "../package.json" with { type: "json" };
+import packageJson from "#package.json" with { type: "json" };
+
 import { TmdbAPI } from "./datasource/tmdb.datasource.ts";
 import { indexTMDBMediaItem } from "./hooks/index-tmdb-media-item.ts";
 import { TmdbIndexerDataResolver } from "./schema/tmdb-indexer-data.resolver.ts";
