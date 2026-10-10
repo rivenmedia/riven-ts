@@ -6,6 +6,17 @@
   {{/if}}
   "version": "0.0.0",
   "type": "module",
+  "imports": {
+    {{#with (packageJsonFields packageType 'imports') as |imports|}}
+    {{#if imports}}
+    {{#each imports}}
+    {{#if this}}
+    "{{@key}}": {{{json this}}}{{#unless @last}},{{/unless}}
+    {{/if}}
+    {{/each}}
+    {{/if}}
+    {{/with}}
+  },
   "scripts": {
     {{#with (packageJsonFields packageType 'scripts') as |scripts|}}
     {{#if scripts}}
