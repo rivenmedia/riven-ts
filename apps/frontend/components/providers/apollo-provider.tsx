@@ -1,13 +1,13 @@
 "use client";
 
-import { privateEnvironment } from "@/environment/private-environment.schema";
-
 import { HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
   ApolloClient,
   InMemoryCache,
 } from "@apollo/client-integration-nextjs";
+
+import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
 function makeClient() {
   const httpLink = new HttpLink({

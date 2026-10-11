@@ -1,25 +1,25 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
+import { cn } from "cn";
+import Link from "next/link";
+import { useParams } from "next/navigation";
+
+import { Button } from "#components/_ui/button.tsx";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "@/components/_ui/card";
-import { Separator } from "@/components/_ui/separator";
+} from "#components/_ui/card.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
 
-import { cn } from "cn";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-
-import { useSteps } from "./_hooks/use-steps";
-import { SetupQualityStep } from "./_steps/quality";
-import { SetupReviewStep } from "./_steps/review";
-import { SetupWelcomeStep } from "./_steps/welcome";
+import { useSteps } from "./_hooks/use-steps.tsx";
+import { SetupQualityStep } from "./_steps/quality.tsx";
+import { SetupReviewStep } from "./_steps/review.tsx";
+import { SetupWelcomeStep } from "./_steps/welcome.tsx";
 
 import type { ParamsOf } from "../../../../.next/types/routes";
-import type { Step } from "./_hooks/use-steps";
+import type { Step } from "./_hooks/use-steps.tsx";
 
 const steps = [
   {

@@ -1,22 +1,21 @@
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import { Label } from "@/components/_ui/label";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-
 import { Trash } from "lucide-react";
 import { useId } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-import { SettingField } from "../setting-field";
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import type {
   CommonSettingFieldProps,
   SettingFieldProps,
-} from "../setting-field";
+} from "#components/settings/setting-field/setting-field.tsx";
 
 export interface SettingsDictionaryFieldProps extends CommonSettingFieldProps {
   keyLabel?: string;

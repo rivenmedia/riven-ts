@@ -1,13 +1,13 @@
-import { ErrorFallback } from "@/components/error-fallback/error-fallback";
-import { ListCarousel } from "@/components/list-carousel/list-carousel";
-import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
-import { query } from "@/lib/graphql/client";
-
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
-import { TrendingTimeWindowSection } from "../trending-time-window-section";
-import { GET_TVDB_TRENDING_SHOWS } from "./_queries/get-tvdb-trending-shows";
+import { TrendingTimeWindowSection } from "#app/(protected)/(home)/_components/trending-time-window-section.tsx";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
+import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
+import { query } from "#lib/graphql/client.ts";
+
+import { GET_TVDB_TRENDING_SHOWS } from "./_queries/get-tvdb-trending-shows.ts";
 
 interface TVDBTrendingShowsContentProps {
   timeWindow: "day" | "week";

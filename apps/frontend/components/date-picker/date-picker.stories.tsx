@@ -1,10 +1,10 @@
-import { createFormDecorator } from "@/.storybook/decorators/create-form-decorator";
-import preview from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { expect, userEvent, within } from "storybook/test";
 
-import { DatePicker } from "./date-picker";
+import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
+import preview from "#.storybook/preview.tsx";
+
+import { DatePicker } from "./date-picker.tsx";
 
 const meta = preview.meta({
   title: "Components / DatePicker",

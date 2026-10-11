@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
-import { TrendingListFilters } from "./trending-list-filters";
+import { preview } from "#.storybook/preview.tsx";
+
+import { TrendingListFilters } from "./trending-list-filters.tsx";
 
 const meta = preview.meta({
   title: "Pages / Trending / Components / TrendingListFilters",

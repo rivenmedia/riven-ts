@@ -1,9 +1,9 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { fn } from "storybook/test";
 
-import { FileInformationPanel } from "./file-information-panel";
+import { preview } from "#.storybook/preview.tsx";
+
+import { FileInformationPanel } from "./file-information-panel.tsx";
 
 import type { UUID } from "node:crypto";
 

@@ -1,7 +1,7 @@
-import { Button } from "@/components/_ui/button";
-
 import { Star } from "lucide-react";
 import Image from "next/image";
+
+import { Button } from "#components/_ui/button.tsx";
 
 export interface OauthProviderButtonProps {
   isLastUsed: boolean;

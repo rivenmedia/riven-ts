@@ -1,24 +1,24 @@
-import { Button } from "@/components/_ui/button";
-import { ButtonGroup } from "@/components/_ui/button-group";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/_ui/field";
-import { Input } from "@/components/_ui/input";
-import { Switch } from "@/components/_ui/switch";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { FormBase } from "../form-base/form-base";
-import { PasswordChangeFormSchema } from "./password-change.form-schema";
+import { ButtonGroup } from "#components/_ui/button-group.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#components/_ui/field.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Switch } from "#components/_ui/switch.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import type { PasswordChangeFormValues } from "./password-change.form-schema";
+import { PasswordChangeFormSchema } from "./password-change.form-schema.ts";
+
+import type { PasswordChangeFormValues } from "./password-change.form-schema.ts";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
 export function PasswordChangeForm() {

@@ -1,10 +1,10 @@
+import { XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/_ui/chart";
-
-import { XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
+} from "#components/_ui/chart.tsx";
 
 export interface ReleaseYearCardProps {
   data: { year: number; count: number }[];

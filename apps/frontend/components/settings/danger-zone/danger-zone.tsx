@@ -1,3 +1,6 @@
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,11 +11,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/_ui/alert-dialog";
-import { Button } from "@/components/_ui/button";
-
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
+} from "#components/_ui/alert-dialog.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 export function DangerZone() {
   const [isOpen, setIsOpen] = useState(false);

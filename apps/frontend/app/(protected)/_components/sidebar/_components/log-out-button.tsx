@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-import { authClient } from "@/lib/auth/client";
-
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
+
+import { Button } from "#components/_ui/button.tsx";
+import { authClient } from "#lib/auth/client.ts";
 
 export function LogOutButton() {
   const router = useRouter();

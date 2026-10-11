@@ -1,14 +1,14 @@
+import Link from "next/link";
+import React from "react";
+
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/_ui/carousel";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
+} from "#components/_ui/carousel.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import Link from "next/link";
-import React from "react";
-
-import type { IndexerData } from "@/app/_types/__generated__/graphql";
+import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 interface MediaCarouselProps {
   items: Pick<IndexerData, "id" | "title" | "type" | "posterUrl" | "year">[];

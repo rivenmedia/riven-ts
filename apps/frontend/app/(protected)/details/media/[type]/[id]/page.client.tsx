@@ -1,14 +1,14 @@
-import { BackdropBackground } from "@/components/media/backdrop-background/backdrop-background";
-import { HeroBanner } from "@/components/media/hero-banner/hero-banner";
-
 import Image from "next/image";
 
-import { ItemCast } from "./_components/item-cast/item-cast";
-import { ItemOverview } from "./_components/item-overview";
-import { ItemRecommendations } from "./_components/item-recommendations/item-recommendations";
-import { SimilarItems } from "./_components/similar-items/similar-items";
+import { BackdropBackground } from "#components/media/backdrop-background/backdrop-background.tsx";
+import { HeroBanner } from "#components/media/hero-banner/hero-banner.tsx";
 
-import type { IndexerData } from "@/app/_types/__generated__/graphql";
+import { ItemCast } from "./_components/item-cast/item-cast.tsx";
+import { ItemOverview } from "./_components/item-overview.tsx";
+import { ItemRecommendations } from "./_components/item-recommendations/item-recommendations.tsx";
+import { SimilarItems } from "./_components/similar-items/similar-items.tsx";
+
+import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 interface MediaDetailsPageProps {
   data: IndexerData;

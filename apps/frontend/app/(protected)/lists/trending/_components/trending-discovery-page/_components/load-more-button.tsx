@@ -1,7 +1,7 @@
-import { Button } from "@/components/_ui/button";
-import { Spinner } from "@/components/_ui/spinner";
-
 import { useInView } from "react-intersection-observer";
+
+import { Button } from "#components/_ui/button.tsx";
+import { Spinner } from "#components/_ui/spinner.tsx";
 
 interface LoadMoreButtonProps {
   loading: boolean;

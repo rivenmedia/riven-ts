@@ -1,12 +1,12 @@
-import { Button } from "@/components/_ui/button";
-
 import { Fingerprint } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { FormBase } from "../form-base/form-base";
-import { usePasskeyForm } from "./passkey-form-provider";
-import { PasskeyList } from "./passkey-list";
+import { Button } from "#components/_ui/button.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
+
+import { usePasskeyForm } from "./passkey-form-provider.tsx";
+import { PasskeyList } from "./passkey-list.tsx";
 
 export function Passkeys() {
   const { isRegisteringPasskey, registerPasskey } = usePasskeyForm();

@@ -1,22 +1,22 @@
-import { Button } from "@/components/_ui/button";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "@/components/_ui/field";
-import { Input } from "@/components/_ui/input";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { delay } from "es-toolkit";
 import { LoaderCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { FormBase } from "../form-base/form-base";
-import { UpdateProfileFormSchema } from "./update-profile.form-schema";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "#components/_ui/field.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import type { UpdateProfileFormValues } from "./update-profile.form-schema";
+import { UpdateProfileFormSchema } from "./update-profile.form-schema.ts";
+
+import type { UpdateProfileFormValues } from "./update-profile.form-schema.ts";
 
 interface UpdateProfileFormProps {
   data: UpdateProfileFormValues;

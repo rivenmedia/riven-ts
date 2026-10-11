@@ -1,10 +1,10 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 
-import { CalendarDayCell } from "./calendar-day-cell";
+import { preview } from "#.storybook/preview.tsx";
 
-import type { CalendarDay } from "../types";
+import { CalendarDayCell } from "./calendar-day-cell.tsx";
+
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 import type { UUID } from "node:crypto";
 
 const busyDay: CalendarDay = {

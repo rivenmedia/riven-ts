@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 import type {
   GetTmdbNowPlayingQuery,
   GetTmdbNowPlayingQueryVariables,
-} from "./get-tmdb-now-playing.query.typegen";
+} from "./get-tmdb-now-playing.query.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<

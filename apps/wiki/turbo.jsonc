@@ -12,6 +12,9 @@
         "$TURBO_ROOT$/**/docs/**/meta.json"
       ]
     },
+    "lint": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:nextjs-types"]
+    },
     "dev": {
       "dependsOn": ["^codegen:config-docs"]
     }

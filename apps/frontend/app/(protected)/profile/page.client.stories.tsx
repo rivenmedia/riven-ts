@@ -1,9 +1,9 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { http, HttpResponse } from "msw";
 
-import { ProfilePage } from "./page.client";
+import { preview } from "#.storybook/preview.tsx";
+
+import { ProfilePage } from "./page.client.tsx";
 
 import type { Passkey } from "@better-auth/passkey";
 

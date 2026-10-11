@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { ConnectionStatusIndicator } from "./connection-status-indicator";
+import { ConnectionStatusIndicator } from "./connection-status-indicator.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / ConnectionStatusIndicator",

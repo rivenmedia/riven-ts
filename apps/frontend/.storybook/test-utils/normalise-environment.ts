@@ -1,7 +1,7 @@
-import { configureLocale } from "@/lib/utils/configure-luxon";
-
 import { faker } from "@faker-js/faker";
 import { DateTime, Settings } from "luxon";
+
+import { configureLocale } from "#lib/utils/configure-luxon.ts";
 
 /**
  * Normalises the Storybook environment so that dates, times, and random data are consistent.

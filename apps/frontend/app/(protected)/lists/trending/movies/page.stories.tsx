@@ -1,10 +1,10 @@
-import preview from "@/.storybook/preview";
-
 import { faker } from "@faker-js/faker";
 import { graphql, HttpResponse } from "msw";
 
-import { GET_DISCOVERY_ITEMS } from "../_components/trending-discovery-page/_components/trending-discovery-item-list";
-import TrendingMoviesPage from "./page";
+import preview from "#.storybook/preview.tsx";
+import { GET_DISCOVERY_ITEMS } from "#app/(protected)/lists/trending/_components/trending-discovery-page/_components/trending-discovery-item-list.tsx";
+
+import TrendingMoviesPage from "./page.tsx";
 
 import type { UUID } from "node:crypto";
 

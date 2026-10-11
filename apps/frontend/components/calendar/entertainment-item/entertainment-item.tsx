@@ -3,9 +3,9 @@ import { Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
-import { getTypeStyle } from "../utilities/get-type-style";
+import { getTypeStyle } from "#components/calendar/utilities/get-type-style.ts";
 
-import type { EntertainmentItemData } from "../types";
+import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 
 function formatEpisodeLabel({ season, episode }: EntertainmentItemData) {
   if (!season) {

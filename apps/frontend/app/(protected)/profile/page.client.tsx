@@ -1,24 +1,28 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
-import { Badge } from "@/components/_ui/badge";
-import { Button } from "@/components/_ui/button";
-import { Separator } from "@/components/_ui/separator";
-import { AccountLinks } from "@/components/auth/account-links/account-links";
-import { CreateUserForm } from "@/components/auth/create-user-form/create-user-form";
-import { EmailChangeForm } from "@/components/auth/email-change-form/email-change-form";
-import { PasskeyFormProvider } from "@/components/auth/passkeys/passkey-form-provider";
-import { Passkeys } from "@/components/auth/passkeys/passkeys";
-import { PasswordChangeForm } from "@/components/auth/password-change-form/password-change-form";
-import { SetPasswordForm } from "@/components/auth/set-password-form/set-password-form";
-import { UpdateProfileForm } from "@/components/auth/update-profile-form/update-profile-form";
-import { UserManagement } from "@/components/auth/user-management/user-management";
-import { PageShell } from "@/components/page-shell/page-shell";
-import { authClient } from "@/lib/auth/client";
-import { getInitials } from "@/lib/utils";
-
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 
-import type { User } from "@/lib/auth/client";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#components/_ui/avatar.tsx";
+import { Badge } from "#components/_ui/badge.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
+import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
+import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
+import { EmailChangeForm } from "#components/auth/email-change-form/email-change-form.tsx";
+import { PasskeyFormProvider } from "#components/auth/passkeys/passkey-form-provider.tsx";
+import { Passkeys } from "#components/auth/passkeys/passkeys.tsx";
+import { PasswordChangeForm } from "#components/auth/password-change-form/password-change-form.tsx";
+import { SetPasswordForm } from "#components/auth/set-password-form/set-password-form.tsx";
+import { UpdateProfileForm } from "#components/auth/update-profile-form/update-profile-form.tsx";
+import { UserManagement } from "#components/auth/user-management/user-management.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { authClient } from "#lib/auth/client.ts";
+import { getInitials } from "#lib/utils.ts";
+
+import type { User } from "#lib/auth/client.ts";
 
 interface ProfilePageProps {
   hasCredentialProvider: boolean;

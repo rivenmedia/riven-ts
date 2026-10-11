@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { KpiStatTile } from "./kpi-stat-tile";
+import { KpiStatTile } from "./kpi-stat-tile.tsx";
 
 const meta = preview.meta({
   title: "Dashboard / KpiStatTile",

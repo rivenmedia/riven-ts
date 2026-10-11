@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import { PasswordChangeForm } from "./password-change-form";
+import { preview } from "#.storybook/preview.tsx";
+
+import { PasswordChangeForm } from "./password-change-form.tsx";
 
 const meta = preview.meta({
   title: "Auth / PasswordChangeForm",

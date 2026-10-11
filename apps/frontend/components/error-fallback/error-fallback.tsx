@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import { catchError } from "next/error";
 
-import { Button } from "../_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 
 import type { HTMLAttributes } from "react";
 

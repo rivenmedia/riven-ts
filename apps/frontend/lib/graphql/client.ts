@@ -1,11 +1,11 @@
-import { privateEnvironment } from "@/environment/private-environment.schema";
-
 import { HttpLink } from "@apollo/client";
 import {
   registerApolloClient,
   ApolloClient,
   InMemoryCache,
 } from "@apollo/client-integration-nextjs";
+
+import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
 export const { getClient, query, PreloadQuery } = registerApolloClient(
   () =>

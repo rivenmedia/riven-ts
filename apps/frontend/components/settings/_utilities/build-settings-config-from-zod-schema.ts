@@ -15,7 +15,7 @@ import {
 import type {
   CommonSettingFieldProps,
   SettingFieldProps,
-} from "../setting-field/setting-field";
+} from "#components/settings/setting-field/setting-field.tsx";
 import type { Constructor } from "type-fest";
 import type { $ZodType } from "zod/v4/core";
 

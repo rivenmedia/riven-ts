@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 
-import { CalendarPage } from "./page.client";
+import { preview } from "#.storybook/preview.tsx";
+
+import { CalendarPage } from "./page.client.tsx";
 
 import type { UUID } from "node:crypto";
 

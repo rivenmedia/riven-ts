@@ -1,15 +1,15 @@
-import { ErrorFallback } from "@/components/error-fallback/error-fallback";
-import { ListCarousel } from "@/components/list-carousel/list-carousel";
-import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
-import { query } from "@/lib/graphql/client";
-
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
-import { TrendingTimeWindowSection } from "../trending-time-window-section";
-import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies";
+import { TrendingTimeWindowSection } from "#app/(protected)/(home)/_components/trending-time-window-section.tsx";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
+import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
+import { query } from "#lib/graphql/client.ts";
 
-import type { TmdbTrendingMoviesTimeWindow } from "../../../../_types/__generated__/graphql";
+import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies.ts";
+
+import type { TmdbTrendingMoviesTimeWindow } from "#app/_types/__generated__/graphql.ts";
 
 interface TMDBTrendingMoviesContentProps {
   timeWindow: TmdbTrendingMoviesTimeWindow;

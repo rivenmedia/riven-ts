@@ -1,7 +1,7 @@
-import { Badge } from "@/components/_ui/badge";
-
 import { cn } from "cn";
 import { startCase } from "es-toolkit";
+
+import { Badge } from "#components/_ui/badge.tsx";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { HTMLAttributes } from "react";

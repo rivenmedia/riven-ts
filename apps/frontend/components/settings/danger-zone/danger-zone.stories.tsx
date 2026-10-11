@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { DangerZone } from "./danger-zone";
+import { DangerZone } from "./danger-zone.tsx";
 
 const meta = preview.meta({
   title: "Settings / DangerZone",

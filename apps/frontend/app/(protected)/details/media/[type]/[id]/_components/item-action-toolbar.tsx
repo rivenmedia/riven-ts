@@ -1,5 +1,3 @@
-import { fly } from "@/components/_animations/fly";
-
 import { cn } from "cn";
 import {
   Download,
@@ -10,14 +8,16 @@ import {
   Trash2,
 } from "lucide-react";
 
-import { RequestItemAction } from "./actions/request-item-action";
-import { ItemAction } from "./item-action";
+import { fly } from "#components/_animations/fly.ts";
 
-import type { SeasonData } from "./season-selector";
+import { RequestItemAction } from "./actions/request-item-action.tsx";
+import { ItemAction } from "./item-action.tsx";
+
 import type {
   MediaItem,
   MediaItemType,
-} from "@/app/_types/__generated__/graphql";
+} from "#app/_types/__generated__/graphql.ts";
+import type { SeasonData } from "./season-selector.tsx";
 
 interface ItemActionToolbarProps {
   title: string | null | undefined;

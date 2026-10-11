@@ -9,13 +9,18 @@ import Link from "next/link";
 import React, { startTransition, useEffect, useState } from "react";
 import { useHoverDirty } from "react-use";
 
-import { fly } from "../_animations/fly";
-import { Button } from "../_ui/button";
-import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
-import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
+import { fly } from "#components/_animations/fly.ts";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "#components/_ui/carousel.tsx";
 
-import type { CarouselApi } from "../_ui/carousel";
-import type { IndexerData, Rating } from "@/app/_types/__generated__/graphql";
+import { getAlignmentClasses } from "./_utilities/get-alignment-classes.ts";
+
+import type { IndexerData, Rating } from "#app/_types/__generated__/graphql.ts";
+import type { CarouselApi } from "#components/_ui/carousel.tsx";
 import type { RefObject } from "react";
 
 export interface NowPlayingProps {

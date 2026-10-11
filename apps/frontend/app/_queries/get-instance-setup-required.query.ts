@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 import type {
   GetInstanceSetupRequiredQuery,
   GetInstanceSetupRequiredQueryVariables,
-} from "./get-instance-setup-required.query.typegen";
+} from "./get-instance-setup-required.query.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_INSTANCE_SETUP_REQUIRED: TypedDocumentNode<

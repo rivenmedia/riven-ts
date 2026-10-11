@@ -1,9 +1,9 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime, Settings } from "luxon";
 import { expect, within } from "storybook/test";
 
-import { Calendar } from "./calendar";
+import { preview } from "#.storybook/preview.tsx";
+
+import { Calendar } from "./calendar.tsx";
 
 import type { UUID } from "node:crypto";
 

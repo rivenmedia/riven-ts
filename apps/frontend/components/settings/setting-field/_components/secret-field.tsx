@@ -1,13 +1,13 @@
-import { Button } from "@/components/_ui/button";
-import { ButtonGroup } from "@/components/_ui/button-group";
-import { Input } from "@/components/_ui/input";
-import { Label } from "@/components/_ui/label";
-
 import { Eye, EyeOff } from "lucide-react";
 import { useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
-import type { CommonSettingFieldProps } from "../setting-field";
+import { ButtonGroup } from "#components/_ui/button-group.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Label } from "#components/_ui/label.tsx";
+
+import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";
 
 export interface SettingsSecretFieldProps extends CommonSettingFieldProps {

@@ -2,7 +2,7 @@
 import "@testing-library/jest-dom/vitest";
 import { vi } from "vitest";
 
-import { configureLocale } from "./lib/utils/configure-luxon";
+import { configureLocale } from "#lib/utils/configure-luxon.ts";
 
 configureLocale("en-GB");
 

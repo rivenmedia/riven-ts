@@ -1,15 +1,15 @@
 "use client";
 
-import { ImmersiveBackground } from "@/components/immersive-background/immersive-background";
-import { PageShell } from "@/components/page-shell/page-shell";
-
 import { usePathname } from "next/navigation";
 
-import { Header } from "./header";
-import { Sidebar } from "./sidebar/sidebar";
+import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
 
-import type { SidebarItem } from "./sidebar/sidebar";
-import type { User } from "@/lib/auth/types";
+import { Header } from "./header.tsx";
+import { Sidebar } from "./sidebar/sidebar.tsx";
+
+import type { User } from "#lib/auth/types.ts";
+import type { SidebarItem } from "./sidebar/sidebar.tsx";
 import type { PropsWithChildren } from "react";
 
 interface PageWrapperProps {

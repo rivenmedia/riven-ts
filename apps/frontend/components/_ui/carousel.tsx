@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -13,6 +11,8 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { Button } from "#components/_ui/button.tsx";
 
 import type { UseEmblaCarouselType } from "embla-carousel-react";
 import type { ComponentProps } from "react";

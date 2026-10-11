@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { RankingTab } from "./ranking-tab";
+import { RankingTab } from "./ranking-tab.tsx";
 
 const meta = preview.meta({
   title: "Settings / RankingTab",

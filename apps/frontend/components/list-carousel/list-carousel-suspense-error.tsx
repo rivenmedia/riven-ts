@@ -1,5 +1,5 @@
-import { Button } from "@/components/_ui/button";
-import { logger } from "@/lib/logger";
+import { Button } from "#components/_ui/button.tsx";
+import { logger } from "#lib/logger.ts";
 
 import type { FallbackProps } from "react-error-boundary";
 

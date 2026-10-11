@@ -1,6 +1,3 @@
-import preview from "@/.storybook/preview";
-import { NotificationsProvider } from "@/components/providers/notifications-provider";
-
 import {
   Home,
   LayoutDashboard,
@@ -11,7 +8,10 @@ import {
 } from "lucide-react";
 import { DateTime } from "luxon";
 
-import { PageWrapper } from "./page-wrapper";
+import preview from "#.storybook/preview.tsx";
+import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
+
+import { PageWrapper } from "./page-wrapper.tsx";
 
 const meta = preview.meta({
   title: "Components / PageWrapper",

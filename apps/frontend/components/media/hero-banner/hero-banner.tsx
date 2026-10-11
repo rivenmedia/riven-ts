@@ -1,14 +1,21 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import { Play, X } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 
-import type { Trailer } from "@/app/_types/__generated__/graphql";
+import { Button } from "#components/_ui/button.tsx";
+
 import type { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
+
+export interface Trailer {
+  id?: string | number;
+  name: string;
+  site: string | null;
+  key: string;
+  url?: string | null;
+}
 
 export interface HeroBannerProps {
   backdropUrl: string | null | undefined;

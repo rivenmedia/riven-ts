@@ -1,6 +1,3 @@
-import { StarCounter } from "@/components/star-counter";
-import { getPlugins } from "@/lib/plugins";
-
 import {
   ArrowRight,
   BarChart3,
@@ -14,6 +11,9 @@ import {
   Zap,
 } from "lucide-react";
 import Link from "next/link";
+
+import { StarCounter } from "#components/star-counter.tsx";
+import { getPlugins } from "#lib/plugins.ts";
 
 import type { LucideIcon } from "lucide-react";
 

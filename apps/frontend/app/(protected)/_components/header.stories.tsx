@@ -1,9 +1,9 @@
-import { preview } from "@/.storybook/preview";
-
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import { Header } from "./header";
+import { preview } from "#.storybook/preview.tsx";
+
+import { Header } from "./header.tsx";
 
 const meta = preview.meta({
   title: "Components / Header",

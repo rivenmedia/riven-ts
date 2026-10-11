@@ -1,5 +1,3 @@
-import { authClient } from "@/lib/auth/client";
-
 import {
   createContext,
   startTransition,
@@ -11,6 +9,8 @@ import {
 } from "react";
 import { useUnmount } from "react-use";
 import { toast } from "sonner";
+
+import { authClient } from "#lib/auth/client.ts";
 
 import type { Passkey } from "@better-auth/passkey/client";
 import type { PropsWithChildren } from "react";

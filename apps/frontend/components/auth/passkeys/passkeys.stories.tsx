@@ -1,5 +1,3 @@
-import { preview } from "@/.storybook/preview";
-
 import { StatusCodes } from "http-status-codes";
 import { DateTime } from "luxon";
 import { delay, http, HttpResponse } from "msw";
@@ -13,8 +11,10 @@ import {
   within,
 } from "storybook/test";
 
-import { PasskeyFormProvider } from "./passkey-form-provider";
-import { Passkeys } from "./passkeys";
+import { preview } from "#.storybook/preview.tsx";
+
+import { PasskeyFormProvider } from "./passkey-form-provider.tsx";
+import { Passkeys } from "./passkeys.tsx";
 
 import type { Passkey } from "@better-auth/passkey/client";
 import type { PathParams } from "msw";

@@ -1,9 +1,9 @@
-import { createFormDecorator } from "@/.storybook/decorators/create-form-decorator";
-import { preview } from "@/.storybook/preview";
-
 import { expect, fn } from "storybook/test";
 
-import { SelectablePill } from "./selectable-pill";
+import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
+import { preview } from "#.storybook/preview.tsx";
+
+import { SelectablePill } from "./selectable-pill.tsx";
 
 const meta = preview.meta({
   title: "Components / SelectablePill",

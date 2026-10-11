@@ -1,11 +1,11 @@
-import preview from "@/.storybook/preview";
-
 import { graphql, HttpResponse } from "msw";
 
-import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query";
-import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query";
-import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query";
-import { MediaDetailsPage } from "./page.client";
+import preview from "#.storybook/preview.tsx";
+
+import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
+import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
+import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
+import { MediaDetailsPage } from "./page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / SingleMediaItem",

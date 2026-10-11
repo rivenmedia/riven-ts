@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { fn } from "storybook/test";
 
-import { ErrorDisplay } from "./error-display";
+import { preview } from "#.storybook/preview.tsx";
+
+import { ErrorDisplay } from "./error-display.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / ErrorDisplay",

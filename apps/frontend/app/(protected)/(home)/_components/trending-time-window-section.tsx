@@ -1,15 +1,15 @@
 "use client";
 
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-
 import { useState } from "react";
+
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 
 import {
   TRENDING_TIME_OPTIONS,
   TrendingItemsActions,
-} from "./trending-items-actions";
+} from "./trending-items-actions.tsx";
 
-import type { TimeWindow } from "./trending-items-actions";
+import type { TimeWindow } from "./trending-items-actions.tsx";
 import type { Route } from "next";
 import type { ReactNode } from "react";
 

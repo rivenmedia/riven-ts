@@ -1,6 +1,6 @@
-import { LibraryPage } from "./page.client";
+import { LibraryPage } from "./page.client.tsx";
 
-import type { MediaItem } from "@/app/_types/__generated__/graphql";
+import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 
 export default async function Library() {
   const totalItems = 100_000;

@@ -20,7 +20,11 @@
       ]
     },
     "codegen:gql": {
-      "dependsOn": ["@repo/riven#codegen:gql-schema"]
+      "dependsOn": ["@repo/riven#codegen:gql-schema"],
+      "outputs": [
+        "./app/_types/__generated__/graphql.ts",
+        "./app/**/*.typegen.ts"
+      ]
     },
     "codegen:gql:watch": {
       "dependsOn": ["@repo/riven#codegen:gql-schema"],

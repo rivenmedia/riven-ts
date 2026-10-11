@@ -1,6 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { ImmersiveBackground } from "./immersive-background";
+import { ImmersiveBackground } from "./immersive-background.tsx";
 
 const meta = preview.meta({
   title: "Components / ImmersiveBackground",

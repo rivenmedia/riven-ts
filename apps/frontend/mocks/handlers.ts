@@ -1,7 +1,7 @@
 import { DateTime } from "luxon";
 import { http, HttpResponse } from "msw";
 
-import type { Session } from "@/lib/auth/client";
+import type { Session } from "#lib/auth/client.ts";
 import type { AnyHandler } from "msw";
 
 export const handlers = [

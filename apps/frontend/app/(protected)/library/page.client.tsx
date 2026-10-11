@@ -1,28 +1,5 @@
 "use client";
 
-import { fly } from "@/components/_animations/fly";
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "@/components/_ui/pagination";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/_ui/select";
-import { ImmersiveBackground } from "@/components/immersive-background/immersive-background";
-import { ListItem } from "@/components/list-item/list-item";
-import { PageShell } from "@/components/page-shell/page-shell";
-import { CardSelectionProvider } from "@/components/providers/card-selection-provider";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { cn } from "cn";
@@ -32,7 +9,31 @@ import Link from "next/link";
 import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import type { MediaItem } from "@/app/_types/__generated__/graphql";
+import { fly } from "#components/_animations/fly.ts";
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationEllipsis,
+  PaginationItem,
+  PaginationLink,
+  PaginationNext,
+  PaginationPrevious,
+} from "#components/_ui/pagination.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "#components/_ui/select.tsx";
+import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
+import { ListItem } from "#components/list-item/list-item.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
+
+import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 
 interface LibraryPageProps {
   items: MediaItem[];

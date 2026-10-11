@@ -3,7 +3,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
-} from "@/components/_ui/card";
+} from "#components/_ui/card.tsx";
 
 export function SetupWelcomeStep() {
   return (

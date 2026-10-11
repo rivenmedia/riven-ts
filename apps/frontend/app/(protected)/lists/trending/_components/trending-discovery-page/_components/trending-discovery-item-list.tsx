@@ -1,17 +1,17 @@
 "use client";
 
-import { ListItem } from "@/components/list-item/list-item";
-
 import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { startTransition, useState } from "react";
 
-import { LoadMoreButton } from "./load-more-button";
+import { ListItem } from "#components/list-item/list-item.tsx";
+
+import { LoadMoreButton } from "./load-more-button.tsx";
 
 import type {
   GetDiscoveryItemsQuery,
   GetDiscoveryItemsQueryVariables,
-} from "./trending-discovery-item-list.typegen";
+} from "./trending-discovery-item-list.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_DISCOVERY_ITEMS: TypedDocumentNode<

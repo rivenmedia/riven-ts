@@ -1,19 +1,19 @@
+import { Mountain } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/_ui/tabs";
-import { authClient } from "@/lib/auth/client";
+} from "#components/_ui/tabs.tsx";
+import { authClient } from "#lib/auth/client.ts";
 
-import { Mountain } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
+import { LoginForm } from "./_forms/login-form.tsx";
+import { RegisterForm } from "./_forms/register-form.tsx";
 
-import { LoginForm } from "./_forms/login-form";
-import { RegisterForm } from "./_forms/register-form";
-
-import type { AuthProvider } from "@/app/_types/__generated__/graphql";
+import type { AuthProvider } from "#app/_types/__generated__/graphql.ts";
 
 interface TabData {
   label: string;

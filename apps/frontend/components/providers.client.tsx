@@ -2,9 +2,9 @@
 
 import { ProgressProvider } from "@bprogress/next/app";
 
-import { TooltipProvider } from "./_ui/tooltip";
-import { NotificationsProvider } from "./providers/notifications-provider";
-import { Toaster } from "./toaster/toaster";
+import { TooltipProvider } from "./_ui/tooltip.tsx";
+import { NotificationsProvider } from "./providers/notifications-provider.tsx";
+import { Toaster } from "./toaster/toaster.tsx";
 
 import type { PropsWithChildren } from "react";
 

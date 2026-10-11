@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 
-import { EntertainmentItem } from "./entertainment-item";
+import { EntertainmentItem } from "./entertainment-item.tsx";
 
-import type { EntertainmentItemData } from "../types";
+import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 
 const meta = preview.meta({
   title: "Calendar / EntertainmentItem",

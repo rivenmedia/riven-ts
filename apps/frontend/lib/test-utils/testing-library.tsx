@@ -1,6 +1,6 @@
-import { Providers } from "@/components/providers";
-
 import { render } from "@testing-library/react";
+
+import { Providers } from "#components/providers.tsx";
 
 import type { RenderOptions } from "@testing-library/react";
 

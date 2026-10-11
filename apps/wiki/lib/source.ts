@@ -1,8 +1,8 @@
-import { excludedWorkspaces } from "@/excluded-workspaces";
-
-import { docs } from "collections/server";
 import { loader } from "fumadocs-core/source";
 import { lucideIconsPlugin } from "fumadocs-core/source/lucide-icons";
+
+import { docs } from "#collections/server.ts";
+import { excludedWorkspaces } from "#excluded-workspaces.ts";
 
 import packageJson from "../package.json" with { type: "json" };
 
