@@ -83,9 +83,14 @@ export const UnrequestedMovie = meta.story({
       overview:
         "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
       backdropUrl:
-        "https://image.tmdb.org/t/p/w1920/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
-      logoUrl:
-        "https://image.tmdb.org/t/p/w500/nxUlI9IPiieWnzHviapG0akZkz8.png",
+        "https://image.tmdb.org/t/p/original/qVGpxnjrGlHaSTCqTQI6viBDSfp.jpg",
+      logo: {
+        __typename: "ItemImage",
+        aspectRatio: 1.22,
+        height: 407,
+        width: 500,
+        url: "https://image.tmdb.org/t/p/w500/nxUlI9IPiieWnzHviapG0akZkz8.png",
+      },
       posterUrl:
         "https://image.tmdb.org/t/p/w300/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
       trailer: {
