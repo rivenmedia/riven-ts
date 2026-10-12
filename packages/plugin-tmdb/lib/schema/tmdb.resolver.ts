@@ -10,6 +10,8 @@ import { formatImageUrl } from "../utilities/format-image-url.ts";
 import { TmdbTrendingMoviesTimeWindow } from "./enums/trending-time-window.enum.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
+import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
+
 @Resolver()
 export class TmdbResolver {
   @Query(() => Boolean)
@@ -56,10 +58,10 @@ export class TmdbResolver {
           name: language.name ?? "",
         })) ?? null,
       productionCompanies:
-        item.production_companies?.map((company) => ({
+        item.production_companies?.map<ProductionCompany>((company) => ({
           id: company.id?.toString() ?? "",
           name: company.name ?? "",
-          logoUrl: formatImageUrl(company.logo_path, "logo"),
+          logoPath: formatImageUrl(company.logo_path, "logo") ?? null,
           originCountry: company.origin_country ?? "",
         })) ?? null,
     };

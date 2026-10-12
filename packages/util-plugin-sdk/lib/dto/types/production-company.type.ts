@@ -8,8 +8,8 @@ export class ProductionCompany {
   @Field(() => String)
   public name!: string;
 
-  @Field(() => String)
-  public logoPath!: string;
+  @Field(() => String, { nullable: true })
+  public logoPath!: string | null;
 
   @Field(() => String)
   public originCountry!: string;

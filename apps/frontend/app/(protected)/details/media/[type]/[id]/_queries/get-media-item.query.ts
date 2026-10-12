@@ -43,6 +43,8 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       productionCompanies {
         id
         name
+        logoPath
+        originCountry
       }
       revenue
       budget
