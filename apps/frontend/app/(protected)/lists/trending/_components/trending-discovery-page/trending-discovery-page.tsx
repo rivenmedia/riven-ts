@@ -4,7 +4,6 @@ import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { TrendingListFilters } from "#app/(protected)/lists/trending/_components/trending-list-fiilters/trending-list-filters.tsx";
-import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-skeleton.tsx";
 
@@ -32,7 +31,6 @@ export function TrendingDiscoveryPage({
 
   return (
     <PageShell className="bg-background relative flex min-h-screen flex-col overflow-x-hidden">
-      <ImmersiveBackground />
       <div className="relative z-10 mx-auto flex w-full max-w-600 flex-col gap-6 px-6 pt-6 pb-24 md:px-12 md:pt-16 md:pb-12 lg:px-16">
         <div className="flex flex-col gap-4">
           <div className="flex flex-wrap items-center justify-between gap-4">
