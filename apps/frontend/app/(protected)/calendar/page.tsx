@@ -1,3 +1,11 @@
+import { CalendarPage as CalendarPageClient } from "./page.client";
+
 export default function CalendarPage() {
-  return <h1>Calendar</h1>;
+  return (
+    <CalendarPageClient
+      calendar={{
+        data: [],
+      }}
+    />
+  );
 }

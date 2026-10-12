@@ -1,3 +1,5 @@
+"use client";
+
 import { DateTime } from "luxon";
 import { useRouter } from "next/navigation";
 

@@ -1,8 +1,10 @@
+"use client";
+
 import {
   createContext,
   startTransition,
+  use,
   useCallback,
-  useContext,
   useMemo,
   useRef,
   useState,
@@ -157,7 +159,7 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
 }
 
 export function usePasskeyForm() {
-  const context = useContext(PasskeyFormContext);
+  const context = use(PasskeyFormContext);
 
   if (!context) {
     throw new Error("usePasskeyForm must be used within a PasskeyFormProvider");

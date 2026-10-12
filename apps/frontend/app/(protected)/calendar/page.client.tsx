@@ -10,9 +10,5 @@ interface CalendarPageProps {
 }
 
 export function CalendarPage({ calendar }: CalendarPageProps) {
-  return (
-    <PageShell className="mx-auto h-full w-full max-w-450 gap-5">
-      <Calendar items={calendar.data} />
-    </PageShell>
-  );
+  return <Calendar items={calendar.data} />;
 }

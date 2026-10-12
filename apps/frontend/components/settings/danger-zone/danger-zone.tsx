@@ -51,12 +51,8 @@ export function DangerZone() {
           </div>
 
           <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-            <AlertDialogTrigger>
-              <Button
-                variant="destructive"
-                className="shrink-0 w-full"
-                type="button"
-              >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" type="button">
                 Reset library
               </Button>
             </AlertDialogTrigger>

@@ -1,3 +1,5 @@
+"use client";
+
 import { ChevronLeft, ChevronRight, Film, Tv } from "lucide-react";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
@@ -27,7 +29,7 @@ export function Calendar({ items }: CalendarProps) {
     resetToToday,
   } = useCalendar();
 
-  const shouldRenderMobileCalendar = useMedia("(max-width: 768px)");
+  const shouldRenderMobileCalendar = useMedia("(max-width: 768px)", false);
 
   const filterOptions = [
     { id: "movies", label: "Movies", type: "movie", icon: Film },

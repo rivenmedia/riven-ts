@@ -31,7 +31,7 @@ export function MoreDetailsPanel({
     <div className="min-w-0 flex-1">
       <SectionHeading title="More Details" />
       <div className="flex flex-col gap-6 text-sm">
-        {(budget ?? revenue) && (
+        {Boolean(budget ?? revenue) && (
           <div className="flex flex-wrap gap-12">
             {budget && (
               <div className="flex min-w-30 flex-col gap-1">
@@ -55,7 +55,8 @@ export function MoreDetailsPanel({
             )}
           </div>
         )}
-        {(originCountry.length > 0 || spokenLanguages?.length) && (
+        {(originCountry.length > 0 ||
+          (spokenLanguages && spokenLanguages.length > 0)) && (
           <div className="flex flex-wrap gap-12">
             {originCountry.length > 0 && (
               <div className="flex min-w-30 flex-col gap-1">
@@ -67,7 +68,7 @@ export function MoreDetailsPanel({
                 </span>
               </div>
             )}
-            {spokenLanguages?.length && (
+            {spokenLanguages && spokenLanguages.length > 0 && (
               <div className="flex min-w-30 flex-col gap-1">
                 <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
                   Languages
@@ -81,7 +82,7 @@ export function MoreDetailsPanel({
             )}
           </div>
         )}
-        {productionCompanies?.length && (
+        {productionCompanies && productionCompanies.length > 0 && (
           <div className="flex flex-col gap-2">
             <span className="text-muted-foreground text-xs font-semibold tracking-wider uppercase">
               Production

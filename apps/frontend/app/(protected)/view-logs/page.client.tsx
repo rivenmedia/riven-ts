@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
@@ -179,6 +181,7 @@ export function LogsPage() {
                   variant="secondary"
                   onClick={handleUploadLogs}
                   type="button"
+                  size="lg"
                 >
                   Upload Logs
                 </Button>

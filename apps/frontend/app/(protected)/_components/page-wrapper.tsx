@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 
-import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 
 import { Header } from "./header.tsx";
@@ -30,10 +29,7 @@ export function PageWrapper({
     <div className="bg-background relative grid h-screen w-screen grid-cols-1 overflow-hidden md:grid-cols-[auto_1fr]">
       <Sidebar items={sidebarItems} currentPath={pathname} user={user} />
       <Header modifierKey={userAgentHeader?.includes("Mac") ? "⌘" : "⌃"} />
-      <PageShell>
-        <ImmersiveBackground />
-        {children}
-      </PageShell>
+      <PageShell>{children}</PageShell>
       {/* <MobileNav /> */}
     </div>
   );
