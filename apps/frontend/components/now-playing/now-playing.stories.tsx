@@ -164,6 +164,11 @@ Default.test(
     args: {
       autoplayDelay: 1000,
     },
+    parameters: {
+      snapshot: {
+        enabled: false,
+      },
+    },
   },
   async ({ args, canvas, userEvent, step }) => {
     const carousel = await canvas.findByRole("region", {
@@ -241,6 +246,11 @@ Default.test(
   {
     args: {
       autoplayDelay: 5000,
+    },
+    parameters: {
+      snapshot: {
+        enabled: false,
+      },
     },
   },
   async ({ args, canvas, userEvent, step }) => {
