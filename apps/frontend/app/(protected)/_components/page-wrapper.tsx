@@ -32,7 +32,7 @@ export function PageWrapper({
       <Header modifierKey={userAgentHeader?.includes("Mac") ? "⌘" : "⌃"} />
       <PageShell className="z-1">
         <ImmersiveBackground />
-        {children}
+        <main>{children}</main>
       </PageShell>
       {/* <MobileNav /> */}
     </div>
