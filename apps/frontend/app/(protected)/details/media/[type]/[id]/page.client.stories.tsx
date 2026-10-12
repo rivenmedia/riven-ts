@@ -109,13 +109,65 @@ export const UnrequestedMovie = meta.story({
       genres: [
         {
           __typename: "Genre",
-          id: "genre-1",
+          id: "27",
           name: "Horror",
+        },
+        {
+          __typename: "Genre",
+          id: "53",
+          name: "Thriller",
+        },
+        {
+          __typename: "Genre",
+          id: "18",
+          name: "Drama",
         },
       ],
       ratings: {},
       status: "released",
-
+      budget: 35_000_000,
+      revenue: 719_766_009,
+      productionCompanies: [
+        {
+          __typename: "ProductionCompany",
+          id: "12",
+          logoPath: "/2ycs64eqV5rqKYHyQK0GVoKGvfX.png",
+          name: "New Line Cinema",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "829",
+          logoPath: "/iJo9zP5QCKyBsmKSOcvXd6UDNih.png",
+          name: "Vertigo Entertainment",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "2723",
+          logoPath: "/rB0dyszYRRR3SAG1tfNRzXoYDYq.png",
+          name: "Lin Pictures",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "87671",
+          logoPath: "/kEEGB5Z2XLYeR3AMt3Qds7vMnvM.png",
+          name: "KatzSmith Productions",
+          originCountry: "US",
+        },
+      ],
+      homepage: "https://example.com",
+      imdbId: "tt1234567",
+      originCountry: ["US"],
+      spokenLanguages: [
+        {
+          __typename: "SpokenLanguage",
+          englishName: "English",
+          iso6391Code: "en",
+          name: "English",
+        },
+      ],
       // seasons: null,
       // type: "movie",
       // completedFileCount: 1,
@@ -137,8 +189,6 @@ export const UnrequestedMovie = meta.story({
       // mediaMetadata: null,
       // state: "completed",
       // totalFileCount: 1,
-      // mediaDetails: {
-      // },
     },
   },
 });

@@ -45,6 +45,23 @@ export class TmdbResolver {
         ? Duration.fromObject({ minutes: item.runtime })
         : null,
       status: IndexerDataStatus.parse(item.status),
+      imdbId: item.imdb_id ?? null,
+      budget: item.budget ?? null,
+      revenue: item.revenue ?? null,
+      homepage: item.homepage ?? null,
+      spokenLanguages:
+        item.spoken_languages?.map((language) => ({
+          englishName: language.english_name ?? "",
+          iso6391Code: language.iso_639_1 ?? "",
+          name: language.name ?? "",
+        })) ?? null,
+      productionCompanies:
+        item.production_companies?.map((company) => ({
+          id: company.id?.toString() ?? "",
+          name: company.name ?? "",
+          logoUrl: formatImageUrl(company.logo_path, "logo"),
+          originCountry: company.origin_country ?? "",
+        })) ?? null,
     };
   }
 

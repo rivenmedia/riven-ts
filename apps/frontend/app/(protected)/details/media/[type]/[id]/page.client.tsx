@@ -4,6 +4,7 @@ import { BackdropBackground } from "#components/media/backdrop-background/backdr
 import { HeroBanner } from "#components/media/hero-banner/hero-banner.tsx";
 
 import { ItemCast } from "./_components/item-cast/item-cast.tsx";
+import { ItemMetadata } from "./_components/item-metadata.tsx";
 import { ItemOverview } from "./_components/item-overview.tsx";
 import { ItemRecommendations } from "./_components/item-recommendations/item-recommendations.tsx";
 import { SimilarItems } from "./_components/similar-items/similar-items.tsx";
@@ -115,7 +116,7 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
                     </section>
                 {/if} */}
           <ItemCast id={data.id} />
-          {/* <ItemMetadata data={data} /> */}
+          <ItemMetadata data={data} />
           <ItemRecommendations id={data.id} />
           <SimilarItems id={data.id} />
           {/* {#if data.mediaDetails?.details.trakt_recommendations?.length}{@render mediaCarousel(

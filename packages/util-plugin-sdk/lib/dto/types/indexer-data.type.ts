@@ -5,7 +5,9 @@ import { MediaItemType } from "../enums/media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
 import { ItemImage } from "./item-image.type.ts";
+import { ProductionCompany } from "./production-company.type.ts";
 import { Ratings } from "./ratings.type.ts";
+import { SpokenLanguage } from "./spoken-language.type.ts";
 import { Trailer } from "./trailer.type.ts";
 
 import type { Duration } from "luxon";
@@ -140,4 +142,25 @@ export abstract class IndexerData {
 
   @Field(() => IndexerDataStatus.out.unwrap().enum)
   public status!: IndexerDataStatus;
+
+  @Field(() => Int, { nullable: true })
+  public budget?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  public revenue?: number | null;
+
+  @Field(() => [String], { nullable: true })
+  public originCountry?: string[] | null;
+
+  @Field(() => [SpokenLanguage], { nullable: true })
+  public spokenLanguages?: SpokenLanguage[] | null;
+
+  @Field(() => [ProductionCompany], { nullable: true })
+  public productionCompanies?: ProductionCompany[] | null;
+
+  @Field(() => String, { nullable: true })
+  public homepage?: string | null;
+
+  @Field(() => String, { nullable: true })
+  public imdbId?: string | null;
 }

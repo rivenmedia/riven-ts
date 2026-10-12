@@ -39,6 +39,14 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       language
       certification
       status
+      originCountry
+      productionCompanies {
+        id
+        name
+      }
+      revenue
+      budget
+      imdbId
       # seasons {
       #   id
       #   name
