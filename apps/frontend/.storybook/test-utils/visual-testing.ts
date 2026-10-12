@@ -15,8 +15,14 @@ declare module "vitest/browser" {
  */
 export interface SnapshotParameters
   extends ToMatchImageSnapshotOptions, ImageSnapshotSubjectOptions {
-  /** Milliseconds to wait before capturing, e.g. to avoid capturing a carousel mid-transition */
-  delay?: number;
+  /**
+   * Milliseconds the page must stay unchanged before capturing, e.g. to avoid capturing a carousel mid-transition.
+   *
+   * Any DOM mutation or image load restarts the wait.
+   *
+   * @default `250` milliseconds
+   */
+  holdMs?: number;
   /** Set to `false` to capture only the viewport, for pages that render long or infinite lists */
   fullPage?: boolean;
   /** Set to `false` to skip the automatic snapshot for this story */
@@ -86,17 +92,26 @@ const waitForVisibleImages = async () => {
   ]);
 };
 
+const hasPendingVisibleImages = () =>
+  [...document.images].some((image) => !image.complete && isInViewport(image));
+
 /**
- * Waits until the DOM hasn't changed for a while, so states that settle shortly after the story renders
- * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently
+ * Waits until the DOM hasn't changed for `quietMs`, so states that settle shortly after the story renders
+ * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently.
+ *
+ * Any mutation, image loading in, or visible image still pending restarts the quiet period.
+ *
+ * @returns Whether the DOM settled before the timeout
  */
 const waitForStableDom = async ({ quietMs = 500, timeoutMs = 10_000 } = {}) => {
   const startedAt = performance.now();
-  let lastMutationAt = startedAt;
+  let lastActivityAt = startedAt;
 
-  const observer = new MutationObserver(() => {
-    lastMutationAt = performance.now();
-  });
+  const markActive = () => {
+    lastActivityAt = performance.now();
+  };
+
+  const observer = new MutationObserver(markActive);
 
   observer.observe(document.body, {
     attributes: true,
@@ -105,17 +120,30 @@ const waitForStableDom = async ({ quietMs = 500, timeoutMs = 10_000 } = {}) => {
     subtree: true,
   });
 
+  // Images repaint once loaded without mutating the DOM, and their events don't bubble, so listen during capture
+  document.addEventListener("load", markActive, { capture: true });
+  document.addEventListener("error", markActive, { capture: true });
+
   try {
-    while (
-      performance.now() - lastMutationAt < quietMs &&
-      performance.now() - startedAt < timeoutMs
-    ) {
+    while (performance.now() - startedAt < timeoutMs) {
+      if (hasPendingVisibleImages()) {
+        markActive();
+      }
+
+      if (performance.now() - lastActivityAt >= quietMs) {
+        return true;
+      }
+
       await new Promise((resolve) => {
         setTimeout(resolve, 50);
       });
     }
+
+    return false;
   } finally {
     observer.disconnect();
+    document.removeEventListener("load", markActive, { capture: true });
+    document.removeEventListener("error", markActive, { capture: true });
   }
 };
 
@@ -182,7 +210,7 @@ export const prepareAutoSnapshot: Extract<
   SetupVisOptions<SnapshotParameters>["auto"],
   // oxlint-disable-next-line typescript/no-unsafe-function-type
   Function
-> = async ({ enabled, delay, fullPage }) => {
+> = async ({ enabled, holdMs = 250, fullPage }) => {
   if (enabled === false) {
     return false;
   }
@@ -204,10 +232,20 @@ export const prepareAutoSnapshot: Extract<
 
   await waitForNextFrame();
 
-  if (delay) {
-    await new Promise((resolve) => {
-      setTimeout(resolve, delay);
+  if (holdMs) {
+    // Restarts whenever the page changes, so e.g. a carousel advancing during the hold period is captured once it settles
+    const isStable = await waitForStableDom({
+      quietMs: holdMs,
+      timeoutMs: holdMs + 10_000,
     });
+
+    if (!isStable) {
+      throw new Error(
+        `The page didn't stay unchanged for the ${holdMs.toString()}ms snapshot hold period; no stable snapshot can be taken.`,
+      );
+    }
+
+    await waitForNextFrame();
   }
 
   return true;
