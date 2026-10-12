@@ -206,9 +206,13 @@ Default.test(
 Default.test(
   "Autoplays the carousel when not hovered",
   {
-    tags: ["!snapshot"],
     args: {
       autoplayDelay: 1000,
+    },
+    parameters: {
+      snapshot: {
+        enabled: false,
+      },
     },
   },
   async ({ args, canvas, step }) => {

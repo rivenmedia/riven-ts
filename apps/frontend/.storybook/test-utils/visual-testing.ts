@@ -19,6 +19,8 @@ export interface SnapshotParameters
   delay?: number;
   /** Set to `false` to capture only the viewport, for pages that render long or infinite lists */
   fullPage?: boolean;
+  /** Set to `false` to skip the automatic snapshot for this story */
+  enabled?: boolean;
 }
 
 const isInViewport = (element: Element) => {
@@ -180,7 +182,11 @@ export const prepareAutoSnapshot: Extract<
   SetupVisOptions<SnapshotParameters>["auto"],
   // oxlint-disable-next-line typescript/no-unsafe-function-type
   Function
-> = async ({ delay, fullPage }) => {
+> = async ({ enabled, delay, fullPage }) => {
+  if (enabled === false) {
+    return false;
+  }
+
   if (fullPage === false) {
     clipBodyToViewport();
   }

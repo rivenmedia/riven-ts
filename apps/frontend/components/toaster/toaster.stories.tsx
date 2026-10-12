@@ -7,8 +7,12 @@ import { Toaster } from "./toaster.tsx";
 
 const meta = preview.meta({
   title: "Components / Toaster",
-  tags: ["!snapshot"],
   component: Toaster,
+  parameters: {
+    snapshot: {
+      enabled: false,
+    },
+  },
 });
 
 export const Default = meta.story({
