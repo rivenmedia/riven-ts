@@ -14,7 +14,7 @@ const meta = preview.meta({
     NowPlayingSkeleton,
   },
   args: {
-    autoplayDelay: 5000,
+    autoplayDelay: 30_000,
     data: [
       {
         id: "603692",
@@ -85,11 +85,6 @@ const meta = preview.meta({
         status: "released",
       },
     ] satisfies IndexerData[],
-  },
-  parameters: {
-    snapshot: {
-      delay: 2500, // Half way between autoplay transitions to prevent taking screenshots mid-switch
-    },
   },
 });
 

@@ -81,7 +81,8 @@
         "!**/*.typegen.ts",
         "!**/next-env.d.ts",
         "!**/public/mockServiceWorker.js"
-      ]
+      ],
+      "dependsOn": ["^build"]
     }
   }
 }
