@@ -1,24 +1,24 @@
-import { fly } from "@/components/_animations/fly";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@/components/_ui/carousel";
-import { ErrorFallback } from "@/components/error-fallback/error-fallback";
-import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
-import { query } from "@/lib/graphql/client";
-import { resolveLocale } from "@/lib/utils/resolve-locale";
-
 import { cn } from "cn";
 import { cacheLife } from "next/cache";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 
+import { fly } from "#components/_animations/fly.ts";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "#components/_ui/carousel.tsx";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
+import { query } from "#lib/graphql/client.ts";
+import { resolveLocale } from "#lib/utils/resolve-locale.ts";
+
 import { GET_ITEM_CAST } from "./_queries/get-item-cast.query";
 
-import type { CastMember } from "@/app/_types/__generated__/graphql";
+import type { CastMember } from "#app/_types/__generated__/graphql.ts";
 
 interface CastMemberCarouselProps {
   cast: CastMember[];

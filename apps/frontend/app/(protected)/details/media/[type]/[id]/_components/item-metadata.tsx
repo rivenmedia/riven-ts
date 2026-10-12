@@ -1,7 +1,7 @@
-import { fly } from "@/components/_animations/fly";
-// import { FileInformationPanel } from "@/components/media/file-information-panel/file-information-panel";
-
 import { cn } from "cn";
+
+import { fly } from "#components/_animations/fly.ts";
+// import { FileInformationPanel } from "#components/media/file-information-panel/file-information-panel.tsx";
 
 import type { GetMediaItemQuery } from "../_queries/get-media-item.query.typegen";
 

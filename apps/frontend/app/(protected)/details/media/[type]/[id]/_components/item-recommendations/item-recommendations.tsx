@@ -1,12 +1,12 @@
-import { fly } from "@/components/_animations/fly";
-import { ErrorFallback } from "@/components/error-fallback/error-fallback";
-import { ListCarouselSkeleton } from "@/components/list-carousel/list-carousel-skeleton";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { query } from "@/lib/graphql/client";
-
 import { cn } from "cn";
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
+
+import { fly } from "#components/_animations/fly.ts";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { query } from "#lib/graphql/client.ts";
 
 import { MediaCarousel } from "../media-carousel";
 import { GET_ITEM_RECOMMENDATIONS } from "./_queries/get-item-recommendations.query";
