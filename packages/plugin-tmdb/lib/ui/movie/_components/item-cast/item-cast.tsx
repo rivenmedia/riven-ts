@@ -1,13 +1,8 @@
 import { fly } from "@repo/util-ui/components/_animations/fly.ts";
-import {
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-} from "@repo/util-ui/components/_ui/carousel.tsx";
+import { CastMemberCarousel } from "@repo/util-ui/components/cast-member-carousel/cast-member-carousel.tsx";
 import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "@repo/util-ui/components/list-carousel/list-carousel-skeleton.tsx";
 import { SectionHeading } from "@repo/util-ui/components/media/section-heading/section-heading.tsx";
-import { PortraitCard } from "@repo/util-ui/components/portrait-card/portrait-card.tsx";
 import { query } from "@repo/util-ui/graphql/client.ts";
 import { resolveLocale } from "@repo/util-ui/utilities/resolve-locale.ts";
 
@@ -17,31 +12,6 @@ import { headers } from "next/headers";
 import { Suspense } from "react";
 
 import { GET_ITEM_CAST } from "./_queries/get-item-cast.query.ts";
-
-import type { CastMember } from "../../../__generated__/graphql.ts";
-
-interface CastMemberCarouselProps {
-  cast: CastMember[];
-}
-
-function CastMemberCarousel({ cast }: CastMemberCarouselProps) {
-  return (
-    <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
-      <CarouselContent className="-ml-3">
-        {cast.map((member) => (
-          <CarouselItem key={member.id} className="basis-auto pl-3">
-            <PortraitCard
-              title={member.name}
-              subtitle={member.character}
-              image={member.profileUrl}
-              className="w-32 md:w-36 lg:w-40"
-            />
-          </CarouselItem>
-        ))}
-      </CarouselContent>
-    </Carousel>
-  );
-}
 
 interface ItemCastContentProps {
   id: string;
