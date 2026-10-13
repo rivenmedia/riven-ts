@@ -1,9 +1,9 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Toaster } from "@repo/util-ui/components/toaster/toaster.tsx";
+
 import { toast } from "sonner";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
-
-import { Toaster } from "./toaster.tsx";
 
 const meta = preview.meta({
   title: "Components / Toaster",

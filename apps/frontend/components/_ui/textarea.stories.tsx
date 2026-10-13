@@ -1,7 +1,8 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+import { Textarea } from "@repo/util-ui/components/_ui/textarea.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import { Label } from "#components/_ui/label.tsx";
-import { Textarea } from "#components/_ui/textarea.tsx";
 
 /**
  * Displays a form textarea or a component that looks like a textarea.

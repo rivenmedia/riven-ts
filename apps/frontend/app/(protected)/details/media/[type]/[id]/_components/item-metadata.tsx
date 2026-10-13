@@ -1,7 +1,7 @@
-import { cn } from "cn";
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
 
-import { fly } from "#components/_animations/fly.ts";
-// import { FileInformationPanel } from "#components/media/file-information-panel/file-information-panel.tsx";
+import { cn } from "cn";
+// import { FileInformationPanel } from "@repo/util-ui/components/media/file-information-panel/file-information-panel.tsx";
 
 import { MoreDetailsPanel } from "./more-details-panel";
 

@@ -4,18 +4,10 @@
   "compilerOptions": {
     "composite": true,
     "rootDir": "lib",
-    "outDir": "dist",
-    "jsx": "react-jsx"
+    "outDir": "dist"
   },
   "files": [],
-  "include": [
-    "lib/**/*.ts",
-    "lib/**/*.tsx",
-    "lib/**/*.mts",
-    "lib/**/*.mtsx",
-    "lib/**/*.cts",
-    "lib/**/*.ctsx"
-  ],
+  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
   "exclude": [
     "lib/**/*.spec.ts",
     "lib/__tests__/**/*.ts",

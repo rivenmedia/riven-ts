@@ -7,13 +7,21 @@ import { Badge } from "#components/_ui/badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 import { useCardSelection } from "#components/providers/card-selection-provider.tsx";
 
-import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+
+export interface ListItemMediaItem {
+  id: string;
+  title: string;
+  type: MediaItemType;
+  posterUrl?: string | null;
+  year?: number | null;
+}
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  mediaItem: Pick<IndexerData, "id" | "title" | "posterUrl" | "type" | "year">;
+  mediaItem: ListItemMediaItem;
   badge?: {
     text: string;
     variant: string;

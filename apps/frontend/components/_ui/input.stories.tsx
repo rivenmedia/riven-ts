@@ -1,9 +1,10 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+
 import { expect, userEvent } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import { Input } from "#components/_ui/input.tsx";
-import { Label } from "#components/_ui/label.tsx";
 
 /**
  * Displays a form input field or a component that looks like an input field.

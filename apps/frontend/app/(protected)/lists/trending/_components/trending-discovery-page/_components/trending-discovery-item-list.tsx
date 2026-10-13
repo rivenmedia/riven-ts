@@ -1,10 +1,10 @@
 "use client";
 
+import { ListItem } from "@repo/util-ui/components/list-item/list-item.tsx";
+
 import { gql } from "@apollo/client";
 import { useSuspenseQuery } from "@apollo/client/react";
 import { startTransition, useState } from "react";
-
-import { ListItem } from "#components/list-item/list-item.tsx";
 
 import { LoadMoreButton } from "./load-more-button.tsx";
 

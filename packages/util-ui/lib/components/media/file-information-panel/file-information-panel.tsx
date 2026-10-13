@@ -5,12 +5,39 @@ import { useState } from "react";
 import { Badge } from "#components/_ui/badge.tsx";
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 
-import type {
-  MediaEntry,
-  MediaMetadata,
-} from "#app/_types/__generated__/graphql.ts";
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";
+
+export interface FileInformationMetadata {
+  audioTracks?:
+    | { channels: number; codec: string; language?: string | null }[]
+    | null;
+  bitRate?: number | null;
+  containerFormat?: string[] | null;
+  duration?: number | null;
+  fileName?: string | null;
+  isProper?: boolean | null;
+  isRemux?: boolean | null;
+  isRepack?: boolean | null;
+  qualitySource?: string | null;
+  subtitleTracks?: { language: string }[] | null;
+  video?: {
+    bitDepth?: number | null;
+    codec?: string | null;
+    frameRate?: number | null;
+    hdrType?: string | null;
+    resolution: { height: number; width: number };
+  } | null;
+}
+
+export interface FileInformationEntry {
+  id: string;
+  fileSize: { size: number; units: string };
+  originalFilename: string;
+  plugin: string;
+  provider?: string | null;
+  mediaMetadata?: FileInformationMetadata | null;
+}
 
 function formatAudioChannels(channels: number | null | undefined) {
   if (!channels) {
@@ -29,8 +56,8 @@ function formatAudioChannels(channels: number | null | undefined) {
 }
 
 export interface FileInformationPanelProps {
-  entries: Omit<PartialDeep<MediaEntry>, "mediaItem">[];
-  fallbackMediaMetadata: MediaMetadata | null;
+  entries: PartialDeep<FileInformationEntry>[];
+  fallbackMediaMetadata: FileInformationMetadata | null;
   onDeleteEntry: (id: UUID, label: string) => void | Promise<void>;
 }
 

@@ -1,10 +1,11 @@
+import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
+import { NowPlayingSkeleton } from "@repo/util-ui/components/now-playing/now-playing-skeleton.tsx";
+import { NowPlaying } from "@repo/util-ui/components/now-playing/now-playing.tsx";
+
 import { cacheLife } from "next/cache";
 import { headers } from "next/headers";
 import { Suspense } from "react";
 
-import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
-import { NowPlayingSkeleton } from "#components/now-playing/now-playing-skeleton.tsx";
-import { NowPlaying } from "#components/now-playing/now-playing.tsx";
 import { query } from "#lib/graphql/client.ts";
 import { resolveLocale } from "#lib/utils/resolve-locale.ts";
 

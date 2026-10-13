@@ -1,0 +1,18 @@
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "@repo/core-util-typescript-config/base.json",
+  "references": [
+    { "path": "./tsconfig.lib.json" },
+    { "path": "./tsconfig.spec.json" }
+  ],
+  "compilerOptions": {
+    "lib": ["dom", "dom.iterable", "esnext"],
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "noEmit": true
+  },
+  "files": ["oxlint.config.ts", "vitest.config.ts"],
+  "include": [],
+  "exclude": []
+}

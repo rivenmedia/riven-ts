@@ -1,3 +1,5 @@
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
+
 import { cn } from "cn";
 import {
   Download,
@@ -7,8 +9,6 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-
-import { fly } from "#components/_animations/fly.ts";
 
 import { RequestItemAction } from "./actions/request-item-action.tsx";
 import { ItemAction } from "./item-action.tsx";

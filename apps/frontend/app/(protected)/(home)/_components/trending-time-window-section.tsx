@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { SectionHeading } from "@repo/util-ui/components/media/section-heading/section-heading.tsx";
 
-import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { useState } from "react";
 
 import {
   TRENDING_TIME_OPTIONS,

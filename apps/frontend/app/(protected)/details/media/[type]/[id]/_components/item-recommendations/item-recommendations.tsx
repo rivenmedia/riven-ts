@@ -1,11 +1,12 @@
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
+import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "@repo/util-ui/components/list-carousel/list-carousel-skeleton.tsx";
+import { SectionHeading } from "@repo/util-ui/components/media/section-heading/section-heading.tsx";
+
 import { cn } from "cn";
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
-import { fly } from "#components/_animations/fly.ts";
-import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
-import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
-import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 import { query } from "#lib/graphql/client.ts";
 
 import { MediaCarousel } from "../media-carousel";

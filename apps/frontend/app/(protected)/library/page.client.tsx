@@ -1,17 +1,9 @@
 "use client";
 
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
-
-import { cn } from "cn";
-import { startCase } from "es-toolkit";
-import { ListChecks, Loader2, Search, Trash } from "lucide-react";
-import Link from "next/link";
-import { FormProvider, useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import { fly } from "#components/_animations/fly.ts";
-import { Button } from "#components/_ui/button.tsx";
-import { Input } from "#components/_ui/input.tsx";
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
 import {
   Pagination,
   PaginationContent,
@@ -20,17 +12,24 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "#components/_ui/pagination.tsx";
+} from "@repo/util-ui/components/_ui/pagination.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#components/_ui/select.tsx";
-import { ListItem } from "#components/list-item/list-item.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
-import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
+} from "@repo/util-ui/components/_ui/select.tsx";
+import { ListItem } from "@repo/util-ui/components/list-item/list-item.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
+import { CardSelectionProvider } from "@repo/util-ui/components/providers/card-selection-provider.tsx";
+
+import { cn } from "cn";
+import { startCase } from "es-toolkit";
+import { ListChecks, Loader2, Search, Trash } from "lucide-react";
+import Link from "next/link";
+import { FormProvider, useForm } from "react-hook-form";
+import { toast } from "sonner";
 
 import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 

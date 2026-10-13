@@ -1,11 +1,12 @@
 "use client";
 
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
+import { PortraitCardSkeleton } from "@repo/util-ui/components/portrait-card/portrait-card-skeleton.tsx";
+
 import { Suspense, useState } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
 import { TrendingListFilters } from "#app/(protected)/lists/trending/_components/trending-list-fiilters/trending-list-filters.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
-import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-skeleton.tsx";
 
 import { TrendingDiscoveryItemList } from "./_components/trending-discovery-item-list.tsx";
 

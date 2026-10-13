@@ -2,8 +2,8 @@ import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "#components/_ui/carousel.tsx";
-import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
+} from "@repo/util-ui/components/_ui/carousel.tsx";
+import { PortraitCard } from "@repo/util-ui/components/portrait-card/portrait-card.tsx";
 
 import type { SeasonData } from "./season-selector.tsx";
 

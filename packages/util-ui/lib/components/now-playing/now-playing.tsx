@@ -1,3 +1,6 @@
+// Provides the types for `<style jsx>`
+/// <reference types="next" />
+
 "use client";
 
 import { cn } from "cn";
@@ -19,25 +22,34 @@ import {
 
 import { getAlignmentClasses } from "./_utilities/get-alignment-classes.ts";
 
-import type { IndexerData, Rating } from "#app/_types/__generated__/graphql.ts";
 import type { CarouselApi } from "#components/_ui/carousel.tsx";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import type { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
 import type { RefObject } from "react";
 
+export interface NowPlayingRating {
+  logo: string;
+  score: string;
+  url: string;
+}
+
+export interface NowPlayingItem {
+  id: string;
+  title: string;
+  type: MediaItemType;
+  overview: string;
+  genres: { id: string; name: string }[];
+  backdropUrl?: string | null;
+  logo?: ItemImage | null;
+  certification?: string | null;
+  language?: string | null;
+  voteAverage?: number | null;
+  /** Ratings keyed by source, e.g. `imdb` or `tmdb` */
+  ratings?: Record<string, NowPlayingRating | string | null | undefined> | null;
+}
+
 export interface NowPlayingProps {
-  data: Pick<
-    IndexerData,
-    | "id"
-    | "title"
-    | "backdropUrl"
-    | "type"
-    | "ratings"
-    | "logo"
-    | "certification"
-    | "language"
-    | "voteAverage"
-    | "overview"
-    | "genres"
-  >[];
+  data: NowPlayingItem[];
   autoplayDelay?: number;
   alignment?: "left" | "center" | "right";
   heightClass?: string;
@@ -124,7 +136,8 @@ export function NowPlaying({
 
             const { __typename: _, ...restRatings } = item.ratings ?? {};
             const ratings = Object.entries(restRatings).filter(
-              (entry): entry is [string, Rating] => entry[1] != null,
+              (entry): entry is [string, NowPlayingRating] =>
+                typeof entry[1] === "object" && entry[1] !== null,
             );
 
             return (

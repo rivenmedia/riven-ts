@@ -1,9 +1,9 @@
+import { FileInformationPanel } from "@repo/util-ui/components/media/file-information-panel/file-information-panel.tsx";
+
 import { DateTime } from "luxon";
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { FileInformationPanel } from "./file-information-panel.tsx";
 
 import type { UUID } from "node:crypto";
 

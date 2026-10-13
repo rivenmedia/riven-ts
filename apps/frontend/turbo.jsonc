@@ -41,7 +41,7 @@
       "with": ["codegen:gql:watch"]
     },
     "build-storybook": {
-      "dependsOn": ["msw:init", "codegen:gql"],
+      "dependsOn": ["msw:init", "codegen:gql", "transit:source-files"],
       "inputs": [".storybook/**", "{app,components,lib}/**/*.{ts,tsx}"],
       "outputs": ["storybook-static"]
     },
@@ -82,7 +82,7 @@
         "!**/next-env.d.ts",
         "!**/public/mockServiceWorker.js"
       ],
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "transit:source-files"]
     }
   }
 }

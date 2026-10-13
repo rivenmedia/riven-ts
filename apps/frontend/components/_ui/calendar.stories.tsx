@@ -1,9 +1,10 @@
+import { Calendar } from "@repo/util-ui/components/_ui/calendar.tsx";
+
 import { DateTime } from "luxon";
 import { action } from "storybook/actions";
 import { expect, userEvent } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Calendar } from "#components/_ui/calendar.tsx";
 
 /**
  * A date field component that allows users to enter and edit date.

@@ -51,6 +51,11 @@ export function Calendar({ items }: CalendarProps) {
       }
 
       const dateKey = DateTime.fromISO(item.airedAt).startOf("day").toISO();
+
+      if (!dateKey) {
+        continue;
+      }
+
       const dayItems = (result[dateKey] ??= []);
 
       dayItems.push(item);
@@ -59,12 +64,16 @@ export function Calendar({ items }: CalendarProps) {
     return result;
   }, [items, selectedFilters]);
 
-  const calendarDays = currentMonthDays.map((interval) => {
-    const dateKey = interval.start.toISO();
+  const calendarDays = currentMonthDays.flatMap(({ start }) => {
+    const dateKey = start?.toISO();
+
+    if (!start || !dateKey) {
+      return [];
+    }
 
     return {
-      date: interval.start,
-      isCurrentMonth: isCurrentMonth(interval.start),
+      date: start,
+      isCurrentMonth: isCurrentMonth(start),
       items: filteredItems[dateKey] ?? [],
       dateKey,
     };

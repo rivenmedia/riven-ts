@@ -1,9 +1,10 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button.tsx";
 import { authClient } from "#lib/auth/client.ts";
 
 import { PasskeySigninButton } from "./passkey-signin-button.tsx";

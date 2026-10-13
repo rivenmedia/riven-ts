@@ -1,4 +1,3 @@
-import { preview } from "#.storybook/preview.tsx";
 import {
   Table,
   TableBody,
@@ -7,7 +6,9 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "#components/_ui/table.tsx";
+} from "@repo/util-ui/components/_ui/table.tsx";
+
+import { preview } from "#.storybook/preview.tsx";
 
 const invoices = [
   {

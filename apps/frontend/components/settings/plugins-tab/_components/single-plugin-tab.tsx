@@ -1,6 +1,4 @@
-import { FormProvider, useForm } from "react-hook-form";
-
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Card,
   CardAction,
@@ -9,9 +7,12 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "#components/_ui/card.tsx";
-import { Label } from "#components/_ui/label.tsx";
-import { Switch } from "#components/_ui/switch.tsx";
+} from "@repo/util-ui/components/_ui/card.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+import { Switch } from "@repo/util-ui/components/_ui/switch.tsx";
+
+import { FormProvider, useForm } from "react-hook-form";
+
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import type { PluginTab } from "#components/settings/plugins-tab/plugins-tab.tsx";

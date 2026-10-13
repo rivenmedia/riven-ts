@@ -1,20 +1,21 @@
-import { cn } from "cn";
-import { Bell, BellRing, Check, CheckCheck, Trash2 } from "lucide-react";
-import { toast } from "sonner";
-
-import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "#components/_ui/popover.tsx";
-import { Separator } from "#components/_ui/separator.tsx";
+} from "@repo/util-ui/components/_ui/popover.tsx";
+import { Separator } from "@repo/util-ui/components/_ui/separator.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "#components/_ui/tooltip.tsx";
+} from "@repo/util-ui/components/_ui/tooltip.tsx";
+
+import { cn } from "cn";
+import { Bell, BellRing, Check, CheckCheck, Trash2 } from "lucide-react";
+import { toast } from "sonner";
+
 import { useNotificationsContext } from "#components/providers/notifications-provider.tsx";
 
 import { formatTimestamp } from "./utilities/format-timestamp.ts";

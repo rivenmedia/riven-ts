@@ -1,9 +1,9 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { AnimatedToggle } from "@repo/util-ui/components/animated-toggle/animated-toggle.tsx";
+
 import Link from "next/link";
 
-import { Button } from "#components/_ui/button.tsx";
-import { AnimatedToggle } from "#components/animated-toggle/animated-toggle.tsx";
-
-import type { ToggleOption } from "#components/animated-toggle/animated-toggle.tsx";
+import type { ToggleOption } from "@repo/util-ui/components/animated-toggle/animated-toggle.tsx";
 import type { Route } from "next";
 import type { HTMLAttributes } from "react";
 

@@ -1,7 +1,8 @@
+import { Skeleton } from "@repo/util-ui/components/_ui/skeleton.tsx";
+
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
-import { Skeleton } from "#components/_ui/skeleton.tsx";
 import { query } from "#lib/graphql/client.ts";
 
 import { GET_MEDIA_ITEM } from "./_queries/get-media-item.query.ts";

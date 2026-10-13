@@ -1,6 +1,3 @@
-import { expect, fn, userEvent, within } from "storybook/test";
-
-import { preview } from "#.storybook/preview.tsx";
 import {
   Select,
   SelectContent,
@@ -10,7 +7,11 @@ import {
   SelectSeparator,
   SelectTrigger,
   SelectValue,
-} from "#components/_ui/select.tsx";
+} from "@repo/util-ui/components/_ui/select.tsx";
+
+import { expect, fn, userEvent, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 
 /**
  * Displays a list of options for the user to pick from—triggered by a button.

@@ -321,6 +321,8 @@ packages/plugin-my-service/
 │   │   ├── my-service.datasource.ts
 │   │   └── __tests__/
 │   │       └── validate.spec.ts
+│   ├── ui/                             # Optional frontend pages
+│   │   └── index.ts
 │   └── schema/
 │       ├── my-service.resolver.ts
 │       ├── my-service-settings.resolver.ts
@@ -340,6 +342,142 @@ packages/plugin-my-service/
 Anything you add under `docs/plugins/my-service/` shows up on this wiki
 automatically — no registration needed. `meta.json` is what names the plugin in
 the sidebar and on the [Plugins](/docs/plugins) page.
+
+## Plugin Pages (Optional)
+
+Plugins can provide their own frontend pages, served at
+`/plugin/{plugin-name}/{route}`. Pages are React components (including Server
+Components) that NextJS bundles and renders directly. Build them from the shared
+design system components in `@repo/util-ui`, so they match the rest of the UI.
+
+<Steps>
+<Step>
+
+### Add the UI entry point
+
+Add a `./ui` export and the UI dependencies to the plugin's `package.json`:
+
+```json title="package.json"
+{
+  "exports": {
+    "./ui": "./lib/ui/index.ts"
+  },
+  "dependencies": {
+    "@repo/util-ui": "workspace:^"
+  },
+  "devDependencies": {
+    "@types/react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  }
+}
+```
+
+UI code is bundled by NextJS rather than run by Node, so it needs its own
+TypeScript config. Add `tsconfig.ui.json`, reference it from `tsconfig.json`,
+and add `"lib/ui"` to the `exclude` list of `tsconfig.lib.json` and
+`tsconfig.spec.json`:
+
+```json title="tsconfig.ui.json"
+{
+  "$schema": "https://www.schemastore.org/tsconfig",
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": true,
+    "noEmit": false,
+    "module": "esnext",
+    "moduleResolution": "bundler",
+    "jsx": "react-jsx"
+  },
+  "files": [],
+  "include": ["lib/ui/**/*.ts", "lib/ui/**/*.tsx"],
+  "exclude": []
+}
+```
+
+</Step>
+<Step>
+
+### Define the pages
+
+```typescript title="lib/ui/index.ts"
+import { definePluginUi } from "@repo/util-plugin-sdk/ui";
+
+export const ui = definePluginUi({
+  pages: {
+    "items/[id]": {
+      async load() {
+        const { ItemPage } = await import("./items/item-page.tsx");
+
+        return ItemPage;
+      },
+    },
+  },
+});
+```
+
+Each key is a route, relative to `/plugin/my-service`:
+
+| Segment     | Matches                       | Param type |
+| ----------- | ----------------------------- | ---------- |
+| `items`     | The literal segment `items`   | -          |
+| `[id]`      | Any single segment            | `string`   |
+| `[...path]` | One or more trailing segments | `string[]` |
+| `""`        | The plugin root (no segments) | -          |
+
+When several routes match, the most specific wins: static segments beat dynamic
+segments, which beat catch-all segments.
+
+Pages receive the same props as NextJS pages. `definePluginUi` checks that each
+page's params match its route:
+
+```tsx title="lib/ui/items/item-page.tsx"
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+
+import type {
+  PluginPageProps,
+  PluginPageRouteParams,
+} from "@repo/util-plugin-sdk/ui";
+
+export async function ItemPage({
+  params,
+}: PluginPageProps<PluginPageRouteParams<"items/[id]">>) {
+  const { id } = await params;
+
+  return <Badge>{id}</Badge>;
+}
+```
+
+</Step>
+<Step>
+
+### Register the plugin in the frontend
+
+Add the plugin to `apps/frontend/package.json`, then register its UI in
+`apps/frontend/lib/plugins/plugin-ui-registry.ts`:
+
+```typescript title="apps/frontend/lib/plugins/plugin-ui-registry.ts"
+export const pluginUiRegistry: PluginUiRegistry = {
+  "my-service": async () => import("@repo/plugin-my-service/ui"),
+};
+```
+
+The import must be a static string, so NextJS can bundle the plugin's pages. A
+test fails if a plugin dependency with a `./ui` export isn't registered.
+
+</Step>
+</Steps>
+
+<Callout>
+  Tailwind picks up classes from any file in `packages/plugin-*/lib/ui/`, so
+  plugin pages can use Tailwind classes directly.
+</Callout>
 
 ## OpenAPI Code Generation (Optional)
 

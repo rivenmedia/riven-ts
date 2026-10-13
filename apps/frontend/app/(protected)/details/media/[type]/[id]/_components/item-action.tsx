@@ -7,8 +7,8 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "#components/_ui/alert-dialog.tsx";
-import { Button } from "#components/_ui/button.tsx";
+} from "@repo/util-ui/components/_ui/alert-dialog.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 // import { Loader2 } from "lucide-react";
 
 import type { LucideIcon } from "lucide-react";

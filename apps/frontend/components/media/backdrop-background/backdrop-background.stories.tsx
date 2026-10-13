@@ -1,8 +1,8 @@
+import { BackdropBackground } from "@repo/util-ui/components/media/backdrop-background/backdrop-background.tsx";
+
 import Image from "next/image";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { BackdropBackground } from "./backdrop-background.tsx";
 
 const meta = preview.meta({
   title: "Media / BackdropBackground",

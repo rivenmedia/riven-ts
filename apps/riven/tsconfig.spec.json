@@ -6,6 +6,6 @@
     "rootDir": "."
   },
   "files": ["vitest.d.ts"],
-  "include": ["lib/**/*.ts", "lib/**/*.tsx", "lib/**/*.mts", "lib/**/*.cts"],
+  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
   "exclude": []
 }

@@ -1,13 +1,13 @@
+import { ListCarouselSkeleton } from "@repo/util-ui/components/list-carousel/list-carousel-skeleton.tsx";
+import { ListCarouselSuspenseError } from "@repo/util-ui/components/list-carousel/list-carousel-suspense-error.tsx";
+import { ListCarousel } from "@repo/util-ui/components/list-carousel/list-carousel.tsx";
+import { CardSelectionProvider } from "@repo/util-ui/components/providers/card-selection-provider.tsx";
+
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
 import { fn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
-
-import { ListCarouselSkeleton } from "./list-carousel-skeleton.tsx";
-import { ListCarouselSuspenseError } from "./list-carousel-suspense-error.tsx";
-import { ListCarousel } from "./list-carousel.tsx";
 
 const meta = preview.meta({
   title: "Components / ListCarousel",

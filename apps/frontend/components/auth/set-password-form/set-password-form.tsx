@@ -1,3 +1,12 @@
+import { ButtonGroup } from "@repo/util-ui/components/_ui/button-group.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import {
+  Field,
+  FieldError,
+  FieldLabel,
+} from "@repo/util-ui/components/_ui/field.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { delay } from "es-toolkit";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
@@ -5,10 +14,6 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { ButtonGroup } from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import { Field, FieldError, FieldLabel } from "#components/_ui/field.tsx";
-import { Input } from "#components/_ui/input.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { SetPasswordFormSchema } from "./set-password.form-schema.ts";

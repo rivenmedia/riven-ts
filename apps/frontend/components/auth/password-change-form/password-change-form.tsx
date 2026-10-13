@@ -1,19 +1,20 @@
+import { ButtonGroup } from "@repo/util-ui/components/_ui/button-group.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import {
+  Field,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@repo/util-ui/components/_ui/field.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+import { Switch } from "@repo/util-ui/components/_ui/switch.tsx";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useId, useState } from "react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
-import { ButtonGroup } from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import {
-  Field,
-  FieldError,
-  FieldGroup,
-  FieldLabel,
-} from "#components/_ui/field.tsx";
-import { Input } from "#components/_ui/input.tsx";
-import { Switch } from "#components/_ui/switch.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { PasswordChangeFormSchema } from "./password-change.form-schema.ts";

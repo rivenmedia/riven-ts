@@ -1,13 +1,14 @@
-import { expect, userEvent } from "storybook/test";
-
-import { preview } from "#.storybook/preview.tsx";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "#components/_ui/carousel.tsx";
+} from "@repo/util-ui/components/_ui/carousel.tsx";
+
+import { expect, userEvent } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 
 /**
  * A carousel with motion and swipe built using Embla.

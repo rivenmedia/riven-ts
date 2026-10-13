@@ -1,15 +1,17 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { ErrorBoundary } from "react-error-boundary";
-
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
+
+import { Suspense, useState } from "react";
+import { ErrorBoundary } from "react-error-boundary";
+
 import { getConnectionStatusText } from "#components/logs-viewer/_utilities/get-connection-status-text.ts";
 import { ConnectionStatusIndicator } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
 import { EmptyState } from "#components/logs-viewer/empty-state/empty-state.tsx";
@@ -18,7 +20,6 @@ import { LiveLogLine } from "#components/logs-viewer/live-log-line/live-log-line
 import { LoadingSpinner } from "#components/logs-viewer/loading-spinner/loading-spinner.tsx";
 import { LogEntryRow } from "#components/logs-viewer/log-entry-row/log-entry-row.tsx";
 import { LogTabButton } from "#components/logs-viewer/log-tab-button/log-tab-button.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
 
 import type { ConnectionStatus } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
 import type { LogEntryRowProps } from "#components/logs-viewer/log-entry-row/log-entry-row.tsx";

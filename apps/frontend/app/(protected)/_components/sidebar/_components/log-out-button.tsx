@@ -1,9 +1,10 @@
 "use client";
 
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { LogOut } from "lucide-react";
 import { useRouter } from "next/navigation";
 
-import { Button } from "#components/_ui/button.tsx";
 import { authClient } from "#lib/auth/client.ts";
 
 export function LogOutButton() {

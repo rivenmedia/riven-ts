@@ -1,4 +1,5 @@
-import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { SectionHeading } from "@repo/util-ui/components/media/section-heading/section-heading.tsx";
+
 import { formatCurrency } from "#lib/utils/format-currency.ts";
 
 import type {

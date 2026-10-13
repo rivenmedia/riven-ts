@@ -1,9 +1,10 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { Link2, Link2Off } from "lucide-react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button.tsx";
 import { authClient } from "#lib/auth/client.ts";
 
 import type { Account, Provider } from "./types.d.ts";

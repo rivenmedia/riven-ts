@@ -1,10 +1,11 @@
+import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
+import { ListCarouselSkeleton } from "@repo/util-ui/components/list-carousel/list-carousel-skeleton.tsx";
+import { ListCarousel } from "@repo/util-ui/components/list-carousel/list-carousel.tsx";
+
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
 import { TrendingTimeWindowSection } from "#app/(protected)/(home)/_components/trending-time-window-section.tsx";
-import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
-import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
-import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
 import { query } from "#lib/graphql/client.ts";
 
 import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies.ts";

@@ -1,3 +1,6 @@
+// Provides the types for `<style jsx>`
+/// <reference types="next" />
+
 import { cn } from "cn";
 
 const CONFETTI_CONFIG = {

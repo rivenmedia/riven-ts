@@ -1,7 +1,7 @@
-import Image from "next/image";
+import { BackdropBackground } from "@repo/util-ui/components/media/backdrop-background/backdrop-background.tsx";
+import { HeroBanner } from "@repo/util-ui/components/media/hero-banner/hero-banner.tsx";
 
-import { BackdropBackground } from "#components/media/backdrop-background/backdrop-background.tsx";
-import { HeroBanner } from "#components/media/hero-banner/hero-banner.tsx";
+import Image from "next/image";
 
 import { ItemCast } from "./_components/item-cast/item-cast.tsx";
 import { ItemMetadata } from "./_components/item-metadata.tsx";

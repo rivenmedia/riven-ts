@@ -72,6 +72,11 @@
       "production": "./dist/validation/index.js",
       "default": "./lib/validation/index.ts"
     },
+    "./ui": {
+      "types": "./dist/ui/index.d.ts",
+      "production": "./dist/ui/index.js",
+      "default": "./lib/ui/index.ts"
+    },
     "./datasource-context": {
       "types": "./dist/datasource/context.d.ts",
       "production": "./dist/datasource/context.js",
@@ -108,6 +113,7 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "@typescript/native": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:",
@@ -121,7 +127,13 @@
   "peerDependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@mikro-orm/core": "catalog:",
+    "@types/react": "catalog:",
     "bullmq": "catalog:",
     "class-validator": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@types/react": {
+      "optional": true
+    }
   }
 }

@@ -1,4 +1,42 @@
 import {
+  ButtonGroup,
+  ButtonGroupSeparator,
+} from "@repo/util-ui/components/_ui/button-group.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@repo/util-ui/components/_ui/dropdown-menu.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+} from "@repo/util-ui/components/_ui/input-group.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@repo/util-ui/components/_ui/popover.tsx";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+} from "@repo/util-ui/components/_ui/select.tsx";
+import { Separator } from "@repo/util-ui/components/_ui/separator.tsx";
+import { Textarea } from "@repo/util-ui/components/_ui/textarea.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@repo/util-ui/components/_ui/tooltip.tsx";
+
+import {
   ArrowLeftIcon,
   ArrowRightIcon,
   AudioLinesIcon,
@@ -11,43 +49,6 @@ import {
 import { useState } from "react";
 
 import { preview } from "#.storybook/preview.tsx";
-import {
-  ButtonGroup,
-  ButtonGroupSeparator,
-} from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "#components/_ui/dropdown-menu.tsx";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-} from "#components/_ui/input-group.tsx";
-import { Input } from "#components/_ui/input.tsx";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "#components/_ui/popover.tsx";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "#components/_ui/select.tsx";
-import { Separator } from "#components/_ui/separator.tsx";
-import { Textarea } from "#components/_ui/textarea.tsx";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "#components/_ui/tooltip.tsx";
 
 /**
  * A container that groups related buttons together with consistent styling.

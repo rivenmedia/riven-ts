@@ -1,9 +1,9 @@
 "use client";
 
-import { usePathname } from "next/navigation";
+import { ImmersiveBackground } from "@repo/util-ui/components/immersive-background/immersive-background.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
 
-import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { usePathname } from "next/navigation";
 
 import { Header } from "./header.tsx";
 import { Sidebar } from "./sidebar/sidebar.tsx";

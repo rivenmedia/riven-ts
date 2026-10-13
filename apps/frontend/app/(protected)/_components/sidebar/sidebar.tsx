@@ -1,17 +1,18 @@
-import { cn } from "cn";
-import { Mountain } from "lucide-react";
-import Link from "next/link";
-
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "#components/_ui/avatar.tsx";
+} from "@repo/util-ui/components/_ui/avatar.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "#components/_ui/tooltip.tsx";
+} from "@repo/util-ui/components/_ui/tooltip.tsx";
+
+import { cn } from "cn";
+import { Mountain } from "lucide-react";
+import Link from "next/link";
+
 import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
 import { getInitials } from "#lib/utils.ts";
