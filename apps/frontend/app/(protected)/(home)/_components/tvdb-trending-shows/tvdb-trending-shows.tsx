@@ -1,12 +1,12 @@
 import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "@repo/util-ui/components/list-carousel/list-carousel-skeleton.tsx";
 import { ListCarousel } from "@repo/util-ui/components/list-carousel/list-carousel.tsx";
+import { query } from "@repo/util-ui/graphql/client.ts";
 
 import { cacheLife, io } from "next/cache";
 import { Suspense } from "react";
 
 import { TrendingTimeWindowSection } from "#app/(protected)/(home)/_components/trending-time-window-section.tsx";
-import { query } from "#lib/graphql/client.ts";
 
 import { GET_TVDB_TRENDING_SHOWS } from "./_queries/get-tvdb-trending-shows.ts";
 

@@ -310,7 +310,7 @@ export function NowPlaying({
                         className="flex h-10 items-center justify-center rounded-md border border-white/10 bg-white/10 px-8 text-sm font-bold text-white shadow-sm backdrop-blur-md transition-all hover:scale-[1.02] hover:bg-white/20 md:h-12 md:text-base"
                         type="button"
                       >
-                        <Link href={`/details/media/${item.type}/${item.id}`}>
+                        <Link href={`/plugin/tmdb/${item.type}/${item.id}`}>
                           More Info
                         </Link>
                       </Button>

@@ -13,6 +13,7 @@
     "lib/__tests__/**/*.ts",
     "lib/__generated__/handlers",
     "lib/__generated__/schemas",
-    "lib/__generated__/mocks"
+    "lib/__generated__/mocks",
+    "lib/ui"
   ]
 }

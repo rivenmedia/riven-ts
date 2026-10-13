@@ -457,6 +457,27 @@ export async function ItemPage({
 </Step>
 <Step>
 
+### Fetch data (Optional)
+
+Server Components fetch data from Riven's GraphQL API with the shared Apollo
+client in `@repo/util-ui`. It works inside `"use cache"` functions too:
+
+```tsx title="lib/ui/items/item-page.tsx"
+import { query } from "@repo/util-ui/graphql/client.ts";
+
+import { GET_ITEM } from "./_queries/get-item.query.ts";
+
+const { data } = await query({ query: GET_ITEM, variables: { id } });
+```
+
+To generate types for the plugin's operations, add a `graphql.config.ts` that
+reads `../../apps/riven/schema.graphql` and generates into `lib/ui/`, plus a
+`codegen:gql` script and Turbo task that depends on
+`@repo/riven#codegen:gql-schema`. `packages/plugin-tmdb` is a working example.
+
+</Step>
+<Step>
+
 ### Register the plugin in the frontend
 
 Add the plugin to `apps/frontend/package.json`, then register its UI in

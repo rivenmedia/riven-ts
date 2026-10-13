@@ -2,5 +2,20 @@
   "$schema": "https://turborepo.dev/schema.json",
   "extends": ["//"],
   "tags": ["group:tmdb", "type:plugin"],
-  "tasks": {}
+  "tasks": {
+    "codegen:gql": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"],
+      "inputs": [
+        "lib/ui/**/*.{ts,tsx}",
+        "!lib/ui/**/__generated__/**/*",
+        "!lib/ui/**/*.typegen.ts",
+        "$TURBO_ROOT$/apps/riven/schema.graphql",
+        "graphql.config.ts"
+      ],
+      "outputs": ["lib/ui/__generated__/graphql.ts", "lib/ui/**/*.typegen.ts"]
+    },
+    "lint": {
+      "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"]
+    }
+  }
 }

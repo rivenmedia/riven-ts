@@ -11,12 +11,15 @@
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
     },
+    "./ui": "./lib/ui/index.ts",
+    "./ui/*": "./lib/ui/*",
     "./wiki.config": "./wiki.config.ts"
   },
   "scripts": {
     "build": "tsc --project tsconfig.lib.json",
     "codegen:api-schemas": "kubb generate",
     "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
+    "codegen:gql": "graphql-codegen --config graphql.config.ts",
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run --passWithNoTests",
@@ -25,12 +28,21 @@
   "dependencies": {
     "@apollo/datasource-rest": "catalog:",
     "@repo/util-plugin-sdk": "workspace:^",
+    "@repo/util-ui": "workspace:^",
     "@repo/util-wiki-helpers": "workspace:^",
+    "cn": "catalog:",
+    "es-toolkit": "catalog:",
+    "lucide-react": "catalog:",
     "type-graphql": "catalog:",
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@apollo/client": "catalog:",
     "@faker-js/faker": "catalog:",
+    "@graphql-codegen/cli": "catalog:",
+    "@graphql-codegen/near-operation-file-preset": "catalog:",
+    "@graphql-codegen/typescript": "catalog:",
+    "@graphql-codegen/typescript-operations": "catalog:",
     "@kubb/cli": "catalog:",
     "@repo/core-util-kubb-config": "workspace:^",
     "@repo/core-util-oxlint-config": "workspace:^",
@@ -38,10 +50,40 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "@typescript/native": "catalog:",
+    "graphql": "catalog:",
     "msw": "catalog:",
+    "next": "catalog:",
     "oxlint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "@apollo/client": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "react-hook-form": "catalog:"
+  },
+  "peerDependenciesMeta": {
+    "@apollo/client": {
+      "optional": true
+    },
+    "next": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    },
+    "react-hook-form": {
+      "optional": true
+    }
   }
 }

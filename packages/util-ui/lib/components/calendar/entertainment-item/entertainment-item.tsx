@@ -22,11 +22,11 @@ function itemUrl(item: EntertainmentItemData) {
     case "movie": {
       // For movies, prefer TMDB ID
       if (item.tmdbId) {
-        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
+        return `/plugin/tmdb/${item.itemType}/${item.tmdbId}` as const;
       }
 
       if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}?indexer=tvdb` as const;
+        return `/plugin/tvdb/${item.itemType}/${item.tvdbId}` as const;
       }
 
       break;
@@ -36,11 +36,11 @@ function itemUrl(item: EntertainmentItemData) {
     case "episode": {
       // For TV items, prefer TVDB ID to skip TMDB→TVDB resolution
       if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}/?indexer=tvdb` as const;
+        return `/plugin/tvdb/${item.itemType}/${item.tvdbId}` as const;
       }
 
       if (item.tmdbId) {
-        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
+        return `/plugin/tmdb/${item.itemType}/${item.tmdbId}` as const;
       }
 
       break;

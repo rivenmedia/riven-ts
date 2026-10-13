@@ -9,7 +9,9 @@
     "#*.tsx": "./lib/*.tsx"
   },
   "exports": {
-    "./components/*": "./lib/components/*"
+    "./components/*": "./lib/components/*",
+    "./graphql/*": "./lib/graphql/*",
+    "./utilities/*": "./lib/utilities/*"
   },
   "scripts": {
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
@@ -40,6 +42,8 @@
     "zod": "catalog:"
   },
   "devDependencies": {
+    "@apollo/client": "catalog:",
+    "@apollo/client-integration-nextjs": "catalog:",
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
@@ -48,6 +52,7 @@
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
     "@typescript/native": "catalog:",
+    "graphql": "catalog:",
     "next": "catalog:",
     "oxlint": "catalog:",
     "react": "catalog:",
@@ -58,6 +63,8 @@
     "vitest": "catalog:"
   },
   "peerDependencies": {
+    "@apollo/client": "catalog:",
+    "@apollo/client-integration-nextjs": "catalog:",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:",

@@ -43,6 +43,7 @@
     "@next-safe-action/adapter-react-hook-form": "catalog:",
     "@react-spring/web": "catalog:",
     "@repo/feature-settings": "workspace:^",
+    "@repo/plugin-tmdb": "workspace:^",
     "@repo/util-auth": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",

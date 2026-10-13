@@ -15,4 +15,6 @@ type PluginUiLoader = () => Promise<{ ui: RivenPluginUi }>;
  */
 export type PluginUiRegistry = Readonly<Record<string, PluginUiLoader>>;
 
-export const pluginUiRegistry: PluginUiRegistry = {};
+export const pluginUiRegistry: PluginUiRegistry = {
+  tmdb: async () => import("@repo/plugin-tmdb/ui"),
+};
