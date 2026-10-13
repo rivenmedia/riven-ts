@@ -1,6 +1,8 @@
 import packageJson from "../package.json" with { type: "json" };
 import { TmdbAPI } from "./datasource/tmdb.datasource.ts";
 import { indexTMDBMediaItem } from "./hooks/index-tmdb-media-item.ts";
+import { getTmdbMovie } from "./query-handlers/get-tmdb-movie.ts";
+import { searchTmdbMovies } from "./query-handlers/search-tmdb-movies.ts";
 import { TmdbIndexerDataResolver } from "./schema/tmdb-indexer-data.resolver.ts";
 import { TmdbSettingsResolver } from "./schema/tmdb-settings.resolver.ts";
 import { TmdbResolver } from "./schema/tmdb.resolver.ts";
@@ -16,6 +18,10 @@ export const plugin: RivenPlugin = {
   resolvers: [TmdbResolver, TmdbSettingsResolver, TmdbIndexerDataResolver],
   hooks: {
     "riven.media-item.index.requested.movie": indexTMDBMediaItem,
+  },
+  queryHandlers: {
+    search: searchTmdbMovies,
+    indexerItem: getTmdbMovie,
   },
   settingsSchema: TmdbSettings,
   async validator() {
