@@ -11,6 +11,7 @@
       "production": "./dist/index.js",
       "default": "./lib/index.ts"
     },
+    "./ui/*/page.tsx": "./lib/ui/*/page.tsx",
     "./wiki.config": "./wiki.config.ts"
   },
   "scripts": {
@@ -38,10 +39,19 @@
     "@repo/core-util-vitest-config": "workspace:^",
     "@repo/util-plugin-testing": "workspace:^",
     "@types/node": "catalog:",
+    "@types/react": "catalog:",
     "@typescript/native": "catalog:",
     "msw": "catalog:",
+    "next": "catalog:",
     "oxlint": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   }
 }

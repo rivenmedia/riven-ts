@@ -6,6 +6,13 @@
     "rootDir": "."
   },
   "files": [],
-  "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
+  "include": [
+    "lib/**/*.ts",
+    "lib/**/*.tsx",
+    "lib/**/*.mts",
+    "lib/**/*.mtsx",
+    "lib/**/*.cts",
+    "lib/**/*.ctsx"
+  ],
   "exclude": []
 }

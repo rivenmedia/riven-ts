@@ -9,6 +9,7 @@ import { SeasonResolver } from "./season.resolver.ts";
 import { ShareLogsResolver } from "./share-logs.resolver.ts";
 import { ShowResolver } from "./show.resolver.ts";
 import { TempFrontendResolver } from "./temp-frontend.resolver.ts";
+import { UiResolver } from "./ui.resolver.tsx";
 import { VfsResolver } from "./vfs/vfs.resolver.ts";
 
 export const resolvers = [
@@ -24,4 +25,5 @@ export const resolvers = [
   VfsResolver,
   IndexerDataResolver,
   TempFrontendResolver,
+  UiResolver,
 ] as const;
