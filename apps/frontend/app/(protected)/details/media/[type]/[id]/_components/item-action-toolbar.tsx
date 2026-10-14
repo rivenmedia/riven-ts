@@ -1,45 +1,36 @@
 import { cn } from "cn";
-import {
-  Download,
-  Pause,
-  Play,
-  RefreshCw,
-  RotateCcw,
-  Trash2,
-} from "lucide-react";
+import { Pause, Play, RefreshCw, RotateCcw, Trash2 } from "lucide-react";
 
 import { fly } from "#components/_animations/fly.ts";
 
-import { BaseRequestItemAction } from "./actions/request-item/_components/base-request-item-action.tsx";
 import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
+import { RequestShowAction } from "./actions/request-item/request-show-action.tsx";
 import { ItemAction } from "./item-action.tsx";
 
-import type {
-  MediaItem,
-  MediaItemType,
-} from "#app/_types/__generated__/graphql.ts";
+import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 import type { SeasonData } from "./season-selector.tsx";
 
-interface ItemActionToolbarProps {
+type ItemActionToolbarProps = {
   title: string;
-  mediaType: MediaItemType | undefined;
   externalId: string;
-  seasons: SeasonData[] | null;
   riven: MediaItem | undefined;
   rivenId: number | string | null | undefined;
   rivenPending: boolean;
-  onRequestSuccess: (itemId?: number) => void | Promise<void>;
-  onActionSuccess: () => void | Promise<void>;
-}
+} & (
+  | {
+      mediaType: "movie";
+      seasons?: never;
+    }
+  | {
+      mediaType: "show";
+      seasons: SeasonData[];
+    }
+);
 
 export function ItemActionToolbar({
   externalId,
   mediaType,
-  onActionSuccess,
-  onRequestSuccess,
   riven,
-  // rivenId,
-  rivenPending,
   seasons,
   title,
 }: ItemActionToolbarProps) {
@@ -52,8 +43,16 @@ export function ItemActionToolbar({
         fly,
       )}
     >
-      {mediaType === "movie" && (
+      {mediaType === "movie" ? (
         <RequestMovieAction title={title} tmdbId={externalId} imdbId={null} />
+      ) : (
+        <RequestShowAction
+          title={title}
+          tvdbId={externalId}
+          imdbId={null}
+          requestedSeasons={new Set([1, 2])}
+          seasons={seasons}
+        />
       )}
       {/* {mediaType && !riven && !rivenPending && (
         <>
@@ -80,7 +79,7 @@ export function ItemActionToolbar({
             className="border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-4"
             title={title}
             ids={rivenIds}
-            onSuccess={onActionSuccess}
+            // onSuccess={onActionSuccess}
             buttonLabel="Reset"
             buttonIcon={<RotateCcw className="mr-1.5 h-4 w-4" />}
           />
@@ -91,12 +90,12 @@ export function ItemActionToolbar({
             className="border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-4"
             title={title}
             ids={rivenIds}
-            onSuccess={onActionSuccess}
+            // onSuccess={onActionSuccess}
             buttonLabel="Retry"
             buttonIcon={<RefreshCw className="mr-1.5 h-4 w-4" />}
           />
 
-          {mediaType !== "movie" && (
+          {/* {mediaType !== "movie" && (
             <BaseRequestItemAction
               size="default"
               variant="secondary"
@@ -107,11 +106,11 @@ export function ItemActionToolbar({
               externalId={externalId ?? ""}
               seasons={seasons}
               requestedSeasons={new Set([1, 2])}
-              onSuccess={onRequestSuccess}
+              // onSuccess={onRequestSuccess}
               buttonLabel="Request More"
               buttonIcon={<Download className="mr-1.5 h-4 w-4" />}
             />
-          )}
+          )} */}
 
           {/* <ItemManualScrape
             size="default"

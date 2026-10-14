@@ -40,12 +40,8 @@ export const requestItem = permissionActionClient
       .refine(atLeastOnePropertyRequired),
   ])
   .action(
-    async ({
-      parsedInput,
-      bindArgsParsedInputs: [{ tmdbId, tvdbId, imdbId }],
-      ctx,
-    }) => {
-      const { data, error } = await getClient().mutate({
+    async ({ bindArgsParsedInputs: [{ tmdbId, tvdbId, imdbId }], ctx }) => {
+      await getClient().mutate({
         mutation: REQUEST_ITEM,
         variables: {
           input: {
@@ -56,9 +52,5 @@ export const requestItem = permissionActionClient
           },
         },
       });
-
-      console.log("requesting item", parsedInput, { data, error });
-
-      return null;
     },
   );

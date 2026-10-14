@@ -25,16 +25,6 @@ export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
     startCase(data.status),
   ].filter(Boolean);
 
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleRequestSuccess = () => {
-    /* empty */
-  };
-
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleActionSuccess = () => {
-    /* empty */
-  };
-
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr] lg:gap-6">
       <div
@@ -71,15 +61,11 @@ export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
 
         <ItemActionToolbar
           title={data.title}
-          mediaType={data.type}
           externalId={data.id}
           // seasons={data.seasons}
-          seasons={[]}
           // {riven}
           // {rivenId}
           // {rivenPending}
-          onRequestSuccess={handleRequestSuccess}
-          onActionSuccess={handleActionSuccess}
           riven={{} as never}
           rivenId={null}
           rivenPending={false}
@@ -87,6 +73,14 @@ export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
           // {rawRivenLoading}
           // {rawRivenError}
           // {rawRivenJson}
+          {...(data.type === "movie"
+            ? {
+                mediaType: "movie",
+              }
+            : {
+                mediaType: "show",
+                seasons: [],
+              })}
         />
 
         <div
