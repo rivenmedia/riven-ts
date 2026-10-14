@@ -1,13 +1,67 @@
-import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
+import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
+
+import {
+  Arg,
+  Ctx,
+  FieldResolver,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
+import { RequestItemInput } from "./inputs/request-item.input.ts";
+
 import type { ApolloServerContext } from "#graphql/context.ts";
+import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { UUID } from "node:crypto";
 
-@Resolver()
+@Resolver(() => ItemRequest)
 export class ItemRequestResolver {
+  @Query(() => ItemRequest, { nullable: true })
+  public async itemRequestByExternalIds(
+    @CoreContext() { services: { itemRequestService } }: CoreContext,
+    @Arg("tmdbId", () => String, { nullable: true }) tmdbId:
+      | string
+      | null = null,
+    @Arg("imdbId", () => String, { nullable: true }) imdbId:
+      | string
+      | null = null,
+    @Arg("tvdbId", () => String, { nullable: true }) tvdbId:
+      | string
+      | null = null,
+  ) {
+    return itemRequestService.getItemRequestByExternalIds({
+      tmdbId,
+      imdbId,
+      tvdbId,
+    });
+  }
+
+  @Mutation(() => Boolean)
+  public requestItem(
+    @Arg("input", () => RequestItemInput)
+    input: RequestItemInput,
+    @Ctx() { sendEvent }: GraphQLContext,
+  ) {
+    sendEvent({
+      item: {
+        type: "movie",
+        requestedBy: input.requestedBy,
+        tmdbId: input.tmdbId,
+        imdbId: input.imdbId,
+      },
+      type: "riven-external.item-requested",
+    });
+
+    return true;
+  }
+
   @Mutation(() => Boolean)
   public async removeItemRequest(
     @Arg("itemRequestId", () => ID) itemRequestId: UUID,
@@ -60,5 +114,10 @@ export class ItemRequestResolver {
 
       throw error;
     }
+  }
+
+  @FieldResolver(() => [MediaItemUnion])
+  public async mediaItems(@Root() itemRequest: ItemRequest) {
+    return itemRequest.mediaItems.load();
   }
 }

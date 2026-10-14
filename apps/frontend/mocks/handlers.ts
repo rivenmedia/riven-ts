@@ -30,4 +30,7 @@ export const handlers = [
       },
     });
   }),
+  http.post("**/api/auth/admin/has-permission", () =>
+    HttpResponse.json({ success: true }),
+  ),
 ] as const satisfies AnyHandler[];

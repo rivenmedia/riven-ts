@@ -10,7 +10,8 @@ import {
 
 import { fly } from "#components/_animations/fly.ts";
 
-import { RequestItemAction } from "./actions/request-item-action.tsx";
+import { BaseRequestItemAction } from "./actions/request-item/_components/base-request-item-action.tsx";
+import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
 import { ItemAction } from "./item-action.tsx";
 
 import type {
@@ -20,9 +21,9 @@ import type {
 import type { SeasonData } from "./season-selector.tsx";
 
 interface ItemActionToolbarProps {
-  title: string | null | undefined;
+  title: string;
   mediaType: MediaItemType | undefined;
-  externalId: string | null | undefined;
+  externalId: string;
   seasons: SeasonData[] | null;
   riven: MediaItem | undefined;
   rivenId: number | string | null | undefined;
@@ -51,22 +52,12 @@ export function ItemActionToolbar({
         fly,
       )}
     >
-      {mediaType && externalId != null && !riven && !rivenPending && (
+      {mediaType === "movie" && (
+        <RequestMovieAction title={title} tmdbId={externalId} imdbId={null} />
+      )}
+      {/* {mediaType && !riven && !rivenPending && (
         <>
-          <RequestItemAction
-            size="default"
-            variant="secondary"
-            className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary hover:border-primary border bg-transparent px-4"
-            title={title}
-            ids={[]}
-            mediaType={mediaType}
-            externalId={externalId}
-            seasons={seasons}
-            requestedSeasons={new Set([1, 2])}
-            onSuccess={onRequestSuccess}
-            buttonIcon={<Download className="mr-1.5 h-4 w-4" />}
-          />
-          {/* <ItemManualScrape
+          <ItemManualScrape
             size="default"
             variant="secondary"
             className="border-border text-muted-foreground hover:bg-muted hover:text-foreground border bg-transparent px-4"
@@ -77,9 +68,9 @@ export function ItemActionToolbar({
             {seasons}>
             <Search className="mr-1.5 h-4 w-4" />
             Manual Scrape
-        </ItemManualScrape> */}
+        </ItemManualScrape>
         </>
-      )}
+      )} */}
       {riven?.id != null && (
         <>
           <ItemAction
@@ -106,7 +97,7 @@ export function ItemActionToolbar({
           />
 
           {mediaType !== "movie" && (
-            <RequestItemAction
+            <BaseRequestItemAction
               size="default"
               variant="secondary"
               className="border-primary/50 text-primary hover:bg-primary/10 hover:text-primary hover:border-primary border bg-transparent px-4"

@@ -40,7 +40,7 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
         />
 
         <div className="px-8 pb-24 md:px-20 lg:px-24">
-          <ItemOverview data={data} />
+          <ItemOverview data={data} mediaItemId={data.id} />
           {/* {#if data.mediaDetails?.type === "movie"}
                     {/* {@const movieDetails = data.mediaDetails.details} */}
           {/* {#if movieDetails.collection}
