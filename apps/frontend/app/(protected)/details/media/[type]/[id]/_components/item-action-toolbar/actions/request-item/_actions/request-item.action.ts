@@ -14,7 +14,7 @@ import type {
 } from "./request-item.action.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
 
-const REQUEST_ITEM: TypedDocumentNode<
+export const REQUEST_ITEM: TypedDocumentNode<
   RequestItemMutation,
   RequestItemMutationVariables
 > = gql`

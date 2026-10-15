@@ -3,6 +3,7 @@
 import { RefreshCw } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 
@@ -16,7 +17,14 @@ interface RetryItemActionProps {
 }
 
 export function RetryItemAction({ id, title }: RetryItemActionProps) {
-  const { callbacks, isOpen, setIsOpen } = useActionDialog();
+  const { callbacks, isOpen, setIsOpen } = useActionDialog({
+    onError() {
+      toast.error("Failed to retry the item.");
+    },
+    onSuccess() {
+      toast.success("Item retried successfully.");
+    },
+  });
   const { execute, isExecuting, isIdle, reset } = useAction(
     retryItem,
     callbacks,

@@ -3,6 +3,7 @@
 import { RefreshCw } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 
@@ -16,7 +17,14 @@ interface ResetItemActionProps {
 }
 
 export function ResetItemAction({ id, title }: ResetItemActionProps) {
-  const { callbacks, isOpen, setIsOpen } = useActionDialog();
+  const { callbacks, isOpen, setIsOpen } = useActionDialog({
+    onSuccess() {
+      toast.success("Reset successful");
+    },
+    onError() {
+      toast.error("Reset failed");
+    },
+  });
   const { execute, isExecuting, isIdle, reset } = useAction(
     resetItem.bind(null, id),
     callbacks,

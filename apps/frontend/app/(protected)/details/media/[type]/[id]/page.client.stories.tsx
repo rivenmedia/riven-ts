@@ -1,8 +1,14 @@
 import { graphql, HttpResponse } from "msw";
+import { expect, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
+import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
 import { GET_ITEM_REQUEST_ACTIONS } from "./_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
+import { DELETE_ITEM_REQUEST } from "./_components/item-action-toolbar/actions/delete-item/_actions/delete-item.action.ts";
+import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_actions/request-item.action.ts";
+import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_actions/reset-item.action.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
@@ -204,6 +210,39 @@ export const UnrequestedMovie = meta.story({
   },
 });
 
+UnrequestedMovie.test(
+  'Requests the movie when the "Request" button is clicked',
+  async ({ userEvent, canvas, canvasElement, msw }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(REQUEST_ITEM, () =>
+        HttpResponse.json({ data: { requestItem: true } }),
+      ),
+    );
+
+    const requestButton = await canvas.findByRole("button", {
+      name: /request/iu,
+    });
+
+    await userEvent.click(requestButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /request/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/request successful/iu),
+    ).toBeInTheDocument();
+  },
+);
+
 export const CompletedMovie = UnrequestedMovie.extend({
   args: {
     data: {
@@ -246,6 +285,112 @@ export const CompletedMovie = UnrequestedMovie.extend({
     );
   },
 });
+
+CompletedMovie.test(
+  'Resets the item when the "Reset" button is clicked',
+  async ({ canvas, userEvent, msw, canvasElement }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(RESET_ITEM, () =>
+        HttpResponse.json({
+          data: {
+            resetMediaItem: [
+              {
+                __typename: "Movie",
+                state: "indexed",
+              },
+            ],
+          },
+        }),
+      ),
+    );
+
+    const resetButton = await canvas.findByRole("button", {
+      name: /reset/iu,
+    });
+
+    await userEvent.click(resetButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /reset/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/reset successful/iu),
+    ).toBeInTheDocument();
+  },
+);
+
+CompletedMovie.test(
+  'Retries the item when the "Retry" button is clicked',
+  async ({ canvas, userEvent, msw, canvasElement }) => {
+    msw.use(getSessionHandler, hasPermissionHandler);
+
+    const retryButton = await canvas.findByRole("button", {
+      name: /retry/iu,
+    });
+
+    await userEvent.click(retryButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /retry/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/item retried successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+
+CompletedMovie.test(
+  'Deletes the item when the "Delete" button is clicked',
+  async ({ canvas, userEvent, msw, canvasElement }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(DELETE_ITEM_REQUEST, () =>
+        HttpResponse.json({
+          data: {
+            removeItemRequest: true,
+          },
+        }),
+      ),
+    );
+
+    const deleteButton = await canvas.findByRole("button", {
+      name: /delete/iu,
+    });
+
+    await userEvent.click(deleteButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /delete/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/item deleted successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
 
 // export const UnrequestedShow = meta.story({
 //   args: {

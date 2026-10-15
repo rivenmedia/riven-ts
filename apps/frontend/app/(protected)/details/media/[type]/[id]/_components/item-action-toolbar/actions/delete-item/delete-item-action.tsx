@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 
@@ -16,9 +17,17 @@ interface DeleteItemActionProps {
 }
 
 export function DeleteItemAction({ id, title }: DeleteItemActionProps) {
-  const { callbacks, isOpen, setIsOpen } = useActionDialog();
+  const { callbacks, isOpen, setIsOpen } = useActionDialog({
+    onSuccess() {
+      toast.success("Item deleted successfully");
+    },
+    onError() {
+      toast.error("Failed to delete item");
+    },
+  });
+
   const { execute, isExecuting, isIdle, reset } = useAction(
-    deleteItem,
+    deleteItem.bind(null, id),
     callbacks,
   );
 
@@ -37,7 +46,7 @@ export function DeleteItemAction({ id, title }: DeleteItemActionProps) {
       isExecuting={isExecuting}
       onSubmit={(event) => {
         event.preventDefault();
-        execute({ id });
+        execute();
       }}
       title={`Deleting "${title}"`}
       slots={{
