@@ -1,11 +1,16 @@
 "use client";
 
-import { BaseRequestItemAction } from "./_components/base-request-item-action";
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
+import { BaseItemAction } from "../_components/base-item-action";
+import { useActionDialog } from "../_hooks/use-action-dialog";
+import { requestItem } from "./_actions/request-item.action";
 import { TriggerButton } from "./_components/trigger-button";
 
-import type { BaseRequestItemActionProps } from "./_components/base-request-item-action";
+import type { BaseItemActionProps } from "../_components/base-item-action";
 
-type RequestMovieActionProps = Pick<BaseRequestItemActionProps, "title"> & {
+type RequestMovieActionProps = Pick<BaseItemActionProps, "title"> & {
   tmdbId: string;
   imdbId: string | null;
 };
@@ -15,14 +20,30 @@ export function RequestMovieAction({
   tmdbId,
   imdbId,
 }: RequestMovieActionProps) {
+  const { isOpen, setIsOpen, callbacks } = useActionDialog({
+    onSuccess() {
+      toast.success("Request successful!");
+    },
+    onError() {
+      toast.error("Request failed!");
+    },
+  });
+  const { execute, isExecuting } = useAction(
+    requestItem.bind(null, { imdbId, tmdbId, tvdbId: null }),
+    callbacks,
+  );
+
   return (
-    <BaseRequestItemAction
-      externalIds={{
-        imdbId,
-        tmdbId,
-        tvdbId: null,
+    <BaseItemAction
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      isExecuting={isExecuting}
+      onSubmit={(event) => {
+        event.preventDefault();
+        execute({});
       }}
-      title={title}
+      title={`Requesting "${title}"`}
+      description="This will send a request to Riven to add this media."
       slots={{
         content: (
           <div className="text-muted-foreground py-4 text-sm">
@@ -30,7 +51,7 @@ export function RequestMovieAction({
           </div>
         ),
         triggerButton: <TriggerButton label="Request" />,
-        requestButtonLabel: "Request",
+        submitButtonLabel: "Request",
       }}
     />
   );

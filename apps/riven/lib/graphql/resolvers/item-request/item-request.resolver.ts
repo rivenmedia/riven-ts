@@ -119,7 +119,7 @@ export class ItemRequestResolver {
 
   @FieldResolver(() => [ItemRequestAction.enum])
   public availableActions(): ItemRequestAction[] {
-    return ["reset", "retry"];
+    return ["reset", "retry", "delete", "pause"];
   }
 
   @FieldResolver(() => [MediaItemUnion])

@@ -1,0 +1,23 @@
+"use server";
+
+import z from "zod";
+
+import { permissionActionClient } from "#lib/server-actions/action-client.ts";
+
+export const deleteItem = permissionActionClient
+  .metadata({
+    permissions: {
+      item: ["request"],
+    },
+  })
+  .inputSchema(
+    z.object({
+      id: z.uuid(),
+    }),
+  )
+  .action(async () => {
+    console.log("hi delete");
+    return {
+      success: true,
+    };
+  });
