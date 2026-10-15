@@ -12,6 +12,7 @@ export const GET_ITEM_RECOMMENDATIONS: TypedDocumentNode<
 > = gql`
   query GetItemRecommendations($id: ID!) {
     tmdbItem(id: $id) {
+      id
       recommendations {
         id
         title

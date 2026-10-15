@@ -46,12 +46,13 @@ export async function ItemActionToolbar({
     },
   });
 
-  const itemRequestId = data?.itemRequestByExternalIds?.id ?? null;
   const availableActions = new Set<ItemRequestAction>(
     data?.itemRequestByExternalIds?.availableActions ?? [
       mediaType === "movie" ? "request_single" : "request_multiple",
     ],
   );
+  const primaryMediaItemId =
+    data?.itemRequestByExternalIds?.primaryMediaItem?.id ?? null;
 
   return (
     <div
@@ -72,20 +73,20 @@ export async function ItemActionToolbar({
           seasons={seasons}
         />
       )}
-      {availableActions.has("reset") && itemRequestId && (
-        <ResetItemAction id={itemRequestId} title={title} />
+      {availableActions.has("reset") && primaryMediaItemId && (
+        <ResetItemAction id={primaryMediaItemId} title={title} />
       )}
-      {availableActions.has("retry") && itemRequestId && (
-        <RetryItemAction id={itemRequestId} title={title} />
+      {availableActions.has("retry") && primaryMediaItemId && (
+        <RetryItemAction id={primaryMediaItemId} title={title} />
       )}
-      {availableActions.has("resume") && itemRequestId && (
-        <ResumeItemAction id={itemRequestId} title={title} />
+      {availableActions.has("resume") && primaryMediaItemId && (
+        <ResumeItemAction id={primaryMediaItemId} title={title} />
       )}
-      {availableActions.has("pause") && itemRequestId && (
-        <PauseItemAction id={itemRequestId} title={title} />
+      {availableActions.has("pause") && primaryMediaItemId && (
+        <PauseItemAction id={primaryMediaItemId} title={title} />
       )}
-      {availableActions.has("delete") && itemRequestId && (
-        <DeleteItemAction id={itemRequestId} title={title} />
+      {availableActions.has("delete") && primaryMediaItemId && (
+        <DeleteItemAction id={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("manual_scrape") && (
         <>

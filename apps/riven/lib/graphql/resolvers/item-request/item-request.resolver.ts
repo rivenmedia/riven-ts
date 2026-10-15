@@ -126,4 +126,21 @@ export class ItemRequestResolver {
   public async mediaItems(@Root() itemRequest: ItemRequest) {
     return itemRequest.mediaItems.load();
   }
+
+  @FieldResolver(() => MediaItemUnion, { nullable: true })
+  public async primaryMediaItem(@Root() itemRequest: ItemRequest) {
+    const mediaItems = await itemRequest.mediaItems.load({
+      where: {
+        type: {
+          $in: ["movie", "show"],
+        },
+      },
+    });
+
+    if (mediaItems.length === 0) {
+      return null;
+    }
+
+    return mediaItems[0];
+  }
 }

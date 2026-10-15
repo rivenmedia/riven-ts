@@ -18,18 +18,14 @@ export async function ItemStatusBadge({ id }: ItemStatusBadgeProps) {
     errorPolicy: "all",
   });
 
-  const mediaItem = data?.itemRequestByExternalIds?.mediaItems.find(
-    (item) => item.__typename === "Movie" || item.__typename === "Show",
-  );
-
-  if (!mediaItem) {
+  if (!data?.itemRequestByExternalIds?.primaryMediaItem) {
     return null;
   }
 
   return (
     <StatusBadge
       className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-      state={mediaItem.state}
+      state={data.itemRequestByExternalIds.primaryMediaItem.state}
       large
     />
   );

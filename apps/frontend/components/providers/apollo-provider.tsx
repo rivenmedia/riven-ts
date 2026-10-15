@@ -15,7 +15,12 @@ function makeClient() {
   });
 
   return new ApolloClient({
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      possibleTypes: {
+        MediaItem: ["Movie", "Show", "Season", "Episode"],
+        ShowLikeMediaItem: ["Show", "Season", "Episode"],
+      },
+    }),
     link: httpLink,
   });
 }

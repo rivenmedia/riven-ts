@@ -2,8 +2,10 @@ import { graphql, HttpResponse } from "msw";
 
 import preview from "#.storybook/preview.tsx";
 
+import { GET_ITEM_REQUEST_ACTIONS } from "./_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
+import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
 import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "./page.client.tsx";
 
@@ -13,13 +15,14 @@ const meta = preview.meta({
 });
 
 export const UnrequestedMovie = meta.story({
-  beforeEach({ msw }) {
+  beforeEach({ args, msw }) {
     msw.use(
       graphql.query(GET_ITEM_CAST, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
               __typename: "TmdbIndexerData",
+              id: args.data.id,
               cast: [
                 {
                   __typename: "CastMember",
@@ -39,6 +42,7 @@ export const UnrequestedMovie = meta.story({
           data: {
             tmdbItem: {
               __typename: "TmdbIndexerData",
+              id: args.data.id,
               recommendations: [
                 {
                   __typename: "TmdbIndexerData",
@@ -59,6 +63,7 @@ export const UnrequestedMovie = meta.story({
           data: {
             tmdbItem: {
               __typename: "TmdbIndexerData",
+              id: args.data.id,
               similarItems: [
                 {
                   __typename: "TmdbIndexerData",
@@ -73,6 +78,12 @@ export const UnrequestedMovie = meta.story({
             },
           },
         }),
+      ),
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
   },
@@ -190,6 +201,49 @@ export const UnrequestedMovie = meta.story({
       // state: "completed",
       // totalFileCount: 1,
     },
+  },
+});
+
+export const CompletedMovie = UnrequestedMovie.extend({
+  args: {
+    data: {
+      ...UnrequestedMovie.composed.args.data,
+      id: "2",
+    },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              availableActions: ["delete", "reset", "retry"],
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+              },
+              seasons: null,
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+                state: "completed",
+                type: "movie",
+              },
+            },
+          },
+        }),
+      ),
+    );
   },
 });
 

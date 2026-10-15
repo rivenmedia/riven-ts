@@ -12,9 +12,13 @@ export const GET_ITEM_REQUEST_ACTIONS: TypedDocumentNode<
 > = gql`
   query GetItemRequestActions($tmdbId: String, $tvdbId: String) {
     itemRequestByExternalIds(tmdbId: $tmdbId, tvdbId: $tvdbId) {
-      id
       seasons
       availableActions
+      primaryMediaItem {
+        ... on MediaItem {
+          id
+        }
+      }
     }
   }
 `;

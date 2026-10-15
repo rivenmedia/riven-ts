@@ -18,7 +18,7 @@ interface ResetItemActionProps {
 export function ResetItemAction({ id, title }: ResetItemActionProps) {
   const { callbacks, isOpen, setIsOpen } = useActionDialog();
   const { execute, isExecuting, isIdle, reset } = useAction(
-    resetItem,
+    resetItem.bind(null, id),
     callbacks,
   );
 
@@ -37,7 +37,7 @@ export function ResetItemAction({ id, title }: ResetItemActionProps) {
       isExecuting={isExecuting}
       onSubmit={(event) => {
         event.preventDefault();
-        execute({ id });
+        execute();
       }}
       title={`Resetting "${title}"`}
       slots={{

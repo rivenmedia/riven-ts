@@ -12,6 +12,7 @@ export const GET_SIMILAR_ITEMS: TypedDocumentNode<
 > = gql`
   query GetSimilarItems($id: ID!) {
     tmdbItem(id: $id) {
+      id
       similarItems {
         id
         title
