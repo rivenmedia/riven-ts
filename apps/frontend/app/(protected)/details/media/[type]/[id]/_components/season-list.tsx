@@ -5,7 +5,7 @@ import {
 } from "#components/_ui/carousel.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import type { SeasonData } from "./season-selector.tsx";
+import type { SeasonData } from "./item-action-toolbar/actions/request-item/_components/season-selector.tsx";
 
 interface SeasonListProps {
   seasons: SeasonData[];

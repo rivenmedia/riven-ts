@@ -5,14 +5,14 @@ import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
-import { SeasonSelector } from "../../../season-selector";
 import { BaseItemAction } from "../_components/base-item-action";
 import { useActionDialog } from "../_hooks/use-action-dialog";
 import { requestItem } from "./_actions/request-item.action";
+import { SeasonSelector } from "./_components/season-selector";
 import { TriggerButton } from "./_components/trigger-button";
 
-import type { SeasonData } from "../../../season-selector";
 import type { BaseItemActionProps } from "../_components/base-item-action";
+import type { SeasonData } from "./_components/season-selector";
 
 interface RequestShowActionProps extends Pick<BaseItemActionProps, "title"> {
   seasons: SeasonData[];

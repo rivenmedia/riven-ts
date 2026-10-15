@@ -13,7 +13,7 @@ import { ResetItemAction } from "./actions/reset-item/reset-item-action.tsx";
 import { ResumeItemAction } from "./actions/resume-item/resume-item-action.tsx";
 import { RetryItemAction } from "./actions/retry-item/retry-item-action.tsx";
 
-import type { SeasonData } from "../season-selector.tsx";
+import type { SeasonData } from "./actions/request-item/_components/season-selector.tsx";
 import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 
 type ItemActionToolbarProps = {
