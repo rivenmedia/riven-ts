@@ -1,3 +1,5 @@
+import { io } from "next/cache";
+
 import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { query } from "#lib/graphql/client.ts";
 
@@ -8,6 +10,8 @@ interface ItemStatusBadgeProps {
 }
 
 export async function ItemStatusBadge({ id }: ItemStatusBadgeProps) {
+  await io();
+
   const { data } = await query({
     query: GET_ITEM_STATUS,
     variables: { tmdbId: id },

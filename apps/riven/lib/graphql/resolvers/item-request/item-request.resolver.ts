@@ -1,4 +1,5 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import {
@@ -114,6 +115,11 @@ export class ItemRequestResolver {
 
       throw error;
     }
+  }
+
+  @FieldResolver(() => [ItemRequestAction.enum])
+  public availableActions(): ItemRequestAction[] {
+    return ["reset", "retry"];
   }
 
   @FieldResolver(() => [MediaItemUnion])

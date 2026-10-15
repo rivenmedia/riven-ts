@@ -9,12 +9,11 @@ import {
   AlertDialogTrigger,
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
-// import { Loader2 } from "lucide-react";
 
+import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
+// import { Loader2 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { ComponentProps, ReactElement } from "react";
-
-type ItemActionKind = "reset" | "retry" | "delete" | "pause" | "resume";
 
 const presentation = {
   delete: {
@@ -48,7 +47,7 @@ const presentation = {
     verb: "retry",
   },
 } satisfies Record<
-  ItemActionKind,
+  Exclude<ItemRequestAction, "request_multiple" | "request_single">,
   { heading: string; label: string; verb: string; done: string }
 >;
 
@@ -58,7 +57,7 @@ interface ItemActionProps extends Pick<
 > {
   buttonLabel: string;
   buttonIcon?: ReactElement<LucideIcon>;
-  kind: ItemActionKind;
+  kind: Exclude<ItemRequestAction, "request_multiple" | "request_single">;
   title: string | null | undefined;
   ids: (string | null | undefined)[];
   size?: ComponentProps<typeof Button>["size"];
@@ -81,10 +80,8 @@ export function ItemAction({
 
   return (
     // {#if page.data.permissions?.canManageLibrary}
-    <AlertDialog
-    //  bind:open
-    >
-      <AlertDialogTrigger>
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
         <Button variant={variant} size={size}>
           {buttonIcon}
           {buttonLabel}
@@ -100,11 +97,12 @@ export function ItemAction({
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
           <Button
-            // disabled={loading}
-            onClick={() => {
-              // confirm();
-            }}
+          // disabled={loading}
+          // onClick={() => {
+          //   // confirm();
+          // }}
           >
+            {presentationKind.label}
             {/* {loading && (
                         <Loader2 className="mr-1 inline-block animate-spin" />
                     )}

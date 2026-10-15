@@ -6,7 +6,7 @@ import { fly } from "#components/_animations/fly.ts";
 import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import { ItemActionToolbar } from "./item-action-toolbar";
+import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
 import { ItemStatusBadge } from "./item-status-badge/item-status-badge";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
@@ -58,31 +58,13 @@ export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
             </span>
           )} */}
         </div>
-
         <ItemActionToolbar
           title={data.title}
           externalId={data.id}
-          // seasons={data.seasons}
-          // {riven}
-          // {rivenId}
-          // {rivenPending}
-          riven={{} as never}
-          rivenId={null}
-          rivenPending={false}
-          // bind:rawDataOpen
-          // {rawRivenLoading}
-          // {rawRivenError}
-          // {rawRivenJson}
           {...(data.type === "movie"
-            ? {
-                mediaType: "movie",
-              }
-            : {
-                mediaType: "show",
-                seasons: [],
-              })}
+            ? { mediaType: "movie" }
+            : { mediaType: "show", seasons: [] })}
         />
-
         <div
           className={cn(
             "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",

@@ -1,10 +1,10 @@
 "use client";
 
-import { SeasonSelector } from "../../season-selector";
+import { SeasonSelector } from "../../../season-selector";
 import { BaseRequestItemAction } from "./_components/base-request-item-action";
 import { TriggerButton } from "./_components/trigger-button";
 
-import type { SeasonData } from "../../season-selector";
+import type { SeasonData } from "../../../season-selector";
 import type { BaseRequestItemActionProps } from "./_components/base-request-item-action";
 
 interface RequestShowActionProps extends Pick<
