@@ -109,7 +109,7 @@ export const processItemRequestProcessor =
             const {
               item: updatedItem,
               isReindex,
-              isAdditionalSeasonRequest,
+              isAdditionalSeasonRequest = false,
             } = await indexerService.indexItem(item);
 
             const itemsToProcess = await mediaItemService.getItemsToProcess(
@@ -129,8 +129,7 @@ export const processItemRequestProcessor =
                     }
                   : {
                       type: "show",
-                      isAdditionalSeasonRequest:
-                        isAdditionalSeasonRequest ?? false,
+                      isAdditionalSeasonRequest,
                       isReindex,
                     },
             });
