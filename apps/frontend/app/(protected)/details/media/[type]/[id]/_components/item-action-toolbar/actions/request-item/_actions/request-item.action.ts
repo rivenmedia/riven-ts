@@ -2,26 +2,12 @@
 
 import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 
-import { gql } from "@apollo/client";
 import { z } from "zod";
 
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
 
-import type {
-  RequestItemMutation,
-  RequestItemMutationVariables,
-} from "./request-item.action.typegen";
-import type { TypedDocumentNode } from "@apollo/client";
-
-export const REQUEST_ITEM: TypedDocumentNode<
-  RequestItemMutation,
-  RequestItemMutationVariables
-> = gql`
-  mutation RequestItem($input: RequestItemInput!) {
-    requestItem(input: $input)
-  }
-`;
+import { REQUEST_ITEM } from "../_mutations/request-item.mutation";
 
 export const requestItem = permissionActionClient
   .metadata({

@@ -1,3 +1,5 @@
+"use server";
+
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { getClient } from "#lib/graphql/client.ts";
