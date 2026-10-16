@@ -1,5 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
+import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import {
@@ -118,29 +119,38 @@ export class ItemRequestResolver {
   }
 
   @FieldResolver(() => [ItemRequestAction.enum])
-  public availableActions(): ItemRequestAction[] {
-    return ["reset", "retry", "delete", "pause"];
+  public async availableActions(
+    @Root() itemRequest: ItemRequest,
+  ): Promise<ItemRequestAction[]> {
+    const actions = new Set<ItemRequestAction>(["reset"]);
+    const primaryMediaItem = await itemRequest.primaryMediaItem();
+
+    if (primaryMediaItem?.state === "failed") {
+      actions.add("retry");
+    }
+
+    const pausableStates = ItemRequestState.exclude([
+      "failed",
+      "completed",
+      "paused",
+      "unreleased",
+    ]);
+
+    if (pausableStates.safeParse(itemRequest.state).success) {
+      actions.add("pause");
+    }
+
+    if (itemRequest.state === "paused") {
+      actions.add("resume");
+    }
+
+    actions.add("delete");
+
+    return [...actions];
   }
 
   @FieldResolver(() => [MediaItemUnion])
   public async mediaItems(@Root() itemRequest: ItemRequest) {
     return itemRequest.mediaItems.load();
-  }
-
-  @FieldResolver(() => MediaItemUnion, { nullable: true })
-  public async primaryMediaItem(@Root() itemRequest: ItemRequest) {
-    const mediaItems = await itemRequest.mediaItems.load({
-      where: {
-        type: {
-          $in: ["movie", "show"],
-        },
-      },
-    });
-
-    if (mediaItems.length === 0) {
-      return null;
-    }
-
-    return mediaItems[0];
   }
 }

@@ -6,6 +6,8 @@ import { CoreKey } from "#graphql/context.ts";
 import { createQueue } from "#message-queue/utilities/create-queue.ts";
 
 import type {
+  ItemRequestResolverSpecGetAvailableActionsQuery,
+  ItemRequestResolverSpecGetAvailableActionsQueryVariables,
   RemoveItemRequestMutation,
   RemoveItemRequestMutationVariables,
 } from "./item-request.resolver.spec.typegen.ts";
@@ -307,5 +309,239 @@ describe("removeItemRequest", () => {
         "Failed to remove item request",
       );
     });
+  });
+});
+
+describe("availableActions", () => {
+  const GET_ITEM_REQUEST_AVAILABLE_ACTIONS: TypedDocumentNode<
+    ItemRequestResolverSpecGetAvailableActionsQuery,
+    ItemRequestResolverSpecGetAvailableActionsQueryVariables
+  > = gql`
+    query ItemRequestResolverSpecGetAvailableActions($tmdbId: String!) {
+      itemRequestByExternalIds(tmdbId: $tmdbId) {
+        availableActions
+      }
+    }
+  `;
+
+  it('includes "reset" as an available action', async ({
+    completedMovieContext: { completedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: completedMovie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.arrayContaining(["reset"]));
+  });
+
+  it('includes "retry" when the primary media item has failed', async ({
+    em,
+    seeders: { seedIndexedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { movie } = await seedIndexedMovie();
+
+    em.persist(movie);
+
+    movie.state = "failed";
+
+    await em.flush();
+
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: movie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.arrayContaining(["retry"]));
+  });
+
+  it('does not include "retry" when the primary media item has not failed', async ({
+    seeders: { seedIndexedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { movie } = await seedIndexedMovie();
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: movie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.not.arrayContaining(["retry"]));
+  });
+
+  it('includes "pause" when the item request is in a pausable state', async ({
+    seeders: { seedScrapedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { movie } = await seedScrapedMovie();
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: movie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.arrayContaining(["pause"]));
+  });
+
+  it('does not include "pause" when the item request is not in a pausable state', async ({
+    completedMovieContext: { completedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: completedMovie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.not.arrayContaining(["pause"]));
+  });
+
+  it('includes "resume" when the item request is paused', async ({
+    em,
+    seeders: { seedScrapedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { movie } = await seedScrapedMovie();
+    const itemRequest = movie.itemRequest.getEntity();
+
+    em.persist(itemRequest);
+
+    itemRequest.state = "paused";
+
+    await em.flush();
+
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: movie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.arrayContaining(["resume"]));
+  });
+
+  it('does not include "resume" when the item request is not in a pausable state', async ({
+    completedMovieContext: { completedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: completedMovie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.not.arrayContaining(["resume"]));
+  });
+
+  it('includes "delete" as an available action', async ({
+    completedMovieContext: { completedMovie },
+    gqlContext,
+    gqlServer,
+  }) => {
+    const { body } = await gqlServer.executeOperation<
+      ItemRequestResolverSpecGetAvailableActionsQuery,
+      ItemRequestResolverSpecGetAvailableActionsQueryVariables
+    >(
+      {
+        query: GET_ITEM_REQUEST_AVAILABLE_ACTIONS,
+        variables: {
+          tmdbId: completedMovie.tmdbId,
+        },
+      },
+      { contextValue: gqlContext },
+    );
+
+    expect.assert(body.kind === "single");
+
+    expect(
+      body.singleResult.data?.itemRequestByExternalIds?.availableActions,
+    ).toStrictEqual(expect.arrayContaining(["delete"]));
   });
 });
