@@ -2,30 +2,10 @@
 
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
-import { gql } from "@apollo/client";
-
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
 
-import type {
-  ResetItemMutation,
-  ResetItemMutationVariables,
-} from "./reset-item.action.typegen";
-import type { TypedDocumentNode } from "@apollo/client";
-
-export const RESET_ITEM: TypedDocumentNode<
-  ResetItemMutation,
-  ResetItemMutationVariables
-> = gql`
-  mutation ResetItem($id: ID!) {
-    resetMediaItem(mediaItemId: $id) {
-      ... on MediaItem {
-        id
-        state
-      }
-    }
-  }
-`;
+import { RESET_ITEM } from "../_mutations/reset-item.mutation";
 
 export const resetItem = permissionActionClient
   .metadata({

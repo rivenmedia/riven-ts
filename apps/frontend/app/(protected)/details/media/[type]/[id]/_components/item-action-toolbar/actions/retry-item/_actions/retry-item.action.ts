@@ -1,29 +1,9 @@
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
-import { gql } from "@apollo/client";
-
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
 
-import type {
-  RetryItemMutation,
-  RetryItemMutationVariables,
-} from "./retry-item.action.typegen";
-import type { TypedDocumentNode } from "@apollo/client";
-
-export const RETRY_ITEM: TypedDocumentNode<
-  RetryItemMutation,
-  RetryItemMutationVariables
-> = gql`
-  mutation RetryItem($id: ID!) {
-    retryMediaItem(mediaItemId: $id) {
-      ... on MediaItem {
-        id
-        state
-      }
-    }
-  }
-`;
+import { RETRY_ITEM } from "../_mutations/retry-item.mutation";
 
 export const retryItem = permissionActionClient
   .metadata({
