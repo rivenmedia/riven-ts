@@ -11,6 +11,7 @@ import { PAUSE_ITEM } from "./_components/item-action-toolbar/actions/pause-item
 import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_mutations/request-item.mutation.ts";
 import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_mutations/reset-item.mutation.ts";
 import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-item/_mutations/resume-item.mutation.ts";
+import { RETRY_ITEM } from "./_components/item-action-toolbar/actions/retry-item/_mutations/retry-item.mutation.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
@@ -337,8 +338,22 @@ CompletedMovie.test(
 
 CompletedMovie.test(
   'Retries the item when the "Retry" button is clicked',
-  async ({ canvas, userEvent, msw, canvasElement }) => {
-    msw.use(getSessionHandler, hasPermissionHandler);
+  async ({ args, canvas, userEvent, msw, canvasElement }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(RETRY_ITEM, () =>
+        HttpResponse.json({
+          data: {
+            retryMediaItem: {
+              __typename: "Movie",
+              id: args.data.id,
+              state: "indexed",
+            },
+          },
+        }),
+      ),
+    );
 
     const retryButton = await canvas.findByRole("button", {
       name: /retry/iu,
