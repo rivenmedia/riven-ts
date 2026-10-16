@@ -74,19 +74,19 @@ export async function ItemActionToolbar({
         />
       )}
       {availableActions.has("reset") && primaryMediaItemId && (
-        <ResetItemAction id={primaryMediaItemId} title={title} />
+        <ResetItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("retry") && primaryMediaItemId && (
-        <RetryItemAction id={primaryMediaItemId} title={title} />
+        <RetryItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("resume") && primaryMediaItemId && (
-        <ResumeItemAction id={primaryMediaItemId} title={title} />
+        <ResumeItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("pause") && primaryMediaItemId && (
-        <PauseItemAction id={primaryMediaItemId} title={title} />
+        <PauseItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("delete") && primaryMediaItemId && (
-        <DeleteItemAction id={primaryMediaItemId} title={title} />
+        <DeleteItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
       {availableActions.has("manual_scrape") && (
         <>

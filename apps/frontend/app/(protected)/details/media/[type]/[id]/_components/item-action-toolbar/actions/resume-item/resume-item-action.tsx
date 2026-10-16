@@ -3,6 +3,7 @@
 import { Play } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
+import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 
@@ -11,14 +12,25 @@ import { useActionDialog } from "../_hooks/use-action-dialog";
 import { resumeItem } from "./_actions/resume-item.action";
 
 interface ResumeItemActionProps {
-  id: string;
+  mediaItemId: string;
   title: string;
 }
 
-export function ResumeItemAction({ id, title }: ResumeItemActionProps) {
-  const { callbacks, isOpen, setIsOpen } = useActionDialog();
+export function ResumeItemAction({
+  mediaItemId,
+  title,
+}: ResumeItemActionProps) {
+  const { callbacks, isOpen, setIsOpen } = useActionDialog({
+    onSuccess() {
+      toast.success("Item resumed successfully.");
+    },
+    onError() {
+      toast.error("Failed to resume the item.");
+    },
+  });
+
   const { execute, isExecuting, isIdle, reset } = useAction(
-    resumeItem,
+    resumeItem.bind(null, mediaItemId),
     callbacks,
   );
 
@@ -37,7 +49,7 @@ export function ResumeItemAction({ id, title }: ResumeItemActionProps) {
       isExecuting={isExecuting}
       onSubmit={(event) => {
         event.preventDefault();
-        execute({ id });
+        execute();
       }}
       title={`Resuming "${title}"`}
       slots={{

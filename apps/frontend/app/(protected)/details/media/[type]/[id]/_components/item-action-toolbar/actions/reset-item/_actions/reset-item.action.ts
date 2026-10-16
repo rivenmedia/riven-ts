@@ -1,7 +1,8 @@
 "use server";
 
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import { gql } from "@apollo/client";
-import { z } from "zod";
 
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
@@ -19,6 +20,7 @@ export const RESET_ITEM: TypedDocumentNode<
   mutation ResetItem($id: ID!) {
     resetMediaItem(mediaItemId: $id) {
       ... on MediaItem {
+        id
         state
       }
     }
@@ -31,7 +33,7 @@ export const resetItem = permissionActionClient
       item: ["reset"],
     },
   })
-  .bindArgsSchemas([z.uuid()])
+  .bindArgsSchemas([UUID])
   .action(async ({ bindArgsParsedInputs: [id] }) => {
     const { data } = await getClient().mutate({
       mutation: RESET_ITEM,
@@ -39,7 +41,7 @@ export const resetItem = permissionActionClient
     });
 
     return {
-      success: true,
+      success: Boolean(data?.resetMediaItem),
       resetItems: data?.resetMediaItem ?? [],
     };
   });

@@ -12,11 +12,14 @@ import { useActionDialog } from "../_hooks/use-action-dialog";
 import { deleteItem } from "./_actions/delete-item.action";
 
 interface DeleteItemActionProps {
-  id: string;
+  mediaItemId: string;
   title: string;
 }
 
-export function DeleteItemAction({ id, title }: DeleteItemActionProps) {
+export function DeleteItemAction({
+  mediaItemId,
+  title,
+}: DeleteItemActionProps) {
   const { callbacks, isOpen, setIsOpen } = useActionDialog({
     onSuccess() {
       toast.success("Item deleted successfully");
@@ -27,7 +30,7 @@ export function DeleteItemAction({ id, title }: DeleteItemActionProps) {
   });
 
   const { execute, isExecuting, isIdle, reset } = useAction(
-    deleteItem.bind(null, id),
+    deleteItem.bind(null, mediaItemId),
     callbacks,
   );
 

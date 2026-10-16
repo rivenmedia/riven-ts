@@ -1,7 +1,8 @@
 "use server";
 
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import { gql } from "@apollo/client";
-import z from "zod";
 
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
@@ -27,7 +28,7 @@ export const deleteItem = permissionActionClient
       item: ["delete"],
     },
   })
-  .bindArgsSchemas([z.uuid()])
+  .bindArgsSchemas([UUID])
   .action(async ({ bindArgsParsedInputs: [id] }) => {
     const { data } = await getClient().mutate({
       mutation: DELETE_ITEM_REQUEST,
@@ -37,6 +38,6 @@ export const deleteItem = permissionActionClient
     });
 
     return {
-      success: data?.removeItemRequest ?? false,
+      success: Boolean(data?.removeItemRequest),
     };
   });

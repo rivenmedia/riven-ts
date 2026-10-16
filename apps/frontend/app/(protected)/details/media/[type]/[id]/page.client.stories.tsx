@@ -7,8 +7,10 @@ import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts"
 
 import { GET_ITEM_REQUEST_ACTIONS } from "./_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
 import { DELETE_ITEM_REQUEST } from "./_components/item-action-toolbar/actions/delete-item/_actions/delete-item.action.ts";
+import { PAUSE_ITEM } from "./_components/item-action-toolbar/actions/pause-item/_actions/pause-item.action.ts";
 import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_actions/request-item.action.ts";
 import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_actions/reset-item.action.ts";
+import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-item/_actions/resume-item.action.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
@@ -20,82 +22,12 @@ const meta = preview.meta({
   component: MediaDetailsPage,
 });
 
+//#region Movie stories
+//#region Unrequested movie
 export const UnrequestedMovie = meta.story({
-  beforeEach({ args, msw }) {
-    msw.use(
-      graphql.query(GET_ITEM_CAST, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              cast: [
-                {
-                  __typename: "CastMember",
-                  character: "Bill Denbrough",
-                  id: "1",
-                  name: "Jaeden Martell",
-                  profileUrl:
-                    "https://image.tmdb.org/t/p/w185/oR7ZJsOHMNFzM1HeugV4a4qCMSF.jpg",
-                },
-              ],
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_RECOMMENDATIONS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              recommendations: [
-                {
-                  __typename: "TmdbIndexerData",
-                  id: "clown-in-a-cornfield",
-                  title: "Clown in a Cornfield",
-                  posterUrl:
-                    "https://image.tmdb.org/t/p/w300/6ep6gw90TJ8bYvJC6hEDo8SxjoJ.jpg",
-                  type: "movie",
-                  year: 2023,
-                },
-              ],
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_SIMILAR_ITEMS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              similarItems: [
-                {
-                  __typename: "TmdbIndexerData",
-                  id: "it-chapter-2",
-                  title: "It Chapter 2",
-                  posterUrl:
-                    "https://image.tmdb.org/t/p/w300/zfE0R94v1E8cuKAerbskfD3VfUt.jpg",
-                  type: "movie",
-                  year: 2019,
-                },
-              ],
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
-        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
-      ),
-    );
-  },
   args: {
     data: {
-      id: "1",
+      id: "unrequested-movie",
       title: "It",
       overview:
         "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
@@ -208,6 +140,78 @@ export const UnrequestedMovie = meta.story({
       // totalFileCount: 1,
     },
   },
+  beforeEach({ args, msw }) {
+    msw.use(
+      graphql.query(GET_ITEM_CAST, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              cast: [
+                {
+                  __typename: "CastMember",
+                  character: "Bill Denbrough",
+                  id: "1",
+                  name: "Jaeden Martell",
+                  profileUrl:
+                    "https://image.tmdb.org/t/p/w185/oR7ZJsOHMNFzM1HeugV4a4qCMSF.jpg",
+                },
+              ],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_RECOMMENDATIONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              recommendations: [
+                {
+                  __typename: "TmdbIndexerData",
+                  id: "clown-in-a-cornfield",
+                  title: "Clown in a Cornfield",
+                  posterUrl:
+                    "https://image.tmdb.org/t/p/w300/6ep6gw90TJ8bYvJC6hEDo8SxjoJ.jpg",
+                  type: "movie",
+                  year: 2023,
+                },
+              ],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_SIMILAR_ITEMS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              similarItems: [
+                {
+                  __typename: "TmdbIndexerData",
+                  id: "it-chapter-2",
+                  title: "It Chapter 2",
+                  posterUrl:
+                    "https://image.tmdb.org/t/p/w300/zfE0R94v1E8cuKAerbskfD3VfUt.jpg",
+                  type: "movie",
+                  year: 2019,
+                },
+              ],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+      ),
+    );
+  },
 });
 
 UnrequestedMovie.test(
@@ -242,12 +246,14 @@ UnrequestedMovie.test(
     ).toBeInTheDocument();
   },
 );
+//#endregion
 
+//#region Completed movie
 export const CompletedMovie = UnrequestedMovie.extend({
   args: {
     data: {
       ...UnrequestedMovie.composed.args.data,
-      id: "2",
+      id: "completed-movie",
     },
   },
   beforeEach({ msw }) {
@@ -288,7 +294,7 @@ export const CompletedMovie = UnrequestedMovie.extend({
 
 CompletedMovie.test(
   'Resets the item when the "Reset" button is clicked',
-  async ({ canvas, userEvent, msw, canvasElement }) => {
+  async ({ args, canvas, userEvent, msw, canvasElement }) => {
     msw.use(
       getSessionHandler,
       hasPermissionHandler,
@@ -298,6 +304,7 @@ CompletedMovie.test(
             resetMediaItem: [
               {
                 __typename: "Movie",
+                id: args.data.id,
                 state: "indexed",
               },
             ],
@@ -391,6 +398,180 @@ CompletedMovie.test(
     ).toBeInTheDocument();
   },
 );
+//#endregion
+
+//#region Paused movie
+export const PausedMovie = UnrequestedMovie.extend({
+  args: {
+    data: {
+      ...UnrequestedMovie.composed.args.data,
+      id: "paused-movie",
+    },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              availableActions: ["delete", "reset", "resume"],
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+              },
+              seasons: null,
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+                state: "paused",
+                type: "movie",
+              },
+            },
+          },
+        }),
+      ),
+    );
+  },
+});
+
+PausedMovie.test(
+  'Resumes the item when the "Resume" button is clicked',
+  async ({ args, canvas, userEvent, msw, canvasElement }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(RESUME_ITEM, () =>
+        HttpResponse.json({
+          data: {
+            resumeMediaItem: {
+              __typename: "Movie",
+              id: args.data.id,
+              state: "scraped",
+            },
+          },
+        }),
+      ),
+    );
+
+    const resumeButton = await canvas.findByRole("button", {
+      name: /resume/iu,
+    });
+
+    await userEvent.click(resumeButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /resume/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/item resumed successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+
+//#region Scraped movie
+export const ScrapedMovie = UnrequestedMovie.extend({
+  args: {
+    data: {
+      ...UnrequestedMovie.composed.args.data,
+      id: "scraped-movie",
+    },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              availableActions: ["delete", "reset", "pause"],
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+              },
+              seasons: null,
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: crypto.randomUUID(),
+                state: "scraped",
+                type: "movie",
+              },
+            },
+          },
+        }),
+      ),
+    );
+  },
+});
+
+ScrapedMovie.test(
+  'Pauses the item when the "Pause" button is clicked',
+  async ({ args, canvas, userEvent, msw, canvasElement }) => {
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(PAUSE_ITEM, () =>
+        HttpResponse.json({
+          data: {
+            pauseMediaItem: {
+              __typename: "Movie",
+              id: args.data.id,
+              state: "paused",
+            },
+          },
+        }),
+      ),
+    );
+
+    const pauseButton = await canvas.findByRole("button", {
+      name: /pause/iu,
+    });
+
+    await userEvent.click(pauseButton);
+
+    const dialog = within(canvasElement.ownerDocument.body).getByRole(
+      "alertdialog",
+    );
+
+    const confirmButton = within(dialog).getByRole("button", {
+      name: /pause/iu,
+    });
+
+    await userEvent.click(confirmButton);
+
+    await expect(
+      await canvas.findByText(/item paused successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+//#endregion
 
 // export const UnrequestedShow = meta.story({
 //   args: {

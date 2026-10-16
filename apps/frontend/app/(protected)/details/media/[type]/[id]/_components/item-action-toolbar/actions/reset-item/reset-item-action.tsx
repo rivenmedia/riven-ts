@@ -12,11 +12,11 @@ import { useActionDialog } from "../_hooks/use-action-dialog";
 import { resetItem } from "./_actions/reset-item.action";
 
 interface ResetItemActionProps {
-  id: string;
+  mediaItemId: string;
   title: string;
 }
 
-export function ResetItemAction({ id, title }: ResetItemActionProps) {
+export function ResetItemAction({ mediaItemId, title }: ResetItemActionProps) {
   const { callbacks, isOpen, setIsOpen } = useActionDialog({
     onSuccess() {
       toast.success("Reset successful");
@@ -25,8 +25,9 @@ export function ResetItemAction({ id, title }: ResetItemActionProps) {
       toast.error("Reset failed");
     },
   });
+
   const { execute, isExecuting, isIdle, reset } = useAction(
-    resetItem.bind(null, id),
+    resetItem.bind(null, mediaItemId),
     callbacks,
   );
 

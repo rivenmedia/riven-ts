@@ -12,11 +12,11 @@ import { useActionDialog } from "../_hooks/use-action-dialog";
 import { retryItem } from "./_actions/retry-item.action";
 
 interface RetryItemActionProps {
-  id: string;
+  mediaItemId: string;
   title: string;
 }
 
-export function RetryItemAction({ id, title }: RetryItemActionProps) {
+export function RetryItemAction({ mediaItemId, title }: RetryItemActionProps) {
   const { callbacks, isOpen, setIsOpen } = useActionDialog({
     onError() {
       toast.error("Failed to retry the item.");
@@ -25,8 +25,9 @@ export function RetryItemAction({ id, title }: RetryItemActionProps) {
       toast.success("Item retried successfully.");
     },
   });
+
   const { execute, isExecuting, isIdle, reset } = useAction(
-    retryItem,
+    retryItem.bind(null, mediaItemId),
     callbacks,
   );
 
@@ -45,7 +46,7 @@ export function RetryItemAction({ id, title }: RetryItemActionProps) {
       isExecuting={isExecuting}
       onSubmit={(event) => {
         event.preventDefault();
-        execute({ id });
+        execute();
       }}
       title={`Retrying "${title}"`}
       slots={{

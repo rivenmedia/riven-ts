@@ -119,6 +119,36 @@ export class MediaItemResolver {
     return [...resetItems];
   }
 
+  @Mutation(() => MediaItemUnion)
+  public retryMediaItem(
+    @Arg("mediaItemId", () => ID) mediaItemId: UUID,
+    @Ctx() { logger }: ApolloServerContext,
+  ) {
+    logger.warn(`[PLACEHOLDER]: Retrying media item with ID: ${mediaItemId}`);
+
+    return null;
+  }
+
+  @Mutation(() => MediaItemUnion)
+  public pauseMediaItem(
+    @Arg("mediaItemId", () => ID) mediaItemId: UUID,
+    @Ctx() { logger }: ApolloServerContext,
+  ) {
+    logger.warn(`[PLACEHOLDER]: Pausing media item with ID: ${mediaItemId}`);
+
+    return null;
+  }
+
+  @Mutation(() => MediaItemUnion)
+  public resumeMediaItem(
+    @Arg("mediaItemId", () => ID) mediaItemId: UUID,
+    @Ctx() { logger }: ApolloServerContext,
+  ) {
+    logger.warn(`[PLACEHOLDER]: Resuming media item with ID: ${mediaItemId}`);
+
+    return null;
+  }
+
   @Mutation(() => Boolean)
   public async blacklistActiveStream(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
