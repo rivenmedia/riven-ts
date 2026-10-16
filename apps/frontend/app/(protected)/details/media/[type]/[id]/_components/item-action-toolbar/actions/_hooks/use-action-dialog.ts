@@ -21,11 +21,12 @@ export function useActionDialog(options?: UseActionDialogOptions) {
     isOpen,
     setIsOpen,
     callbacks: {
-      onSuccess: () => {
+      onSuccess() {
         setIsOpen(false);
+
         options?.onSuccess?.();
       },
-      onError: () => {
+      onError() {
         options?.onError?.();
       },
     },

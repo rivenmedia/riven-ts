@@ -1,3 +1,5 @@
+"use client";
+
 import { Play } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
