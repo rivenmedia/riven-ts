@@ -6,11 +6,11 @@ import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
 import { GET_ITEM_REQUEST_ACTIONS } from "./_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
-import { DELETE_ITEM_REQUEST } from "./_components/item-action-toolbar/actions/delete-item/_actions/delete-item.action.ts";
-import { PAUSE_ITEM } from "./_components/item-action-toolbar/actions/pause-item/_actions/pause-item.action.ts";
-import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_actions/request-item.action.ts";
-import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_actions/reset-item.action.ts";
-import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-item/_actions/resume-item.action.ts";
+import { DELETE_ITEM_REQUEST } from "./_components/item-action-toolbar/actions/delete-item/_mutations/delete-item-request.mutation.ts";
+import { PAUSE_ITEM } from "./_components/item-action-toolbar/actions/pause-item/_mutations/pause-item.mutation.ts";
+import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_mutations/request-item.mutation.ts";
+import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_mutations/reset-item.mutation.ts";
+import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-item/_mutations/resume-item.mutation.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
