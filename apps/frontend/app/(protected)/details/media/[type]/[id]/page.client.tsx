@@ -13,7 +13,7 @@ interface MediaDetailsPageProps {
 export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
   return (
     <SingleMediaItem
-      data={data}
+      indexerData={data}
       slots={{
         castList: <ItemCast id={data.id} />,
         itemMetadata: <ItemMetadata data={data} />,

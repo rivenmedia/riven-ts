@@ -6,15 +6,15 @@ import { query } from "#lib/graphql/client.ts";
 import { GET_ITEM_STATUS } from "./_queries/get-item-status.query";
 
 interface ItemStatusBadgeProps {
-  id: string;
+  indexerItemId: string;
 }
 
-export async function ItemStatusBadge({ id }: ItemStatusBadgeProps) {
+export async function ItemStatusBadge({ indexerItemId }: ItemStatusBadgeProps) {
   await io();
 
   const { data } = await query({
     query: GET_ITEM_STATUS,
-    variables: { tmdbId: id },
+    variables: { tmdbId: indexerItemId },
     errorPolicy: "all",
   });
 

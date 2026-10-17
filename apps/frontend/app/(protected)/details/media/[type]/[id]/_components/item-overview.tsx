@@ -13,10 +13,9 @@ import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 interface ItemOverviewProps {
   data: IndexerData;
-  mediaItemId: string;
 }
 
-export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
+export function ItemOverview({ data }: ItemOverviewProps) {
   const details = [
     data.year,
     data.runtime,
@@ -50,7 +49,7 @@ export function ItemOverview({ data, mediaItemId }: ItemOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {data.title}
           </h1>
-          <ItemStatusBadge id={mediaItemId} />
+          <ItemStatusBadge indexerItemId={data.id} />
           {/* {data.mediaDetails.totalFileCount > 0 && (
             <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
               {data.mediaDetails.completedFileCount}/
