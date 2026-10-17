@@ -5,13 +5,10 @@ import { fly } from "#components/_animations/fly.ts";
 import { query } from "#lib/graphql/client.ts";
 
 import { GET_ITEM_REQUEST_ACTIONS } from "./_queries/get-item-request-actions.query.ts";
-import { DeleteItemAction } from "./actions/delete-item/delete-item-action.tsx";
-import { PauseItemAction } from "./actions/pause-item/pause-item-action.tsx";
+import { ConfirmItemAction } from "./actions/_components/confirm-item-action.tsx";
 import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
 import { RequestShowAction } from "./actions/request-item/request-show-action.tsx";
-import { ResetItemAction } from "./actions/reset-item/reset-item-action.tsx";
-import { ResumeItemAction } from "./actions/resume-item/resume-item-action.tsx";
-import { RetryItemAction } from "./actions/retry-item/retry-item-action.tsx";
+import { confirmItemActions } from "./confirm-item-actions.tsx";
 
 import type { SeasonData } from "./actions/request-item/_components/season-selector.tsx";
 import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
@@ -38,12 +35,12 @@ export async function ItemActionToolbar({
 }: ItemActionToolbarProps) {
   await io();
 
+  const externalIds =
+    mediaType === "movie" ? { tmdbId: externalId } : { tvdbId: externalId };
+
   const { data } = await query({
     query: GET_ITEM_REQUEST_ACTIONS,
-    variables: {
-      tmdbId: mediaType === "movie" ? externalId : null,
-      tvdbId: mediaType === "show" ? externalId : null,
-    },
+    variables: externalIds,
   });
 
   const availableActions = new Set<ItemRequestAction>(
@@ -52,9 +49,10 @@ export async function ItemActionToolbar({
     ],
   );
 
-  const itemRequestId = data?.itemRequestByExternalIds?.id ?? null;
-  const primaryMediaItemId =
-    data?.itemRequestByExternalIds?.primaryMediaItem?.id ?? null;
+  const targetIds = {
+    itemRequest: data?.itemRequestByExternalIds?.id,
+    mediaItem: data?.itemRequestByExternalIds?.primaryMediaItem?.id,
+  };
 
   return (
     <div
@@ -64,31 +62,35 @@ export async function ItemActionToolbar({
       )}
     >
       {availableActions.has("request_single") && mediaType === "movie" && (
-        <RequestMovieAction title={title} tmdbId={externalId} imdbId={null} />
+        <RequestMovieAction title={title} externalIds={externalIds} />
       )}
-      {availableActions.has("request_multiple") && mediaType === "show" && (
-        <RequestShowAction
-          title={title}
-          tvdbId={externalId}
-          imdbId={null}
-          requestedSeasons={new Set(data?.itemRequestByExternalIds?.seasons)}
-          seasons={seasons}
-        />
-      )}
-      {availableActions.has("reset") && primaryMediaItemId && (
-        <ResetItemAction mediaItemId={primaryMediaItemId} title={title} />
-      )}
-      {availableActions.has("retry") && primaryMediaItemId && (
-        <RetryItemAction mediaItemId={primaryMediaItemId} title={title} />
-      )}
-      {availableActions.has("resume") && primaryMediaItemId && (
-        <ResumeItemAction mediaItemId={primaryMediaItemId} title={title} />
-      )}
-      {availableActions.has("pause") && primaryMediaItemId && (
-        <PauseItemAction mediaItemId={primaryMediaItemId} title={title} />
-      )}
-      {availableActions.has("delete") && itemRequestId && (
-        <DeleteItemAction itemRequestId={itemRequestId} title={title} />
+      {(availableActions.has("request_multiple") ||
+        availableActions.has("request_more")) &&
+        mediaType === "show" && (
+          <RequestShowAction
+            title={title}
+            externalIds={externalIds}
+            requestedSeasons={new Set(data?.itemRequestByExternalIds?.seasons)}
+            seasons={seasons}
+          />
+        )}
+      {confirmItemActions.map(
+        ({ availableAction, target, action, pendingLabel, ...props }) => {
+          const targetId = targetIds[target];
+
+          if (!availableActions.has(availableAction) || !targetId) {
+            return null;
+          }
+
+          return (
+            <ConfirmItemAction
+              key={availableAction}
+              action={action.bind(null, targetId)}
+              title={`${pendingLabel} "${title}"`}
+              {...props}
+            />
+          );
+        },
       )}
       {availableActions.has("manual_scrape") && (
         <>

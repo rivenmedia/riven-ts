@@ -14,18 +14,17 @@ import { TriggerButton } from "./_components/trigger-button";
 
 import type { BaseItemActionProps } from "../_components/base-item-action";
 import type { SeasonData } from "./_components/season-selector";
+import type { ExternalIds } from "./_schemas/external-ids.schema";
 
 interface RequestShowActionProps extends Pick<BaseItemActionProps, "title"> {
   seasons: SeasonData[];
   requestedSeasons: Set<number>;
-  imdbId: string | null;
-  tvdbId: string | null;
+  externalIds: ExternalIds;
 }
 
 export function RequestShowAction({
   title,
-  imdbId,
-  tvdbId,
+  externalIds,
   seasons,
   requestedSeasons,
 }: RequestShowActionProps) {
@@ -39,7 +38,7 @@ export function RequestShowAction({
   });
 
   const { action, form, handleSubmitWithAction } = useHookFormAction(
-    requestItem.bind(null, { imdbId, tvdbId, tmdbId: null }),
+    requestItem.bind(null, externalIds),
     zodResolver(z.record(z.string(), z.any())),
     {
       formProps: {

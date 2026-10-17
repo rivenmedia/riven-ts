@@ -9,16 +9,15 @@ import { requestItem } from "./_actions/request-item.action";
 import { TriggerButton } from "./_components/trigger-button";
 
 import type { BaseItemActionProps } from "../_components/base-item-action";
+import type { ExternalIds } from "./_schemas/external-ids.schema";
 
 type RequestMovieActionProps = Pick<BaseItemActionProps, "title"> & {
-  tmdbId: string;
-  imdbId: string | null;
+  externalIds: ExternalIds;
 };
 
 export function RequestMovieAction({
   title,
-  tmdbId,
-  imdbId,
+  externalIds,
 }: RequestMovieActionProps) {
   const { isOpen, setIsOpen, callbacks } = useActionDialog({
     onSuccess() {
@@ -30,7 +29,7 @@ export function RequestMovieAction({
   });
 
   const { execute, isExecuting } = useAction(
-    requestItem.bind(null, { imdbId, tmdbId, tvdbId: null }),
+    requestItem.bind(null, externalIds),
     callbacks,
   );
 

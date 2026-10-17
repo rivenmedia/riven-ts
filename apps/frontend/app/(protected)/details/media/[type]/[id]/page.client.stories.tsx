@@ -18,6 +18,112 @@ import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-it
 import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "./page.client.tsx";
 
+import type {
+  ItemRequestAction,
+  MediaItemState,
+} from "#app/_types/__generated__/graphql.ts";
+import type { TypedDocumentNode } from "@apollo/client";
+import type { StoryContext } from "@storybook/nextjs-vite";
+import type { GraphQLQuery } from "msw";
+
+//#region Helpers
+/**
+ * Mocks a mutation on a single entity, failing it if it doesn't target the expected ID.
+ */
+const mockMutationWithIdEqualityCheck = <
+  Mutation extends GraphQLQuery,
+  Variables extends { id: string },
+>(
+  document: TypedDocumentNode<Mutation, Variables>,
+  expectedId: string,
+  data: Mutation,
+) =>
+  graphql.mutation(document, ({ variables }) => {
+    if (variables.id !== expectedId) {
+      return HttpResponse.json({
+        errors: [{ message: `Invalid id parameter: ${variables.id}` }],
+      });
+    }
+
+    return HttpResponse.json({ data });
+  });
+
+/**
+ * Mocks the item request queries for a movie that has been requested.
+ *
+ * @returns The mocked handlers, and the IDs they use
+ */
+const mockRequestedMovie = ({
+  state,
+  availableActions,
+}: {
+  state: MediaItemState;
+  availableActions: ItemRequestAction[];
+}) => {
+  const itemRequestId = crypto.randomUUID();
+  const primaryMediaItemId = crypto.randomUUID();
+
+  return {
+    itemRequestId,
+    primaryMediaItemId,
+    handlers: [
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              id: itemRequestId,
+              availableActions,
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: primaryMediaItemId,
+              },
+              seasons: null,
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              id: itemRequestId,
+              primaryMediaItem: {
+                __typename: "Movie",
+                id: primaryMediaItemId,
+                state,
+                type: "movie",
+              },
+            },
+          },
+        }),
+      ),
+    ],
+  };
+};
+
+/**
+ * Opens an item action's dialog, then confirms it.
+ */
+const confirmItemAction = async (
+  {
+    canvas,
+    canvasElement,
+    userEvent,
+  }: Pick<StoryContext, "canvas" | "canvasElement" | "userEvent">,
+  name: RegExp,
+) => {
+  await userEvent.click(await canvas.findByRole("button", { name }));
+
+  const dialog = within(canvasElement.ownerDocument.body).getByRole(
+    "alertdialog",
+  );
+
+  await userEvent.click(within(dialog).getByRole("button", { name }));
+};
+//#endregion
+
 const meta = preview.meta({
   title: "Pages / SingleMediaItem",
   component: MediaDetailsPage,
@@ -217,8 +323,8 @@ export const UnrequestedMovie = meta.story({
 
 UnrequestedMovie.test(
   'Requests the movie when the "Request" button is clicked',
-  async ({ userEvent, canvas, canvasElement, msw }) => {
-    msw.use(
+  async (context) => {
+    context.msw.use(
       getSessionHandler,
       hasPermissionHandler,
       graphql.mutation(REQUEST_ITEM, () =>
@@ -226,24 +332,10 @@ UnrequestedMovie.test(
       ),
     );
 
-    const requestButton = await canvas.findByRole("button", {
-      name: /request/iu,
-    });
-
-    await userEvent.click(requestButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /request/iu,
-    });
-
-    await userEvent.click(confirmButton);
+    await confirmItemAction(context, /request/iu);
 
     await expect(
-      await canvas.findByText(/request successful/iu),
+      await context.canvas.findByText(/request successful/iu),
     ).toBeInTheDocument();
   },
 );
@@ -258,92 +350,33 @@ export const CompletedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
-    const itemRequestId = crypto.randomUUID();
-    const primaryMediaItemId = crypto.randomUUID();
+    const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedMovie({
+      state: "completed",
+      availableActions: ["delete", "reset", "retry"],
+    });
 
     msw.use(
       getSessionHandler,
       hasPermissionHandler,
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              availableActions: ["delete", "reset", "retry"],
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-              },
-              seasons: null,
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-                state: "completed",
-                type: "movie",
-              },
-            },
-          },
-        }),
-      ),
-      graphql.mutation(DELETE_ITEM_REQUEST, ({ variables }) => {
-        if (variables.id !== itemRequestId) {
-          return HttpResponse.json({
-            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
-          });
-        }
-
-        return HttpResponse.json({
-          data: {
-            removeItemRequest: true,
-          },
-        });
+      ...handlers,
+      mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
+        removeItemRequest: true,
       }),
-      graphql.mutation(RESET_ITEM, ({ variables }) => {
-        if (variables.id !== primaryMediaItemId) {
-          return HttpResponse.json({
-            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
-          });
-        }
-
-        return HttpResponse.json({
-          data: {
-            resetMediaItem: [
-              {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-                state: "indexed",
-              },
-            ],
+      mockMutationWithIdEqualityCheck(RESET_ITEM, primaryMediaItemId, {
+        resetMediaItem: [
+          {
+            __typename: "Movie",
+            id: primaryMediaItemId,
+            state: "indexed",
           },
-        });
+        ],
       }),
-      graphql.mutation(RETRY_ITEM, ({ variables }) => {
-        if (variables.id !== primaryMediaItemId) {
-          return HttpResponse.json({
-            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
-          });
-        }
-
-        return HttpResponse.json({
-          data: {
-            retryMediaItem: {
-              __typename: "Movie",
-              id: primaryMediaItemId,
-              state: "indexed",
-            },
-          },
-        });
+      mockMutationWithIdEqualityCheck(RETRY_ITEM, primaryMediaItemId, {
+        retryMediaItem: {
+          __typename: "Movie",
+          id: primaryMediaItemId,
+          state: "indexed",
+        },
       }),
     );
   },
@@ -351,75 +384,33 @@ export const CompletedMovie = UnrequestedMovie.extend({
 
 CompletedMovie.test(
   'Resets the item when the "Reset" button is clicked',
-  async ({ canvas, userEvent, canvasElement }) => {
-    const resetButton = await canvas.findByRole("button", {
-      name: /reset/iu,
-    });
-
-    await userEvent.click(resetButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /reset/iu,
-    });
-
-    await userEvent.click(confirmButton);
+  async (context) => {
+    await confirmItemAction(context, /reset/iu);
 
     await expect(
-      await canvas.findByText(/reset successful/iu),
+      await context.canvas.findByText(/reset successful/iu),
     ).toBeInTheDocument();
   },
 );
 
 CompletedMovie.test(
   'Retries the item when the "Retry" button is clicked',
-  async ({ canvas, userEvent, canvasElement }) => {
-    const retryButton = await canvas.findByRole("button", {
-      name: /retry/iu,
-    });
-
-    await userEvent.click(retryButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /retry/iu,
-    });
-
-    await userEvent.click(confirmButton);
+  async (context) => {
+    await confirmItemAction(context, /retry/iu);
 
     await expect(
-      await canvas.findByText(/item retried successfully/iu),
+      await context.canvas.findByText(/item retried successfully/iu),
     ).toBeInTheDocument();
   },
 );
 
 CompletedMovie.test(
   'Deletes the item when the "Delete" button is clicked',
-  async ({ canvas, userEvent, canvasElement }) => {
-    const deleteButton = await canvas.findByRole("button", {
-      name: /delete/iu,
-    });
-
-    await userEvent.click(deleteButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /delete/iu,
-    });
-
-    await userEvent.click(confirmButton);
+  async (context) => {
+    await confirmItemAction(context, /delete/iu);
 
     await expect(
-      await canvas.findByText(/item deleted successfully/iu),
+      await context.canvas.findByText(/item deleted successfully/iu),
     ).toBeInTheDocument();
   },
 );
@@ -434,86 +425,33 @@ export const PausedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
-    const itemRequestId = crypto.randomUUID();
-    const primaryMediaItemId = crypto.randomUUID();
+    const { primaryMediaItemId, handlers } = mockRequestedMovie({
+      state: "paused",
+      availableActions: ["delete", "reset", "resume"],
+    });
 
     msw.use(
       getSessionHandler,
       hasPermissionHandler,
-      graphql.mutation(RESUME_ITEM, ({ variables }) => {
-        if (variables.id !== primaryMediaItemId) {
-          return HttpResponse.json({
-            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
-          });
-        }
-
-        return HttpResponse.json({
-          data: {
-            resumeMediaItem: {
-              __typename: "Movie",
-              id: primaryMediaItemId,
-              state: "scraped",
-            },
-          },
-        });
+      ...handlers,
+      mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
+        resumeMediaItem: {
+          __typename: "Movie",
+          id: primaryMediaItemId,
+          state: "scraped",
+        },
       }),
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              availableActions: ["delete", "reset", "resume"],
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-              },
-              seasons: null,
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-                state: "paused",
-                type: "movie",
-              },
-            },
-          },
-        }),
-      ),
     );
   },
 });
 
 PausedMovie.test(
   'Resumes the item when the "Resume" button is clicked',
-  async ({ canvas, userEvent, canvasElement }) => {
-    const resumeButton = await canvas.findByRole("button", {
-      name: /resume/iu,
-    });
-
-    await userEvent.click(resumeButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /resume/iu,
-    });
-
-    await userEvent.click(confirmButton);
+  async (context) => {
+    await confirmItemAction(context, /resume/iu);
 
     await expect(
-      await canvas.findByText(/item resumed successfully/iu),
+      await context.canvas.findByText(/item resumed successfully/iu),
     ).toBeInTheDocument();
   },
 );
@@ -528,84 +466,36 @@ export const ScrapedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
-    const itemRequestId = crypto.randomUUID();
-    const primaryMediaItemId = crypto.randomUUID();
+    const { primaryMediaItemId, handlers } = mockRequestedMovie({
+      state: "scraped",
+      availableActions: ["delete", "reset", "pause"],
+    });
 
     msw.use(
       getSessionHandler,
       hasPermissionHandler,
-      graphql.mutation(PAUSE_ITEM, () =>
-        HttpResponse.json({
-          data: {
-            pauseMediaItem: {
-              __typename: "Movie",
-              id: primaryMediaItemId,
-              state: "paused",
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              availableActions: ["delete", "reset", "pause"],
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-              },
-              seasons: null,
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              primaryMediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-                state: "scraped",
-                type: "movie",
-              },
-            },
-          },
-        }),
-      ),
+      ...handlers,
+      mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
+        pauseMediaItem: {
+          __typename: "Movie",
+          id: primaryMediaItemId,
+          state: "paused",
+        },
+      }),
     );
   },
 });
 
 ScrapedMovie.test(
   'Pauses the item when the "Pause" button is clicked',
-  async ({ canvas, userEvent, canvasElement }) => {
-    const pauseButton = await canvas.findByRole("button", {
-      name: /pause/iu,
-    });
-
-    await userEvent.click(pauseButton);
-
-    const dialog = within(canvasElement.ownerDocument.body).getByRole(
-      "alertdialog",
-    );
-
-    const confirmButton = within(dialog).getByRole("button", {
-      name: /pause/iu,
-    });
-
-    await userEvent.click(confirmButton);
+  async (context) => {
+    await confirmItemAction(context, /pause/iu);
 
     await expect(
-      await canvas.findByText(/item paused successfully/iu),
+      await context.canvas.findByText(/item paused successfully/iu),
     ).toBeInTheDocument();
   },
 );
-//#endregion
 //#endregion
 
 // export const UnrequestedShow = meta.story({

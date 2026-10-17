@@ -5,6 +5,7 @@ import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.unio
 
 import {
   Arg,
+  Args,
   Ctx,
   FieldResolver,
   ID,
@@ -14,6 +15,7 @@ import {
   Root,
 } from "type-graphql";
 
+import { ExternalIdsArgs } from "#graphql/args/external-ids.args.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
@@ -28,21 +30,9 @@ export class ItemRequestResolver {
   @Query(() => ItemRequest, { nullable: true })
   public async itemRequestByExternalIds(
     @CoreContext() { services: { itemRequestService } }: CoreContext,
-    @Arg("tmdbId", () => String, { nullable: true }) tmdbId:
-      | string
-      | null = null,
-    @Arg("imdbId", () => String, { nullable: true }) imdbId:
-      | string
-      | null = null,
-    @Arg("tvdbId", () => String, { nullable: true }) tvdbId:
-      | string
-      | null = null,
+    @Args(() => ExternalIdsArgs) externalIds: ExternalIdsArgs,
   ) {
-    return itemRequestService.getItemRequestByExternalIds({
-      tmdbId,
-      imdbId,
-      tvdbId,
-    });
+    return itemRequestService.getItemRequestByExternalIds(externalIds);
   }
 
   @Mutation(() => Boolean)
@@ -142,6 +132,10 @@ export class ItemRequestResolver {
 
     if (itemRequest.state === "paused") {
       actions.add("resume");
+    }
+
+    if (itemRequest.type === "show" && itemRequest.isPartialRequest) {
+      actions.add("request_more");
     }
 
     actions.add("delete");
