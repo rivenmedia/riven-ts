@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "cn";
+import Link from "next/link";
 import { useMemo } from "react";
 
 import { Badge } from "#components/_ui/badge.tsx";
@@ -8,6 +9,7 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 import { useCardSelection } from "#components/providers/card-selection-provider.tsx";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
+import type { LinkProps } from "next/link";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
@@ -20,6 +22,7 @@ interface ListItemProps extends Pick<
   };
   indexer: string | undefined;
   isSelectable?: boolean;
+  href?: LinkProps<`/details/media/${string}/${string}`>["href"];
 }
 
 export function ListItem({
@@ -28,6 +31,7 @@ export function ListItem({
   indexer,
   mediaItem,
   isSelectable = false,
+  href,
 }: ListItemProps) {
   const cardSelectionContext = useCardSelection();
 
@@ -108,6 +112,14 @@ export function ListItem({
           )
         }
       />
+    );
+  }
+
+  if (href) {
+    return (
+      <Link href={href} className={containerClasses}>
+        {renderCardContent()}
+      </Link>
     );
   }
 

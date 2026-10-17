@@ -45,6 +45,7 @@ export function ListCarousel({
               mediaItem={item}
               indexer={indexer}
               className="w-36 md:w-44 lg:w-48"
+              href={`/details/media/${item.type}/${item.id}`}
             />
           </CarouselItem>
         ))}
