@@ -165,15 +165,27 @@ const getContentHeight = () =>
   );
 
 /**
+ * Resizes the test iframe, along with the browser page that hosts it.
+ *
+ * Vitest scales the iframe down when it's larger than the page, and the page keeps whatever size an earlier story left it at,
+ * so snapshots of stories larger than the default page (e.g. the `desktop` viewport) would otherwise vary in size between runs.
+ */
+const setViewport = async (width: number, height: number) => {
+  // Imported lazily, as this module is also loaded by the Storybook UI, outside of Vitest
+  const { commands, page } = await import("vitest/browser");
+
+  await commands.setBrowserViewport(width, height);
+  // Vitest only recalculates the iframe's scale when its viewport is set
+  await page.viewport(width, height);
+};
+
+/**
  * Grows the test iframe to fit the page's content, as the snapshot is clipped to the iframe.
  *
  * Elements sized relative to the viewport (e.g. `h-[50vh]`) grow along with it, so this repeats until the height settles.
  * Storybook resets the viewport before each story, so this doesn't need undoing.
  */
 const fitViewportToContent = async ({ maxAttempts = 10 } = {}) => {
-  // Imported lazily, as this module is also loaded by the Storybook UI, outside of Vitest
-  const { commands, page } = await import("vitest/browser");
-
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const width = globalThis.innerWidth;
     const height = getContentHeight();
@@ -182,9 +194,7 @@ const fitViewportToContent = async ({ maxAttempts = 10 } = {}) => {
       return;
     }
 
-    // Vitest scales the iframe down to fit the page, so the page must be at least as large
-    await commands.setBrowserViewport(width, height);
-    await page.viewport(width, height);
+    await setViewport(width, height);
   }
 
   // Content can grow with the viewport indefinitely (e.g. `h-screen` alongside other content),
@@ -224,6 +234,9 @@ export const prepareAutoSnapshot: Extract<
 
   await waitForStableDom();
   await waitForVisibleImages();
+
+  // Content that fits the iframe is still scaled down if the page is smaller than it
+  await setViewport(globalThis.innerWidth, globalThis.innerHeight);
 
   if (fullPage !== false) {
     // Content may have grown while loading
