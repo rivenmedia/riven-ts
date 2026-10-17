@@ -124,13 +124,8 @@ export function ListItem({
   }
 
   return (
-    <button
-      aria-disabled="true"
-      tabIndex={-1}
-      className={containerClasses}
-      type="button"
-    >
+    <div aria-disabled="true" tabIndex={-1} className={containerClasses}>
       {renderCardContent()}
-    </button>
+    </div>
   );
 }

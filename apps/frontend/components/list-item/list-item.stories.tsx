@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
-import { fn } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
 import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
@@ -53,16 +53,8 @@ export const Default = meta.story({
   },
 });
 
-export const WithBadge = meta.story({
+export const WithBadge = Default.extend({
   args: {
-    mediaItem: {
-      id: "1",
-      title: "The Matrix",
-      posterUrl: faker.image.url(),
-      type: "movie",
-      year: 1999,
-    },
-    indexer: "tmdb",
     badge: {
       text: "New",
       variant: "success",
@@ -70,16 +62,20 @@ export const WithBadge = meta.story({
   },
 });
 
-export const Selectable = meta.story({
+export const WithHref = Default.extend({
   args: {
-    mediaItem: {
-      id: "1",
-      title: "The Matrix",
-      posterUrl: faker.image.url(),
-      type: "movie",
-      year: 1999,
-    },
+    href: `/details/media/movie/1`,
+  },
+});
+
+WithHref.test("Links to the correct page", async ({ args, canvas }) => {
+  const link = await canvas.findByRole("link");
+
+  await expect(link).toHaveAttribute("href", args.href);
+});
+
+export const Selectable = Default.extend({
+  args: {
     isSelectable: true,
-    indexer: "tmdb",
   },
 });
