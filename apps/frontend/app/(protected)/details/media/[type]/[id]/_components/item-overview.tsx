@@ -4,10 +4,10 @@ import React from "react";
 
 import { fly } from "#components/_animations/fly.ts";
 import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
-// import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import { ItemActionToolbar } from "./item-action-toolbar";
+import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
+import { ItemStatusBadge } from "./item-status-badge/item-status-badge";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
@@ -23,16 +23,6 @@ export function ItemOverview({ data }: ItemOverviewProps) {
     data.certification,
     startCase(data.status),
   ].filter(Boolean);
-
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleRequestSuccess = () => {
-    /* empty */
-  };
-
-  // oxlint-disable-next-line unicorn/consistent-function-scoping
-  const handleActionSuccess = () => {
-    /* empty */
-  };
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-[auto_1fr] lg:gap-6">
@@ -59,39 +49,21 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {data.title}
           </h1>
-          {/* <StatusBadge
-            className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-            state={data.mediaDetails.state}
-            large
-          />
-          {data.mediaDetails.totalFileCount > 0 && (
+          <ItemStatusBadge indexerItemId={data.id} />
+          {/* {data.mediaDetails.totalFileCount > 0 && (
             <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
               {data.mediaDetails.completedFileCount}/
               {data.mediaDetails.totalFileCount} files
             </span>
           )} */}
         </div>
-
         <ItemActionToolbar
           title={data.title}
-          mediaType={data.type}
           externalId={data.id}
-          // seasons={data.seasons}
-          seasons={[]}
-          // {riven}
-          // {rivenId}
-          // {rivenPending}
-          onRequestSuccess={handleRequestSuccess}
-          onActionSuccess={handleActionSuccess}
-          riven={{} as never}
-          rivenId={null}
-          rivenPending={false}
-          // bind:rawDataOpen
-          // {rawRivenLoading}
-          // {rawRivenError}
-          // {rawRivenJson}
+          {...(data.type === "movie"
+            ? { mediaType: "movie" }
+            : { mediaType: "show", seasons: [] })}
         />
-
         <div
           className={cn(
             "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",

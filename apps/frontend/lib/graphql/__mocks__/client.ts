@@ -8,7 +8,12 @@ const httpLink = new HttpLink({
 });
 
 const client = new ApolloClient({
-  cache: new InMemoryCache(),
+  cache: new InMemoryCache({
+    possibleTypes: {
+      MediaItem: ["Movie", "Show", "Season", "Episode"],
+      ShowLikeMediaItem: ["Show", "Season", "Episode"],
+    },
+  }),
   link: httpLink,
 });
 
@@ -18,3 +23,5 @@ const client = new ApolloClient({
  */
 export const query: ApolloClient["query"] = async (options) =>
   client.query(options);
+
+export const getClient = () => client;

@@ -55,6 +55,23 @@ export class ItemRequestService extends BaseService {
   }
 
   @CreateRequestContext()
+  public async getItemRequestByExternalIds({
+    tmdbId,
+    imdbId,
+    tvdbId,
+  }: Pick<ItemRequest, "tmdbId" | "imdbId" | "tvdbId">) {
+    if (!tmdbId && !imdbId && !tvdbId) {
+      throw new Error("At least one external ID must be provided");
+    }
+
+    return this.em.findOne(ItemRequest, {
+      ...(tmdbId && { tmdbId }),
+      ...(imdbId && { imdbId }),
+      ...(tvdbId && { tvdbId }),
+    });
+  }
+
+  @CreateRequestContext()
   public async markAsFailed(id: UUID) {
     const itemRequest = await this.getItemRequestById(id);
 

@@ -12,6 +12,7 @@ export const GET_ITEM_CAST: TypedDocumentNode<
 > = gql`
   query GetItemCast($id: ID!, $language: String!) {
     tmdbItem(id: $id) {
+      id
       cast(language: $language) {
         id
         name

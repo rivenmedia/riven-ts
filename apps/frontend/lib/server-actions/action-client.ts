@@ -12,4 +12,6 @@ export const loggedInActionClient = actionClient.use(checkSessionMiddleware);
 
 export const permissionActionClient = createSafeActionClient({
   defineMetadataSchema: () => PermissionMetadata,
-}).use(checkPermissionMiddleware);
+})
+  .use(checkPermissionMiddleware)
+  .use(checkSessionMiddleware);

@@ -1,3 +1,4 @@
+import type { SetupWorker } from "msw/browser";
 import type {
   ImageSnapshotSubjectOptions,
   SetupVisOptions,
@@ -95,11 +96,41 @@ const waitForVisibleImages = async () => {
 const hasPendingVisibleImages = () =>
   [...document.images].some((image) => !image.complete && isInViewport(image));
 
+/** Requests MSW is still handling, by request ID */
+const pendingRequestIds = new Set<string>();
+
+const trackedWorkers = new WeakSet<SetupWorker>();
+
+/**
+ * Tracks the requests MSW is handling, so snapshots wait for them.
+ *
+ * A story can render nothing at all while a request is pending (e.g. a suspended component without a fallback),
+ * so the DOM can stay unchanged for long enough to pass for settled.
+ */
+export const trackPendingRequests = (worker: SetupWorker) => {
+  if (trackedWorkers.has(worker)) {
+    return;
+  }
+
+  trackedWorkers.add(worker);
+
+  worker.events.on("request:start", ({ requestId }) => {
+    pendingRequestIds.add(requestId);
+  });
+
+  // MSW emits `unhandledException` instead of `request:end` when a handler throws
+  for (const event of ["request:end", "unhandledException"] as const) {
+    worker.events.on(event, ({ requestId }) => {
+      pendingRequestIds.delete(requestId);
+    });
+  }
+};
+
 /**
  * Waits until the DOM hasn't changed for `quietMs`, so states that settle shortly after the story renders
  * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently.
  *
- * Any mutation, image loading in, or visible image still pending restarts the quiet period.
+ * Any mutation, image loading in, visible image still pending, or request still pending restarts the quiet period.
  *
  * @returns Whether the DOM settled before the timeout
  */
@@ -126,7 +157,7 @@ const waitForStableDom = async ({ quietMs = 500, timeoutMs = 10_000 } = {}) => {
 
   try {
     while (performance.now() - startedAt < timeoutMs) {
-      if (hasPendingVisibleImages()) {
+      if (hasPendingVisibleImages() || pendingRequestIds.size > 0) {
         markActive();
       }
 
@@ -165,15 +196,27 @@ const getContentHeight = () =>
   );
 
 /**
+ * Resizes the test iframe, along with the browser page that hosts it.
+ *
+ * Vitest scales the iframe down when it's larger than the page, and the page keeps whatever size an earlier story left it at,
+ * so snapshots of stories larger than the default page (e.g. the `desktop` viewport) would otherwise vary in size between runs.
+ */
+const setViewport = async (width: number, height: number) => {
+  // Imported lazily, as this module is also loaded by the Storybook UI, outside of Vitest
+  const { commands, page } = await import("vitest/browser");
+
+  await commands.setBrowserViewport(width, height);
+  // Vitest only recalculates the iframe's scale when its viewport is set
+  await page.viewport(width, height);
+};
+
+/**
  * Grows the test iframe to fit the page's content, as the snapshot is clipped to the iframe.
  *
  * Elements sized relative to the viewport (e.g. `h-[50vh]`) grow along with it, so this repeats until the height settles.
  * Storybook resets the viewport before each story, so this doesn't need undoing.
  */
 const fitViewportToContent = async ({ maxAttempts = 10 } = {}) => {
-  // Imported lazily, as this module is also loaded by the Storybook UI, outside of Vitest
-  const { commands, page } = await import("vitest/browser");
-
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
     const width = globalThis.innerWidth;
     const height = getContentHeight();
@@ -182,9 +225,7 @@ const fitViewportToContent = async ({ maxAttempts = 10 } = {}) => {
       return;
     }
 
-    // Vitest scales the iframe down to fit the page, so the page must be at least as large
-    await commands.setBrowserViewport(width, height);
-    await page.viewport(width, height);
+    await setViewport(width, height);
   }
 
   // Content can grow with the viewport indefinitely (e.g. `h-screen` alongside other content),
@@ -224,6 +265,9 @@ export const prepareAutoSnapshot: Extract<
 
   await waitForStableDom();
   await waitForVisibleImages();
+
+  // Content that fits the iframe is still scaled down if the page is smaller than it
+  await setViewport(globalThis.innerWidth, globalThis.innerHeight);
 
   if (fullPage !== false) {
     // Content may have grown while loading
@@ -269,6 +313,9 @@ const removeLeakedAnimationPause = () => {
 export const resetAutoSnapshot = () => {
   document.body.style.removeProperty("height");
   document.body.style.removeProperty("overflow");
+
+  // Requests from the previous story may never finish, e.g. if it unmounted mid-request
+  pendingRequestIds.clear();
 
   removeLeakedAnimationPause();
 };

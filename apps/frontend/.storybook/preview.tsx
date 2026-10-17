@@ -24,6 +24,7 @@ import { normaliseEnvironment } from "./test-utils/normalise-environment.ts";
 import {
   prepareAutoSnapshot,
   resetAutoSnapshot,
+  trackPendingRequests,
 } from "./test-utils/visual-testing.ts";
 
 import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
@@ -150,8 +151,9 @@ export const preview = definePreview({
       );
     },
   ],
-  beforeEach({ globals }) {
+  beforeEach({ globals, msw }) {
     resetAutoSnapshot();
+    trackPendingRequests(msw);
     resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
     toast.dismiss();
 
