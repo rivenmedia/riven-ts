@@ -5,6 +5,7 @@ import z from "zod";
 
 import { episodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRecordSchema.ts";
 import { getAllSeries200Schema } from "../__generated__/zod/getAllSeriesSchema.ts";
+import { getSearchResults200Schema } from "../__generated__/zod/getSearchResultsSchema.ts";
 import { getSeriesExtendedQueryResponseSchema } from "../__generated__/zod/getSeriesExtendedSchema.ts";
 import { getSeriesTranslation200Schema } from "../__generated__/zod/getSeriesTranslationSchema.ts";
 import { postLogin200Schema } from "../__generated__/zod/postLoginSchema.ts";
@@ -86,6 +87,25 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     } while (nextUrl);
 
     return allEpisodes;
+  }
+
+  /**
+   * Search TVDB for series matching the query
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Search/getSearchResults}
+   *
+   * @param query The search query
+   */
+  public async searchSeries(query: string) {
+    const response = await this.get<unknown>("search", {
+      params: {
+        query,
+        type: "series",
+      },
+    });
+    const { data = [] } = getSearchResults200Schema.parse(response);
+
+    return data;
   }
 
   /**
