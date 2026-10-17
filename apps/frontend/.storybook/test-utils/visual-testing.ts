@@ -1,3 +1,4 @@
+import type { SetupWorker } from "msw/browser";
 import type {
   ImageSnapshotSubjectOptions,
   SetupVisOptions,
@@ -95,11 +96,41 @@ const waitForVisibleImages = async () => {
 const hasPendingVisibleImages = () =>
   [...document.images].some((image) => !image.complete && isInViewport(image));
 
+/** Requests MSW is still handling, by request ID */
+const pendingRequestIds = new Set<string>();
+
+const trackedWorkers = new WeakSet<SetupWorker>();
+
+/**
+ * Tracks the requests MSW is handling, so snapshots wait for them.
+ *
+ * A story can render nothing at all while a request is pending (e.g. a suspended component without a fallback),
+ * so the DOM can stay unchanged for long enough to pass for settled.
+ */
+export const trackPendingRequests = (worker: SetupWorker) => {
+  if (trackedWorkers.has(worker)) {
+    return;
+  }
+
+  trackedWorkers.add(worker);
+
+  worker.events.on("request:start", ({ requestId }) => {
+    pendingRequestIds.add(requestId);
+  });
+
+  // MSW emits `unhandledException` instead of `request:end` when a handler throws
+  for (const event of ["request:end", "unhandledException"] as const) {
+    worker.events.on(event, ({ requestId }) => {
+      pendingRequestIds.delete(requestId);
+    });
+  }
+};
+
 /**
  * Waits until the DOM hasn't changed for `quietMs`, so states that settle shortly after the story renders
  * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently.
  *
- * Any mutation, image loading in, or visible image still pending restarts the quiet period.
+ * Any mutation, image loading in, visible image still pending, or request still pending restarts the quiet period.
  *
  * @returns Whether the DOM settled before the timeout
  */
@@ -126,7 +157,7 @@ const waitForStableDom = async ({ quietMs = 500, timeoutMs = 10_000 } = {}) => {
 
   try {
     while (performance.now() - startedAt < timeoutMs) {
-      if (hasPendingVisibleImages()) {
+      if (hasPendingVisibleImages() || pendingRequestIds.size > 0) {
         markActive();
       }
 
@@ -282,6 +313,9 @@ const removeLeakedAnimationPause = () => {
 export const resetAutoSnapshot = () => {
   document.body.style.removeProperty("height");
   document.body.style.removeProperty("overflow");
+
+  // Requests from the previous story may never finish, e.g. if it unmounted mid-request
+  pendingRequestIds.clear();
 
   removeLeakedAnimationPause();
 };
