@@ -12,6 +12,7 @@ export const GET_ITEM_STATUS: TypedDocumentNode<
 > = gql`
   query GetItemStatus($tmdbId: String!) {
     itemRequestByExternalIds(tmdbId: $tmdbId) {
+      id
       primaryMediaItem {
         ... on MediaItem {
           state

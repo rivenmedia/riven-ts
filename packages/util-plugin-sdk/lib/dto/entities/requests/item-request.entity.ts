@@ -117,17 +117,9 @@ export class ItemRequest {
   public isPartialRequest!: Opt<boolean>;
 
   public async getMediaItemTitle() {
-    const [mediaItem] = await this.mediaItems.matching({
-      where: {
-        type: this.type,
-      },
-    });
+    const primaryMediaItem = await this.primaryMediaItem();
 
-    if (!mediaItem) {
-      return "Unknown Title";
-    }
-
-    return mediaItem.fullTitle;
+    return primaryMediaItem?.fullTitle ?? "Unknown Title";
   }
 
   @Field(() => MediaItemUnion, { nullable: true })

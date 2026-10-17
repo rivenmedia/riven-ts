@@ -51,6 +51,8 @@ export async function ItemActionToolbar({
       mediaType === "movie" ? "request_single" : "request_multiple",
     ],
   );
+
+  const itemRequestId = data?.itemRequestByExternalIds?.id ?? null;
   const primaryMediaItemId =
     data?.itemRequestByExternalIds?.primaryMediaItem?.id ?? null;
 
@@ -85,8 +87,8 @@ export async function ItemActionToolbar({
       {availableActions.has("pause") && primaryMediaItemId && (
         <PauseItemAction mediaItemId={primaryMediaItemId} title={title} />
       )}
-      {availableActions.has("delete") && primaryMediaItemId && (
-        <DeleteItemAction mediaItemId={primaryMediaItemId} title={title} />
+      {availableActions.has("delete") && itemRequestId && (
+        <DeleteItemAction itemRequestId={itemRequestId} title={title} />
       )}
       {availableActions.has("manual_scrape") && (
         <>

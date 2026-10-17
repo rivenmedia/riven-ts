@@ -258,16 +258,22 @@ export const CompletedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
+    const itemRequestId = crypto.randomUUID();
+    const primaryMediaItemId = crypto.randomUUID();
+
     msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
       graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               availableActions: ["delete", "reset", "retry"],
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
               },
               seasons: null,
             },
@@ -279,9 +285,10 @@ export const CompletedMovie = UnrequestedMovie.extend({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
                 state: "completed",
                 type: "movie",
               },
@@ -289,31 +296,62 @@ export const CompletedMovie = UnrequestedMovie.extend({
           },
         }),
       ),
+      graphql.mutation(DELETE_ITEM_REQUEST, ({ variables }) => {
+        if (variables.id !== itemRequestId) {
+          return HttpResponse.json({
+            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
+          });
+        }
+
+        return HttpResponse.json({
+          data: {
+            removeItemRequest: true,
+          },
+        });
+      }),
+      graphql.mutation(RESET_ITEM, ({ variables }) => {
+        if (variables.id !== primaryMediaItemId) {
+          return HttpResponse.json({
+            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
+          });
+        }
+
+        return HttpResponse.json({
+          data: {
+            resetMediaItem: [
+              {
+                __typename: "Movie",
+                id: primaryMediaItemId,
+                state: "indexed",
+              },
+            ],
+          },
+        });
+      }),
+      graphql.mutation(RETRY_ITEM, ({ variables }) => {
+        if (variables.id !== primaryMediaItemId) {
+          return HttpResponse.json({
+            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
+          });
+        }
+
+        return HttpResponse.json({
+          data: {
+            retryMediaItem: {
+              __typename: "Movie",
+              id: primaryMediaItemId,
+              state: "indexed",
+            },
+          },
+        });
+      }),
     );
   },
 });
 
 CompletedMovie.test(
   'Resets the item when the "Reset" button is clicked',
-  async ({ args, canvas, userEvent, msw, canvasElement }) => {
-    msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
-      graphql.mutation(RESET_ITEM, () =>
-        HttpResponse.json({
-          data: {
-            resetMediaItem: [
-              {
-                __typename: "Movie",
-                id: args.data.id,
-                state: "indexed",
-              },
-            ],
-          },
-        }),
-      ),
-    );
-
+  async ({ canvas, userEvent, canvasElement }) => {
     const resetButton = await canvas.findByRole("button", {
       name: /reset/iu,
     });
@@ -338,23 +376,7 @@ CompletedMovie.test(
 
 CompletedMovie.test(
   'Retries the item when the "Retry" button is clicked',
-  async ({ args, canvas, userEvent, msw, canvasElement }) => {
-    msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
-      graphql.mutation(RETRY_ITEM, () =>
-        HttpResponse.json({
-          data: {
-            retryMediaItem: {
-              __typename: "Movie",
-              id: args.data.id,
-              state: "indexed",
-            },
-          },
-        }),
-      ),
-    );
-
+  async ({ canvas, userEvent, canvasElement }) => {
     const retryButton = await canvas.findByRole("button", {
       name: /retry/iu,
     });
@@ -379,19 +401,7 @@ CompletedMovie.test(
 
 CompletedMovie.test(
   'Deletes the item when the "Delete" button is clicked',
-  async ({ canvas, userEvent, msw, canvasElement }) => {
-    msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
-      graphql.mutation(DELETE_ITEM_REQUEST, () =>
-        HttpResponse.json({
-          data: {
-            removeItemRequest: true,
-          },
-        }),
-      ),
-    );
-
+  async ({ canvas, userEvent, canvasElement }) => {
     const deleteButton = await canvas.findByRole("button", {
       name: /delete/iu,
     });
@@ -424,16 +434,39 @@ export const PausedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
+    const itemRequestId = crypto.randomUUID();
+    const primaryMediaItemId = crypto.randomUUID();
+
     msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(RESUME_ITEM, ({ variables }) => {
+        if (variables.id !== primaryMediaItemId) {
+          return HttpResponse.json({
+            errors: [{ message: `Invalid id parameter: ${variables.id}` }],
+          });
+        }
+
+        return HttpResponse.json({
+          data: {
+            resumeMediaItem: {
+              __typename: "Movie",
+              id: primaryMediaItemId,
+              state: "scraped",
+            },
+          },
+        });
+      }),
       graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               availableActions: ["delete", "reset", "resume"],
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
               },
               seasons: null,
             },
@@ -445,9 +478,10 @@ export const PausedMovie = UnrequestedMovie.extend({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
                 state: "paused",
                 type: "movie",
               },
@@ -461,23 +495,7 @@ export const PausedMovie = UnrequestedMovie.extend({
 
 PausedMovie.test(
   'Resumes the item when the "Resume" button is clicked',
-  async ({ args, canvas, userEvent, msw, canvasElement }) => {
-    msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
-      graphql.mutation(RESUME_ITEM, () =>
-        HttpResponse.json({
-          data: {
-            resumeMediaItem: {
-              __typename: "Movie",
-              id: args.data.id,
-              state: "scraped",
-            },
-          },
-        }),
-      ),
-    );
-
+  async ({ canvas, userEvent, canvasElement }) => {
     const resumeButton = await canvas.findByRole("button", {
       name: /resume/iu,
     });
@@ -510,16 +528,33 @@ export const ScrapedMovie = UnrequestedMovie.extend({
     },
   },
   beforeEach({ msw }) {
+    const itemRequestId = crypto.randomUUID();
+    const primaryMediaItemId = crypto.randomUUID();
+
     msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(PAUSE_ITEM, () =>
+        HttpResponse.json({
+          data: {
+            pauseMediaItem: {
+              __typename: "Movie",
+              id: primaryMediaItemId,
+              state: "paused",
+            },
+          },
+        }),
+      ),
       graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               availableActions: ["delete", "reset", "pause"],
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
               },
               seasons: null,
             },
@@ -531,9 +566,10 @@ export const ScrapedMovie = UnrequestedMovie.extend({
           data: {
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
+              id: itemRequestId,
               primaryMediaItem: {
                 __typename: "Movie",
-                id: crypto.randomUUID(),
+                id: primaryMediaItemId,
                 state: "scraped",
                 type: "movie",
               },
@@ -547,23 +583,7 @@ export const ScrapedMovie = UnrequestedMovie.extend({
 
 ScrapedMovie.test(
   'Pauses the item when the "Pause" button is clicked',
-  async ({ args, canvas, userEvent, msw, canvasElement }) => {
-    msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
-      graphql.mutation(PAUSE_ITEM, () =>
-        HttpResponse.json({
-          data: {
-            pauseMediaItem: {
-              __typename: "Movie",
-              id: args.data.id,
-              state: "paused",
-            },
-          },
-        }),
-      ),
-    );
-
+  async ({ canvas, userEvent, canvasElement }) => {
     const pauseButton = await canvas.findByRole("button", {
       name: /pause/iu,
     });

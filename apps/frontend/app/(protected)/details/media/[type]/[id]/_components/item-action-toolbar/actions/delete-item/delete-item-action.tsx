@@ -12,12 +12,12 @@ import { useActionDialog } from "../_hooks/use-action-dialog";
 import { deleteItem } from "./_actions/delete-item.action";
 
 interface DeleteItemActionProps {
-  mediaItemId: string;
+  itemRequestId: string;
   title: string;
 }
 
 export function DeleteItemAction({
-  mediaItemId,
+  itemRequestId,
   title,
 }: DeleteItemActionProps) {
   const { callbacks, isOpen, setIsOpen } = useActionDialog({
@@ -30,7 +30,7 @@ export function DeleteItemAction({
   });
 
   const { execute, isExecuting, isIdle, reset } = useAction(
-    deleteItem.bind(null, mediaItemId),
+    deleteItem.bind(null, itemRequestId),
     callbacks,
   );
 
