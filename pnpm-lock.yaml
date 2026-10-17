@@ -626,10 +626,7 @@ importers:
         version: 4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
       '@apollo/client-integration-nextjs':
         specifier: 'catalog:'
-        version: 0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
-      '@base-ui/react':
-        specifier: 'catalog:'
-        version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+        version: 0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(next@16.3.6(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
       '@better-auth/passkey':
         specifier: 'catalog:'
         version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.4.3))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7))(better-call@1.4.0(zod@4.4.3))(nanostores@1.5.1)
@@ -648,6 +645,9 @@ importers:
       '@repo/feature-settings':
         specifier: workspace:^
         version: link:../../packages/feature-settings
+      '@repo/plugin-tmdb':
+        specifier: workspace:^
+        version: link:../../packages/plugin-tmdb
       '@repo/util-auth':
         specifier: workspace:^
         version: link:../../packages/util-auth
@@ -657,6 +657,9 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
+      '@repo/util-ui':
+        specifier: workspace:^
+        version: link:../../packages/util-ui
       '@repo/util-wiki-helpers':
         specifier: workspace:^
         version: link:../../packages/util-docs-generation
@@ -666,24 +669,12 @@ importers:
       better-auth:
         specifier: 'catalog:'
         version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.7)
-      class-variance-authority:
-        specifier: 'catalog:'
-        version: 0.7.1
       cn:
         specifier: 'catalog:'
         version: 0.2.6
       consola:
         specifier: 'catalog:'
         version: 3.4.2
-      embla-carousel-autoplay:
-        specifier: 'catalog:'
-        version: 8.6.0(embla-carousel@8.6.0)
-      embla-carousel-fade:
-        specifier: 'catalog:'
-        version: 8.6.0(embla-carousel@8.6.0)
-      embla-carousel-react:
-        specifier: 'catalog:'
-        version: 8.6.0(react@19.3.0)
       es-toolkit:
         specifier: 'catalog:'
         version: 1.46.1
@@ -708,15 +699,9 @@ importers:
       postcss-easings:
         specifier: 'catalog:'
         version: 4.0.0(postcss@8.5.26)
-      radix-ui:
-        specifier: 'catalog:'
-        version: 1.6.7(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react:
         specifier: 'catalog:'
         version: 19.3.0
-      react-day-picker:
-        specifier: 'catalog:'
-        version: 10.0.1(@types/react@19.3.0)(react@19.3.0)
       react-dom:
         specifier: 'catalog:'
         version: 19.3.0(react@19.3.0)
@@ -747,9 +732,6 @@ importers:
       tw-animate-css:
         specifier: 'catalog:'
         version: 1.4.0
-      use-mask-input:
-        specifier: 'catalog:'
-        version: 3.13.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       zod:
         specifier: ^4.4.3
         version: 4.4.3
@@ -850,9 +832,6 @@ importers:
       react-i18next:
         specifier: 'catalog:'
         version: 17.0.13(i18next@26.4.2(typescript@7.0.2))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(typescript@7.0.2)
-      recharts:
-        specifier: 'catalog:'
-        version: 3.10.1(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react-is@17.0.2)(react@19.3.0)(redux@5.0.1)
       storybook:
         specifier: ^10.4.6
         version: 10.5.9(@emnapi/core@1.10.0)(@emnapi/runtime@1.11.3)(@types/react@19.3.0)(react@19.3.0)
@@ -862,9 +841,6 @@ importers:
       typescript:
         specifier: catalog:typescript7-native
         version: 7.0.2
-      vaul:
-        specifier: 'catalog:'
-        version: 1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       vite:
         specifier: ^8.1.3
         version: 8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)
@@ -2229,9 +2205,21 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
+      '@repo/util-ui':
+        specifier: workspace:^
+        version: link:../util-ui
       '@repo/util-wiki-helpers':
         specifier: workspace:^
         version: link:../util-docs-generation
+      cn:
+        specifier: 'catalog:'
+        version: 0.2.6
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.46.1
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.562.0(react@19.3.0)
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2239,9 +2227,24 @@ importers:
         specifier: ^4.4.3
         version: 4.4.3
     devDependencies:
+      '@apollo/client':
+        specifier: 'catalog:'
+        version: 4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
       '@faker-js/faker':
         specifier: 'catalog:'
         version: 10.1.0
+      '@graphql-codegen/cli':
+        specifier: 'catalog:'
+        version: 6.3.1(@parcel/watcher@2.5.6)(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)
+      '@graphql-codegen/near-operation-file-preset':
+        specifier: 'catalog:'
+        version: 4.0.0(graphql@16.14.0)
+      '@graphql-codegen/typescript':
+        specifier: 'catalog:'
+        version: 5.0.10(graphql@16.14.0)
+      '@graphql-codegen/typescript-operations':
+        specifier: 'catalog:'
+        version: 5.1.0(graphql@16.14.0)
       '@kubb/cli':
         specifier: 'catalog:'
         version: 4.20.1(@kubb/react-fabric@0.12.7)(@typescript/typescript6@6.0.2)
@@ -2263,15 +2266,33 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
       '@typescript/native':
         specifier: 'catalog:'
         version: typescript@7.0.2
+      graphql:
+        specifier: 'catalog:'
+        version: 16.14.0
       msw:
         specifier: 'catalog:'
         version: 2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2)
+      next:
+        specifier: 'catalog:'
+        version: 16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
+      react-hook-form:
+        specifier: 'catalog:'
+        version: 7.85.0(react@19.3.0)
       typescript:
         specifier: 'catalog:'
         version: '@typescript/typescript6@6.0.2'
@@ -2526,6 +2547,9 @@ importers:
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
       '@typescript/native':
         specifier: 'catalog:'
         version: typescript@7.0.2
@@ -2642,6 +2666,127 @@ importers:
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
+      typescript:
+        specifier: 'catalog:'
+        version: '@typescript/typescript6@6.0.2'
+      vitest:
+        specifier: 'catalog:'
+        version: 4.1.7(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.7)(@vitest/coverage-v8@4.1.7)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.2.1(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/util-ui:
+    dependencies:
+      '@base-ui/react':
+        specifier: 'catalog:'
+        version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@react-spring/web':
+        specifier: 'catalog:'
+        version: 10.1.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@repo/util-plugin-sdk':
+        specifier: workspace:^
+        version: link:../util-plugin-sdk
+      class-variance-authority:
+        specifier: 'catalog:'
+        version: 0.7.1
+      cn:
+        specifier: 'catalog:'
+        version: 0.2.6
+      embla-carousel-autoplay:
+        specifier: 'catalog:'
+        version: 8.6.0(embla-carousel@8.6.0)
+      embla-carousel-fade:
+        specifier: 'catalog:'
+        version: 8.6.0(embla-carousel@8.6.0)
+      embla-carousel-react:
+        specifier: 'catalog:'
+        version: 8.6.0(react@19.3.0)
+      es-toolkit:
+        specifier: 'catalog:'
+        version: 1.46.1
+      lucide-react:
+        specifier: 'catalog:'
+        version: 0.562.0(react@19.3.0)
+      luxon:
+        specifier: 'catalog:'
+        version: 3.7.2
+      radix-ui:
+        specifier: 'catalog:'
+        version: 1.6.7(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      react-day-picker:
+        specifier: 'catalog:'
+        version: 10.0.1(@types/react@19.3.0)(react@19.3.0)
+      react-use:
+        specifier: 'catalog:'
+        version: 17.6.1(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      recharts:
+        specifier: 'catalog:'
+        version: 3.10.1(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react-is@17.0.2)(react@19.3.0)(redux@5.0.1)
+      sonner:
+        specifier: 'catalog:'
+        version: 2.0.8(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      use-mask-input:
+        specifier: 'catalog:'
+        version: 3.13.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      vaul:
+        specifier: 'catalog:'
+        version: 1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      zod:
+        specifier: ^4.4.3
+        version: 4.4.3
+    devDependencies:
+      '@apollo/client':
+        specifier: 'catalog:'
+        version: 4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
+      '@apollo/client-integration-nextjs':
+        specifier: 'catalog:'
+        version: 0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(next@16.3.6(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
+      '@repo/core-util-oxlint-config':
+        specifier: workspace:^
+        version: link:../core/util-oxlint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/luxon':
+        specifier: 'catalog:'
+        version: 3.7.1
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.3.0
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.3.0(@types/react@19.3.0)
+      '@typescript/native':
+        specifier: 'catalog:'
+        version: typescript@7.0.2
+      graphql:
+        specifier: 'catalog:'
+        version: 16.14.0
+      next:
+        specifier: 'catalog:'
+        version: 16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
+      react:
+        specifier: 'catalog:'
+        version: 19.3.0
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.3.0(react@19.3.0)
+      react-error-boundary:
+        specifier: 'catalog:'
+        version: 6.1.2(react@19.3.0)
+      react-hook-form:
+        specifier: 'catalog:'
+        version: 7.85.0(react@19.3.0)
+      type-fest:
+        specifier: 'catalog:'
+        version: 5.6.0
       typescript:
         specifier: 'catalog:'
         version: '@typescript/typescript6@6.0.2'
@@ -12546,9 +12691,6 @@ packages:
   require-main-filename@2.0.0:
     resolution: {integrity: sha512-NKN5kMDylKuldxYLSUfrbo5Tuzh4hd+2E8NPPX02mZtn1VuREQToYe/ZdlJy+J3uCpfaiGF05e7B8W0iXbQHmg==}
 
-  reselect@5.1.1:
-    resolution: {integrity: sha512-K/BG6eIky/SBpzfHZv/dd+9JBFiS4SWV7FIujVyJRux6e45+73RaUHXLmIR1f7WOMaQ0U1km6qwklRQxpJJY0w==}
-
   reselect@5.2.0:
     resolution: {integrity: sha512-AgZ3UOZm3YndfrJ4OYjgrT7bmCm/1iqkjvEfH/oYjzh6PD2qw4QuT3jjnXIrpdt4MTpMXclMT3lXbmRY+XRakw==}
 
@@ -14059,7 +14201,7 @@ snapshots:
       rxjs: 7.8.2
       semver: 7.8.0
 
-  '@apollo/client-integration-nextjs@0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(next@16.3.6(@babel/core@7.29.7)(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)':
+  '@apollo/client-integration-nextjs@0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(next@16.3.6(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)':
     dependencies:
       '@apollo/client': 4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
       '@apollo/client-react-streaming': 0.14.5(@apollo/client@4.1.9(graphql-ws@6.0.6(graphql@16.14.0)(ws@8.21.3))(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2))(@types/react@19.3.0)(graphql@16.14.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(rxjs@7.8.2)
@@ -17897,7 +18039,7 @@ snapshots:
 
   '@radix-ui/react-popper@1.3.7(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
     dependencies:
-      '@floating-ui/react-dom': 2.1.8(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@floating-ui/react-dom': 2.1.9(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@radix-ui/react-arrow': 1.1.15(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@radix-ui/react-compose-refs': 1.1.5(@types/react@19.3.0)(react@19.3.0)
       '@radix-ui/react-context': 1.2.2(@types/react@19.3.0)(react@19.3.0)
@@ -18512,7 +18654,7 @@ snapshots:
       immer: 11.1.17
       redux: 5.0.1
       redux-thunk: 3.1.0(redux@5.0.1)
-      reselect: 5.1.1
+      reselect: 5.2.0
     optionalDependencies:
       react: 19.3.0
       react-redux: 9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1)
@@ -24732,8 +24874,6 @@ snapshots:
 
   require-main-filename@2.0.0: {}
 
-  reselect@5.1.1: {}
-
   reselect@5.2.0: {}
 
   resize-observer-polyfill@1.5.1: {}
@@ -25914,7 +26054,7 @@ snapshots:
 
   vaul@1.1.2(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
-      '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
+      '@radix-ui/react-dialog': 1.1.23(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
     transitivePeerDependencies:

@@ -1,6 +1,6 @@
-import { preview } from "#.storybook/preview.tsx";
+import { ErrorFallback } from "@repo/util-ui/components/error-fallback/error-fallback.tsx";
 
-import { ErrorFallback } from "./error-fallback.tsx";
+import { preview } from "#.storybook/preview.tsx";
 
 function ErroringComponent({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) {

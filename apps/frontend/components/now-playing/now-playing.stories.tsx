@@ -1,9 +1,9 @@
+import { NowPlayingSkeleton } from "@repo/util-ui/components/now-playing/now-playing-skeleton.tsx";
+import { NowPlaying } from "@repo/util-ui/components/now-playing/now-playing.tsx";
+
 import { expect, waitFor } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { NowPlayingSkeleton } from "./now-playing-skeleton.tsx";
-import { NowPlaying } from "./now-playing.tsx";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 

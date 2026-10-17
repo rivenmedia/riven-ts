@@ -1,14 +1,14 @@
-import { useId, useMemo } from "react";
-import { useFormContext } from "react-hook-form";
-
-import { Label } from "#components/_ui/label.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "#components/_ui/select.tsx";
+} from "@repo/util-ui/components/_ui/select.tsx";
+
+import { useId, useMemo } from "react";
+import { useFormContext } from "react-hook-form";
 
 import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";

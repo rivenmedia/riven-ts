@@ -1,16 +1,18 @@
 "use client";
 
-import { DateTime } from "luxon";
-import { useRouter } from "next/navigation";
-
 import {
   Avatar,
   AvatarFallback,
   AvatarImage,
-} from "#components/_ui/avatar.tsx";
-import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import { Separator } from "#components/_ui/separator.tsx";
+} from "@repo/util-ui/components/_ui/avatar.tsx";
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Separator } from "@repo/util-ui/components/_ui/separator.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
+
+import { DateTime } from "luxon";
+import { useRouter } from "next/navigation";
+
 import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
 import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
 import { EmailChangeForm } from "#components/auth/email-change-form/email-change-form.tsx";
@@ -20,7 +22,6 @@ import { PasswordChangeForm } from "#components/auth/password-change-form/passwo
 import { SetPasswordForm } from "#components/auth/set-password-form/set-password-form.tsx";
 import { UpdateProfileForm } from "#components/auth/update-profile-form/update-profile-form.tsx";
 import { UserManagement } from "#components/auth/user-management/user-management.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { authClient } from "#lib/auth/client.ts";
 import { getInitials } from "#lib/utils.ts";
 

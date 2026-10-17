@@ -1,6 +1,4 @@
-import { DateTime } from "luxon";
-
-import { Badge } from "#components/_ui/badge.tsx";
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
 import {
   Table,
   TableBody,
@@ -8,7 +6,10 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "#components/_ui/table.tsx";
+} from "@repo/util-ui/components/_ui/table.tsx";
+
+import { DateTime } from "luxon";
+
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { DeleteUserConfirmationDialog } from "./components/delete-user-confirmation-dialog.tsx";

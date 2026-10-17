@@ -1,7 +1,4 @@
-import { cn } from "cn";
-import { Check, Palette } from "lucide-react";
-
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,12 +7,16 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "#components/_ui/dropdown-menu.tsx";
+} from "@repo/util-ui/components/_ui/dropdown-menu.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "#components/_ui/tooltip.tsx";
+} from "@repo/util-ui/components/_ui/tooltip.tsx";
+
+import { cn } from "cn";
+import { Check, Palette } from "lucide-react";
+
 import { themes, useTheme } from "#components/providers/theme-provider.tsx";
 
 export function ThemeSwitcher() {

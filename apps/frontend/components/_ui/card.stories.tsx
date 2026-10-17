@@ -1,7 +1,4 @@
-import { BellRing } from "lucide-react";
-
-import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Card,
   CardAction,
@@ -10,7 +7,11 @@ import {
   CardFooter,
   CardHeader,
   CardTitle,
-} from "#components/_ui/card.tsx";
+} from "@repo/util-ui/components/_ui/card.tsx";
+
+import { BellRing } from "lucide-react";
+
+import { preview } from "#.storybook/preview.tsx";
 
 const notifications = [
   {

@@ -1,5 +1,6 @@
+import { Separator } from "@repo/util-ui/components/_ui/separator.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
-import { Separator } from "#components/_ui/separator.tsx";
 
 /**
  * Visually or semantically separates content.

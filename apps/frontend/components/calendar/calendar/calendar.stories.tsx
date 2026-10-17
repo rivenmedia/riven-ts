@@ -1,9 +1,9 @@
+import { Calendar } from "@repo/util-ui/components/calendar/calendar/calendar.tsx";
+
 import { DateTime, Settings } from "luxon";
 import { expect, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { Calendar } from "./calendar.tsx";
 
 import type { UUID } from "node:crypto";
 

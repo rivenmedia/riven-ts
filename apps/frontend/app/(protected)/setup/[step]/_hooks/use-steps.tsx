@@ -1,9 +1,9 @@
 "use client";
 
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { kebabCase } from "es-toolkit";
 import Link from "next/link";
-
-import { Button } from "#components/_ui/button.tsx";
 
 export interface Step {
   id: string;

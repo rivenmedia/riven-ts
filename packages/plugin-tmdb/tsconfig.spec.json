@@ -7,5 +7,5 @@
   },
   "files": [],
   "include": ["lib/**/*.ts", "lib/**/*.mts", "lib/**/*.cts"],
-  "exclude": []
+  "exclude": ["lib/ui"]
 }

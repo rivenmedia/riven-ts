@@ -3,6 +3,10 @@
 @import "shadcn/tailwind.css";
 @import "./transitions/all.css";
 
+/* Workspace packages are outside of Tailwind's automatic source detection */
+@source "../../../../packages/util-ui/lib";
+@source "../../../../packages/plugin-*/lib/ui/**/*.{ts,tsx}";
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {

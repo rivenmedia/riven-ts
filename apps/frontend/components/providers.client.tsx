@@ -1,10 +1,11 @@
 "use client";
 
+import { TooltipProvider } from "@repo/util-ui/components/_ui/tooltip.tsx";
+import { Toaster } from "@repo/util-ui/components/toaster/toaster.tsx";
+
 import { ProgressProvider } from "@bprogress/next/app";
 
-import { TooltipProvider } from "./_ui/tooltip.tsx";
 import { NotificationsProvider } from "./providers/notifications-provider.tsx";
-import { Toaster } from "./toaster/toaster.tsx";
 
 import type { PropsWithChildren } from "react";
 

@@ -1,7 +1,12 @@
+import {
+  Tabs,
+  TabsList,
+  TabsTrigger,
+} from "@repo/util-ui/components/_ui/tabs.tsx";
+
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Tabs, TabsList, TabsTrigger } from "#components/_ui/tabs.tsx";
 
 import { LogTabButton } from "./log-tab-button.tsx";
 

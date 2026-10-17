@@ -1,15 +1,16 @@
-import { Mountain } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
+import { query } from "@repo/util-ui/graphql/client.ts";
+
+import { Mountain } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 import { authClient } from "#lib/auth/client.ts";
-import { query } from "#lib/graphql/client.ts";
 
 import { LoginForm } from "./_forms/login-form.tsx";
 import { RegisterForm } from "./_forms/register-form.tsx";

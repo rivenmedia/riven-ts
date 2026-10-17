@@ -1,10 +1,10 @@
 import { LogLevel } from "@repo/feature-settings/enums/log-level.enum";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { startCase } from "es-toolkit";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import { GeneralTabFormSchema } from "./general-tab.form-schema.ts";

@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
-
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
+
+import { useState } from "react";
+
 import { DangerZone } from "#components/settings/danger-zone/danger-zone.tsx";
 import { GeneralTab } from "#components/settings/general-tab/general-tab.tsx";
 import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";

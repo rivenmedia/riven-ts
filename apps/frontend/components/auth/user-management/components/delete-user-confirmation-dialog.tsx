@@ -1,6 +1,3 @@
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -11,8 +8,12 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
   AlertDialogAction,
-} from "#components/_ui/alert-dialog.tsx";
-import { Button } from "#components/_ui/button.tsx";
+} from "@repo/util-ui/components/_ui/alert-dialog.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
+import { useForm } from "react-hook-form";
+import { toast } from "sonner";
+
 import { authClient } from "#lib/auth/client.ts";
 
 import type { User } from "#lib/auth/client.ts";

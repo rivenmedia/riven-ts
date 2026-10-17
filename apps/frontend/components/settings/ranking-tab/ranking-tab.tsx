@@ -3,7 +3,7 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
 
 import { RankingProfilesTab } from "./_components/ranking-profiles-tab.tsx";
 import { RankingSettingsTab } from "./_components/ranking-settings-tab.tsx";

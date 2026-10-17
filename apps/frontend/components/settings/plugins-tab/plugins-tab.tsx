@@ -1,10 +1,10 @@
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
 
 import { SinglePluginTab } from "./_components/single-plugin-tab.tsx";
 

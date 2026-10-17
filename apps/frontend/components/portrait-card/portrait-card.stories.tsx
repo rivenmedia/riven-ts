@@ -1,10 +1,10 @@
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+import { PortraitCard } from "@repo/util-ui/components/portrait-card/portrait-card.tsx";
+
 import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Badge } from "#components/_ui/badge.tsx";
-
-import { PortraitCard } from "./portrait-card.tsx";
 
 const meta = preview.meta({
   title: "Components / PortraitCard",

@@ -1,12 +1,12 @@
+import { TypeFilterChips } from "@repo/util-ui/components/calendar/type-filter-chips/type-filter-chips.tsx";
+
 import { Film, Tv } from "lucide-react";
 import { useState } from "react";
 import { expect, fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 
-import { TypeFilterChips } from "./type-filter-chips.tsx";
-
-import type { FilterOption } from "#components/calendar/types.d.ts";
+import type { FilterOption } from "@repo/util-ui/components/calendar/types.d.ts";
 
 const options = [
   { id: "movies", label: "Movies", type: "movie", icon: Film },

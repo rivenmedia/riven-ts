@@ -1,5 +1,6 @@
+import { Skeleton } from "@repo/util-ui/components/_ui/skeleton.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
-import { Skeleton } from "#components/_ui/skeleton.tsx";
 
 /**
  * Use to show a placeholder while content is loading.

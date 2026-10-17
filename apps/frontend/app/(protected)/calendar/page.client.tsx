@@ -1,7 +1,7 @@
-import { Calendar } from "#components/calendar/calendar/calendar.tsx";
-import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { Calendar } from "@repo/util-ui/components/calendar/calendar/calendar.tsx";
+import { PageShell } from "@repo/util-ui/components/page-shell/page-shell.tsx";
 
-import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
+import type { EntertainmentItemData } from "@repo/util-ui/components/calendar/types.d.ts";
 
 interface CalendarPageProps {
   calendar: {

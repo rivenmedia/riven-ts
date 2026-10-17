@@ -1,8 +1,8 @@
+import { EntertainmentItem } from "@repo/util-ui/components/calendar/entertainment-item/entertainment-item.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
 
-import { EntertainmentItem } from "./entertainment-item.tsx";
-
-import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
+import type { EntertainmentItemData } from "@repo/util-ui/components/calendar/types.d.ts";
 
 const meta = preview.meta({
   title: "Calendar / EntertainmentItem",

@@ -1,10 +1,10 @@
+import { CalendarMobileDayCard } from "@repo/util-ui/components/calendar/calendar-mobile-day-card/calendar-mobile-day-card.tsx";
+
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
 
-import { CalendarMobileDayCard } from "./calendar-mobile-day-card.tsx";
-
-import type { CalendarDay } from "#components/calendar/types.d.ts";
+import type { CalendarDay } from "@repo/util-ui/components/calendar/types.d.ts";
 import type { UUID } from "node:crypto";
 
 const meta = preview.meta({

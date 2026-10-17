@@ -1,11 +1,12 @@
 "use client";
 
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { Fingerprint, StarIcon } from "lucide-react";
 import { use } from "react";
 import { browser } from "react-dom";
 
 import { browserSupportsPasskeys } from "#app/(public)/login/_utils/browser-supports-passkeys.ts";
-import { Button } from "#components/_ui/button.tsx";
 
 interface PasskeySigninButtonProps {
   lastLoginMethod: string | null;

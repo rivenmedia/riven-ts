@@ -1,12 +1,13 @@
-import { expect, userEvent, waitFor } from "storybook/test";
-
-import { preview } from "#.storybook/preview.tsx";
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "#components/_ui/tabs.tsx";
+} from "@repo/util-ui/components/_ui/tabs.tsx";
+
+import { expect, userEvent, waitFor } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 
 /**
  * A set of layered sections of content—known as tab panels—that are displayed

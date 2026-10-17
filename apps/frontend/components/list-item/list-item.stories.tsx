@@ -1,11 +1,11 @@
+import { ListItem } from "@repo/util-ui/components/list-item/list-item.tsx";
+import { CardSelectionProvider } from "@repo/util-ui/components/providers/card-selection-provider.tsx";
+
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
 import { fn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
-
-import { ListItem } from "./list-item.tsx";
 
 const meta = preview.meta({
   title: "Components / List Item",

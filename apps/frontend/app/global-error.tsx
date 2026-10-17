@@ -1,12 +1,12 @@
 "use client";
 
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { cn } from "cn";
 import { ArrowLeft, Home, RotateCcw, TriangleAlert } from "lucide-react";
 import Link from "next/link";
-
-import { fly } from "#components/_animations/fly.ts";
-import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
 
 import type { ErrorInfo } from "next/error";
 

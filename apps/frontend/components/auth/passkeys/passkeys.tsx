@@ -1,8 +1,9 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+
 import { Fingerprint } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Button } from "#components/_ui/button.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { usePasskeyForm } from "./passkey-form-provider.tsx";

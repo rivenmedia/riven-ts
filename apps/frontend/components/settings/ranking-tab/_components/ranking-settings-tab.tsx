@@ -1,8 +1,8 @@
 import { createSettings, SettingsSchema } from "@repo/util-rank-torrent-name";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
 import { buildSettingsConfigFromZodSchema } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 

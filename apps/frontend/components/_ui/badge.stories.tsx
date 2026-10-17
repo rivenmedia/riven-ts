@@ -1,5 +1,6 @@
+import { Badge } from "@repo/util-ui/components/_ui/badge.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
-import { Badge } from "#components/_ui/badge.tsx";
 
 /**
  * Displays a badge or a component that looks like a badge.

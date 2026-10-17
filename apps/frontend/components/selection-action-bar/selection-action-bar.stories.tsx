@@ -1,11 +1,11 @@
+import { SelectionActionBar } from "@repo/util-ui/components/selection-action-bar/selection-action-bar.tsx";
+
 import { ListChecks, LoaderCircle, Trash } from "lucide-react";
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 
-import { SelectionActionBar } from "./selection-action-bar.tsx";
-
-import type { SelectionAction } from "./selection-action-bar.tsx";
+import type { SelectionAction } from "@repo/util-ui/components/selection-action-bar/selection-action-bar.tsx";
 
 const meta = preview.meta({
   title: "Components / SelectionActionBar",

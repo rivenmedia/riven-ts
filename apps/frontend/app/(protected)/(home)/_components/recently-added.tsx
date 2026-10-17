@@ -1,12 +1,12 @@
 "use client";
 
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
+import { ListCarousel } from "@repo/util-ui/components/list-carousel/list-carousel.tsx";
+import { SectionHeading } from "@repo/util-ui/components/media/section-heading/section-heading.tsx";
+
 import { gql } from "@apollo/client";
 import { useQuery } from "@apollo/client/react";
 import { cn } from "cn";
-
-import { fly } from "#components/_animations/fly.ts";
-import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
-import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 
 import type {
   GetRecentlyAddedQuery,

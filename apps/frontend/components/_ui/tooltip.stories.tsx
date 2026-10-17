@@ -1,13 +1,14 @@
-import { Plus } from "lucide-react";
-import { expect, userEvent, waitFor, within } from "storybook/test";
-
-import { preview } from "#.storybook/preview.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "#components/_ui/tooltip.tsx";
+} from "@repo/util-ui/components/_ui/tooltip.tsx";
+
+import { Plus } from "lucide-react";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 
 /**
  * A popup that displays information related to an element when the element

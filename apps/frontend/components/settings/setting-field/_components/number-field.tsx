@@ -1,8 +1,8 @@
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+
 import { useId } from "react";
 import { useFormContext } from "react-hook-form";
-
-import { Input } from "#components/_ui/input.tsx";
-import { Label } from "#components/_ui/label.tsx";
 
 import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { ComponentProps } from "react";

@@ -27,7 +27,7 @@
       // Use this when you want to invalidate a task's cache when its dependencies' source files change.
       "dependsOn": ["^transit:source-files"],
       "inputs": [
-        "lib/**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
+        "lib/**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5,css}",
         "!**/__tests__",
         "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",
         "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}",

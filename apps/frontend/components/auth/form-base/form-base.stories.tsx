@@ -1,7 +1,8 @@
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
+import { Input } from "@repo/util-ui/components/_ui/input.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
-import { Input } from "#components/_ui/input.tsx";
-import { Label } from "#components/_ui/label.tsx";
 
 import { FormBase } from "./form-base.tsx";
 

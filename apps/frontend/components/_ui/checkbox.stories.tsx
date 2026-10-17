@@ -1,8 +1,9 @@
+import { Checkbox } from "@repo/util-ui/components/_ui/checkbox.tsx";
+import { Label } from "@repo/util-ui/components/_ui/label.tsx";
+
 import { expect, userEvent, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { Checkbox } from "#components/_ui/checkbox.tsx";
-import { Label } from "#components/_ui/label.tsx";
 
 /**
  * A control that allows the user to toggle between checked and not checked.

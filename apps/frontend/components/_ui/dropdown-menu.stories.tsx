@@ -1,7 +1,3 @@
-import { Mail, Plus, PlusCircle, Search, UserPlus } from "lucide-react";
-import { expect, userEvent, within } from "storybook/test";
-
-import preview from "#.storybook/preview.tsx";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -18,7 +14,12 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
-} from "#components/_ui/dropdown-menu.tsx";
+} from "@repo/util-ui/components/_ui/dropdown-menu.tsx";
+
+import { Mail, Plus, PlusCircle, Search, UserPlus } from "lucide-react";
+import { expect, userEvent, within } from "storybook/test";
+
+import preview from "#.storybook/preview.tsx";
 
 /**
  * Displays a menu to the user — such as a set of actions or functions —

@@ -1,6 +1,6 @@
-import { preview } from "#.storybook/preview.tsx";
+import { BirthdayConfetti } from "@repo/util-ui/components/effects/birthday-confetti/birthday-confetti.tsx";
 
-import { BirthdayConfetti } from "./birthday-confetti.tsx";
+import { preview } from "#.storybook/preview.tsx";
 
 const meta = preview.meta({
   title: "Effects / BirthdayConfetti",

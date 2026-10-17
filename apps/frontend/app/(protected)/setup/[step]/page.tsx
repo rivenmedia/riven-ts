@@ -1,17 +1,17 @@
 "use client";
 
-import { cn } from "cn";
-import Link from "next/link";
-import { useParams } from "next/navigation";
-
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "@repo/util-ui/components/_ui/button.tsx";
 import {
   Card,
   CardContent,
   CardFooter,
   CardHeader,
-} from "#components/_ui/card.tsx";
-import { Separator } from "#components/_ui/separator.tsx";
+} from "@repo/util-ui/components/_ui/card.tsx";
+import { Separator } from "@repo/util-ui/components/_ui/separator.tsx";
+
+import { cn } from "cn";
+import Link from "next/link";
+import { useParams } from "next/navigation";
 
 import { useSteps } from "./_hooks/use-steps.tsx";
 import { SetupQualityStep } from "./_steps/quality.tsx";

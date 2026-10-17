@@ -1,6 +1,6 @@
-import { cn } from "cn";
+import { fly } from "@repo/util-ui/components/_animations/fly.ts";
 
-import { fly } from "#components/_animations/fly.ts";
+import { cn } from "cn";
 
 import { RecentlyAdded } from "./_components/recently-added.tsx";
 import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing.tsx";
