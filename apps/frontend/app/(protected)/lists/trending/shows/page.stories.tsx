@@ -2,8 +2,8 @@ import { faker } from "@faker-js/faker";
 import { graphql, HttpResponse } from "msw";
 
 import preview from "#.storybook/preview.tsx";
-import { GET_DISCOVERY_ITEMS } from "#app/(protected)/lists/trending/_components/trending-discovery-page/_components/trending-discovery-item-list.tsx";
 
+import { GET_FILTERED_TVDB_TRENDING_SHOWS } from "./_queries/get-tvdb-trending-shows.query.ts";
 import TrendingShowsPage from "./page.tsx";
 
 import type { UUID } from "node:crypto";
@@ -13,10 +13,10 @@ const meta = preview.meta({
   component: TrendingShowsPage,
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_DISCOVERY_ITEMS, () =>
+      graphql.query(GET_FILTERED_TVDB_TRENDING_SHOWS, () =>
         HttpResponse.json({
           data: {
-            discoveryItems: Array.from({ length: 50 }).map(() => ({
+            tvdbTrendingShows: Array.from({ length: 50 }).map(() => ({
               __typename: "TmdbIndexerData",
               id: faker.string.uuid() as UUID,
               posterUrl: faker.image.urlPicsumPhotos({
@@ -26,6 +26,8 @@ const meta = preview.meta({
               title: faker.lorem.words(3),
               type: "show",
               year: faker.date.past({ years: 10 }).getFullYear(),
+              releaseDate: faker.date.past({ years: 10 }).toISOString(),
+              overview: faker.lorem.paragraph(),
             })),
           },
         }),

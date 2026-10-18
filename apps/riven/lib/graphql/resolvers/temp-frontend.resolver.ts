@@ -1,8 +1,4 @@
-import {
-  MediaItem,
-  Show,
-  MediaEntry,
-} from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItem, MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
@@ -17,6 +13,7 @@ import {
   Field,
   Float,
   ID,
+  Int,
   ObjectType,
   Query,
   Resolver,
@@ -193,9 +190,10 @@ export class TempFrontendResolver {
     return [];
   }
 
-  @Query(() => [Show])
+  @Query(() => [IndexerData])
   public tvdbTrendingShows(
     @Arg("timeWindow", () => String) _timeWindow: string,
+    @Arg("page", () => Int) _page: number,
   ) {
     return [];
   }
@@ -203,11 +201,6 @@ export class TempFrontendResolver {
   @Query(() => MediaDetails)
   public mediaDetails(@Arg("id", () => ID) _id: string) {
     return {};
-  }
-
-  @Query(() => [IndexerData])
-  public discoveryItems() {
-    return [];
   }
 
   @Query(() => [AuthProvider])
