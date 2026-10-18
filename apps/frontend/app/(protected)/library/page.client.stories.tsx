@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { graphql, http, HttpResponse } from "msw";
+import { graphql, HttpResponse } from "msw";
 import { expect, waitFor } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
