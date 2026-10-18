@@ -6,9 +6,11 @@ import {
   Movie,
   Season,
   Show,
+  ShowLikeMediaItem,
   Stream,
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
@@ -57,10 +59,17 @@ export class MediaItemResolver {
 
   @Query(() => MediaItemCursor)
   public async mediaItems(
+    @Arg("search", () => String, { nullable: true })
+    search: string | null,
     @Arg("type", () => [MediaItemType.enum], {
       defaultValue: ["movie", "show"],
     })
     filter: MediaItemType[],
+    @Arg("state", () => [MediaItemState.enum], {
+      nullable: true,
+      defaultValue: [...MediaItemState.options],
+    })
+    state: MediaItemState[] | null,
     @Arg("includeUnrequestedItems", () => Boolean, { defaultValue: false })
     includeUnrequestedItems: boolean,
     @Args(() => PaginationArgs)
@@ -73,6 +82,8 @@ export class MediaItemResolver {
       itemsPerPage,
       after,
       before,
+      ...(state && { state }),
+      ...(search && { search }),
     });
   }
 
@@ -196,6 +207,21 @@ export class MediaItemResolver {
     }
 
     return true;
+  }
+
+  @FieldResolver(() => String)
+  public primaryExternalId(@Root() mediaItem: MediaItem) {
+    if (mediaItem instanceof ShowLikeMediaItem) {
+      return mediaItem.tvdbId;
+    }
+
+    if (mediaItem instanceof Movie) {
+      return mediaItem.tmdbId;
+    }
+
+    throw new Error(
+      `Unsupported media item type: ${mediaItem.constructor.name}`,
+    );
   }
 
   @FieldResolver(() => Int)

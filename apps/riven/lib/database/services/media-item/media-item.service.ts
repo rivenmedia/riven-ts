@@ -18,6 +18,7 @@ import { settings } from "#utilities/settings.ts";
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
+import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { UUID } from "node:crypto";
 
@@ -106,13 +107,17 @@ export class MediaItemService extends BaseService {
 
   @EnsureRequestContext()
   public async getPaginatedMediaItems({
+    search,
     filter = ["movie", "show"],
+    state,
     includeUnrequestedItems = false,
     before,
     after,
     itemsPerPage = 25,
   }: {
+    search?: string;
     filter?: MediaItemType[];
+    state?: MediaItemState[];
     includeUnrequestedItems?: boolean;
     before?: string | null;
     after?: string | null;
@@ -130,6 +135,8 @@ export class MediaItemService extends BaseService {
         isRequested: {
           $in: [true, !includeUnrequestedItems],
         },
+        ...(state ? { state: { $in: state } } : {}),
+        ...(search && { fullTitle: { $ilike: `%${search}%` } }),
       },
       orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
       ...(before ? { before, last: itemsPerPage } : {}),
