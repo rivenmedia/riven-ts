@@ -17,6 +17,7 @@ export const GET_ITEM_CAST: TypedDocumentNode<
   ) {
     tmdbItem(id: $id, type: $type) {
       id
+      type
       cast(language: $language) {
         id
         name

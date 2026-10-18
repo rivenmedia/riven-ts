@@ -13,6 +13,7 @@ export const GET_SIMILAR_ITEMS: TypedDocumentNode<
   query GetSimilarItems($id: ID!, $type: TopLevelMediaItemType!) {
     tmdbItem(id: $id, type: $type) {
       id
+      type
       similarItems {
         id
         title
