@@ -34,7 +34,8 @@ export function TrendingDiscoveryPage<
   const [activeFilters, setActiveFilters] =
     useState<TrendingListFiltersFormValues | null>(null);
 
-  const [activeSort, setActiveSort] = useState<SortOptionValue | null>(null);
+  // oxlint-disable-next-line no-unused-vars react/hook-use-state
+  const [_activeSort, setActiveSort] = useState<SortOptionValue | null>(null);
 
   return (
     <div className="relative z-10 mx-auto flex w-full max-w-600 flex-col gap-6 px-6 pt-6 pb-24 md:px-12 md:pt-16 md:pb-12 lg:px-16">
@@ -58,8 +59,6 @@ export function TrendingDiscoveryPage<
       </div>
       <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9">
         <TrendingDiscoveryItemList
-          activeFilters={activeFilters}
-          sortType={activeSort}
           initialData={initialData}
           fetchPage={fetchPage}
           noItemsFoundMessage={emptyMessage}

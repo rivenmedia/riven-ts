@@ -7,15 +7,11 @@ import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-sk
 
 import { LoadMoreButton } from "./load-more-button.tsx";
 
-import type { SortOptionValue } from "../../trending-list-filters/constants.ts";
-import type { TrendingListFiltersFormValues } from "../../trending-list-filters/trending-list-filters.form-schema.ts";
 import type { ComponentProps } from "react";
 
 interface TrendingDiscoveryItemListProps<
   T extends ComponentProps<typeof ListItem>["mediaItem"],
 > {
-  activeFilters: TrendingListFiltersFormValues | null;
-  sortType: SortOptionValue | null;
   initialData: Map<string, T>;
   fetchPage: (page: number) => Promise<Map<string, T>>;
   noItemsFoundMessage: string;
@@ -24,8 +20,6 @@ interface TrendingDiscoveryItemListProps<
 export function TrendingDiscoveryItemList<
   T extends ComponentProps<typeof ListItem>["mediaItem"],
 >({
-  activeFilters,
-  sortType,
   initialData,
   fetchPage,
   noItemsFoundMessage,
