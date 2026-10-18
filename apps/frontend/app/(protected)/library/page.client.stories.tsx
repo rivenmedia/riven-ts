@@ -1,8 +1,9 @@
 import { faker } from "@faker-js/faker";
-import { graphql, HttpResponse } from "msw";
+import { graphql, http, HttpResponse } from "msw";
 import { expect, waitFor } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 
 import { GET_LIBRARY_ITEMS } from "./_queries/get-library-items.query.ts";
 import { LibraryPage } from "./page.client.tsx";
@@ -81,6 +82,7 @@ const meta = preview.meta({
   component: LibraryPage,
   beforeEach({ msw }) {
     msw.use(
+      getSessionHandler,
       graphql.query(GET_LIBRARY_ITEMS, ({ variables }) => {
         const search = variables.search?.toLowerCase();
 

@@ -3,14 +3,14 @@
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { getClient } from "#lib/graphql/client.ts";
-import { actionClient } from "#lib/server-actions/action-client.ts";
+import { loggedInActionClient } from "#lib/server-actions/action-client.ts";
 
 import { GET_LIBRARY_ITEMS } from "../_queries/get-library-items.query";
 import { LibrarySearchForm } from "../_schemas/library-search.form-schema";
 
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
-export const searchLibrary = actionClient
+export const searchLibrary = loggedInActionClient
   .inputSchema(LibrarySearchForm)
   .action(async ({ parsedInput }) => {
     function getType(): MediaItemType[] {
