@@ -201,11 +201,11 @@ export const Default = meta.story({
             data: {
               tvdbTrendingShows: [
                 {
-                  __typename: "Show",
+                  __typename: "TmdbIndexerData",
                   id: crypto.randomUUID(),
                   type: "show",
                   title: "Breaking Bad",
-                  posterPath:
+                  posterUrl:
                     "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
                   year: 2008,
                 },
@@ -218,11 +218,11 @@ export const Default = meta.story({
           data: {
             tvdbTrendingShows: [
               {
-                __typename: "Show",
+                __typename: "TmdbIndexerData",
                 id: crypto.randomUUID(),
                 type: "show",
                 title: "Arcane",
-                posterPath:
+                posterUrl:
                   "https://artworks.thetvdb.com/banners/v4/series/371028/posters/617f6a8c59e8f.jpg",
                 year: 2024,
               },
