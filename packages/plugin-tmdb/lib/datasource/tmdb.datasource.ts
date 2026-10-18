@@ -114,8 +114,13 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
 
   public async getTrendingMovies(
     timeWindow: TrendingMoviesPathParamsSchema["time_window"],
+    page: number,
   ) {
-    const response = await this.get<unknown>(`trending/movie/${timeWindow}`);
+    const response = await this.get<unknown>(`trending/movie/${timeWindow}`, {
+      params: {
+        page: page.toString(),
+      },
+    });
 
     return trendingMovies200Schema.parse(response);
   }

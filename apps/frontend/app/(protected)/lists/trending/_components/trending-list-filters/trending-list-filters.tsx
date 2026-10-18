@@ -38,6 +38,7 @@ import {
 } from "./constants.ts";
 import { TrendingListFiltersFormSchema } from "./trending-list-filters.form-schema.ts";
 
+import type { SortOptionValue } from "./constants.ts";
 import type { TrendingListFiltersFormValues } from "./trending-list-filters.form-schema.ts";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 
@@ -45,7 +46,7 @@ export interface TrendingListFiltersProps {
   hasActiveFilters: boolean;
   onClear: () => void;
   onApply: (data: TrendingListFiltersFormValues) => void;
-  onSortChange: (value: string) => void;
+  onSortChange: (value: SortOptionValue) => void;
   mediaType: Extract<MediaItemType, "movie" | "show">;
 }
 

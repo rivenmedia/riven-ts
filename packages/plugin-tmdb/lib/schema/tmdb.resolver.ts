@@ -2,7 +2,7 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
 import { DateTime, Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
-import { Arg, ID, Query, Resolver } from "type-graphql";
+import { Arg, ID, Int, Query, Resolver } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
@@ -109,10 +109,12 @@ export class TmdbResolver {
   public async tmdbTrendingMovies(
     @Arg("timeWindow", () => TmdbTrendingMoviesTimeWindow.enum)
     timeWindow: TmdbTrendingMoviesTimeWindow,
+    @Arg("page", () => Int, { defaultValue: 1 })
+    page: number,
     @PluginDataSource(pluginConfig.name, TmdbAPI)
     api: TmdbAPI,
   ): Promise<TmdbIndexerData[]> {
-    const trendingMovies = await api.getTrendingMovies(timeWindow);
+    const trendingMovies = await api.getTrendingMovies(timeWindow, page);
 
     if (!trendingMovies.results?.length) {
       throw new Error("No trending movies found.");

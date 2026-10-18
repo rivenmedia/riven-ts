@@ -98,3 +98,5 @@ export const SORT_OPTIONS = [
   },
   { value: "revenue.desc", label: "Highest Revenue", allowedFor: ["movie"] },
 ] as const satisfies SortOption[];
+
+export type SortOptionValue = (typeof SORT_OPTIONS)[number]["value"];
