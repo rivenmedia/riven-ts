@@ -3,7 +3,8 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { cn } from "cn";
-import { ListChecks, Loader2, Search, Trash } from "lucide-react";
+import { Book, ListChecks, Loader2, Search, Trash } from "lucide-react";
+import Link from "next/link";
 import { useRef } from "react";
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
@@ -24,6 +25,7 @@ import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
 
 import { searchLibrary } from "./_actions/search.action";
+import { LibraryMessage } from "./_components/library-message";
 import { LibrarySearchInputs } from "./_components/library-search-inputs";
 import { LibrarySearchForm } from "./_schemas/library-search.form-schema";
 
@@ -41,6 +43,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
     zodResolver(LibrarySearchForm),
     {
       formProps: {
+        disabled: totalItems === 0,
         defaultValues: {
           search: "",
           type: "all",
@@ -227,25 +230,46 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
               </>
             ) : (
               <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center space-y-4 text-center">
-                <div className="flex h-24 w-24 items-center justify-center rounded-full border border-white/5 bg-zinc-900/50">
-                  <Search className="h-10 w-10 text-zinc-600" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-medium text-white">
-                    No items found
-                  </h3>
-                  <p className="mx-auto mt-2 max-w-sm text-zinc-500">
-                    We couldn&apos;t find anything matching your search. Try
-                    adjusting the filters or search term.
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  className="border-white/10 hover:bg-white/5"
-                  type="reset"
-                >
-                  Clear all filters
-                </Button>
+                {totalItems === 0 ? (
+                  <LibraryMessage
+                    icon={Book}
+                    title="Your library is empty"
+                    description={
+                      "You haven't added any items to your library yet.\nStart by adding your favourite movies and shows."
+                    }
+                    button={
+                      <Button
+                        variant="outline"
+                        className="border-white/10 hover:bg-white/5"
+                        type="button"
+                      >
+                        <Link href="/explore">Add items to library</Link>
+                      </Button>
+                    }
+                  />
+                ) : (
+                  <LibraryMessage
+                    icon={Search}
+                    title="No items found"
+                    description={
+                      "We couldn't find anything matching your search.\nTry adjusting the filters or search term."
+                    }
+                    button={
+                      <Button
+                        variant="outline"
+                        className="border-white/10 hover:bg-white/5"
+                        type="button"
+                        onClick={() => {
+                          // Reset the form values and re-submit
+                          form.reset();
+                          submitForm();
+                        }}
+                      >
+                        Clear all filters
+                      </Button>
+                    }
+                  />
+                )}
               </div>
             )}
           </form>

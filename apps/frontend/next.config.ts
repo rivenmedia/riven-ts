@@ -12,6 +12,7 @@ export default {
     remotePatterns: [
       new URL("https://images.pexels.com/photos/**"),
       new URL("https://image.tmdb.org/t/p/**"),
+      new URL("https://artworks.thetvdb.com/banners/v4/series/*/posters/*"),
     ],
   },
   typescript: {

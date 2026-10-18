@@ -69,7 +69,7 @@ export function LibrarySearchInputs({
             handleFilterChange();
           }}
         >
-          <SelectTrigger className="w-30 space-y-0">
+          <SelectTrigger aria-label="Type" className="w-30 space-y-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -86,7 +86,7 @@ export function LibrarySearchInputs({
             handleFilterChange();
           }}
         >
-          <SelectTrigger className="w-45 space-y-0">
+          <SelectTrigger aria-label="State" className="w-45 space-y-0">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

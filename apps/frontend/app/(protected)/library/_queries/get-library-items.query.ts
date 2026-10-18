@@ -26,6 +26,7 @@ export const GET_LIBRARY_ITEMS: TypedDocumentNode<
           type
           releaseDate
           year
+          posterUrl: posterPath
         }
       }
     }
