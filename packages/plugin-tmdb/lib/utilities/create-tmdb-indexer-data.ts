@@ -1,6 +1,3 @@
-import { movieAdapter } from "../adapters/movie.adapter.ts";
-import { showAdapter } from "../adapters/show.adapter.ts";
-
 import type { TmdbIndexerData } from "../schema/types/tmdb-indexer-data.type.ts";
 
 type DerivedFields = "tmdbId" | "tvdbId" | "type" | "isRequestable" | "adapter";
@@ -14,7 +11,6 @@ export function createTmdbMovie(
     tvdbId: null,
     type: "movie",
     isRequestable: true,
-    adapter: movieAdapter,
   };
 }
 
@@ -29,6 +25,5 @@ export function createTmdbShow(
     id: data.tvdbId ?? `tmdb-${data.tmdbId}`,
     type: "show",
     isRequestable: data.tvdbId !== null,
-    adapter: showAdapter,
   };
 }

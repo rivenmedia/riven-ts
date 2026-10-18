@@ -6,6 +6,7 @@ import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
+import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import {
   Arg,
@@ -178,7 +179,7 @@ class NowPlayingItem {
 
 @Resolver()
 export class TempFrontendResolver {
-  @Query(() => [MediaItem])
+  @Query(() => [MediaItemUnion])
   public recentlyAdded() {
     return [];
   }

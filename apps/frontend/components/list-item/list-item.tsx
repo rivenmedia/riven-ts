@@ -10,13 +10,19 @@ import { useCardSelection } from "#components/providers/card-selection-provider.
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 import type { LinkProps } from "next/link";
+import type { SetOptional } from "type-fest";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  mediaItem: Pick<IndexerData, "id" | "title" | "posterUrl" | "type" | "year"> &
-    Partial<Pick<IndexerData, "isRequestable">>;
+  mediaItem: SetOptional<
+    Pick<
+      IndexerData,
+      "id" | "title" | "posterUrl" | "type" | "year" | "isRequestable"
+    >,
+    "isRequestable"
+  >;
   badge?: {
     text: string;
     variant: string;

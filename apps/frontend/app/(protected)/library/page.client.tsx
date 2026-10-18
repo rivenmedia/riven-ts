@@ -1,5 +1,7 @@
 "use client";
 
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { cn } from "cn";
@@ -62,7 +64,10 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
     formRef.current?.requestSubmit();
   };
 
-  const results = action.result.data?.items ?? items;
+  const results = (action.result.data?.items ?? items).filter(
+    (item): item is typeof item & { type: TopLevelMediaItemType } =>
+      TopLevelMediaItemType.safeParse(item.type).success,
+  );
 
   return (
     <PageShell className="relative z-10 flex min-h-screen flex-col overflow-x-hidden bg-transparent">

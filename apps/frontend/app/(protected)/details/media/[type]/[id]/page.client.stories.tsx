@@ -256,6 +256,7 @@ export const UnrequestedMovie = meta.story({
             tmdbItem: {
               __typename: "TmdbIndexerData",
               id: args.data.id,
+              type: args.data.type,
               cast: [
                 {
                   __typename: "CastMember",
@@ -276,6 +277,7 @@ export const UnrequestedMovie = meta.story({
             tmdbItem: {
               __typename: "TmdbIndexerData",
               id: args.data.id,
+              type: args.data.type,
               recommendations: [
                 {
                   __typename: "TmdbIndexerData",
@@ -298,6 +300,7 @@ export const UnrequestedMovie = meta.story({
             tmdbItem: {
               __typename: "TmdbIndexerData",
               id: args.data.id,
+              type: args.data.type,
               similarItems: [
                 {
                   __typename: "TmdbIndexerData",
