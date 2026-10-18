@@ -15,6 +15,11 @@ export const { getClient, query, PreloadQuery } = registerApolloClient(
           MediaItem: ["Movie", "Show", "Season", "Episode"],
           ShowLikeMediaItem: ["Show", "Season", "Episode"],
         },
+        typePolicies: {
+          TmdbIndexerData: {
+            keyFields: ["type", "id"],
+          },
+        },
       }),
       link: new HttpLink({
         uri: `${privateEnvironment.BACKEND_URL}/graphql`,

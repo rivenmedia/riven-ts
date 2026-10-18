@@ -10,6 +10,11 @@ const createClient = () =>
         MediaItem: ["Movie", "Show", "Season", "Episode"],
         ShowLikeMediaItem: ["Show", "Season", "Episode"],
       },
+      typePolicies: {
+        TmdbIndexerData: {
+          keyFields: ["type", "id"],
+        },
+      },
     }),
     link: new HttpLink({
       uri: new URL("/graphql", privateEnvironment.BACKEND_URL).toString(),

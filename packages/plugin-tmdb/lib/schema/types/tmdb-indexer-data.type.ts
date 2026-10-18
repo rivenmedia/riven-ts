@@ -2,21 +2,12 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
 
-import { movieAdapter } from "../../adapters/movie.adapter.ts";
-import { showAdapter } from "../../adapters/show.adapter.ts";
-
-import type { TmdbMediaAdapter } from "../../adapters/tmdb-media-adapter.ts";
 import type { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
 import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
-
-const adapters = {
-  movie: movieAdapter,
-  show: showAdapter,
-} satisfies Record<TmdbIndexerData["type"], TmdbMediaAdapter>;
 
 /**
  * A movie or show from TMDB.
@@ -90,6 +81,4 @@ export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   public productionCompanies?: ProductionCompany[] | null;
 
   public originCountry?: string[] | null;
-
-  public readonly adapter = adapters[this.type];
 }

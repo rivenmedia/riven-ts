@@ -1,4 +1,4 @@
-import type { TmdbAPI } from "../datasource/tmdb.datasource.ts";
+import type { TmdbAPI, TmdbMediaType } from "../datasource/tmdb.datasource.ts";
 import type { TmdbIndexerData } from "../schema/types/tmdb-indexer-data.type.ts";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 
@@ -7,11 +7,8 @@ import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
  */
 export async function resolveGenres(
   api: TmdbAPI,
-  {
-    genres,
-    genreIds,
-    adapter: { mediaType },
-  }: Pick<TmdbIndexerData, "genres" | "genreIds" | "adapter">,
+  mediaType: TmdbMediaType,
+  { genres, genreIds }: Pick<TmdbIndexerData, "genres" | "genreIds">,
   locale: string,
 ): Promise<Genre[]> {
   if (genres.length > 0) {
