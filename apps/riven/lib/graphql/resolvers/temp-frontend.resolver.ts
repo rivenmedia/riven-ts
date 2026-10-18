@@ -193,7 +193,7 @@ export class TempFrontendResolver {
   @Query(() => [IndexerData])
   public tvdbTrendingShows(
     @Arg("timeWindow", () => String) _timeWindow: string,
-    @Arg("page", () => Int) _page: number,
+    @Arg("page", () => Int, { defaultValue: 1 }) _page: number,
   ) {
     return [];
   }

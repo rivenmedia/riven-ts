@@ -11,7 +11,7 @@ export const GET_TVDB_TRENDING_SHOWS: TypedDocumentNode<
   GetTvdbTrendingShowsQueryVariables
 > = gql`
   query GetTvdbTrendingShows($timeWindow: String = "day") {
-    tvdbTrendingShows(timeWindow: $timeWindow, page: 1) {
+    tvdbTrendingShows(timeWindow: $timeWindow) {
       id
       title
       posterUrl
