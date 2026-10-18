@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const MovieImage = z.object({
+export const MediaImage = z.object({
   aspect_ratio: z.number(),
   height: z.int(),
   iso_639_1: z.string().nullable(),
@@ -10,4 +10,4 @@ export const MovieImage = z.object({
   width: z.int(),
 });
 
-export type MovieImage = z.infer<typeof MovieImage>;
+export type MediaImage = z.infer<typeof MediaImage>;

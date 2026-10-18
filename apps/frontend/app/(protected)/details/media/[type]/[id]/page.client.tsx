@@ -15,10 +15,12 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
     <SingleMediaItem
       indexerData={data}
       slots={{
-        castList: <ItemCast id={data.id} />,
+        castList: <ItemCast id={data.id} type={data.type} />,
         itemMetadata: <ItemMetadata data={data} />,
-        itemRecommendations: <ItemRecommendations id={data.id} />,
-        similarItems: <SimilarItems id={data.id} />,
+        itemRecommendations: (
+          <ItemRecommendations id={data.id} type={data.type} />
+        ),
+        similarItems: <SimilarItems id={data.id} type={data.type} />,
       }}
     />
   );

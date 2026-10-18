@@ -10,8 +10,8 @@ export const GET_SIMILAR_ITEMS: TypedDocumentNode<
   GetSimilarItemsQuery,
   GetSimilarItemsQueryVariables
 > = gql`
-  query GetSimilarItems($id: ID!) {
-    tmdbItem(id: $id) {
+  query GetSimilarItems($id: ID!, $type: TopLevelMediaItemType!) {
+    tmdbItem(id: $id, type: $type) {
       id
       similarItems {
         id
@@ -19,6 +19,7 @@ export const GET_SIMILAR_ITEMS: TypedDocumentNode<
         type
         posterUrl
         year
+        isRequestable
       }
     }
   }

@@ -4,7 +4,6 @@ import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.e
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
-import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { MediaMetadata } from "@repo/util-plugin-sdk/dto/types/media-metadata.type";
 import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
@@ -13,7 +12,6 @@ import {
   Field,
   Float,
   ID,
-  Int,
   ObjectType,
   Query,
   Resolver,
@@ -187,14 +185,6 @@ export class TempFrontendResolver {
 
   @Query(() => [NowPlayingItem])
   public nowPlaying() {
-    return [];
-  }
-
-  @Query(() => [IndexerData])
-  public tvdbTrendingShows(
-    @Arg("timeWindow", () => String) _timeWindow: string,
-    @Arg("page", () => Int, { defaultValue: 1 }) _page: number,
-  ) {
     return [];
   }
 

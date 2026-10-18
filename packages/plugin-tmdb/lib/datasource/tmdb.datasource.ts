@@ -1,4 +1,5 @@
 import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
@@ -7,11 +8,17 @@ import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIds
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
+import { FindShowsByExternalId } from "../schemas/find-shows-by-external-id.schema.ts";
+import { MediaImages } from "../schemas/media-images.schema.ts";
+import { MediaVideos } from "../schemas/media-videos.schema.ts";
 import { MovieCredits } from "../schemas/movie-credits.schema.ts";
-import { MovieImages } from "../schemas/movie-images.schema.ts";
 import { MovieRecommendations } from "../schemas/movie-recommendations.schema.ts";
 import { MovieSimilarItems } from "../schemas/movie-similar-items.schema.ts";
-import { MovieVideos } from "../schemas/movie-videos.schema.ts";
+import { ShowAggregateCredits } from "../schemas/show-aggregate-credits.schema.ts";
+import { ShowContentRatings } from "../schemas/show-content-ratings.schema.ts";
+import { ShowDetails } from "../schemas/show-details.schema.ts";
+import { ShowExternalIds } from "../schemas/show-external-ids.schema.ts";
+import { ShowListResponse } from "../schemas/show-list-item.schema.ts";
 
 import type { FindByIdQueryParams } from "../__generated__/types/FindById.ts";
 import type { TrendingMoviesPathParamsSchema } from "../__generated__/zod/trendingMoviesSchema.ts";
@@ -22,6 +29,23 @@ import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
 class TmdbAPIError extends Error {
   public override name = "TmdbAPIError";
 }
+
+/**
+ * The media type path segment used by TMDB endpoints that exist for both movies and shows.
+ */
+export type TmdbMediaType = "movie" | "tv";
+
+type TrendingTimeWindow = NonNullable<
+  TrendingMoviesPathParamsSchema["time_window"]
+>;
+
+/**
+ * TMDB <-> TVDB ID mappings practically never change, so they are cached for much longer
+ * than TMDB's default `max-age` (~1 hour).
+ */
+const externalIdCacheOptions = {
+  ttl: Duration.fromObject({ week: 1 }).as("seconds"),
+};
 
 export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   public override baseURL = "https://api.themoviedb.org/3/";
@@ -65,6 +89,24 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     }
   }
 
+  /**
+   * Resolve a show's TMDB ID from its TVDB ID.
+   *
+   * @returns The TMDB ID, or `null` if TMDB has no show with that TVDB ID
+   */
+  public async getShowTmdbIdFromTvdbId(tvdbId: string) {
+    const response = await this.get<unknown>(`find/${tvdbId}`, {
+      params: {
+        external_source: "tvdb_id",
+      },
+      cacheOptions: externalIdCacheOptions,
+    });
+
+    const { tv_results: tvResults } = FindShowsByExternalId.parse(response);
+
+    return tvResults[0]?.id.toString() ?? null;
+  }
+
   public async findById(externalId: string, params: FindByIdQueryParams) {
     const response = await this.get<unknown>(`find/${externalId}`, {
       params,
@@ -79,19 +121,41 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return movieDetails200Schema.parse(response);
   }
 
+  public async getShowDetails(showId: string) {
+    const response = await this.get<unknown>(`tv/${showId}`, {
+      params: {
+        append_to_response: "external_ids",
+      },
+    });
+
+    return ShowDetails.parse(response);
+  }
+
+  public async getShowExternalIds(showId: string) {
+    const response = await this.get<unknown>(`tv/${showId}/external_ids`, {
+      cacheOptions: externalIdCacheOptions,
+    });
+
+    return ShowExternalIds.parse(response);
+  }
+
   public async getNowPlaying() {
     const response = await this.get<unknown>(`movie/now_playing`);
 
     return movieNowPlayingList200Schema.parse(response);
   }
 
-  public async getLocalisedGenres(locale: string) {
-    const response = await this.get<unknown>(`genre/movie/list`, {
+  /**
+   * Movie and TV genres are separate lists in TMDB, with partially overlapping IDs.
+   */
+  public async getLocalisedGenres(mediaType: TmdbMediaType, locale: string) {
+    const response = await this.get<unknown>(`genre/${mediaType}/list`, {
       params: {
         language: locale,
       },
     });
 
+    // The movie and TV genre list responses share the same shape
     const { genres } = genreMovieList200Schema.parse(response);
 
     return genres.map((genre) => ({
@@ -106,16 +170,19 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return movieReleaseDates200Schema.parse(response);
   }
 
+  public async getShowContentRatings(showId: string) {
+    const response = await this.get<unknown>(`tv/${showId}/content_ratings`);
+
+    return ShowContentRatings.parse(response);
+  }
+
   public async getExternalIds(movieId: string) {
     const response = await this.get<unknown>(`movie/${movieId}/external_ids`);
 
     return movieExternalIds200Schema.parse(response);
   }
 
-  public async getTrendingMovies(
-    timeWindow: TrendingMoviesPathParamsSchema["time_window"],
-    page: number,
-  ) {
+  public async getTrendingMovies(timeWindow: TrendingTimeWindow, page: number) {
     const response = await this.get<unknown>(`trending/movie/${timeWindow}`, {
       params: {
         page: page.toString(),
@@ -125,17 +192,31 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return trendingMovies200Schema.parse(response);
   }
 
-  public async getLocalisedVideos(movieId: string, locale?: string) {
-    const response = await this.get<unknown>(`movie/${movieId}/videos`, {
+  public async getTrendingShows(timeWindow: TrendingTimeWindow, page: number) {
+    const response = await this.get<unknown>(`trending/tv/${timeWindow}`, {
+      params: {
+        page: page.toString(),
+      },
+    });
+
+    return ShowListResponse.parse(response);
+  }
+
+  public async getLocalisedVideos(
+    mediaType: TmdbMediaType,
+    id: string,
+    locale?: string,
+  ) {
+    const response = await this.get<unknown>(`${mediaType}/${id}/videos`, {
       params: {
         language: locale,
       },
     });
 
-    return MovieVideos.parse(response);
+    return MediaVideos.parse(response);
   }
 
-  public async getRecommendations(movieId: string) {
+  public async getMovieRecommendations(movieId: string) {
     const response = await this.get<unknown>(
       `movie/${movieId}/recommendations`,
     );
@@ -143,10 +224,22 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return MovieRecommendations.parse(response);
   }
 
-  public async getSimilarItems(movieId: string) {
+  public async getShowRecommendations(showId: string) {
+    const response = await this.get<unknown>(`tv/${showId}/recommendations`);
+
+    return ShowListResponse.parse(response);
+  }
+
+  public async getSimilarMovies(movieId: string) {
     const response = await this.get<unknown>(`movie/${movieId}/similar`);
 
     return MovieSimilarItems.parse(response);
+  }
+
+  public async getSimilarShows(showId: string) {
+    const response = await this.get<unknown>(`tv/${showId}/similar`);
+
+    return ShowListResponse.parse(response);
   }
 
   public async getLocalisedCredits(movieId: string, language: string) {
@@ -159,13 +252,30 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     return MovieCredits.parse(response);
   }
 
-  public async getLocalisedImages(movieId: string, language: string) {
-    const response = await this.get<unknown>(`movie/${movieId}/images`, {
+  public async getLocalisedShowAggregateCredits(
+    showId: string,
+    language: string,
+  ) {
+    const response = await this.get<unknown>(`tv/${showId}/aggregate_credits`, {
       params: {
         language,
       },
     });
 
-    return MovieImages.parse(response);
+    return ShowAggregateCredits.parse(response);
+  }
+
+  public async getLocalisedImages(
+    mediaType: TmdbMediaType,
+    id: string,
+    language: string,
+  ) {
+    const response = await this.get<unknown>(`${mediaType}/${id}/images`, {
+      params: {
+        language,
+      },
+    });
+
+    return MediaImages.parse(response);
   }
 }

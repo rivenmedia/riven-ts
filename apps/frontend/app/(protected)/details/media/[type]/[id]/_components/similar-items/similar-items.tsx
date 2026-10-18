@@ -11,11 +11,14 @@ import { query } from "#lib/graphql/client.ts";
 import { MediaCarousel } from "../media-carousel";
 import { GET_SIMILAR_ITEMS } from "./_queries/get-similar-items.query";
 
+import type { TopLevelMediaItemType } from "#app/_types/__generated__/graphql.ts";
+
 interface SimilarItemsContentProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-async function SimilarItemsContent({ id }: SimilarItemsContentProps) {
+async function SimilarItemsContent({ id, type }: SimilarItemsContentProps) {
   "use cache";
 
   cacheLife("days");
@@ -24,6 +27,7 @@ async function SimilarItemsContent({ id }: SimilarItemsContentProps) {
     query: GET_SIMILAR_ITEMS,
     variables: {
       id,
+      type,
     },
   });
 
@@ -32,19 +36,21 @@ async function SimilarItemsContent({ id }: SimilarItemsContentProps) {
 
 interface SimilarItemsLoaderProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-async function SimilarItemsLoader({ id }: SimilarItemsLoaderProps) {
+async function SimilarItemsLoader({ id, type }: SimilarItemsLoaderProps) {
   await io();
 
-  return <SimilarItemsContent id={id} />;
+  return <SimilarItemsContent id={id} type={type} />;
 }
 
 interface SimilarItemsProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-export function SimilarItems({ id }: SimilarItemsProps) {
+export function SimilarItems({ id, type }: SimilarItemsProps) {
   return (
     <section
       className={cn("mt-8 md:mt-12 animation-duration-400 delay-650", fly)}
@@ -52,7 +58,7 @@ export function SimilarItems({ id }: SimilarItemsProps) {
       <SectionHeading title="Similar Items" />
       <ErrorFallback message="Unable to load similar items">
         <Suspense fallback={<ListCarouselSkeleton />}>
-          <SimilarItemsLoader id={id} />
+          <SimilarItemsLoader id={id} type={type} />
         </Suspense>
       </ErrorFallback>
     </section>

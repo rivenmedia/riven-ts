@@ -1,7 +1,7 @@
 import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
 
 import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
-import { MediaItemType } from "../enums/media-item-type.enum.ts";
+import { TopLevelMediaItemType } from "../enums/top-level-media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
 import { ItemImage } from "./item-image.type.ts";
@@ -100,8 +100,17 @@ export abstract class IndexerData {
   @Field(() => Ratings, { nullable: true })
   public ratings?: Ratings | null;
 
-  @Field(() => MediaItemType.enum)
-  public type!: MediaItemType;
+  @Field(() => TopLevelMediaItemType.enum)
+  public type!: TopLevelMediaItemType;
+
+  /**
+   * Whether the media item can be requested in Riven.
+   *
+   * Items are not requestable when the indexer cannot provide the external ID
+   * that Riven uses to request that media type, e.g. a show without a TVDB ID.
+   */
+  @Field()
+  public isRequestable!: boolean;
 
   @Field(() => Int, { nullable: true })
   public get year() {

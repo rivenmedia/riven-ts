@@ -1,6 +1,6 @@
 import z from "zod";
 
-export const MovieVideos = z.object({
+export const MediaVideos = z.object({
   id: z.int(),
   results: z.array(
     z.object({

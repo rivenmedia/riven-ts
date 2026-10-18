@@ -26,7 +26,7 @@ function itemUrl(item: EntertainmentItemData) {
       }
 
       if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}?indexer=tvdb` as const;
+        return `/details/media/${item.itemType}/${item.tvdbId}` as const;
       }
 
       break;
@@ -36,7 +36,7 @@ function itemUrl(item: EntertainmentItemData) {
     case "episode": {
       // For TV items, prefer TVDB ID to skip TMDB→TVDB resolution
       if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}/?indexer=tvdb` as const;
+        return `/details/media/${item.itemType}/${item.tvdbId}` as const;
       }
 
       if (item.tmdbId) {

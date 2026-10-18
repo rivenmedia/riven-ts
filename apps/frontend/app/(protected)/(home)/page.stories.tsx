@@ -7,7 +7,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { GET_RECENTLY_ADDED } from "./_components/recently-added.tsx";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
 import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies.ts";
-import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows.ts";
+import { GET_TMDB_TRENDING_SHOWS } from "./_components/tmdb-trending-shows/_queries/get-tmdb-trending-shows.ts";
 import HomePage from "./page.tsx";
 
 const meta = preview.meta({
@@ -195,11 +195,11 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_TVDB_TRENDING_SHOWS, ({ variables }) => {
+      graphql.query(GET_TMDB_TRENDING_SHOWS, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              tvdbTrendingShows: [
+              tmdbTrendingShows: [
                 {
                   __typename: "TmdbIndexerData",
                   id: crypto.randomUUID(),
@@ -208,6 +208,7 @@ export const Default = meta.story({
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
                   year: 2008,
+                  isRequestable: true,
                 },
               ],
             },
@@ -216,7 +217,7 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            tvdbTrendingShows: [
+            tmdbTrendingShows: [
               {
                 __typename: "TmdbIndexerData",
                 id: crypto.randomUUID(),
@@ -225,6 +226,7 @@ export const Default = meta.story({
                 posterUrl:
                   "https://artworks.thetvdb.com/banners/v4/series/371028/posters/617f6a8c59e8f.jpg",
                 year: 2024,
+                isRequestable: true,
               },
             ],
           },

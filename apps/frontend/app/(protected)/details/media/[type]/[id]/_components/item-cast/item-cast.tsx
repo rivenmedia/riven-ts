@@ -18,7 +18,10 @@ import { resolveLocale } from "#lib/utils/resolve-locale.ts";
 
 import { GET_ITEM_CAST } from "./_queries/get-item-cast.query";
 
-import type { CastMember } from "#app/_types/__generated__/graphql.ts";
+import type {
+  CastMember,
+  TopLevelMediaItemType,
+} from "#app/_types/__generated__/graphql.ts";
 
 interface CastMemberCarouselProps {
   cast: CastMember[];
@@ -45,10 +48,11 @@ function CastMemberCarousel({ cast }: CastMemberCarouselProps) {
 
 interface ItemCastContentProps {
   id: string;
+  type: TopLevelMediaItemType;
   locale: string;
 }
 
-async function ItemCastContent({ id, locale }: ItemCastContentProps) {
+async function ItemCastContent({ id, type, locale }: ItemCastContentProps) {
   "use cache";
 
   cacheLife("days");
@@ -57,6 +61,7 @@ async function ItemCastContent({ id, locale }: ItemCastContentProps) {
     query: GET_ITEM_CAST,
     variables: {
       id,
+      type,
       language: locale,
     },
   });
@@ -70,21 +75,23 @@ async function ItemCastContent({ id, locale }: ItemCastContentProps) {
 
 interface ItemCastLoaderProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-async function ItemCastLoader({ id }: ItemCastLoaderProps) {
+async function ItemCastLoader({ id, type }: ItemCastLoaderProps) {
   const headersList = await headers();
   const acceptLanguage = headersList.get("accept-language");
   const locale = resolveLocale(acceptLanguage);
 
-  return <ItemCastContent id={id} locale={locale} />;
+  return <ItemCastContent id={id} type={type} locale={locale} />;
 }
 
 interface ItemCastProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-export function ItemCast({ id }: ItemCastProps) {
+export function ItemCast({ id, type }: ItemCastProps) {
   return (
     <section
       className={cn("mt-8 md:mt-12 animation-duration-400 delay-550", fly)}
@@ -92,7 +99,7 @@ export function ItemCast({ id }: ItemCastProps) {
       <SectionHeading title="Cast" />
       <ErrorFallback message="Unable to load cast information">
         <Suspense fallback={<ListCarouselSkeleton />}>
-          <ItemCastLoader id={id} />
+          <ItemCastLoader id={id} type={type} />
         </Suspense>
       </ErrorFallback>
     </section>

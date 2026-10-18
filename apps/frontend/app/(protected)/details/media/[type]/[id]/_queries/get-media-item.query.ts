@@ -10,8 +10,8 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
   GetMediaItemQuery,
   GetMediaItemQueryVariables
 > = gql`
-  query GetMediaItem($id: ID!) {
-    tmdbItem(id: $id) {
+  query GetMediaItem($id: ID!, $type: TopLevelMediaItemType!) {
+    tmdbItem(id: $id, type: $type) {
       id
       backdropUrl
       logo(width: 750) {
@@ -49,6 +49,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       revenue
       budget
       imdbId
+      isRequestable
       # seasons {
       #   id
       #   name

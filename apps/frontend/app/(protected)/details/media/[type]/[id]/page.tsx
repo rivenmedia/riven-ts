@@ -1,3 +1,5 @@
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
@@ -10,12 +12,20 @@ import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client.tsx";
 async function MediaDetails({
   params,
 }: Pick<PageProps<"/details/media/[type]/[id]">, "params">) {
-  const { id } = await params;
+  const { id, type } = await params;
+
+  const parsedType = TopLevelMediaItemType.safeParse(type);
+
+  if (!parsedType.success) {
+    return notFound();
+  }
+
   const { data } = await query({
     query: GET_MEDIA_ITEM,
     errorPolicy: "all",
     variables: {
       id,
+      type: parsedType.data,
     },
   });
 

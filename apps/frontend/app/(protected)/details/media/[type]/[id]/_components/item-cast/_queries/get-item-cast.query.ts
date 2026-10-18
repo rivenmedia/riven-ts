@@ -10,8 +10,12 @@ export const GET_ITEM_CAST: TypedDocumentNode<
   GetItemCastQuery,
   GetItemCastQueryVariables
 > = gql`
-  query GetItemCast($id: ID!, $language: String!) {
-    tmdbItem(id: $id) {
+  query GetItemCast(
+    $id: ID!
+    $type: TopLevelMediaItemType!
+    $language: String!
+  ) {
+    tmdbItem(id: $id, type: $type) {
       id
       cast(language: $language) {
         id

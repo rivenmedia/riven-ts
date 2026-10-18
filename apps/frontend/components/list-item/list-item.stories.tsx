@@ -74,6 +74,28 @@ WithHref.test("Links to the correct page", async ({ args, canvas }) => {
   await expect(link).toHaveAttribute("href", args.href);
 });
 
+export const NotRequestable = Default.extend({
+  args: {
+    mediaItem: {
+      id: "tmdb-1",
+      title: "Show Without A TVDB ID",
+      posterUrl: faker.image.url(),
+      type: "show",
+      year: 2024,
+      isRequestable: false,
+    },
+    href: `/details/media/show/tmdb-1`,
+  },
+});
+
+NotRequestable.test(
+  "Does not link to a details page, and shows a badge",
+  async ({ canvas }) => {
+    await expect(canvas.queryByRole("link")).not.toBeInTheDocument();
+    await expect(await canvas.findByText("Not requestable")).toBeVisible();
+  },
+);
+
 export const Selectable = Default.extend({
   args: {
     isSelectable: true,

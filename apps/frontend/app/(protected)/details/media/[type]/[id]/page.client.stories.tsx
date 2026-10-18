@@ -135,6 +135,7 @@ export const UnrequestedMovie = meta.story({
   args: {
     data: {
       id: "unrequested-movie",
+      isRequestable: true,
       title: "It",
       overview:
         "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
@@ -284,6 +285,7 @@ export const UnrequestedMovie = meta.story({
                     "https://image.tmdb.org/t/p/w300/6ep6gw90TJ8bYvJC6hEDo8SxjoJ.jpg",
                   type: "movie",
                   year: 2023,
+                  isRequestable: true,
                 },
               ],
             },
@@ -305,6 +307,7 @@ export const UnrequestedMovie = meta.story({
                     "https://image.tmdb.org/t/p/w300/zfE0R94v1E8cuKAerbskfD3VfUt.jpg",
                   type: "movie",
                   year: 2019,
+                  isRequestable: true,
                 },
               ],
             },

@@ -1,13 +1,20 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
-import { DateTime, Duration } from "@repo/util-plugin-sdk/helpers/dates";
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { Arg, ID, Int, Query, Resolver } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
+import { createTmdbMovie } from "../utilities/create-tmdb-indexer-data.ts";
 import { formatImageUrl } from "../utilities/format-image-url.ts";
-import { TmdbTrendingMoviesTimeWindow } from "./enums/trending-time-window.enum.ts";
+import { parseTmdbDate } from "../utilities/parse-tmdb-date.ts";
+import {
+  showDetailsToTmdbShow,
+  showListItemsToTmdbShows,
+} from "../utilities/to-tmdb-show.ts";
+import { TmdbTrendingTimeWindow } from "./enums/trending-time-window.enum.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
@@ -21,14 +28,124 @@ export class TmdbResolver {
     return api.validate();
   }
 
-  @Query(() => TmdbIndexerData)
+  @Query(() => TmdbIndexerData, {
+    description:
+      "Look up a single item from TMDB. Movies are keyed by their TMDB ID, and shows by their TVDB ID.",
+  })
   public async tmdbItem(
     @Arg("id", () => ID) id: string,
+    @Arg("type", () => TopLevelMediaItemType.enum, { defaultValue: "movie" })
+    type: TopLevelMediaItemType,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<TmdbIndexerData> {
+    return type === "show"
+      ? this.#getShowByTvdbId(api, id)
+      : this.#getMovieByTmdbId(api, id);
+  }
+
+  @Query(() => [TmdbIndexerData])
+  public async tmdbNowPlaying(
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<TmdbIndexerData[]> {
+    const nowPlaying = await api.getNowPlaying();
+
+    if (!nowPlaying.results?.length) {
+      throw new Error("No now playing movies found.");
+    }
+
+    const mappedData = new Map<string, TmdbIndexerData>();
+
+    for (const movie of nowPlaying.results) {
+      if (!movie.id || !movie.title || !movie.overview) {
+        continue;
+      }
+
+      mappedData.set(
+        movie.id.toString(),
+        createTmdbMovie({
+          id: movie.id.toString(),
+          title: movie.title,
+          overview: movie.overview,
+          backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),
+          posterUrl: formatImageUrl(movie.poster_path, "poster"),
+          genres: [],
+          genreIds: movie.genre_ids ?? [],
+          language: movie.original_language ?? null,
+          releaseDate: parseTmdbDate(movie.release_date),
+          rawRuntime: null,
+          status: "unknown",
+        }),
+      );
+    }
+
+    return [...mappedData.values()];
+  }
+
+  @Query(() => [TmdbIndexerData])
+  public async tmdbTrendingMovies(
+    @Arg("timeWindow", () => TmdbTrendingTimeWindow.enum)
+    timeWindow: TmdbTrendingTimeWindow,
+    @Arg("page", () => Int, { defaultValue: 1 })
+    page: number,
+    @PluginDataSource(pluginConfig.name, TmdbAPI)
+    api: TmdbAPI,
+  ): Promise<TmdbIndexerData[]> {
+    const trendingMovies = await api.getTrendingMovies(timeWindow, page);
+
+    if (!trendingMovies.results?.length) {
+      throw new Error("No trending movies found.");
+    }
+
+    const mappedData = new Map<string, TmdbIndexerData>();
+
+    for (const movie of trendingMovies.results) {
+      if (!movie.id || !movie.title || !movie.overview) {
+        continue;
+      }
+
+      mappedData.set(
+        movie.id.toString(),
+        createTmdbMovie({
+          id: movie.id.toString(),
+          title: movie.title,
+          overview: movie.overview,
+          backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),
+          posterUrl: formatImageUrl(movie.poster_path, "poster"),
+          genres: [],
+          genreIds: movie.genre_ids ?? [],
+          language: movie.original_language ?? null,
+          releaseDate: parseTmdbDate(movie.release_date),
+          rawRuntime: null,
+          status: "unknown",
+        }),
+      );
+    }
+
+    return [...mappedData.values()];
+  }
+
+  @Query(() => [TmdbIndexerData])
+  public async tmdbTrendingShows(
+    @Arg("timeWindow", () => TmdbTrendingTimeWindow.enum)
+    timeWindow: TmdbTrendingTimeWindow,
+    @Arg("page", () => Int, { defaultValue: 1 })
+    page: number,
+    @PluginDataSource(pluginConfig.name, TmdbAPI)
+    api: TmdbAPI,
+  ): Promise<TmdbIndexerData[]> {
+    const { results } = await api.getTrendingShows(timeWindow, page);
+
+    if (results.length === 0) {
+      throw new Error("No trending shows found.");
+    }
+
+    return showListItemsToTmdbShows(api, results);
+  }
+
+  async #getMovieByTmdbId(api: TmdbAPI, id: string) {
     const item = await api.getMovieDetails(id);
 
-    return {
+    return createTmdbMovie({
       id,
       genres: item.genres.map((genre) => ({
         id: genre.id.toString(),
@@ -38,11 +155,8 @@ export class TmdbResolver {
       title: item.title ?? "",
       language: item.original_language ?? null,
       posterUrl: formatImageUrl(item.poster_path, "poster"),
-      releaseDate: item.release_date
-        ? DateTime.fromISO(item.release_date).toJSDate()
-        : null,
+      releaseDate: parseTmdbDate(item.release_date),
       backdropUrl: formatImageUrl(item.backdrop_path, "backdrop"),
-      type: "movie",
       rawRuntime: item.runtime
         ? Duration.fromObject({ minutes: item.runtime })
         : null,
@@ -64,87 +178,18 @@ export class TmdbResolver {
           logoPath: formatImageUrl(company.logo_path, "logo") ?? null,
           originCountry: company.origin_country ?? "",
         })) ?? null,
-    };
+    });
   }
 
-  @Query(() => [TmdbIndexerData])
-  public async tmdbNowPlaying(
-    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
-  ): Promise<TmdbIndexerData[]> {
-    const nowPlaying = await api.getNowPlaying();
+  async #getShowByTvdbId(api: TmdbAPI, tvdbId: string) {
+    const tmdbId = await api.getShowTmdbIdFromTvdbId(tvdbId);
 
-    if (!nowPlaying.results?.length) {
-      throw new Error("No now playing movies found.");
+    if (!tmdbId) {
+      throw new Error(`No TMDB show found for TVDB ID ${tvdbId}`);
     }
 
-    const mappedData = new Map<string, TmdbIndexerData>();
+    const details = await api.getShowDetails(tmdbId);
 
-    for (const movie of nowPlaying.results) {
-      if (!movie.id || !movie.title || !movie.overview) {
-        continue;
-      }
-
-      mappedData.set(movie.id.toString(), {
-        id: movie.id.toString(),
-        title: movie.title,
-        overview: movie.overview,
-        backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),
-        posterUrl: formatImageUrl(movie.poster_path, "poster"),
-        genres: [],
-        genreIds: movie.genre_ids ?? [],
-        language: movie.original_language ?? null,
-        type: "movie",
-        releaseDate: movie.release_date
-          ? DateTime.fromISO(movie.release_date).toJSDate()
-          : null,
-        rawRuntime: null,
-        status: "unknown",
-      });
-    }
-
-    return [...mappedData.values()];
-  }
-
-  @Query(() => [TmdbIndexerData])
-  public async tmdbTrendingMovies(
-    @Arg("timeWindow", () => TmdbTrendingMoviesTimeWindow.enum)
-    timeWindow: TmdbTrendingMoviesTimeWindow,
-    @Arg("page", () => Int, { defaultValue: 1 })
-    page: number,
-    @PluginDataSource(pluginConfig.name, TmdbAPI)
-    api: TmdbAPI,
-  ): Promise<TmdbIndexerData[]> {
-    const trendingMovies = await api.getTrendingMovies(timeWindow, page);
-
-    if (!trendingMovies.results?.length) {
-      throw new Error("No trending movies found.");
-    }
-
-    const mappedData = new Map<string, TmdbIndexerData>();
-
-    for (const movie of trendingMovies.results) {
-      if (!movie.id || !movie.title || !movie.overview) {
-        continue;
-      }
-
-      mappedData.set(movie.id.toString(), {
-        id: movie.id.toString(),
-        title: movie.title,
-        overview: movie.overview,
-        backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),
-        posterUrl: formatImageUrl(movie.poster_path, "poster"),
-        genres: [],
-        genreIds: movie.genre_ids ?? [],
-        language: movie.original_language ?? null,
-        type: "movie",
-        releaseDate: movie.release_date
-          ? DateTime.fromISO(movie.release_date).toJSDate()
-          : null,
-        rawRuntime: null,
-        status: "unknown",
-      });
-    }
-
-    return [...mappedData.values()];
+    return showDetailsToTmdbShow(details);
   }
 }
