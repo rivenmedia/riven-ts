@@ -58,7 +58,13 @@ export function RequestShowAction({
   return (
     <BaseItemAction
       open={isOpen}
-      onOpenChange={setIsOpen}
+      onOpenChange={(open) => {
+        if (!open) {
+          form.reset();
+        }
+
+        setIsOpen(open);
+      }}
       isExecuting={action.isExecuting}
       onSubmit={(event) => void handleSubmitWithAction(event)}
       title={`Requesting "${title}"`}

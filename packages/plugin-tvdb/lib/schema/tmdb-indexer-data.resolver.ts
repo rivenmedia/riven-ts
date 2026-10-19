@@ -44,13 +44,15 @@ export class TvdbTmdbIndexerDataResolver {
       if (
         !episode.seasonNumber ||
         typeof episode.number !== "number" ||
-        typeof episode.absoluteNumber !== "number"
+        typeof episode.absoluteNumber !== "number" ||
+        !episode.seriesId
       ) {
         continue;
       }
 
       if (!seasons.has(episode.seasonNumber)) {
         seasons.set(episode.seasonNumber, {
+          showId: episode.seriesId.toString(),
           number: episode.seasonNumber,
           id:
             episode.seasons

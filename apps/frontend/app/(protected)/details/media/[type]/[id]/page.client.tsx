@@ -2,7 +2,7 @@ import { SingleMediaItem } from "../../_components/single-media-item.tsx";
 import { ItemCast } from "./_components/item-cast/item-cast.tsx";
 import { ItemMetadata } from "./_components/item-metadata.tsx";
 import { ItemRecommendations } from "./_components/item-recommendations/item-recommendations.tsx";
-import { SeasonList } from "./_components/season-list.tsx";
+import { ItemSeasons } from "./_components/item-seasons/item-seasons.tsx";
 import { SimilarItems } from "./_components/similar-items/similar-items.tsx";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
@@ -16,7 +16,7 @@ export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
     <SingleMediaItem
       indexerData={data}
       slots={{
-        seasonList: <SeasonList seasons={data.seasons ?? []} />,
+        seasonList: data.type === "show" && <ItemSeasons id={data.id} />,
         castList: <ItemCast id={data.id} type={data.type} />,
         itemMetadata: <ItemMetadata data={data} />,
         itemRecommendations: (

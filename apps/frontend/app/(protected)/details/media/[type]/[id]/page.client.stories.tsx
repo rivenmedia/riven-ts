@@ -14,6 +14,7 @@ import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-it
 import { RETRY_ITEM } from "./_components/item-action-toolbar/actions/retry-item/_mutations/retry-item.mutation.ts";
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
+import { GET_ITEM_SEASONS } from "./_components/item-seasons/_queries/get-item-seasons.query.ts";
 import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
 import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "./page.client.tsx";
@@ -89,11 +90,12 @@ const mockRequestedMovie = ({
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
               id: itemRequestId,
-              primaryMediaItem: {
+              mediaItem: {
                 __typename: "Movie",
                 id: primaryMediaItemId,
                 state,
                 type: "movie",
+                isRequested: true,
               },
             },
           },
@@ -101,6 +103,94 @@ const mockRequestedMovie = ({
       ),
     ],
   };
+};
+
+/**
+ * Mocks the item request queries for a show that has been requested.
+ *
+ * @returns The mocked handlers, and the IDs they use
+ */
+const mockRequestedShow = ({
+  state,
+  availableActions,
+}: {
+  state: MediaItemState;
+  availableActions: ItemRequestAction[];
+}) => {
+  const itemRequestId = crypto.randomUUID();
+  const primaryMediaItemId = crypto.randomUUID();
+
+  return {
+    itemRequestId,
+    primaryMediaItemId,
+    handlers: [
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              id: itemRequestId,
+              availableActions,
+              primaryMediaItem: {
+                __typename: "Show",
+                id: primaryMediaItemId,
+              },
+              seasons: null,
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({
+          data: {
+            itemRequestByExternalIds: {
+              __typename: "ItemRequest",
+              id: itemRequestId,
+              mediaItem: {
+                __typename: "Show",
+                id: primaryMediaItemId,
+                state,
+                type: "show",
+                isRequested: true,
+              },
+            },
+          },
+        }),
+      ),
+    ],
+  };
+};
+
+/**
+ * Opens an item action's dialog, then confirms it.
+ */
+const requestItemSeasons = async (
+  {
+    canvas,
+    canvasElement,
+    userEvent,
+  }: Pick<StoryContext, "canvas" | "canvasElement" | "userEvent">,
+  seasons: Set<number>,
+) => {
+  await userEvent.click(
+    await canvas.findByRole("button", { name: /request/iu }),
+  );
+
+  const dialog = within(canvasElement.ownerDocument.body).getByRole(
+    "alertdialog",
+  );
+
+  for (const season of seasons) {
+    await userEvent.click(
+      within(dialog).getByRole("checkbox", {
+        name: new RegExp(`Season ${season.toString()}`, "iu"),
+      }),
+    );
+  }
+
+  await userEvent.click(
+    within(dialog).getByRole("button", { name: /request selected/iu }),
+  );
 };
 
 /**
@@ -503,93 +593,375 @@ ScrapedMovie.test(
   },
 );
 //#endregion
+//#endregion
 
-// export const UnrequestedShow = meta.story({
-//   args: {
-//     data: {
-//       mediaDetails: {
-//         __typename: "MediaDetails",
-//         details: {
-//           __typename: "MediaDetailsDetails",
-//           id: crypto.randomUUID() as UUID,
-//           backdropPath:
-//             "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-//           logo: null,
-//           trailer: {
-//             __typename: "Trailer",
-//             id: crypto.randomUUID() as UUID,
-//             name: "Trailer 1",
-//             site: "YouTube",
-//             key: "abcd1234",
-//             url: "https://www.youtube.com/watch?v=abcd1234",
-//           },
-//           posterPath:
-//             "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
-//           year: 2021,
-//           formattedRuntime: "",
-//           originalLanguage: "en",
-//           certification: "pg-13",
-//           status: "Released",
-//           title: "Arcane",
-//           overview:
-//             "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
-//           recommendations: [],
-//           similar: [],
-//           genres: [
-//             {
-//               __typename: "Genre",
-//               id: crypto.randomUUID() as UUID,
-//               name: "Action",
-//             },
-//           ],
-//           cast: [
-//             {
-//               __typename: "CastMember",
-//               character: "Jinx",
-//               name: "Ella Purnell",
-//               id: crypto.randomUUID() as UUID,
-//               profilePath:
-//                 "https://artworks.thetvdb.com/banners/v4/actor/599610/photo/673af66279aeb.jpg",
-//             },
-//             {
-//               __typename: "CastMember",
-//               character: "Vi",
-//               name: "Hailee Steinfeld",
-//               id: crypto.randomUUID() as UUID,
-//               profilePath:
-//                 "https://artworks.thetvdb.com/banners/v4/actor/327453/photo/673b757403cbb.jpg",
-//             },
-//           ],
-//           seasons: [
-//             {
-//               __typename: "SeasonData",
-//               completedCount: 8,
-//               episodeCount: 8,
-//               id: crypto.randomUUID() as UUID,
-//               name: "Season 1",
-//               seasonNumber: 1,
-//               image:
-//                 "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
-//             },
-//             {
-//               __typename: "SeasonData",
-//               completedCount: 8,
-//               episodeCount: 8,
-//               id: crypto.randomUUID() as UUID,
-//               name: "Season 2",
-//               seasonNumber: 2,
-//               image:
-//                 "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
-//             },
-//           ],
-//         },
-//         type: "show",
-//         completedFileCount: 1,
-//         filesystemEntries: [],
-//         mediaMetadata: null,
-//         state: "completed",
-//         totalFileCount: 0,
-//       },
-//     },
-//   },
-// });
+//#region Show stories
+//#region Unrequested show
+export const UnrequestedShow = meta.story({
+  args: {
+    data: {
+      id: "unrequested-show",
+      isRequestable: true,
+      title: "Arcane",
+      overview:
+        "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
+      backdropUrl:
+        "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
+      logo: null,
+      posterUrl:
+        "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+      trailer: {
+        __typename: "Trailer",
+        id: crypto.randomUUID(),
+        name: "Trailer 1",
+        site: "YouTube",
+        key: "abcd1234",
+        url: "https://www.youtube.com/watch?v=abcd1234",
+      },
+      year: 2021,
+      runtime: "",
+      language: "en",
+      certification: "R",
+      type: "show",
+      genres: [
+        {
+          __typename: "Genre",
+          id: crypto.randomUUID(),
+          name: "Action",
+        },
+      ],
+      ratings: {},
+      status: "released",
+      budget: 35_000_000,
+      revenue: 719_766_009,
+      productionCompanies: [
+        {
+          __typename: "ProductionCompany",
+          id: "12",
+          logoPath: "/2ycs64eqV5rqKYHyQK0GVoKGvfX.png",
+          name: "New Line Cinema",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "829",
+          logoPath: "/iJo9zP5QCKyBsmKSOcvXd6UDNih.png",
+          name: "Vertigo Entertainment",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "2723",
+          logoPath: "/rB0dyszYRRR3SAG1tfNRzXoYDYq.png",
+          name: "Lin Pictures",
+          originCountry: "US",
+        },
+        {
+          __typename: "ProductionCompany",
+          id: "87671",
+          logoPath: "/kEEGB5Z2XLYeR3AMt3Qds7vMnvM.png",
+          name: "KatzSmith Productions",
+          originCountry: "US",
+        },
+      ],
+      homepage: "https://example.com",
+      imdbId: "tt1234567",
+      originCountry: ["US"],
+      spokenLanguages: [
+        {
+          __typename: "SpokenLanguage",
+          englishName: "English",
+          iso6391Code: "en",
+          name: "English",
+        },
+      ],
+    },
+  },
+  beforeEach({ args, msw }) {
+    msw.use(
+      graphql.query(GET_ITEM_SEASONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              seasons: [
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-1`,
+                  number: 1,
+                  showId: args.data.id,
+                  title: "Season 1",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                },
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-2`,
+                  number: 2,
+                  showId: args.data.id,
+                  title: "Season 2",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                },
+              ],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_CAST, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              cast: [
+                {
+                  __typename: "CastMember",
+                  character: "Jinx",
+                  name: "Ella Purnell",
+                  id: crypto.randomUUID(),
+                  profileUrl:
+                    "https://artworks.thetvdb.com/banners/v4/actor/599610/photo/673af66279aeb.jpg",
+                },
+                {
+                  __typename: "CastMember",
+                  character: "Vi",
+                  name: "Hailee Steinfeld",
+                  id: crypto.randomUUID(),
+                  profileUrl:
+                    "https://artworks.thetvdb.com/banners/v4/actor/327453/photo/673b757403cbb.jpg",
+                },
+              ],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_RECOMMENDATIONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              recommendations: [],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_SIMILAR_ITEMS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              similarItems: [],
+            },
+          },
+        }),
+      ),
+      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+      ),
+      graphql.query(GET_ITEM_STATUS, () =>
+        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+      ),
+    );
+  },
+});
+
+UnrequestedShow.test(
+  'Requests the show when the "Request" button is clicked',
+  async (context) => {
+    context.msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      graphql.mutation(REQUEST_ITEM, () =>
+        HttpResponse.json({ data: { requestItem: true } }),
+      ),
+    );
+
+    await requestItemSeasons(context, new Set([1]));
+
+    await expect(
+      await context.canvas.findByText(/request successful/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+
+//#region Completed show
+export const CompletedShow = UnrequestedShow.extend({
+  args: {
+    data: {
+      ...UnrequestedShow.composed.args.data,
+      id: "completed-show",
+    },
+  },
+  beforeEach({ msw }) {
+    const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedShow({
+      state: "completed",
+      availableActions: ["delete", "reset", "retry"],
+    });
+
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      ...handlers,
+      mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
+        removeItemRequest: true,
+      }),
+      mockMutationWithIdEqualityCheck(RESET_ITEM, primaryMediaItemId, {
+        resetMediaItem: [
+          {
+            __typename: "Show",
+            id: primaryMediaItemId,
+            state: "indexed",
+          },
+        ],
+      }),
+      mockMutationWithIdEqualityCheck(RETRY_ITEM, primaryMediaItemId, {
+        retryMediaItem: {
+          __typename: "Show",
+          id: primaryMediaItemId,
+          state: "indexed",
+        },
+      }),
+    );
+  },
+});
+
+CompletedShow.test(
+  'Resets the item when the "Reset" button is clicked',
+  async (context) => {
+    await confirmItemAction(context, /reset/iu);
+
+    await expect(
+      await context.canvas.findByText(/reset successful/iu),
+    ).toBeInTheDocument();
+  },
+);
+
+CompletedShow.test(
+  'Retries the item when the "Retry" button is clicked',
+  async (context) => {
+    await confirmItemAction(context, /retry/iu);
+
+    await expect(
+      await context.canvas.findByText(/item retried successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+
+CompletedShow.test(
+  'Deletes the item when the "Delete" button is clicked',
+  async (context) => {
+    await confirmItemAction(context, /delete/iu);
+
+    await expect(
+      await context.canvas.findByText(/item deleted successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+
+//#region Paused show
+export const PausedShow = UnrequestedShow.extend({
+  args: {
+    data: {
+      ...UnrequestedShow.composed.args.data,
+      id: "paused-show",
+    },
+  },
+  beforeEach({ msw }) {
+    const { primaryMediaItemId, handlers } = mockRequestedShow({
+      state: "paused",
+      availableActions: ["delete", "reset", "resume"],
+    });
+
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      ...handlers,
+      mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
+        resumeMediaItem: {
+          __typename: "Show",
+          id: primaryMediaItemId,
+          state: "scraped",
+        },
+      }),
+    );
+  },
+});
+
+PausedShow.test(
+  'Resumes the item when the "Resume" button is clicked',
+  async (context) => {
+    await confirmItemAction(context, /resume/iu);
+
+    await expect(
+      await context.canvas.findByText(/item resumed successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+
+//#region Scraped show
+export const ScrapedShow = UnrequestedShow.extend({
+  args: {
+    data: {
+      ...UnrequestedShow.composed.args.data,
+      id: "scraped-show",
+    },
+  },
+  beforeEach({ msw }) {
+    const { primaryMediaItemId, handlers } = mockRequestedShow({
+      state: "scraped",
+      availableActions: ["delete", "reset", "pause"],
+    });
+
+    msw.use(
+      getSessionHandler,
+      hasPermissionHandler,
+      ...handlers,
+      mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
+        pauseMediaItem: {
+          __typename: "Show",
+          id: primaryMediaItemId,
+          state: "paused",
+        },
+      }),
+    );
+  },
+});
+
+ScrapedShow.test(
+  'Pauses the item when the "Pause" button is clicked',
+  async (context) => {
+    await confirmItemAction(context, /pause/iu);
+
+    await expect(
+      await context.canvas.findByText(/item paused successfully/iu),
+    ).toBeInTheDocument();
+  },
+);
+//#endregion
+
+//#endregion

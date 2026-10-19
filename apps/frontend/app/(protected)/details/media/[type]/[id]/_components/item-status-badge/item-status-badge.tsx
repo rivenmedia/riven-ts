@@ -5,27 +5,58 @@ import { query } from "#lib/graphql/client.ts";
 
 import { GET_ITEM_STATUS } from "./_queries/get-item-status.query";
 
-interface ItemStatusBadgeProps {
-  indexerItemId: string;
-}
+import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
 
-export async function ItemStatusBadge({ indexerItemId }: ItemStatusBadgeProps) {
+type ItemStatusBadgeProps = {
+  indexerItemId: string;
+} & (
+  | {
+      type: Extract<MediaItemType, "movie" | "show">;
+      seasonNumber?: never;
+      episodeNumber?: never;
+    }
+  | {
+      type: Extract<MediaItemType, "season">;
+      seasonNumber: number;
+      episodeNumber?: never;
+    }
+  | {
+      type: Extract<MediaItemType, "episode">;
+      seasonNumber: number;
+      episodeNumber: number;
+    }
+);
+
+export async function ItemStatusBadge({
+  indexerItemId,
+  seasonNumber,
+  episodeNumber,
+  type,
+}: ItemStatusBadgeProps) {
   await io();
 
   const { data } = await query({
     query: GET_ITEM_STATUS,
-    variables: { tmdbId: indexerItemId },
+    variables: {
+      type,
+      ...(type === "movie"
+        ? { tmdbId: indexerItemId }
+        : { tvdbId: indexerItemId }),
+      ...(type === "season" ? { seasonNumber } : {}),
+      ...(type === "episode" ? { seasonNumber, episodeNumber } : {}),
+    },
     errorPolicy: "all",
   });
 
-  if (!data?.itemRequestByExternalIds?.primaryMediaItem) {
+  if (!data?.itemRequestByExternalIds?.mediaItem) {
     return null;
   }
 
   return (
     <StatusBadge
       className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-      state={data.itemRequestByExternalIds.primaryMediaItem.state}
+      state={data.itemRequestByExternalIds.mediaItem.state}
+      isRequested={data.itemRequestByExternalIds.mediaItem.isRequested}
       large
     />
   );

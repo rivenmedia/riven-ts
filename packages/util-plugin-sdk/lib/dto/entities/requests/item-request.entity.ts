@@ -8,12 +8,14 @@ import {
   Unique,
 } from "@mikro-orm/decorators/legacy";
 import { IsNumberString, IsOptional, Matches } from "class-validator";
+import assert from "node:assert";
 import { randomUUID } from "node:crypto";
-import { Field, ID, ObjectType } from "type-graphql";
+import { Arg, Field, ID, Int, ObjectType } from "type-graphql";
 
 import { DateTime } from "../../../helpers/dates.ts";
 import { ItemRequestState } from "../../enums/item-request-state.enum.ts";
 import { ItemRequestType } from "../../enums/item-request-type.enum.ts";
+import { MediaItemType } from "../../enums/media-item-type.enum.ts";
 import { MediaItemUnion } from "../../unions/media-item.union.ts";
 import { MediaItem } from "../media-items/media-item.entity.ts";
 import { Season } from "../media-items/season.entity.ts";
@@ -131,5 +133,70 @@ export class ItemRequest {
     });
 
     return mediaItem ?? null;
+  }
+
+  @Field(() => MediaItemUnion, { nullable: true })
+  public async mediaItem(
+    @Arg("type", () => MediaItemType.enum) type: MediaItemType,
+    @Arg("seasonNumber", () => Int, { nullable: true })
+    seasonNumber?: number,
+    @Arg("episodeNumber", () => Int, { nullable: true })
+    episodeNumber?: number,
+  ) {
+    if (type === "movie" || type === "show") {
+      const [mediaItem] = await this.mediaItems.matching({
+        where: {
+          type,
+        },
+      });
+
+      return mediaItem ?? null;
+    }
+
+    assert.ok(
+      seasonNumber !== undefined,
+      `Season number must be provided for ${type} type media items.`,
+    );
+
+    if (type === "episode" && episodeNumber === undefined) {
+      throw new Error(
+        "Season number and episode number must be provided for episode type media items.",
+      );
+    }
+
+    const [season] = await this.seasonItems.matching({
+      where: {
+        number: seasonNumber,
+      },
+    });
+
+    if (!season) {
+      throw new Error(
+        `Season number ${seasonNumber.toString()} not found for this item request.`,
+      );
+    }
+
+    if (type === "season") {
+      return season;
+    }
+
+    assert.ok(
+      episodeNumber !== undefined,
+      "Episode number must be provided for episode type media items.",
+    );
+
+    const [episode] = await season.episodes.matching({
+      where: {
+        number: episodeNumber,
+      },
+    });
+
+    if (!episode) {
+      throw new Error(
+        `Episode number ${episodeNumber.toString()} not found for season ${seasonNumber.toString()} in this item request.`,
+      );
+    }
+
+    return episode;
   }
 }

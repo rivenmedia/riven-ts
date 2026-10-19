@@ -3,6 +3,7 @@ import { startCase } from "es-toolkit";
 import React from "react";
 
 import { fly } from "#components/_animations/fly.ts";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
@@ -49,7 +50,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {data.title}
           </h1>
-          <ItemStatusBadge indexerItemId={data.id} />
+          <ItemStatusBadge indexerItemId={data.id} type={data.type} />
           {/* {data.mediaDetails.totalFileCount > 0 && (
             <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
               {data.mediaDetails.completedFileCount}/
@@ -57,13 +58,13 @@ export function ItemOverview({ data }: ItemOverviewProps) {
             </span>
           )} */}
         </div>
-        <ItemActionToolbar
-          title={data.title}
-          externalId={data.id}
-          {...(data.type === "movie"
-            ? { mediaType: "movie" }
-            : { mediaType: "show", seasons: data.seasons ?? [] })}
-        />
+        <ErrorFallback message="Failed to load item action toolbar.">
+          <ItemActionToolbar
+            title={data.title}
+            externalId={data.id}
+            mediaType={data.type}
+          />
+        </ErrorFallback>
         <div
           className={cn(
             "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",

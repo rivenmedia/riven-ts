@@ -10,14 +10,25 @@ export const GET_ITEM_STATUS: TypedDocumentNode<
   GetItemStatusQuery,
   GetItemStatusQueryVariables
 > = gql`
-  query GetItemStatus($tmdbId: String!) {
-    itemRequestByExternalIds(tmdbId: $tmdbId) {
+  query GetItemStatus(
+    $tvdbId: String
+    $tmdbId: String
+    $type: MediaItemType!
+    $seasonNumber: Int
+    $episodeNumber: Int
+  ) {
+    itemRequestByExternalIds(tvdbId: $tvdbId, tmdbId: $tmdbId) {
       id
-      primaryMediaItem {
+      mediaItem(
+        type: $type
+        seasonNumber: $seasonNumber
+        episodeNumber: $episodeNumber
+      ) {
         ... on MediaItem {
           state
           type
           id
+          isRequested
         }
       }
     }

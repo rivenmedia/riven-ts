@@ -4,33 +4,25 @@ import { io } from "next/cache";
 import { fly } from "#components/_animations/fly.ts";
 import { query } from "#lib/graphql/client.ts";
 
+import { fetchItemSeasons } from "../item-seasons/_data-access/fetch-item-seasons.ts";
 import { GET_ITEM_REQUEST_ACTIONS } from "./_queries/get-item-request-actions.query.ts";
 import { ConfirmItemAction } from "./actions/_components/confirm-item-action.tsx";
 import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
 import { RequestShowAction } from "./actions/request-item/request-show-action.tsx";
 import { confirmItemActions } from "./confirm-item-actions.tsx";
 
-import type { IndexerSeason } from "#app/_types/__generated__/graphql.ts";
+import type { TopLevelMediaItemType } from "#app/_types/__generated__/graphql.ts";
 import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 
-type ItemActionToolbarProps = {
+interface ItemActionToolbarProps {
   title: string;
   externalId: string;
-} & (
-  | {
-      mediaType: "movie";
-      seasons?: never;
-    }
-  | {
-      mediaType: "show";
-      seasons: IndexerSeason[];
-    }
-);
+  mediaType: TopLevelMediaItemType;
+}
 
 export async function ItemActionToolbar({
   externalId,
   mediaType,
-  seasons,
   title,
 }: ItemActionToolbarProps) {
   await io();
@@ -54,6 +46,8 @@ export async function ItemActionToolbar({
     mediaItem: data?.itemRequestByExternalIds?.primaryMediaItem?.id,
   };
 
+  const seasons = await fetchItemSeasons(externalId);
+
   return (
     <div
       className={cn(
@@ -66,7 +60,8 @@ export async function ItemActionToolbar({
       )}
       {(availableActions.has("request_multiple") ||
         availableActions.has("request_more")) &&
-        mediaType === "show" && (
+        mediaType === "show" &&
+        seasons && (
           <RequestShowAction
             title={title}
             externalIds={externalIds}

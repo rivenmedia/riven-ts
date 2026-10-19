@@ -11,15 +11,18 @@ export interface StatusBadgeProps extends Pick<
   "className"
 > {
   state: MediaItemState;
+  isRequested: boolean;
   large?: boolean;
 }
 
 export function StatusBadge({
   state,
+  isRequested,
   large = false,
   className,
 }: StatusBadgeProps) {
   const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
+  const label = isRequested ? startCase(state) : "Unrequested";
 
   return (
     <Badge
@@ -39,10 +42,11 @@ export function StatusBadge({
         state === "paused" &&
           "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         state === "failed" && "bg-red-600/80 text-red-50 hover:bg-red-600/70",
+        !isRequested && "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         className,
       )}
     >
-      {startCase(state)}
+      {label}
     </Badge>
   );
 }
