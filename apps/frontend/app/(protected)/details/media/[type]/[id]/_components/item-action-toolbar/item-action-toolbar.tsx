@@ -46,7 +46,8 @@ export async function ItemActionToolbar({
     mediaItem: data?.itemRequestByExternalIds?.primaryMediaItem?.id,
   };
 
-  const seasons = await fetchItemSeasons(externalId);
+  const seasons =
+    mediaType === "show" ? await fetchItemSeasons(externalId) : null;
 
   return (
     <div
