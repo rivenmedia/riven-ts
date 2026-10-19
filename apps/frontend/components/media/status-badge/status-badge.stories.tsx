@@ -23,13 +23,11 @@ const meta = preview.meta({
         "requested",
       ],
     },
-    large: {
-      control: "boolean",
-    },
   },
   args: {
     state: "completed" as const,
     large: true,
+    isRequested: true,
   },
 });
 
@@ -43,7 +41,7 @@ export const AllStates = meta.story({
           <SectionHeading title="Large Status Badges" />
           <div className="flex flex-wrap gap-2">
             {MediaItemState.options.map((state) => (
-              <StatusBadge key={state} state={state} large />
+              <StatusBadge key={state} state={state} isRequested large />
             ))}
           </div>
         </div>
@@ -51,7 +49,12 @@ export const AllStates = meta.story({
           <SectionHeading title="Small Status Badges" />
           <div className="flex flex-wrap gap-2">
             {MediaItemState.options.map((state) => (
-              <StatusBadge key={state} state={state} large={false} />
+              <StatusBadge
+                key={state}
+                state={state}
+                isRequested
+                large={false}
+              />
             ))}
           </div>
         </div>
