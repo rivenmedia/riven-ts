@@ -43,10 +43,13 @@ export class ItemRequestResolver {
   ) {
     sendEvent({
       item: {
-        type: "movie",
         requestedBy: input.requestedBy,
         tmdbId: input.tmdbId,
         imdbId: input.imdbId,
+        tvdbId: input.tvdbId,
+        ...(input.type === "show"
+          ? { type: "show", seasons: input.requestedSeasons }
+          : { type: "movie" }),
       },
       type: "riven-external.item-requested",
     });

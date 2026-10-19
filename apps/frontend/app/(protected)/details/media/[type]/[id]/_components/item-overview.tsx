@@ -62,7 +62,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           externalId={data.id}
           {...(data.type === "movie"
             ? { mediaType: "movie" }
-            : { mediaType: "show", seasons: [] })}
+            : { mediaType: "show", seasons: data.seasons ?? [] })}
         />
         <div
           className={cn(

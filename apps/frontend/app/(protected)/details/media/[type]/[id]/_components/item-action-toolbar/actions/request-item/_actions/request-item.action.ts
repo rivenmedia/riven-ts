@@ -1,12 +1,11 @@
 "use server";
 
-import { z } from "zod";
-
 import { getClient } from "#lib/graphql/client.ts";
 import { permissionActionClient } from "#lib/server-actions/action-client.ts";
 
 import { REQUEST_ITEM } from "../_mutations/request-item.mutation";
 import { ExternalIds } from "../_schemas/external-ids.schema";
+import { RequestShowFormSchema } from "../_schemas/request-show.form-schema";
 
 export const requestItem = permissionActionClient
   .metadata({
@@ -14,10 +13,14 @@ export const requestItem = permissionActionClient
       item: ["request"],
     },
   })
-  .inputSchema(z.record(z.string(), z.unknown()))
+  .inputSchema(RequestShowFormSchema)
   .bindArgsSchemas([ExternalIds])
   .action(
-    async ({ bindArgsParsedInputs: [{ tmdbId, tvdbId, imdbId }], ctx }) => {
+    async ({
+      parsedInput: { requestedSeasons },
+      bindArgsParsedInputs: [{ tmdbId, tvdbId, imdbId }],
+      ctx,
+    }) => {
       const { data } = await getClient().mutate({
         mutation: REQUEST_ITEM,
         variables: {
@@ -26,6 +29,14 @@ export const requestItem = permissionActionClient
             ...(tvdbId && { tvdbId }),
             ...(imdbId && { imdbId }),
             requestedBy: ctx.auth.user.email,
+            ...(requestedSeasons
+              ? {
+                  requestedSeasons: Object.keys(requestedSeasons).map(Number),
+                  type: "show",
+                }
+              : {
+                  type: "movie",
+                }),
           },
         },
       });

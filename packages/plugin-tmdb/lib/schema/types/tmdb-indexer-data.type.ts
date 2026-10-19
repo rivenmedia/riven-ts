@@ -1,3 +1,4 @@
+import { IndexerBaseItem } from "@repo/util-plugin-sdk/dto/types/indexer-base-item.type";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
@@ -19,11 +20,11 @@ import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
  *
  * TMDB lookups must always use {@link TmdbIndexerData.tmdbId}.
  */
-@ObjectType({ implements: IndexerData })
-export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
-  @Field(() => ID)
-  public id!: string;
-
+@ObjectType({ implements: [IndexerData, IndexerBaseItem] })
+export class TmdbIndexerData
+  extends IndexerBaseItem
+  implements Omit<IndexerData, keyof IndexerBaseItem | "runtime" | "year">
+{
   @Field(() => ID)
   public tmdbId!: string;
 
@@ -31,13 +32,7 @@ export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   public tvdbId?: string | null;
 
   @Field()
-  public title!: string;
-
-  @Field()
   public overview!: string;
-
-  @Field(() => String, { nullable: true })
-  public posterUrl?: string | null;
 
   @Field(() => String, { nullable: true })
   public backdropUrl?: string | null;

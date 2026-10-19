@@ -10,7 +10,7 @@ import { RequestMovieAction } from "./actions/request-item/request-movie-action.
 import { RequestShowAction } from "./actions/request-item/request-show-action.tsx";
 import { confirmItemActions } from "./confirm-item-actions.tsx";
 
-import type { SeasonData } from "./actions/request-item/_components/season-selector.tsx";
+import type { IndexerSeason } from "#app/_types/__generated__/graphql.ts";
 import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 
 type ItemActionToolbarProps = {
@@ -23,7 +23,7 @@ type ItemActionToolbarProps = {
     }
   | {
       mediaType: "show";
-      seasons: SeasonData[];
+      seasons: IndexerSeason[];
     }
 );
 

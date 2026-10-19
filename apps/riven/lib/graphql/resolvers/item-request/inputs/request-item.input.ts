@@ -1,4 +1,6 @@
-import { InputType, Field } from "type-graphql";
+import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
+
+import { InputType, Field, Int } from "type-graphql";
 
 @InputType()
 export class RequestItemInput {
@@ -13,4 +15,10 @@ export class RequestItemInput {
 
   @Field(() => String, { nullable: true })
   public tvdbId?: string | null;
+
+  @Field(() => TopLevelMediaItemType.enum)
+  public type!: TopLevelMediaItemType;
+
+  @Field(() => [Int], { nullable: true })
+  public requestedSeasons?: number[];
 }

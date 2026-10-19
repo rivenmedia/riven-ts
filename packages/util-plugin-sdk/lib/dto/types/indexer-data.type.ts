@@ -1,9 +1,11 @@
-import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
+import { Field, Float, Int, InterfaceType } from "type-graphql";
 
 import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
 import { TopLevelMediaItemType } from "../enums/top-level-media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
+import { IndexerBaseItem } from "./indexer-base-item.type.ts";
+import { IndexerSeason } from "./indexer-season.type.ts";
 import { ItemImage } from "./item-image.type.ts";
 import { ProductionCompany } from "./production-company.type.ts";
 import { Ratings } from "./ratings.type.ts";
@@ -28,31 +30,14 @@ import type { Duration } from "luxon";
  */
 @InterfaceType({
   description: "Represents a media item returned from an indexer.",
+  implements: IndexerBaseItem,
 })
-export abstract class IndexerData {
-  /**
-   * The unique identifier for the media item on the indexer.
-   */
-  @Field(() => ID)
-  public id!: string;
-
-  /**
-   * The title of the media item.
-   */
-  @Field()
-  public title!: string;
-
+export abstract class IndexerData extends IndexerBaseItem {
   /**
    * The overview or summary of the media item.
    */
   @Field()
   public overview!: string;
-
-  /**
-   * The URL of the poster image for the media item.
-   */
-  @Field(() => String, { nullable: true })
-  public posterUrl?: string | null;
 
   /**
    * The URL of the backdrop image for the media item.
@@ -172,4 +157,7 @@ export abstract class IndexerData {
 
   @Field(() => String, { nullable: true })
   public imdbId?: string | null;
+
+  @Field(() => [IndexerSeason], { nullable: true })
+  public seasons?: IndexerSeason[] | null;
 }

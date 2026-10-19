@@ -50,18 +50,21 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       budget
       imdbId
       isRequestable
-      # seasons {
-      #   id
-      #   name
-      #   seasonNumber
-      #   episodeCount
-      #   completedCount
-      #   image
-      # }
+      seasons {
+        id
+        number
+        title
+        posterUrl
+        episodes {
+          id
+          title
+          number
+          posterUrl
+        }
+      }
       # totalFileCount
       # completedFileCount
       type
-      # state
       # filesystemEntries {
       #   id
       #   fileSize {

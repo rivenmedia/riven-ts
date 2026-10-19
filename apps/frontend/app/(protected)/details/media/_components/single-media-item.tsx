@@ -11,6 +11,7 @@ import type { ReactNode } from "react";
 interface SingleMediaItemProps {
   indexerData: IndexerData;
   slots: {
+    seasonList?: ReactNode;
     castList?: ReactNode;
     itemMetadata?: ReactNode;
     itemRecommendations?: ReactNode;
@@ -43,6 +44,7 @@ export function SingleMediaItem({ indexerData, slots }: SingleMediaItemProps) {
         />
         <div className="px-8 pb-24 md:px-20 lg:px-24">
           <ItemOverview data={indexerData} />
+          {slots.seasonList}
           {slots.castList}
           {slots.itemMetadata}
           {slots.itemRecommendations}
