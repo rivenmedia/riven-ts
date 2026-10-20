@@ -1009,7 +1009,7 @@ export const ScrapedShow = UnrequestedShow.extend({
       },
     },
   },
-  beforeEach({ msw }) {
+  beforeEach({ args, msw }) {
     const { primaryMediaItemId, handlers } = mockRequestedShow({
       availableActions: ["delete", "reset", "pause"],
     });
@@ -1025,6 +1025,61 @@ export const ScrapedShow = UnrequestedShow.extend({
           state: "paused",
         },
       }),
+      graphql.query(GET_ITEM_SEASONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              seasons: [
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-1`,
+                  number: 1,
+                  title: "Season 1",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedEpisodeCount: 0,
+                    state: "scraped",
+                    isRequested: true,
+                  },
+                },
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-2`,
+                  number: 2,
+                  title: "Season 2",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedEpisodeCount: 0,
+                    state: "scraped",
+                    isRequested: true,
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      ),
     );
   },
 });
