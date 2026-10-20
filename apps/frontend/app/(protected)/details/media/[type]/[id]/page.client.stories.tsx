@@ -278,9 +278,6 @@ export const UnrequestedMovie = meta.story({
         },
       ],
       mediaItem: null,
-      // seasons: null,
-      // type: "movie",
-      // completedFileCount: 1,
       // filesystemEntries: [
       //   {
       //     __typename: "MediaEntry",
@@ -297,8 +294,6 @@ export const UnrequestedMovie = meta.story({
       //   },
       // ],
       // mediaMetadata: null,
-      // state: "completed",
-      // totalFileCount: 1,
     },
   },
   beforeEach({ args, msw }) {
