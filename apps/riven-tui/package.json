@@ -10,13 +10,13 @@
   ],
   "type": "module",
   "imports": {
-    "#*.ts": {
-      "production": "./dist/*.js",
-      "default": "./lib/*.ts"
-    },
     "#*.tsx": {
       "production": "./dist/*.js",
       "default": "./lib/*.tsx"
+    },
+    "#*.ts": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.ts"
     }
   },
   "exports": {

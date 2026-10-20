@@ -26,7 +26,7 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
   return (
     <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
       <CarouselContent>
-        {seasons.map(({ episodes, id, number, posterUrl, showId }) => {
+        {seasons.map(({ episodes, id, number, posterUrl, rootId }) => {
           const episodesLength = episodes.length;
 
           return (
@@ -39,7 +39,7 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
                 className="w-28 md:w-32 lg:w-36"
                 topRight={
                   <ItemStatusBadge
-                    indexerItemId={showId}
+                    indexerItemId={rootId}
                     type="season"
                     seasonNumber={number}
                   />

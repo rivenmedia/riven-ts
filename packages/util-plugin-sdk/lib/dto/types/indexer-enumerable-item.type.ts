@@ -6,6 +6,7 @@ import { IndexerBaseItem } from "./indexer-base-item.type.ts";
 @InterfaceType({
   description:
     "An enumerable item returned from an indexer (e.g., a season or episode).",
+  implements: IndexerBaseItem,
 })
 export abstract class IndexerEnumerableItem extends IndexerBaseItem {
   @Min(0)

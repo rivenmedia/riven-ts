@@ -18,6 +18,7 @@ export const GET_FILTERED_TMDB_TRENDING_SHOWS: TypedDocumentNode<
       posterUrl
       releaseDate
       type
+      year
       isRequestable
     }
   }

@@ -52,7 +52,8 @@ export class TvdbTmdbIndexerDataResolver {
 
       if (!seasons.has(episode.seasonNumber)) {
         seasons.set(episode.seasonNumber, {
-          showId: episode.seriesId.toString(),
+          rootId: episode.seriesId.toString(),
+          type: "season",
           number: episode.seasonNumber,
           id:
             episode.seasons
@@ -65,9 +66,12 @@ export class TvdbTmdbIndexerDataResolver {
       }
 
       seasons.get(episode.seasonNumber)?.episodes.push({
+        type: "episode",
+        rootId: episode.seriesId.toString(),
         id: episode.id?.toString() ?? `episode-${episode.number.toString()}`,
         title: episode.name ?? `Episode ${episode.number.toString()}`,
         number: episode.number,
+        seasonNumber: episode.seasonNumber,
         posterUrl: episode.image ?? null,
       });
     }

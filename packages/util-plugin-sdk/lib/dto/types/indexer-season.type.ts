@@ -8,7 +8,7 @@ import { IndexerEpisode } from "./indexer-episode.type.ts";
 })
 export class IndexerSeason extends IndexerEnumerableItem {
   @Field(() => ID)
-  public showId!: string;
+  declare public rootId: string;
 
   @Field(() => [IndexerEpisode])
   public episodes!: IndexerEpisode[];

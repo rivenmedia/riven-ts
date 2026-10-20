@@ -18,15 +18,23 @@ import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 import type { TmdbMediaAdapter } from "../adapters/tmdb-media-adapter.ts";
 import type { ResolverInterface } from "type-graphql";
 
-const adapters = {
+const adapters: Partial<Record<TmdbIndexerData["type"], TmdbMediaAdapter>> = {
   movie: movieAdapter,
   show: showAdapter,
-} satisfies Record<TmdbIndexerData["type"], TmdbMediaAdapter>;
+} satisfies Partial<Record<TmdbIndexerData["type"], TmdbMediaAdapter>>;
 
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
   #getAdapter(tmdbIndexerData: TmdbIndexerData) {
-    return adapters[tmdbIndexerData.type];
+    const adapter = adapters[tmdbIndexerData.type];
+
+    if (!adapter) {
+      throw new Error(
+        `No adapter found for media type: ${tmdbIndexerData.type}`,
+      );
+    }
+
+    return adapter;
   }
 
   @FieldResolver(() => [Genre], { name: "genres" })
@@ -44,7 +52,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
   }
 
   @FieldResolver(() => String, { nullable: true })
-  public async certification(
+  public certification(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @Arg("locale", { defaultValue: "en-US" }) locale: string,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
@@ -57,7 +65,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
   }
 
   @FieldResolver(() => String, { nullable: true })
-  public async imdbId(
+  public imdbId(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<string | null> {
@@ -81,7 +89,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
   }
 
   @FieldResolver(() => [TmdbIndexerData], { nullable: true })
-  public async recommendations(
+  public recommendations(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<TmdbIndexerData[] | null> {
@@ -92,7 +100,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
   }
 
   @FieldResolver(() => [TmdbIndexerData], { nullable: true })
-  public async similarItems(
+  public similarItems(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<TmdbIndexerData[] | null> {
@@ -103,7 +111,7 @@ export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerDat
   }
 
   @FieldResolver(() => [CastMember], { nullable: true })
-  public async cast(
+  public cast(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
     @Arg("language", () => String, { defaultValue: "en-US" }) language: string,

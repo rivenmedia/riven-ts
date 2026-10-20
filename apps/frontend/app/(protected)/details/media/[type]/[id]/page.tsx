@@ -20,7 +20,7 @@ async function MediaDetails({
     return notFound();
   }
 
-  const { data } = await query({
+  const { data, error } = await query({
     query: GET_MEDIA_ITEM,
     errorPolicy: "all",
     variables: {
@@ -28,6 +28,10 @@ async function MediaDetails({
       type: parsedType.data,
     },
   });
+
+  if (error) {
+    throw error;
+  }
 
   if (!data) {
     return notFound();

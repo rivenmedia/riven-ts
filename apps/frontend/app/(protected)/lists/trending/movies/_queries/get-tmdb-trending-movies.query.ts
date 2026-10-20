@@ -18,6 +18,7 @@ export const GET_FILTERED_TMDB_TRENDING_MOVIES: TypedDocumentNode<
       posterUrl
       releaseDate
       type
+      year
     }
   }
 `;

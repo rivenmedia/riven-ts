@@ -1,7 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
-import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import {
   Arg,
@@ -144,10 +143,5 @@ export class ItemRequestResolver {
     actions.add("delete");
 
     return [...actions];
-  }
-
-  @FieldResolver(() => [MediaItemUnion])
-  public async mediaItems(@Root() itemRequest: ItemRequest) {
-    return itemRequest.mediaItems.load();
   }
 }

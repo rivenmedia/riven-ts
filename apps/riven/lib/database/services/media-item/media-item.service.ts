@@ -3,6 +3,7 @@ import {
   MediaItem,
   Movie,
   Season,
+  Show,
 } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
@@ -10,6 +11,7 @@ import {
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
+import assert from "node:assert";
 
 import { services } from "#database/database.ts";
 import { BaseService } from "#database/services/core/base-service.ts";
@@ -68,6 +70,53 @@ export class MediaItemService extends BaseService {
     options?: FindOneOrFailOptions<MediaItem, Hint, Fields, Excludes>,
   ) {
     return this.em.getRepository(MediaItem).findOneOrFail(id, options);
+  }
+
+  @CreateRequestContext()
+  public async getMediaItemByExternalId(
+    externalId: string,
+    type: MediaItemType,
+    {
+      episodeNumber,
+      seasonNumber,
+    }: { seasonNumber?: number; episodeNumber?: number } = {},
+  ) {
+    switch (type) {
+      case "movie": {
+        return this.em.getRepository(Movie).findOne({ tmdbId: externalId });
+      }
+      case "show": {
+        return this.em.getRepository(Show).findOne({ tvdbId: externalId });
+      }
+      case "season": {
+        assert.ok(
+          seasonNumber != null,
+          "Season number must be provided for season type",
+        );
+
+        return this.em.getRepository(Season).findOne({
+          tvdbId: externalId,
+          number: seasonNumber,
+        });
+      }
+      case "episode": {
+        assert.ok(
+          seasonNumber != null,
+          "Season number must be provided for episode type",
+        );
+
+        assert.ok(
+          episodeNumber != null,
+          "Episode number must be provided for episode type",
+        );
+
+        return this.em.getRepository(Episode).findOne({
+          tvdbId: externalId,
+          number: episodeNumber,
+          season: { number: seasonNumber },
+        });
+      }
+    }
   }
 
   @CreateRequestContext()
