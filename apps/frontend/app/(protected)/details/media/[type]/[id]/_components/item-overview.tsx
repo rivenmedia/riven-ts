@@ -5,10 +5,10 @@ import React from "react";
 import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
+import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
-import { ItemStatusBadge } from "./item-status-badge/item-status-badge";
 
 import type {
   IndexerData,
@@ -53,16 +53,14 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {data.title}
           </h1>
-          <ItemStatusBadge
-            indexerItemId={data.id}
-            type={data.type as TopLevelMediaItemType}
-          />
-          {/* {data.mediaDetails.totalFileCount > 0 && (
-            <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
-              {data.mediaDetails.completedFileCount}/
-              {data.mediaDetails.totalFileCount} files
-            </span>
-          )} */}
+          {data.mediaItem && (
+            <StatusBadge
+              className="px-3 py-1.5 text-sm font-medium inline-block h-8"
+              isRequested={data.mediaItem.isRequested}
+              state={data.mediaItem.state}
+              large
+            />
+          )}
         </div>
         <ErrorFallback message="Failed to load item action toolbar.">
           <ItemActionToolbar

@@ -6,14 +6,21 @@ import { Badge } from "#components/_ui/badge.tsx";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { HTMLAttributes } from "react";
 
-export interface StatusBadgeProps extends Pick<
+export type StatusBadgeProps = Pick<
   HTMLAttributes<HTMLElement>,
   "className"
-> {
-  state: MediaItemState;
-  isRequested: boolean;
+> & {
   large?: boolean;
-}
+} & (
+    | {
+        isRequested: boolean;
+        state: MediaItemState;
+      }
+    | {
+        isRequested: false;
+        state?: never;
+      }
+  );
 
 export function StatusBadge({
   state,

@@ -26,6 +26,11 @@ export const GET_ITEM_SEASONS: TypedDocumentNode<
         posterUrl
         number
         rootId
+        mediaItem {
+          isRequested
+          state
+          completedFileCount
+        }
       }
     }
   }

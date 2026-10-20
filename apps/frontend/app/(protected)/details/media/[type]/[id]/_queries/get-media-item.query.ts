@@ -51,8 +51,12 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       budget
       imdbId
       isRequestable
-      # totalFileCount
-      # completedFileCount
+      mediaItem {
+        ... on MediaItem {
+          isRequested
+          state
+        }
+      }
       # filesystemEntries {
       #   id
       #   fileSize {

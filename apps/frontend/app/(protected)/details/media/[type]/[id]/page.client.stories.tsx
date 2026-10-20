@@ -15,13 +15,13 @@ import { RETRY_ITEM } from "./_components/item-action-toolbar/actions/retry-item
 import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_SEASONS } from "./_components/item-seasons/_queries/get-item-seasons.query.ts";
-import { GET_ITEM_STATUS } from "./_components/item-status-badge/_queries/get-item-status.query.ts";
 import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "./page.client.tsx";
 
 import type {
   ItemRequestAction,
-  MediaItemState,
+  Movie,
+  Show,
 } from "#app/_types/__generated__/graphql.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 import type { StoryContext } from "@storybook/nextjs-vite";
@@ -55,10 +55,8 @@ const mockMutationWithIdEqualityCheck = <
  * @returns The mocked handlers, and the IDs they use
  */
 const mockRequestedMovie = ({
-  state,
   availableActions,
 }: {
-  state: MediaItemState;
   availableActions: ItemRequestAction[];
 }) => {
   const itemRequestId = crypto.randomUUID();
@@ -80,23 +78,6 @@ const mockRequestedMovie = ({
                 id: primaryMediaItemId,
               },
               seasons: null,
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              mediaItem: {
-                __typename: "Movie",
-                id: primaryMediaItemId,
-                state,
-                type: "movie",
-                isRequested: true,
-              },
             },
           },
         }),
@@ -111,10 +92,8 @@ const mockRequestedMovie = ({
  * @returns The mocked handlers, and the IDs they use
  */
 const mockRequestedShow = ({
-  state,
   availableActions,
 }: {
-  state: MediaItemState;
   availableActions: ItemRequestAction[];
 }) => {
   const itemRequestId = crypto.randomUUID();
@@ -136,23 +115,6 @@ const mockRequestedShow = ({
                 id: primaryMediaItemId,
               },
               seasons: null,
-            },
-          },
-        }),
-      ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({
-          data: {
-            itemRequestByExternalIds: {
-              __typename: "ItemRequest",
-              id: itemRequestId,
-              mediaItem: {
-                __typename: "Show",
-                id: primaryMediaItemId,
-                state,
-                type: "show",
-                isRequested: true,
-              },
             },
           },
         }),
@@ -315,6 +277,7 @@ export const UnrequestedMovie = meta.story({
           name: "English",
         },
       ],
+      mediaItem: null,
       // seasons: null,
       // type: "movie",
       // completedFileCount: 1,
@@ -410,9 +373,6 @@ export const UnrequestedMovie = meta.story({
       graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
-      ),
     );
   },
 });
@@ -443,11 +403,16 @@ export const CompletedMovie = UnrequestedMovie.extend({
     data: {
       ...UnrequestedMovie.composed.args.data,
       id: "completed-movie",
+      mediaItem: {
+        ...UnrequestedMovie.composed.args.data.mediaItem,
+        type: "movie",
+        state: "completed",
+        isRequested: true,
+      } as Movie,
     },
   },
   beforeEach({ msw }) {
     const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedMovie({
-      state: "completed",
       availableActions: ["delete", "reset", "retry"],
     });
 
@@ -518,11 +483,16 @@ export const PausedMovie = UnrequestedMovie.extend({
     data: {
       ...UnrequestedMovie.composed.args.data,
       id: "paused-movie",
+      mediaItem: {
+        ...UnrequestedMovie.composed.args.data.mediaItem,
+        type: "movie",
+        state: "paused",
+        isRequested: true,
+      } as Movie,
     },
   },
   beforeEach({ msw }) {
     const { primaryMediaItemId, handlers } = mockRequestedMovie({
-      state: "paused",
       availableActions: ["delete", "reset", "resume"],
     });
 
@@ -559,11 +529,15 @@ export const ScrapedMovie = UnrequestedMovie.extend({
     data: {
       ...UnrequestedMovie.composed.args.data,
       id: "scraped-movie",
+      mediaItem: {
+        ...UnrequestedMovie.composed.args.data.mediaItem,
+        state: "scraped",
+        isRequested: true,
+      } as Movie,
     },
   },
   beforeEach({ msw }) {
     const { primaryMediaItemId, handlers } = mockRequestedMovie({
-      state: "scraped",
       availableActions: ["delete", "reset", "pause"],
     });
 
@@ -675,6 +649,7 @@ export const UnrequestedShow = meta.story({
           name: "English",
         },
       ],
+      mediaItem: null,
     },
   },
   beforeEach({ args, msw }) {
@@ -702,6 +677,7 @@ export const UnrequestedShow = meta.story({
                     title: `Episode ${String(index + 1)}`,
                     posterUrl: null,
                   })),
+                  mediaItem: null,
                 },
                 {
                   __typename: "IndexerSeason",
@@ -718,6 +694,7 @@ export const UnrequestedShow = meta.story({
                     title: `Episode ${String(index + 1)}`,
                     posterUrl: null,
                   })),
+                  mediaItem: null,
                 },
               ],
             },
@@ -780,9 +757,6 @@ export const UnrequestedShow = meta.story({
       graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
-      graphql.query(GET_ITEM_STATUS, () =>
-        HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
-      ),
     );
   },
 });
@@ -813,11 +787,15 @@ export const CompletedShow = UnrequestedShow.extend({
     data: {
       ...UnrequestedShow.composed.args.data,
       id: "completed-show",
+      mediaItem: {
+        ...UnrequestedShow.composed.args.data.mediaItem,
+        state: "completed",
+        isRequested: true,
+      } as Show,
     },
   },
-  beforeEach({ msw }) {
+  beforeEach({ args, msw }) {
     const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedShow({
-      state: "completed",
       availableActions: ["delete", "reset", "retry"],
     });
 
@@ -844,6 +822,63 @@ export const CompletedShow = UnrequestedShow.extend({
           state: "indexed",
         },
       }),
+      graphql.query(GET_ITEM_SEASONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              seasons: [
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-1`,
+                  number: 1,
+                  rootId: args.data.id,
+                  title: "Season 1",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedFileCount: 9,
+                    state: "completed",
+                    isRequested: true,
+                  },
+                },
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-2`,
+                  number: 2,
+                  rootId: args.data.id,
+                  title: "Season 2",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedFileCount: 9,
+                    state: "completed",
+                    isRequested: true,
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      ),
     );
   },
 });
@@ -888,11 +923,15 @@ export const PausedShow = UnrequestedShow.extend({
     data: {
       ...UnrequestedShow.composed.args.data,
       id: "paused-show",
+      mediaItem: {
+        ...UnrequestedShow.composed.args.data.mediaItem,
+        state: "paused",
+        isRequested: true,
+      } as Show,
     },
   },
-  beforeEach({ msw }) {
+  beforeEach({ args, msw }) {
     const { primaryMediaItemId, handlers } = mockRequestedShow({
-      state: "paused",
       availableActions: ["delete", "reset", "resume"],
     });
 
@@ -907,6 +946,63 @@ export const PausedShow = UnrequestedShow.extend({
           state: "scraped",
         },
       }),
+      graphql.query(GET_ITEM_SEASONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: args.data.id,
+              type: args.data.type,
+              seasons: [
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-1`,
+                  number: 1,
+                  rootId: args.data.id,
+                  title: "Season 1",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedFileCount: 9,
+                    state: "completed",
+                    isRequested: true,
+                  },
+                },
+                {
+                  __typename: "IndexerSeason",
+                  id: `${args.data.id}:season-2`,
+                  number: 2,
+                  rootId: args.data.id,
+                  title: "Season 2",
+                  posterUrl:
+                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
+                  episodes: Array.from({ length: 9 }).map((_, index) => ({
+                    __typename: "IndexerEpisode",
+                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
+                    number: index + 1,
+                    title: `Episode ${String(index + 1)}`,
+                    posterUrl: null,
+                  })),
+                  mediaItem: {
+                    __typename: "Season",
+                    completedFileCount: 5,
+                    state: "paused",
+                    isRequested: true,
+                  },
+                },
+              ],
+            },
+          },
+        }),
+      ),
     );
   },
 });
@@ -929,11 +1025,15 @@ export const ScrapedShow = UnrequestedShow.extend({
     data: {
       ...UnrequestedShow.composed.args.data,
       id: "scraped-show",
+      mediaItem: {
+        ...UnrequestedShow.composed.args.data.mediaItem,
+        state: "scraped",
+        isRequested: true,
+      } as Show,
     },
   },
   beforeEach({ msw }) {
     const { primaryMediaItemId, handlers } = mockRequestedShow({
-      state: "scraped",
       availableActions: ["delete", "reset", "pause"],
     });
 

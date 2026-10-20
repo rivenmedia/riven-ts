@@ -11,19 +11,24 @@ import {
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import { ItemStatusBadge } from "../item-status-badge/item-status-badge";
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
 
 import type {
   IndexerEpisode,
   IndexerSeason,
+  Season,
 } from "#app/_types/__generated__/graphql.ts";
 
 interface SeasonCarouselProps {
   seasons: (Pick<IndexerSeason, "id" | "number" | "posterUrl" | "rootId"> & {
     episodes: Pick<IndexerEpisode, "__typename">[];
+    mediaItem: Pick<
+      Season,
+      "isRequested" | "state" | "completedFileCount"
+    > | null;
   })[];
 }
 
@@ -31,7 +36,7 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
   return (
     <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
       <CarouselContent>
-        {seasons.map(({ episodes, id, number, posterUrl, rootId }) => {
+        {seasons.map(({ episodes, id, number, posterUrl, mediaItem }) => {
           const episodesLength = episodes.length;
 
           return (
@@ -43,14 +48,17 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
                 image={posterUrl}
                 className="w-28 md:w-32 lg:w-36"
                 topRight={
-                  <ItemStatusBadge
-                    indexerItemId={rootId}
-                    type="season"
-                    seasonNumber={number}
-                  />
+                  mediaItem ? (
+                    <StatusBadge
+                      isRequested={mediaItem.isRequested}
+                      state={mediaItem.state}
+                    />
+                  ) : (
+                    <StatusBadge isRequested={false} />
+                  )
                 }
               />
-              {episodes.length > 0 && (
+              {mediaItem && episodes.length > 0 && (
                 <div className="mt-1.5 flex items-center gap-1.5 px-0.5">
                   <div className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
                     <div
@@ -58,14 +66,13 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
                       style={{
                         width: `${Math.min(
                           100,
-                          // oxlint-disable-next-line oxc/erasing-op
-                          (0 / episodesLength) * 100,
+                          (mediaItem.completedFileCount / episodesLength) * 100,
                         ).toString()}%`,
                       }}
                     />
                   </div>
                   <span className="text-muted-foreground font-mono text-[10px]">
-                    {0}/{episodesLength}
+                    {mediaItem.completedFileCount}/{episodesLength}
                   </span>
                 </div>
               )}
