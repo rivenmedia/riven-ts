@@ -4,7 +4,10 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { Checkbox } from "#components/_ui/checkbox.tsx";
 import { Field, FieldGroup, FieldLabel } from "#components/_ui/field.tsx";
 
-import type { IndexerSeason } from "#app/_types/__generated__/graphql.ts";
+import type {
+  IndexerEpisode,
+  IndexerSeason,
+} from "#app/_types/__generated__/graphql.ts";
 import type { RequestShowFormValues } from "../_schemas/request-show.form-schema";
 import type { HTMLAttributes } from "react";
 
@@ -12,7 +15,9 @@ interface SeasonSelectorProps extends Pick<
   HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  seasons: IndexerSeason[];
+  seasons: (Pick<IndexerSeason, "id" | "number"> & {
+    episodes: Pick<IndexerEpisode, "id" | "number">[];
+  })[];
   requestedSeasons: Set<number>;
 }
 
@@ -61,8 +66,8 @@ export function SeasonSelector({
           {totalSelected > 0 ? "Deselect all" : "Select all"}
         </button>
       </div>
-      {seasons.map((season) => {
-        const isPreviouslyRequested = requestedSeasons.has(season.number);
+      {seasons.map(({ id, number, episodes }) => {
+        const isPreviouslyRequested = requestedSeasons.has(number);
 
         function renderContent() {
           if (isPreviouslyRequested) {
@@ -81,15 +86,15 @@ export function SeasonSelector({
 
           return (
             <span className="text-muted-foreground text-xs font-normal opacity-70">
-              {season.episodes.length} eps
+              {episodes.length} eps
             </span>
           );
         }
 
-        const name = `requestedSeasons.${season.number.toString()}` as const;
+        const name = `requestedSeasons.${number.toString()}` as const;
 
         return (
-          <FieldGroup key={season.id}>
+          <FieldGroup key={id}>
             <Field orientation="horizontal">
               <Controller
                 name={name}
@@ -110,7 +115,7 @@ export function SeasonSelector({
                       value="1"
                     />
                     <FieldLabel htmlFor={name}>
-                      <span>Season {season.number}</span>
+                      <span>Season {number}</span>
                     </FieldLabel>
                   </>
                 )}

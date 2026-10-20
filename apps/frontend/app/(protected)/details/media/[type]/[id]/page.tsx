@@ -37,7 +37,20 @@ async function MediaDetails({
     return notFound();
   }
 
-  return <MediaDetailsPageClient data={data.tmdbItem} />;
+  const { type: itemType } = data.tmdbItem;
+
+  if (itemType === "episode" || itemType === "season") {
+    return notFound();
+  }
+
+  return (
+    <MediaDetailsPageClient
+      data={{
+        ...data.tmdbItem,
+        type: itemType,
+      }}
+    />
+  );
 }
 
 function MediaDetailsSkeleton() {

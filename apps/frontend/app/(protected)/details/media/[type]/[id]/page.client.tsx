@@ -5,10 +5,13 @@ import { ItemRecommendations } from "./_components/item-recommendations/item-rec
 import { ItemSeasons } from "./_components/item-seasons/item-seasons.tsx";
 import { SimilarItems } from "./_components/similar-items/similar-items.tsx";
 
-import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
+import type {
+  IndexerData,
+  TopLevelMediaItemType,
+} from "#app/_types/__generated__/graphql.ts";
 
 interface MediaDetailsPageProps {
-  data: IndexerData;
+  data: IndexerData & { type: TopLevelMediaItemType };
 }
 
 export function MediaDetailsPage({ data }: MediaDetailsPageProps) {

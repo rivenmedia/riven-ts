@@ -16,10 +16,15 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 import { ItemStatusBadge } from "../item-status-badge/item-status-badge";
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
 
-import type { IndexerSeason } from "#app/_types/__generated__/graphql.ts";
+import type {
+  IndexerEpisode,
+  IndexerSeason,
+} from "#app/_types/__generated__/graphql.ts";
 
 interface SeasonCarouselProps {
-  seasons: IndexerSeason[];
+  seasons: (Pick<IndexerSeason, "id" | "number" | "posterUrl" | "rootId"> & {
+    episodes: Pick<IndexerEpisode, "__typename">[];
+  })[];
 }
 
 function SeasonCarousel({ seasons }: SeasonCarouselProps) {

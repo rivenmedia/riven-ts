@@ -10,7 +10,10 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
 import { ItemStatusBadge } from "./item-status-badge/item-status-badge";
 
-import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
+import type {
+  IndexerData,
+  TopLevelMediaItemType,
+} from "#app/_types/__generated__/graphql.ts";
 
 interface ItemOverviewProps {
   data: IndexerData;
@@ -50,7 +53,10 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {data.title}
           </h1>
-          <ItemStatusBadge indexerItemId={data.id} type={data.type} />
+          <ItemStatusBadge
+            indexerItemId={data.id}
+            type={data.type as TopLevelMediaItemType}
+          />
           {/* {data.mediaDetails.totalFileCount > 0 && (
             <span className="text-muted-foreground border-border rounded-full border px-3 py-1.5 text-sm font-medium tabular-nums">
               {data.mediaDetails.completedFileCount}/
@@ -62,7 +68,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <ItemActionToolbar
             title={data.title}
             externalId={data.id}
-            mediaType={data.type}
+            mediaType={data.type as TopLevelMediaItemType}
           />
         </ErrorFallback>
         <div
