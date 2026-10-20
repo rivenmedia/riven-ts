@@ -29,7 +29,7 @@ export const it = testBase
     const { setupServer } = await import("msw/node");
 
     const server = setupServer(
-      graphql.link("http://localhost/graphql").query(() => true, passthrough),
+      graphql.link(/http:\/\/localhost:\d+\//iu).query(() => true, passthrough),
     );
 
     if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
