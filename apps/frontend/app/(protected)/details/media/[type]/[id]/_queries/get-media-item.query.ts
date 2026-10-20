@@ -13,6 +13,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
   query GetMediaItem($id: ID!, $type: TopLevelMediaItemType!) {
     tmdbItem(id: $id, type: $type) {
       id
+      type
       backdropUrl
       logo(width: 750) {
         aspectRatio
@@ -52,7 +53,6 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       isRequestable
       # totalFileCount
       # completedFileCount
-      type
       # filesystemEntries {
       #   id
       #   fileSize {
