@@ -23,7 +23,7 @@ import type {
 } from "#app/_types/__generated__/graphql.ts";
 
 interface SeasonCarouselProps {
-  seasons: (Pick<IndexerSeason, "id" | "number" | "posterUrl" | "rootId"> & {
+  seasons: (Pick<IndexerSeason, "id" | "number" | "posterUrl"> & {
     episodes: Pick<IndexerEpisode, "__typename">[];
     mediaItem: Pick<
       Season,

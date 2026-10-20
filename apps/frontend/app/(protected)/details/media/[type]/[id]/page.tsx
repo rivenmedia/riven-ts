@@ -9,6 +9,8 @@ import { query } from "#lib/graphql/client.ts";
 import { GET_MEDIA_ITEM } from "./_queries/get-media-item.query.ts";
 import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client.tsx";
 
+import type { MediaItemUnion } from "#app/_types/__generated__/graphql.ts";
+
 async function MediaDetails({
   params,
 }: Pick<PageProps<"/details/media/[type]/[id]">, "params">) {
@@ -48,6 +50,7 @@ async function MediaDetails({
       data={{
         ...data.tmdbItem,
         type: itemType,
+        mediaItem: data.tmdbItem.mediaItem as MediaItemUnion,
       }}
     />
   );

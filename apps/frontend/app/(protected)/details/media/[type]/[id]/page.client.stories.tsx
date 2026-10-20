@@ -666,7 +666,6 @@ export const UnrequestedShow = meta.story({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-1`,
                   number: 1,
-                  rootId: args.data.id,
                   title: "Season 1",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
@@ -683,7 +682,6 @@ export const UnrequestedShow = meta.story({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-2`,
                   number: 2,
-                  rootId: args.data.id,
                   title: "Season 2",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
@@ -834,7 +832,6 @@ export const CompletedShow = UnrequestedShow.extend({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-1`,
                   number: 1,
-                  rootId: args.data.id,
                   title: "Season 1",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
@@ -856,7 +853,6 @@ export const CompletedShow = UnrequestedShow.extend({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-2`,
                   number: 2,
-                  rootId: args.data.id,
                   title: "Season 2",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
@@ -958,7 +954,6 @@ export const PausedShow = UnrequestedShow.extend({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-1`,
                   number: 1,
-                  rootId: args.data.id,
                   title: "Season 1",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
@@ -980,7 +975,6 @@ export const PausedShow = UnrequestedShow.extend({
                   __typename: "IndexerSeason",
                   id: `${args.data.id}:season-2`,
                   number: 2,
-                  rootId: args.data.id,
                   title: "Season 2",
                   posterUrl:
                     "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
