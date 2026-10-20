@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 
 import preview from "#.storybook/preview.tsx";
+import { api } from "#mocks/graphql.ts";
 
 import { GET_FILTERED_TMDB_TRENDING_SHOWS } from "./_queries/get-tmdb-trending-shows.query.ts";
 import TrendingShowsPage from "./page.tsx";
@@ -13,7 +14,7 @@ const meta = preview.meta({
   component: TrendingShowsPage,
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_FILTERED_TMDB_TRENDING_SHOWS, () =>
+      api.query(GET_FILTERED_TMDB_TRENDING_SHOWS, () =>
         HttpResponse.json({
           data: {
             tmdbTrendingShows: Array.from({ length: 50 }).map(() => ({

@@ -1,8 +1,9 @@
 import { DateTime } from "luxon";
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
+import { api } from "#mocks/graphql.ts";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added.tsx";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
@@ -21,7 +22,7 @@ const meta = preview.meta({
 export const Default = meta.story({
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_TMDB_NOW_PLAYING, () =>
+      api.query(GET_TMDB_NOW_PLAYING, () =>
         HttpResponse.json({
           data: {
             tmdbNowPlaying: [
@@ -160,7 +161,7 @@ export const Default = meta.story({
           },
         }),
       ),
-      graphql.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
+      api.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
@@ -195,7 +196,7 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_TMDB_TRENDING_SHOWS, ({ variables }) => {
+      api.query(GET_TMDB_TRENDING_SHOWS, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
@@ -232,7 +233,7 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_RECENTLY_ADDED, () =>
+      api.query(GET_RECENTLY_ADDED, () =>
         HttpResponse.json({
           data: {
             recentlyAdded: [],
@@ -336,7 +337,7 @@ Default.test(
 export const WithRecentlyAdded = Default.extend({
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_RECENTLY_ADDED, () =>
+      api.query(GET_RECENTLY_ADDED, () =>
         HttpResponse.json({
           data: {
             recentlyAdded: [

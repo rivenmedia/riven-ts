@@ -1,7 +1,8 @@
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { api } from "#mocks/graphql.ts";
 import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
@@ -21,7 +22,7 @@ import { MediaDetailsPage } from "./page.client.tsx";
 import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 import type { StoryContext } from "@storybook/nextjs-vite";
-import type { GraphQLQuery } from "msw";
+import type { GraphQLQuery } from "msw/graphql";
 
 //#region Helpers
 /**
@@ -35,7 +36,7 @@ const mockMutationWithIdEqualityCheck = <
   expectedId: string,
   data: Mutation,
 ) =>
-  graphql.mutation(document, ({ variables }) => {
+  api.mutation(document, ({ variables }) => {
     if (variables.id !== expectedId) {
       return HttpResponse.json({
         errors: [{ message: `Invalid id parameter: ${variables.id}` }],
@@ -62,7 +63,7 @@ const mockRequestedMovie = ({
     itemRequestId,
     primaryMediaItemId,
     handlers: [
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
@@ -99,7 +100,7 @@ const mockRequestedShow = ({
     itemRequestId,
     primaryMediaItemId,
     handlers: [
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
@@ -294,7 +295,7 @@ export const UnrequestedMovie = meta.story({
   },
   beforeEach({ args, msw }) {
     msw.use(
-      graphql.query(GET_ITEM_CAST, () =>
+      api.query(GET_ITEM_CAST, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -315,7 +316,7 @@ export const UnrequestedMovie = meta.story({
           },
         }),
       ),
-      graphql.query(GET_ITEM_RECOMMENDATIONS, () =>
+      api.query(GET_ITEM_RECOMMENDATIONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -338,7 +339,7 @@ export const UnrequestedMovie = meta.story({
           },
         }),
       ),
-      graphql.query(GET_SIMILAR_ITEMS, () =>
+      api.query(GET_SIMILAR_ITEMS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -361,7 +362,7 @@ export const UnrequestedMovie = meta.story({
           },
         }),
       ),
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
@@ -374,7 +375,7 @@ UnrequestedMovie.test(
     context.msw.use(
       getSessionHandler,
       hasPermissionHandler,
-      graphql.mutation(REQUEST_ITEM, () =>
+      api.mutation(REQUEST_ITEM, () =>
         HttpResponse.json({ data: { requestItem: true } }),
       ),
     );
@@ -640,7 +641,7 @@ export const UnrequestedShow = meta.story({
   },
   beforeEach({ args, msw }) {
     msw.use(
-      graphql.query(GET_ITEM_SEASONS, () =>
+      api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -685,7 +686,7 @@ export const UnrequestedShow = meta.story({
           },
         }),
       ),
-      graphql.query(GET_ITEM_CAST, () =>
+      api.query(GET_ITEM_CAST, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -714,7 +715,7 @@ export const UnrequestedShow = meta.story({
           },
         }),
       ),
-      graphql.query(GET_ITEM_RECOMMENDATIONS, () =>
+      api.query(GET_ITEM_RECOMMENDATIONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -726,7 +727,7 @@ export const UnrequestedShow = meta.story({
           },
         }),
       ),
-      graphql.query(GET_SIMILAR_ITEMS, () =>
+      api.query(GET_SIMILAR_ITEMS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -738,7 +739,7 @@ export const UnrequestedShow = meta.story({
           },
         }),
       ),
-      graphql.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
@@ -751,7 +752,7 @@ UnrequestedShow.test(
     context.msw.use(
       getSessionHandler,
       hasPermissionHandler,
-      graphql.mutation(REQUEST_ITEM, () =>
+      api.mutation(REQUEST_ITEM, () =>
         HttpResponse.json({ data: { requestItem: true } }),
       ),
     );
@@ -805,7 +806,7 @@ export const CompletedShow = UnrequestedShow.extend({
           state: "indexed",
         },
       }),
-      graphql.query(GET_ITEM_SEASONS, () =>
+      api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -926,7 +927,7 @@ export const PausedShow = UnrequestedShow.extend({
           state: "scraped",
         },
       }),
-      graphql.query(GET_ITEM_SEASONS, () =>
+      api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {
@@ -1025,7 +1026,7 @@ export const ScrapedShow = UnrequestedShow.extend({
           state: "paused",
         },
       }),
-      graphql.query(GET_ITEM_SEASONS, () =>
+      api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
             tmdbItem: {

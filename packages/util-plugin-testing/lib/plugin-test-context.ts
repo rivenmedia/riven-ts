@@ -32,9 +32,7 @@ export const it = baseIt
       });
     }
 
-    server.listen({
-      onUnhandledRequest: "error",
-    });
+    server.listen({ onUnhandledFrame: "error" });
 
     onCleanup(() => {
       server.close();
