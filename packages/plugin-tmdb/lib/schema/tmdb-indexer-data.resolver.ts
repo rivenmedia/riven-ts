@@ -16,17 +16,18 @@ import { selectTrailer } from "../utilities/select-trailer.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 import type { TmdbMediaAdapter } from "../adapters/tmdb-media-adapter.ts";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { ResolverInterface } from "type-graphql";
 
-const adapters: Partial<Record<TmdbIndexerData["type"], TmdbMediaAdapter>> = {
-  movie: movieAdapter,
-  show: showAdapter,
-} satisfies Partial<Record<TmdbIndexerData["type"], TmdbMediaAdapter>>;
+const adapters = new Map<MediaItemType, TmdbMediaAdapter>([
+  ["movie", movieAdapter],
+  ["show", showAdapter],
+]);
 
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
   #getAdapter(tmdbIndexerData: TmdbIndexerData) {
-    const adapter = adapters[tmdbIndexerData.type];
+    const adapter = adapters.get(tmdbIndexerData.type);
 
     if (!adapter) {
       throw new Error(
