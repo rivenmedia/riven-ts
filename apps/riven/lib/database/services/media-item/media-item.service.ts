@@ -11,7 +11,6 @@ import {
   EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
-import assert from "node:assert";
 
 import { services } from "#database/database.ts";
 import { BaseService } from "#database/services/core/base-service.ts";
@@ -22,7 +21,13 @@ import { resetMediaItem } from "./utilities/reset-media-item.ts";
 import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
+import type { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import type { UUID } from "node:crypto";
+
+interface EpisodePosition {
+  seasonNumber: number;
+  episodeNumber: number;
+}
 
 export class MediaItemService extends BaseService {
   readonly #rootItemTypes = new Set<MediaItemType>([
@@ -72,14 +77,14 @@ export class MediaItemService extends BaseService {
     return this.em.getRepository(MediaItem).findOneOrFail(id, options);
   }
 
+  /**
+   * Finds a root media item by the external ID Riven uses to request it:
+   * the TMDB ID for movies, and the TVDB ID for shows.
+   */
   @CreateRequestContext()
   public async getMediaItemByExternalId(
     externalId: string,
-    type: MediaItemType,
-    {
-      episodeNumber,
-      seasonNumber,
-    }: { seasonNumber?: number; episodeNumber?: number } = {},
+    type: TopLevelMediaItemType,
   ) {
     switch (type) {
       case "movie": {
@@ -88,35 +93,27 @@ export class MediaItemService extends BaseService {
       case "show": {
         return this.em.getRepository(Show).findOne({ tvdbId: externalId });
       }
-      case "season": {
-        assert.ok(
-          seasonNumber != null,
-          "Season number must be provided for season type",
-        );
-
-        return this.em.getRepository(Season).findOne({
-          tvdbId: externalId,
-          number: seasonNumber,
-        });
-      }
-      case "episode": {
-        assert.ok(
-          seasonNumber != null,
-          "Season number must be provided for episode type",
-        );
-
-        assert.ok(
-          episodeNumber != null,
-          "Episode number must be provided for episode type",
-        );
-
-        return this.em.getRepository(Episode).findOne({
-          tvdbId: externalId,
-          number: episodeNumber,
-          season: { number: seasonNumber },
-        });
-      }
     }
+  }
+
+  @CreateRequestContext()
+  public async getSeasonByShowTvdbId(showTvdbId: string, seasonNumber: number) {
+    return this.em.getRepository(Season).findOne({
+      tvdbId: showTvdbId,
+      number: seasonNumber,
+    });
+  }
+
+  @CreateRequestContext()
+  public async getEpisodeByShowTvdbId(
+    showTvdbId: string,
+    { seasonNumber, episodeNumber }: EpisodePosition,
+  ) {
+    return this.em.getRepository(Episode).findOne({
+      tvdbId: showTvdbId,
+      number: episodeNumber,
+      season: { number: seasonNumber },
+    });
   }
 
   @CreateRequestContext()

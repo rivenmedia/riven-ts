@@ -4,6 +4,7 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { Field, ID, ObjectType } from "type-graphql";
 
 import type { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
+import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
 import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
@@ -53,6 +54,8 @@ export class TmdbIndexerData
   public genreIds?: number[];
 
   public certification?: string | null;
+
+  public type!: Extract<MediaItemType, "movie" | "show">;
 
   public isRequestable!: boolean;
 

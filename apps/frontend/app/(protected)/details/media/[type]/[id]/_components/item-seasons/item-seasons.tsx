@@ -16,20 +16,10 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
 
-import type {
-  IndexerEpisode,
-  IndexerSeason,
-  Season,
-} from "#app/_types/__generated__/graphql.ts";
+import type { GetItemSeasonsQuery } from "./_queries/get-item-seasons.query.typegen.ts";
 
 interface SeasonCarouselProps {
-  seasons: (Pick<IndexerSeason, "id" | "number" | "posterUrl"> & {
-    episodes: Pick<IndexerEpisode, "__typename">[];
-    mediaItem: Pick<
-      Season,
-      "isRequested" | "state" | "completedEpisodeCount"
-    > | null;
-  })[];
+  seasons: NonNullable<GetItemSeasonsQuery["tmdbItem"]["seasons"]>;
 }
 
 function SeasonCarousel({ seasons }: SeasonCarouselProps) {

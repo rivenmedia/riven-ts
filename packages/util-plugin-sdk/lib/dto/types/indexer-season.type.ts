@@ -1,4 +1,4 @@
-import { Field, ID, ObjectType } from "type-graphql";
+import { Field, ObjectType } from "type-graphql";
 
 import { IndexerEnumerableItem } from "./indexer-enumerable-item.type.ts";
 import { IndexerEpisode } from "./indexer-episode.type.ts";
@@ -7,9 +7,6 @@ import { IndexerEpisode } from "./indexer-episode.type.ts";
   implements: IndexerEnumerableItem,
 })
 export class IndexerSeason extends IndexerEnumerableItem {
-  @Field(() => ID)
-  declare public rootId: string;
-
   @Field(() => [IndexerEpisode])
   public episodes!: IndexerEpisode[];
 }

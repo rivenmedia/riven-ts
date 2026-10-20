@@ -12,17 +12,12 @@ import { SeasonSelector } from "./_components/season-selector";
 import { TriggerButton } from "./_components/trigger-button";
 import { RequestShowFormSchema } from "./_schemas/request-show.form-schema";
 
-import type {
-  IndexerEpisode,
-  IndexerSeason,
-} from "#app/_types/__generated__/graphql.ts";
 import type { BaseItemActionProps } from "../_components/base-item-action";
 import type { ExternalIds } from "./_schemas/external-ids.schema";
+import type { ComponentProps } from "react";
 
 interface RequestShowActionProps extends Pick<BaseItemActionProps, "title"> {
-  seasons: (Pick<IndexerSeason, "id" | "number"> & {
-    episodes: Pick<IndexerEpisode, "id" | "number">[];
-  })[];
+  seasons: ComponentProps<typeof SeasonSelector>["seasons"];
   requestedSeasons: Set<number>;
   externalIds: ExternalIds;
 }

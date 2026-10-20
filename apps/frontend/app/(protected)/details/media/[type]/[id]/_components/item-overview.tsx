@@ -12,11 +12,13 @@ import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
 
 import type {
   IndexerData,
-  TopLevelMediaItemType,
+  MediaItem,
 } from "#app/_types/__generated__/graphql.ts";
 
 interface ItemOverviewProps {
-  data: IndexerData;
+  data: Omit<IndexerData, "mediaItem"> & {
+    mediaItem?: Pick<MediaItem, "isRequested" | "state"> | null;
+  };
 }
 
 export function ItemOverview({ data }: ItemOverviewProps) {
@@ -66,7 +68,7 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           <ItemActionToolbar
             title={data.title}
             externalId={data.id}
-            mediaType={data.type as TopLevelMediaItemType}
+            mediaType={data.type}
           />
         </ErrorFallback>
         <div

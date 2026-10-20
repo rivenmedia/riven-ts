@@ -16,26 +16,17 @@ import { selectTrailer } from "../utilities/select-trailer.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
 import type { TmdbMediaAdapter } from "../adapters/tmdb-media-adapter.ts";
-import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import type { ResolverInterface } from "type-graphql";
 
-const adapters = new Map<MediaItemType, TmdbMediaAdapter>([
-  ["movie", movieAdapter],
-  ["show", showAdapter],
-]);
+const adapters = {
+  movie: movieAdapter,
+  show: showAdapter,
+} satisfies Record<TmdbIndexerData["type"], TmdbMediaAdapter>;
 
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
   #getAdapter(tmdbIndexerData: TmdbIndexerData) {
-    const adapter = adapters.get(tmdbIndexerData.type);
-
-    if (!adapter) {
-      throw new Error(
-        `No adapter found for media type: ${tmdbIndexerData.type}`,
-      );
-    }
-
-    return adapter;
+    return adapters[tmdbIndexerData.type];
   }
 
   @FieldResolver(() => [Genre], { name: "genres" })

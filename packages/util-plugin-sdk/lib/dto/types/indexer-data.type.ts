@@ -1,6 +1,7 @@
 import { Field, Float, Int, InterfaceType } from "type-graphql";
 
 import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
+import { TopLevelMediaItemType } from "../enums/top-level-media-item-type.enum.ts";
 import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
 import { IndexerBaseItem } from "./indexer-base-item.type.ts";
@@ -83,6 +84,9 @@ export abstract class IndexerData extends IndexerBaseItem {
 
   @Field(() => Ratings, { nullable: true })
   public ratings?: Ratings | null;
+
+  @Field(() => TopLevelMediaItemType.enum)
+  public type!: TopLevelMediaItemType;
 
   /**
    * Whether the media item can be requested in Riven.

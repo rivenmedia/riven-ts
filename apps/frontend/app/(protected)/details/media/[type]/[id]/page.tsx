@@ -9,8 +9,6 @@ import { query } from "#lib/graphql/client.ts";
 import { GET_MEDIA_ITEM } from "./_queries/get-media-item.query.ts";
 import { MediaDetailsPage as MediaDetailsPageClient } from "./page.client.tsx";
 
-import type { MediaItemUnion } from "#app/_types/__generated__/graphql.ts";
-
 async function MediaDetails({
   params,
 }: Pick<PageProps<"/details/media/[type]/[id]">, "params">) {
@@ -22,7 +20,7 @@ async function MediaDetails({
     return notFound();
   }
 
-  const { data, error } = await query({
+  const { data } = await query({
     query: GET_MEDIA_ITEM,
     errorPolicy: "all",
     variables: {
@@ -31,29 +29,11 @@ async function MediaDetails({
     },
   });
 
-  if (error) {
-    throw error;
-  }
-
   if (!data) {
     return notFound();
   }
 
-  const { type: itemType } = data.tmdbItem;
-
-  if (itemType === "episode" || itemType === "season") {
-    return notFound();
-  }
-
-  return (
-    <MediaDetailsPageClient
-      data={{
-        ...data.tmdbItem,
-        type: itemType,
-        mediaItem: data.tmdbItem.mediaItem as MediaItemUnion,
-      }}
-    />
-  );
+  return <MediaDetailsPageClient data={data.tmdbItem} />;
 }
 
 function MediaDetailsSkeleton() {

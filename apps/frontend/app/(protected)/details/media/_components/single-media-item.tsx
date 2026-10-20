@@ -5,11 +5,10 @@ import { HeroBanner } from "#components/media/hero-banner/hero-banner.tsx";
 
 import { ItemOverview } from "../[type]/[id]/_components/item-overview";
 
-import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 
 interface SingleMediaItemProps {
-  indexerData: IndexerData;
+  indexerData: ComponentProps<typeof ItemOverview>["data"];
   slots: {
     seasonList?: ReactNode;
     castList?: ReactNode;

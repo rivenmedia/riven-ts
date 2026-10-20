@@ -27,7 +27,7 @@ export function MoreDetailsPanel({
   imdbId,
   externalLinks,
 }: MoreDetailsPanelProps) {
-  const duplicatedProductionCompanies = new Set(
+  const duplicateCompanyNames = new Set(
     productionCompanies
       ?.filter(
         (company, index, self) =>
@@ -98,7 +98,7 @@ export function MoreDetailsPanel({
             </span>
             <div className="flex flex-wrap gap-2">
               {productionCompanies.map((company) => {
-                const isDuplicated = duplicatedProductionCompanies.has(
+                const isDuplicated = duplicateCompanyNames.has(
                   company.name.toLowerCase(),
                 );
 

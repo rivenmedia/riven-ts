@@ -12,10 +12,9 @@ export class IndexerSeasonResolver {
     @Root() indexerSeason: IndexerSeason,
     @CoreContext() { services: { mediaItemService } }: CoreContext,
   ) {
-    return mediaItemService.getMediaItemByExternalId(
+    return mediaItemService.getSeasonByShowTvdbId(
       indexerSeason.rootId,
-      "season",
-      { seasonNumber: indexerSeason.number },
+      indexerSeason.number,
     );
   }
 }

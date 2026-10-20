@@ -18,11 +18,7 @@ import { GET_ITEM_SEASONS } from "./_components/item-seasons/_queries/get-item-s
 import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "./page.client.tsx";
 
-import type {
-  ItemRequestAction,
-  Movie,
-  Show,
-} from "#app/_types/__generated__/graphql.ts";
+import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 import type { StoryContext } from "@storybook/nextjs-vite";
 import type { GraphQLQuery } from "msw";
@@ -399,11 +395,9 @@ export const CompletedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.composed.args.data,
       id: "completed-movie",
       mediaItem: {
-        ...UnrequestedMovie.composed.args.data.mediaItem,
-        type: "movie",
         state: "completed",
         isRequested: true,
-      } as Movie,
+      },
     },
   },
   beforeEach({ msw }) {
@@ -479,11 +473,9 @@ export const PausedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.composed.args.data,
       id: "paused-movie",
       mediaItem: {
-        ...UnrequestedMovie.composed.args.data.mediaItem,
-        type: "movie",
         state: "paused",
         isRequested: true,
-      } as Movie,
+      },
     },
   },
   beforeEach({ msw }) {
@@ -525,10 +517,9 @@ export const ScrapedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.composed.args.data,
       id: "scraped-movie",
       mediaItem: {
-        ...UnrequestedMovie.composed.args.data.mediaItem,
         state: "scraped",
         isRequested: true,
-      } as Movie,
+      },
     },
   },
   beforeEach({ msw }) {
@@ -781,10 +772,9 @@ export const CompletedShow = UnrequestedShow.extend({
       ...UnrequestedShow.composed.args.data,
       id: "completed-show",
       mediaItem: {
-        ...UnrequestedShow.composed.args.data.mediaItem,
         state: "completed",
         isRequested: true,
-      } as Show,
+      },
     },
   },
   beforeEach({ args, msw }) {
@@ -915,10 +905,9 @@ export const PausedShow = UnrequestedShow.extend({
       ...UnrequestedShow.composed.args.data,
       id: "paused-show",
       mediaItem: {
-        ...UnrequestedShow.composed.args.data.mediaItem,
         state: "paused",
         isRequested: true,
-      } as Show,
+      },
     },
   },
   beforeEach({ args, msw }) {
@@ -1015,10 +1004,9 @@ export const ScrapedShow = UnrequestedShow.extend({
       ...UnrequestedShow.composed.args.data,
       id: "scraped-show",
       mediaItem: {
-        ...UnrequestedShow.composed.args.data.mediaItem,
         state: "scraped",
         isRequested: true,
-      } as Show,
+      },
     },
   },
   beforeEach({ msw }) {
