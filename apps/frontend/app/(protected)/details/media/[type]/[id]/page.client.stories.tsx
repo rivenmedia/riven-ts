@@ -839,7 +839,7 @@ export const CompletedShow = UnrequestedShow.extend({
                   })),
                   mediaItem: {
                     __typename: "Season",
-                    completedFileCount: 9,
+                    completedEpisodeCount: 9,
                     state: "completed",
                     isRequested: true,
                   },
@@ -860,7 +860,7 @@ export const CompletedShow = UnrequestedShow.extend({
                   })),
                   mediaItem: {
                     __typename: "Season",
-                    completedFileCount: 9,
+                    completedEpisodeCount: 9,
                     state: "completed",
                     isRequested: true,
                   },
@@ -961,7 +961,7 @@ export const PausedShow = UnrequestedShow.extend({
                   })),
                   mediaItem: {
                     __typename: "Season",
-                    completedFileCount: 9,
+                    completedEpisodeCount: 9,
                     state: "completed",
                     isRequested: true,
                   },
@@ -982,7 +982,7 @@ export const PausedShow = UnrequestedShow.extend({
                   })),
                   mediaItem: {
                     __typename: "Season",
-                    completedFileCount: 5,
+                    completedEpisodeCount: 5,
                     state: "paused",
                     isRequested: true,
                   },

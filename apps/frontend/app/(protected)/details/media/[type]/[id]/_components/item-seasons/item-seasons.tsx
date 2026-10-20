@@ -27,7 +27,7 @@ interface SeasonCarouselProps {
     episodes: Pick<IndexerEpisode, "__typename">[];
     mediaItem: Pick<
       Season,
-      "isRequested" | "state" | "completedFileCount"
+      "isRequested" | "state" | "completedEpisodeCount"
     > | null;
   })[];
 }
@@ -66,13 +66,14 @@ function SeasonCarousel({ seasons }: SeasonCarouselProps) {
                       style={{
                         width: `${Math.min(
                           100,
-                          (mediaItem.completedFileCount / episodesLength) * 100,
+                          (mediaItem.completedEpisodeCount / episodesLength) *
+                            100,
                         ).toString()}%`,
                       }}
                     />
                   </div>
                   <span className="text-muted-foreground font-mono text-[10px]">
-                    {mediaItem.completedFileCount}/{episodesLength}
+                    {mediaItem.completedEpisodeCount}/{episodesLength}
                   </span>
                 </div>
               )}

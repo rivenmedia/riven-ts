@@ -27,7 +27,7 @@ export class SeasonResolver {
   }
 
   @FieldResolver(() => Int)
-  public async completedFileCount(@Root() season: Season) {
+  public async completedEpisodeCount(@Root() season: Season) {
     return season.episodes.loadCount({
       where: { state: "completed" },
     });
