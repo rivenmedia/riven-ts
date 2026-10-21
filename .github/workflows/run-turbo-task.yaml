@@ -59,9 +59,8 @@ jobs:
 
       - name: Get turbo version
         id: get-turbo-version
-        uses: mikefarah/yq@v4
-        with:
-          cmd: yq '.importers["."].devDependencies.turbo.version' 'pnpm-lock.yaml'
+        run: |
+          echo "result=$(pnpm ls turbo -w --json | jq -r '.[0].devDependencies.turbo.version')" >> $GITHUB_OUTPUT
 
       # Set environment variables for the turbo task, as these may be included in the cache key
       - name: Set environment variables
