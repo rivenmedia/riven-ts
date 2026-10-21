@@ -3,13 +3,17 @@
   "extends": ["//"],
   "tasks": {
     "build": {
-      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"]
+      "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"],
+      "passThroughEnv": ["ENABLE_TEST_PROXY"]
+    },
+    "e2e": {
+      "passThroughEnv": ["ENABLE_TEST_PROXY"]
     },
     "dev": {
       "cache": false,
       "with": ["@repo/riven#dev", "codegen:gql:watch"],
       "persistent": true,
-      "passThroughEnv": ["NEXT_RUNTIME"]
+      "passThroughEnv": ["NEXT_RUNTIME", "ENABLE_TEST_PROXY"]
     },
     "lint": {
       "dependsOn": [
