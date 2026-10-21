@@ -89,10 +89,10 @@ export class IndexerQueryResolver {
     description: "Search across all plugins that provide a search handler.",
   })
   public async search(
+    @Ctx() { plugins, logger }: ApolloServerContext,
     @Arg("query") query: string,
     @Arg("type", () => TopLevelMediaItemType.enum, { nullable: true })
-    type: TopLevelMediaItemType | null,
-    @Ctx() { plugins, logger }: ApolloServerContext,
+    type: TopLevelMediaItemType | null = null,
   ): Promise<SearchResponse> {
     const handlers = [...getQueryHandlers(plugins, "search", type)];
 

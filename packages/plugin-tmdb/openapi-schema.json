@@ -399,7 +399,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/2LqaLgk4Z226KkgPJuiOQ58wvrm.jpg"
+                            "example": "/2LqaLgk4Z226KkgPJuiOQ58wvrm.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -548,7 +549,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg"
+                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -654,7 +656,9 @@
                             "type": "string",
                             "example": "Test Alpha Sort"
                           },
-                          "poster_path": {}
+                          "poster_path": {
+                            "nullable": true
+                          }
                         }
                       }
                     },
@@ -775,7 +779,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg"
+                            "example": "/6oom5QYQ2yQTMJIbnvbkBL9cHo6.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -929,7 +934,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/sY9hg5dLJ93RJOyKEiu1nAtBRND.jpg"
+                            "example": "/sY9hg5dLJ93RJOyKEiu1nAtBRND.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -1209,7 +1215,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/xENglsVIIWEEhhB5lgpy33tGcKI.jpg"
+                            "example": "/xENglsVIIWEEhhB5lgpy33tGcKI.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -1355,7 +1362,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/s2e7hTrdmNUaJDf0yDP5b4AHvrD.jpg"
+                            "example": "/s2e7hTrdmNUaJDf0yDP5b4AHvrD.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -3783,7 +3791,8 @@
                     },
                     "poster_path": {
                       "type": "string",
-                      "example": "/22dj38IckjzEEUZwN1tPU5VJ1qq.jpg"
+                      "example": "/22dj38IckjzEEUZwN1tPU5VJ1qq.jpg",
+                      "nullable": true
                     },
                     "backdrop_path": {
                       "type": "string",
@@ -3821,7 +3830,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg"
+                            "example": "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+                            "nullable": true
                           },
                           "media_type": {
                             "type": "string",
@@ -4545,7 +4555,8 @@
                         },
                         "poster_path": {
                           "type": "string",
-                          "example": "/igwIPNClQpGVzb61QlGqcpT5zUy.jpg"
+                          "example": "/igwIPNClQpGVzb61QlGqcpT5zUy.jpg",
+                          "nullable": true
                         },
                         "media_type": { "type": "string", "example": "tv" },
                         "genre_ids": {
@@ -4613,7 +4624,8 @@
                               },
                               "poster_path": {
                                 "type": "string",
-                                "example": "/aUQKIpZZ31KWbpdHMCmaV76u78T.jpg"
+                                "example": "/aUQKIpZZ31KWbpdHMCmaV76u78T.jpg",
+                                "nullable": true
                               },
                               "season_number": {
                                 "type": "integer",
@@ -4970,7 +4982,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ngl2FKBlU4fhbdsrtdom9LVLBXw.jpg"
+                            "example": "/ngl2FKBlU4fhbdsrtdom9LVLBXw.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -5278,7 +5291,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ujlkQtHAVShWyWTloGU2Vh5Jbo9.jpg"
+                            "example": "/ujlkQtHAVShWyWTloGU2Vh5Jbo9.jpg",
+                            "nullable": true
                           },
                           "vote_average": {
                             "type": "integer",
@@ -5396,7 +5410,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg"
+                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
+                            "nullable": true
                           },
                           "media_type": {
                             "type": "string",
@@ -5646,7 +5661,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/8Wdd3fQfbbQeoSfWpHrDfaFNhBU.jpg"
+                            "example": "/8Wdd3fQfbbQeoSfWpHrDfaFNhBU.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -5795,7 +5811,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg"
+                            "example": "/7WUHnWGx5OO145IRxPDUkQSh4C7.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -6100,7 +6117,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/nA5otwVxAfpBP4PVgeuBk3qHcLY.jpg"
+                            "example": "/nA5otwVxAfpBP4PVgeuBk3qHcLY.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -6537,7 +6555,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/iNKf4D0AzOj9GLq8ZyG3WZaqibL.jpg"
+                            "example": "/iNKf4D0AzOj9GLq8ZyG3WZaqibL.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -6577,7 +6596,8 @@
                     },
                     "poster_path": {
                       "type": "string",
-                      "example": "/coJVIUEOToAEGViuhclM7pXC75R.jpg"
+                      "example": "/coJVIUEOToAEGViuhclM7pXC75R.jpg",
+                      "nullable": true
                     }
                   }
                 }
@@ -6746,7 +6766,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg"
+                            "example": "/qNBAXBIQlnOThrVvA6mA2B5ggV6.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -6877,7 +6898,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ngl2FKBlU4fhbdsrtdom9LVLBXw.jpg"
+                            "example": "/ngl2FKBlU4fhbdsrtdom9LVLBXw.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -7008,7 +7030,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg"
+                            "example": "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -7149,7 +7172,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/mIBCtPvKZQlxubxKMeViO2UrP3q.jpg"
+                            "example": "/mIBCtPvKZQlxubxKMeViO2UrP3q.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -7290,7 +7314,8 @@
                     },
                     "poster_path": {
                       "type": "string",
-                      "example": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
+                      "example": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+                      "nullable": true
                     },
                     "production_companies": {
                       "type": "array",
@@ -8074,7 +8099,9 @@
                       "example": 0,
                       "default": 0
                     },
-                    "poster_path": {},
+                    "poster_path": {
+                      "nullable": true
+                    },
                     "production_companies": { "type": "array" },
                     "production_countries": { "type": "array" },
                     "release_date": { "type": "string", "example": "" },
@@ -8184,7 +8211,9 @@
                           "iso_639_1": { "type": "string", "example": "en" },
                           "list_type": { "type": "string", "example": "movie" },
                           "name": { "type": "string", "example": "My Movies" },
-                          "poster_path": {}
+                          "poster_path": {
+                            "nullable": true
+                          }
                         }
                       }
                     },
@@ -8501,7 +8530,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/xvz0qZkXXMq3dH2Revxii8drxWc.jpg"
+                            "example": "/xvz0qZkXXMq3dH2Revxii8drxWc.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -15144,7 +15174,8 @@
                                 },
                                 "poster_path": {
                                   "type": "string",
-                                  "example": "/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg"
+                                  "example": "/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+                                  "nullable": true
                                 },
                                 "release_date": {
                                   "type": "string",
@@ -15466,7 +15497,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg"
+                            "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -15555,7 +15587,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/zHNNT9gfiGsuadR6x38KYOp6ekq.jpg"
+                            "example": "/zHNNT9gfiGsuadR6x38KYOp6ekq.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -15858,7 +15891,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg"
+                            "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -15946,7 +15980,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/zHNNT9gfiGsuadR6x38KYOp6ekq.jpg"
+                            "example": "/zHNNT9gfiGsuadR6x38KYOp6ekq.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -16072,7 +16107,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/l5y8egG27p2fSTyq8s21SQMmQLy.jpg"
+                            "example": "/l5y8egG27p2fSTyq8s21SQMmQLy.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -16156,7 +16192,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/dDfXQH6Kg2JNASI0dqNALukjhk1.jpg"
+                            "example": "/dDfXQH6Kg2JNASI0dqNALukjhk1.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -16315,7 +16352,8 @@
                               },
                               "poster_path": {
                                 "type": "string",
-                                "example": "/uqx37cS8cpHg8U35f9U5IBlrCV3.jpg"
+                                "example": "/uqx37cS8cpHg8U35f9U5IBlrCV3.jpg",
+                                "nullable": true
                               },
                               "media_type": {
                                 "type": "string",
@@ -16615,7 +16653,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/yFSIUVTCvgYrpalUktulvk3Gi5Y.jpg"
+                            "example": "/yFSIUVTCvgYrpalUktulvk3Gi5Y.jpg",
+                            "nullable": true
                           }
                         }
                       }
@@ -16873,7 +16912,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg"
+                            "example": "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
+                            "nullable": true
                           },
                           "release_date": {
                             "type": "string",
@@ -16997,7 +17037,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg"
+                            "example": "/6FfCtAuVAW8XJjZ7eWeLibRLWTw.jpg",
+                            "nullable": true
                           },
                           "media_type": {
                             "type": "string",
@@ -17175,7 +17216,8 @@
                                 },
                                 "poster_path": {
                                   "type": "string",
-                                  "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg"
+                                  "example": "/arw2vcBveWOVZr6pxd9XTd1TdQa.jpg",
+                                  "nullable": true
                                 },
                                 "media_type": {
                                   "type": "string",
@@ -17343,7 +17385,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg"
+                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -17457,7 +17500,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg"
+                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
+                            "nullable": true
                           },
                           "media_type": {
                             "type": "string",
@@ -17589,7 +17633,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg"
+                            "example": "/wDWwtvkRRlgTiUr6TyLSMX8FCuZ.jpg",
+                            "nullable": true
                           },
                           "media_type": {
                             "type": "string",
@@ -17769,7 +17814,8 @@
                                 },
                                 "poster_path": {
                                   "type": "string",
-                                  "example": "/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg"
+                                  "example": "/gajva2L0rPYkEWjzgFlBXCAVBE5.jpg",
+                                  "nullable": true
                                 },
                                 "media_type": {
                                   "type": "string",
@@ -17907,7 +17953,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/dBxxtfhC4vYrxB2fLsSxOTY2dQc.jpg"
+                            "example": "/dBxxtfhC4vYrxB2fLsSxOTY2dQc.jpg",
+                            "nullable": true
                           },
                           "media_type": { "type": "string", "example": "tv" },
                           "genre_ids": {
@@ -18049,7 +18096,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg"
+                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg",
+                            "nullable": true
                           },
                           "vote_average": {
                             "type": "integer",
@@ -18169,7 +18217,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg"
+                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg",
+                            "nullable": true
                           },
                           "vote_average": {
                             "type": "integer",
@@ -18288,7 +18337,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg"
+                            "example": "/aoAZgnmMzY9vVy9VWnO3U5PZENh.jpg",
+                            "nullable": true
                           },
                           "vote_average": {
                             "type": "integer",
@@ -18407,7 +18457,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/phv2Jc4H8cvRzvTKb9X1uKMboTu.jpg"
+                            "example": "/phv2Jc4H8cvRzvTKb9X1uKMboTu.jpg",
+                            "nullable": true
                           },
                           "vote_average": {
                             "type": "number",
@@ -18680,7 +18731,8 @@
                     },
                     "poster_path": {
                       "type": "string",
-                      "example": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg"
+                      "example": "/1XS1oqL89opfnbLl8WnZY1O1uJx.jpg",
+                      "nullable": true
                     },
                     "production_companies": {
                       "type": "array",
@@ -18743,7 +18795,8 @@
                           "overview": { "type": "string", "example": "" },
                           "poster_path": {
                             "type": "string",
-                            "example": "/kMTcwNRfFKCZ0O2OaBZS0nZ2AIe.jpg"
+                            "example": "/kMTcwNRfFKCZ0O2OaBZS0nZ2AIe.jpg",
+                            "nullable": true
                           },
                           "season_number": {
                             "type": "integer",
@@ -19898,7 +19951,9 @@
                       "example": 0,
                       "default": 0
                     },
-                    "poster_path": {},
+                    "poster_path": {
+                      "nullable": true
+                    },
                     "production_companies": { "type": "array" },
                     "production_countries": { "type": "array" },
                     "seasons": {
@@ -19919,7 +19974,9 @@
                           },
                           "name": { "type": "string", "example": "Season 1" },
                           "overview": { "type": "string", "example": "" },
-                          "poster_path": {},
+                          "poster_path": {
+                            "nullable": true
+                          },
                           "season_number": {
                             "type": "integer",
                             "example": 1,
@@ -20016,7 +20073,9 @@
                           "iso_639_1": { "type": "string", "example": "en" },
                           "iso_3166_1": { "type": "string", "example": "US" },
                           "name": { "type": "string", "example": "Done" },
-                          "poster_path": {}
+                          "poster_path": {
+                            "nullable": true
+                          }
                         }
                       }
                     },
@@ -20114,7 +20173,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg"
+                            "example": "/ggFHVNu6YYI5L9pCfOacjizRGt.jpg",
+                            "nullable": true
                           },
                           "media_type": { "type": "string", "example": "tv" },
                           "genre_ids": {
@@ -20422,7 +20482,8 @@
                           },
                           "poster_path": {
                             "type": "string",
-                            "example": "/xXWynVdMGyJXBUDvIN27AXM3iJJ.jpg"
+                            "example": "/xXWynVdMGyJXBUDvIN27AXM3iJJ.jpg",
+                            "nullable": true
                           },
                           "first_air_date": {
                             "type": "string",
@@ -24625,7 +24686,8 @@
                     "id": { "type": "integer", "example": 3624, "default": 0 },
                     "poster_path": {
                       "type": "string",
-                      "example": "/wgfKiqzuMrFIkU1M68DDDY8kGC1.jpg"
+                      "example": "/wgfKiqzuMrFIkU1M68DDDY8kGC1.jpg",
+                      "nullable": true
                     },
                     "season_number": {
                       "type": "integer",
