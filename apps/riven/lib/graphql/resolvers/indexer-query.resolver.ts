@@ -5,7 +5,6 @@ import {
   Arg,
   Ctx,
   Field,
-  ID,
   Int,
   ObjectType,
   Query,
@@ -147,47 +146,5 @@ export class IndexerQueryResolver {
       results: interleave(resultLists),
       errors,
     };
-  }
-
-  @Query(() => IndexerData, {
-    nullable: true,
-    description:
-      "Look up a single item from the first plugin that can provide it.",
-  })
-  public async indexerItem(
-    @Arg("id", () => ID) id: string,
-    @Arg("type", () => TopLevelMediaItemType.enum)
-    type: TopLevelMediaItemType,
-    @Ctx() { plugins, logger }: ApolloServerContext,
-  ): Promise<IndexerDataResult | null> {
-    const errors: unknown[] = [];
-
-    for (const { pluginName, queryHandler, dataSources } of getQueryHandlers(
-      plugins,
-      "indexerItem",
-      type,
-    )) {
-      try {
-        const item = await queryHandler.handler({
-          args: { id, type },
-          dataSources,
-          logger,
-        });
-
-        if (item) {
-          return toObjectType(queryHandler, item);
-        }
-      } catch (error) {
-        logger.warn(`Item handler for ${pluginName} failed`, { err: error });
-
-        errors.push(error);
-      }
-    }
-
-    if (errors.length > 0) {
-      throw new AggregateError(errors, `Unable to resolve ${type} ${id}`);
-    }
-
-    return null;
   }
 }

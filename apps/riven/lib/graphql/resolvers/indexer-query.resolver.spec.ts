@@ -83,15 +83,6 @@ const SEARCH = `
   }
 `;
 
-const INDEXER_ITEM = `
-  query IndexerItem($id: ID!, $type: TopLevelMediaItemType!) {
-    indexerItem(id: $id, type: $type) {
-      __typename
-      id
-    }
-  }
-`;
-
 describe("search", () => {
   it("interleaves results from every plugin with a search handler", async ({
     gqlContext,
@@ -195,48 +186,6 @@ describe("search", () => {
     expect(body.singleResult.data?.["search"]).toMatchObject({
       results: [{ plugin: "shows" }],
       errors: [{ plugin: "movies", message: "Rate limited" }],
-    });
-  });
-});
-
-describe("indexerItem", () => {
-  it("returns the item from the plugin that supports the requested type", async ({
-    gqlContext,
-    gqlServer,
-  }) => {
-    const { body } = await gqlServer.executeOperation(
-      { query: INDEXER_ITEM, variables: { id: "81189", type: "show" } },
-      {
-        contextValue: {
-          ...gqlContext,
-          plugins: new Map([
-            createPlugin("movies", {
-              indexerItem: {
-                type: MovieIndexerData as never,
-                mediaTypes: ["movie"],
-                handler: async ({ args }) =>
-                  Promise.resolve(createItem(args.id, "movie")),
-              },
-            }),
-            createPlugin("shows", {
-              indexerItem: {
-                type: ShowIndexerData as never,
-                mediaTypes: ["show"],
-                handler: async ({ args }) =>
-                  Promise.resolve(createItem(args.id, "show")),
-              },
-            }),
-          ]),
-        },
-      },
-    );
-
-    assert.ok(body.kind === "single");
-
-    expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.["indexerItem"]).toMatchObject({
-      __typename: "ShowIndexerData",
-      id: "81189",
     });
   });
 });

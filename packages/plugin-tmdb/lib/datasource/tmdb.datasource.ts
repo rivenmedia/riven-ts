@@ -7,7 +7,6 @@ import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.t
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
-import { searchMovie200Schema } from "../__generated__/zod/searchMovieSchema.ts";
 import { searchMulti200Schema } from "../__generated__/zod/searchMultiSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
 import { FindShowsByExternalId } from "../schemas/find-shows-by-external-id.schema.ts";
@@ -164,17 +163,6 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
       id: genre.id.toString(),
       name: genre.name,
     }));
-  }
-
-  public async searchMovies(query: string, page: number) {
-    const response = await this.get<unknown>(`search/movie`, {
-      params: {
-        query,
-        page: page.toString(),
-      },
-    });
-
-    return searchMovie200Schema.parse(response);
   }
 
   public async searchMulti(query: string, page: number) {

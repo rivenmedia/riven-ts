@@ -61,13 +61,6 @@ export const SearchQueryArgs = z.object({
 
 export type SearchQueryArgs = z.infer<typeof SearchQueryArgs>;
 
-export const IndexerItemQueryArgs = z.object({
-  id: z.string().min(1),
-  type: TopLevelMediaItemType,
-});
-
-export type IndexerItemQueryArgs = z.infer<typeof IndexerItemQueryArgs>;
-
 /**
  * Handlers that plugins can register to contribute to core GraphQL queries.
  *
@@ -75,15 +68,9 @@ export type IndexerItemQueryArgs = z.infer<typeof IndexerItemQueryArgs>;
  * as the caller is waiting on the response.
  *
  * - `search`: called on every plugin that supports the requested type; results are merged.
- * - `indexerItem`: called on each plugin that supports the requested type, in registration order,
- *   until one returns a non-null result.
  */
 export const RivenQueryHandlers = {
   search: createQueryHandlerSchema(SearchQueryArgs, z.array(IndexerDataResult)),
-  indexerItem: createQueryHandlerSchema(
-    IndexerItemQueryArgs,
-    IndexerDataResult.nullable(),
-  ),
 };
 
 export type RivenQueryHandlerName = keyof typeof RivenQueryHandlers;
