@@ -4,6 +4,7 @@ import { useState } from "react";
 
 import { InfiniteItemGrid } from "#app/(protected)/_components/infinite-item-grid/infinite-item-grid.tsx";
 import { TrendingListFilters } from "#app/(protected)/lists/trending/_components/trending-list-filters/trending-list-filters.tsx";
+import { ItemGrid } from "#components/item-grid/item-grid.tsx";
 
 import type { TrendingListFiltersFormValues } from "#app/(protected)/lists/trending/_components/trending-list-filters/trending-list-filters.form-schema.ts";
 import type { ListItem } from "#components/list-item/list-item.tsx";
@@ -56,13 +57,13 @@ export function TrendingDiscoveryPage<
           />
         </div>
       </div>
-      <div className="grid grid-cols-2 gap-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-7 2xl:grid-cols-9">
+      <ItemGrid>
         <InfiniteItemGrid
           initialData={initialData}
           fetchPage={fetchPage}
           noItemsFoundMessage={emptyMessage}
         />
-      </div>
+      </ItemGrid>
     </div>
   );
 }

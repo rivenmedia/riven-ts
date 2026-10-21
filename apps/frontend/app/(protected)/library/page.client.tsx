@@ -195,7 +195,6 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                       >
                         <ListItem
                           mediaItem={item}
-                          indexer=""
                           isSelectable
                           className="aspect-2/3 w-full"
                           {...(i % 2 === 0

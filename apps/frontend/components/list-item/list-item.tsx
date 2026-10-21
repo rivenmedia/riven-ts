@@ -27,7 +27,6 @@ interface ListItemProps extends Pick<
     text: string;
     variant: string;
   };
-  indexer: string | undefined;
   isSelectable?: boolean;
   href?: LinkProps<`/details/media/${string}/${string}`>["href"];
 }

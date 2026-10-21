@@ -14,15 +14,10 @@ import type { ComponentProps } from "react";
 
 interface ListCarouselProps {
   items: ComponentProps<typeof ListItem>["mediaItem"][];
-  indexer: string | undefined;
   ignoreAnimation?: boolean;
 }
 
-export function ListCarousel({
-  items,
-  indexer,
-  ignoreAnimation,
-}: ListCarouselProps) {
+export function ListCarousel({ items, ignoreAnimation }: ListCarouselProps) {
   return (
     <Carousel
       opts={{
@@ -43,7 +38,6 @@ export function ListCarousel({
           >
             <ListItem
               mediaItem={item}
-              indexer={indexer}
               className="w-36 md:w-44 lg:w-48"
               href={`/details/media/${item.type}/${item.id}`}
             />

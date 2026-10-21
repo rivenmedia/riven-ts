@@ -31,11 +31,10 @@ export function InfiniteItemGrid<
 
   return (
     <>
-      {[...data.values()].map((item) => (
-        <div key={item.id} className="aspect-2/3 w-full">
+      {[...data].map(([key, item]) => (
+        <div key={key} className="aspect-2/3 w-full">
           <ListItem
             mediaItem={item}
-            indexer=""
             href={`/details/media/${item.type}/${item.id}`}
           />
         </div>

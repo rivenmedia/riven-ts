@@ -38,7 +38,6 @@ async function TMDBTrendingShowsContent({
     <ListCarousel
       key={timeWindow}
       items={data.tmdbTrendingShows}
-      indexer="tmdb"
       ignoreAnimation
     />
   );

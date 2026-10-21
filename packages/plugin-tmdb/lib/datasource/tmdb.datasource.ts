@@ -7,7 +7,6 @@ import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.t
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
-import { searchMulti200Schema } from "../__generated__/zod/searchMultiSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
 import { FindShowsByExternalId } from "../schemas/find-shows-by-external-id.schema.ts";
 import { MediaImages } from "../schemas/media-images.schema.ts";
@@ -15,6 +14,7 @@ import { MediaVideos } from "../schemas/media-videos.schema.ts";
 import { MovieCredits } from "../schemas/movie-credits.schema.ts";
 import { MovieRecommendations } from "../schemas/movie-recommendations.schema.ts";
 import { MovieSimilarItems } from "../schemas/movie-similar-items.schema.ts";
+import { SearchMultiResponse } from "../schemas/search-multi.schema.ts";
 import { ShowAggregateCredits } from "../schemas/show-aggregate-credits.schema.ts";
 import { ShowContentRatings } from "../schemas/show-content-ratings.schema.ts";
 import { ShowDetails } from "../schemas/show-details.schema.ts";
@@ -173,7 +173,7 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
       },
     });
 
-    return searchMulti200Schema.parse(response);
+    return SearchMultiResponse.parse(response);
   }
 
   public async getReleaseDates(tmdbId: string) {

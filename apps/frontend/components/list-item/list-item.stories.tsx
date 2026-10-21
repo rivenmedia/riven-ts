@@ -49,7 +49,6 @@ export const Default = meta.story({
       type: "movie",
       year: 1999,
     },
-    indexer: "tmdb",
   },
 });
 

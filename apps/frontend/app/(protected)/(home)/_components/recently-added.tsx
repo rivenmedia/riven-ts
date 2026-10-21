@@ -51,7 +51,7 @@ export function RecentlyAdded({
   return (
     <div className={cn("flex flex-col gap-4 delay-100", fly, className)}>
       <SectionHeading title="Recently Added" />
-      <ListCarousel items={filtered} indexer="" />
+      <ListCarousel items={filtered} />
     </div>
   );
 }

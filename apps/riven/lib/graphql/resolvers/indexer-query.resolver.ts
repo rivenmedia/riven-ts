@@ -105,41 +105,45 @@ export class IndexerQueryResolver {
   ): Promise<SearchResponse> {
     const handlers = [...getQueryHandlers(plugins, "search", type)];
 
-    const settled = await Promise.allSettled(
+    const outcomes = await Promise.all(
       handlers.map(async ({ pluginName, queryHandler, dataSources }) => {
-        const items = await queryHandler.handler({
-          args: { query, page, type },
-          dataSources,
-          logger,
-        });
+        try {
+          const items = await queryHandler.handler({
+            args: { query, page, type },
+            dataSources,
+            logger,
+          });
 
-        return items.map<SearchResult>((item) => ({
-          plugin: pluginName,
-          item: toObjectType(queryHandler, item),
-        }));
+          return {
+            results: items.map<SearchResult>((item) => ({
+              plugin: pluginName,
+              item: toObjectType(queryHandler, item),
+            })),
+          };
+        } catch (error) {
+          logger.warn(`Search handler for ${pluginName} failed`, {
+            err: error,
+          });
+
+          return {
+            error: {
+              plugin: pluginName,
+              message: error instanceof Error ? error.message : String(error),
+            },
+          };
+        }
       }),
     );
 
     const resultLists: SearchResult[][] = [];
     const errors: QueryHandlerError[] = [];
 
-    for (const [index, outcome] of settled.entries()) {
-      const { pluginName } = handlers[index] ?? { pluginName: "unknown" };
-
-      if (outcome.status === "fulfilled") {
-        resultLists.push(outcome.value);
-
-        continue;
+    for (const outcome of outcomes) {
+      if ("error" in outcome) {
+        errors.push(outcome.error);
+      } else {
+        resultLists.push(outcome.results);
       }
-
-      const error: unknown = outcome.reason;
-
-      logger.warn(`Search handler for ${pluginName} failed`, { err: error });
-
-      errors.push({
-        plugin: pluginName,
-        message: error instanceof Error ? error.message : String(error),
-      });
     }
 
     return {

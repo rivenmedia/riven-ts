@@ -5,7 +5,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 import { gql } from "@apollo/client";
 import assert from "node:assert";
 import { ObjectType } from "type-graphql";
-import { describe, expect } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
@@ -85,109 +85,107 @@ const SEARCH = gql`
   }
 `;
 
-describe("search", () => {
-  it("interleaves results from every plugin with a search handler", async ({
-    gqlContext,
-    gqlServer,
-  }) => {
-    const { body } = await gqlServer.executeOperation(
-      { query: SEARCH, variables: { query: "breaking" } },
-      {
-        contextValue: {
-          ...gqlContext,
-          plugins: new Map([
-            createPlugin("movies", {
-              search: searchHandler(MovieIndexerData, "movie", ["m1", "m2"]),
-            }),
-            createPlugin("shows", {
-              search: searchHandler(ShowIndexerData, "show", ["s1"]),
-            }),
-            createPlugin("no-search", {}),
-          ]),
-        },
+it("interleaves results from every plugin with a search handler", async ({
+  gqlContext,
+  gqlServer,
+}) => {
+  const { body } = await gqlServer.executeOperation(
+    { query: SEARCH, variables: { query: "breaking" } },
+    {
+      contextValue: {
+        ...gqlContext,
+        plugins: new Map([
+          createPlugin("movies", {
+            search: searchHandler(MovieIndexerData, "movie", ["m1", "m2"]),
+          }),
+          createPlugin("shows", {
+            search: searchHandler(ShowIndexerData, "show", ["s1"]),
+          }),
+          createPlugin("no-search", {}),
+        ]),
       },
-    );
+    },
+  );
 
-    assert.ok(body.kind === "single");
+  assert.ok(body.kind === "single");
 
-    expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.["search"]).toMatchObject({
-      results: [
-        {
-          plugin: "movies",
-          item: { __typename: "MovieIndexerData", id: "m1", type: "movie" },
-        },
-        {
-          plugin: "shows",
-          item: { __typename: "ShowIndexerData", id: "s1", type: "show" },
-        },
-        {
-          plugin: "movies",
-          item: { __typename: "MovieIndexerData", id: "m2", type: "movie" },
-        },
-      ],
-      errors: [],
-    });
+  expect(body.singleResult.errors).toBeUndefined();
+  expect(body.singleResult.data?.["search"]).toMatchObject({
+    results: [
+      {
+        plugin: "movies",
+        item: { __typename: "MovieIndexerData", id: "m1", type: "movie" },
+      },
+      {
+        plugin: "shows",
+        item: { __typename: "ShowIndexerData", id: "s1", type: "show" },
+      },
+      {
+        plugin: "movies",
+        item: { __typename: "MovieIndexerData", id: "m2", type: "movie" },
+      },
+    ],
+    errors: [],
   });
+});
 
-  it("only calls plugins that support the requested type", async ({
-    gqlContext,
-    gqlServer,
-  }) => {
-    const { body } = await gqlServer.executeOperation(
-      { query: SEARCH, variables: { query: "breaking", type: "show" } },
-      {
-        contextValue: {
-          ...gqlContext,
-          plugins: new Map([
-            createPlugin("movies", {
-              search: searchHandler(MovieIndexerData, "movie", ["m1"]),
-            }),
-            createPlugin("shows", {
-              search: searchHandler(ShowIndexerData, "show", ["s1"]),
-            }),
-          ]),
-        },
+it("only calls plugins that support the requested type", async ({
+  gqlContext,
+  gqlServer,
+}) => {
+  const { body } = await gqlServer.executeOperation(
+    { query: SEARCH, variables: { query: "breaking", type: "show" } },
+    {
+      contextValue: {
+        ...gqlContext,
+        plugins: new Map([
+          createPlugin("movies", {
+            search: searchHandler(MovieIndexerData, "movie", ["m1"]),
+          }),
+          createPlugin("shows", {
+            search: searchHandler(ShowIndexerData, "show", ["s1"]),
+          }),
+        ]),
       },
-    );
+    },
+  );
 
-    assert.ok(body.kind === "single");
+  assert.ok(body.kind === "single");
 
-    expect(body.singleResult.data?.["search"]).toMatchObject({
-      results: [{ plugin: "shows" }],
-    });
+  expect(body.singleResult.data?.["search"]).toMatchObject({
+    results: [{ plugin: "shows" }],
   });
+});
 
-  it("returns partial results when a plugin fails", async ({
-    gqlContext,
-    gqlServer,
-  }) => {
-    const { body } = await gqlServer.executeOperation(
-      { query: SEARCH, variables: { query: "breaking" } },
-      {
-        contextValue: {
-          ...gqlContext,
-          plugins: new Map([
-            createPlugin("movies", {
-              search: {
-                ...searchHandler(MovieIndexerData, "movie", []),
-                handler: async () => Promise.reject(new Error("Rate limited")),
-              },
-            }),
-            createPlugin("shows", {
-              search: searchHandler(ShowIndexerData, "show", ["s1"]),
-            }),
-          ]),
-        },
+it("returns partial results when a plugin fails", async ({
+  gqlContext,
+  gqlServer,
+}) => {
+  const { body } = await gqlServer.executeOperation(
+    { query: SEARCH, variables: { query: "breaking" } },
+    {
+      contextValue: {
+        ...gqlContext,
+        plugins: new Map([
+          createPlugin("movies", {
+            search: {
+              ...searchHandler(MovieIndexerData, "movie", []),
+              handler: async () => Promise.reject(new Error("Rate limited")),
+            },
+          }),
+          createPlugin("shows", {
+            search: searchHandler(ShowIndexerData, "show", ["s1"]),
+          }),
+        ]),
       },
-    );
+    },
+  );
 
-    assert.ok(body.kind === "single");
+  assert.ok(body.kind === "single");
 
-    expect(body.singleResult.errors).toBeUndefined();
-    expect(body.singleResult.data?.["search"]).toMatchObject({
-      results: [{ plugin: "shows" }],
-      errors: [{ plugin: "movies", message: "Rate limited" }],
-    });
+  expect(body.singleResult.errors).toBeUndefined();
+  expect(body.singleResult.data?.["search"]).toMatchObject({
+    results: [{ plugin: "shows" }],
+    errors: [{ plugin: "movies", message: "Rate limited" }],
   });
 });

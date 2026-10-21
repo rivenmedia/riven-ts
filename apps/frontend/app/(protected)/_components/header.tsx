@@ -65,7 +65,7 @@ export function Header({ modifierKey }: HeaderProps) {
       urlQuery !== form.getValues("query") &&
       inputRef.current !== document.activeElement
     ) {
-      form.setValue("query", urlQuery);
+      form.reset({ query: urlQuery });
     }
   }, [searchParams, form]);
 

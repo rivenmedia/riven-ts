@@ -58,7 +58,6 @@ export const Default = meta.story({
       type: faker.helpers.arrayElement(["movie", "show"]),
       year: 2021,
     })),
-    indexer: "tmdb",
   },
 });
 

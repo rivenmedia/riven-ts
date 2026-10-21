@@ -1,16 +1,10 @@
-import { cacheLife } from "next/cache";
-
-import { query } from "#lib/graphql/client.ts";
+import { getClient } from "#lib/graphql/client.ts";
 
 import { InfiniteItemGrid } from "../_components/infinite-item-grid/infinite-item-grid";
 import { GET_SEARCH_RESULTS } from "./_queries/get-search-results.query";
 
-async function getSearchResults(searchQuery: string, page = 1) {
-  "use cache";
-
-  cacheLife("days");
-
-  const { data } = await query({
+async function fetchSearchResults(searchQuery: string, page: number) {
+  const { data } = await getClient().query({
     query: GET_SEARCH_RESULTS,
     variables: {
       query: searchQuery,
@@ -18,13 +12,27 @@ async function getSearchResults(searchQuery: string, page = 1) {
     },
   });
 
-  const results = new Map();
-
-  for (const result of data?.search.results ?? []) {
-    results.set(result.item.id, result.item);
+  if (!data) {
+    throw new Error("Failed to load search results");
   }
 
-  return results;
+  // Item IDs are only unique within a plugin and media type
+  const items = new Map(
+    data.search.results.map(({ plugin, item }) => [
+      `${plugin}:${item.type}:${item.id}`,
+      item,
+    ]),
+  );
+
+  return { items, errors: data.search.errors };
+}
+
+async function fetchSearchResultsPage(searchQuery: string, page: number) {
+  "use server";
+
+  const { items } = await fetchSearchResults(searchQuery, page);
+
+  return items;
 }
 
 export default async function ExplorePage({
@@ -40,14 +48,24 @@ export default async function ExplorePage({
     throw new TypeError("Invalid search query");
   }
 
-  const initialData = await getSearchResults(searchQuery);
+  const { items, errors } = await fetchSearchResults(searchQuery, 1);
 
   return (
-    <InfiniteItemGrid
-      key={searchQuery}
-      fetchPage={getSearchResults.bind(null, searchQuery)}
-      initialData={initialData}
-      noItemsFoundMessage={`No items found matching "${searchQuery}"`}
-    />
+    <>
+      {errors.length > 0 && (
+        <p className="text-muted-foreground col-span-full text-sm">
+          Some sources could not be searched:{" "}
+          {errors
+            .map(({ plugin, message }) => `${plugin} (${message})`)
+            .join(", ")}
+        </p>
+      )}
+      <InfiniteItemGrid
+        key={searchQuery}
+        fetchPage={fetchSearchResultsPage.bind(null, searchQuery)}
+        initialData={items}
+        noItemsFoundMessage={`No items found matching "${searchQuery}"`}
+      />
+    </>
   );
 }

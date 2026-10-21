@@ -1,8 +1,8 @@
 import z from "zod";
 
-import type { ZodObject } from "zod";
+import type { ZodType } from "zod";
 
-export function createPagedResponseSchema<T extends ZodObject>(itemSchema: T) {
+export function createPagedResponseSchema<T extends ZodType>(itemSchema: T) {
   return z.object({
     page: z.int(),
     results: z.array(itemSchema),
