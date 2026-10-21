@@ -1,3 +1,4 @@
+import { IndexerBaseItem } from "@repo/util-plugin-sdk/dto/types/indexer-base-item.type";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
@@ -14,10 +15,10 @@ import type {
   RivenQueryHandler,
 } from "@repo/util-plugin-sdk/schemas/query-handlers/index";
 
-@ObjectType({ implements: IndexerData })
+@ObjectType({ implements: [IndexerData, IndexerBaseItem] })
 class MovieIndexerData {}
 
-@ObjectType({ implements: IndexerData })
+@ObjectType({ implements: [IndexerData, IndexerBaseItem] })
 class ShowIndexerData {}
 
 const createItem = (id: string, type: "movie" | "show"): IndexerDataResult => ({
