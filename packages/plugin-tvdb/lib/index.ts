@@ -18,7 +18,6 @@ export const plugin: RivenPlugin = {
   hooks: {
     "riven.media-item.index.requested.show": indexTVDBMediaItem,
   },
-
   settingsSchema: TvdbSettings,
   async validator({ dataSources }) {
     return dataSources.get(TvdbAPI).validate();

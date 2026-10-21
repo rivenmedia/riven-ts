@@ -2,9 +2,10 @@ import z from "zod";
 
 import { TopLevelMediaItemType } from "../../dto/enums/top-level-media-item-type.enum.ts";
 import { DataSourceMap } from "../../utilities/datasource-map.ts";
+import { LoggerSchema } from "../logger.schema.ts";
 
 import type { IndexerData } from "../../dto/types/indexer-data.type.ts";
-import type { Logger } from "winston";
+import type { Constructor } from "type-fest";
 import type { ZodObject, ZodType } from "zod";
 
 /**
@@ -20,7 +21,7 @@ export type IndexerDataResult = Omit<IndexerData, "year" | "runtime">;
  * Core instantiates results as this class so GraphQL can resolve the concrete type
  * behind the `IndexerData` interface, and so the plugin's own field resolvers run.
  */
-const IndexerDataClass = z.custom<new () => IndexerDataResult>(
+const IndexerDataClass = z.custom<Constructor<IndexerDataResult>>(
   (value) => typeof value === "function",
 );
 
@@ -43,10 +44,7 @@ const createQueryHandlerSchema = <A extends ZodObject, O extends ZodType>(
         z.object({
           args: argsSchema,
           dataSources: z.instanceof(DataSourceMap),
-          logger: z.custom<Logger>(
-            (val) =>
-              val && typeof val === "object" && "info" in val && "error" in val,
-          ),
+          logger: LoggerSchema,
         }),
       ],
       output: z.promise(outputSchema),

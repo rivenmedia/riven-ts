@@ -1,6 +1,7 @@
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import { DataSourceMap } from "@repo/util-plugin-sdk/utilities/datasource-map";
 
+import { gql } from "@apollo/client";
 import assert from "node:assert";
 import { ObjectType } from "type-graphql";
 import { describe, expect } from "vitest";
@@ -64,7 +65,7 @@ const searchHandler = (
     Promise.resolve(ids.map((id) => createItem(id, mediaType))),
 });
 
-const SEARCH = `
+const SEARCH = gql`
   query Search($query: String!, $type: TopLevelMediaItemType) {
     search(query: $query, type: $type) {
       results {
