@@ -7,6 +7,7 @@ export const ItemPermission = z.enum([
   "delete",
   "reset",
   "pause",
+  "resume",
   "retry",
   "scrape",
 ]);

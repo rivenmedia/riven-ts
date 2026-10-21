@@ -41,6 +41,12 @@ export function initApolloClient(uri: URL, signal?: AbortSignal) {
     cache: new InMemoryCache({
       possibleTypes: {
         MediaItem: ["Movie", "Show", "Season", "Episode"],
+        ShowLikeMediaItem: ["Show", "Season", "Episode"],
+      },
+      typePolicies: {
+        TmdbIndexerData: {
+          keyFields: ["type", "id"],
+        },
       },
     }),
     dataMasking: true,

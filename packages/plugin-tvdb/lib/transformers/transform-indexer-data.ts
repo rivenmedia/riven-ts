@@ -38,6 +38,7 @@ export const transformSearchResult = (
     type: "show",
     status: parseStatus(result.status),
     originCountry: result.country ? [result.country] : null,
+    isRequestable: true,
   };
 };
 
@@ -60,4 +61,5 @@ export const transformSeriesToIndexerData = (
     : null,
   status: parseStatus(series.status?.name),
   originCountry: series.originalCountry ? [series.originalCountry] : null,
+  isRequestable: Boolean(series.id),
 });

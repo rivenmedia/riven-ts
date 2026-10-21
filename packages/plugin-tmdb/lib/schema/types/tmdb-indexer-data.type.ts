@@ -1,3 +1,4 @@
+import { IndexerBaseItem } from "@repo/util-plugin-sdk/dto/types/indexer-base-item.type";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { Field, ID, ObjectType } from "type-graphql";
@@ -9,19 +10,29 @@ import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/producti
 import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
-@ObjectType({ implements: IndexerData })
-export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
+/**
+ * A movie or show from TMDB.
+ *
+ * The `id` is the ID Riven uses to request the item:
+ * - Movies: the TMDB ID
+ * - Shows: the TVDB ID, or a namespaced TMDB ID (`tmdb-<id>`) when TMDB has no TVDB ID.
+ *   These shows are surfaced for visibility, but are not requestable.
+ *
+ * TMDB lookups must always use {@link TmdbIndexerData.tmdbId}.
+ */
+@ObjectType({ implements: [IndexerData, IndexerBaseItem] })
+export class TmdbIndexerData
+  extends IndexerBaseItem
+  implements Omit<IndexerData, keyof IndexerBaseItem | "runtime" | "year">
+{
   @Field(() => ID)
-  public id!: string;
+  public tmdbId!: string;
 
-  @Field()
-  public title!: string;
+  @Field(() => ID, { nullable: true })
+  public tvdbId?: string | null;
 
   @Field()
   public overview!: string;
-
-  @Field(() => String, { nullable: true })
-  public posterUrl?: string | null;
 
   @Field(() => String, { nullable: true })
   public backdropUrl?: string | null;
@@ -45,6 +56,8 @@ export class TmdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   public certification?: string | null;
 
   public type!: Extract<MediaItemType, "movie" | "show">;
+
+  public isRequestable!: boolean;
 
   public imdbId?: string | null;
 

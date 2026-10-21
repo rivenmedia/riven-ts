@@ -81,10 +81,7 @@ it.concurrent("adds the plugin as a dependency to @repo/wiki", ({
     `${process.cwd()}/apps/wiki/package.json`,
   );
 
-  expect(packageJson.dependencies).toHaveProperty(
-    packageFullName,
-    "workspace:^",
-  );
+  expect(packageJson.dependencies).toHaveProperty(packageFullName, "catalog:");
 });
 
 it.concurrent("adds the plugin as a dependency to @repo/riven", ({
@@ -94,10 +91,7 @@ it.concurrent("adds the plugin as a dependency to @repo/riven", ({
     `${process.cwd()}/apps/riven/package.json`,
   );
 
-  expect(packageJson.dependencies).toHaveProperty(
-    packageFullName,
-    "workspace:^",
-  );
+  expect(packageJson.dependencies).toHaveProperty(packageFullName, "catalog:");
 });
 
 it.concurrent("generates a plugin with the correct name in package.json", ({

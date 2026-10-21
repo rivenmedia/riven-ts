@@ -1,13 +1,8 @@
 import assert from "node:assert";
 
 import { GET_AUTH_PROVIDERS } from "#app/(public)/login/_queries/get-auth-providers.query.ts";
-import {
-  HttpResponse,
-  expect,
-  graphql,
-  http,
-  test,
-} from "#playwright/fixtures.ts";
+import { api } from "#mocks/graphql.ts";
+import { HttpResponse, expect, http, test } from "#playwright/fixtures.ts";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 
@@ -19,7 +14,7 @@ test("navigates to the dashboard after registration", async ({
   context,
 }) => {
   msw.use(
-    graphql.query(GET_AUTH_PROVIDERS, () =>
+    api.query(GET_AUTH_PROVIDERS, () =>
       HttpResponse.json({
         data: {
           authProviders: [

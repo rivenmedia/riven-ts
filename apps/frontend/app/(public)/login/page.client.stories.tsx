@@ -1,5 +1,4 @@
 import { redirect } from "@storybook/nextjs-vite/navigation.mock";
-import { screen } from "@testing-library/react";
 import { http, HttpResponse } from "msw";
 import { expect, spyOn } from "storybook/test";
 
@@ -53,16 +52,16 @@ CredentialsEnabled.test(
     });
 
     await step("Fill out the login form", async () => {
-      await userEvent.type(screen.getByLabelText(/username/iu), "username");
-      await userEvent.type(screen.getByLabelText(/^password$/iu), "password");
+      await userEvent.type(canvas.getByLabelText(/username/iu), "username");
+      await userEvent.type(canvas.getByLabelText(/^password$/iu), "password");
     });
 
     await step("Submit the login form", async () => {
-      await userEvent.click(screen.getByRole("button", { name: /submit/iu }));
+      await userEvent.click(canvas.getByRole("button", { name: /submit/iu }));
     });
 
     await expect(
-      await screen.findByText(/login successful/iu),
+      await canvas.findByText(/login successful/iu),
     ).toBeInTheDocument();
 
     await expect(redirect).toBeCalledWith("/");
@@ -88,16 +87,16 @@ CredentialsEnabled.test(
     });
 
     await step("Fill out the login form", async () => {
-      await userEvent.type(screen.getByLabelText(/username/iu), "username");
-      await userEvent.type(screen.getByLabelText(/^password$/iu), "password");
+      await userEvent.type(canvas.getByLabelText(/username/iu), "username");
+      await userEvent.type(canvas.getByLabelText(/^password$/iu), "password");
     });
 
     await step("Submit the login form", async () => {
-      await userEvent.click(screen.getByRole("button", { name: /submit/iu }));
+      await userEvent.click(canvas.getByRole("button", { name: /submit/iu }));
     });
 
     await expect(
-      await screen.findByText(/an error occurred during login/iu),
+      await canvas.findByText(/an error occurred during login/iu),
     ).toBeInTheDocument();
 
     await expect(redirect).not.toBeCalled();
@@ -125,24 +124,24 @@ CredentialsEnabled.test(
     });
 
     await step("Fill out the registration form", async () => {
-      await userEvent.type(screen.getByLabelText(/username/iu), "username");
+      await userEvent.type(canvas.getByLabelText(/username/iu), "username");
       await userEvent.type(
-        screen.getByLabelText(/email/iu),
+        canvas.getByLabelText(/email/iu),
         "email@example.com",
       );
-      await userEvent.type(screen.getByLabelText(/^password$/iu), "password");
+      await userEvent.type(canvas.getByLabelText(/^password$/iu), "password");
       await userEvent.type(
-        screen.getByLabelText(/confirm password/iu),
+        canvas.getByLabelText(/confirm password/iu),
         "password",
       );
     });
 
     await step("Submit the registration form", async () => {
-      await userEvent.click(screen.getByRole("button", { name: /submit/iu }));
+      await userEvent.click(canvas.getByRole("button", { name: /submit/iu }));
     });
 
     await expect(
-      await screen.findByText(/registration successful/iu),
+      await canvas.findByText(/registration successful/iu),
     ).toBeInTheDocument();
 
     await expect(redirect).toBeCalledWith("/");
@@ -168,24 +167,24 @@ CredentialsEnabled.test(
     });
 
     await step("Fill out the registration form", async () => {
-      await userEvent.type(screen.getByLabelText(/username/iu), "username");
+      await userEvent.type(canvas.getByLabelText(/username/iu), "username");
       await userEvent.type(
-        screen.getByLabelText(/email/iu),
+        canvas.getByLabelText(/email/iu),
         "email@example.com",
       );
-      await userEvent.type(screen.getByLabelText(/^password$/iu), "password");
+      await userEvent.type(canvas.getByLabelText(/^password$/iu), "password");
       await userEvent.type(
-        screen.getByLabelText(/confirm password/iu),
+        canvas.getByLabelText(/confirm password/iu),
         "password",
       );
     });
 
     await step("Submit the registration form", async () => {
-      await userEvent.click(screen.getByRole("button", { name: /submit/iu }));
+      await userEvent.click(canvas.getByRole("button", { name: /submit/iu }));
     });
 
     await expect(
-      await screen.findByText(/an error occurred during registration/iu),
+      await canvas.findByText(/an error occurred during registration/iu),
     ).toBeInTheDocument();
 
     await expect(redirect).not.toBeCalled();

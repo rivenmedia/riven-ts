@@ -46,6 +46,7 @@ const meta = preview.meta({
         },
         logo: null,
         status: "released",
+        isRequestable: true,
       },
       {
         id: "94605",
@@ -66,6 +67,7 @@ const meta = preview.meta({
         ratings: {},
         logo: null,
         status: "released",
+        isRequestable: true,
       },
       {
         id: "1291595",
@@ -83,6 +85,7 @@ const meta = preview.meta({
         ratings: {},
         logo: null,
         status: "released",
+        isRequestable: true,
       },
     ] satisfies IndexerData[],
   },
@@ -327,6 +330,7 @@ export const WithLongTitle = meta.story({
         ratings: {},
         logo: null,
         status: "released",
+        isRequestable: true,
       },
       {
         id: "1291593",
@@ -349,6 +353,7 @@ export const WithLongTitle = meta.story({
         ratings: {},
         logo: null,
         status: "released",
+        isRequestable: true,
       },
       {
         id: "1291595",
@@ -366,6 +371,7 @@ export const WithLongTitle = meta.story({
         ratings: {},
         logo: null,
         status: "released",
+        isRequestable: true,
       },
     ],
   },
@@ -409,6 +415,7 @@ export const WithLogos = meta.story({
           width: 300,
         },
         status: "released",
+        isRequestable: true,
       },
       {
         id: "94605",
@@ -434,6 +441,7 @@ export const WithLogos = meta.story({
           width: 300,
         },
         status: "released",
+        isRequestable: true,
       },
       {
         id: "1291595",
@@ -456,6 +464,7 @@ export const WithLogos = meta.story({
           width: 300,
         },
         status: "released",
+        isRequestable: true,
       },
     ],
   },

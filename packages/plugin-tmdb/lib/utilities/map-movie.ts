@@ -7,6 +7,7 @@ import type { MovieDetails200Schema } from "../__generated__/zod/movieDetailsSch
 import type { SearchMovie200Schema } from "../__generated__/zod/searchMovieSchema.ts";
 import type { TmdbIndexerData } from "../schema/types/tmdb-indexer-data.type.ts";
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
+import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
 
 type MovieListItem = NonNullable<SearchMovie200Schema["results"]>[number];
 
@@ -37,7 +38,7 @@ export const mapMovieDetails = (
   revenue: item.revenue ?? null,
   homepage: item.homepage ?? null,
   spokenLanguages:
-    item.spoken_languages?.map((language) => ({
+    item.spoken_languages?.map<SpokenLanguage>((language) => ({
       englishName: language.english_name ?? "",
       iso6391Code: language.iso_639_1 ?? "",
       name: language.name ?? "",
@@ -49,6 +50,8 @@ export const mapMovieDetails = (
       logoPath: formatImageUrl(company.logo_path, "logo") ?? null,
       originCountry: company.origin_country ?? "",
     })) ?? null,
+  isRequestable: true,
+  tmdbId: id,
 });
 
 /**
@@ -65,6 +68,8 @@ export const mapMovieListItem = (
 
   return {
     id: movie.id.toString(),
+    tmdbId: movie.id.toString(),
+    isRequestable: true,
     title: movie.title,
     overview: movie.overview ?? "",
     backdropUrl: formatImageUrl(movie.backdrop_path, "backdrop"),

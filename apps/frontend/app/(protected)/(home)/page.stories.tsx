@@ -1,13 +1,14 @@
 import { DateTime } from "luxon";
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
+import { api } from "#mocks/graphql.ts";
 
 import { GET_RECENTLY_ADDED } from "./_components/recently-added.tsx";
 import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
 import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies.ts";
-import { GET_TVDB_TRENDING_SHOWS } from "./_components/tvdb-trending-shows/_queries/get-tvdb-trending-shows.ts";
+import { GET_TMDB_TRENDING_SHOWS } from "./_components/tmdb-trending-shows/_queries/get-tmdb-trending-shows.ts";
 import HomePage from "./page.tsx";
 
 const meta = preview.meta({
@@ -21,7 +22,7 @@ const meta = preview.meta({
 export const Default = meta.story({
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_TMDB_NOW_PLAYING, () =>
+      api.query(GET_TMDB_NOW_PLAYING, () =>
         HttpResponse.json({
           data: {
             tmdbNowPlaying: [
@@ -160,7 +161,7 @@ export const Default = meta.story({
           },
         }),
       ),
-      graphql.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
+      api.query(GET_TMDB_TRENDING_MOVIES, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
@@ -195,19 +196,20 @@ export const Default = meta.story({
           },
         });
       }),
-      graphql.query(GET_TVDB_TRENDING_SHOWS, ({ variables }) => {
+      api.query(GET_TMDB_TRENDING_SHOWS, ({ variables }) => {
         if (variables.timeWindow === "day") {
           return HttpResponse.json({
             data: {
-              tvdbTrendingShows: [
+              tmdbTrendingShows: [
                 {
-                  __typename: "Show",
+                  __typename: "TmdbIndexerData",
                   id: crypto.randomUUID(),
                   type: "show",
                   title: "Breaking Bad",
-                  posterPath:
+                  posterUrl:
                     "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
                   year: 2008,
+                  isRequestable: true,
                 },
               ],
             },
@@ -216,21 +218,22 @@ export const Default = meta.story({
 
         return HttpResponse.json({
           data: {
-            tvdbTrendingShows: [
+            tmdbTrendingShows: [
               {
-                __typename: "Show",
+                __typename: "TmdbIndexerData",
                 id: crypto.randomUUID(),
                 type: "show",
                 title: "Arcane",
-                posterPath:
+                posterUrl:
                   "https://artworks.thetvdb.com/banners/v4/series/371028/posters/617f6a8c59e8f.jpg",
                 year: 2024,
+                isRequestable: true,
               },
             ],
           },
         });
       }),
-      graphql.query(GET_RECENTLY_ADDED, () =>
+      api.query(GET_RECENTLY_ADDED, () =>
         HttpResponse.json({
           data: {
             recentlyAdded: [],
@@ -334,7 +337,7 @@ Default.test(
 export const WithRecentlyAdded = Default.extend({
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_RECENTLY_ADDED, () =>
+      api.query(GET_RECENTLY_ADDED, () =>
         HttpResponse.json({
           data: {
             recentlyAdded: [

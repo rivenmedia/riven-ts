@@ -6,20 +6,30 @@ import { Badge } from "#components/_ui/badge.tsx";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { HTMLAttributes } from "react";
 
-export interface StatusBadgeProps extends Pick<
+export type StatusBadgeProps = Pick<
   HTMLAttributes<HTMLElement>,
   "className"
-> {
-  state: MediaItemState;
+> & {
   large?: boolean;
-}
+} & (
+    | {
+        isRequested: boolean;
+        state: MediaItemState;
+      }
+    | {
+        isRequested: false;
+        state?: never;
+      }
+  );
 
 export function StatusBadge({
   state,
+  isRequested,
   large = false,
   className,
 }: StatusBadgeProps) {
   const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
+  const label = isRequested ? startCase(state) : "Unrequested";
 
   return (
     <Badge
@@ -39,10 +49,11 @@ export function StatusBadge({
         state === "paused" &&
           "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         state === "failed" && "bg-red-600/80 text-red-50 hover:bg-red-600/70",
+        !isRequested && "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         className,
       )}
     >
-      {startCase(state)}
+      {label}
     </Badge>
   );
 }

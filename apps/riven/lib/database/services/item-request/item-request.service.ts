@@ -12,6 +12,7 @@ import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { Ref } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 import type { UUID } from "node:crypto";
 
 export class ItemRequestService extends BaseService {
@@ -52,6 +53,23 @@ export class ItemRequestService extends BaseService {
   @CreateRequestContext()
   public async getItemRequestById(id: UUID) {
     return this.em.findOneOrFail(ItemRequest, id);
+  }
+
+  @CreateRequestContext()
+  public async getItemRequestByExternalIds({
+    tmdbId,
+    imdbId,
+    tvdbId,
+  }: ExternalIds) {
+    if (!tmdbId && !imdbId && !tvdbId) {
+      throw new Error("At least one external ID must be provided");
+    }
+
+    return this.em.findOne(ItemRequest, {
+      ...(tmdbId && { tmdbId }),
+      ...(imdbId && { imdbId }),
+      ...(tvdbId && { tvdbId }),
+    });
   }
 
   @CreateRequestContext()

@@ -8,8 +8,8 @@
   "type": "module",
   "imports": {
     "#*.css": "./*.css",
-    "#*.ts": "./*.ts",
-    "#*.tsx": "./*.tsx"
+    "#*.tsx": "./*.tsx",
+    "#*.ts": "./*.ts"
   },
   "exports": {
     "./wiki.config": "./wiki.config.ts"

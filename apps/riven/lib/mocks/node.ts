@@ -25,4 +25,4 @@ const scenarioHandlers = mockScenario.handlers;
 
 export const server = setupServer(...scenarioHandlers);
 
-server.listen({ onUnhandledRequest: "bypass" });
+server.listen({ onUnhandledFrame: "bypass" });

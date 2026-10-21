@@ -10,14 +10,17 @@ export const GET_ITEM_RECOMMENDATIONS: TypedDocumentNode<
   GetItemRecommendationsQuery,
   GetItemRecommendationsQueryVariables
 > = gql`
-  query GetItemRecommendations($id: ID!) {
-    tmdbItem(id: $id) {
+  query GetItemRecommendations($id: ID!, $type: TopLevelMediaItemType!) {
+    tmdbItem(id: $id, type: $type) {
+      id
+      type
       recommendations {
         id
         title
         type
         posterUrl
         year
+        isRequestable
       }
     }
   }

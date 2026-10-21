@@ -47,12 +47,14 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       });
     } catch (error) {
       if (
-        error instanceof MediaItemScrapeErrorIncorrectState ||
-        error instanceof MediaItemScrapeError
+        error instanceof MediaItemScrapeError ||
+        error instanceof MediaItemScrapeErrorIncorrectState
       ) {
         sendEvent(error.payload);
 
-        throw new UnrecoverableError(error.message);
+        throw new UnrecoverableError(
+          `Failed to scrape ${error.payload.item.fullTitle}: ${error.message}`,
+        );
       }
 
       if (error instanceof MediaItemScrapeErrorNoStreamsFound) {

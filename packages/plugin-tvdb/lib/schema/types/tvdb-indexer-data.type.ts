@@ -1,3 +1,4 @@
+import { IndexerBaseItem } from "@repo/util-plugin-sdk/dto/types/indexer-base-item.type";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import { ObjectType } from "type-graphql";
@@ -7,8 +8,11 @@ import type { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-t
 import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
-@ObjectType({ implements: IndexerData })
-export class TvdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
+@ObjectType({ implements: [IndexerData, IndexerBaseItem] })
+export class TvdbIndexerData implements Omit<
+  IndexerData,
+  keyof IndexerBaseItem | "runtime" | "year"
+> {
   public id!: string;
 
   public title!: string;
@@ -30,4 +34,6 @@ export class TvdbIndexerData implements Omit<IndexerData, "runtime" | "year"> {
   public status!: IndexerDataStatus;
 
   public originCountry?: string[] | null;
+
+  public isRequestable!: boolean;
 }

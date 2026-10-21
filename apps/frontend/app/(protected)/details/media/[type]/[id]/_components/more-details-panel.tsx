@@ -27,6 +27,15 @@ export function MoreDetailsPanel({
   imdbId,
   externalLinks,
 }: MoreDetailsPanelProps) {
+  const duplicateCompanyNames = new Set(
+    productionCompanies
+      ?.filter(
+        (company, index, self) =>
+          index !== self.findIndex(({ name }) => name === company.name),
+      )
+      .map(({ name }) => name.toLowerCase()),
+  );
+
   return (
     <div className="min-w-0 flex-1">
       <SectionHeading title="More Details" />
@@ -88,14 +97,21 @@ export function MoreDetailsPanel({
               Production
             </span>
             <div className="flex flex-wrap gap-2">
-              {productionCompanies.map((company) => (
-                <span
-                  key={company.name}
-                  className="text-muted-foreground rounded border border-white/10 bg-white/5 px-2 py-1 text-xs"
-                >
-                  {company.name}
-                </span>
-              ))}
+              {productionCompanies.map((company) => {
+                const isDuplicated = duplicateCompanyNames.has(
+                  company.name.toLowerCase(),
+                );
+
+                return (
+                  <span
+                    key={company.id}
+                    className="text-muted-foreground rounded border border-white/10 bg-white/5 px-2 py-1 text-xs"
+                  >
+                    {company.name}{" "}
+                    {isDuplicated && `[${company.originCountry}]`}
+                  </span>
+                );
+              })}
             </div>
           </div>
         )}

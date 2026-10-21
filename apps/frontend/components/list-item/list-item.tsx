@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "cn";
+import Link from "next/link";
 import { useMemo } from "react";
 
 import { Badge } from "#components/_ui/badge.tsx";
@@ -8,19 +9,33 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 import { useCardSelection } from "#components/providers/card-selection-provider.tsx";
 
 import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
+import type { LinkProps } from "next/link";
+import type { SetOptional } from "type-fest";
 
 interface ListItemProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {
-  mediaItem: Pick<IndexerData, "id" | "title" | "posterUrl" | "type" | "year">;
+  mediaItem: SetOptional<
+    Pick<
+      IndexerData,
+      "id" | "title" | "posterUrl" | "type" | "year" | "isRequestable"
+    >,
+    "isRequestable"
+  >;
   badge?: {
     text: string;
     variant: string;
   };
   indexer: string | undefined;
   isSelectable?: boolean;
+  href?: LinkProps<`/details/media/${string}/${string}`>["href"];
 }
+
+const notRequestableBadge = {
+  text: "Not requestable",
+  variant: "default",
+} as const satisfies ListItemProps["badge"];
 
 export function ListItem({
   className,
@@ -28,8 +43,14 @@ export function ListItem({
   indexer,
   mediaItem,
   isSelectable = false,
+  href,
 }: ListItemProps) {
   const cardSelectionContext = useCardSelection();
+
+  // Items that can't be requested (e.g. shows without a TVDB ID) have no details page to link to
+  const isRequestable = mediaItem.isRequestable !== false;
+  const resolvedBadge =
+    badge ?? (isRequestable ? undefined : notRequestableBadge);
 
   if (isSelectable && !cardSelectionContext) {
     throw new Error(
@@ -95,15 +116,15 @@ export function ListItem({
             },
           })}
         topRight={
-          badge && (
+          resolvedBadge && (
             <Badge
               className={cn(
                 "border-white/10 px-2 py-0.5 text-[10px] shadow-sm backdrop-blur-md",
-                badgeVariantClasses[badge.variant] ??
+                badgeVariantClasses[resolvedBadge.variant] ??
                   badgeVariantClasses["default"],
               )}
             >
-              {badge.text}
+              {resolvedBadge.text}
             </Badge>
           )
         }
@@ -111,14 +132,17 @@ export function ListItem({
     );
   }
 
+  if (href && isRequestable) {
+    return (
+      <Link href={href} className={containerClasses}>
+        {renderCardContent()}
+      </Link>
+    );
+  }
+
   return (
-    <button
-      aria-disabled="true"
-      tabIndex={-1}
-      className={containerClasses}
-      type="button"
-    >
+    <div aria-disabled="true" tabIndex={-1} className={containerClasses}>
       {renderCardContent()}
-    </button>
+    </div>
   );
 }

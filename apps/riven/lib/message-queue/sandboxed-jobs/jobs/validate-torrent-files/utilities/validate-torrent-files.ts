@@ -48,7 +48,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
       }
 
       ... on Episode {
-        tvdbId
         runtime
         lookupKeys
         number
@@ -59,7 +58,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Season {
         number
-        tvdbId
         episodes {
           lookupKeys
         }
@@ -67,7 +65,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Show {
         status
-        tvdbId
         seasons {
           totalEpisodes
           episodes {

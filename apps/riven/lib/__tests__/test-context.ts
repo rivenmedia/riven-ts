@@ -1,6 +1,7 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { graphql, passthrough } from "msw";
+import { passthrough } from "msw";
+import { graphql } from "msw/graphql";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { test as testBase, vi } from "vitest";
@@ -28,10 +29,7 @@ export const it = testBase
     const { setupServer } = await import("msw/node");
 
     const server = setupServer(
-      graphql.query(
-        ({ request: { url } }) => url.includes("localhost"),
-        passthrough,
-      ),
+      graphql.link(/http:\/\/localhost:\d+\//iu).query(() => true, passthrough),
     );
 
     if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
@@ -47,9 +45,7 @@ export const it = testBase
     }
 
     // Start the worker before the test.
-    server.listen({
-      onUnhandledRequest: "error",
-    });
+    server.listen({ onUnhandledFrame: "error" });
 
     onCleanup(() => {
       // Stop the worker after the test.

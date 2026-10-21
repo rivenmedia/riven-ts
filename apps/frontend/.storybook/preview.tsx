@@ -24,13 +24,29 @@ import { normaliseEnvironment } from "./test-utils/normalise-environment.ts";
 import {
   prepareAutoSnapshot,
   resetAutoSnapshot,
+  trackPendingRequests,
 } from "./test-utils/visual-testing.ts";
 
+import type { resetClient } from "#lib/graphql/__mocks__/client.ts";
 import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 // Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
 sb.mock(import("next/cache"));
+
+/**
+ * Gives the mocked GraphQL client a fresh cache, so data doesn't leak between stories.
+ *
+ * The mock is served in place of the real module, so it must be imported via the real path to share its instance.
+ */
+const resetMockGraphqlClient = async () => {
+  const mockGraphqlClient =
+    (await import("#lib/graphql/client.ts")) as unknown as {
+      resetClient: typeof resetClient;
+    };
+
+  mockGraphqlClient.resetClient();
+};
 
 normaliseEnvironment();
 
@@ -150,9 +166,14 @@ export const preview = definePreview({
       );
     },
   ],
-  beforeEach({ globals }) {
+  async beforeEach({ globals, msw }) {
     resetAutoSnapshot();
-    resetApolloClientSingletons(); // Clear Apollo Client cache to prevent stale data between stories
+    trackPendingRequests(msw);
+
+    // Clear the Apollo Client caches to prevent stale data between stories
+    resetApolloClientSingletons();
+    await resetMockGraphqlClient();
+
     toast.dismiss();
 
     headers().append("accept-language", globals.locale);

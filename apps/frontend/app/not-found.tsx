@@ -9,13 +9,6 @@ import { Button } from "#components/_ui/button.tsx";
 export default function NotFoundPage() {
   return (
     <div className="relative isolate flex min-h-[calc(100vh-4rem)] items-center overflow-hidden px-4 py-16 md:px-10">
-      <div className="absolute inset-0 -z-10">
-        <div className="bg-background absolute inset-0" />
-        <div className="via-primary/50 absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent to-transparent" />
-        <div className="bg-primary/10 absolute top-1/4 left-1/2 h-80 w-80 -translate-x-1/2 rounded-full blur-[110px]" />
-        <div className="bg-accent/10 absolute right-0 bottom-0 h-72 w-72 rounded-full blur-[120px]" />
-      </div>
-
       <section className="mx-auto flex w-full max-w-4xl flex-col gap-8">
         <div className="flex flex-col gap-5">
           <Badge

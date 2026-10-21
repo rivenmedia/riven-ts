@@ -9,10 +9,10 @@ import { query } from "#lib/graphql/client.ts";
 
 import { GET_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies.ts";
 
-import type { TmdbTrendingMoviesTimeWindow } from "#app/_types/__generated__/graphql.ts";
+import type { TmdbTrendingTimeWindow } from "#app/_types/__generated__/graphql.ts";
 
 interface TMDBTrendingMoviesContentProps {
-  timeWindow: TmdbTrendingMoviesTimeWindow;
+  timeWindow: TmdbTrendingTimeWindow;
 }
 
 /**
@@ -45,7 +45,7 @@ async function TMDBTrendingMoviesContent({
 }
 
 interface TMDBTrendingMoviesLoaderProps {
-  timeWindow: TmdbTrendingMoviesTimeWindow;
+  timeWindow: TmdbTrendingTimeWindow;
 }
 
 /**
@@ -60,7 +60,7 @@ async function TMDBTrendingMoviesLoader({
 }
 
 interface TMDBTrendingMoviesSlotProps {
-  timeWindow: TmdbTrendingMoviesTimeWindow;
+  timeWindow: TmdbTrendingTimeWindow;
 }
 
 function TMDBTrendingMoviesSlot({ timeWindow }: TMDBTrendingMoviesSlotProps) {

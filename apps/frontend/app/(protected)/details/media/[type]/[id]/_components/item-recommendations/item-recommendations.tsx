@@ -11,12 +11,16 @@ import { query } from "#lib/graphql/client.ts";
 import { MediaCarousel } from "../media-carousel";
 import { GET_ITEM_RECOMMENDATIONS } from "./_queries/get-item-recommendations.query";
 
+import type { TopLevelMediaItemType } from "#app/_types/__generated__/graphql.ts";
+
 interface ItemRecommendationsContentProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
 async function ItemRecommendationsContent({
   id,
+  type,
 }: ItemRecommendationsContentProps) {
   "use cache";
 
@@ -26,6 +30,7 @@ async function ItemRecommendationsContent({
     query: GET_ITEM_RECOMMENDATIONS,
     variables: {
       id,
+      type,
     },
   });
 
@@ -34,21 +39,24 @@ async function ItemRecommendationsContent({
 
 interface ItemRecommendationsLoaderProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
 async function ItemRecommendationsLoader({
   id,
+  type,
 }: ItemRecommendationsLoaderProps) {
   await io();
 
-  return <ItemRecommendationsContent id={id} />;
+  return <ItemRecommendationsContent id={id} type={type} />;
 }
 
 interface ItemRecommendationsProps {
   id: string;
+  type: TopLevelMediaItemType;
 }
 
-export function ItemRecommendations({ id }: ItemRecommendationsProps) {
+export function ItemRecommendations({ id, type }: ItemRecommendationsProps) {
   return (
     <section
       className={cn("mt-8 md:mt-12 animation-duration-400 delay-600", fly)}
@@ -56,7 +64,7 @@ export function ItemRecommendations({ id }: ItemRecommendationsProps) {
       <SectionHeading title="Recommendations" />
       <ErrorFallback message="Unable to load recommendations">
         <Suspense fallback={<ListCarouselSkeleton />}>
-          <ItemRecommendationsLoader id={id} />
+          <ItemRecommendationsLoader id={id} type={type} />
         </Suspense>
       </ErrorFallback>
     </section>

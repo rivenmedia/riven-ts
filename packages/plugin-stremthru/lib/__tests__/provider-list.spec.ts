@@ -174,7 +174,20 @@ it("moves rate-limited providers back to the providers list after the rate limit
   settings,
   dataSourceMap,
 }) => {
-  vi.useFakeTimers();
+  // `setImmediate` must stay real, as MSW's interceptor relies on it to handle requests.
+  vi.useFakeTimers({
+    toFake: [
+      "setTimeout",
+      "clearTimeout",
+      "setInterval",
+      "clearInterval",
+      "Date",
+    ],
+  });
+
+  // TTLCache holds a reference to the real `performance` object from import time,
+  // so faking the global doesn't reach it. Drive its clock from the faked `Date` instead.
+  vi.spyOn(performance, "now").mockImplementation(Date.now);
 
   const providerListRequestedHook =
     plugin.hooks["riven.media-item.download.provider-list-requested"];
@@ -224,20 +237,17 @@ it("moves rate-limited providers back to the providers list after the rate limit
     },
   });
 
-  await vi.waitFor(
-    async () => {
-      const check = await providerListRequestedHook({
-        dataSources: dataSourceMap,
-        settings,
-        event: {},
-        logger: {} as never,
-      });
+  await vi.advanceTimersByTimeAsync(2000);
 
-      expect(check).toStrictEqual({
-        providers: ["debridlink", "alldebrid", "realdebrid"],
-        rateLimitedProviders: {},
-      });
-    },
-    { timeout: 2000 },
-  );
+  const check = await providerListRequestedHook({
+    dataSources: dataSourceMap,
+    settings,
+    event: {},
+    logger: {} as never,
+  });
+
+  expect(check).toStrictEqual({
+    providers: ["debridlink", "alldebrid", "realdebrid"],
+    rateLimitedProviders: {},
+  });
 });

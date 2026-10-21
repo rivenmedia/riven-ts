@@ -15,7 +15,17 @@ function makeClient() {
   });
 
   return new ApolloClient({
-    cache: new InMemoryCache(),
+    cache: new InMemoryCache({
+      possibleTypes: {
+        MediaItem: ["Movie", "Show", "Season", "Episode"],
+        ShowLikeMediaItem: ["Show", "Season", "Episode"],
+      },
+      typePolicies: {
+        TmdbIndexerData: {
+          keyFields: ["type", "id"],
+        },
+      },
+    }),
     link: httpLink,
   });
 }

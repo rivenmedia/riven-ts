@@ -10,7 +10,7 @@ export const GET_TMDB_TRENDING_MOVIES: TypedDocumentNode<
   GetTmdbTrendingMoviesQuery,
   GetTmdbTrendingMoviesQueryVariables
 > = gql`
-  query GetTmdbTrendingMovies($timeWindow: TMDBTrendingMoviesTimeWindow!) {
+  query GetTmdbTrendingMovies($timeWindow: TMDBTrendingTimeWindow!) {
     tmdbTrendingMovies(timeWindow: $timeWindow) {
       id
       title
