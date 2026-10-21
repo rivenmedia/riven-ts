@@ -1,9 +1,14 @@
+import { z } from "zod";
+
 import type { NextConfig } from "next";
 
 export default {
   experimental: {
     authInterrupts: true,
-    testProxy: true,
+    testProxy: z
+      .stringbool()
+      .default(false)
+      .parse(process.env["ENABLE_TEST_PROXY"]),
     typedEnv: true,
   },
   cacheComponents: true,
