@@ -55,6 +55,7 @@ const createQueryHandlerSchema = <A extends ZodObject, O extends ZodType>(
 
 export const SearchQueryArgs = z.object({
   query: z.string().trim().min(1),
+  page: z.int().positive(),
   type: TopLevelMediaItemType.nullable(),
 });
 

@@ -1,7 +1,16 @@
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
-import { Arg, Ctx, Field, ID, ObjectType, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Ctx,
+  Field,
+  ID,
+  Int,
+  ObjectType,
+  Query,
+  Resolver,
+} from "type-graphql";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type {
@@ -93,13 +102,14 @@ export class IndexerQueryResolver {
     @Arg("query") query: string,
     @Arg("type", () => TopLevelMediaItemType.enum, { nullable: true })
     type: TopLevelMediaItemType | null = null,
+    @Arg("page", () => Int, { defaultValue: 1 }) page = 1,
   ): Promise<SearchResponse> {
     const handlers = [...getQueryHandlers(plugins, "search", type)];
 
     const settled = await Promise.allSettled(
       handlers.map(async ({ pluginName, queryHandler, dataSources }) => {
         const items = await queryHandler.handler({
-          args: { query, type },
+          args: { query, page, type },
           dataSources,
           logger,
         });

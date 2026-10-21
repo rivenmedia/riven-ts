@@ -26,6 +26,7 @@ const createItem = (id: string, type: "movie" | "show"): IndexerDataResult => ({
   genres: [],
   type,
   status: "unknown",
+  isRequestable: true,
 });
 
 const createPlugin = (
