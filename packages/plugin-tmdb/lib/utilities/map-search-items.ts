@@ -6,15 +6,13 @@ import { formatImageUrl } from "./format-image-url.ts";
 import type { SearchMulti200Schema } from "../__generated__/zod/searchMultiSchema.ts";
 import type { TmdbIndexerData } from "../schema/types/tmdb-indexer-data.type.ts";
 
-type MovieListItem = NonNullable<SearchMulti200Schema["results"]>[number];
-
 /**
  * Map a movie from a TMDB list endpoint (search, trending, now playing).
  *
  * @returns The mapped movie, or null if it is missing required fields
  */
 export const mapMovieListItem = (
-  movie: MovieListItem,
+  movie: NonNullable<SearchMulti200Schema["results"]>[number],
 ): TmdbIndexerData | null => {
   if (!movie.id || !movie.title) {
     return null;

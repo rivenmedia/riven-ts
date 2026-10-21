@@ -1,6 +1,9 @@
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { TmdbIndexerData } from "../schema/types/tmdb-indexer-data.type.ts";
-import { mapMovieListItem, mapShowListItem } from "../utilities/map-movie.ts";
+import {
+  mapMovieListItem,
+  mapShowListItem,
+} from "../utilities/map-search-items.ts";
 
 import type { RivenQueryHandler } from "@repo/util-plugin-sdk/schemas/query-handlers/index";
 
@@ -21,18 +24,26 @@ export const searchTmdbMovies: RivenQueryHandler<"search"> = {
 
       switch (result.media_type) {
         case "movie": {
-          parsedResults.push(mapMovieListItem(result));
+          const item = mapMovieListItem(result);
+
+          if (item) {
+            parsedResults.push(item);
+          }
 
           break;
         }
         case "tv": {
-          parsedResults.push(mapShowListItem(result));
+          const item = mapShowListItem(result);
+
+          if (item) {
+            parsedResults.push(item);
+          }
 
           break;
         }
       }
     }
 
-    return parsedResults.filter((movie) => movie !== null);
+    return parsedResults;
   },
 };
