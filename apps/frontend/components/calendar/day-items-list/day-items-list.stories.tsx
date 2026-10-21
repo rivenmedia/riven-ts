@@ -3,8 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { DayItemsList } from "./day-items-list.tsx";
+import { DayItemsList } from "#components/calendar/day-items-list/day-items-list.tsx";
 
 import type { CalendarDay } from "#components/calendar/types.d.ts";
 

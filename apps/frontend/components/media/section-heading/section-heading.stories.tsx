@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { SectionHeading } from "./section-heading.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 
 const meta = preview.meta({
   title: "Media / SectionHeading",

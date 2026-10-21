@@ -11,9 +11,8 @@ import {
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
+import { Sidebar } from "#app/(protected)/_components/sidebar/sidebar.tsx";
 import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
-
-import { Sidebar } from "./sidebar.tsx";
 
 const meta = preview.meta({
   title: "Components / Sidebar",

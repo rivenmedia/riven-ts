@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { PageShell } from "./page-shell.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
 
 const meta = preview.meta({
   title: "Components / PageShell",

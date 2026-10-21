@@ -4,10 +4,9 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse } from "msw";
 
 import preview from "#.storybook/preview.tsx";
+import { GET_FILTERED_TMDB_TRENDING_MOVIES } from "#app/(protected)/lists/trending/movies/_queries/get-tmdb-trending-movies.query.ts";
+import TrendingMoviesPage from "#app/(protected)/lists/trending/movies/page.tsx";
 import { api } from "#mocks/graphql.ts";
-
-import { GET_FILTERED_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies.query.ts";
-import TrendingMoviesPage from "./page.tsx";
 
 const meta = preview.meta({
   title: "Pages / Trending / Movies",

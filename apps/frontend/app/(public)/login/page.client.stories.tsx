@@ -3,8 +3,7 @@ import { http, HttpResponse } from "msw";
 import { expect, spyOn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-
-import { LoginPage } from "./page.client.tsx";
+import { LoginPage } from "#app/(public)/login/page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Login",

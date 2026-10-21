@@ -2,22 +2,21 @@ import { HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { GET_ITEM_REQUEST_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
+import { DELETE_ITEM_REQUEST } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/delete-item/_mutations/delete-item-request.mutation.ts";
+import { PAUSE_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/pause-item/_mutations/pause-item.mutation.ts";
+import { REQUEST_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/request-item/_mutations/request-item.mutation.ts";
+import { RESET_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/reset-item/_mutations/reset-item.mutation.ts";
+import { RESUME_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/resume-item/_mutations/resume-item.mutation.ts";
+import { RETRY_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/retry-item/_mutations/retry-item.mutation.ts";
+import { GET_ITEM_CAST } from "#app/(protected)/details/media/[type]/[id]/_components/item-cast/_queries/get-item-cast.query.ts";
+import { GET_ITEM_RECOMMENDATIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-recommendations/_queries/get-item-recommendations.query.ts";
+import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-seasons.query.ts";
+import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
+import { MediaDetailsPage } from "#app/(protected)/details/media/[type]/[id]/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
 import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
-
-import { GET_ITEM_REQUEST_ACTIONS } from "./_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
-import { DELETE_ITEM_REQUEST } from "./_components/item-action-toolbar/actions/delete-item/_mutations/delete-item-request.mutation.ts";
-import { PAUSE_ITEM } from "./_components/item-action-toolbar/actions/pause-item/_mutations/pause-item.mutation.ts";
-import { REQUEST_ITEM } from "./_components/item-action-toolbar/actions/request-item/_mutations/request-item.mutation.ts";
-import { RESET_ITEM } from "./_components/item-action-toolbar/actions/reset-item/_mutations/reset-item.mutation.ts";
-import { RESUME_ITEM } from "./_components/item-action-toolbar/actions/resume-item/_mutations/resume-item.mutation.ts";
-import { RETRY_ITEM } from "./_components/item-action-toolbar/actions/retry-item/_mutations/retry-item.mutation.ts";
-import { GET_ITEM_CAST } from "./_components/item-cast/_queries/get-item-cast.query.ts";
-import { GET_ITEM_RECOMMENDATIONS } from "./_components/item-recommendations/_queries/get-item-recommendations.query.ts";
-import { GET_ITEM_SEASONS } from "./_components/item-seasons/_queries/get-item-seasons.query.ts";
-import { GET_SIMILAR_ITEMS } from "./_components/similar-items/_queries/get-similar-items.query.ts";
-import { MediaDetailsPage } from "./page.client.tsx";
 
 import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
 import type { TypedDocumentNode } from "@apollo/client";
@@ -393,7 +392,7 @@ UnrequestedMovie.test(
 export const CompletedMovie = UnrequestedMovie.extend({
   args: {
     data: {
-      ...UnrequestedMovie.composed.args.data,
+      ...UnrequestedMovie.input.args.data,
       id: "completed-movie",
       mediaItem: {
         state: "completed",
@@ -471,7 +470,7 @@ CompletedMovie.test(
 export const PausedMovie = UnrequestedMovie.extend({
   args: {
     data: {
-      ...UnrequestedMovie.composed.args.data,
+      ...UnrequestedMovie.input.args.data,
       id: "paused-movie",
       mediaItem: {
         state: "paused",
@@ -515,7 +514,7 @@ PausedMovie.test(
 export const ScrapedMovie = UnrequestedMovie.extend({
   args: {
     data: {
-      ...UnrequestedMovie.composed.args.data,
+      ...UnrequestedMovie.input.args.data,
       id: "scraped-movie",
       mediaItem: {
         state: "scraped",
@@ -770,7 +769,7 @@ UnrequestedShow.test(
 export const CompletedShow = UnrequestedShow.extend({
   args: {
     data: {
-      ...UnrequestedShow.composed.args.data,
+      ...UnrequestedShow.input.args.data,
       id: "completed-show",
       mediaItem: {
         state: "completed",
@@ -903,7 +902,7 @@ CompletedShow.test(
 export const PausedShow = UnrequestedShow.extend({
   args: {
     data: {
-      ...UnrequestedShow.composed.args.data,
+      ...UnrequestedShow.input.args.data,
       id: "paused-show",
       mediaItem: {
         state: "paused",
@@ -1002,7 +1001,7 @@ PausedShow.test(
 export const ScrapedShow = UnrequestedShow.extend({
   args: {
     data: {
-      ...UnrequestedShow.composed.args.data,
+      ...UnrequestedShow.input.args.data,
       id: "scraped-show",
       mediaItem: {
         state: "scraped",

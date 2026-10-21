@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { BirthdayConfetti } from "./birthday-confetti.tsx";
+import { BirthdayConfetti } from "#components/effects/birthday-confetti/birthday-confetti.tsx";
 
 const meta = preview.meta({
   title: "Effects / BirthdayConfetti",

@@ -2,8 +2,7 @@ import { DateTime } from "luxon";
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { FileInformationPanel } from "./file-information-panel.tsx";
+import { FileInformationPanel } from "#components/media/file-information-panel/file-information-panel.tsx";
 
 const meta = preview.meta({
   title: "Media / FileInformationPanel",

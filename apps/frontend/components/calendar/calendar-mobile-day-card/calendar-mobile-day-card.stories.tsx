@@ -3,8 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { CalendarMobileDayCard } from "./calendar-mobile-day-card.tsx";
+import { CalendarMobileDayCard } from "#components/calendar/calendar-mobile-day-card/calendar-mobile-day-card.tsx";
 
 import type { CalendarDay } from "#components/calendar/types.d.ts";
 

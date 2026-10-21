@@ -3,8 +3,7 @@ import { useState } from "react";
 import { expect, fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { TypeFilterChips } from "./type-filter-chips.tsx";
+import { TypeFilterChips } from "#components/calendar/type-filter-chips/type-filter-chips.tsx";
 
 import type { FilterOption } from "#components/calendar/types.d.ts";
 

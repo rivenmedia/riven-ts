@@ -3,8 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { CalendarDayCell } from "./calendar-day-cell.tsx";
+import { CalendarDayCell } from "#components/calendar/calendar-day-cell/calendar-day-cell.tsx";
 
 import type { CalendarDay } from "#components/calendar/types.d.ts";
 

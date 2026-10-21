@@ -12,9 +12,8 @@ import {
 } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { PasskeyFormProvider } from "./passkey-form-provider.tsx";
-import { Passkeys } from "./passkeys.tsx";
+import { PasskeyFormProvider } from "#components/auth/passkeys/passkey-form-provider.tsx";
+import { Passkeys } from "#components/auth/passkeys/passkeys.tsx";
 
 import type { Passkey } from "@better-auth/passkey/client";
 import type { PathParams } from "msw";

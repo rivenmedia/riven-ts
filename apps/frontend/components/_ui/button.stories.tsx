@@ -115,7 +115,7 @@ export const Loading = meta.story({
     </Button>
   ),
   args: {
-    ...Outline.composed.args,
+    ...Outline.input.args,
     disabled: true,
   },
 });
@@ -131,7 +131,7 @@ export const WithIcon = meta.story({
     </Button>
   ),
   args: {
-    ...Secondary.composed.args,
+    ...Secondary.input.args,
   },
 });
 
@@ -160,7 +160,7 @@ export const Large = meta.story({
  */
 export const Icon = meta.story({
   args: {
-    ...Secondary.composed.args,
+    ...Secondary.input.args,
     size: "icon",
     title: "Mail",
     children: <Mail />,

@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { LibraryChartsCard } from "./library-charts-card.tsx";
+import { LibraryChartsCard } from "#components/dashboard/library-charts-card/library-charts-card.tsx";
 
 const meta = preview.meta({
   title: "Dashboard / LibraryChartsCard",

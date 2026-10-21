@@ -3,8 +3,7 @@ import { http, HttpResponse } from "msw";
 import { expect, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { UserManagement } from "./user-management.tsx";
+import { UserManagement } from "#components/auth/user-management/user-management.tsx";
 
 const meta = preview.meta({
   title: "Auth / UserManagement",

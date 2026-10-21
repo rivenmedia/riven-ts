@@ -3,8 +3,7 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { CalendarPage } from "./page.client.tsx";
+import { CalendarPage } from "#app/(protected)/calendar/page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Calendar",

@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { EmailChangeForm } from "./email-change-form.tsx";
+import { EmailChangeForm } from "#components/auth/email-change-form/email-change-form.tsx";
 
 const meta = preview.meta({
   title: "Auth / EmailChangeForm",

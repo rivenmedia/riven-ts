@@ -2,8 +2,7 @@ import { expect, userEvent, within } from "storybook/test";
 
 import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
 import { preview } from "#.storybook/preview.tsx";
-
-import { SettingField } from "./setting-field.tsx";
+import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 const meta = preview.meta({
   title: "Settings / SettingField",

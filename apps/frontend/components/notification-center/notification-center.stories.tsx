@@ -3,12 +3,11 @@ import { useMemo } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
+import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 import {
   NotificationsContext,
   NotificationsProvider,
 } from "#components/providers/notifications-provider.tsx";
-
-import { NotificationCenter } from "./notification-center.tsx";
 
 import type {
   NotificationsContextValue,

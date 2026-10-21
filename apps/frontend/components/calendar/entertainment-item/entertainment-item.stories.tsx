@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { EntertainmentItem } from "./entertainment-item.tsx";
+import { EntertainmentItem } from "#components/calendar/entertainment-item/entertainment-item.tsx";
 
 import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 

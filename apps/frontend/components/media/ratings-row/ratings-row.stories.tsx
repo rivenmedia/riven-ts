@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { RatingsRow } from "./ratings-row.tsx";
+import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
 
 const meta = preview.meta({
   title: "Media / RatingsRow",

@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { ErrorFallback } from "./error-fallback.tsx";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 
 function ErroringComponent({ shouldThrow }: { shouldThrow: boolean }) {
   if (shouldThrow) {

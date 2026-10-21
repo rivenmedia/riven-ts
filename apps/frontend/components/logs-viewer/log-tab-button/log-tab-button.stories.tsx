@@ -2,8 +2,7 @@ import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 import { Tabs, TabsList, TabsTrigger } from "#components/_ui/tabs.tsx";
-
-import { LogTabButton } from "./log-tab-button.tsx";
+import { LogTabButton } from "#components/logs-viewer/log-tab-button/log-tab-button.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / LogTabButton",

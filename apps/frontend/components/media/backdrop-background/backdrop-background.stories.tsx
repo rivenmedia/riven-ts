@@ -1,8 +1,7 @@
 import Image from "next/image";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { BackdropBackground } from "./backdrop-background.tsx";
+import { BackdropBackground } from "#components/media/backdrop-background/backdrop-background.tsx";
 
 const meta = preview.meta({
   title: "Media / BackdropBackground",
@@ -19,16 +18,13 @@ const meta = preview.meta({
   },
 });
 
-const sampleImage =
-  "https://image.tmdb.org/t/p/original/1CIaRYKf3zg2Xyce1CSfCMg2Vfw.jpg";
-
 export const Zinc = meta.story({
   args: {
     image: (
       <Image
         alt="backdrop"
         className="h-full w-full object-cover opacity-30 blur-3xl"
-        src={sampleImage}
+        src="https://image.tmdb.org/t/p/original/1CIaRYKf3zg2Xyce1CSfCMg2Vfw.jpg"
         fill
       />
     ),
@@ -42,7 +38,7 @@ export const Background = meta.story({
       <Image
         alt="backdrop"
         className="h-full w-full object-cover opacity-30 blur-3xl"
-        src={sampleImage}
+        src="https://image.tmdb.org/t/p/original/1CIaRYKf3zg2Xyce1CSfCMg2Vfw.jpg"
         fill
       />
     ),

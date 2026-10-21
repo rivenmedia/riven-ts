@@ -2,8 +2,7 @@ import { expect, waitFor, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
 import { defaultTheme } from "#components/providers/theme-provider.tsx";
-
-import { ThemeSwitcher } from "./theme-switcher.tsx";
+import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
 
 const meta = preview.meta({
   title: "Components/Theme Switcher",

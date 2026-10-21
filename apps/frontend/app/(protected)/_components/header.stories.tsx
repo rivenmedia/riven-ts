@@ -2,8 +2,7 @@ import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { Header } from "./header.tsx";
+import { Header } from "#app/(protected)/_components/header.tsx";
 
 const meta = preview.meta({
   title: "Components / Header",

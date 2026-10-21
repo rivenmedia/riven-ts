@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import SetupStepPage from "./page.tsx";
+import SetupStepPage from "#app/(protected)/setup/[step]/page.tsx";
 
 const meta = preview.meta({
   title: "Pages / Setup",

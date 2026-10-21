@@ -2,8 +2,7 @@ import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state
 
 import { preview } from "#.storybook/preview.tsx";
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
-
-import { StatusBadge } from "./status-badge.tsx";
+import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 
 const meta = preview.meta({
   title: "Media / StatusBadge",

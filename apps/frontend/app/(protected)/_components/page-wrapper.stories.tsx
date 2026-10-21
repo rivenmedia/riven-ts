@@ -9,9 +9,8 @@ import {
 import { DateTime } from "luxon";
 
 import preview from "#.storybook/preview.tsx";
+import { PageWrapper } from "#app/(protected)/_components/page-wrapper.tsx";
 import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
-
-import { PageWrapper } from "./page-wrapper.tsx";
 
 const meta = preview.meta({
   title: "Components / PageWrapper",

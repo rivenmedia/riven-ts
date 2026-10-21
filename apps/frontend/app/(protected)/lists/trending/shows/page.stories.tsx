@@ -4,10 +4,9 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse } from "msw";
 
 import preview from "#.storybook/preview.tsx";
+import { GET_FILTERED_TMDB_TRENDING_SHOWS } from "#app/(protected)/lists/trending/shows/_queries/get-tmdb-trending-shows.query.ts";
+import TrendingShowsPage from "#app/(protected)/lists/trending/shows/page.tsx";
 import { api } from "#mocks/graphql.ts";
-
-import { GET_FILTERED_TMDB_TRENDING_SHOWS } from "./_queries/get-tmdb-trending-shows.query.ts";
-import TrendingShowsPage from "./page.tsx";
 
 const meta = preview.meta({
   title: "Pages / Trending / Shows",

@@ -2,8 +2,7 @@ import { toast } from "sonner";
 
 import { preview } from "#.storybook/preview.tsx";
 import { Button } from "#components/_ui/button.tsx";
-
-import { Toaster } from "./toaster.tsx";
+import { Toaster } from "#components/toaster/toaster.tsx";
 
 const meta = preview.meta({
   title: "Components / Toaster",

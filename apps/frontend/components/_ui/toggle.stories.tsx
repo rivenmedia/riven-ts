@@ -48,7 +48,7 @@ export const WithText = meta.story({
       Italic
     </Toggle>
   ),
-  args: { ...Outline.composed.args },
+  args: { ...Outline.input.args },
 });
 
 /**

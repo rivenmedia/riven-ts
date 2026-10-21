@@ -1,8 +1,7 @@
 import { expect, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { CreateUserForm } from "./create-user-form.tsx";
+import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
 
 const meta = preview.meta({
   title: "Auth / CreateUserForm",

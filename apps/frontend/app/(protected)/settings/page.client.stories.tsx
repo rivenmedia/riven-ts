@@ -1,6 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-
-import { SettingsPage } from "./page.client.tsx";
+import { SettingsPage } from "#app/(protected)/settings/page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Settings",

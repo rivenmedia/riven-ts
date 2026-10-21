@@ -3,13 +3,12 @@ import { HttpResponse } from "msw";
 import { expect, waitFor } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { GET_LIBRARY_ITEMS } from "#app/(protected)/library/_queries/get-library-items.query.ts";
+import { LibraryPage } from "#app/(protected)/library/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
 import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 
-import { GET_LIBRARY_ITEMS } from "./_queries/get-library-items.query.ts";
-import { LibraryPage } from "./page.client.tsx";
-
-import type { GetLibraryItemsQuery } from "./_queries/get-library-items.query.typegen.ts";
+import type { GetLibraryItemsQuery } from "#app/(protected)/library/_queries/get-library-items.query.typegen.ts";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { StoryContext } from "@storybook/nextjs-vite";
 
@@ -38,6 +37,8 @@ const libraryItems = [
 ] as const satisfies (GetLibraryItemsQuery["mediaItems"]["items"][number] & {
   state: MediaItemState;
 })[];
+
+const { length: libraryItemsCount } = libraryItems;
 
 /**
  * Checks whether a value passes a GraphQL list filter, where an omitted filter matches everything.
@@ -112,7 +113,7 @@ const meta = preview.meta({
 
 export const Default = meta.story({
   args: {
-    totalItems: libraryItems.length,
+    totalItems: libraryItemsCount,
     items: libraryItems,
   },
 });

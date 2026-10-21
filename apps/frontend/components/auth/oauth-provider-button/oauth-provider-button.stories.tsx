@@ -1,8 +1,7 @@
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { OauthProviderButton } from "./oauth-provider-button.tsx";
+import { OauthProviderButton } from "#components/auth/oauth-provider-button/oauth-provider-button.tsx";
 
 const meta = preview.meta({
   title: "Auth / OauthProviderButton",

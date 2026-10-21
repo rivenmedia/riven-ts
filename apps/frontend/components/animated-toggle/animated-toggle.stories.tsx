@@ -1,8 +1,7 @@
 import { expect, fn, userEvent, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-
-import { AnimatedToggle } from "./animated-toggle.tsx";
+import { AnimatedToggle } from "#components/animated-toggle/animated-toggle.tsx";
 
 const meta = preview.meta({
   title: "Components / AnimatedToggle",

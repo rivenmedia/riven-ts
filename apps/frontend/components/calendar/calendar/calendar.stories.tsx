@@ -4,8 +4,7 @@ import { DateTime, Settings } from "luxon";
 import { expect, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-
-import { Calendar } from "./calendar.tsx";
+import { Calendar } from "#components/calendar/calendar/calendar.tsx";
 
 const meta = preview.meta({
   title: "Calendar / Calendar",

@@ -3,13 +3,12 @@ import { HttpResponse } from "msw";
 import { expect, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
+import { GET_RECENTLY_ADDED } from "#app/(protected)/(home)/_components/recently-added.tsx";
+import { GET_TMDB_NOW_PLAYING } from "#app/(protected)/(home)/_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
+import { GET_TMDB_TRENDING_MOVIES } from "#app/(protected)/(home)/_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies.ts";
+import { GET_TMDB_TRENDING_SHOWS } from "#app/(protected)/(home)/_components/tmdb-trending-shows/_queries/get-tmdb-trending-shows.ts";
+import HomePage from "#app/(protected)/(home)/page.tsx";
 import { api } from "#mocks/graphql.ts";
-
-import { GET_RECENTLY_ADDED } from "./_components/recently-added.tsx";
-import { GET_TMDB_NOW_PLAYING } from "./_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";
-import { GET_TMDB_TRENDING_MOVIES } from "./_components/tmdb-trending-movies/_queries/get-tmdb-trending-movies.ts";
-import { GET_TMDB_TRENDING_SHOWS } from "./_components/tmdb-trending-shows/_queries/get-tmdb-trending-shows.ts";
-import HomePage from "./page.tsx";
 
 const meta = preview.meta({
   title: "Pages / Home",
