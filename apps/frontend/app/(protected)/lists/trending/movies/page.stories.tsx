@@ -1,3 +1,5 @@
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import { faker } from "@faker-js/faker";
 import { HttpResponse } from "msw";
 
@@ -6,8 +8,6 @@ import { api } from "#mocks/graphql.ts";
 
 import { GET_FILTERED_TMDB_TRENDING_MOVIES } from "./_queries/get-tmdb-trending-movies.query.ts";
 import TrendingMoviesPage from "./page.tsx";
-
-import type { UUID } from "node:crypto";
 
 const meta = preview.meta({
   title: "Pages / Trending / Movies",
@@ -19,7 +19,7 @@ const meta = preview.meta({
           data: {
             tmdbTrendingMovies: Array.from({ length: 50 }).map(() => ({
               __typename: "TmdbIndexerData",
-              id: faker.string.uuid() as UUID,
+              id: UUID.parse(faker.string.uuid()),
               posterUrl: faker.image.urlPicsumPhotos({
                 width: 200,
                 height: 300,

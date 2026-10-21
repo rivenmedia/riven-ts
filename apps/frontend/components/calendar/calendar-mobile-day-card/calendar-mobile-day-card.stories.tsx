@@ -1,3 +1,5 @@
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
+
 import { DateTime } from "luxon";
 
 import { preview } from "#.storybook/preview.tsx";
@@ -5,7 +7,6 @@ import { preview } from "#.storybook/preview.tsx";
 import { CalendarMobileDayCard } from "./calendar-mobile-day-card.tsx";
 
 import type { CalendarDay } from "#components/calendar/types.d.ts";
-import type { UUID } from "node:crypto";
 
 const meta = preview.meta({
   title: "Calendar / CalendarMobileDayCard",
@@ -17,7 +18,7 @@ const meta = preview.meta({
       isCurrentMonth: true,
       items: [
         {
-          itemId: crypto.randomUUID() as UUID,
+          itemId: UUID.parse(crypto.randomUUID()),
           tvdbId: "",
           tmdbId: "603692",
           showTitle: "John Wick: Chapter 4",
@@ -25,7 +26,7 @@ const meta = preview.meta({
           airedAt: "2024-06-12",
         },
         {
-          itemId: crypto.randomUUID() as UUID,
+          itemId: UUID.parse(crypto.randomUUID()),
           tvdbId: "121361",
           tmdbId: "1399",
           showTitle: "Game of Thrones",

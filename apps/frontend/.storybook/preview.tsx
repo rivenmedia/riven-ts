@@ -1,4 +1,3 @@
-import "./types.d.ts";
 import "#lib/styles/themes/all.css";
 import "#lib/styles/globals.css";
 import { resetApolloClientSingletons } from "@apollo/client-integration-nextjs";

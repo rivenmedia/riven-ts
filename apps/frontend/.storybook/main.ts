@@ -6,6 +6,7 @@ export default defineMain({
     "@storybook/addon-a11y",
     "@storybook/addon-docs",
     "@storybook/addon-vitest",
+    "@storybook/addon-mcp",
     defineStorybookVis({
       visProjects: [
         { snapshotRootDir: "__vis__/local" },
@@ -17,7 +18,10 @@ export default defineMain({
   framework: "@storybook/nextjs-vite",
   staticDirs: ["../public"],
   features: {
+    componentsManifest: true,
+    experimentalReview: true,
     experimentalCodeExamples: true,
     experimentalTestSyntax: true,
+    experimentalReactComponentMeta: true,
   },
 });

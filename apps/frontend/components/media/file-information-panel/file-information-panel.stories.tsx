@@ -5,8 +5,6 @@ import { preview } from "#.storybook/preview.tsx";
 
 import { FileInformationPanel } from "./file-information-panel.tsx";
 
-import type { UUID } from "node:crypto";
-
 const meta = preview.meta({
   title: "Media / FileInformationPanel",
   component: FileInformationPanel,
@@ -62,7 +60,7 @@ export const MinimalFields = meta.story({
   args: {
     entries: [
       {
-        id: "1234" as UUID,
+        id: "1234",
         originalFilename: "movie.mkv",
       },
     ],
