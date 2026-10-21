@@ -40,7 +40,6 @@ const notRequestableBadge = {
 export function ListItem({
   className,
   badge,
-  indexer,
   mediaItem,
   isSelectable = false,
   href,
@@ -60,15 +59,12 @@ export function ListItem({
 
   // Normalize type for different indexers
   const normalisedType = useMemo(() => {
-    if (
-      (indexer === "tvdb" || indexer === "tmdb") &&
-      mediaItem.type === "show"
-    ) {
+    if (mediaItem.type === "show") {
       return "tv";
     }
 
     return mediaItem.type;
-  }, [mediaItem.type, indexer]);
+  }, [mediaItem.type]);
 
   const subtitle = useMemo(() => {
     const parts = [];

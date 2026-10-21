@@ -12,7 +12,7 @@ export function LoadMoreButton({ onLoadMore, loading }: LoadMoreButtonProps) {
   const { ref } = useInView({
     scrollMargin: "200px",
     onChange(inView) {
-      if (inView) {
+      if (inView && !loading) {
         onLoadMore();
       }
     },

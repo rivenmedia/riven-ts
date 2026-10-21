@@ -70,18 +70,7 @@ export function Header({ modifierKey }: HeaderProps) {
   }, [searchParams, form]);
 
   function navigateToSearch(query: string) {
-    // Read directly from local state
     const isExplorePage = pathname === "/explore";
-
-    // Client-first search: Immediately update store if we're on the explore page
-    // This avoids waiting for the server round-trip (goto -> load -> data -> effect)
-    // and fixes reactivity issues when typing quickly.
-
-    // if (isExplorePage) {
-    //   const parsed = parseSearchQuery(query);
-    //   searchStore.syncQuery(parsed);
-    // }
-
     const navigationType: RedirectType = isExplorePage ? "replace" : "push";
     const navigationUrl =
       `/explore?query=${encodeURIComponent(query)}` as const;
