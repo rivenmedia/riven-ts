@@ -16,7 +16,7 @@ export class AuthService extends BaseService {
   }
 
   public getAvailableAuthProviders(): AuthProvider[] {
-    return Object.values(getAuthProviders());
+    return [...getAuthProviders().values()];
   }
 
   @CreateRequestContext()

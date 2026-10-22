@@ -34,7 +34,7 @@ export class User {
   @Property({ default: false })
   public emailVerified!: boolean;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public image?: string;
 
@@ -51,11 +51,11 @@ export class User {
   @Unique()
   public username?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public displayUsername?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public role?: string;
 
@@ -63,7 +63,7 @@ export class User {
   @Property({ default: false })
   public banned!: boolean;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public banReason?: string;
 
@@ -71,7 +71,7 @@ export class User {
   @Property()
   public banExpires?: Date | null;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public lastLoginMethod?: string;
 

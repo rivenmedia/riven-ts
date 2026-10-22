@@ -20,7 +20,7 @@ export class Passkey {
   @PrimaryKey({ type: "uuid" })
   public id: UUID = randomUUID();
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public name?: string;
 
@@ -45,7 +45,7 @@ export class Passkey {
   @Property({ default: false })
   public backedUp!: boolean;
 
-  @Field(() => [String])
+  @Field(() => [String], { nullable: true })
   @Property({ type: "json" })
   public transports?: string[];
 
@@ -53,7 +53,7 @@ export class Passkey {
   @Property()
   public createdAt: Date = new Date();
 
-  @Field(() => String)
+  @Field(() => String, { nullable: true })
   @Property()
   public aaguid?: string;
 

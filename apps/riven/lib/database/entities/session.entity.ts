@@ -40,15 +40,15 @@ export class Session {
   @Property({ onUpdate: () => DateTime.utc().toJSDate() })
   public updatedAt!: Opt<Date>;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public ipAddress?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public userAgent?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public impersonatedBy?: string;
 

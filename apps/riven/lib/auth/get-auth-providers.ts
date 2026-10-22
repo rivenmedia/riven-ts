@@ -12,36 +12,36 @@ export interface AuthProvider {
 }
 
 export function getAuthProviders() {
-  const providers: Record<string, AuthProvider> = {};
+  const providers = new Map<string, AuthProvider>();
 
   if (auth.options.emailAndPassword.enabled) {
-    providers["credential"] = {
+    providers.set("credential", {
       key: "credential",
       enabled: auth.options.emailAndPassword.enabled,
       disableSignup: auth.options.emailAndPassword.disableSignUp,
-    };
+    });
   }
 
   if (!frontendSettings.disablePlex) {
-    providers["plex"] = {
+    providers.set("plex", {
       key: "plex",
       enabled: true,
       disableSignup: !frontendSettings.enablePlexSignup,
       name: "Plex",
       icon: "https://cdn.jsdelivr.net/gh/selfhst/icons@main/svg/plex.svg",
-    };
+    });
   }
 
   const genericProviders = getGenericOAuthProviders(process.env);
 
   for (const provider of genericProviders) {
-    providers[provider.providerId] = {
+    providers.set(provider.providerId, {
       key: provider.providerId,
       enabled: true,
       disableSignup: Boolean(provider.disableSignUp),
       name: provider.name ?? provider.providerId,
       icon: provider.icon,
-    };
+    });
   }
 
   return providers;

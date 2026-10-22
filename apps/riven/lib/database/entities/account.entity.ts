@@ -28,35 +28,35 @@ export class Account {
   @Property()
   public providerId!: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public accessToken?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public refreshToken?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public idToken?: string;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @Property()
   public accessTokenExpiresAt?: Opt<Date>;
 
-  @Field(() => Date)
+  @Field(() => Date, { nullable: true })
   @Property()
   public refreshTokenExpiresAt?: Opt<Date>;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public scope?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public issuer?: string;
 
-  @Field()
+  @Field(() => String, { nullable: true })
   @Property()
   public password?: string;
 

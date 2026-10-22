@@ -1,6 +1,6 @@
 import { Field, ObjectType } from "type-graphql";
 
-import type { AuthProvider as IAuthProvider } from "../../../../auth/get-auth-providers.ts";
+import type { AuthProvider as IAuthProvider } from "#auth/get-auth-providers.ts";
 
 @ObjectType()
 export class AuthProvider implements IAuthProvider {
