@@ -38,8 +38,6 @@ export async function proxy(request: NextRequest) {
   } else if (session?.user.role === "admin") {
     const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
 
-    console.log(data?.instanceStatus);
-
     if (
       !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
       data?.instanceStatus.setupRequired
