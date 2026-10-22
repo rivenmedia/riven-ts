@@ -4,6 +4,7 @@ interface NowPlayingSkeletonProps {
   heightClass: string;
 }
 
+/** Loading placeholder matching the `NowPlaying` hero. */
 export function NowPlayingSkeleton({ heightClass }: NowPlayingSkeletonProps) {
   return (
     <div

@@ -107,6 +107,9 @@ function WeekNumberComponent({
   );
 }
 
+/**
+ * Date grid for single, multiple or range selection, built on react-day-picker.
+ */
 function Calendar({
   className,
   classNames,

@@ -8,6 +8,10 @@ import { FormBase } from "#components/auth/form-base/form-base.tsx";
 import { usePasskeyForm } from "./passkey-form-provider.tsx";
 import { PasskeyList } from "./passkey-list.tsx";
 
+/**
+ * Lists the user's passkeys and lets them add, rename and delete them. Must be
+ * rendered inside `PasskeyFormProvider`.
+ */
 export function Passkeys() {
   const { isRegisteringPasskey, registerPasskey } = usePasskeyForm();
 

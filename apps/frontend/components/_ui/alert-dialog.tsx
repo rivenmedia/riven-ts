@@ -5,6 +5,9 @@ import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 
 import { Button } from "#components/_ui/button.tsx";
 
+/**
+ * Modal that interrupts the user to confirm an important or destructive action.
+ */
 function AlertDialog({
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Root>) {

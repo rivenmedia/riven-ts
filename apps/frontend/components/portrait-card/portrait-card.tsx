@@ -18,6 +18,10 @@ interface PortraitCardProps extends Pick<
   showContent?: boolean;
 }
 
+/**
+ * Poster-ratio card with an image, title/subtitle overlay, optional top-right
+ * slot and selection checkbox.
+ */
 export function PortraitCard({
   image,
   title,

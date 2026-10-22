@@ -9,6 +9,7 @@ interface CalendarPageProps {
   };
 }
 
+/** Calendar route showing releases in the `Calendar` component. */
 export function CalendarPage({ calendar }: CalendarPageProps) {
   return (
     <PageShell className="mx-auto h-full w-full max-w-450 gap-5">

@@ -28,6 +28,7 @@ function TooltipTrigger({
   return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
 }
 
+/** Hover/focus hint shown next to its trigger (the Tooltip's content). */
 function TooltipContent({
   className,
   sideOffset = 0,

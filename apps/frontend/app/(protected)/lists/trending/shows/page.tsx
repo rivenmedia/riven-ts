@@ -16,6 +16,7 @@ async function fetchTrendingShowsPage(page: number) {
   );
 }
 
+/** Infinite-scrolling list of trending shows. */
 export default async function TrendingShowsPage() {
   const initialData = await fetchTrendingShowsPage(1);
 

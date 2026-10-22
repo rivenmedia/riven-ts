@@ -55,6 +55,10 @@ export interface EntertainmentItemProps {
   compact?: boolean;
 }
 
+/**
+ * One calendar release (movie, show, season or episode), styled by type, with a
+ * compact variant.
+ */
 export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
   const style = getTypeStyle(item.itemType);
 

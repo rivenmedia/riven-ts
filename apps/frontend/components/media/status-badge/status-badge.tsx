@@ -22,6 +22,10 @@ export type StatusBadgeProps = Pick<
       }
   );
 
+/**
+ * Badge showing a media item's state, or "Unrequested" if it hasn't been
+ * requested.
+ */
 export function StatusBadge({
   state,
   isRequested,

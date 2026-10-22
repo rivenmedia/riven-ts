@@ -17,6 +17,10 @@ export interface DayItemsListProps {
   showMore?: boolean;
 }
 
+/**
+ * List of releases for one day, with an optional limit and a "+N more" dialog
+ * for the rest.
+ */
 export function DayItemsList({
   day,
   limit = Infinity,

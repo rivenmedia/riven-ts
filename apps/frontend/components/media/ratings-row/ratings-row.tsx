@@ -15,6 +15,10 @@ export interface RatingsRowProps {
   loading: boolean;
 }
 
+/**
+ * Row of external rating scores linking to each source, with a loading
+ * skeleton.
+ */
 export function RatingsRow({ loading, scores }: RatingsRowProps) {
   if (loading) {
     return (

@@ -21,6 +21,10 @@ import { PasswordChangeFormSchema } from "./password-change.form-schema.ts";
 import type { PasswordChangeFormValues } from "./password-change.form-schema.ts";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
+/**
+ * Form for changing the current password, with visibility toggles and an option
+ * to revoke other sessions.
+ */
 export function PasswordChangeForm() {
   const form = useForm({
     resolver: zodResolver(PasswordChangeFormSchema),

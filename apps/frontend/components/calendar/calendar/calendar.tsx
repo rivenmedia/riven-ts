@@ -18,6 +18,10 @@ export interface CalendarProps {
   items: EntertainmentItemData[];
 }
 
+/**
+ * Monthly release calendar with type filters. Shows a grid on desktop and a
+ * list of day cards on mobile.
+ */
 export function Calendar({ items }: CalendarProps) {
   const {
     dayNames,

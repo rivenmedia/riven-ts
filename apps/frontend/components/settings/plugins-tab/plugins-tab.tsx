@@ -21,6 +21,9 @@ export interface PluginsTabProps {
   plugins: PluginTab[];
 }
 
+/**
+ * Vertical tabs listing registered plugins, each with its own settings form.
+ */
 export function PluginsTab({ plugins }: PluginsTabProps) {
   if (plugins.length === 0) {
     return (

@@ -14,6 +14,10 @@ export interface ErrorFallbackProps extends Pick<
   message: string;
 }
 
+/**
+ * Error-boundary fallback that shows a message and a Retry button that resets
+ * the boundary.
+ */
 export const ErrorFallback = catchError<ErrorFallbackProps>(
   ({ className, message }, { retry }) => (
     <div

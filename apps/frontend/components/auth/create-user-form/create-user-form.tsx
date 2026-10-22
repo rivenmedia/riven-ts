@@ -26,6 +26,9 @@ import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { CreateUserFormSchema } from "./create-user.form-schema.ts";
 
+/**
+ * Admin form for creating a new user with a username, email, password and role.
+ */
 export function CreateUserForm() {
   const form = useForm({
     resolver: zodResolver(CreateUserFormSchema),

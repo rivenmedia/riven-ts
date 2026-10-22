@@ -74,6 +74,10 @@ const stepNumberClassNames = {
   upcoming: "text-muted-foreground border-white/10",
 } as const satisfies Record<StepProgress, string>;
 
+/**
+ * First-run setup wizard route that renders the current step with stepper
+ * navigation.
+ */
 export default function SetupStepPage() {
   const { step } = useParams<ParamsOf<"/setup/[step]">>();
 

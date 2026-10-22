@@ -36,6 +36,10 @@ const notRequestableBadge = {
   variant: "default",
 } as const satisfies ListItemProps["badge"];
 
+/**
+ * Poster card for a media item, linking to its details page. Can be selected
+ * when inside `CardSelectionProvider`.
+ */
 export function ListItem({
   className,
   badge,

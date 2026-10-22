@@ -14,6 +14,7 @@ import { GeneralTab } from "#components/settings/general-tab/general-tab.tsx";
 import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 
+/** Settings route with General, Plugins and Ranking tabs. */
 export function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 

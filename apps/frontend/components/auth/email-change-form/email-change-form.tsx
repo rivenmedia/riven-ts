@@ -18,6 +18,7 @@ const EmailChangeFormSchema = z.object({
   newEmail: z.email(),
 });
 
+/** Form for changing the email address on the current user's account. */
 export function EmailChangeForm() {
   const form = useForm({
     resolver: zodResolver(EmailChangeFormSchema),

@@ -1,5 +1,6 @@
 import { PortraitCardSkeleton } from "#components/portrait-card/portrait-card-skeleton.tsx";
 
+/** Loading placeholder matching the `ListCarousel` layout. */
 export function ListCarouselSkeleton() {
   return (
     <div className="flex gap-3 overflow-x-clip">

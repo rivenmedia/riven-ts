@@ -5,6 +5,10 @@ export interface BackdropBackgroundProps {
   image: ReactElement;
 }
 
+/**
+ * Full-bleed blurred backdrop image with gradient overlays, in zinc or
+ * background tone.
+ */
 export function BackdropBackground({
   tone = "zinc",
   image,

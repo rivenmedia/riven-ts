@@ -44,6 +44,7 @@ function SheetOverlay({
   );
 }
 
+/** Side panel that slides in from a screen edge (the Sheet's content). */
 function SheetContent({
   className,
   children,

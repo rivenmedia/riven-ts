@@ -20,6 +20,10 @@ interface HeaderProps {
   modifierKey: "⌘" | "⌃";
 }
 
+/**
+ * Top bar with the global search input (focused with ⌘/Ctrl+K) that navigates
+ * to the explore page.
+ */
 export function Header({ modifierKey }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();

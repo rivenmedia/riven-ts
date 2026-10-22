@@ -15,6 +15,7 @@ export interface LibraryChartsCardProps {
   isLoading: boolean;
 }
 
+/** Card charting the library's breakdown by media type and by item state. */
 export function LibraryChartsCard({
   statistics,
   isLoading,

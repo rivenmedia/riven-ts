@@ -4,6 +4,7 @@ export interface LogTabButtonProps extends HTMLAttributes<HTMLButtonElement> {
   name: string;
 }
 
+/** Tab button for switching between log views (e.g. live vs historical). */
 export function LogTabButton({ name, onClick, ...props }: LogTabButtonProps) {
   return (
     <button

@@ -18,6 +18,10 @@ interface PageWrapperProps {
   sidebarItems: readonly SidebarItem[];
 }
 
+/**
+ * Authenticated app layout combining the sidebar, header, immersive background
+ * and main content.
+ */
 export function PageWrapper({
   children,
   sidebarItems,

@@ -9,6 +9,10 @@ export interface AccountLinksProps {
   providers: Record<string, Provider>;
 }
 
+/**
+ * Lists each configured auth provider and lets the user link or unlink their
+ * account for it.
+ */
 export function AccountLinks({ accounts, providers }: AccountLinksProps) {
   function renderContent() {
     const providerEntries = Object.entries(providers);

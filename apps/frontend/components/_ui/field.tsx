@@ -71,6 +71,7 @@ const fieldVariants = cva(
   },
 );
 
+/** Form field layout tying a label, control, description and error together. */
 function Field({
   className,
   orientation = "vertical",

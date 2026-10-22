@@ -18,6 +18,7 @@ import {
 } from "#components/_ui/tooltip.tsx";
 import { themes, useTheme } from "#components/providers/theme-provider.tsx";
 
+/** Icon button that opens a dropdown for switching the app's colour theme. */
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
 

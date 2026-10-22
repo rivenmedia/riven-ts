@@ -5,6 +5,10 @@ interface SetupReviewStepProps {
   blockers: string[];
 }
 
+/**
+ * Final setup step summarising valid plugins and enabled profiles, and listing
+ * any blockers.
+ */
 export function SetupReviewStep({
   validPluginCount,
   enabledProfileCount,

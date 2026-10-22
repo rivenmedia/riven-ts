@@ -10,6 +10,9 @@ export interface CalendarMobileDayCardProps {
   isToday: boolean;
 }
 
+/**
+ * Mobile calendar row showing a day's title, item count and full release list.
+ */
 export function CalendarMobileDayCard({
   day,
   isToday,

@@ -41,6 +41,10 @@ const buttonVariants = cva(
   },
 );
 
+/**
+ * Clickable action with visual variants (default, outline, ghost, secondary,
+ * destructive, link) and sizes, including icon-only.
+ */
 function Button({
   className,
   variant = "default",

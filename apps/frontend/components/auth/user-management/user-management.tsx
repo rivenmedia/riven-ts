@@ -20,6 +20,10 @@ export interface UserManagementProps {
   users: User[];
 }
 
+/**
+ * Admin table of users with their role and creation date, plus per-user delete
+ * actions.
+ */
 export function UserManagement({ currentUserId, users }: UserManagementProps) {
   return (
     <FormBase

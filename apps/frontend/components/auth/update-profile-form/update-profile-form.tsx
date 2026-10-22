@@ -22,6 +22,7 @@ interface UpdateProfileFormProps {
   data: UpdateProfileFormValues;
 }
 
+/** Form for editing the current user's profile details. */
 export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
   const form = useForm({
     resolver: zodResolver(UpdateProfileFormSchema),

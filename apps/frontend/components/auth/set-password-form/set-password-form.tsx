@@ -16,6 +16,10 @@ import { SetPasswordFormSchema } from "./set-password.form-schema.ts";
 import type { SetPasswordFormValues } from "./set-password.form-schema.ts";
 import type { UseFormRegisterReturn } from "react-hook-form";
 
+/**
+ * Form for setting a password on an account that doesn't have one yet (e.g. an
+ * OAuth-only account).
+ */
 export function SetPasswordForm() {
   const form = useForm({
     resolver: zodResolver(SetPasswordFormSchema),

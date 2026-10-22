@@ -10,6 +10,10 @@ import { Button } from "#components/_ui/button.tsx";
 
 import type { ErrorInfo } from "next/error";
 
+/**
+ * App-wide error page that works out the HTTP status from the error and shows a
+ * matching title, detail and retry action.
+ */
 export default function GlobalErrorPage({ retry, error }: ErrorInfo) {
   // oxlint-disable-next-line unicorn/prefer-global-this
   const isBrowser = typeof window !== "undefined";

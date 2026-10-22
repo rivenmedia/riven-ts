@@ -11,6 +11,10 @@ export interface SelectablePillProps {
   onChange?: (checked: boolean) => void;
 }
 
+/**
+ * Pill-shaped checkbox toggle bound to a react-hook-form field, used for multi-
+ * select filters.
+ */
 export function SelectablePill({
   value,
   label,

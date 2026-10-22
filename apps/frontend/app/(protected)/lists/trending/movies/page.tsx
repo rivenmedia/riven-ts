@@ -16,6 +16,7 @@ async function fetchTrendingMoviesPage(page: number) {
   );
 }
 
+/** Infinite-scrolling list of trending movies. */
 export default async function TrendingMoviesPage() {
   const trendingMoviesPage = await fetchTrendingMoviesPage(1);
 

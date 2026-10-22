@@ -38,6 +38,10 @@ interface LibraryPageProps {
   totalItems: number;
 }
 
+/**
+ * Library route listing the user's media items, with search, type and state
+ * filters.
+ */
 export function LibraryPage({ items, totalItems }: LibraryPageProps) {
   const formRef = useRef<HTMLFormElement>(null);
   const { action, form, handleSubmitWithAction } = useHookFormAction(

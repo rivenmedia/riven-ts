@@ -32,6 +32,10 @@ interface ProfilePageProps {
   user: User;
 }
 
+/**
+ * Profile route with account settings, security options, linked accounts and
+ * admin user management.
+ */
 export function ProfilePage({
   hasCredentialProvider,
   canManageUsers,

@@ -12,6 +12,7 @@ export interface TypeFilterChipsProps {
   onChange: (filters: Record<string, boolean>) => void;
 }
 
+/** Checkbox chips for showing or hiding calendar items by media type. */
 export function TypeFilterChips({
   options,
   filters,

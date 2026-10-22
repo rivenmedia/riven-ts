@@ -17,6 +17,7 @@ interface ListCarouselProps {
   ignoreAnimation?: boolean;
 }
 
+/** Horizontally scrollable carousel of `ListItem` posters. */
 export function ListCarousel({ items, ignoreAnimation }: ListCarouselProps) {
   return (
     <Carousel

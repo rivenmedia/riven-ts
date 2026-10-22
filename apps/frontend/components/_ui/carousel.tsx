@@ -50,6 +50,10 @@ function useCarousel() {
   return context;
 }
 
+/**
+ * Horizontally or vertically scrolling slides with previous/next controls,
+ * built on Embla.
+ */
 function Carousel({
   opts,
   orientation = opts?.axis === "y" ? "vertical" : "horizontal",

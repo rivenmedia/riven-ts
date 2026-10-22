@@ -15,6 +15,9 @@ export interface GeneralTabProps {
   data: GeneralTabFormValues;
 }
 
+/**
+ * Form for general instance settings, such as instance name and notifications.
+ */
 export function GeneralTab({ data }: GeneralTabProps) {
   const form = useForm({
     defaultValues: data,

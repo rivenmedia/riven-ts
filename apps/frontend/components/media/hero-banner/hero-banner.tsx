@@ -23,6 +23,10 @@ export interface HeroBannerProps {
   trailer: Trailer | null | undefined;
 }
 
+/**
+ * Details-page hero with a backdrop and logo that can play the YouTube trailer
+ * inline. Renders nothing without a backdrop or trailer.
+ */
 export function HeroBanner({ backdropUrl, logo, trailer }: HeroBannerProps) {
   const [isTrailerVisible, setIsTrailerVisible] = useState(false);
   const showTrailer = trailer && isTrailerVisible;

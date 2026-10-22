@@ -33,6 +33,9 @@ interface SidebarProps {
   user: User | undefined;
 }
 
+/**
+ * Desktop icon sidebar with tooltipped main navigation links and the user menu.
+ */
 export function Sidebar({ currentPath, items, user }: SidebarProps) {
   return (
     <aside className="bg-background/40 top-0 left-0 z-50 hidden h-screen w-14 flex-col items-center border-r border-white/5 backdrop-blur-md md:flex">

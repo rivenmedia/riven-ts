@@ -26,6 +26,10 @@ interface DatePickerProps extends Pick<ComponentProps<"input">, "aria-label"> {
   required?: boolean;
 }
 
+/**
+ * Masked `yyyy-MM-dd` date input with a calendar popover and min/max bounds.
+ * Must be used inside a react-hook-form `FormProvider`.
+ */
 export function DatePicker({
   name,
   defaultValue,

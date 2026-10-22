@@ -50,6 +50,10 @@ export interface TrendingListFiltersProps {
   mediaType: Extract<MediaItemType, "movie" | "show">;
 }
 
+/**
+ * Filter sheet for trending lists with sort, genre and content-rating options
+ * for movies or shows.
+ */
 export function TrendingListFilters({
   hasActiveFilters,
   onClear,

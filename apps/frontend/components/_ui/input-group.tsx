@@ -9,6 +9,10 @@ import { Textarea } from "#components/_ui/textarea.tsx";
 
 import type { VariantProps } from "class-variance-authority";
 
+/**
+ * Input or textarea with inline addons such as icons, text, buttons or
+ * spinners.
+ */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

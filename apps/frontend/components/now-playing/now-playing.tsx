@@ -43,6 +43,9 @@ export interface NowPlayingProps {
   heightClass?: string;
 }
 
+/**
+ * Autoplaying, fading hero carousel of now-playing titles that pauses on hover.
+ */
 export function NowPlaying({
   data,
   alignment = "left",

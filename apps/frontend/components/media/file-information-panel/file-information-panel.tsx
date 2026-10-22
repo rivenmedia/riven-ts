@@ -34,6 +34,10 @@ export interface FileInformationPanelProps {
   onDeleteEntry: (id: UUID, label: string) => void | Promise<void>;
 }
 
+/**
+ * Shows video, audio and subtitle metadata for a media item's files, with a
+ * picker when there are several files.
+ */
 export function FileInformationPanel({
   entries,
   fallbackMediaMetadata,

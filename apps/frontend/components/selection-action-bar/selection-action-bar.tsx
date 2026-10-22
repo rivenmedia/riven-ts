@@ -20,6 +20,10 @@ export interface SelectionActionBarProps {
   onClear: () => void;
 }
 
+/**
+ * Floating bar showing how many items are selected, with bulk actions and a
+ * clear button.
+ */
 export function SelectionActionBar({
   actions,
   count,

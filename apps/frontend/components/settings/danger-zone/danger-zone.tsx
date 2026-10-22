@@ -14,6 +14,10 @@ import {
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 
+/**
+ * Settings section for destructive actions, such as resetting the library,
+ * behind a confirmation dialog.
+ */
 export function DangerZone() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);

@@ -11,6 +11,10 @@ interface MediaDetailsPageProps {
   data: ComponentProps<typeof SingleMediaItem>["indexerData"];
 }
 
+/**
+ * Movie/show details route with request actions, metadata, seasons, cast,
+ * recommendations and similar items.
+ */
 export function MediaDetailsPage({ data }: MediaDetailsPageProps) {
   return (
     <SingleMediaItem

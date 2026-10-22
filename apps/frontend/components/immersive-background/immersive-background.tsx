@@ -1,3 +1,4 @@
+/** Decorative gradient layers rendered behind page content. */
 export function ImmersiveBackground() {
   return (
     <div className="pointer-events-none fixed inset-0 z-[-1]">

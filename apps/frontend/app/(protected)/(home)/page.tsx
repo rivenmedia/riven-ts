@@ -7,6 +7,10 @@ import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing.
 import { TMDBTrendingMovies } from "./_components/tmdb-trending-movies/tmdb-trending-movies.tsx";
 import { TMDBTrendingShows } from "./_components/tmdb-trending-shows/tmdb-trending-shows.tsx";
 
+/**
+ * Home route with the now-playing hero, recently added items and trending
+ * movie/show carousels.
+ */
 export default function HomePage() {
   return (
     <div className="relative z-10 flex w-full flex-col gap-10 pb-24 md:gap-12">

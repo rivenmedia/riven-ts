@@ -55,6 +55,10 @@ export type SettingFieldProps = (
     };
   }[SettingsFieldType];
 
+/**
+ * Renders the right input for a schema-driven setting (text, secret, number,
+ * boolean, select, array, rank, dictionary or group).
+ */
 export function SettingField({
   type,
   config,

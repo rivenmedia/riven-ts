@@ -5,6 +5,9 @@ import {
   CardTitle,
 } from "#components/_ui/card.tsx";
 
+/**
+ * First setup step explaining what Riven does and what the setup will cover.
+ */
 export function SetupWelcomeStep() {
   return (
     <div className="mx-auto grid w-full max-w-4xl gap-8">

@@ -17,6 +17,10 @@ interface AnimatedToggleProps<T extends string = string> {
   onChange: (selectedItem: T) => void;
 }
 
+/**
+ * Segmented control with a spring-animated indicator that slides to the
+ * selected option.
+ */
 export function AnimatedToggle<T extends string = string>({
   options,
   defaultValue = options[0].value,

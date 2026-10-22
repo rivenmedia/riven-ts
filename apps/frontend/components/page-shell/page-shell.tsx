@@ -4,6 +4,7 @@ import { fly } from "#components/_animations/fly.ts";
 
 import type { HTMLAttributes } from "react";
 
+/** Standard padded content container for a page's body. */
 export function PageShell({
   className,
   children,

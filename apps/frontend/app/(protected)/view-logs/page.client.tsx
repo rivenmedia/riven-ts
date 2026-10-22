@@ -23,6 +23,7 @@ import { PageShell } from "#components/page-shell/page-shell.tsx";
 import type { ConnectionStatus } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
 import type { LogEntryRowProps } from "#components/logs-viewer/log-entry-row/log-entry-row.tsx";
 
+/** Logs route with live-stream and historical log tabs. */
 export function LogsPage() {
   const logStore = {
     reconnect() {

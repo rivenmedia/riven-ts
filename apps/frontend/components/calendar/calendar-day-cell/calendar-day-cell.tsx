@@ -18,6 +18,10 @@ function getDayNumberClassName(isToday: boolean, isCurrentMonth: boolean) {
   return isCurrentMonth ? "text-foreground" : "text-muted-foreground/70";
 }
 
+/**
+ * Desktop calendar grid cell showing the date, item count and up to three
+ * releases, with a "+N more" overflow.
+ */
 export function CalendarDayCell({ day, isToday }: CalendarDayCellProps) {
   return (
     <div

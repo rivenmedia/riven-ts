@@ -14,6 +14,10 @@ export interface ConnectionStatusIndicatorProps {
   maxReconnectAttempts: number;
 }
 
+/**
+ * Coloured dot and label for the log stream connection status, including
+ * reconnect attempts.
+ */
 export function ConnectionStatusIndicator({
   connectionStatus,
   maxReconnectAttempts,

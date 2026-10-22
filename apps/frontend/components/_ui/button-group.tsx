@@ -23,6 +23,10 @@ const buttonGroupVariants = cva(
   },
 );
 
+/**
+ * Joins related buttons, inputs or menus into one segmented control,
+ * horizontally or vertically.
+ */
 function ButtonGroup({
   className,
   orientation,

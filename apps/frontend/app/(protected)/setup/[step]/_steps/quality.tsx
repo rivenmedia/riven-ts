@@ -43,6 +43,9 @@ const QualityFormSchema = z.object({
   selectedProfile: z.string(),
 });
 
+/**
+ * Setup step for choosing a quality/ranking profile and its general options.
+ */
 export function SetupQualityStep({
   profiles,
   generalSections,

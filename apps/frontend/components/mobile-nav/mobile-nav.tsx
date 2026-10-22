@@ -20,6 +20,10 @@ const MAIN_PAGES = new Set<string>([
   // "/auth",
 ] satisfies AppRoutes[]);
 
+/**
+ * Mobile navigation with a back button on non-main pages and a slide-out
+ * sidebar.
+ */
 export function MobileNav() {
   const pathname = usePathname();
   const router = useRouter();

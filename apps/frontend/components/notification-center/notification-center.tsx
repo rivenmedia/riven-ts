@@ -30,6 +30,10 @@ export interface NotificationCenterProps {
   buttonProps?: Pick<ComponentProps<typeof Button>, "variant" | "className">;
 }
 
+/**
+ * Bell button with an unread count that opens a popover of live notifications,
+ * with mark-read and clear actions.
+ */
 export function NotificationCenter({
   buttonProps,
   popoverProps,

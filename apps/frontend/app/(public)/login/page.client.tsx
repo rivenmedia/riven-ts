@@ -24,6 +24,10 @@ interface LoginPageProps {
   authProviders: AuthProvider[];
 }
 
+/**
+ * Login route with login and (when signup is allowed) register tabs, supporting
+ * credentials, passkeys and OAuth.
+ */
 export function LoginPage({ authProviders }: LoginPageProps) {
   const credentialProvider = authProviders.find(
     ({ key }) => key === "credential",

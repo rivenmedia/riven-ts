@@ -10,6 +10,10 @@ export interface OauthProviderButtonProps {
   onClick: () => void;
 }
 
+/**
+ * Sign-in button for an OAuth provider, with the provider's icon and a "last
+ * used" marker.
+ */
 export function OauthProviderButton({
   isLastUsed,
   onClick,

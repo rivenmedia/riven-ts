@@ -12,6 +12,7 @@ export interface RankingTabProps {
   selectedProfile: string;
 }
 
+/** Tabs for choosing a ranking profile and adjusting ranking settings. */
 export function RankingTab({ selectedProfile }: RankingTabProps) {
   return (
     <Tabs defaultValue="ranking-profiles" className="space-y-4">
