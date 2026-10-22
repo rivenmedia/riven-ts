@@ -18,6 +18,13 @@ import { GeneratedCacheAdapter, PostgreSqlDriver } from "@mikro-orm/postgresql";
 
 import { withLogContext } from "#utilities/logger/log-context.ts";
 
+import {
+  User,
+  Account,
+  Passkey,
+  Session,
+  Verification,
+} from "./entities/index.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
@@ -40,6 +47,11 @@ const entities = [
   ItemRequest,
   Stream,
   BlacklistedStream,
+  User,
+  Account,
+  Passkey,
+  Session,
+  Verification,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {

@@ -1,22 +1,21 @@
 import { NextResponse } from "next/server";
-// import { authClient } from "#lib/auth/client.ts";
-// import { getClient } from "#lib/graphql/client.ts";
 
-// import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
+import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
+import { authClient } from "#lib/auth/client.ts";
+import { getClient } from "#lib/graphql/client.ts";
 
-// import type { AppRoutes, RedirectRoutes } from "./.next/types/routes";
+import type { AppRoutes, RedirectRoutes } from "./.next/types/routes";
 import type { NextRequest, ProxyConfig } from "next/server";
 
-// const paths = {
-//   login: "/login",
-//   home: "/",
-//   instanceSetup: "/setup",
-// } as const satisfies Record<string, AppRoutes | RedirectRoutes>;
+const paths = {
+  login: "/login",
+  home: "/",
+  instanceSetup: "/setup",
+} as const satisfies Record<string, AppRoutes | RedirectRoutes>;
 
-// const client = getClient();
+const client = getClient();
 
-// oxlint-disable-next-line typescript/require-await
 export async function proxy(request: NextRequest) {
   if (
     request.nextUrl.pathname === "/graphql" ||
@@ -30,29 +29,31 @@ export async function proxy(request: NextRequest) {
     return NextResponse.rewrite(rewriteUrl);
   }
 
-  // const { data: session } = await authClient.getSession();
+  const { data: session } = await authClient.getSession();
 
-  // if (!session && request.nextUrl.pathname !== paths.login) {
-  //   return NextResponse.redirect(new URL(paths.login, request.url));
-  // } else if (session && request.nextUrl.pathname === paths.login) {
-  //   return NextResponse.redirect(new URL(paths.home, request.url));
-  // } else if (session?.user.role === "admin") {
-  //   const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
+  if (!session && request.nextUrl.pathname !== paths.login) {
+    return NextResponse.redirect(new URL(paths.login, request.url));
+  } else if (session && request.nextUrl.pathname === paths.login) {
+    return NextResponse.redirect(new URL(paths.home, request.url));
+  } else if (session?.user.role === "admin") {
+    const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
 
-  //   if (
-  //     !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
-  //     data?.instanceStatus.setupRequired
-  //   ) {
-  //     return NextResponse.redirect(new URL(paths.instanceSetup, request.url));
-  //   } else if (
-  //     request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
-  //     !data?.instanceStatus.setupRequired
-  //   ) {
-  //     return NextResponse.redirect(new URL(paths.home, request.url));
-  //   }
-  // }
+    console.log(data?.instanceStatus);
 
-  // return NextResponse.next();
+    if (
+      !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
+      data?.instanceStatus.setupRequired
+    ) {
+      return NextResponse.redirect(new URL(paths.instanceSetup, request.url));
+    } else if (
+      request.nextUrl.pathname.startsWith(paths.instanceSetup) &&
+      !data?.instanceStatus.setupRequired
+    ) {
+      return NextResponse.redirect(new URL(paths.home, request.url));
+    }
+  }
+
+  return NextResponse.next();
 }
 
 export const config: ProxyConfig = {
