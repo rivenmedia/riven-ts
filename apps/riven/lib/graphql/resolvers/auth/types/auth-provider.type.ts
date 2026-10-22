@@ -13,7 +13,7 @@ export class AuthProvider implements IAuthProvider {
   @Field()
   public disableSignup!: boolean;
 
-  @Field({ nullable: true })
+  @Field(() => String, { nullable: true })
   public name?: string;
 
   @Field(() => String, { nullable: true })
