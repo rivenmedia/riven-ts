@@ -20,7 +20,7 @@ import type { GenericOAuthConfig } from "better-auth/plugins";
  * Or using ISSUER for auto-discovery:
  * - OAUTH_PROVIDER_KEYCLOAK_ISSUER=https://auth.example.com/realms/myrealm
  */
-export interface GenericOAuthProvider extends GenericOAuthConfig {
+interface GenericOAuthProvider extends GenericOAuthConfig {
   /** Display name for the provider */
   name?: string;
   /** Icon URL for the provider */
