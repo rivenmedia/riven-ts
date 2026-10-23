@@ -120,8 +120,7 @@ const configSchema = z.object({
 export function getGenericOAuthProviders(
   env: NodeJS.ProcessEnv,
 ): GenericOAuthProvider[] {
-  const root = unflattenObject(env);
-  const parsedEnv = configSchema.safeParse(root);
+  const parsedEnv = configSchema.safeParse(unflattenObject(env));
 
   if (!parsedEnv.success) {
     throw new Error("Invalid OAuth configuration");
@@ -135,18 +134,7 @@ export function getGenericOAuthProviders(
 
   const providers: GenericOAuthProvider[] = [];
 
-  for (const [providerNameUpper, config] of Object.entries(providersObj)) {
-    if (typeof config !== "object") {
-      continue;
-    }
-
-    const providerId = providerNameUpper.toLowerCase();
-
-    // Skip if it somehow picked up non-provider keys (unlikely with the structure)
-
-    // Parse fields
-    // OAUTH_PROVIDER_GOOGLE_CLIENT_ID -> GOOGLE -> CLIENT -> ID
-
+  for (const [providerId, config] of Object.entries(providersObj)) {
     const { client: { id: clientId, secret: clientSecret } = {} } = config;
 
     if (clientId && clientSecret) {
