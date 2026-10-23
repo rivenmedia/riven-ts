@@ -147,47 +147,47 @@ function getPlexHeaders(
 /**
  * Generates a Plex PIN for authentication
  */
-export async function generatePlexPin(
-  options: PlexOAuthOptions,
-): Promise<PlexPinResponse> {
-  const response = await fetch("https://plex.tv/api/v2/pins", {
-    method: "POST",
-    headers: getPlexHeaders(options),
-    body: JSON.stringify({
-      strong: true,
-    }),
-  });
+// async function generatePlexPin(
+//   options: PlexOAuthOptions,
+// ): Promise<PlexPinResponse> {
+//   const response = await fetch("https://plex.tv/api/v2/pins", {
+//     method: "POST",
+//     headers: getPlexHeaders(options),
+//     body: JSON.stringify({
+//       strong: true,
+//     }),
+//   });
 
-  if (!response.ok) {
-    throw new Error("Failed to generate Plex PIN");
-  }
+//   if (!response.ok) {
+//     throw new Error("Failed to generate Plex PIN");
+//   }
 
-  // oxlint-disable-next-line typescript/no-unsafe-return
-  return response.json();
-}
+//   // oxlint-disable-next-line typescript/no-unsafe-return
+//   return response.json();
+// }
 
-/**
- * Builds the Plex authorization URL with a PIN
- */
-export function buildPlexAuthUrl(
-  options: PlexOAuthOptions,
-  pinCode: string,
-  forwardUrl?: string,
-): URL {
-  const product = options.product ?? "Riven Media";
-  const version = options.version ?? "1.0";
-  const platform = options.platform ?? "Web";
-  const device = options.device ?? "Browser";
+// /**
+//  * Builds the Plex authorization URL with a PIN
+//  */
+// function buildPlexAuthUrl(
+//   options: PlexOAuthOptions,
+//   pinCode: string,
+//   forwardUrl?: string,
+// ): URL {
+//   const product = options.product ?? "Riven Media";
+//   const version = options.version ?? "1.0";
+//   const platform = options.platform ?? "Web";
+//   const device = options.device ?? "Browser";
 
-  const authURL = new URL("https://app.plex.tv/auth");
-  authURL.hash = `?clientID=${encodeURIComponent(options.clientId)}&code=${encodeURIComponent(pinCode)}&context[device][product]=${encodeURIComponent(product)}&context[device][version]=${encodeURIComponent(version)}&context[device][platform]=${encodeURIComponent(platform)}&context[device][device]=${encodeURIComponent(device)}`;
+//   const authURL = new URL("https://app.plex.tv/auth");
+//   authURL.hash = `?clientID=${encodeURIComponent(options.clientId)}&code=${encodeURIComponent(pinCode)}&context[device][product]=${encodeURIComponent(product)}&context[device][version]=${encodeURIComponent(version)}&context[device][platform]=${encodeURIComponent(platform)}&context[device][device]=${encodeURIComponent(device)}`;
 
-  if (forwardUrl) {
-    authURL.hash += `&forwardUrl=${encodeURIComponent(forwardUrl)}`;
-  }
+//   if (forwardUrl) {
+//     authURL.hash += `&forwardUrl=${encodeURIComponent(forwardUrl)}`;
+//   }
 
-  return authURL;
-}
+//   return authURL;
+// }
 
 /**
  * Checks the status of a Plex PIN and retrieves the auth token if available
