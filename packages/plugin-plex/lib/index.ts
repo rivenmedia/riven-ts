@@ -57,6 +57,43 @@ async function updateSections(
   }
 }
 
+/**
+ * Deletes the Plex items with the given title that are stored entirely within the removed path.
+ *
+ * @returns The number of deleted items
+ */
+async function deleteItemsInPath(
+  plexAPI: PlexAPI,
+  removedPath: string,
+  fullRemovedPath: string,
+  title: string,
+) {
+  const sectionKey = await plexAPI.getLibrarySectionKey(removedPath);
+  const ratingKeys = await plexAPI.getItemKeysByTitle(sectionKey, title);
+
+  let deletedItemCount = 0;
+
+  for (const ratingKey of ratingKeys) {
+    const locations = await plexAPI.getItemLocations(ratingKey);
+
+    const isStoredInRemovedPath =
+      locations.length > 0 &&
+      locations.every(
+        (location) =>
+          location === fullRemovedPath ||
+          location.startsWith(`${fullRemovedPath}/`),
+      );
+
+    if (isStoredInRemovedPath) {
+      await plexAPI.deleteItem(ratingKey);
+
+      deletedItemCount += 1;
+    }
+  }
+
+  return deletedItemCount;
+}
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -93,8 +130,39 @@ export const plugin: RivenPlugin = {
         `Updated ${sectionPaths.length.toString()} paths for ${event.item.fullTitle}`,
       );
     },
-    "riven.media-item.removed": async ({ dataSources, event, logger }) => {
-      await updateSections(dataSources.get(PlexAPI), event.paths, event.title);
+    "riven.media-item.removed": async ({
+      dataSources,
+      event,
+      logger,
+      settings,
+    }) => {
+      const plexAPI = dataSources.get(PlexAPI);
+      const { plexLibraryPath } = settings.get(PlexSettings);
+      const unmatchedPaths: string[] = [];
+
+      for (const removedPath of event.paths) {
+        try {
+          const deletedItemCount = await deleteItemsInPath(
+            plexAPI,
+            removedPath,
+            path.join(plexLibraryPath, removedPath),
+            event.title,
+          );
+
+          if (deletedItemCount === 0) {
+            unmatchedPaths.push(removedPath);
+          }
+        } catch (error) {
+          logger.warn(
+            `Unable to delete ${event.title} from Plex, refreshing ${removedPath} instead`,
+            { err: error },
+          );
+
+          unmatchedPaths.push(removedPath);
+        }
+      }
+
+      await updateSections(plexAPI, unmatchedPaths, event.title);
 
       logger.info(
         `Removed ${event.paths.length.toString()} paths for ${event.title}`,
