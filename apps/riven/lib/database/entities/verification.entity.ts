@@ -9,7 +9,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 
 import type { UUID } from "node:crypto";
 
-@Entity()
+@Entity({ schema: "auth_db" })
 @ObjectType()
 export class Verification {
   @Field(() => ID)

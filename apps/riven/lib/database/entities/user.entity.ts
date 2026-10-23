@@ -15,7 +15,7 @@ import { Account, Passkey, Session } from "./index.ts";
 import type { Opt } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
-@Entity()
+@Entity({ schema: "auth_db" })
 @ObjectType()
 export class User {
   @Field(() => ID)
