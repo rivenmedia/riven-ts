@@ -1,7 +1,7 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { Eye, EyeOff, LoaderCircle } from "lucide-react";
 import { useId, useState } from "react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { ButtonGroup } from "#components/_ui/button-group.tsx";
@@ -16,6 +16,7 @@ import { Input } from "#components/_ui/input.tsx";
 import { Switch } from "#components/_ui/switch.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
+import { changePassword } from "./change-password.action.ts";
 import { PasswordChangeFormSchema } from "./password-change.form-schema.ts";
 
 import type { PasswordChangeFormValues } from "./password-change.form-schema.ts";
@@ -26,21 +27,28 @@ import type { UseFormRegisterReturn } from "react-hook-form";
  * to revoke other sessions.
  */
 export function PasswordChangeForm() {
-  const form = useForm({
-    resolver: zodResolver(PasswordChangeFormSchema),
-    defaultValues: {
-      confirmNewPassword: "",
-      currentPassword: "",
-      newPassword: "",
-      revokeSessions: false,
+  const { form, handleSubmitWithAction } = useHookFormAction(
+    changePassword,
+    zodResolver(PasswordChangeFormSchema),
+    {
+      actionProps: {
+        onError({ error }) {
+          toast.error(error.serverError);
+        },
+        onSuccess() {
+          toast.success("Password changed successfully!");
+        },
+      },
+      formProps: {
+        defaultValues: {
+          confirmNewPassword: "",
+          currentPassword: "",
+          newPassword: "",
+          revokeOtherSessions: false,
+        },
+      },
     },
-  });
-
-  const handleSubmit = form.handleSubmit((_data) => {
-    // TODO: Implement password change logic here
-
-    toast.success("Password changed successfully!");
-  });
+  );
 
   const [passwordVisibility, setPasswordVisibility] = useState({
     currentPassword: false,
@@ -81,6 +89,7 @@ export function PasswordChangeForm() {
             size="icon"
             aria-label="toggle password visibility"
             type="button"
+            tabIndex={-1}
           >
             {passwordVisibility[name] ? <EyeOff /> : <Eye />}
           </Button>
@@ -90,14 +99,10 @@ export function PasswordChangeForm() {
     );
   }
 
-  const revokeSessionsId = useId();
+  const revokeOtherSessionsId = useId();
 
   return (
-    <form
-      onSubmit={(event) => void handleSubmit(event)}
-      // method="POST"
-      // action="?/passwordChange"
-    >
+    <form onSubmit={(event) => void handleSubmitWithAction(event)}>
       <FormBase
         title="Change Password"
         description="Update your account password to keep your account secure"
@@ -121,17 +126,19 @@ export function PasswordChangeForm() {
             <Field>
               <div className="flex items-center gap-2">
                 <Switch
-                  {...form.register("revokeSessions")}
-                  id={revokeSessionsId}
+                  {...form.register("revokeOtherSessions")}
+                  id={revokeOtherSessionsId}
                   onCheckedChange={(checked) => {
-                    form.setValue("revokeSessions", checked);
+                    form.setValue("revokeOtherSessions", checked);
                   }}
                 />
-                <FieldLabel htmlFor={revokeSessionsId}>
+                <FieldLabel htmlFor={revokeOtherSessionsId}>
                   Revoke all other sessions
                 </FieldLabel>
               </div>
-              <FieldError errors={[form.formState.errors.revokeSessions]} />
+              <FieldError
+                errors={[form.formState.errors.revokeOtherSessions]}
+              />
             </Field>
           </FieldGroup>
         }
