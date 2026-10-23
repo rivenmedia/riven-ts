@@ -7,13 +7,13 @@ import { query } from "#lib/graphql/client.ts";
 import { ProfilePage as ProfilePageClient } from "./page.client";
 
 export default async function ProfilePage() {
-  const session = await authClient.getSession({
+  const authData = await authClient.getSession({
     fetchOptions: {
       throw: true,
     },
   });
 
-  if (!session?.user) {
+  if (!authData?.user) {
     unauthorized();
   }
 
@@ -21,7 +21,7 @@ export default async function ProfilePage() {
     await Promise.all([
       authClient.admin.hasPermission({
         permissions: { user: ["create"] },
-        userId: session.user.id,
+        userId: authData.user.id,
       }),
       query({
         query: GET_AUTH_PROVIDERS,
@@ -38,7 +38,7 @@ export default async function ProfilePage() {
     <ProfilePageClient
       canManageUsers={canManageUsers?.success ?? false}
       hasCredentialProvider={hasCredentialProvider}
-      user={session.user}
+      user={authData.user}
     />
   );
 }

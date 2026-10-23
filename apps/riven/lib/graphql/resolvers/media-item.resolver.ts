@@ -100,6 +100,11 @@ export class MediaItemResolver {
     });
   }
 
+  @Query(() => [MediaItemUnion])
+  public recentlyAdded() {
+    return [];
+  }
+
   @Mutation(() => [MediaItemUnion])
   public async resetMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,

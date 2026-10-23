@@ -25,10 +25,14 @@ export const admin = ac.newRole({
 });
 
 export const user = ac.newRole({
+  session: [],
+  user: ["set-email", "set-password"],
   item: [ItemPermission.enum.request],
 });
 
 export const manager = ac.newRole({
+  session: [],
+  user: ["set-email", "set-password"],
   item: ItemPermission.options,
 });
 

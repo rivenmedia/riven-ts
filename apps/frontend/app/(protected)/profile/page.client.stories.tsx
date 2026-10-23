@@ -4,11 +4,20 @@ import { http, HttpResponse } from "msw";
 import { preview } from "#.storybook/preview.tsx";
 import { ProfilePage } from "#app/(protected)/profile/page.client.tsx";
 
+import ProfileLayout from "./layout";
+
 import type { Passkey } from "@better-auth/passkey";
 
 const meta = preview.meta({
   title: "Pages / Profile",
   component: ProfilePage,
+  decorators: [
+    (Story) => (
+      <ProfileLayout>
+        <Story />
+      </ProfileLayout>
+    ),
+  ],
   beforeEach({ msw }) {
     msw.use(
       http.get("**/api/auth/passkey/list-user-passkeys", () =>
