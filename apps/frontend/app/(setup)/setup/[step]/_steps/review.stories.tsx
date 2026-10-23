@@ -1,5 +1,5 @@
 import { preview } from "#.storybook/preview.tsx";
-import { SetupReviewStep } from "#app/(protected)/setup/[step]/_steps/review.tsx";
+import { SetupReviewStep } from "#app/(setup)/setup/[step]/_steps/review.tsx";
 
 const meta = preview.meta({
   title: "Setup / Review",

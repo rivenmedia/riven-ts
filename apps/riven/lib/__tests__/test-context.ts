@@ -265,16 +265,21 @@ export const it = testBase
 
     return buildMockServer<ApolloServerContext>(resolvers);
   })
-  .extend("createGqlContext", { scope: "file" }, ({ services, orm }) => () => ({
-    [CoreKey]: {
-      em: orm.em.fork(),
-      services,
-      sendEvent: vi.fn<MainRunnerMachineIntake>(),
-    },
-    logger,
-    sendEvent: vi.fn<MainRunnerMachineIntake>(),
-    plugins: new Map(),
-  }))
+  .extend(
+    "createGqlContext",
+    { scope: "file" },
+    ({ services, orm }) =>
+      (): ApolloServerContext => ({
+        [CoreKey]: {
+          em: orm.em.fork(),
+          services,
+          sendEvent: vi.fn<MainRunnerMachineIntake>(),
+        },
+        logger,
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
+        plugins: new Map(),
+      }),
+  )
   .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(
     "gqlServer",
