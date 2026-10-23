@@ -23,7 +23,7 @@ import { UserManagement } from "#components/auth/user-management/user-management
 import { authClient } from "#lib/auth/client.ts";
 import { getInitials } from "#lib/utils.ts";
 
-import { DeleteAccountConfirmationDialog } from "./_components/delete-account-confirmation-dialog";
+import { DeleteAccountButton } from "./_components/delete-account-confirmation-dialog/delete-account-confirmation-dialog";
 
 import type { User } from "#lib/auth/client.ts";
 
@@ -46,16 +46,6 @@ export function ProfilePage({
 
   async function handleLogout() {
     await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/login");
-        },
-      },
-    });
-  }
-
-  async function handleDeleteAccount() {
-    await authClient.deleteUser({
       fetchOptions: {
         onSuccess: () => {
           router.push("/login");
@@ -124,7 +114,7 @@ export function ProfilePage({
             Logout
           </Button>
 
-          <DeleteAccountConfirmationDialog onConfirm={handleDeleteAccount} />
+          <DeleteAccountButton />
         </div>
       </section>
 

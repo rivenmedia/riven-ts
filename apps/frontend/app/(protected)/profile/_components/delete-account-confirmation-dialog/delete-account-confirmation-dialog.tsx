@@ -11,13 +11,9 @@ import {
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 
-interface DeleteAccountConfirmationDialogProps {
-  onConfirm: () => Promise<void>;
-}
+import { deleteAccount } from "./delete-account.action";
 
-export function DeleteAccountConfirmationDialog({
-  onConfirm,
-}: DeleteAccountConfirmationDialogProps) {
+export function DeleteAccountButton() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -42,9 +38,7 @@ export function DeleteAccountConfirmationDialog({
           <AlertDialogAction
             type="button"
             variant="destructive"
-            onClick={() => {
-              void onConfirm();
-            }}
+            onClick={() => void deleteAccount()}
           >
             Confirm
           </AlertDialogAction>

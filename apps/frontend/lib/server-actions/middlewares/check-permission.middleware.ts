@@ -1,4 +1,9 @@
-import { ItemPermission } from "@repo/util-auth/access-control";
+import {
+  ItemPermission,
+  SessionPermission,
+  UserPermission,
+} from "@repo/util-auth/access-control";
+import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 
 import { createMiddleware } from "next-safe-action";
 import z from "zod";
@@ -6,9 +11,14 @@ import z from "zod";
 import { authClient } from "#lib/auth/client.ts";
 
 export const PermissionMetadata = z.object({
-  permissions: z.object({
-    item: z.array(ItemPermission),
-  }),
+  permissions: z
+    .object({
+      item: z.array(ItemPermission),
+      user: z.array(UserPermission),
+      session: z.array(SessionPermission),
+    })
+    .partial()
+    .refine(atLeastOnePropertyRequired),
 });
 
 export const checkPermissionMiddleware = createMiddleware<{

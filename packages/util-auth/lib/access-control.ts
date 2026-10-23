@@ -12,6 +12,10 @@ export const ItemPermission = z.enum([
   "scrape",
 ]);
 
+export const UserPermission = z.enum([...defaultStatements.user]);
+
+export const SessionPermission = z.enum([...defaultStatements.session]);
+
 const statement = {
   ...defaultStatements,
   item: ItemPermission.options,
