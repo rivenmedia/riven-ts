@@ -9,10 +9,12 @@ import {
   useRef,
   useState,
 } from "react";
+import { browser } from "react-dom";
 import { useUnmount } from "react-use";
 import { toast } from "sonner";
 
 import { authClient } from "#lib/auth/client.ts";
+import { logger } from "#lib/logger.ts";
 
 import type { Passkey } from "@better-auth/passkey/client";
 import type { PropsWithChildren } from "react";
@@ -34,6 +36,8 @@ const PasskeyFormContext = createContext<PasskeyFormContextValue | undefined>(
 );
 
 export function PasskeyFormProvider({ children }: PropsWithChildren) {
+  use(browser());
+
   const abortController = useMemo(() => new AbortController(), []);
   const passkeyLoaderRef = useRef<Promise<Passkey[]> | null>(null);
 
@@ -95,7 +99,9 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
           },
         },
       });
-    } catch {
+    } catch (error) {
+      logger.error("Error adding passkey", error);
+
       toast.error("Failed to register passkey");
     } finally {
       setIsRegisteringPasskey(false);

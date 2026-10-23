@@ -1,3 +1,5 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { delay } from "es-toolkit";
 import { LoaderCircle } from "lucide-react";

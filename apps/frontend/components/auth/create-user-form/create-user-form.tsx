@@ -1,3 +1,5 @@
+"use client";
+
 import { UserRole } from "@repo/util-auth/access-control";
 
 import { zodResolver } from "@hookform/resolvers/zod";
