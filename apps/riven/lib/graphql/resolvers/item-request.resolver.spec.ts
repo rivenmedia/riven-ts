@@ -1,8 +1,10 @@
 import { gql } from "@apollo/client";
+import path from "node:path";
 import { describe, expect, vi } from "vitest";
 
 import { it } from "../../__tests__/test-context.ts";
 import { createQueue } from "../../message-queue/utilities/create-queue.ts";
+import { attrCache } from "../../vfs/utilities/attr-cache.ts";
 import { CoreKey } from "../context.ts";
 
 import type {
@@ -223,6 +225,126 @@ describe("removeItemRequest", () => {
         item: expect.objectContaining({ id: completedMovie.itemRequest.id }),
         title: completedMovie.title,
       });
+    });
+
+    it("fires a riven.media-item.removed event with the movie's directory", async ({
+      completedMovieContext: { completedMovie },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const [mediaEntry] = await completedMovie.getMediaEntries();
+
+      expect.assert(mediaEntry);
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            itemRequestId: completedMovie.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      expect(gqlContext[CoreKey].sendEvent).toHaveBeenCalledWith({
+        type: "riven.media-item.removed",
+        title: completedMovie.title,
+        paths: [path.join("movies", path.dirname(mediaEntry.path))],
+      });
+    });
+
+    it("fires a riven.media-item.removed event with the show's directory", async ({
+      completedShowContext: { completedShow },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const [mediaEntry] = await completedShow.getMediaEntries();
+
+      expect.assert(mediaEntry);
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            itemRequestId: completedShow.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      expect(gqlContext[CoreKey].sendEvent).toHaveBeenCalledWith({
+        type: "riven.media-item.removed",
+        title: completedShow.title,
+        paths: [
+          path.join("shows", path.dirname(path.dirname(mediaEntry.path))),
+        ],
+      });
+    });
+
+    it("clears the cached VFS attributes of the removed item", async ({
+      completedMovieContext: { completedMovie },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const [mediaEntry] = await completedMovie.getMediaEntries();
+
+      expect.assert(mediaEntry);
+
+      const moviePath = `/movies/${path.dirname(mediaEntry.path)}`;
+
+      attrCache.set(moviePath, { size: 1 });
+
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            itemRequestId: completedMovie.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      expect(attrCache.has(moviePath)).toBe(false);
+    });
+
+    it("does not fire a riven.media-item.removed event if the item has no media entries", async ({
+      indexedMovieContext: { indexedMovie },
+      gqlContext,
+      gqlServer,
+    }) => {
+      const { body } = await gqlServer.executeOperation<
+        RemoveItemRequestMutation,
+        RemoveItemRequestMutationVariables
+      >(
+        {
+          query: REMOVE_ITEM_REQUEST,
+          variables: {
+            itemRequestId: indexedMovie.itemRequest.id,
+          },
+        },
+        { contextValue: gqlContext },
+      );
+
+      expect.assert(body.kind === "single");
+
+      expect(gqlContext[CoreKey].sendEvent).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: "riven.media-item.removed" }),
+      );
     });
 
     it("returns true", async ({

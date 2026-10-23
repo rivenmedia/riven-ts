@@ -1,6 +1,8 @@
+import path from "node:path";
 import { Arg, Ctx, ID, Mutation, Resolver } from "type-graphql";
 
 import { clearDeduplicationJob } from "../../message-queue/utilities/clear-deduplication-job.ts";
+import { invalidateAttrCache } from "../../vfs/utilities/invalidate-attr-cache.ts";
 import { CoreContext } from "../decorators/core-context.ts";
 
 import type { ApolloServerContext } from "../context.ts";
@@ -12,7 +14,11 @@ export class ItemRequestResolver {
   public async removeItemRequest(
     @Arg("itemRequestId", () => ID) itemRequestId: UUID,
     @Ctx() { logger }: ApolloServerContext,
-    @CoreContext() { sendEvent, services: { itemRequestService } }: CoreContext,
+    @CoreContext()
+    {
+      sendEvent,
+      services: { itemRequestService, mediaEntryService },
+    }: CoreContext,
   ): Promise<boolean> {
     try {
       const itemRequest =
@@ -44,13 +50,34 @@ export class ItemRequestResolver {
         }
       }
 
+      const mediaEntries =
+        await mediaEntryService.getMediaEntriesByItemRequestId(itemRequest.id);
+
+      const paths = [
+        ...new Set(
+          mediaEntries.map((entry) =>
+            path.join(entry.baseDirectory, entry.path.split(path.sep)[0] ?? ""),
+          ),
+        ),
+      ];
+
       await itemRequestService.removeItemRequest(itemRequest);
+
+      invalidateAttrCache(paths);
 
       sendEvent({
         type: "riven.item-request.removed",
         item: itemRequest,
         title,
       });
+
+      if (paths.length > 0) {
+        sendEvent({
+          type: "riven.media-item.removed",
+          title,
+          paths,
+        });
+      }
 
       return true;
     } catch (error) {

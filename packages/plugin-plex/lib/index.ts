@@ -30,6 +30,33 @@ function getExternalIds(item: Pick<WatchlistItem, "Guid" | "type">) {
   return request;
 }
 
+async function updateSections(
+  plexAPI: PlexAPI,
+  sectionPaths: string[],
+  title: string,
+) {
+  const results = await Promise.allSettled(
+    sectionPaths.map(async (sectionPath) => plexAPI.updateSection(sectionPath)),
+  );
+
+  const errors = results
+    .filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    )
+    .map((result) =>
+      result.reason instanceof Error
+        ? result.reason
+        : new Error(String(result.reason)),
+    );
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Failed to update library sections for ${title}. ${errors.map((error) => error.message).join(", ")}`,
+      { cause: errors },
+    );
+  }
+}
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -60,32 +87,17 @@ export const plugin: RivenPlugin = {
 
       const sectionPaths = [...sectionPathsSet];
 
-      const results = await Promise.allSettled(
-        sectionPaths.map(async (sectionPath) =>
-          plexAPI.updateSection(sectionPath),
-        ),
-      );
-
-      const errors = results
-        .filter(
-          (result): result is PromiseRejectedResult =>
-            result.status === "rejected",
-        )
-        .map((result) =>
-          result.reason instanceof Error
-            ? result.reason
-            : new Error(String(result.reason)),
-        );
-
-      if (errors.length > 0) {
-        throw new Error(
-          `Failed to update library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
-          { cause: errors },
-        );
-      }
+      await updateSections(plexAPI, sectionPaths, event.item.fullTitle);
 
       logger.info(
-        `Updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
+        `Updated ${sectionPaths.length.toString()} paths for ${event.item.fullTitle}`,
+      );
+    },
+    "riven.media-item.removed": async ({ dataSources, event, logger }) => {
+      await updateSections(dataSources.get(PlexAPI), event.paths, event.title);
+
+      logger.info(
+        `Removed ${event.paths.length.toString()} paths for ${event.title}`,
       );
     },
     "riven.content-service.requested": async ({

@@ -45,6 +45,39 @@ export const plugin: RivenPlugin = {
         `Updated ${sectionPaths.length.toString()} path${sectionPaths.length === 1 ? "" : "s"} for ${event.item.fullTitle}`,
       );
     },
+    "riven.media-item.removed": async ({
+      dataSources,
+      event,
+      logger,
+      settings,
+    }) => {
+      const jellyfinAPI = dataSources.get(JellyfinAPI);
+      const { jellyfinLibraryPath } = settings.get(JellyfinSettings);
+
+      const removedPaths = event.paths.map((removedPath) =>
+        path.join(jellyfinLibraryPath, removedPath),
+      );
+
+      const items = await jellyfinAPI.getItems();
+
+      const removedItems = items.filter(
+        ({ Path: itemPath }) =>
+          itemPath &&
+          removedPaths.some(
+            (removedPath) =>
+              itemPath === removedPath ||
+              itemPath.startsWith(`${removedPath}/`),
+          ),
+      );
+
+      await Promise.all(
+        removedItems.map(async ({ Id }) => jellyfinAPI.deleteItem(Id)),
+      );
+
+      logger.info(
+        `Removed ${removedItems.length.toString()} item${removedItems.length === 1 ? "" : "s"} for ${event.title}`,
+      );
+    },
   },
   settingsSchema: JellyfinSettings,
   async validator({ dataSources }) {

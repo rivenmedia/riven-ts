@@ -566,6 +566,20 @@ export const mainRunnerMachine = setup({
             ],
           },
 
+          "riven.media-item.removed": {
+            description:
+              "Indicates that the files of a media item have been removed from the library.",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { title, paths } }) => ({
+                  message: `Removed ${paths.length.toString()} path${paths.length === 1 ? "" : "s"} for ${chalk.bold(title)}`,
+                  level: "verbose",
+                }),
+              },
+            ],
+          },
+
           /**
            * Index lifecycle events
            */
