@@ -70,6 +70,6 @@
     "react-devtools-core": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   }
 }

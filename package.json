@@ -32,6 +32,7 @@
     "@turbo/gen": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
+    "@vitest/browser": "catalog:vitest",
     "es-toolkit": "catalog:",
     "execa": "catalog:",
     "husky": "catalog:",
@@ -43,7 +44,7 @@
     "turbo": "catalog:",
     "type-fest": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   },
   "devEngines": {
     "runtime": {

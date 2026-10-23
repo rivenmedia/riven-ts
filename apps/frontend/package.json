@@ -105,7 +105,7 @@
     "@types/react-dom": "catalog:",
     "@typescript/native": "catalog:",
     "@vitejs/plugin-react": "catalog:",
-    "@vitest/browser-playwright": "catalog:",
+    "@vitest/browser-playwright": "catalog:vitest",
     "http-status-codes": "catalog:",
     "i18next": "catalog:",
     "i18next-browser-languagedetector": "catalog:",
@@ -121,7 +121,7 @@
     "typescript": "catalog:",
     "vaul": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   },
   "msw": {
     "workerDirectory": "public"

@@ -142,7 +142,7 @@
     "oxlint": "catalog:",
     "redis-memory-server": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   },
   "mikro-orm": {
     "configPaths": [
