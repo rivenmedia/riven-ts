@@ -1,6 +1,19 @@
 import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import type { ItemMetadata } from "./get-item-metadata.ts";
 
+const brazilianPortugueseVariants = new Set([
+  "brazillian-portuguese",
+  "brazillian portuguese",
+  "brazilian-portuguese",
+  "brazilian portuguese",
+]);
+
+function normalizeLanguage(language: string) {
+  const normalized = language.toLowerCase();
+
+  return brazilianPortugueseVariants.has(normalized) ? "pt-BR" : normalized;
+}
+
 /**
  * Picks the best subtitle per language (first matching result per language)
  */
@@ -20,10 +33,10 @@ export function selectBestSubtitlePerLanguage(
       continue;
     }
 
-    const subLangLower = sub.lang.toLowerCase();
+    const language = normalizeLanguage(sub.lang);
 
-    if (!bestPerLanguage.has(subLangLower)) {
-      bestPerLanguage.set(subLangLower, sub);
+    if (!bestPerLanguage.has(language)) {
+      bestPerLanguage.set(language, sub);
     }
   }
 
