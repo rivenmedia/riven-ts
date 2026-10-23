@@ -13,7 +13,7 @@ const meta = preview.meta({
   component: ProfilePage,
   decorators: [
     (Story) => (
-      <ProfileLayout>
+      <ProfileLayout params={Promise.resolve({})}>
         <Story />
       </ProfileLayout>
     ),
