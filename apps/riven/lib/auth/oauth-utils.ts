@@ -1,3 +1,6 @@
+import { startCase } from "es-toolkit";
+import { z } from "zod";
+
 import type { GenericOAuthConfig } from "better-auth/plugins";
 
 /**
@@ -33,6 +36,7 @@ function unflattenObject(
   delimiter = "_",
 ): NestedObject {
   const result: NestedObject = {};
+
   for (const key in data) {
     if (!key.startsWith("OAUTH_PROVIDER_")) {
       continue;
@@ -55,11 +59,13 @@ function unflattenObject(
         continue;
       }
 
+      const partKey = part.toLowerCase();
+
       if (i === parts.length - 1) {
-        current[part] = value;
+        current[partKey] = value;
       } else {
-        current[part] ??= {};
-        current = current[part] as NestedObject;
+        current[partKey] ??= {};
+        current = current[partKey] as NestedObject;
       }
     }
   }
@@ -67,14 +73,61 @@ function unflattenObject(
   return result;
 }
 
+const urlConfigSchema = z.object({ url: z.url().optional() });
+
+const configSchema = z.object({
+  oauth: z
+    .object({
+      provider: z
+        .record(
+          z.string(),
+          z
+            .object({
+              client: z
+                .object({
+                  id: z.string().optional(),
+                  secret: z.string().optional(),
+                })
+                .partial(),
+              discovery: urlConfigSchema.optional(),
+              issuer: z.url().optional(),
+              scopes: z
+                .string()
+                .optional()
+                .transform((val) =>
+                  val?.split(",").map((scope) => scope.trim()),
+                ),
+              pkce: z.stringbool().default(false),
+              disable: z
+                .object({ signup: z.stringbool().default(false) })
+                .optional(),
+              redirect: z.object({ uri: z.url().optional() }).optional(),
+              auth: urlConfigSchema.optional(),
+              authorization: urlConfigSchema.optional(),
+              token: urlConfigSchema.optional(),
+              userinfo: urlConfigSchema.optional(),
+              user: z.object({ info: urlConfigSchema.optional() }).optional(),
+              name: z.string().optional(),
+              icon: z.string().optional(),
+            })
+            .partial(),
+        )
+        .optional(),
+    })
+    .optional(),
+});
+
 export function getGenericOAuthProviders(
   env: NodeJS.ProcessEnv,
 ): GenericOAuthProvider[] {
   const root = unflattenObject(env);
+  const parsedEnv = configSchema.safeParse(root);
 
-  // config.OAUTH.PROVIDER.[PROVIDER_NAME]
-  const oauth = root["OAUTH"] as NestedObject | undefined;
-  const providersObj = oauth?.["PROVIDER"] as NestedObject | undefined;
+  if (!parsedEnv.success) {
+    throw new Error("Invalid OAuth configuration");
+  }
+
+  const providersObj = parsedEnv.data.oauth?.provider;
 
   if (!providersObj) {
     return [];
@@ -94,48 +147,29 @@ export function getGenericOAuthProviders(
     // Parse fields
     // OAUTH_PROVIDER_GOOGLE_CLIENT_ID -> GOOGLE -> CLIENT -> ID
 
-    const clientObj = config["CLIENT"] as NestedObject | undefined;
-    const clientId = clientObj?.["ID"] as string | undefined;
-    const clientSecret = clientObj?.["SECRET"] as string | undefined;
+    const { client: { id: clientId, secret: clientSecret } = {} } = config;
 
     if (clientId && clientSecret) {
+      const discoveryUrl =
+        config.discovery?.url ??
+        (config.issuer
+          ? `${config.issuer}/.well-known/openid-configuration`
+          : undefined);
+
       providers.push({
         providerId,
         clientId,
         clientSecret,
-        discoveryUrl:
-          ((config["DISCOVERY"] as NestedObject)["URL"] as
-            | string
-            | undefined) ??
-          ((config["ISSUER"] as string)
-            ? `${config["ISSUER"] as string}/.well-known/openid-configuration`
-            : undefined),
-        scopes: (config["SCOPES"] as string)
-          .split(",")
-          .map((scope) => scope.trim()),
-        pkce: (config["PKCE"] as string) === "true",
-        disableSignUp:
-          ((config["DISABLE"] as NestedObject)["SIGNUP"] as string) === "true",
-        redirectURI: (config["REDIRECT"] as NestedObject)["URI"] as
-          | string
-          | undefined,
-        authorizationUrl:
-          ((config["AUTHORIZATION"] as NestedObject)["URL"] as
-            | string
-            | undefined) ??
-          ((config["AUTH"] as NestedObject)["URL"] as string | undefined),
-        tokenUrl: (config["TOKEN"] as NestedObject)["URL"] as
-          | string
-          | undefined,
-        userInfoUrl:
-          ((config["USERINFO"] as NestedObject)["URL"] as string | undefined) ??
-          (((config["USER"] as NestedObject)["INFO"] as NestedObject)["URL"] as
-            | string
-            | undefined),
-        name:
-          (config["NAME"] as string) ||
-          providerId.charAt(0).toUpperCase() + providerId.slice(1),
-        icon: config["ICON"] as string,
+        discoveryUrl,
+        scopes: config.scopes,
+        pkce: config.pkce,
+        disableSignUp: config.disable?.signup ?? false,
+        redirectURI: config.redirect?.uri,
+        authorizationUrl: config.authorization?.url ?? config.auth?.url,
+        tokenUrl: config.token?.url,
+        userInfoUrl: config.userinfo?.url ?? config.user?.info?.url,
+        name: config.name ?? startCase(providerId),
+        icon: config.icon ?? "",
       });
     }
   }
