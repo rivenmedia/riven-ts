@@ -3,10 +3,10 @@
 import { authClient } from "#lib/auth/client.ts";
 import { loggedInActionClient } from "#lib/server-actions/action-client.ts";
 
-import { EmailChangeFormSchema } from "./email-change.form-schema";
+import { ChangeEmailFormSchema } from "./change-email.form-schema";
 
 export const changeEmail = loggedInActionClient
-  .inputSchema(EmailChangeFormSchema)
+  .inputSchema(ChangeEmailFormSchema)
   .action(async ({ parsedInput: { newEmail } }) => {
     await authClient.changeEmail({
       newEmail,

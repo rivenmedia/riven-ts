@@ -8,8 +8,8 @@ import {
 import { Badge } from "#components/_ui/badge.tsx";
 import { Separator } from "#components/_ui/separator.tsx";
 import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
+import { ChangeEmailForm } from "#components/auth/change-email-form/change-email-form.tsx";
 import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
-import { EmailChangeForm } from "#components/auth/email-change-form/email-change-form.tsx";
 import { PasskeyFormProvider } from "#components/auth/passkeys/passkey-form-provider.tsx";
 import { Passkeys } from "#components/auth/passkeys/passkeys.tsx";
 import { PasswordChangeForm } from "#components/auth/password-change-form/password-change-form.tsx";
@@ -101,7 +101,7 @@ export function ProfilePage({
 
       {hasCredentialProvider ? <PasswordChangeForm /> : <SetPasswordForm />}
       <Separator />
-      <EmailChangeForm />
+      <ChangeEmailForm />
       <Separator />
       <UpdateProfileForm
         data={{

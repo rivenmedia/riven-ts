@@ -16,13 +16,13 @@ import { Input } from "#components/_ui/input.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { changeEmail } from "./change-email.action";
-import { EmailChangeFormSchema } from "./email-change.form-schema";
+import { ChangeEmailFormSchema } from "./change-email.form-schema";
 
 /** Form for changing the email address on the current user's account. */
-export function EmailChangeForm() {
+export function ChangeEmailForm() {
   const { form, handleSubmitWithAction } = useHookFormAction(
     changeEmail,
-    zodResolver(EmailChangeFormSchema),
+    zodResolver(ChangeEmailFormSchema),
     {
       actionProps: {
         onError: ({ error }) => {

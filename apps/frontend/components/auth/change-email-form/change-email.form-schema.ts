@@ -1,5 +1,5 @@
 import z from "zod";
 
-export const EmailChangeFormSchema = z.object({
+export const ChangeEmailFormSchema = z.object({
   newEmail: z.email(),
 });
