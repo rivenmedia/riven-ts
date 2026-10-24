@@ -15,7 +15,6 @@ import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_co
 import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "#app/(protected)/details/media/[type]/[id]/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
-import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
 import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
@@ -177,7 +176,6 @@ const meta = preview.meta({
   component: MediaDetailsPage,
   beforeEach({ msw }) {
     msw.use(
-      getSessionHandler,
       createHasPermissionHandler({
         item: ["delete", "pause", "request", "reset", "resume", "retry"],
       }),
