@@ -69,6 +69,12 @@ export const nextCookiesClientPlugin = {
               ctx.headers.set(header, value);
             }
 
+            // Top-level navigations (e.g. a hard refresh) carry no Origin or Referer, which
+            // Better Auth's CSRF check rejects for cookie-authenticated POSTs
+            if (!ctx.headers.has("origin")) {
+              ctx.headers.set("origin", new URL(ctx.url).origin);
+            }
+
             ctx.headers.set("cookie", cookieStore.toString());
           }
         },

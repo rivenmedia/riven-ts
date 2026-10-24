@@ -37,7 +37,7 @@ export default async function ProfilePage() {
     }),
   ]);
 
-  const { users } = canListUsers
+  const { users } = canListUsers?.success
     ? await authClient.admin.listUsers({
         query: {},
         fetchOptions: {
