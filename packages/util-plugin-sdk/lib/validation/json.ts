@@ -1,11 +1,15 @@
 import z from "zod";
 
+import type { ZodCodec, ZodString } from "zod";
+
 /**
  * Encodes/decodes between a JSON string and a JSON object.
  *
  * @param schema The Zod schema to validate the JSON object against.
  */
-export const json = <T extends z.core.$ZodType>(schema: T) =>
+export const json = <T extends z.core.$ZodType>(
+  schema: T,
+): ZodCodec<ZodString, T> =>
   z.codec(z.string(), schema, {
     decode: (jsonString, ctx) => {
       try {
