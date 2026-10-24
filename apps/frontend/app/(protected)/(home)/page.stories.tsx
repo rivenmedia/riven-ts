@@ -32,7 +32,11 @@ export const Default = meta.story({
                 title: "John Wick: Chapter 4",
                 backdropUrl:
                   "https://image.tmdb.org/t/p/original/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg",
-                releaseDate: "2023-03-24",
+                releaseDate: DateTime.fromObject({
+                  year: 2023,
+                  month: 3,
+                  day: 24,
+                }).toISO(),
                 voteAverage: 7.8,
                 language: "en",
                 overview:
@@ -78,6 +82,7 @@ export const Default = meta.story({
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
                 },
+                seasonLabel: "Spring 2023",
               },
               {
                 __typename: "TmdbIndexerData",
@@ -86,7 +91,11 @@ export const Default = meta.story({
                 title: "Arcane",
                 backdropUrl:
                   "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-                releaseDate: "2024-11-09",
+                releaseDate: DateTime.fromObject({
+                  year: 2024,
+                  month: 11,
+                  day: 9,
+                }).toISO(),
                 voteAverage: 9.1,
                 language: "en",
                 overview:
@@ -117,6 +126,7 @@ export const Default = meta.story({
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
                 },
+                seasonLabel: "Fall 2024",
               },
               {
                 __typename: "TmdbIndexerData",
@@ -155,6 +165,7 @@ export const Default = meta.story({
                   width: 400,
                   url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
                 },
+                seasonLabel: "Summer 2026",
               },
             ],
           },

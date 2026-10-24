@@ -22,6 +22,7 @@ const libraryItems = [
     year: 2023,
     posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
     state: "completed",
+    primaryExternalId: "tmdb-12345",
   },
   {
     __typename: "Show",
@@ -32,6 +33,7 @@ const libraryItems = [
     year: 2024,
     posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
     state: "indexed",
+    primaryExternalId: "tvdb-12345",
   },
 ] as const satisfies (GetLibraryItemsQuery["mediaItems"]["items"][number] & {
   state: MediaItemState;
