@@ -1,8 +1,13 @@
+import path from "node:path";
 import { z } from "zod";
 
 import type { NextConfig } from "next";
 
 export default {
+  // Next.js won't infer the monorepo root when it's also the home directory (e.g. `/app` in Docker)
+  turbopack: {
+    root: path.join(import.meta.dirname, "../.."),
+  },
   experimental: {
     authInterrupts: true,
     testProxy: z
