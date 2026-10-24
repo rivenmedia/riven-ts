@@ -2,8 +2,6 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { Check, Fingerprint, Pencil, X } from "lucide-react";
 import { DateTime } from "luxon";
-// import { useForm } from "react-hook-form";
-// import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 import { Input } from "#components/_ui/input.tsx";
@@ -13,7 +11,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "#components/_ui/tooltip.tsx";
-// import { authClient } from "#lib/auth/client.ts";
 
 import { updatePasskeyName } from "./_actions/update-passkey-name.action.ts";
 import { usePasskeyForm } from "./passkey-form-provider.tsx";

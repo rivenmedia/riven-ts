@@ -52,7 +52,10 @@ export const clearPreviousInstanceState = fromPromise<
         "This may lead to data loss if there are pending items in the database.",
     );
 
-    await database.orm.schema.refresh({ schema: "public" });
+    await database.orm.schema.refresh({
+      // Target the `public` schema to avoid wiping users.
+      schema: "public",
+    });
 
     logger.info("Database cleared.");
   }
