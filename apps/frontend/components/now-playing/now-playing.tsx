@@ -154,7 +154,7 @@ export function NowPlaying({
                 />
                 <div
                   className={cn(
-                    "absolute top-0 right-0 bottom-0 left-0 z-10 flex flex-col justify-end px-8 pt-2 pb-24 md:px-32 md:pt-8 md:pb-20 lg:right-0 lg:left-0",
+                    "absolute top-0 right-0 bottom-0 left-0 z-10 flex flex-col justify-end px-8 pt-2 pb-24 md:px-32 md:pt-8 md:pb-16 lg:right-0 lg:left-0",
                     getAlignmentClasses(alignment, "container"),
                   )}
                 >
