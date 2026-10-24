@@ -15,5 +15,8 @@ export const linkAccount = loggedInActionClient
     await authClient.linkSocial({
       provider: providerId,
       callbackURL: "/auth",
+      fetchOptions: {
+        throw: true,
+      },
     });
   });

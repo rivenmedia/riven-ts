@@ -20,6 +20,7 @@ export default async function ProfilePage() {
   const [
     { data: canManageUsers },
     { data: canListUsers },
+    { data: accounts },
     { data: authProvidersData },
   ] = await Promise.all([
     authClient.admin.hasPermission({
@@ -30,6 +31,7 @@ export default async function ProfilePage() {
       permissions: { user: ["list"] },
       userId: authData.user.id,
     }),
+    authClient.listAccounts(),
     query({
       query: GET_AUTH_PROVIDERS,
     }),
@@ -50,12 +52,21 @@ export default async function ProfilePage() {
     ),
   );
 
+  const providers = new Map(
+    (authProvidersData?.authProviders ?? []).map((provider) => [
+      provider.key,
+      provider,
+    ]),
+  );
+
   return (
     <ProfilePageClient
       canManageUsers={canManageUsers?.success ?? false}
       hasCredentialProvider={hasCredentialProvider}
       user={authData.user}
       users={users}
+      accounts={accounts ?? []}
+      providers={Object.fromEntries(providers)}
     />
   );
 }

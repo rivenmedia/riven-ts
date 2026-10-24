@@ -21,13 +21,17 @@ import { getInitials } from "#lib/utils.ts";
 import { DeleteAccountConfirmationDialog } from "./_components/delete-account-confirmation-dialog/delete-account-confirmation-dialog";
 import { LogoutButton } from "./_components/logout-button/logout-button";
 
+import type { AuthProvider } from "#app/_types/__generated__/graphql.ts";
 import type { User } from "#lib/auth/client.ts";
+import type { Account } from "better-auth";
 
 interface ProfilePageProps {
+  accounts: Account[];
   hasCredentialProvider: boolean;
   canManageUsers: boolean;
   user: User;
   users: User[];
+  providers: Record<string, AuthProvider>;
 }
 
 /**
@@ -35,10 +39,12 @@ interface ProfilePageProps {
  * admin user management.
  */
 export function ProfilePage({
+  accounts,
   hasCredentialProvider,
   canManageUsers,
   user,
   users,
+  providers,
 }: ProfilePageProps) {
   return (
     <>
@@ -113,7 +119,7 @@ export function ProfilePage({
           <Separator />
         </>
       )}
-      <AccountLinks accounts={[]} providers={{}} />
+      <AccountLinks accounts={accounts} providers={providers} />
       <Separator />
       <PasskeyFormProvider>
         <Passkeys />

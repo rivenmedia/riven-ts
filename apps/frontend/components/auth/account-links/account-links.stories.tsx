@@ -1,5 +1,3 @@
-import { DateTime } from "luxon";
-
 import { preview } from "#.storybook/preview.tsx";
 import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
 
@@ -28,16 +26,8 @@ const meta = preview.meta({
 
 export const OneLinked = meta.story({
   args: {
-    accounts: [
-      {
-        id: "1",
-        providerId: "plex",
-        createdAt: DateTime.fromISO("2024-01-01").toJSDate(),
-        updatedAt: DateTime.fromISO("2024-01-01").toJSDate(),
-        accountId: "plex-123",
-        scopes: [],
-      },
-    ],
+    accounts: [{ providerId: "plex" }],
+    providers: { plex: { enabled: true } },
   },
 });
 

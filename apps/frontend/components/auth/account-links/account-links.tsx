@@ -2,11 +2,12 @@ import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { SingleAccountLink } from "./single-account-link.tsx";
 
-import type { Account, Provider } from "./types.d.ts";
+import type { SingleAccountLinkProps } from "./single-account-link.tsx";
+import type { Account } from "better-auth";
 
 export interface AccountLinksProps {
-  accounts: Account[];
-  providers: Record<string, Provider>;
+  accounts: Pick<Account, "providerId">[];
+  providers: Record<string, SingleAccountLinkProps["provider"]>;
 }
 
 /**
@@ -28,7 +29,9 @@ export function AccountLinks({ accounts, providers }: AccountLinksProps) {
     return providerEntries.map(([providerId, config]) => (
       <SingleAccountLink
         key={providerId}
-        account={accounts.find(({ providerId: id }) => id === providerId)}
+        hasLinkedAccount={accounts.some(
+          ({ providerId: id }) => id === providerId,
+        )}
         providerId={providerId}
         provider={config}
       />

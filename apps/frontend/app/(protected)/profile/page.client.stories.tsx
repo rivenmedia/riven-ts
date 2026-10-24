@@ -54,6 +54,8 @@ export const Admin = meta.story({
   args: {
     canManageUsers: true,
     hasCredentialProvider: true,
+    accounts: [],
+    providers: {},
     user: {
       id: "1",
       email: "admin@example.com",
@@ -119,6 +121,8 @@ export const Member = meta.story({
   args: {
     canManageUsers: false,
     hasCredentialProvider: false,
+    accounts: [],
+    providers: {},
     user: {
       id: "1",
       email: "member@example.com",
