@@ -1,41 +1,13 @@
-import { faker } from "@faker-js/faker";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
+import {
+  firstPage,
+  pageSize,
+  pages,
+} from "#app/(protected)/_components/infinite-item-grid/infinite-item-grid.fixtures.ts";
 import { InfiniteItemGrid } from "#app/(protected)/_components/infinite-item-grid/infinite-item-grid.tsx";
 import { ItemGrid } from "#components/item-grid/item-grid.tsx";
-
-import type { ListItem } from "#components/list-item/list-item.tsx";
-import type { ComponentProps } from "react";
-
-type MediaItem = ComponentProps<typeof ListItem>["mediaItem"];
-
-const pageSize = 20;
-
-function createPage(page: number) {
-  return new Map<string, MediaItem>(
-    Array.from({ length: pageSize }).map((_, index) => {
-      const position = (page - 1) * pageSize + index + 1;
-      const id = `movie-${String(position)}`;
-
-      return [
-        id,
-        {
-          id,
-          title: `Result ${String(position)}`,
-          posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
-          type: "movie",
-          year: 2000 + index,
-          isRequestable: true,
-        },
-      ];
-    }),
-  );
-}
-
-// Created up front so the random posters are consistent between runs
-const firstPage = createPage(1);
-const pages = [firstPage, createPage(2), createPage(3)];
 
 const meta = preview.meta({
   title: "Components / InfiniteItemGrid",
@@ -124,7 +96,7 @@ export const FetchingMore = meta.story({
     // Never resolves, to hold the grid in its loading state
     fetchPage: fn(
       (_page: number) =>
-        new Promise<Map<string, MediaItem>>(() => {
+        new Promise<never>(() => {
           /* never resolves */
         }),
     ),
@@ -147,9 +119,7 @@ FetchingMore.test(
 
 export const NoMoreResults = meta.story({
   args: {
-    fetchPage: fn((_page: number) =>
-      Promise.resolve(new Map<string, MediaItem>()),
-    ),
+    fetchPage: fn((_page: number) => Promise.resolve(new Map())),
   },
 });
 

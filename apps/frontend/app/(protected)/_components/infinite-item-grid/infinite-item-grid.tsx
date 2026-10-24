@@ -17,6 +17,11 @@ interface InfiniteItemGridProps<
   noItemsFoundMessage: string;
 }
 
+/**
+ * Grid items for a paged list that appends the next page from a Load More
+ * button, which also loads automatically when scrolled into view. Render
+ * inside `ItemGrid`.
+ */
 export function InfiniteItemGrid<
   T extends ComponentProps<typeof ListItem>["mediaItem"],
 >({ initialData, fetchPage, noItemsFoundMessage }: InfiniteItemGridProps<T>) {

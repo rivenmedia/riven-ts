@@ -35,6 +35,10 @@ async function fetchSearchResultsPage(searchQuery: string, page: number) {
   return items;
 }
 
+/**
+ * Explore route showing paged search results for the `query` search param,
+ * noting any sources that failed to search.
+ */
 export default async function ExplorePage({
   searchParams,
 }: PageProps<"/explore">) {
