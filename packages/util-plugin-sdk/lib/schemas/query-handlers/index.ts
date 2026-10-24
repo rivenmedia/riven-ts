@@ -13,7 +13,10 @@ import type { ZodObject, ZodType } from "zod";
  *
  * `year` and `runtime` are derived getters on {@link IndexerData}, so plugins do not provide them.
  */
-export type IndexerDataResult = Omit<IndexerData, "year" | "runtime">;
+export type IndexerDataResult = Omit<
+  IndexerData,
+  "year" | "runtime" | "seasonLabel"
+>;
 
 /**
  * A class decorated with `@ObjectType({ implements: IndexerData })`.

@@ -23,7 +23,11 @@ import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 @ObjectType({ implements: [IndexerData, IndexerBaseItem] })
 export class TmdbIndexerData
   extends IndexerBaseItem
-  implements Omit<IndexerData, keyof IndexerBaseItem | "runtime" | "year">
+  implements
+    Omit<
+      IndexerData,
+      keyof IndexerBaseItem | "runtime" | "year" | "seasonLabel"
+    >
 {
   @Field(() => ID)
   public tmdbId!: string;
