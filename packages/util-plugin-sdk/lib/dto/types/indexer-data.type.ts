@@ -106,6 +106,27 @@ export abstract class IndexerData extends IndexerBaseItem {
     return this.releaseDate.getFullYear();
   }
 
+  @Field(() => String, { nullable: true })
+  public get seasonLabel() {
+    if (!this.releaseDate) {
+      return null;
+    }
+
+    const seasonLabels = ["Spring", "Summer", "Fall", "Winter"];
+
+    const month = this.releaseDate.getMonth();
+    const seasonIndex = Math.floor((month + 1) / 3) % 4;
+
+    const seasonLabel = seasonLabels[seasonIndex];
+    const { year } = this;
+
+    if (!seasonLabel || !year) {
+      return null;
+    }
+
+    return `${seasonLabel} ${year.toString()}`;
+  }
+
   @Field(() => Trailer, { nullable: true })
   public trailer?: Trailer | null;
 

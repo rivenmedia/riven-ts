@@ -22,9 +22,11 @@ import {
   PaginationNext,
   PaginationPrevious,
 } from "#components/_ui/pagination.tsx";
+import { ItemGrid } from "#components/item-grid/item-grid.tsx";
 import { ListItem } from "#components/list-item/list-item.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
+import { isFeatureEnabled } from "#lib/enabled-features.ts";
 
 import { searchLibrary } from "./_actions/search.action";
 import { LibraryMessage } from "./_components/library-message";
@@ -34,7 +36,10 @@ import { LibrarySearchForm } from "./_schemas/library-search.form-schema";
 import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
 
 interface LibraryPageProps {
-  items: Pick<MediaItem, "id" | "posterPath" | "title" | "type" | "year">[];
+  items: Pick<
+    MediaItem,
+    "id" | "posterPath" | "title" | "type" | "year" | "primaryExternalId"
+  >[];
   totalItems: number;
 }
 
@@ -190,7 +195,7 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                     },
                   ]}
                 >
-                  <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 md:gap-6 lg:grid-cols-5 xl:grid-cols-6 2xl:grid-cols-7">
+                  <ItemGrid>
                     {results.map((item, i) => (
                       <div
                         key={item.id}
@@ -199,15 +204,15 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
                       >
                         <ListItem
                           mediaItem={item}
-                          isSelectable
+                          href={`/details/media/${item.type}/${item.primaryExternalId}`}
+                          isSelectable={isFeatureEnabled(
+                            "selectableLibraryItems",
+                          )}
                           className="aspect-2/3 w-full"
-                          {...(i % 2 === 0
-                            ? { badge: { text: "New", variant: "success" } }
-                            : {})}
                         />
                       </div>
                     ))}
-                  </div>
+                  </ItemGrid>
                 </CardSelectionProvider>
                 <div className="flex justify-center pt-12 pb-24">
                   <Pagination>

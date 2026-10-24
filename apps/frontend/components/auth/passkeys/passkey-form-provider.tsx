@@ -5,12 +5,12 @@ import {
   startTransition,
   use,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
 import { browser } from "react-dom";
-import { useUnmount } from "react-use";
 import { toast } from "sonner";
 
 import { authClient } from "#lib/auth/client.ts";
@@ -38,14 +38,14 @@ const PasskeyFormContext = createContext<PasskeyFormContextValue | undefined>(
 export function PasskeyFormProvider({ children }: PropsWithChildren) {
   use(browser());
 
-  const abortController = useMemo(() => new AbortController(), []);
+  const abortControllerRef = useRef(new AbortController());
   const passkeyLoaderRef = useRef<Promise<Passkey[]> | null>(null);
 
   const createPasskeyLoader = useCallback(() => {
     passkeyLoaderRef.current ??= authClient.passkey
       .listUserPasskeys({
         fetchOptions: {
-          signal: abortController.signal,
+          signal: abortControllerRef.current.signal,
           throw: true,
         },
       })
@@ -54,12 +54,7 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
       });
 
     return passkeyLoaderRef.current;
-  }, [abortController]);
-
-  useUnmount(() => {
-    abortController.abort();
-    passkeyLoaderRef.current = null;
-  });
+  }, []);
 
   const [loadPasskeys, setLoadPasskeys] = useState<Promise<Passkey[]>>(() =>
     createPasskeyLoader(),
@@ -74,6 +69,18 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
       setLoadPasskeys(createPasskeyLoader());
     });
   }, [createPasskeyLoader]);
+
+  useEffect(() => {
+    if (abortControllerRef.current.signal.aborted) {
+      abortControllerRef.current = new AbortController();
+      reloadPasskeys();
+    }
+
+    return () => {
+      abortControllerRef.current.abort();
+      passkeyLoaderRef.current = null;
+    };
+  }, [reloadPasskeys]);
 
   function startEditingPasskey(passkey: Passkey) {
     setCurrentlyEditingPasskey(passkey);

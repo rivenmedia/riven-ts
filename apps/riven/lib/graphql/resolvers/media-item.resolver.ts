@@ -214,7 +214,10 @@ export class MediaItemResolver {
     return true;
   }
 
-  @FieldResolver(() => String)
+  @FieldResolver(() => String, {
+    description:
+      "The primary external ID of the media item (TMDB ID for movies, TVDB ID for shows)",
+  })
   public primaryExternalId(@Root() mediaItem: MediaItem) {
     if (mediaItem instanceof ShowLikeMediaItem) {
       return mediaItem.tvdbId;

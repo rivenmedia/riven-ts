@@ -11,6 +11,7 @@ import {
 import { headers } from "next/headers";
 
 import { authClient } from "#lib/auth/client.ts";
+import { isFeatureEnabled } from "#lib/enabled-features.ts";
 
 import { PageWrapper } from "./_components/page-wrapper.tsx";
 
@@ -28,15 +29,35 @@ export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
 
   const sidebarItems: readonly SidebarItem[] = [
     { href: "/", icon: <Home />, label: "Home" },
-    { href: "/dashboard", icon: <LayoutDashboard />, label: "Dashboard" },
+    {
+      href: "/dashboard",
+      icon: <LayoutDashboard />,
+      label: "Dashboard",
+      hidden: !isFeatureEnabled("dashboardPage"),
+    },
     { href: "/library", icon: <Library />, label: "Library" },
     { href: "/explore", icon: <Search />, label: "Explore" },
-    { href: "/calendar", icon: <CalendarDays />, label: "Calendar" },
+    {
+      href: "/calendar",
+      icon: <CalendarDays />,
+      label: "Calendar",
+      hidden: !isFeatureEnabled("calendarPage"),
+    },
     { href: "/profile", icon: <User />, label: "Profile" },
     ...(isAdmin
       ? ([
-          { href: "/settings", icon: <Settings />, label: "Settings" },
-          { href: "/view-logs", icon: <FileClock />, label: "Logs" },
+          {
+            href: "/settings",
+            icon: <Settings />,
+            label: "Settings",
+            hidden: !isFeatureEnabled("settingsPage"),
+          },
+          {
+            href: "/view-logs",
+            icon: <FileClock />,
+            label: "Logs",
+            hidden: !isFeatureEnabled("logsPage"),
+          },
         ] as const)
       : []),
   ];

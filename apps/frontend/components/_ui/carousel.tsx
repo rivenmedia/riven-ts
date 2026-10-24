@@ -224,6 +224,9 @@ function CarouselPrevious({
         className,
       )}
       disabled={!canScrollPrev}
+      // Stops Firefox persisting `disabled` across reloads, which causes a
+      // hydration mismatch. React's button types omit `autoComplete`.
+      {...{ autoComplete: "off" }}
       onClick={scrollPrev}
       {...props}
     >
@@ -254,6 +257,9 @@ function CarouselNext({
         className,
       )}
       disabled={!canScrollNext}
+      // Stops Firefox persisting `disabled` across reloads, which causes a
+      // hydration mismatch. React's button types omit `autoComplete`.
+      {...{ autoComplete: "off" }}
       onClick={scrollNext}
       {...props}
     >

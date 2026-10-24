@@ -45,7 +45,11 @@ export default async function ExplorePage({
   const { query: searchQuery } = await searchParams;
 
   if (!searchQuery) {
-    return null;
+    return (
+      <p className="text-muted-foreground col-span-full">
+        Enter a search term to find movies and shows.
+      </p>
+    );
   }
 
   if (typeof searchQuery !== "string") {

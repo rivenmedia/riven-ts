@@ -37,6 +37,7 @@ export interface NowPlayingProps {
     | "voteAverage"
     | "overview"
     | "genres"
+    | "seasonLabel"
   >[];
   autoplayDelay?: number;
   alignment?: "left" | "center" | "right";
@@ -153,7 +154,7 @@ export function NowPlaying({
                 />
                 <div
                   className={cn(
-                    "absolute top-0 right-0 bottom-0 left-0 z-10 flex flex-col justify-end px-8 pt-2 pb-24 md:px-32 md:pt-8 md:pb-16 lg:right-0 lg:left-0",
+                    "absolute top-0 right-0 bottom-0 left-0 z-10 flex flex-col justify-end px-8 pt-2 pb-24 md:px-32 md:pt-8 md:pb-20 lg:right-0 lg:left-0",
                     getAlignmentClasses(alignment, "container"),
                   )}
                 >
@@ -206,12 +207,14 @@ export function NowPlaying({
                           </span>
                         </>
                       )}
-                      <span className="text-white/40">|</span>
-                      <span className="text-white drop-shadow-md">
-                        {/* {getSeasonAndYear(
-                            item.releaseDate ?? item.firstAirDate ?? "",
-                          )} */}
-                      </span>
+                      {item.seasonLabel && (
+                        <>
+                          <span className="text-white/40">|</span>
+                          <span className="text-white drop-shadow-md">
+                            {item.seasonLabel}
+                          </span>
+                        </>
+                      )}
                       {item.language && (
                         <>
                           <span className="text-white/40">|</span>

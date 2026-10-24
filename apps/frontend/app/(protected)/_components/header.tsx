@@ -31,7 +31,6 @@ export function Header({ modifierKey }: HeaderProps) {
 
   // Local input value state to decouple from URL updates while typing
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null);
 
   const form = useForm({
     defaultValues: { query: searchParams.get("query") ?? "" },
@@ -115,7 +114,6 @@ export function Header({ modifierKey }: HeaderProps) {
     <header className="pointer-events-none absolute top-0 left-0 z-50 h-20 w-full items-center bg-linear-to-b from-black/50 to-transparent px-4 transition-all duration-500 md:flex md:px-16">
       <div className="pointer-events-auto flex w-full items-center justify-between gap-6">
         <form
-          ref={formRef}
           className="mx-auto w-full max-w-lg transition-all duration-300 focus-within:max-w-xl"
           onSubmit={() => void onSubmit()}
         >

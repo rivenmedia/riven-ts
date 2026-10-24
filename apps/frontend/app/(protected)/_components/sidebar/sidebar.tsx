@@ -14,6 +14,7 @@ import {
 } from "#components/_ui/tooltip.tsx";
 import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
+import { isFeatureEnabled } from "#lib/enabled-features.ts";
 import { getInitials } from "#lib/utils.ts";
 
 import { LogOutButton } from "./_components/log-out-button.tsx";
@@ -22,6 +23,7 @@ import type { User } from "#lib/auth/types.ts";
 import type { ComponentProps, ReactNode } from "react";
 
 export interface SidebarItem {
+  hidden?: boolean;
   href: Extract<ComponentProps<typeof Link>["href"], string>;
   icon: ReactNode;
   label: string;
@@ -49,6 +51,10 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
         aria-label="Main Navigation"
       >
         {items.map((item) => {
+          if (item.hidden) {
+            return null;
+          }
+
           const isCurrentPath = currentPath === item.href;
 
           return (
@@ -75,16 +81,19 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
       </nav>
 
       <div className="mt-auto flex flex-col items-center gap-3.5 pb-4">
-        <NotificationCenter
-          buttonProps={{
-            variant: "ghost",
-            className: "hover:bg-accent/80 group rounded-md transition-colors",
-          }}
-          popoverProps={{
-            side: "right",
-            align: "end",
-          }}
-        />
+        {isFeatureEnabled("notificationCentre") && (
+          <NotificationCenter
+            buttonProps={{
+              variant: "ghost",
+              className:
+                "hover:bg-accent/80 group rounded-md transition-colors",
+            }}
+            popoverProps={{
+              side: "right",
+              align: "end",
+            }}
+          />
+        )}
         <ThemeSwitcher />
         {user ? (
           <>

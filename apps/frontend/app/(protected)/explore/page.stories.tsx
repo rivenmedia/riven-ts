@@ -197,11 +197,17 @@ export const WithoutQuery = meta.story({
 });
 
 WithoutQuery.test(
-  "Renders nothing and doesn't search until a query is entered",
-  async ({ canvasElement }) => {
+  "Prompts for a query and doesn't search until one is entered",
+  async ({ canvas }) => {
+    const message = await canvas.findByText(
+      "Enter a search term to find movies and shows.",
+    );
+
+    // Suspense briefly hides the resolved page while the async component re-renders
     await waitFor(async () => {
-      await expect(canvasElement.querySelector(".grid")).toBeEmptyDOMElement();
+      await expect(message).toBeVisible();
     });
+
     await expect(unexpectedSearchHandler).not.toHaveBeenCalled();
   },
 );

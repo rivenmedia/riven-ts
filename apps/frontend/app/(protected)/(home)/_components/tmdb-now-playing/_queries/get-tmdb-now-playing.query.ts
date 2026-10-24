@@ -20,6 +20,7 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
         id
         name
       }
+      seasonLabel
       releaseDate
       language
       voteAverage
