@@ -10,6 +10,7 @@ import {
   ZodOptional,
   ZodNullable,
   ZodBoolean,
+  z,
 } from "zod";
 
 import type {
@@ -189,11 +190,9 @@ function buildNumberSetting(
 ): SettingEntry {
   const commonConfig = buildCommonConfig(schema, key);
 
-  const { minValue, maxValue, format, _zod } = schema;
-  const hasMinConstraint = minValue != null && Number.isFinite(minValue);
-  const hasMaxConstraint = maxValue != null && Number.isFinite(maxValue);
-
-  const { multipleOf } = _zod.bag;
+  const { multipleOf, minimum, maximum, type } = z.toJSONSchema(schema);
+  const hasMinConstraint = minimum != null && Number.isFinite(minimum);
+  const hasMaxConstraint = maximum != null && Number.isFinite(maximum);
 
   return [
     commonConfig.name,
@@ -202,12 +201,12 @@ function buildNumberSetting(
       config: {
         ...commonConfig,
         registerOptions: {
-          ...(hasMinConstraint ? { min: minValue } : {}),
-          ...(hasMaxConstraint ? { max: maxValue } : {}),
+          ...(hasMinConstraint ? { min: minimum } : {}),
+          ...(hasMaxConstraint ? { max: maximum } : {}),
           required,
           valueAsNumber: true,
         },
-        step: getNumberStep(multipleOf, format === "safeint"),
+        step: getNumberStep(multipleOf, type === "integer"),
       },
     },
   ];
