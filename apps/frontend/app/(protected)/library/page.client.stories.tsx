@@ -6,7 +6,6 @@ import preview from "#.storybook/preview.tsx";
 import { GET_LIBRARY_ITEMS } from "#app/(protected)/library/_queries/get-library-items.query.ts";
 import { LibraryPage } from "#app/(protected)/library/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
-import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 
 import type { GetLibraryItemsQuery } from "#app/(protected)/library/_queries/get-library-items.query.typegen.ts";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
@@ -84,7 +83,6 @@ const meta = preview.meta({
   component: LibraryPage,
   beforeEach({ msw }) {
     msw.use(
-      getSessionHandler,
       api.query(GET_LIBRARY_ITEMS, ({ variables }) => {
         const search = variables.search?.toLowerCase();
 

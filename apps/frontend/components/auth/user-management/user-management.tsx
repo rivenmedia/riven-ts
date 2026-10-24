@@ -48,9 +48,7 @@ export function UserManagement({ currentUserId, users }: UserManagementProps) {
                     aria-labelledby={`user-${user.email}`}
                   >
                     <TableCell>
-                      <div className="font-medium">
-                        {user.username ?? user.name}
-                      </div>
+                      <div className="font-medium">{user.name}</div>
                       <div
                         className="text-muted-foreground text-xs"
                         id={`user-${user.email}`}

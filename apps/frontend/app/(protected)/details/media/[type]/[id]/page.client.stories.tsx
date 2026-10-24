@@ -15,8 +15,7 @@ import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_co
 import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
 import { MediaDetailsPage } from "#app/(protected)/details/media/[type]/[id]/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
-import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
-import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
+import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
 import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
 import type { TypedDocumentNode } from "@apollo/client";
@@ -175,6 +174,13 @@ const confirmItemAction = async (
 const meta = preview.meta({
   title: "Pages / SingleMediaItem",
   component: MediaDetailsPage,
+  beforeEach({ msw }) {
+    msw.use(
+      createHasPermissionHandler({
+        item: ["delete", "pause", "request", "reset", "resume", "retry"],
+      }),
+    );
+  },
 });
 
 //#region Movie stories
@@ -372,8 +378,6 @@ UnrequestedMovie.test(
   'Requests the movie when the "Request" button is clicked',
   async (context) => {
     context.msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       api.mutation(REQUEST_ITEM, () =>
         HttpResponse.json({ data: { requestItem: true } }),
       ),
@@ -406,8 +410,6 @@ export const CompletedMovie = UnrequestedMovie.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
         removeItemRequest: true,
@@ -484,8 +486,6 @@ export const PausedMovie = UnrequestedMovie.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
         resumeMediaItem: {
@@ -528,8 +528,6 @@ export const ScrapedMovie = UnrequestedMovie.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
         pauseMediaItem: {
@@ -749,8 +747,6 @@ UnrequestedShow.test(
   'Requests the show when the "Request" button is clicked',
   async (context) => {
     context.msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       api.mutation(REQUEST_ITEM, () =>
         HttpResponse.json({ data: { requestItem: true } }),
       ),
@@ -783,8 +779,6 @@ export const CompletedShow = UnrequestedShow.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
         removeItemRequest: true,
@@ -916,8 +910,6 @@ export const PausedShow = UnrequestedShow.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
         resumeMediaItem: {
@@ -1015,8 +1007,6 @@ export const ScrapedShow = UnrequestedShow.extend({
     });
 
     msw.use(
-      getSessionHandler,
-      hasPermissionHandler,
       ...handlers,
       mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
         pauseMediaItem: {

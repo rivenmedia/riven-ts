@@ -1,10 +1,13 @@
+import { startCase } from "es-toolkit";
 import { Link2, Link2Off } from "lucide-react";
+import { useAction } from "next-safe-action/hooks";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
-import { authClient } from "#lib/auth/client.ts";
+
+import { linkAccount } from "./_actions/link-account.action.ts";
+import { unlinkAccount } from "./_actions/unlink-account.action.ts";
 
 import type { Account, Provider } from "./types.d.ts";
 
@@ -19,48 +22,28 @@ export function SingleAccountLink({
   provider,
   providerId,
 }: SingleAccountLinkProps) {
-  const router = useRouter();
+  const providerName = provider.name ?? startCase(providerId);
+
+  const linkAccountAction = useAction(linkAccount, {
+    onError() {
+      toast.error("Failed to link account.");
+    },
+    onSuccess() {
+      toast.success(`${providerName} linked successfully.`);
+    },
+  });
+
+  const unlinkAccountAction = useAction(unlinkAccount, {
+    onError() {
+      toast.error("Failed to unlink account.");
+    },
+    onSuccess() {
+      toast.success(`${providerName} unlinked successfully.`);
+    },
+  });
 
   if (!provider.enabled || providerId === "credential") {
     return null;
-  }
-
-  const providerName =
-    provider.name ?? providerId.charAt(0).toUpperCase() + providerId.slice(1);
-
-  async function handleLink() {
-    await authClient.linkSocial({
-      provider: providerId,
-      callbackURL: "/auth",
-    });
-
-    toast.success(`${providerId} linked successfully.`);
-  }
-
-  async function handleUnlink() {
-    const { data: accounts, error } = await authClient.listAccounts();
-
-    if (error) {
-      toast.error("Failed to fetch accounts.");
-
-      return;
-    }
-
-    const accountToUnlink = accounts.find(
-      (target) => target.providerId === providerId,
-    );
-
-    if (!accountToUnlink) {
-      toast.error("Account not found.");
-
-      return;
-    }
-
-    await authClient.unlinkAccount({ accountId: accountToUnlink.id });
-
-    toast.success(`${providerId} unlinked successfully.`);
-
-    router.refresh();
   }
 
   return (
@@ -80,7 +63,7 @@ export function SingleAccountLink({
           variant="destructive"
           size="sm"
           onClick={() => {
-            void handleUnlink();
+            unlinkAccountAction.execute({ providerId });
           }}
           type="button"
         >
@@ -91,7 +74,7 @@ export function SingleAccountLink({
         <Button
           size="sm"
           onClick={() => {
-            void handleLink();
+            linkAccountAction.execute({ providerId });
           }}
           type="button"
         >

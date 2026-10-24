@@ -17,16 +17,32 @@ export default async function ProfilePage() {
     unauthorized();
   }
 
-  const [{ data: canManageUsers }, { data: authProvidersData }] =
-    await Promise.all([
-      authClient.admin.hasPermission({
-        permissions: { user: ["create"] },
-        userId: authData.user.id,
-      }),
-      query({
-        query: GET_AUTH_PROVIDERS,
-      }),
-    ]);
+  const [
+    { data: canManageUsers },
+    { data: canListUsers },
+    { data: authProvidersData },
+  ] = await Promise.all([
+    authClient.admin.hasPermission({
+      permissions: { user: ["create"] },
+      userId: authData.user.id,
+    }),
+    authClient.admin.hasPermission({
+      permissions: { user: ["list"] },
+      userId: authData.user.id,
+    }),
+    query({
+      query: GET_AUTH_PROVIDERS,
+    }),
+  ]);
+
+  const { users } = canListUsers
+    ? await authClient.admin.listUsers({
+        query: {},
+        fetchOptions: {
+          throw: true,
+        },
+      })
+    : { users: [] };
 
   const hasCredentialProvider = Boolean(
     authProvidersData?.authProviders.some(
@@ -39,6 +55,7 @@ export default async function ProfilePage() {
       canManageUsers={canManageUsers?.success ?? false}
       hasCredentialProvider={hasCredentialProvider}
       user={authData.user}
+      users={users}
     />
   );
 }

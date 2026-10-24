@@ -21,8 +21,10 @@ export const PermissionMetadata = z.object({
     .refine(atLeastOnePropertyRequired),
 });
 
+export type PermissionMetadata = z.infer<typeof PermissionMetadata>;
+
 export const checkPermissionMiddleware = createMiddleware<{
-  metadata: z.infer<typeof PermissionMetadata>;
+  metadata: PermissionMetadata;
 }>().define(async ({ metadata, next }) => {
   const { data } = await authClient.admin.hasPermission({
     permissions: metadata.permissions,

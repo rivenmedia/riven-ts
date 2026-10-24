@@ -1,7 +1,8 @@
+"use client";
+
 import { zodResolver } from "@hookform/resolvers/zod";
-import { delay } from "es-toolkit";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { LoaderCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
@@ -14,6 +15,7 @@ import {
 import { Input } from "#components/_ui/input.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
+import { updateProfile } from "./update-profile.action.ts";
 import { UpdateProfileFormSchema } from "./update-profile.form-schema.ts";
 
 import type { UpdateProfileFormValues } from "./update-profile.form-schema.ts";
@@ -24,10 +26,20 @@ interface UpdateProfileFormProps {
 
 /** Form for editing the current user's profile details. */
 export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
-  const form = useForm({
-    resolver: zodResolver(UpdateProfileFormSchema),
-    defaultValues: data,
-  });
+  const { form, handleSubmitWithAction } = useHookFormAction(
+    updateProfile,
+    zodResolver(UpdateProfileFormSchema),
+    {
+      actionProps: {
+        onSuccess() {
+          toast.success("Profile updated successfully!");
+        },
+      },
+      formProps: {
+        defaultValues: data,
+      },
+    },
+  );
 
   const {
     formState: { isSubmitting, isDirty },
@@ -47,16 +59,10 @@ export function UpdateProfileForm({ data }: UpdateProfileFormProps) {
     );
   }
 
-  const handleSubmit = form.handleSubmit(async (_data) => {
-    await delay(100);
-
-    toast.success("Profile updated successfully!");
-  });
-
   return (
     <form
       aria-labelledby="update-profile-form-title"
-      onSubmit={(event) => void handleSubmit(event)}
+      onSubmit={(event) => void handleSubmitWithAction(event)}
     >
       <FormBase
         title="Update Profile"

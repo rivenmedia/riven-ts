@@ -41,3 +41,5 @@ export const manager = ac.newRole({
 });
 
 export const UserRole = z.enum(["user", "manager", "admin"]);
+
+export type UserRole = z.infer<typeof UserRole>;

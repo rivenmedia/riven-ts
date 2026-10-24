@@ -1,10 +1,9 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { delay } from "es-toolkit";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
 import { LoaderCircle } from "lucide-react";
-import { useForm } from "react-hook-form";
-import z from "zod";
+import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
 import {
@@ -16,31 +15,36 @@ import {
 import { Input } from "#components/_ui/input.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-const EmailChangeFormSchema = z.object({
-  newEmail: z.email(),
-});
+import { changeEmail } from "./change-email.action";
+import { EmailChangeFormSchema } from "./email-change.form-schema";
 
 /** Form for changing the email address on the current user's account. */
 export function EmailChangeForm() {
-  const form = useForm({
-    resolver: zodResolver(EmailChangeFormSchema),
-  });
+  const { form, handleSubmitWithAction } = useHookFormAction(
+    changeEmail,
+    zodResolver(EmailChangeFormSchema),
+    {
+      actionProps: {
+        onError: ({ error }) => {
+          toast.error(error.serverError);
+        },
+        onSuccess: () => {
+          toast.success("Email changed successfully");
+        },
+      },
+    },
+  );
 
   const {
     formState: { errors, isDirty, isSubmitting },
   } = form;
 
-  const handleSubmit = form.handleSubmit(async (_data) => {
-    await delay(2000);
-  });
-
   return (
     <form
       method="POST"
       onSubmit={(event) => {
-        void handleSubmit(event);
+        void handleSubmitWithAction(event);
       }}
-      // action="?/emailChange"
     >
       <FormBase
         title="Change Email"

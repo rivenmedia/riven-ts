@@ -6,7 +6,9 @@ import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { headers } from "@storybook/nextjs-vite/headers.mock";
+import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
+import { setupWorker } from "msw/browser";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
 import addonVis from "storybook-addon-vis";
@@ -16,6 +18,7 @@ import { themes } from "storybook/theming";
 import { i18n } from "#.storybook/i18n.ts";
 import { fontMono, fontSansSerif, fontSerif } from "#app/fonts.ts";
 import { Providers } from "#components/providers.tsx";
+import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
 
 import { WithI18n } from "./decorators/with-i18n.tsx";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
@@ -91,7 +94,17 @@ export const preview = definePreview({
     addonA11y(),
     addonDocs(),
     addonVitest(),
-    mswAddon(),
+    mswAddon(async () => {
+      const worker = setupWorker(
+        getSessionHandler,
+        http.get("https://picsum.photos/seed/:id/:width/:height", passthrough),
+        http.get("http://localhost:6006/*", passthrough),
+      );
+
+      await worker.start({ onUnhandledFrame: "error", quiet: true });
+
+      return worker;
+    }),
     addonVis({
       auto: prepareAutoSnapshot,
       createMissingBaseline: !import.meta.env.CI,

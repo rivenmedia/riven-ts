@@ -1,3 +1,4 @@
+import { http, HttpResponse } from "msw";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
@@ -15,6 +16,13 @@ export const Default = meta.story({
       username: "",
       avatar: "",
     },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      http.post("**/api/auth/update-user", () =>
+        HttpResponse.json({ success: true }),
+      ),
+    );
   },
 });
 
