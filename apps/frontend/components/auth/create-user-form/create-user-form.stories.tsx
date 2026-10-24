@@ -3,7 +3,7 @@ import { expect, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
-import { hasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
+import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
 const meta = preview.meta({
   title: "Auth / CreateUserForm",
@@ -13,7 +13,7 @@ const meta = preview.meta({
 export const Default = meta.story({
   beforeEach({ msw }) {
     msw.use(
-      hasPermissionHandler,
+      createHasPermissionHandler({ user: ["create"] }),
       http.post("**/api/auth/admin/create-user", () =>
         HttpResponse.json({ success: true }),
       ),
