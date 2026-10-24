@@ -1,6 +1,6 @@
 ARG HOME=/app
 ARG NODE_VERSION=24.15.0
-ARG TURBO_VERSION=2.10.11
+ARG TURBO_VERSION=2.11.4
 ARG PNPM_VERSION=12.15.0
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
 ARG PNPM_STORE=${PNPM_HOME}/store
@@ -15,6 +15,18 @@ FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
 
     ARG TARGETPLATFORM
     ARG BUILDPLATFORM
+
+    # Install build dependencies
+    RUN apt-get update && apt-get install -y \
+        wget \
+        fuse3 \
+        libfuse3-dev \
+        libfuse-dev \
+        make \
+        gcc \
+        python3 \
+        build-essential \
+        git
 
 FROM core-os AS base
 
@@ -64,6 +76,7 @@ FROM base AS builder
 
     COPY --from=prepare ${HOME}/out/pnpm-lock.yaml ./
     COPY --from=prepare ${HOME}/out/pnpm-workspace.yaml ./
+    COPY --from=prepare ${HOME}/out/json/patches ./patches
 
     RUN pnpm fetch
 
@@ -90,7 +103,7 @@ FROM builder AS production-deploy
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm --filter @repo/frontend --prod deploy pruned
+    RUN pnpm --config.allow-unused-patches=true --filter @repo/frontend --prod deploy pruned
 
 FROM node:${NODE_VERSION}-alpine AS runner
 
