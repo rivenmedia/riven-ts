@@ -9,6 +9,7 @@ import type { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
 import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
 import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
+import type { ReadonlyKeysOf } from "type-fest";
 
 /**
  * A movie or show from TMDB.
@@ -24,10 +25,7 @@ import type { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 export class TmdbIndexerData
   extends IndexerBaseItem
   implements
-    Omit<
-      IndexerData,
-      keyof IndexerBaseItem | "runtime" | "year" | "seasonLabel"
-    >
+    Omit<IndexerData, keyof IndexerBaseItem | ReadonlyKeysOf<IndexerData>>
 {
   @Field(() => ID)
   public tmdbId!: string;

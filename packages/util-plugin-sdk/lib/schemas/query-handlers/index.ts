@@ -5,7 +5,7 @@ import { DataSourceMap } from "../../utilities/datasource-map.ts";
 import { LoggerSchema } from "../logger.schema.ts";
 
 import type { IndexerData } from "../../dto/types/indexer-data.type.ts";
-import type { Constructor } from "type-fest";
+import type { Constructor, ReadonlyKeysOf } from "type-fest";
 import type { ZodObject, ZodType } from "zod";
 
 /**
@@ -13,10 +13,7 @@ import type { ZodObject, ZodType } from "zod";
  *
  * `year` and `runtime` are derived getters on {@link IndexerData}, so plugins do not provide them.
  */
-export type IndexerDataResult = Omit<
-  IndexerData,
-  "year" | "runtime" | "seasonLabel"
->;
+export type IndexerDataResult = Omit<IndexerData, ReadonlyKeysOf<IndexerData>>;
 
 /**
  * A class decorated with `@ObjectType({ implements: IndexerData })`.
