@@ -34,6 +34,8 @@ import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 // Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("../lib/enabled-features.ts"));
+
 sb.mock(import("next/cache"));
 
 /**
