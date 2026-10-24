@@ -86,6 +86,13 @@ export const RivenSettings = z.object({
       "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
     )
     .meta({ "wiki.section": "danger-zone" }),
+  unsafeWipeUsersOnStartup: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "**UNSAFE**.\n \nIf true, all user data will be removed on application startup.",
+    )
+    .meta({ "wiki.section": "danger-zone" }),
   enabledLogTransports: json(z.array(z.enum(["console", "file"])))
     .default(["console", "file"])
     .describe("The enabled logging transports.")
