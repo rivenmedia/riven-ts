@@ -98,6 +98,7 @@ export const preview = definePreview({
       const worker = setupWorker(
         getSessionHandler,
         http.get("https://picsum.photos/seed/:id/:width/:height", passthrough),
+        http.get("http://localhost:6006/*", passthrough),
       );
 
       await worker.start({ onUnhandledFrame: "error", quiet: true });

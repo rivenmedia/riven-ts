@@ -27,6 +27,7 @@ interface ProfilePageProps {
   hasCredentialProvider: boolean;
   canManageUsers: boolean;
   user: User;
+  users: User[];
 }
 
 /**
@@ -37,6 +38,7 @@ export function ProfilePage({
   hasCredentialProvider,
   canManageUsers,
   user,
+  users,
 }: ProfilePageProps) {
   return (
     <>
@@ -107,7 +109,7 @@ export function ProfilePage({
         <>
           <CreateUserForm />
           <Separator />
-          <UserManagement currentUserId={user.id} users={[]} />
+          <UserManagement currentUserId={user.id} users={users} />
           <Separator />
         </>
       )}
