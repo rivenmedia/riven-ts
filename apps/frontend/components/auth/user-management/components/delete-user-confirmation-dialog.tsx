@@ -1,6 +1,3 @@
-import { useAction } from "next-safe-action/hooks";
-import { toast } from "sonner";
-
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -10,11 +7,10 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
-  AlertDialogAction,
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 
-import { deleteUser } from "../_actions/delete-user.action";
+import { DeleteUserConfirmationButton } from "./delete-user-confirmation-button";
 
 import type { User } from "#lib/auth/client.ts";
 
@@ -25,15 +21,6 @@ interface DeleteUserConfirmationDialogProps {
 export function DeleteUserConfirmationDialog({
   user,
 }: DeleteUserConfirmationDialogProps) {
-  const deleteUserAction = useAction(deleteUser, {
-    onError() {
-      toast.error("Failed to delete user.");
-    },
-    onSuccess() {
-      toast.success("User deleted successfully.");
-    },
-  });
-
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -56,14 +43,7 @@ export function DeleteUserConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={() => {
-              deleteUserAction.execute(user.id);
-            }}
-          >
-            Confirm
-          </AlertDialogAction>
+          <DeleteUserConfirmationButton userId={user.id} />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
