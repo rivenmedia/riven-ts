@@ -1,7 +1,4 @@
-"use client";
-
 import { DateTime } from "luxon";
-import { useRouter } from "next/navigation";
 
 import {
   Avatar,
@@ -9,7 +6,6 @@ import {
   AvatarImage,
 } from "#components/_ui/avatar.tsx";
 import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
 import { Separator } from "#components/_ui/separator.tsx";
 import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
 import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
@@ -20,10 +16,10 @@ import { PasswordChangeForm } from "#components/auth/password-change-form/passwo
 import { SetPasswordForm } from "#components/auth/set-password-form/set-password-form.tsx";
 import { UpdateProfileForm } from "#components/auth/update-profile-form/update-profile-form.tsx";
 import { UserManagement } from "#components/auth/user-management/user-management.tsx";
-import { authClient } from "#lib/auth/client.ts";
 import { getInitials } from "#lib/utils.ts";
 
-import { DeleteAccountButton } from "./_components/delete-account-confirmation-dialog/delete-account-confirmation-dialog";
+import { DeleteAccountConfirmationDialog } from "./_components/delete-account-confirmation-dialog/delete-account-confirmation-dialog";
+import { LogoutButton } from "./_components/logout-button/logout-button";
 
 import type { User } from "#lib/auth/client.ts";
 
@@ -42,18 +38,6 @@ export function ProfilePage({
   canManageUsers,
   user,
 }: ProfilePageProps) {
-  const router = useRouter();
-
-  async function handleLogout() {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/login");
-        },
-      },
-    });
-  }
-
   return (
     <>
       <section className="border-border/60 flex flex-col gap-5 border-b pb-6 lg:flex-row lg:items-start lg:justify-between">
@@ -101,20 +85,9 @@ export function ProfilePage({
             </dl>
           </div>
         </div>
-
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            variant="secondary"
-            className="w-full sm:w-auto"
-            onClick={() => {
-              void handleLogout();
-            }}
-            type="button"
-          >
-            Logout
-          </Button>
-
-          <DeleteAccountButton />
+          <LogoutButton />
+          <DeleteAccountConfirmationDialog />
         </div>
       </section>
 

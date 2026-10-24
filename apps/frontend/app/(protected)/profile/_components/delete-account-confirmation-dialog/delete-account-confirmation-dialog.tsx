@@ -1,6 +1,5 @@
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -11,9 +10,9 @@ import {
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 
-import { deleteAccount } from "./delete-account.action";
+import { DeleteAccountConfirmationButton } from "./_components/delete-account-confirmation-button";
 
-export function DeleteAccountButton() {
+export function DeleteAccountConfirmationDialog() {
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -35,13 +34,7 @@ export function DeleteAccountButton() {
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            type="button"
-            variant="destructive"
-            onClick={() => void deleteAccount()}
-          >
-            Confirm
-          </AlertDialogAction>
+          <DeleteAccountConfirmationButton />
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
