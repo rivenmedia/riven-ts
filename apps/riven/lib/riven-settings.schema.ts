@@ -221,8 +221,12 @@ export const RivenSettings = z.object({
     .meta({ "wiki.section": "debugging" }),
   adminUserCredentials: z
     .templateLiteral([z.string().min(1), z.literal(":"), z.string().min(1)])
-    .describe("The admin user credentials - in the format username:password")
+    .optional()
     .transform((val) => {
+      if (!val) {
+        return null;
+      }
+
       const [username, password] = val.split(":");
 
       if (!username || !password) {
@@ -232,7 +236,8 @@ export const RivenSettings = z.object({
       }
 
       return { username, password };
-    }),
+    })
+    .describe("The admin user credentials - in the format username:password"),
   retryLibraryIntervalSeconds: z.coerce
     .number()
     .int()

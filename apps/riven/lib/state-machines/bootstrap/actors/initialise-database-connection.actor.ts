@@ -71,8 +71,9 @@ export const initialiseDatabaseConnection =
         orm: database.orm,
         services,
         requiresAdminUserCreation:
-          settings.unsafeWipeUsersOnStartup ||
-          !(await services.authService.hasExistingAdminUser()),
+          settings.adminUserCredentials != null &&
+          (settings.unsafeWipeUsersOnStartup ||
+            !(await services.authService.hasExistingAdminUser())),
       };
     },
   );
