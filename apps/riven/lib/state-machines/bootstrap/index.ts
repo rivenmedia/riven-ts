@@ -556,6 +556,11 @@ export const bootstrapMachine = setup({
               "Services not available when creating admin user. Ensure the database connection has been initialised first.",
             );
 
+            assert.ok(
+              settings.adminUserCredentials,
+              "Admin user credentials not available. Ensure they are set in the configuration.",
+            );
+
             return {
               services,
               username: settings.adminUserCredentials.username,
