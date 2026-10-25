@@ -1,29 +1,14 @@
 "use client";
 
 import { LogOut } from "lucide-react";
-import { useRouter } from "next/navigation";
 
+import { logout } from "#app/(protected)/_actions/logout.action.ts";
 import { Button } from "#components/_ui/button.tsx";
-import { authClient } from "#lib/auth/client.ts";
 
 export function LogOutButton() {
-  const router = useRouter();
-
   return (
     <Button
-      onClick={() => {
-        async function signOut() {
-          await authClient.signOut({
-            fetchOptions: {
-              onSuccess: () => {
-                router.push("/login");
-              },
-            },
-          });
-        }
-
-        void signOut();
-      }}
+      onClick={() => void logout()}
       variant="ghost"
       size="icon"
       className="size-10 cursor-pointer rounded-md"

@@ -4,6 +4,7 @@ ARG TURBO_VERSION=2.11.4
 ARG PNPM_VERSION=12.15.0
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
 ARG PNPM_STORE=${PNPM_HOME}/store
+ARG APP_DIR=apps/frontend
 ARG USER=riven
 ARG PUID=1000
 ARG PGID=1000
@@ -92,20 +93,10 @@ FROM base AS builder
 
     RUN --mount=type=secret,id=TURBO_TOKEN,env=TURBO_TOKEN turbo @repo/frontend#build
 
-FROM builder AS production-deploy
-
-    LABEL builder="true"
-
-    ARG HOME
-
-    WORKDIR ${HOME}
-
-    ARG CI
-    ENV CI=${CI}
-
-    RUN pnpm --config.allow-unused-patches=true --filter @repo/frontend --prod deploy pruned
-
-FROM node:${NODE_VERSION}-alpine AS runner
+# The runner requires a slim image to provide tools such as `sharp` for image resizing;
+# Don't use an `alpine` base as it fails silently when calling `_next/image` URLs,
+# and will fall back to returning the largest image in the srcset.
+FROM node:${NODE_VERSION}-slim AS runner
 
     LABEL name="Riven TS Frontend" \
           description="Riven(TS) Media Server Frontend" \
@@ -113,32 +104,31 @@ FROM node:${NODE_VERSION}-alpine AS runner
           stage="runner"
 
     ARG HOME
+    ARG APP_DIR
 
     WORKDIR ${HOME}
 
-    ARG USER
-
-    ENV USERNAME=${USER}
-    ENV USERGROUP=${USER}
-
-    ARG PUID
-    ARG PGID
-
-    ENV PUID=${PUID}
-    ENV PGID=${PGID}
-
-    ARG HOME
-    ENV HOME=${HOME}
-
-    # Modify existing node user to match desired UID/GID
-    RUN deluser --remove-home node && \
-        addgroup -g ${PGID} ${USERGROUP} && \
-        adduser -D -u ${PUID} -G ${USERGROUP} -h ${HOME} ${USERNAME}
-
-    USER ${PUID}:${PGID}
-
-    COPY --from=production-deploy ${HOME}/pruned .
-
     ENV NODE_ENV=production
+    ENV PORT=9000
+    ENV HOSTNAME="0.0.0.0"
 
-    CMD ["next", "start"]
+    ENV NEXT_TELEMETRY_DISABLED=1
+
+    # Automatically leverage output traces to reduce image size
+    # https://nextjs.org/docs/advanced-features/output-file-tracing
+    COPY --from=builder --chown=node:node ${HOME}/${APP_DIR}/.next/standalone ./
+
+    # Mirror the project structure in the image's public files
+    # to match what outputFileTracingRoot expects
+    COPY --from=builder --chown=node:node ${HOME}/${APP_DIR}/public ./${APP_DIR}/public
+    COPY --from=builder --chown=node:node ${HOME}/${APP_DIR}/.next/static ./${APP_DIR}/.next/static
+
+    # Switch to non-root user for security best practices
+    USER node
+
+    EXPOSE 9000
+
+    WORKDIR ${HOME}/${APP_DIR}
+
+    # Start Next.js standalone server
+    CMD ["node", "server.js"]

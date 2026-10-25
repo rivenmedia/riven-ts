@@ -8,10 +8,12 @@ import {
 } from "better-auth/client/plugins";
 import { createAuthClient } from "better-auth/react";
 
+import { privateEnvironment } from "#environment/private-environment.schema.ts";
+
 import { nextCookiesClientPlugin } from "./plugins/next-cookies.ts";
 
 export const authClient = createAuthClient({
-  baseURL: "https://localhost:9000",
+  baseURL: privateEnvironment.ORIGIN,
   plugins: [
     usernameClient(),
     adminClient({
