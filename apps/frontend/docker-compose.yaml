@@ -1,9 +1,7 @@
 services:
   riven-frontend:
     container_name: riven-frontend
-    build:
-      context: ../..
-      dockerfile: apps/frontend/Dockerfile
+    image: ghcr.io/rivenmedia/riven-ts-frontend:main
     env_file: .env.riven-frontend
     ports:
       - 9000:9000

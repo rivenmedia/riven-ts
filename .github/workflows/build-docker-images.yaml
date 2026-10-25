@@ -1,6 +1,6 @@
 name: Build Docker Images
 
-description: Build Docker images for the Riven app and optionally push them to the registry.
+description: Build Docker images for the Riven backend and frontend apps and optionally push them to the registry.
 
 on:
   push:
@@ -30,24 +30,31 @@ jobs:
   # node-gyp-build-optional-packages and similar libraries under qemu
   # emulation. Native runners avoid both failure modes and finish faster.
   build:
-    name: Build ${{ matrix.platform }}
+    name: Build ${{ matrix.app.name }} (${{ matrix.target.platform }})
     permissions:
       contents: read
       packages: write
     strategy:
       fail-fast: false
       matrix:
-        include:
+        app:
+          - name: riven
+            dockerfile: apps/riven/Dockerfile
+            image: ghcr.io/${{ github.repository }}
+          - name: frontend
+            dockerfile: apps/frontend/Dockerfile
+            image: ghcr.io/${{ github.repository }}-frontend
+        target:
           - platform: linux/amd64
             runner: ubuntu-latest
           - platform: linux/arm64
             runner: ubuntu-24.04-arm
-    runs-on: ${{ matrix.runner }}
+    runs-on: ${{ matrix.target.runner }}
     steps:
       - name: Prepare platform suffix
         id: platform
         env:
-          PLATFORM: ${{ matrix.platform }}
+          PLATFORM: ${{ matrix.target.platform }}
         run: echo "suffix=${PLATFORM//\//-}" >> $GITHUB_OUTPUT
 
       - name: Checkout code
@@ -58,7 +65,7 @@ jobs:
         uses: docker/metadata-action@v6
         with:
           images: |
-            ghcr.io/${{ github.repository }}
+            ${{ matrix.app.image }}
 
       - name: Login to GitHub Container Registry
         uses: docker/login-action@v4
@@ -76,17 +83,17 @@ jobs:
         id: build
         uses: docker/build-push-action@v7
         with:
-          file: apps/riven/Dockerfile
-          platforms: ${{ matrix.platform }}
+          file: ${{ matrix.app.dockerfile }}
+          platforms: ${{ matrix.target.platform }}
           labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             TURBO_TEAM=${{ vars.TURBO_TEAM }}
           secret-envs: |
             TURBO_TOKEN=TURBO_TOKEN
-          cache-from: type=gha,scope=${{ steps.platform.outputs.suffix }}
-          cache-to: type=gha,mode=max,scope=${{ steps.platform.outputs.suffix }}
+          cache-from: type=gha,scope=${{ matrix.app.name }}-${{ steps.platform.outputs.suffix }}
+          cache-to: type=gha,mode=max,scope=${{ matrix.app.name }}-${{ steps.platform.outputs.suffix }}
           target: runner
-          outputs: type=image,name=ghcr.io/${{ github.repository }},push-by-digest=true,name-canonical=true,push=${{ env.SHOULD_PUSH }}
+          outputs: type=image,name=${{ matrix.app.image }},push-by-digest=true,name-canonical=true,push=${{ env.SHOULD_PUSH }}
         env:
           TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
@@ -103,28 +110,36 @@ jobs:
         if: env.SHOULD_PUSH == 'true'
         uses: actions/upload-artifact@v7
         with:
-          name: digests-${{ steps.platform.outputs.suffix }}
+          name: digests-${{ matrix.app.name }}-${{ steps.platform.outputs.suffix }}
           path: ${{ runner.temp }}/digests/*
           if-no-files-found: error
           retention-days: 1
 
   # Stitch the per-arch digests into a single multi-arch manifest list under
   # the user-facing tags from `metadata-action`. This is what consumers pull
-  # as `ghcr.io/.../riven-ts:main`, `:sha-<short>`, etc.
+  # as `ghcr.io/.../riven-ts:main`, `ghcr.io/.../riven-ts-frontend:sha-<short>`, etc.
   merge:
-    name: Merge multi-arch manifest
+    name: Merge ${{ matrix.app.name }} multi-arch manifest
     if: github.event_name == 'push' || (github.event.pull_request != null && github.event.pull_request.head.repo.full_name == github.repository)
     needs: build
     runs-on: ubuntu-latest
     permissions:
       contents: read
       packages: write
+    strategy:
+      fail-fast: false
+      matrix:
+        app:
+          - name: riven
+            image: ghcr.io/${{ github.repository }}
+          - name: frontend
+            image: ghcr.io/${{ github.repository }}-frontend
     steps:
       - name: Download digests
         uses: actions/download-artifact@v8
         with:
           path: ${{ runner.temp }}/digests
-          pattern: digests-*
+          pattern: digests-${{ matrix.app.name }}-*
           merge-multiple: true
 
       - name: Login to GitHub Container Registry
@@ -143,7 +158,7 @@ jobs:
         with:
           # See https://docs.docker.com/build/ci/github-actions/manage-tags-labels
           images: |
-            ghcr.io/${{ github.repository }}
+            ${{ matrix.app.image }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -155,7 +170,7 @@ jobs:
       - name: Create manifest list and push
         working-directory: ${{ runner.temp }}/digests
         env:
-          IMAGE: ghcr.io/${{ github.repository }}
+          IMAGE: ${{ matrix.app.image }}
         run: |
           docker buildx imagetools create \
             $(jq -cr '.tags | map("-t " + .) | join(" ")' <<<"$DOCKER_METADATA_OUTPUT_JSON") \
@@ -163,7 +178,7 @@ jobs:
 
       - name: Inspect image
         env:
-          IMAGE: ghcr.io/${{ github.repository }}
+          IMAGE: ${{ matrix.app.image }}
           VERSION: ${{ steps.meta.outputs.version }}
         run: |
           docker buildx imagetools inspect "${IMAGE}:${VERSION}"
