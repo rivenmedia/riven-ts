@@ -233,6 +233,9 @@ catalogs:
     '@graphql-typed-document-node/core':
       specifier: ^3.2.0
       version: 3.2.0
+    '@graphql-yoga/subscription':
+      specifier: ^5.1.1
+      version: 5.1.1
     '@hookform/resolvers':
       specifier: ^5.4.0
       version: 5.9.1
@@ -1099,6 +1102,9 @@ importers:
       '@elastic/ecs-winston-format':
         specifier: 'catalog:'
         version: 1.5.3
+      '@graphql-yoga/subscription':
+        specifier: 'catalog:'
+        version: 5.1.1
       '@keyv/redis':
         specifier: 'catalog:'
         version: 5.1.6(keyv@5.6.0)
@@ -4188,12 +4194,12 @@ packages:
     peerDependencies:
       graphql: ^0.8.0 || ^0.9.0 || ^0.10.0 || ^0.11.0 || ^0.12.0 || ^0.13.0 || ^14.0.0 || ^15.0.0 || ^16.0.0 || ^17.0.0
 
-  '@graphql-yoga/subscription@5.0.5':
-    resolution: {integrity: sha512-oCMWOqFs6QV96/NZRt/ZhTQvzjkGB4YohBOpKM4jH/lDT4qb7Lex/aGCxpi/JD9njw3zBBtMqxbaC22+tFHVvw==}
+  '@graphql-yoga/subscription@5.1.1':
+    resolution: {integrity: sha512-I48DpyPTxYzmO5TwvKOXxiLI/tsbyeYNhb4/6/oJEBn6nlb8snHL0G0Fw1LC2ApNW1QKYuCPRDTp9yUwVBqhNQ==}
     engines: {node: '>=18.0.0'}
 
-  '@graphql-yoga/typed-event-target@3.0.2':
-    resolution: {integrity: sha512-ZpJxMqB+Qfe3rp6uszCQoag4nSw42icURnBRfFYSOmTgEeOe4rD0vYlbA8spvCu2TlCesNTlEN9BLWtQqLxabA==}
+  '@graphql-yoga/typed-event-target@3.0.3':
+    resolution: {integrity: sha512-j/EgVfZSzKA2lVeiZ0un8E2eVIqWa9Woyqta4A40ht1M93ui9CDVHU6pmphoQTpFa92BNbMVexXdOtMQk8LCjA==}
     engines: {node: '>=18.0.0'}
 
   '@hexagon/base64@1.1.28':
@@ -15402,14 +15408,14 @@ snapshots:
     dependencies:
       graphql: 16.14.0
 
-  '@graphql-yoga/subscription@5.0.5':
+  '@graphql-yoga/subscription@5.1.1':
     dependencies:
-      '@graphql-yoga/typed-event-target': 3.0.2
+      '@graphql-yoga/typed-event-target': 3.0.3
       '@repeaterjs/repeater': 3.0.6
       '@whatwg-node/events': 0.1.2
       tslib: 2.8.1
 
-  '@graphql-yoga/typed-event-target@3.0.2':
+  '@graphql-yoga/typed-event-target@3.0.3':
     dependencies:
       '@repeaterjs/repeater': 3.0.6
       tslib: 2.8.1
@@ -25133,7 +25139,7 @@ snapshots:
 
   type-graphql@2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0):
     dependencies:
-      '@graphql-yoga/subscription': 5.0.5
+      '@graphql-yoga/subscription': 5.1.1
       '@types/node': 24.12.4
       '@types/semver': 7.7.1
       graphql: 16.14.0

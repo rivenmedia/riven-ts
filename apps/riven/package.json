@@ -57,6 +57,7 @@
     "@as-integrations/express5": "catalog:",
     "@better-auth/passkey": "catalog:",
     "@elastic/ecs-winston-format": "catalog:",
+    "@graphql-yoga/subscription": "catalog:",
     "@keyv/redis": "catalog:",
     "@mikro-orm/core": "catalog:",
     "@mikro-orm/decorators": "catalog:",

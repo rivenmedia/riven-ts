@@ -7,6 +7,7 @@ import { randomUUID } from "node:crypto";
 import { test as testBase, vi } from "vitest";
 
 import { CoreKey } from "#graphql/context.ts";
+import { pubSub } from "#graphql/pubsub.ts";
 import { queueNameFor } from "#message-queue/utilities/queue-name-for.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
@@ -263,7 +264,10 @@ export const it = testBase
       await import("@repo/core-util-mock-graphql-server");
     const { resolvers } = await import("#graphql/resolvers/index.ts");
 
-    return buildMockServer<ApolloServerContext>(resolvers);
+    return buildMockServer<ApolloServerContext>({
+      resolvers,
+      pubSub,
+    });
   })
   .extend(
     "createGqlContext",

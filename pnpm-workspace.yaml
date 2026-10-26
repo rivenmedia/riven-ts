@@ -80,6 +80,7 @@ catalog:
   "@graphql-codegen/typescript": ^5.0.10
   "@graphql-codegen/typescript-operations": ^5.1.0
   "@graphql-typed-document-node/core": ^3.2.0
+  "@graphql-yoga/subscription": ^5.1.1
   "@hookform/resolvers": ^5.4.0
   "@inkjs/ui": ^2.0.0
   "@isaacs/ttlcache": ^2.1.5

@@ -7,8 +7,10 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import { wrap } from "@mikro-orm/core";
+import { ChangeSetType, wrap } from "@mikro-orm/core";
 import chalk from "chalk";
+
+import { pubSub } from "#graphql/pubsub.ts";
 
 import type {
   ChangeSet,
@@ -44,16 +46,24 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
 
     for (const changeSet of uow.getChangeSets()) {
       if (
+        changeSet.type === ChangeSetType.UPDATE &&
         changeSet.entity instanceof MediaItem &&
         changeSet.originalEntity &&
         changeSet.payload["state"]
       ) {
-        const previousState = changeSet.originalEntity["state"] as string;
-        const nextState = changeSet.payload["state"] as string;
+        const previousState = MediaItemState.parse(
+          changeSet.originalEntity["state"],
+        );
+        const nextState = MediaItemState.parse(changeSet.payload["state"]);
 
         logger.debug(
-          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("->")} ${chalk.green(nextState)}`,
+          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("→")} ${chalk.green(nextState)}`,
         );
+
+        pubSub.publish("MEDIA_ITEM_STATE_CHANGED", {
+          item: changeSet.entity,
+          stateChange: [previousState, nextState],
+        });
       }
     }
   }

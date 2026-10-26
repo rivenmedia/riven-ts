@@ -16,6 +16,7 @@ import { fromPromise } from "xstate";
 import { initAuth } from "#auth/auth.ts";
 import { initApolloClient } from "#graphql/apollo-client.ts";
 import { buildContextFunction } from "#graphql/build-context-function.ts";
+import { pubSub } from "#graphql/pubsub.ts";
 import { resolvers } from "#graphql/resolvers/index.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { redisCache } from "#utilities/redis-cache.ts";
@@ -66,6 +67,7 @@ export const startGqlServer = fromPromise<
     cache: redisCache,
     schema: await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
+      pubSub,
     }),
     introspection: true,
     plugins: [
