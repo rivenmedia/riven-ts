@@ -99,6 +99,7 @@
     "express": "catalog:",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
+    "graphql-ws": "catalog:",
     "keyv": "catalog:",
     "lru-cache": "catalog:",
     "luxon": "catalog:",
@@ -110,6 +111,7 @@
     "undici": "catalog:",
     "winston": "catalog:",
     "winston-daily-rotate-file": "catalog:",
+    "ws": "catalog:",
     "xstate": "catalog:",
     "zod": "catalog:",
     "zod-validation-error": "catalog:"
@@ -136,6 +138,7 @@
     "@types/luxon": "catalog:",
     "@types/node": "catalog:",
     "@types/triple-beam": "catalog:",
+    "@types/ws": "catalog:",
     "@typescript/native": "catalog:",
     "esbuild": "catalog:",
     "esbuild-node-externals": "catalog:",
