@@ -38,6 +38,7 @@ export const searchLibrary = loggedInActionClient
     const { data } = await getClient().query({
       query: GET_LIBRARY_ITEMS,
       variables: {
+        after: parsedInput.after ?? null,
         search: parsedInput.search ?? null,
         type: getType(),
         state: getState(),

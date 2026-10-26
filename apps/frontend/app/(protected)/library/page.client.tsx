@@ -4,36 +4,37 @@ import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { cn } from "cn";
 import { Book, ListChecks, Loader2, Search, Trash } from "lucide-react";
 import Link from "next/link";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
+import { z } from "zod";
 
-import { fly } from "#components/_animations/fly.ts";
 import { Button } from "#components/_ui/button.tsx";
-import {
-  Pagination,
-  PaginationContent,
-  PaginationEllipsis,
-  PaginationItem,
-  PaginationLink,
-  PaginationNext,
-  PaginationPrevious,
-} from "#components/_ui/pagination.tsx";
 import { ItemGrid } from "#components/item-grid/item-grid.tsx";
-import { ListItem } from "#components/list-item/list-item.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
 import { isFeatureEnabled } from "#lib/enabled-features.ts";
 
+import { InfiniteItemGrid } from "../_components/infinite-item-grid/infinite-item-grid";
 import { searchLibrary } from "./_actions/search.action";
 import { LibraryMessage } from "./_components/library-message";
 import { LibrarySearchInputs } from "./_components/library-search-inputs";
 import { LibrarySearchForm } from "./_schemas/library-search.form-schema";
 
 import type { MediaItem } from "#app/_types/__generated__/graphql.ts";
+import type { LibrarySearchFormValues } from "./_schemas/library-search.form-schema";
+
+const TopLevelMediaItem = z.looseObject({
+  type: TopLevelMediaItemType,
+});
+
+function isTopLevelMediaItem(
+  item: unknown,
+): item is { type: TopLevelMediaItemType } {
+  return TopLevelMediaItem.safeParse(item).success;
+}
 
 interface LibraryPageProps {
   items: Pick<
@@ -41,29 +42,87 @@ interface LibraryPageProps {
     "id" | "posterPath" | "title" | "type" | "year" | "primaryExternalId"
   >[];
   totalItems: number;
+  endCursor: string | null;
+  hasNextPage: boolean;
 }
+
+const defaultFormValues = {
+  search: "",
+  type: "all",
+  state: "all",
+} satisfies LibrarySearchFormValues;
 
 /**
  * Library route listing the user's media items, with search, type and state
  * filters.
  */
-export function LibraryPage({ items, totalItems }: LibraryPageProps) {
+export function LibraryPage({
+  items,
+  totalItems,
+  endCursor,
+  hasNextPage,
+}: LibraryPageProps) {
   const formRef = useRef<HTMLFormElement>(null);
+
+  // Cursor for the page after the last one loaded; reset whenever a new search completes
+  const nextPageRef = useRef({ endCursor, hasNextPage });
+  const [searchCount, setSearchCount] = useState(0);
+
   const { action, form, handleSubmitWithAction } = useHookFormAction(
     searchLibrary,
     zodResolver(LibrarySearchForm),
     {
+      actionProps: {
+        onSuccess({ data }) {
+          nextPageRef.current = {
+            endCursor: data.endCursor,
+            hasNextPage: data.hasNextPage,
+          };
+
+          setSearchCount((count) => count + 1);
+        },
+      },
       formProps: {
         disabled: totalItems === 0,
-        defaultValues: {
-          search: "",
-          type: "all",
-          state: "all",
-        },
+        defaultValues: defaultFormValues,
         progressive: true,
       },
     },
   );
+
+  const fetchNextPage = async () => {
+    const nextPage = nextPageRef.current;
+
+    if (!nextPage.hasNextPage || !nextPage.endCursor) {
+      return new Map<string, never>();
+    }
+
+    // Use the last submitted filters, not any unsubmitted edits in the form
+    const result = await searchLibrary({
+      ...(action.isIdle ? defaultFormValues : action.input),
+      after: nextPage.endCursor,
+    });
+
+    if (!result.data) {
+      toast.error("Failed to load more items");
+
+      return new Map<string, never>();
+    }
+
+    // Ignore pages that resolve after a new search has replaced the results
+    if (nextPageRef.current === nextPage) {
+      nextPageRef.current = {
+        endCursor: result.data.endCursor,
+        hasNextPage: result.data.hasNextPage,
+      };
+    }
+
+    return new Map(
+      result.data.items
+        .filter((item) => isTopLevelMediaItem(item))
+        .map((item) => [item.id, item]),
+    );
+  };
 
   const lastSubmittedSearchRef = useRef(form.formState.defaultValues?.search);
 
@@ -73,10 +132,11 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
     formRef.current?.requestSubmit();
   };
 
-  const results = (action.result.data?.items ?? items).filter(
-    (item): item is typeof item & { type: TopLevelMediaItemType } =>
-      TopLevelMediaItemType.safeParse(item.type).success,
+  const results = (action.result.data?.items ?? items).filter((item) =>
+    isTopLevelMediaItem(item),
   );
+
+  const initialResultsMap = new Map(results.map((item) => [item.id, item]));
 
   return (
     <PageShell className="relative z-10 flex min-h-screen flex-col overflow-x-hidden bg-transparent">
@@ -110,137 +170,104 @@ export function LibraryPage({ items, totalItems }: LibraryPageProps) {
               />
             </header>
             {results.length > 0 ? (
-              <>
-                <CardSelectionProvider
-                  actions={[
-                    {
-                      label: "Reset",
-                      icon: ListChecks,
-                      handleClick: () => {
-                        // actionInProgress = true;
-                        // try {
-                        //   const result = await reset_items({
-                        //     ids: itemsStore.items.map((id) => id.toString()),
-                        //   });
-                        //   if (result.count > 0) {
-                        //     toast.success(`Reset ${result.count} items`);
-                        //   } else {
-                        //     toast.info("No matching items were reset");
-                        //   }
-                        //   // itemsStore.clear();
-                        //   // await refreshLiveLibrary();
-                        // } catch (error) {
-                        //   if (error instanceof Error) {
-                        //     toast.error(`Error: ${error.message}`);
-                        //   } else {
-                        //     toast.error("An unknown error occurred");
-                        //   }
-                        // } finally {
-                        //   actionInProgress = false;
+              <CardSelectionProvider
+                actions={[
+                  {
+                    label: "Reset",
+                    icon: ListChecks,
+                    handleClick: () => {
+                      // actionInProgress = true;
+                      // try {
+                      //   const result = await reset_items({
+                      //     ids: itemsStore.items.map((id) => id.toString()),
+                      //   });
+                      //   if (result.count > 0) {
+                      //     toast.success(`Reset ${result.count} items`);
+                      //   } else {
+                      //     toast.info("No matching items were reset");
+                      //   }
+                      //   // itemsStore.clear();
+                      //   // await refreshLiveLibrary();
+                      // } catch (error) {
+                      //   if (error instanceof Error) {
+                      //     toast.error(`Error: ${error.message}`);
+                      //   } else {
+                      //     toast.error("An unknown error occurred");
+                      //   }
+                      // } finally {
+                      //   actionInProgress = false;
+                      // }
+                    },
+                  },
+                  {
+                    label: "Retry",
+                    icon: Loader2,
+                    handleClick: () => {
+                      // actionInProgress = true;
+                      try {
+                        // const result = await retry_items({
+                        // ids: itemsStore.items.map((id) => id.toString()),
+                        // });
+                        // if (result.count > 0) {
+                        //   toast.success(
+                        //     `Marked ${result.count} items for retry`,
+                        //   );
+                        // } else {
+                        //   toast.info("No matching items were marked for retry");
                         // }
-                      },
-                    },
-                    {
-                      label: "Retry",
-                      icon: Loader2,
-                      handleClick: () => {
-                        // actionInProgress = true;
-                        try {
-                          // const result = await retry_items({
-                          // ids: itemsStore.items.map((id) => id.toString()),
-                          // });
-                          // if (result.count > 0) {
-                          //   toast.success(
-                          //     `Marked ${result.count} items for retry`,
-                          //   );
-                          // } else {
-                          //   toast.info("No matching items were marked for retry");
-                          // }
-                          // itemsStore.clear();
-                          // await refreshLiveLibrary();
-                        } catch (error) {
-                          if (error instanceof Error) {
-                            toast.error(`Error: ${error.message}`);
-                          } else {
-                            toast.error("An unknown error occurred");
-                          }
-                        } finally {
-                          // actionInProgress = false;
+                        // itemsStore.clear();
+                        // await refreshLiveLibrary();
+                      } catch (error) {
+                        if (error instanceof Error) {
+                          toast.error(`Error: ${error.message}`);
+                        } else {
+                          toast.error("An unknown error occurred");
                         }
-                      },
+                      } finally {
+                        // actionInProgress = false;
+                      }
                     },
-                    {
-                      label: "Remove",
-                      icon: Trash,
-                      variant: "destructive",
-                      handleClick: () => {
-                        // actionInProgress = true;
-                        try {
-                          // await remove_items({
-                          //   ids: itemsStore.items.map((id) => id.toString()),
-                          // });
-                          // toast.success(`Removed ${itemsStore.count} items`);
-                          // itemsStore.clear();
-                          // await refreshLiveLibrary();
-                        } catch (error) {
-                          if (error instanceof Error) {
-                            toast.error(`Error: ${error.message}`);
-                          } else {
-                            toast.error("An unknown error occurred");
-                          }
-                        } finally {
-                          // actionInProgress = false;
+                  },
+                  {
+                    label: "Remove",
+                    icon: Trash,
+                    variant: "destructive",
+                    handleClick: () => {
+                      // actionInProgress = true;
+                      try {
+                        // await remove_items({
+                        //   ids: itemsStore.items.map((id) => id.toString()),
+                        // });
+                        // toast.success(`Removed ${itemsStore.count} items`);
+                        // itemsStore.clear();
+                        // await refreshLiveLibrary();
+                      } catch (error) {
+                        if (error instanceof Error) {
+                          toast.error(`Error: ${error.message}`);
+                        } else {
+                          toast.error("An unknown error occurred");
                         }
-                      },
+                      } finally {
+                        // actionInProgress = false;
+                      }
                     },
-                  ]}
-                >
-                  <ItemGrid>
-                    {results.map((item, i) => (
-                      <div
-                        key={item.id}
-                        className={cn("animation-duration-700", fly)}
-                        style={{ animationDelay: `${(i * 30).toString()}ms` }}
-                      >
-                        <ListItem
-                          mediaItem={item}
-                          href={`/details/media/${item.type}/${item.primaryExternalId}`}
-                          isSelectable={isFeatureEnabled(
-                            "selectableLibraryItems",
-                          )}
-                          className="aspect-2/3 w-full"
-                        />
-                      </div>
-                    ))}
-                  </ItemGrid>
-                </CardSelectionProvider>
-                <div className="flex justify-center pt-12 pb-24">
-                  <Pagination>
-                    <PaginationContent>
-                      <PaginationItem>
-                        <PaginationPrevious href="#" />
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink href="#">1</PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink href="#" isActive>
-                          2
-                        </PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationLink href="#">3</PaginationLink>
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationEllipsis />
-                      </PaginationItem>
-                      <PaginationItem>
-                        <PaginationNext href="#" />
-                      </PaginationItem>
-                    </PaginationContent>
-                  </Pagination>
-                </div>
-              </>
+                  },
+                ]}
+              >
+                <ItemGrid>
+                  <InfiniteItemGrid
+                    key={searchCount}
+                    fetchPage={fetchNextPage}
+                    initialData={initialResultsMap}
+                    noItemsFoundMessage="Your library is empty"
+                    getItemHref={(item) =>
+                      `/details/media/${item.type}/${item.primaryExternalId}`
+                    }
+                    isSelectable={isFeatureEnabled("selectableLibraryItems")}
+                    isAnimated
+                  />
+                </ItemGrid>
+              </CardSelectionProvider>
             ) : (
               <div className="flex min-h-[50vh] flex-1 flex-col items-center justify-center space-y-4 text-center">
                 {totalItems === 0 ? (

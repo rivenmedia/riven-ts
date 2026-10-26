@@ -26,5 +26,12 @@ async function getLibraryItems() {
 export default async function Library() {
   const data = await getLibraryItems();
 
-  return <LibraryPage items={data.items} totalItems={data.totalCount} />;
+  return (
+    <LibraryPage
+      items={data.items}
+      totalItems={data.totalCount}
+      endCursor={data.endCursor}
+      hasNextPage={data.hasNextPage}
+    />
+  );
 }

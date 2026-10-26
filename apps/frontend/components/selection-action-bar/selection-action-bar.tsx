@@ -75,6 +75,7 @@ export function SelectionActionBar({
               });
             }}
             type="button"
+            aria-label="Clear selection"
           >
             <X className="h-4 w-4" />
           </Button>

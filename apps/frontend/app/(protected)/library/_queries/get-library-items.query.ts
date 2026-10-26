@@ -11,14 +11,16 @@ export const GET_LIBRARY_ITEMS: TypedDocumentNode<
   GetLibraryItemsQueryVariables
 > = gql`
   query GetLibraryItems(
+    $after: String
     $search: String
     $type: [MediaItemType!]
     $state: [MediaItemState!]
   ) {
-    mediaItems(search: $search, type: $type, state: $state) {
+    mediaItems(after: $after, search: $search, type: $type, state: $state) {
       hasNextPage
       hasPrevPage
       totalCount
+      endCursor
       items {
         ... on MediaItem {
           id

@@ -6,6 +6,7 @@ export const LibrarySearchForm = z.object({
   search: z.string().optional(),
   type: z.enum(["movies", "tv", "all"]),
   state: z.enum([...MediaItemState.options, "all"]),
+  after: z.string().optional(),
 });
 
 export type LibrarySearchFormValues = z.infer<typeof LibrarySearchForm>;

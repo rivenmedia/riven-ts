@@ -41,6 +41,28 @@ const libraryItems = [
 
 const { length: libraryItemsCount } = libraryItems;
 
+const libraryPageSize = 25;
+const libraryPageCount = 3;
+
+/**
+ * Builds one page of library items, numbered continuously across pages.
+ */
+const createLibraryPage = (page: number) =>
+  Array.from({ length: libraryPageSize }).map((_, index) => {
+    const position = String((page - 1) * libraryPageSize + index + 1);
+
+    return {
+      __typename: "Movie",
+      id: position,
+      type: "movie",
+      title: `Item ${position}`,
+      releaseDate: "2024-06-01",
+      year: 2024,
+      posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
+      primaryExternalId: `external-${position}`,
+    } as const satisfies GetLibraryItemsQuery["mediaItems"]["items"][number];
+  });
+
 /**
  * Checks whether a value passes a GraphQL list filter, where an omitted filter matches everything.
  */
@@ -102,6 +124,7 @@ const meta = preview.meta({
               hasNextPage: false,
               hasPrevPage: false,
               totalCount: items.length,
+              endCursor: null,
               items,
             },
           },
@@ -115,6 +138,8 @@ export const Default = meta.story({
   args: {
     totalItems: libraryItemsCount,
     items: libraryItems,
+    endCursor: null,
+    hasNextPage: false,
   },
 });
 
@@ -191,10 +216,85 @@ Default.test(
   },
 );
 
+export const MultiplePages = meta.story({
+  args: {
+    totalItems: libraryPageSize * libraryPageCount,
+    items: createLibraryPage(1),
+    endCursor: "1",
+    hasNextPage: true,
+  },
+  parameters: {
+    snapshot: {
+      // Scrolling the Load More button into view would fetch the next page mid-snapshot
+      fullPage: false,
+    },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      api.query(GET_LIBRARY_ITEMS, ({ variables }) => {
+        const page = variables.after ? Number(variables.after) + 1 : 1;
+
+        return HttpResponse.json({
+          data: {
+            mediaItems: {
+              __typename: "MediaItemCursor",
+              hasNextPage: page < libraryPageCount,
+              hasPrevPage: page > 1,
+              totalCount: libraryPageSize * libraryPageCount,
+              endCursor: String(page),
+              items: createLibraryPage(page),
+            },
+          },
+        });
+      }),
+    );
+  },
+});
+
+MultiplePages.test(
+  "Loads the next page when Load More is clicked",
+  async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", { name: "Load More" }),
+    );
+
+    await expect(await canvas.findByText("Item 26")).toBeInTheDocument();
+    await expect(
+      canvas.getByText(`Item ${String(libraryPageSize * 2)}`),
+    ).toBeInTheDocument();
+  },
+);
+
+MultiplePages.test(
+  "Stops loading once the last page has been fetched",
+  async ({ canvas, userEvent }) => {
+    const lastItemTitle = `Item ${String(libraryPageSize * libraryPageCount)}`;
+
+    // Keep loading until there are no more pages, as the grid only learns it has reached the end from an empty page
+    await waitFor(async () => {
+      const loadMoreButton = canvas.queryByRole("button", {
+        name: "Load More",
+      });
+
+      if (loadMoreButton) {
+        await userEvent.click(loadMoreButton);
+      }
+
+      await expect(
+        canvas.queryByRole("button", { name: /Load More|Loading/u }),
+      ).not.toBeInTheDocument();
+    });
+
+    await expect(canvas.getByText(lastItemTitle)).toBeInTheDocument();
+  },
+);
+
 export const NoItems = meta.story({
   args: {
     totalItems: 0,
     items: [],
+    endCursor: null,
+    hasNextPage: false,
   },
 });
 

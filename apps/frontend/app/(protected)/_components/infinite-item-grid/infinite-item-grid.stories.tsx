@@ -1,4 +1,5 @@
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { Trash } from "lucide-react";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 import {
@@ -8,6 +9,7 @@ import {
 } from "#app/(protected)/_components/infinite-item-grid/infinite-item-grid.fixtures.ts";
 import { InfiniteItemGrid } from "#app/(protected)/_components/infinite-item-grid/infinite-item-grid.tsx";
 import { ItemGrid } from "#components/item-grid/item-grid.tsx";
+import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / InfiniteItemGrid",
@@ -88,6 +90,77 @@ Default.test(
 
     await expect(args.fetchPage).toHaveBeenNthCalledWith(1, 2);
     await expect(args.fetchPage).toHaveBeenNthCalledWith(2, 3);
+  },
+);
+
+export const CustomItemHref = meta.story({
+  args: {
+    getItemHref: (item) => `/details/media/${item.type}/external-${item.id}`,
+  },
+});
+
+CustomItemHref.test(
+  "Links each item using the custom href, including loaded pages",
+  async ({ canvas }) => {
+    await expect(
+      await canvas.findByRole("link", { name: /Result 1\b/u }),
+    ).toHaveAttribute("href", "/details/media/movie/external-movie-1");
+
+    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+
+    await expect(
+      await canvas.findByRole("link", { name: /Result 21\b/u }),
+    ).toHaveAttribute("href", "/details/media/movie/external-movie-21");
+  },
+);
+
+export const Selectable = meta.story({
+  args: {
+    isSelectable: true,
+  },
+  decorators: [
+    (Story) => (
+      <CardSelectionProvider
+        actions={[{ label: "Remove", icon: Trash, handleClick: fn() }]}
+      >
+        <Story />
+      </CardSelectionProvider>
+    ),
+  ],
+});
+
+Selectable.test("Allows items to be selected", async ({ canvas }) => {
+  const link = await canvas.findByRole("link", { name: /Result 1\b/u });
+  const checkbox = within(link).getByRole("checkbox", { name: "Select item" });
+
+  await expect(canvas.getAllByRole("checkbox")).toHaveLength(pageSize);
+
+  await userEvent.click(checkbox);
+
+  await expect(checkbox).toBeChecked();
+});
+
+export const Animated = meta.story({
+  args: {
+    isAnimated: true,
+  },
+});
+
+Animated.test(
+  "Staggers each page's items from its own first item",
+  async ({ canvas }) => {
+    const getAnimationDelay = async (name: RegExp) => {
+      const link = await canvas.findByRole("link", { name });
+
+      return link.parentElement?.style.animationDelay;
+    };
+
+    await expect(await getAnimationDelay(/Result 2\b/u)).toBe("30ms");
+
+    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+
+    await expect(await getAnimationDelay(/Result 21\b/u)).toBe("0ms");
+    await expect(await getAnimationDelay(/Result 22\b/u)).toBe("30ms");
   },
 );
 
