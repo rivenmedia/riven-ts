@@ -1,19 +1,42 @@
 "use client";
 
-import { HttpLink } from "@apollo/client";
+import { ApolloLink, HttpLink } from "@apollo/client";
 import {
   ApolloNextAppProvider,
   ApolloClient,
   InMemoryCache,
 } from "@apollo/client-integration-nextjs";
+import { GraphQLWsLink } from "@apollo/client/link/subscriptions";
+import { OperationTypeNode } from "graphql";
+import { createClient } from "graphql-ws";
 
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
-function makeClient() {
-  const httpLink = new HttpLink({
-    uri: `${privateEnvironment.BACKEND_URL}/graphql`,
-  });
+function makeLink() {
+  const graphqlUrl = new URL(
+    `${privateEnvironment.BACKEND_URL}/graphql`,
+  ).toString();
 
+  const httpLink = new HttpLink({ uri: graphqlUrl });
+
+  // Subscriptions are only established in the browser, so there's no need for a WebSocket during SSR.
+  // This avoids `typeof window`, which Storybook's test runner compiles as if it were on the server
+  if (!("window" in globalThis)) {
+    return httpLink;
+  }
+
+  const wsLink = new GraphQLWsLink(
+    createClient({ url: graphqlUrl.replace(/^http/u, "ws") }),
+  );
+
+  return ApolloLink.split(
+    ({ operationType }) => operationType === OperationTypeNode.SUBSCRIPTION,
+    wsLink,
+    httpLink,
+  );
+}
+
+function makeClient() {
   return new ApolloClient({
     cache: new InMemoryCache({
       possibleTypes: {
@@ -26,7 +49,7 @@ function makeClient() {
         },
       },
     }),
-    link: httpLink,
+    link: makeLink(),
   });
 }
 

@@ -58,6 +58,7 @@
     "embla-carousel-react": "catalog:",
     "es-toolkit": "catalog:",
     "graphql": "catalog:",
+    "graphql-ws": "catalog:",
     "lucide-react": "catalog:",
     "luxon": "catalog:",
     "next": "catalog:",

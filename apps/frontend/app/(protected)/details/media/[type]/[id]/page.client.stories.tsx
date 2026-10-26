@@ -1,8 +1,11 @@
+import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { HttpResponse } from "msw";
-import { expect, within } from "storybook/test";
+import { startTransition, useEffect, useState } from "react";
+import { expect, waitFor, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
 import { GET_ITEM_REQUEST_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
+import { ON_ITEM_REQUEST_CHANGED } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_subscriptions/on-item-request-changed.subscription.ts";
 import { DELETE_ITEM_REQUEST } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/delete-item/_mutations/delete-item-request.mutation.ts";
 import { PAUSE_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/pause-item/_mutations/pause-item.mutation.ts";
 import { REQUEST_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/request-item/_mutations/request-item.mutation.ts";
@@ -13,18 +16,31 @@ import { GET_ITEM_CAST } from "#app/(protected)/details/media/[type]/[id]/_compo
 import { GET_ITEM_RECOMMENDATIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-recommendations/_queries/get-item-recommendations.query.ts";
 import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-seasons.query.ts";
 import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
+import { GET_MEDIA_ITEM } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.ts";
 import { MediaDetailsPage } from "#app/(protected)/details/media/[type]/[id]/page.client.tsx";
+import { GET_ITEM_STATE } from "#components/item-state-badge/_queries/get-item-state.query.ts";
+import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subscriptions/on-media-item-state-changed.subscription.ts";
 import { api } from "#mocks/graphql.ts";
 import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
-import type { ItemRequestAction } from "#app/_types/__generated__/graphql.ts";
+import type { GetMediaItemQuery } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.typegen.ts";
+import type {
+  ItemRequestAction,
+  MediaItem,
+} from "#app/_types/__generated__/graphql.ts";
+import type { query, resetClient } from "#lib/graphql/__mocks__/client.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import type { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import type { StoryContext } from "@storybook/nextjs-vite";
 import type { GraphQLQuery } from "msw/graphql";
+import type { ComponentProps } from "react";
 
 //#region Helpers
 /**
  * Mocks a mutation on a single entity, failing it if it doesn't target the expected ID.
+ *
+ * @param onSuccess - Called when the mutation succeeds, e.g. to publish the resulting state change
  */
 const mockMutationWithIdEqualityCheck = <
   Mutation extends GraphQLQuery,
@@ -33,6 +49,7 @@ const mockMutationWithIdEqualityCheck = <
   document: TypedDocumentNode<Mutation, Variables>,
   expectedId: string,
   data: Mutation,
+  onSuccess?: () => void,
 ) =>
   api.mutation(document, ({ variables }) => {
     if (variables.id !== expectedId) {
@@ -41,25 +58,99 @@ const mockMutationWithIdEqualityCheck = <
       });
     }
 
+    onSuccess?.();
+
     return HttpResponse.json({ data });
   });
+
+type RequestedMediaItem = Pick<MediaItem, "id" | "isRequested" | "state">;
+
+/**
+ * Mocks a media item's state, and the subscription to its state changes.
+ *
+ * @returns The mocked handlers, and a function that changes the item's state and notifies its subscribers
+ */
+const mockItemState = (
+  __typename: Capitalize<TopLevelMediaItemType>,
+  { id, isRequested, state: initialState }: RequestedMediaItem,
+) => {
+  let currentState = initialState;
+
+  const subscribers = new Set<() => void>();
+
+  return {
+    publishState: (state: MediaItemState) => {
+      currentState = state;
+
+      for (const notify of subscribers) {
+        notify();
+      }
+    },
+    handlers: [
+      api.query(GET_ITEM_STATE, () =>
+        HttpResponse.json({
+          data: {
+            mediaItemById: { __typename, isRequested, state: currentState },
+          },
+        }),
+      ),
+      api.subscription(
+        ON_MEDIA_ITEM_STATE_CHANGED,
+        ({ subscription, finalize }) => {
+          if (subscription.variables.id !== id) {
+            subscription.error([
+              {
+                message: `Invalid id parameter: ${subscription.variables.id}`,
+              },
+            ]);
+
+            return;
+          }
+
+          const notify = () => {
+            subscription.publish({
+              data: {
+                mediaItemStateChanged: { __typename, state: currentState },
+              },
+            });
+          };
+
+          subscribers.add(notify);
+
+          finalize(() => {
+            subscribers.delete(notify);
+          });
+
+          // Catch up on any changes made before the subscription was established
+          if (currentState !== initialState) {
+            notify();
+          }
+        },
+      ),
+    ],
+  };
+};
 
 /**
  * Mocks the item request queries for a movie that has been requested.
  *
- * @returns The mocked handlers, and the IDs they use
+ * @returns The mocked handlers, the IDs they use, and a function to publish state changes
  */
 const mockRequestedMovie = ({
   availableActions,
+  mediaItem,
 }: {
   availableActions: ItemRequestAction[];
+  mediaItem: RequestedMediaItem;
 }) => {
   const itemRequestId = crypto.randomUUID();
-  const primaryMediaItemId = crypto.randomUUID();
+  const { id: primaryMediaItemId } = mediaItem;
+  const itemState = mockItemState("Movie", mediaItem);
 
   return {
     itemRequestId,
     primaryMediaItemId,
+    publishState: itemState.publishState,
     handlers: [
       api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
@@ -77,6 +168,7 @@ const mockRequestedMovie = ({
           },
         }),
       ),
+      ...itemState.handlers,
     ],
   };
 };
@@ -84,19 +176,23 @@ const mockRequestedMovie = ({
 /**
  * Mocks the item request queries for a show that has been requested.
  *
- * @returns The mocked handlers, and the IDs they use
+ * @returns The mocked handlers, the IDs they use, and a function to publish state changes
  */
 const mockRequestedShow = ({
   availableActions,
+  mediaItem,
 }: {
   availableActions: ItemRequestAction[];
+  mediaItem: RequestedMediaItem;
 }) => {
   const itemRequestId = crypto.randomUUID();
-  const primaryMediaItemId = crypto.randomUUID();
+  const primaryMediaItemId = mediaItem.id;
+  const itemState = mockItemState("Show", mediaItem);
 
   return {
     itemRequestId,
     primaryMediaItemId,
+    publishState: itemState.publishState,
     handlers: [
       api.query(GET_ITEM_REQUEST_ACTIONS, () =>
         HttpResponse.json({
@@ -114,9 +210,126 @@ const mockRequestedShow = ({
           },
         }),
       ),
+      ...itemState.handlers,
     ],
   };
 };
+
+type MediaDetailsData = ComponentProps<typeof MediaDetailsPage>["data"];
+
+/**
+ * How long Riven takes to process an item request in the background.
+ *
+ * Changes are published after this, so the mutation that triggered them has responded first, as it would in reality.
+ */
+const ITEM_REQUEST_PROCESSING_MS = 100;
+
+/**
+ * Mocks the subscription to changes in the item's request.
+ *
+ * @returns The mocked handler, and a function that publishes a change once the request has been processed
+ */
+const mockItemRequestChanges = (externalId: string) => {
+  const subscribers = new Set<(itemRequestId: string) => void>();
+
+  return {
+    publishChange: (itemRequestId: string) => {
+      setTimeout(() => {
+        for (const notify of subscribers) {
+          notify(itemRequestId);
+        }
+      }, ITEM_REQUEST_PROCESSING_MS);
+    },
+    handler: api.subscription(
+      ON_ITEM_REQUEST_CHANGED,
+      ({ subscription, finalize }) => {
+        const { tmdbId, tvdbId } = subscription.variables;
+
+        if ((tmdbId ?? tvdbId) !== externalId) {
+          subscription.error([
+            { message: `Invalid external ID: ${String(tmdbId ?? tvdbId)}` },
+          ]);
+
+          return;
+        }
+
+        const notify = (itemRequestId: string) => {
+          subscription.publish({ data: { itemRequestChanged: itemRequestId } });
+        };
+
+        subscribers.add(notify);
+
+        finalize(() => {
+          subscribers.delete(notify);
+        });
+      },
+    ),
+  };
+};
+
+/**
+ * Mocks the item query the route renders the page with, which is re-fetched when the page refreshes.
+ *
+ * Matched by name, as the stories' data has the page's props type, which is looser than the query's.
+ */
+const mockMediaItemQuery = (
+  data: MediaDetailsData,
+  mediaItem: GetMediaItemQuery["tmdbItem"]["mediaItem"],
+) =>
+  api.query("GetMediaItem", () =>
+    HttpResponse.json({
+      data: {
+        tmdbItem: { ...data, __typename: "TmdbIndexerData", mediaItem },
+      },
+    }),
+  );
+
+/**
+ * Renders the page, emulating `router.refresh()` by re-fetching the item like the route does.
+ *
+ * Storybook can't re-render server components on a server, so the page is re-rendered in a transition instead,
+ * with a fresh GraphQL client as `registerApolloClient` creates one per request. Like a real refresh, this keeps
+ * the existing DOM (so mount animations don't replay) while the async components re-run.
+ */
+function RefreshablePage({ data: initialData }: { data: MediaDetailsData }) {
+  const [data, setData] = useState(initialData);
+
+  useEffect(() => {
+    const { refresh } = getRouter();
+
+    const refetch = async () => {
+      // The mock is served in place of the real module, so it must be imported via the real path to share its instance
+      const mockGraphqlClient =
+        (await import("#lib/graphql/client.ts")) as unknown as {
+          query: typeof query;
+          resetClient: typeof resetClient;
+        };
+
+      mockGraphqlClient.resetClient();
+
+      const { data: refreshed } = await mockGraphqlClient.query({
+        query: GET_MEDIA_ITEM,
+        variables: { id: initialData.id, type: initialData.type },
+      });
+
+      if (refreshed) {
+        startTransition(() => {
+          setData(refreshed.tmdbItem);
+        });
+      }
+    };
+
+    refresh.mockImplementation(() => {
+      void refetch();
+    });
+
+    return () => {
+      refresh.mockReset();
+    };
+  }, [initialData]);
+
+  return <MediaDetailsPage data={data} />;
+}
 
 /**
  * Opens an item action's dialog, then confirms it.
@@ -174,11 +387,13 @@ const confirmItemAction = async (
 const meta = preview.meta({
   title: "Pages / SingleMediaItem",
   component: MediaDetailsPage,
-  beforeEach({ msw }) {
+  render: (args) => <RefreshablePage {...args} />,
+  beforeEach({ args, msw }) {
     msw.use(
       createHasPermissionHandler({
         item: ["delete", "pause", "request", "reset", "resume", "retry"],
       }),
+      mockItemRequestChanges(args.data.id).handler,
     );
   },
 });
@@ -371,22 +586,51 @@ export const UnrequestedMovie = meta.story({
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
+
+    const itemRequestChanges = mockItemRequestChanges(args.data.id);
+
+    msw.use(
+      itemRequestChanges.handler,
+      api.mutation(REQUEST_ITEM, () => {
+        const mediaItem = {
+          id: crypto.randomUUID(),
+          state: "indexed",
+          isRequested: true,
+        } as const;
+
+        const { itemRequestId, handlers } = mockRequestedMovie({
+          availableActions: ["delete", "reset", "pause"],
+          mediaItem,
+        });
+
+        msw.use(
+          ...handlers,
+          mockMediaItemQuery(args.data, { __typename: "Movie", ...mediaItem }),
+        );
+
+        itemRequestChanges.publishChange(itemRequestId);
+
+        return HttpResponse.json({ data: { requestItem: true } });
+      }),
+    );
   },
 });
 
 UnrequestedMovie.test(
   'Requests the movie when the "Request" button is clicked',
-  async (context) => {
-    context.msw.use(
-      api.mutation(REQUEST_ITEM, () =>
-        HttpResponse.json({ data: { requestItem: true } }),
-      ),
-    );
-
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /request/iu);
 
     await expect(
-      await context.canvas.findByText(/request successful/iu),
+      await canvas.findByText(/request successful/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("button", { name: /delete/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -399,71 +643,123 @@ export const CompletedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.input.args.data,
       id: "completed-movie",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "completed",
         isRequested: true,
       },
     },
   },
-  beforeEach({ msw }) {
-    const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedMovie({
-      availableActions: ["delete", "reset", "retry"],
-    });
+  beforeEach({ args, msw }) {
+    expect.assert(args.data.mediaItem);
+
+    const { itemRequestId, primaryMediaItemId, publishState, handlers } =
+      mockRequestedMovie({
+        availableActions: ["delete", "reset", "retry"],
+        mediaItem: args.data.mediaItem,
+      });
+
+    const itemRequestChanges = mockItemRequestChanges(args.data.id);
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
-        removeItemRequest: true,
-      }),
-      mockMutationWithIdEqualityCheck(RESET_ITEM, primaryMediaItemId, {
-        resetMediaItem: [
-          {
+      itemRequestChanges.handler,
+      mockMutationWithIdEqualityCheck(
+        DELETE_ITEM_REQUEST,
+        itemRequestId,
+        { removeItemRequest: true },
+        () => {
+          msw.use(
+            api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+              HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+            ),
+            mockMediaItemQuery(args.data, null),
+          );
+
+          itemRequestChanges.publishChange(itemRequestId);
+        },
+      ),
+      mockMutationWithIdEqualityCheck(
+        RESET_ITEM,
+        primaryMediaItemId,
+        {
+          resetMediaItem: [
+            {
+              __typename: "Movie",
+              id: primaryMediaItemId,
+              state: "indexed",
+            },
+          ],
+        },
+        () => {
+          publishState("indexed");
+        },
+      ),
+      mockMutationWithIdEqualityCheck(
+        RETRY_ITEM,
+        primaryMediaItemId,
+        {
+          retryMediaItem: {
             __typename: "Movie",
             id: primaryMediaItemId,
             state: "indexed",
           },
-        ],
-      }),
-      mockMutationWithIdEqualityCheck(RETRY_ITEM, primaryMediaItemId, {
-        retryMediaItem: {
-          __typename: "Movie",
-          id: primaryMediaItemId,
-          state: "indexed",
         },
-      }),
+        () => {
+          publishState("indexed");
+        },
+      ),
     );
   },
 });
 
 CompletedMovie.test(
   'Resets the item when the "Reset" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /reset/iu);
 
     await expect(
-      await context.canvas.findByText(/reset successful/iu),
+      await canvas.findByText(/reset successful/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
     ).toBeInTheDocument();
   },
 );
 
 CompletedMovie.test(
   'Retries the item when the "Retry" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /retry/iu);
 
     await expect(
-      await context.canvas.findByText(/item retried successfully/iu),
+      await canvas.findByText(/item retried successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
     ).toBeInTheDocument();
   },
 );
 
 CompletedMovie.test(
   'Deletes the item when the "Delete" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /delete/iu);
 
     await expect(
-      await context.canvas.findByText(/item deleted successfully/iu),
+      await canvas.findByText(/item deleted successfully/iu),
     ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("button", { name: /request/iu }),
+    ).toBeInTheDocument();
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole("status", { name: /completed/iu }),
+      ).not.toBeInTheDocument();
+    });
   },
 );
 //#endregion
@@ -475,36 +771,51 @@ export const PausedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.input.args.data,
       id: "paused-movie",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "paused",
         isRequested: true,
       },
     },
   },
-  beforeEach({ msw }) {
-    const { primaryMediaItemId, handlers } = mockRequestedMovie({
+  beforeEach({ args, msw }) {
+    expect.assert(args.data.mediaItem);
+
+    const { primaryMediaItemId, publishState, handlers } = mockRequestedMovie({
       availableActions: ["delete", "reset", "resume"],
+      mediaItem: args.data.mediaItem,
     });
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
-        resumeMediaItem: {
-          __typename: "Movie",
-          id: primaryMediaItemId,
-          state: "scraped",
+      mockMutationWithIdEqualityCheck(
+        RESUME_ITEM,
+        primaryMediaItemId,
+        {
+          resumeMediaItem: {
+            __typename: "Movie",
+            id: primaryMediaItemId,
+            state: "scraped",
+          },
         },
-      }),
+        () => {
+          publishState("scraped");
+        },
+      ),
     );
   },
 });
 
 PausedMovie.test(
   'Resumes the item when the "Resume" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /resume/iu);
 
     await expect(
-      await context.canvas.findByText(/item resumed successfully/iu),
+      await canvas.findByText(/item resumed successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /scraped/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -517,36 +828,51 @@ export const ScrapedMovie = UnrequestedMovie.extend({
       ...UnrequestedMovie.input.args.data,
       id: "scraped-movie",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "scraped",
         isRequested: true,
       },
     },
   },
-  beforeEach({ msw }) {
-    const { primaryMediaItemId, handlers } = mockRequestedMovie({
+  beforeEach({ args, msw }) {
+    expect.assert(args.data.mediaItem);
+
+    const { primaryMediaItemId, publishState, handlers } = mockRequestedMovie({
       availableActions: ["delete", "reset", "pause"],
+      mediaItem: args.data.mediaItem,
     });
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
-        pauseMediaItem: {
-          __typename: "Movie",
-          id: primaryMediaItemId,
-          state: "paused",
+      mockMutationWithIdEqualityCheck(
+        PAUSE_ITEM,
+        primaryMediaItemId,
+        {
+          pauseMediaItem: {
+            __typename: "Movie",
+            id: primaryMediaItemId,
+            state: "paused",
+          },
         },
-      }),
+        () => {
+          publishState("paused");
+        },
+      ),
     );
   },
 });
 
 ScrapedMovie.test(
   'Pauses the item when the "Pause" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /pause/iu);
 
     await expect(
-      await context.canvas.findByText(/item paused successfully/iu),
+      await canvas.findByText(/item paused successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /paused/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -740,22 +1066,51 @@ export const UnrequestedShow = meta.story({
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
+
+    const itemRequestChanges = mockItemRequestChanges(args.data.id);
+
+    msw.use(
+      itemRequestChanges.handler,
+      api.mutation(REQUEST_ITEM, () => {
+        const mediaItem = {
+          id: crypto.randomUUID(),
+          state: "indexed",
+          isRequested: true,
+        } as const;
+
+        const { itemRequestId, handlers } = mockRequestedShow({
+          availableActions: ["delete", "reset", "pause"],
+          mediaItem,
+        });
+
+        msw.use(
+          ...handlers,
+          mockMediaItemQuery(args.data, { __typename: "Show", ...mediaItem }),
+        );
+
+        itemRequestChanges.publishChange(itemRequestId);
+
+        return HttpResponse.json({ data: { requestItem: true } });
+      }),
+    );
   },
 });
 
 UnrequestedShow.test(
   'Requests the show when the "Request" button is clicked',
-  async (context) => {
-    context.msw.use(
-      api.mutation(REQUEST_ITEM, () =>
-        HttpResponse.json({ data: { requestItem: true } }),
-      ),
-    );
-
+  async ({ canvas, context }) => {
     await requestItemSeasons(context, new Set([1]));
 
     await expect(
-      await context.canvas.findByText(/request successful/iu),
+      await canvas.findByText(/request successful/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("button", { name: /delete/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -768,37 +1123,71 @@ export const CompletedShow = UnrequestedShow.extend({
       ...UnrequestedShow.input.args.data,
       id: "completed-show",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "completed",
         isRequested: true,
       },
     },
   },
   beforeEach({ args, msw }) {
-    const { itemRequestId, primaryMediaItemId, handlers } = mockRequestedShow({
-      availableActions: ["delete", "reset", "retry"],
-    });
+    expect.assert(args.data.mediaItem);
+
+    const { itemRequestId, primaryMediaItemId, publishState, handlers } =
+      mockRequestedShow({
+        availableActions: ["delete", "reset", "retry"],
+        mediaItem: args.data.mediaItem,
+      });
+
+    const itemRequestChanges = mockItemRequestChanges(args.data.id);
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(DELETE_ITEM_REQUEST, itemRequestId, {
-        removeItemRequest: true,
-      }),
-      mockMutationWithIdEqualityCheck(RESET_ITEM, primaryMediaItemId, {
-        resetMediaItem: [
-          {
+      itemRequestChanges.handler,
+      mockMutationWithIdEqualityCheck(
+        DELETE_ITEM_REQUEST,
+        itemRequestId,
+        { removeItemRequest: true },
+        () => {
+          msw.use(
+            api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+              HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
+            ),
+            mockMediaItemQuery(args.data, null),
+          );
+
+          itemRequestChanges.publishChange(itemRequestId);
+        },
+      ),
+      mockMutationWithIdEqualityCheck(
+        RESET_ITEM,
+        primaryMediaItemId,
+        {
+          resetMediaItem: [
+            {
+              __typename: "Show",
+              id: primaryMediaItemId,
+              state: "indexed",
+            },
+          ],
+        },
+        () => {
+          publishState("indexed");
+        },
+      ),
+      mockMutationWithIdEqualityCheck(
+        RETRY_ITEM,
+        primaryMediaItemId,
+        {
+          retryMediaItem: {
             __typename: "Show",
             id: primaryMediaItemId,
             state: "indexed",
           },
-        ],
-      }),
-      mockMutationWithIdEqualityCheck(RETRY_ITEM, primaryMediaItemId, {
-        retryMediaItem: {
-          __typename: "Show",
-          id: primaryMediaItemId,
-          state: "indexed",
         },
-      }),
+        () => {
+          publishState("indexed");
+        },
+      ),
       api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
@@ -860,34 +1249,52 @@ export const CompletedShow = UnrequestedShow.extend({
 
 CompletedShow.test(
   'Resets the item when the "Reset" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /reset/iu);
 
     await expect(
-      await context.canvas.findByText(/reset successful/iu),
+      await canvas.findByText(/reset successful/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
     ).toBeInTheDocument();
   },
 );
 
 CompletedShow.test(
   'Retries the item when the "Retry" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /retry/iu);
 
     await expect(
-      await context.canvas.findByText(/item retried successfully/iu),
+      await canvas.findByText(/item retried successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /indexed/iu }),
     ).toBeInTheDocument();
   },
 );
 
 CompletedShow.test(
   'Deletes the item when the "Delete" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /delete/iu);
 
     await expect(
-      await context.canvas.findByText(/item deleted successfully/iu),
+      await canvas.findByText(/item deleted successfully/iu),
     ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("button", { name: /request/iu }),
+    ).toBeInTheDocument();
+
+    await waitFor(async () => {
+      await expect(
+        canvas.queryByRole("status", { name: /completed/iu }),
+      ).not.toBeInTheDocument();
+    });
   },
 );
 //#endregion
@@ -899,25 +1306,36 @@ export const PausedShow = UnrequestedShow.extend({
       ...UnrequestedShow.input.args.data,
       id: "paused-show",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "paused",
         isRequested: true,
       },
     },
   },
   beforeEach({ args, msw }) {
-    const { primaryMediaItemId, handlers } = mockRequestedShow({
+    expect.assert(args.data.mediaItem);
+
+    const { primaryMediaItemId, publishState, handlers } = mockRequestedShow({
       availableActions: ["delete", "reset", "resume"],
+      mediaItem: args.data.mediaItem,
     });
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(RESUME_ITEM, primaryMediaItemId, {
-        resumeMediaItem: {
-          __typename: "Show",
-          id: primaryMediaItemId,
-          state: "scraped",
+      mockMutationWithIdEqualityCheck(
+        RESUME_ITEM,
+        primaryMediaItemId,
+        {
+          resumeMediaItem: {
+            __typename: "Show",
+            id: primaryMediaItemId,
+            state: "scraped",
+          },
         },
-      }),
+        () => {
+          publishState("scraped");
+        },
+      ),
       api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
@@ -979,11 +1397,15 @@ export const PausedShow = UnrequestedShow.extend({
 
 PausedShow.test(
   'Resumes the item when the "Resume" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /resume/iu);
 
     await expect(
-      await context.canvas.findByText(/item resumed successfully/iu),
+      await canvas.findByText(/item resumed successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /scraped/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -996,25 +1418,36 @@ export const ScrapedShow = UnrequestedShow.extend({
       ...UnrequestedShow.input.args.data,
       id: "scraped-show",
       mediaItem: {
+        id: crypto.randomUUID(),
         state: "scraped",
         isRequested: true,
       },
     },
   },
   beforeEach({ args, msw }) {
-    const { primaryMediaItemId, handlers } = mockRequestedShow({
+    expect.assert(args.data.mediaItem);
+
+    const { primaryMediaItemId, publishState, handlers } = mockRequestedShow({
       availableActions: ["delete", "reset", "pause"],
+      mediaItem: args.data.mediaItem,
     });
 
     msw.use(
       ...handlers,
-      mockMutationWithIdEqualityCheck(PAUSE_ITEM, primaryMediaItemId, {
-        pauseMediaItem: {
-          __typename: "Show",
-          id: primaryMediaItemId,
-          state: "paused",
+      mockMutationWithIdEqualityCheck(
+        PAUSE_ITEM,
+        primaryMediaItemId,
+        {
+          pauseMediaItem: {
+            __typename: "Show",
+            id: primaryMediaItemId,
+            state: "paused",
+          },
         },
-      }),
+        () => {
+          publishState("paused");
+        },
+      ),
       api.query(GET_ITEM_SEASONS, () =>
         HttpResponse.json({
           data: {
@@ -1076,11 +1509,15 @@ export const ScrapedShow = UnrequestedShow.extend({
 
 ScrapedShow.test(
   'Pauses the item when the "Pause" button is clicked',
-  async (context) => {
+  async ({ canvas, context }) => {
     await confirmItemAction(context, /pause/iu);
 
     await expect(
       await context.canvas.findByText(/item paused successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("status", { name: /paused/iu }),
     ).toBeInTheDocument();
   },
 );

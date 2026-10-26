@@ -900,6 +900,9 @@ importers:
       graphql:
         specifier: 'catalog:'
         version: 16.14.0
+      graphql-ws:
+        specifier: 'catalog:'
+        version: 6.4.1(graphql@16.14.0)(ws@8.22.0)
       lucide-react:
         specifier: 'catalog:'
         version: 0.562.0(react@19.3.0)

@@ -28,6 +28,7 @@ import {
   Query,
   Resolver,
   Root,
+  Subscription,
 } from "type-graphql";
 
 import { PaginationArgs } from "#graphql/args/pagination.args.ts";
@@ -38,6 +39,7 @@ import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { UUID } from "node:crypto";
+import type { SubscribeResolverData } from "type-graphql";
 
 const MediaItemCursor = createCursorType<MediaItem>(
   "MediaItem",
@@ -46,6 +48,18 @@ const MediaItemCursor = createCursorType<MediaItem>(
 
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
+  @Subscription(() => MediaItemUnion, {
+    topics: "MEDIA_ITEM_STATE_CHANGED",
+    topicId: ({ args }: SubscribeResolverData<unknown, { id: UUID }>) =>
+      args.id,
+  })
+  public mediaItemStateChanged(
+    @Arg("id", () => ID) _id: UUID,
+    @Root() mediaItem: MediaItem,
+  ) {
+    return mediaItem;
+  }
+
   @Query(() => MediaItemUnion, {
     description:
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",

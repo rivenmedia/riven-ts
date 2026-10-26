@@ -25,6 +25,7 @@ import {
   Session,
   Verification,
 } from "./entities/index.ts";
+import { ItemRequestChangeSubscriber } from "./subscribers/item-request-change.subscriber.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
@@ -108,6 +109,7 @@ export async function createDatabaseConfig({
       new ShowNextAirDateSubscriber(),
       new MediaItemStateSubscriber(),
       new ItemRequestStateSubscriber(),
+      new ItemRequestChangeSubscriber(),
     ],
     ...metadataCacheConfig,
     ...options,

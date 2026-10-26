@@ -4,8 +4,8 @@ import React from "react";
 
 import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+import { ItemStateBadge } from "#components/item-state-badge/item-state-badge.tsx";
 import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
-import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import { ItemActionToolbar } from "./item-action-toolbar/item-action-toolbar";
@@ -17,7 +17,7 @@ import type {
 
 interface ItemOverviewProps {
   data: Omit<IndexerData, "mediaItem"> & {
-    mediaItem?: Pick<MediaItem, "isRequested" | "state"> | null;
+    mediaItem?: Pick<MediaItem, "id" | "isRequested" | "state"> | null;
   };
 }
 
@@ -56,10 +56,9 @@ export function ItemOverview({ data }: ItemOverviewProps) {
             {data.title}
           </h1>
           {data.mediaItem && (
-            <StatusBadge
+            <ItemStateBadge
               className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-              isRequested={data.mediaItem.isRequested}
-              state={data.mediaItem.state}
+              id={data.mediaItem.id}
               large
             />
           )}

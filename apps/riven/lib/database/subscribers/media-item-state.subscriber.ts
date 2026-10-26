@@ -60,7 +60,7 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
           `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("→")} ${chalk.green(nextState)}`,
         );
 
-        pubSub.publish("MEDIA_ITEM_STATE_CHANGED", {
+        pubSub.publish("MEDIA_ITEM_STATE_CHANGED", changeSet.entity.id, {
           item: changeSet.entity,
           stateChange: [previousState, nextState],
         });

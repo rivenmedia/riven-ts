@@ -53,6 +53,7 @@ export const GET_MEDIA_ITEM: TypedDocumentNode<
       isRequestable
       mediaItem {
         ... on MediaItem {
+          id
           isRequested
           state
         }

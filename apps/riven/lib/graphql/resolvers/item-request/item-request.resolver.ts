@@ -12,10 +12,12 @@ import {
   Query,
   Resolver,
   Root,
+  Subscription,
 } from "type-graphql";
 
 import { ExternalIdsArgs } from "#graphql/args/external-ids.args.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
+import { getExternalIdTopics } from "#graphql/pubsub.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
 import { RequestItemInput } from "./inputs/request-item.input.ts";
@@ -23,9 +25,31 @@ import { RequestItemInput } from "./inputs/request-item.input.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { UUID } from "node:crypto";
+import type { SubscribeResolverData } from "type-graphql";
 
 @Resolver(() => ItemRequest)
 export class ItemRequestResolver {
+  @Subscription(() => ID, {
+    description:
+      "Emits the ID of the item request with the given external ID whenever it is created, updated, indexed or removed. Only the first provided external ID is used, in the order TMDB, TVDB, IMDB.",
+    topics: "ITEM_REQUEST_CHANGED",
+    topicId: ({ args }: SubscribeResolverData<unknown, ExternalIdsArgs>) => {
+      const [topic] = getExternalIdTopics(args);
+
+      if (!topic) {
+        throw new Error("At least one external ID must be provided");
+      }
+
+      return topic;
+    },
+  })
+  public itemRequestChanged(
+    @Args(() => ExternalIdsArgs) _externalIds: ExternalIdsArgs,
+    @Root() itemRequestId: UUID,
+  ) {
+    return itemRequestId;
+  }
+
   @Query(() => ItemRequest, { nullable: true })
   public async itemRequestByExternalIds(
     @CoreContext() { services: { itemRequestService } }: CoreContext,

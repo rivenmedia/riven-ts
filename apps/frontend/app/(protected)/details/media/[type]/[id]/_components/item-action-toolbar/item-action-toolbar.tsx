@@ -5,6 +5,7 @@ import { fly } from "#components/_animations/fly.ts";
 import { query } from "#lib/graphql/client.ts";
 
 import { fetchItemSeasons } from "../item-seasons/_data-access/fetch-item-seasons.ts";
+import { RefreshOnItemRequestChange } from "./_components/refresh-on-item-request-change.tsx";
 import { GET_ITEM_REQUEST_ACTIONS } from "./_queries/get-item-request-actions.query.ts";
 import { ConfirmItemAction } from "./actions/_components/confirm-item-action.tsx";
 import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
@@ -56,6 +57,7 @@ export async function ItemActionToolbar({
         fly,
       )}
     >
+      <RefreshOnItemRequestChange externalIds={externalIds} />
       {availableActions.has("request_single") && mediaType === "movie" && (
         <RequestMovieAction title={title} externalIds={externalIds} />
       )}

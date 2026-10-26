@@ -10,6 +10,7 @@ export type StatusBadgeProps = Pick<
   HTMLAttributes<HTMLElement>,
   "className"
 > & {
+  isLive?: boolean;
   large?: boolean;
 } & (
     | {
@@ -31,12 +32,15 @@ export function StatusBadge({
   isRequested,
   large = false,
   className,
+  isLive = false,
 }: StatusBadgeProps) {
   const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
   const label = isRequested ? startCase(state) : "Unrequested";
 
   return (
     <Badge
+      aria-label={label}
+      asChild={isLive}
       variant="secondary"
       className={cn(
         "inline-flex items-center justify-center backdrop-blur-sm",
@@ -57,7 +61,7 @@ export function StatusBadge({
         className,
       )}
     >
-      {label}
+      {isLive ? <output>{label}</output> : label}
     </Badge>
   );
 }

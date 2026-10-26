@@ -526,6 +526,7 @@ describe("afterFlush", () => {
 
     expect(publishSpy).toHaveBeenCalledWith(
       "MEDIA_ITEM_STATE_CHANGED",
+      movie.id,
       expect.objectContaining({
         item: movie,
         stateChange: ["indexed", "scraped"],
