@@ -25,11 +25,6 @@ export const GET_ITEM_SEASONS: TypedDocumentNode<
         }
         posterUrl
         number
-        mediaItem {
-          isRequested
-          state
-          completedEpisodeCount
-        }
       }
     }
   }

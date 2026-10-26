@@ -7829,10 +7829,23 @@
                       "example": "tt0137523",
                       "nullable": true
                     },
-                    "wikidata_id": {},
-                    "facebook_id": { "type": "string", "example": "FightClub" },
-                    "instagram_id": {},
-                    "twitter_id": {}
+                    "wikidata_id": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "facebook_id": {
+                      "type": "string",
+                      "example": "FightClub",
+                      "nullable": true
+                    },
+                    "instagram_id": {
+                      "type": "string",
+                      "nullable": true
+                    },
+                    "twitter_id": {
+                      "type": "string",
+                      "nullable": true
+                    }
                   }
                 }
               }
@@ -19585,7 +19598,11 @@
                   "type": "object",
                   "properties": {
                     "id": { "type": "integer", "example": 1399, "default": 0 },
-                    "imdb_id": { "type": "string", "example": "tt0944947" },
+                    "imdb_id": {
+                      "type": "string",
+                      "example": "tt0944947",
+                      "nullable": true
+                    },
                     "freebase_mid": {
                       "type": "string",
                       "example": "/m/0524b41"
@@ -19597,7 +19614,8 @@
                     "tvdb_id": {
                       "type": "integer",
                       "example": 121361,
-                      "default": 0
+                      "default": 0,
+                      "nullable": true
                     },
                     "tvrage_id": {
                       "type": "integer",

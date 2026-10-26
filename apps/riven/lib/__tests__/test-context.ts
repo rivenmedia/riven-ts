@@ -4,6 +4,7 @@ import { passthrough } from "msw";
 import { graphql } from "msw/graphql";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
 import { test as testBase, vi } from "vitest";
 
 import { CoreKey } from "#graphql/context.ts";
@@ -17,8 +18,11 @@ import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type { ValidPlugin, ValidPluginMap } from "#types/plugins.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
+import type * as GraphQL from "graphql";
+import type { ExecutionResult } from "graphql";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
 
@@ -309,6 +313,55 @@ export const it = testBase
 
       return apolloServerInstance;
     },
+  )
+  .extend("gqlSchema", { scope: "file" }, async () => {
+    const { buildSchema } = await import("@repo/core-util-graphql-schema");
+    const { resolvers } = await import("#graphql/resolvers/index.ts");
+
+    return buildSchema({ resolvers, pubSub });
+  })
+  .extend(
+    "gqlSubscribe",
+    ({ gqlSchema, gqlContext }, { onCleanup }) =>
+      async <TData, TVariables extends Record<string, unknown>>(
+        document: TypedDocumentNode<TData, TVariables>,
+        variables: TVariables,
+      ) => {
+        // Vite resolves `graphql` to its ESM build, whereas type-graphql (loaded by Node)
+        // uses the CJS build, so the schema must be executed by the same CJS module.
+        const { subscribe } = createRequire(import.meta.url)(
+          "graphql",
+        ) as typeof GraphQL;
+
+        const result = await subscribe({
+          schema: gqlSchema,
+          document,
+          variableValues: variables,
+          contextValue: gqlContext,
+        });
+
+        if (!(Symbol.asyncIterator in result)) {
+          throw new Error(
+            `Subscription failed: ${JSON.stringify(result.errors)}`,
+          );
+        }
+
+        onCleanup(async () => {
+          await result.return();
+        });
+
+        return {
+          // Requesting the next event starts listening for published events,
+          // so this must be called before triggering the event.
+          nextEvent: result.next().then(({ done, value }) => {
+            assert.ok(!done, "Subscription ended without emitting an event");
+
+            // Results are built from null-prototype objects,
+            // which are cloned into plain objects for strict equality checks.
+            return structuredClone(value) as ExecutionResult<TData>;
+          }),
+        };
+      },
   )
   .extend(
     "apolloClient",

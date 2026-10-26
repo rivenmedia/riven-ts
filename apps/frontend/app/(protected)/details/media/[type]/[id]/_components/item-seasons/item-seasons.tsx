@@ -11,61 +11,47 @@ import {
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
-import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
-import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
+import { query } from "#lib/graphql/client.ts";
 
+import { LiveSeasonCard } from "./_components/season-card/season-card.client.tsx";
+import { SeasonCard } from "./_components/season-card/season-card.tsx";
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
+import { GET_ITEM_SEASON_STATES } from "./_queries/get-item-season-states.query.ts";
 
+import type { SeasonState } from "./_components/season-card/season-card.tsx";
 import type { GetItemSeasonsQuery } from "./_queries/get-item-seasons.query.typegen.ts";
 
 interface SeasonCarouselProps {
   seasons: NonNullable<GetItemSeasonsQuery["tmdbItem"]["seasons"]>;
+  /**
+   * The states of the indexed seasons, keyed by season number.
+   */
+  seasonStates: Map<number, SeasonState & { id: string }>;
 }
 
-function SeasonCarousel({ seasons }: SeasonCarouselProps) {
+function SeasonCarousel({ seasons, seasonStates }: SeasonCarouselProps) {
   return (
     <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
       <CarouselContent>
-        {seasons.map(({ episodes, id, number, posterUrl, mediaItem }) => {
-          const episodesLength = episodes.length;
+        {seasons.map(({ episodes, id, number, posterUrl }) => {
+          const props = {
+            title: number === 0 ? "Specials" : `Season ${number.toString()}`,
+            posterUrl,
+            episodeCount: episodes.length,
+          };
+
+          const seasonState = seasonStates.get(number);
 
           return (
             <CarouselItem key={id} className="basis-auto">
-              <PortraitCard
-                title={
-                  number === 0 ? "Specials" : `Season ${number.toString()}`
-                }
-                image={posterUrl}
-                className="w-28 md:w-32 lg:w-36"
-                topRight={
-                  mediaItem ? (
-                    <StatusBadge
-                      isRequested={mediaItem.isRequested}
-                      state={mediaItem.state}
-                    />
-                  ) : (
-                    <StatusBadge isRequested={false} />
-                  )
-                }
-              />
-              {mediaItem && episodes.length > 0 && (
-                <div className="mt-1.5 flex items-center gap-1.5 px-0.5">
-                  <div className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
-                    <div
-                      className="bg-primary h-full rounded-full transition-all duration-500"
-                      style={{
-                        width: `${Math.min(
-                          100,
-                          (mediaItem.completedEpisodeCount / episodesLength) *
-                            100,
-                        ).toString()}%`,
-                      }}
-                    />
-                  </div>
-                  <span className="text-muted-foreground font-mono text-[10px]">
-                    {mediaItem.completedEpisodeCount}/{episodesLength}
-                  </span>
-                </div>
+              {seasonState ? (
+                <LiveSeasonCard
+                  {...props}
+                  id={seasonState.id}
+                  initialSeason={seasonState}
+                />
+              ) : (
+                <SeasonCard {...props} />
               )}
             </CarouselItem>
           );
@@ -82,13 +68,31 @@ interface ItemSeasonsLoaderProps {
 async function ItemSeasonsLoader({ id }: ItemSeasonsLoaderProps) {
   await io();
 
-  const seasons = await fetchItemSeasons(id);
+  // The seasons are cached, so the indexed seasons' states are fetched separately to stay up to date
+  const [seasons, { data, error }] = await Promise.all([
+    fetchItemSeasons(id),
+    query({
+      query: GET_ITEM_SEASON_STATES,
+      variables: { tvdbId: id },
+    }),
+  ]);
+
+  if (error) {
+    throw error;
+  }
 
   if (!seasons) {
     return <p>No seasons found.</p>;
   }
 
-  return <SeasonCarousel seasons={seasons} />;
+  const show = data?.itemRequestByExternalIds?.primaryMediaItem;
+  const seasonStates = new Map(
+    show?.__typename === "Show"
+      ? show.seasons.map((season) => [season.number, season])
+      : [],
+  );
+
+  return <SeasonCarousel seasons={seasons} seasonStates={seasonStates} />;
 }
 
 interface ItemSeasonsProps {

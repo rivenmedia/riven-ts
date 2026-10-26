@@ -55,11 +55,14 @@ export class MediaItemResolver {
     topicId: ({ args }: SubscribeResolverData<unknown, { id: UUID }>) =>
       args.id,
   })
-  public mediaItemStateChanged(
+  public async mediaItemStateChanged(
     @Arg("id", () => ID) _id: UUID,
-    @Root() mediaItem: MediaItem,
+    @Root() mediaItemId: UUID,
+    @CoreContext() { em }: CoreContext,
   ) {
-    return mediaItem;
+    // A subscription's context lives as long as the subscription, so a fresh fork
+    // is used for each event to avoid resolving stale data from its identity map.
+    return em.fork().findOneOrFail(MediaItem, mediaItemId);
   }
 
   @Query(() => MediaItemUnion, {

@@ -14,7 +14,9 @@ import { RESUME_ITEM } from "#app/(protected)/details/media/[type]/[id]/_compone
 import { RETRY_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/retry-item/_mutations/retry-item.mutation.ts";
 import { GET_ITEM_CAST } from "#app/(protected)/details/media/[type]/[id]/_components/item-cast/_queries/get-item-cast.query.ts";
 import { GET_ITEM_RECOMMENDATIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-recommendations/_queries/get-item-recommendations.query.ts";
+import { GET_ITEM_SEASON_STATES } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-season-states.query.ts";
 import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-seasons.query.ts";
+import { ON_SEASON_UPDATED } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_subscriptions/on-season-updated.subscription.ts";
 import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
 import { GET_MEDIA_ITEM } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.ts";
 import { MediaDetailsPage } from "#app/(protected)/details/media/[type]/[id]/page.client.tsx";
@@ -23,6 +25,8 @@ import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subsc
 import { api } from "#mocks/graphql.ts";
 import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
+import type { SeasonState } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_components/season-card/season-card.tsx";
+import type { GetItemSeasonStatesQuery } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-season-states.query.typegen.ts";
 import type { GetMediaItemQuery } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.typegen.ts";
 import type {
   ItemRequestAction,
@@ -173,6 +177,57 @@ const mockRequestedMovie = ({
   };
 };
 
+const SEASON_POSTER_URLS = [
+  "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
+  "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
+];
+
+const mockItemSeasonStates = (
+  itemRequest: GetItemSeasonStatesQuery["itemRequestByExternalIds"],
+) =>
+  api.query(GET_ITEM_SEASON_STATES, () =>
+    HttpResponse.json({ data: { itemRequestByExternalIds: itemRequest } }),
+  );
+
+/**
+ * Mocks a show's seasons, none of which have been indexed, and the subscription to their updates.
+ */
+const mockItemSeasons = (showId: string) => [
+  api.query(GET_ITEM_SEASONS, () =>
+    HttpResponse.json({
+      data: {
+        tmdbItem: {
+          __typename: "TmdbIndexerData",
+          id: showId,
+          type: "show",
+          seasons: SEASON_POSTER_URLS.map((posterUrl, index) => {
+            const number = index + 1;
+
+            return {
+              __typename: "IndexerSeason",
+              id: `${showId}:season-${String(number)}`,
+              number,
+              title: `Season ${String(number)}`,
+              posterUrl,
+              episodes: Array.from({ length: 9 }).map((_, episodeIndex) => ({
+                __typename: "IndexerEpisode",
+                id: `${showId}:season-${String(number)}:episode-${String(episodeIndex + 1)}`,
+                number: episodeIndex + 1,
+                title: `Episode ${String(episodeIndex + 1)}`,
+                posterUrl: null,
+              })),
+            };
+          }),
+        },
+      },
+    }),
+  ),
+  mockItemSeasonStates(null),
+  api.subscription(ON_SEASON_UPDATED, () => {
+    // The seasons don't change
+  }),
+];
+
 /**
  * Mocks the item request queries for a show that has been requested.
  *
@@ -181,9 +236,14 @@ const mockRequestedMovie = ({
 const mockRequestedShow = ({
   availableActions,
   mediaItem,
+  seasons,
 }: {
   availableActions: ItemRequestAction[];
   mediaItem: RequestedMediaItem;
+  /**
+   * The state of each season's media item, or `null` if the season hasn't been indexed
+   */
+  seasons: (SeasonState | null)[];
 }) => {
   const itemRequestId = crypto.randomUUID();
   const primaryMediaItemId = mediaItem.id;
@@ -210,6 +270,26 @@ const mockRequestedShow = ({
           },
         }),
       ),
+      mockItemSeasonStates({
+        __typename: "ItemRequest",
+        id: itemRequestId,
+        primaryMediaItem: {
+          __typename: "Show",
+          id: primaryMediaItemId,
+          seasons: seasons.flatMap((season, index) =>
+            season
+              ? [
+                  {
+                    __typename: "Season",
+                    id: crypto.randomUUID(),
+                    number: index + 1,
+                    ...season,
+                  },
+                ]
+              : [],
+          ),
+        },
+      }),
       ...itemState.handlers,
     ],
   };
@@ -673,6 +753,7 @@ export const CompletedMovie = UnrequestedMovie.extend({
               HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
             ),
             mockMediaItemQuery(args.data, null),
+            mockItemSeasonStates(null),
           );
 
           itemRequestChanges.publishChange(itemRequestId);
@@ -964,51 +1045,7 @@ export const UnrequestedShow = meta.story({
   },
   beforeEach({ args, msw }) {
     msw.use(
-      api.query(GET_ITEM_SEASONS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              type: args.data.type,
-              seasons: [
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-1`,
-                  number: 1,
-                  title: "Season 1",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: null,
-                },
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-2`,
-                  number: 2,
-                  title: "Season 2",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: null,
-                },
-              ],
-            },
-          },
-        }),
-      ),
+      ...mockItemSeasons(args.data.id),
       api.query(GET_ITEM_CAST, () =>
         HttpResponse.json({
           data: {
@@ -1081,6 +1118,10 @@ export const UnrequestedShow = meta.story({
         const { itemRequestId, handlers } = mockRequestedShow({
           availableActions: ["delete", "reset", "pause"],
           mediaItem,
+          seasons: [
+            { state: "indexed", isRequested: true, completedEpisodeCount: 0 },
+            null,
+          ],
         });
 
         msw.use(
@@ -1105,9 +1146,12 @@ UnrequestedShow.test(
       await canvas.findByText(/request successful/iu),
     ).toBeInTheDocument();
 
-    await expect(
-      await canvas.findByRole("status", { name: /indexed/iu }),
-    ).toBeInTheDocument();
+    // The show and its requested season are both indexed
+    await waitFor(async () => {
+      await expect(
+        canvas.getAllByRole("status", { name: /indexed/iu }),
+      ).toHaveLength(2);
+    });
 
     await expect(
       await canvas.findByRole("button", { name: /delete/iu }),
@@ -1136,6 +1180,10 @@ export const CompletedShow = UnrequestedShow.extend({
       mockRequestedShow({
         availableActions: ["delete", "reset", "retry"],
         mediaItem: args.data.mediaItem,
+        seasons: [
+          { state: "completed", isRequested: true, completedEpisodeCount: 9 },
+          { state: "completed", isRequested: true, completedEpisodeCount: 9 },
+        ],
       });
 
     const itemRequestChanges = mockItemRequestChanges(args.data.id);
@@ -1153,6 +1201,7 @@ export const CompletedShow = UnrequestedShow.extend({
               HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
             ),
             mockMediaItemQuery(args.data, null),
+            mockItemSeasonStates(null),
           );
 
           itemRequestChanges.publishChange(itemRequestId);
@@ -1187,61 +1236,6 @@ export const CompletedShow = UnrequestedShow.extend({
         () => {
           publishState("indexed");
         },
-      ),
-      api.query(GET_ITEM_SEASONS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              type: args.data.type,
-              seasons: [
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-1`,
-                  number: 1,
-                  title: "Season 1",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 9,
-                    state: "completed",
-                    isRequested: true,
-                  },
-                },
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-2`,
-                  number: 2,
-                  title: "Season 2",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 9,
-                    state: "completed",
-                    isRequested: true,
-                  },
-                },
-              ],
-            },
-          },
-        }),
       ),
     );
   },
@@ -1318,6 +1312,10 @@ export const PausedShow = UnrequestedShow.extend({
     const { primaryMediaItemId, publishState, handlers } = mockRequestedShow({
       availableActions: ["delete", "reset", "resume"],
       mediaItem: args.data.mediaItem,
+      seasons: [
+        { state: "completed", isRequested: true, completedEpisodeCount: 9 },
+        { state: "paused", isRequested: true, completedEpisodeCount: 5 },
+      ],
     });
 
     msw.use(
@@ -1335,61 +1333,6 @@ export const PausedShow = UnrequestedShow.extend({
         () => {
           publishState("scraped");
         },
-      ),
-      api.query(GET_ITEM_SEASONS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              type: args.data.type,
-              seasons: [
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-1`,
-                  number: 1,
-                  title: "Season 1",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 9,
-                    state: "completed",
-                    isRequested: true,
-                  },
-                },
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-2`,
-                  number: 2,
-                  title: "Season 2",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 5,
-                    state: "paused",
-                    isRequested: true,
-                  },
-                },
-              ],
-            },
-          },
-        }),
       ),
     );
   },
@@ -1430,6 +1373,10 @@ export const ScrapedShow = UnrequestedShow.extend({
     const { primaryMediaItemId, publishState, handlers } = mockRequestedShow({
       availableActions: ["delete", "reset", "pause"],
       mediaItem: args.data.mediaItem,
+      seasons: [
+        { state: "scraped", isRequested: true, completedEpisodeCount: 0 },
+        { state: "scraped", isRequested: true, completedEpisodeCount: 0 },
+      ],
     });
 
     msw.use(
@@ -1447,61 +1394,6 @@ export const ScrapedShow = UnrequestedShow.extend({
         () => {
           publishState("paused");
         },
-      ),
-      api.query(GET_ITEM_SEASONS, () =>
-        HttpResponse.json({
-          data: {
-            tmdbItem: {
-              __typename: "TmdbIndexerData",
-              id: args.data.id,
-              type: args.data.type,
-              seasons: [
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-1`,
-                  number: 1,
-                  title: "Season 1",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/830385/posters/6187fabf54442.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-1:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 0,
-                    state: "scraped",
-                    isRequested: true,
-                  },
-                },
-                {
-                  __typename: "IndexerSeason",
-                  id: `${args.data.id}:season-2`,
-                  number: 2,
-                  title: "Season 2",
-                  posterUrl:
-                    "https://artworks.thetvdb.com/banners/v4/season/2033977/posters/6791509cb5fcd.jpg",
-                  episodes: Array.from({ length: 9 }).map((_, index) => ({
-                    __typename: "IndexerEpisode",
-                    id: `${args.data.id}:season-2:episode-${String(index + 1)}`,
-                    number: index + 1,
-                    title: `Episode ${String(index + 1)}`,
-                    posterUrl: null,
-                  })),
-                  mediaItem: {
-                    __typename: "Season",
-                    completedEpisodeCount: 0,
-                    state: "scraped",
-                    isRequested: true,
-                  },
-                },
-              ],
-            },
-          },
-        }),
       ),
     );
   },

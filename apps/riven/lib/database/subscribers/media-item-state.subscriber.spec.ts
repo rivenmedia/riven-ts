@@ -1,10 +1,9 @@
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 
 import { DateTime } from "luxon";
-import { describe, expect, vi } from "vitest";
+import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { pubSub } from "#graphql/pubsub.ts";
 
 const indexedAt = DateTime.utc().toJSDate();
 const pastReleaseDate = DateTime.utc().minus({ years: 1 }).toJSDate();
@@ -505,32 +504,5 @@ describe("onFlush", () => {
       // The season's own state is left untouched by this path.
       expect(season.state).toBe("paused");
     });
-  });
-});
-
-describe("afterFlush", () => {
-  it("publishes a MEDIA_ITEM_STATE_CHANGED event", async ({
-    em,
-    factories: { streamFactory },
-    seeders: { seedIndexedMovie },
-  }) => {
-    const { movie } = await seedIndexedMovie();
-
-    const publishSpy = vi.spyOn(pubSub, "publish");
-
-    const stream = await streamFactory.createOne();
-
-    movie.streams.add(stream);
-
-    await em.persist(movie).flush();
-
-    expect(publishSpy).toHaveBeenCalledWith(
-      "MEDIA_ITEM_STATE_CHANGED",
-      movie.id,
-      expect.objectContaining({
-        item: movie,
-        stateChange: ["indexed", "scraped"],
-      }),
-    );
   });
 });

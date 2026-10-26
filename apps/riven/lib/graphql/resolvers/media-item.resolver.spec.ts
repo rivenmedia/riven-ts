@@ -11,6 +11,8 @@ import type {
   BlacklistActiveStreamMutationVariables,
   GetMediaItemsQuery,
   GetMediaItemsQueryVariables,
+  MediaItemStateChangedSubscription,
+  MediaItemStateChangedSubscriptionVariables,
 } from "./media-item.resolver.spec.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
@@ -169,5 +171,46 @@ describe("mediaItems", () => {
     expect(body.singleResult.data?.mediaItems.items[0]?.fullTitle).toBe(
       movieA.fullTitle,
     );
+  });
+});
+
+describe("mediaItemStateChanged", () => {
+  const MEDIA_ITEM_STATE_CHANGED: TypedDocumentNode<
+    MediaItemStateChangedSubscription,
+    MediaItemStateChangedSubscriptionVariables
+  > = gql`
+    subscription MediaItemStateChanged($id: ID!) {
+      mediaItemStateChanged(id: $id) {
+        ... on Movie {
+          id
+          state
+        }
+      }
+    }
+  `;
+
+  it("emits the media item when its state changes", async ({
+    em,
+    gqlSubscribe,
+    indexedMovieContext: { indexedMovie },
+    factories: { streamFactory },
+  }) => {
+    const { nextEvent } = await gqlSubscribe(MEDIA_ITEM_STATE_CHANGED, {
+      id: indexedMovie.id,
+    });
+
+    indexedMovie.streams.add(await streamFactory.createOne());
+
+    await em.persist(indexedMovie).flush();
+
+    const { data, errors } = await nextEvent;
+
+    expect(errors).toBeUndefined();
+    expect(data).toStrictEqual({
+      mediaItemStateChanged: {
+        id: indexedMovie.id,
+        state: "scraped",
+      },
+    });
   });
 });
