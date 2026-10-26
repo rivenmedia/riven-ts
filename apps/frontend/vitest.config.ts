@@ -55,6 +55,11 @@ export default defineConfig((config) => {
               enabled: true,
               commands: { setBrowserViewport },
               provider: playwright({
+                launchOptions: {
+                  // Use the new Chromium headless mode
+                  // https://vitest.dev/config/browser/playwright#launchoptions
+                  channel: "chromium",
+                },
                 contextOptions: {
                   reducedMotion: "reduce",
                   deviceScaleFactor: 1,

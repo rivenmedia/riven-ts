@@ -33,4 +33,7 @@ runs:
           exit 1
         fi
 
-        pnx playwright@$PLAYWRIGHT_VERSION install chromium --with-deps
+        # Skip man-db rebuilds
+        sudo rm -f /var/lib/man-db/auto-update
+
+        pnx playwright@$PLAYWRIGHT_VERSION install chromium --with-deps --no-shell
