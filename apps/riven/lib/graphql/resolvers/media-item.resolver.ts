@@ -49,6 +49,8 @@ const MediaItemCursor = createCursorType<MediaItem>(
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
   @Subscription(() => MediaItemUnion, {
+    description:
+      "Emits the media item for the given ID whenever its state changes.",
     topics: "MEDIA_ITEM_STATE_CHANGED",
     topicId: ({ args }: SubscribeResolverData<unknown, { id: UUID }>) =>
       args.id,

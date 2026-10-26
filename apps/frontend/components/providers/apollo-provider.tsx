@@ -25,9 +25,12 @@ function makeLink() {
     return httpLink;
   }
 
-  const wsLink = new GraphQLWsLink(
-    createClient({ url: graphqlUrl.replace(/^http/u, "ws") }),
-  );
+  // `BACKEND_URL` is server-only, so the browser connects to its own origin and `proxy.ts` forwards the upgrade to the backend
+  const wsUrl = new URL("/graphql", globalThis.location.href);
+
+  wsUrl.protocol = wsUrl.protocol.replace(/^http/u, "ws");
+
+  const wsLink = new GraphQLWsLink(createClient({ url: wsUrl.toString() }));
 
   return ApolloLink.split(
     ({ operationType }) => operationType === OperationTypeNode.SUBSCRIPTION,

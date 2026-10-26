@@ -1,5 +1,4 @@
 import { graphql } from "msw/graphql";
 
-import { privateEnvironment } from "#environment/private-environment.schema.ts";
-
-export const api = graphql.link(`${privateEnvironment.BACKEND_URL}/graphql`);
+// Matches any origin, as queries go to `BACKEND_URL` but subscriptions connect via the frontend's own origin
+export const api = graphql.link(/\/graphql$/u);
