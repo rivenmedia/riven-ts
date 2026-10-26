@@ -268,24 +268,29 @@ MultiplePages.test(
 MultiplePages.test(
   "Stops loading once the last page has been fetched",
   async ({ canvas, userEvent }) => {
-    const lastItemTitle = `Item ${String(libraryPageSize * libraryPageCount)}`;
+    const loadMore = async () => {
+      await userEvent.click(
+        await canvas.findByRole("button", { name: "Load More" }),
+      );
+    };
 
-    // Keep loading until there are no more pages, as the grid only learns it has reached the end from an empty page
+    // Wait for each page separately, so every fetch gets its own timeout
+    for (let page = 2; page <= libraryPageCount; page++) {
+      await loadMore();
+
+      await expect(
+        await canvas.findByText(`Item ${String(libraryPageSize * page)}`),
+      ).toBeInTheDocument();
+    }
+
+    // The grid only learns it has reached the end from an empty page
+    await loadMore();
+
     await waitFor(async () => {
-      const loadMoreButton = canvas.queryByRole("button", {
-        name: "Load More",
-      });
-
-      if (loadMoreButton) {
-        await userEvent.click(loadMoreButton);
-      }
-
       await expect(
         canvas.queryByRole("button", { name: /Load More|Loading/u }),
       ).not.toBeInTheDocument();
     });
-
-    await expect(canvas.getByText(lastItemTitle)).toBeInTheDocument();
   },
 );
 
