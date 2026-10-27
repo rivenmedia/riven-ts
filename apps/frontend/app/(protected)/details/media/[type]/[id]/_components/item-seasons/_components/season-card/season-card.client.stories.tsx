@@ -38,7 +38,13 @@ Default.test(
     await expect(
       await canvas.findByRole("status", { name: /partially completed/iu }),
     ).toBeInTheDocument();
-    await expect(canvas.getByText("3/9")).toBeInTheDocument();
+
+    await expect(
+      await canvas.findByRole("progressbar", {
+        name: /season 1 progress/iu,
+        value: { max: 9, now: 3 },
+      }),
+    ).toBeInTheDocument();
   },
 );
 
@@ -90,6 +96,12 @@ StateChanged.test(
     await expect(
       await canvas.findByRole("status", { name: /completed/iu }),
     ).toBeInTheDocument();
-    await expect(await canvas.findByText("9/9")).toBeInTheDocument();
+
+    await expect(
+      canvas.getByRole("progressbar", {
+        name: /season 1 progress/iu,
+        value: { max: 9, now: 9 },
+      }),
+    ).toBeInTheDocument();
   },
 );

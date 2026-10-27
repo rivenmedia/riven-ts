@@ -1,3 +1,7 @@
+import { useId } from "react";
+
+import { Field, FieldLabel } from "#components/_ui/field.tsx";
+import { Progress } from "#components/_ui/progress.tsx";
 import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
@@ -31,6 +35,8 @@ export function SeasonCard({
   season,
   isLive = false,
 }: SeasonCardProps) {
+  const progressId = useId();
+
   return (
     <>
       <PortraitCard
@@ -50,22 +56,21 @@ export function SeasonCard({
         }
       />
       {season && episodeCount > 0 && (
-        <div className="mt-1.5 flex items-center gap-1.5 px-0.5">
-          <div className="bg-muted h-1 flex-1 overflow-hidden rounded-full">
-            <div
-              className="bg-primary h-full rounded-full transition-all duration-500"
-              style={{
-                width: `${Math.min(
-                  100,
-                  (season.completedEpisodeCount / episodeCount) * 100,
-                ).toString()}%`,
-              }}
+        <Field>
+          <FieldLabel className="sr-only" id={progressId}>
+            {title} progress
+          </FieldLabel>
+          <div className="mt-1.5 px-0.5 flex items-center gap-1.5">
+            <Progress
+              aria-labelledby={progressId}
+              value={season.completedEpisodeCount}
+              max={episodeCount}
             />
+            <span className="text-muted-foreground font-mono text-[10px]">
+              {season.completedEpisodeCount}/{episodeCount}
+            </span>
           </div>
-          <span className="text-muted-foreground font-mono text-[10px]">
-            {season.completedEpisodeCount}/{episodeCount}
-          </span>
-        </div>
+        </Field>
       )}
     </>
   );
