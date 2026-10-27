@@ -25,6 +25,8 @@ import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subsc
 import { api } from "#mocks/graphql.ts";
 import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handler.ts";
 
+import { BLACKLIST_ACTIVE_STREAM } from "./_components/item-action-toolbar/actions/blacklist-active-stream/_mutations/blacklist-active-stream.mutation";
+
 import type { SeasonState } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_components/season-card/season-card.tsx";
 import type { GetItemSeasonStatesQuery } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-season-states.query.typegen.ts";
 import type { GetMediaItemQuery } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.typegen.ts";
@@ -734,7 +736,12 @@ export const CompletedMovie = UnrequestedMovie.extend({
 
     const { itemRequestId, primaryMediaItemId, publishState, handlers } =
       mockRequestedMovie({
-        availableActions: ["delete", "reset", "retry"],
+        availableActions: [
+          "delete",
+          "reset",
+          "retry",
+          "blacklist_active_stream",
+        ],
         mediaItem: args.data.mediaItem,
       });
 
@@ -789,6 +796,14 @@ export const CompletedMovie = UnrequestedMovie.extend({
           publishState("indexed");
         },
       ),
+      mockMutationWithIdEqualityCheck(
+        BLACKLIST_ACTIVE_STREAM,
+        primaryMediaItemId,
+        { blacklistActiveStream: true },
+        () => {
+          publishState("scraped");
+        },
+      ),
     );
   },
 });
@@ -841,6 +856,21 @@ CompletedMovie.test(
         canvas.queryByRole("status", { name: /completed/iu }),
       ).not.toBeInTheDocument();
     });
+  },
+);
+
+CompletedMovie.test(
+  'Blacklists the active stream when the "Blacklist Active Stream" button is clicked',
+  async ({ canvas, context }) => {
+    await confirmItemAction(context, /blacklist active stream/iu);
+
+    await expect(
+      await canvas.findByText(/active stream blacklisted successfully/iu),
+    ).toBeInTheDocument();
+
+    await expect(
+      canvas.findByRole("status", { name: /scraped/iu }),
+    ).toBeInTheDocument();
   },
 );
 //#endregion
