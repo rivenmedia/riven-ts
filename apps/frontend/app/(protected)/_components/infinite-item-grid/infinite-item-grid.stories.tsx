@@ -40,19 +40,23 @@ export const Default = meta.story();
 
 Default.test("Renders the initial page of items", async ({ canvas }) => {
   await expect(await canvas.findAllByRole("link")).toHaveLength(pageSize);
+
   await expect(
-    canvas.getByRole("link", { name: /Result 1\b/u }),
+    canvas.getByRole("link", { name: /result 1\b/iu }),
   ).toHaveAttribute("href", "/details/media/movie/movie-1");
-  await expect(canvas.getByRole("button", { name: "Load More" })).toBeEnabled();
+
+  await expect(
+    canvas.getByRole("button", { name: /load more/iu }),
+  ).toBeEnabled();
 });
 
 Default.test(
   "Clicking Load More appends the next page",
   async ({ args, canvas }) => {
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await expect(
-      await canvas.findByRole("link", { name: /Result 21\b/u }),
+      await canvas.findByRole("link", { name: /result 21\b/iu }),
     ).toBeVisible();
 
     await expect(args.fetchPage).toHaveBeenCalledOnce();
@@ -60,7 +64,7 @@ Default.test(
 
     await expect(canvas.getAllByRole("link")).toHaveLength(pageSize * 2);
     await expect(
-      canvas.getByRole("button", { name: "Load More" }),
+      canvas.getByRole("button", { name: /load more/iu }),
     ).toBeEnabled();
   },
 );
@@ -68,13 +72,13 @@ Default.test(
 Default.test(
   "Loads the next page when the Load More button scrolls into view",
   async ({ args, canvas }) => {
-    canvas.getByRole("button", { name: "Load More" }).scrollIntoView();
+    canvas.getByRole("button", { name: /load more/iu }).scrollIntoView();
 
     await waitFor(async () => {
       await expect(args.fetchPage).toHaveBeenCalledWith(2);
     });
     await expect(
-      await canvas.findByRole("link", { name: /Result 21\b/u }),
+      await canvas.findByRole("link", { name: /result 21\b/iu }),
     ).toBeInTheDocument();
   },
 );
@@ -82,11 +86,11 @@ Default.test(
 Default.test(
   "Requests successive pages on each load",
   async ({ args, canvas }) => {
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
-    await canvas.findByRole("link", { name: /Result 21\b/u });
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
+    await canvas.findByRole("link", { name: /result 21\b/iu });
 
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
-    await canvas.findByRole("link", { name: /Result 41\b/u });
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
+    await canvas.findByRole("link", { name: /result 41\b/iu });
 
     await expect(args.fetchPage).toHaveBeenNthCalledWith(1, 2);
     await expect(args.fetchPage).toHaveBeenNthCalledWith(2, 3);
@@ -103,13 +107,13 @@ CustomItemHref.test(
   "Links each item using the custom href, including loaded pages",
   async ({ canvas }) => {
     await expect(
-      await canvas.findByRole("link", { name: /Result 1\b/u }),
+      await canvas.findByRole("link", { name: /result 1\b/iu }),
     ).toHaveAttribute("href", "/details/media/movie/external-movie-1");
 
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await expect(
-      await canvas.findByRole("link", { name: /Result 21\b/u }),
+      await canvas.findByRole("link", { name: /result 21\b/iu }),
     ).toHaveAttribute("href", "/details/media/movie/external-movie-21");
   },
 );
@@ -130,8 +134,10 @@ export const Selectable = meta.story({
 });
 
 Selectable.test("Allows items to be selected", async ({ canvas }) => {
-  const link = await canvas.findByRole("link", { name: /Result 1\b/u });
-  const checkbox = within(link).getByRole("checkbox", { name: "Select item" });
+  const link = await canvas.findByRole("link", { name: /result 1\b/iu });
+  const checkbox = within(link).getByRole("checkbox", {
+    name: /select item/iu,
+  });
 
   await expect(canvas.getAllByRole("checkbox")).toHaveLength(pageSize);
 
@@ -157,7 +163,7 @@ Animated.test(
 
     await expect(await getAnimationDelay(/Result 2\b/u)).toBe("30ms");
 
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await expect(await getAnimationDelay(/Result 21\b/u)).toBe("0ms");
     await expect(await getAnimationDelay(/Result 22\b/u)).toBe("30ms");
@@ -175,17 +181,19 @@ export const FetchingMore = meta.story({
     ),
   },
   async play({ canvas }) {
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
   },
 });
 
 FetchingMore.test(
   "Disables the button and shows a spinner while fetching",
   async ({ canvas }) => {
-    const button = await canvas.findByRole("button", { name: "Loading" });
+    const button = await canvas.findByRole("button", { name: /loading/iu });
 
     await expect(button).toBeDisabled();
-    await expect(canvas.getByRole("status", { name: "Loading" })).toBeVisible();
+    await expect(
+      canvas.getByRole("status", { name: /loading/iu }),
+    ).toBeVisible();
     await expect(canvas.getAllByRole("link")).toHaveLength(pageSize);
   },
 );
@@ -199,11 +207,11 @@ export const NoMoreResults = meta.story({
 NoMoreResults.test(
   "Hides the Load More button once a page adds no new items",
   async ({ args, canvas }) => {
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await waitFor(async () => {
       await expect(
-        canvas.queryByRole("button", { name: /Load More|Loading/u }),
+        canvas.queryByRole("button", { name: /load more|loading/iu }),
       ).not.toBeInTheDocument();
     });
 
@@ -221,11 +229,11 @@ NoMoreResults.test(
     },
   },
   async ({ canvas }) => {
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await waitFor(async () => {
       await expect(
-        canvas.queryByRole("button", { name: /Load More|Loading/u }),
+        canvas.queryByRole("button", { name: /load more|loading/iu }),
       ).not.toBeInTheDocument();
     });
 

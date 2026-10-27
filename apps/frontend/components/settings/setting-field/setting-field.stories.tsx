@@ -177,7 +177,7 @@ NullableBoolean.test(
     await step("Selects Always", async () => {
       await userEvent.click(trigger);
       await userEvent.click(
-        await body.findByRole("option", { name: "Always" }),
+        await body.findByRole("option", { name: /always/iu }),
       );
 
       await expect(trigger).toHaveTextContent("Always");
@@ -185,7 +185,9 @@ NullableBoolean.test(
 
     await step("Selects Never", async () => {
       await userEvent.click(trigger);
-      await userEvent.click(await body.findByRole("option", { name: "Never" }));
+      await userEvent.click(
+        await body.findByRole("option", { name: /never/iu }),
+      );
 
       await expect(trigger).toHaveTextContent("Never");
     });
@@ -223,7 +225,7 @@ Select.test(
     await expect(trigger).toHaveTextContent("1080p");
 
     await userEvent.click(trigger);
-    await userEvent.click(await body.findByRole("option", { name: "720p" }));
+    await userEvent.click(await body.findByRole("option", { name: /720p/iu }));
 
     await expect(trigger).toHaveTextContent("720p");
   },

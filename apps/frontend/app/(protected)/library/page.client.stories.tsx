@@ -255,7 +255,7 @@ MultiplePages.test(
   "Loads the next page when Load More is clicked",
   async ({ canvas, userEvent }) => {
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Load More" }),
+      await canvas.findByRole("button", { name: /load more/iu }),
     );
 
     await expect(await canvas.findByText("Item 26")).toBeInTheDocument();
@@ -270,7 +270,7 @@ MultiplePages.test(
   async ({ canvas, userEvent }) => {
     const loadMore = async () => {
       await userEvent.click(
-        await canvas.findByRole("button", { name: "Load More" }),
+        await canvas.findByRole("button", { name: /load more/iu }),
       );
     };
 
@@ -288,7 +288,7 @@ MultiplePages.test(
 
     await waitFor(async () => {
       await expect(
-        canvas.queryByRole("button", { name: /Load More|Loading/u }),
+        canvas.queryByRole("button", { name: /load more|loading/iu }),
       ).not.toBeInTheDocument();
     });
   },

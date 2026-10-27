@@ -91,10 +91,10 @@ export const Default = meta.story();
 
 Default.test("Shows the search results", async ({ canvas }) => {
   await expect(
-    await canvas.findByRole("link", { name: /Matrix Result 1\b/u }),
+    await canvas.findByRole("link", { name: /matrix Result 1\b/iu }),
   ).toHaveAttribute("href", "/details/media/movie/1");
   await expect(
-    canvas.getByRole("link", { name: /Matrix Result 2\b/u }),
+    canvas.getByRole("link", { name: /matrix Result 2\b/iu }),
   ).toHaveAttribute("href", "/details/media/show/2");
   await expect(canvas.getAllByRole("link")).toHaveLength(pageSize);
   await expect(
@@ -106,19 +106,19 @@ Default.test(
   "Loads more results until the search is exhausted",
   async ({ canvas }) => {
     await userEvent.click(
-      await canvas.findByRole("button", { name: "Load More" }),
+      await canvas.findByRole("button", { name: /load more/iu }),
     );
 
     await expect(
-      await canvas.findByRole("link", { name: /Matrix Result 21\b/u }),
+      await canvas.findByRole("link", { name: /matrix Result 21\b/iu }),
     ).toBeInTheDocument();
     await expect(canvas.getAllByRole("link")).toHaveLength(pageSize * 2);
 
-    await userEvent.click(canvas.getByRole("button", { name: "Load More" }));
+    await userEvent.click(canvas.getByRole("button", { name: /load more/iu }));
 
     await waitFor(async () => {
       await expect(
-        canvas.queryByRole("button", { name: /Load More|Loading/u }),
+        canvas.queryByRole("button", { name: /load more|loading/iu }),
       ).not.toBeInTheDocument();
     });
     await expect(canvas.getAllByRole("link")).toHaveLength(pageSize * 2);

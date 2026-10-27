@@ -36,7 +36,7 @@ Default.test(
   "Shows the season's state and completed episodes",
   async ({ canvas }) => {
     await expect(
-      await canvas.findByRole("status", { name: "Partially Completed" }),
+      await canvas.findByRole("status", { name: /partially completed/iu }),
     ).toBeInTheDocument();
     await expect(canvas.getByText("3/9")).toBeInTheDocument();
   },
@@ -54,7 +54,7 @@ export const Unrequested = meta.story({
 
 Unrequested.test("Shows the season as unrequested", async ({ canvas }) => {
   await expect(
-    await canvas.findByRole("status", { name: "Unrequested" }),
+    await canvas.findByRole("status", { name: /unrequested/iu }),
   ).toBeInTheDocument();
 });
 
@@ -88,7 +88,7 @@ StateChanged.test(
   "Shows the latest state and completed episodes from the subscription",
   async ({ canvas }) => {
     await expect(
-      await canvas.findByRole("status", { name: "Completed" }),
+      await canvas.findByRole("status", { name: /completed/iu }),
     ).toBeInTheDocument();
     await expect(await canvas.findByText("9/9")).toBeInTheDocument();
   },
