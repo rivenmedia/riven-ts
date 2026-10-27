@@ -1,3 +1,5 @@
+"use client";
+
 import { cn } from "cn";
 import { startCase } from "es-toolkit";
 
