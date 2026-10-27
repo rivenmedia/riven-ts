@@ -7,8 +7,8 @@ import { it } from "#__tests__/test-context.ts";
 import { createQueue } from "#message-queue/utilities/create-queue.ts";
 
 import type {
-  BlacklistActiveStreamMutation,
-  BlacklistActiveStreamMutationVariables,
+  BlacklistActiveStreamResolverSpecMutation,
+  BlacklistActiveStreamResolverSpecMutationVariables,
   GetMediaItemsQuery,
   GetMediaItemsQueryVariables,
   MediaItemStateChangedSubscription,
@@ -18,10 +18,10 @@ import type { TypedDocumentNode } from "@apollo/client";
 
 describe("blacklistActiveStream", () => {
   const BLACKLIST_ACTIVE_STREAM: TypedDocumentNode<
-    BlacklistActiveStreamMutation,
-    BlacklistActiveStreamMutationVariables
+    BlacklistActiveStreamResolverSpecMutation,
+    BlacklistActiveStreamResolverSpecMutationVariables
   > = gql`
-    mutation BlacklistActiveStream($mediaItemId: ID!) {
+    mutation BlacklistActiveStreamResolverSpec($mediaItemId: ID!) {
       blacklistActiveStream(mediaItemId: $mediaItemId)
     }
   `;
@@ -34,8 +34,8 @@ describe("blacklistActiveStream", () => {
     createQueue("process-media-item");
 
     const { body } = await gqlServer.executeOperation<
-      BlacklistActiveStreamMutation,
-      BlacklistActiveStreamMutationVariables
+      BlacklistActiveStreamResolverSpecMutation,
+      BlacklistActiveStreamResolverSpecMutationVariables
     >(
       {
         query: BLACKLIST_ACTIVE_STREAM,
@@ -61,8 +61,8 @@ describe("blacklistActiveStream", () => {
     expect.assert(completedMovie.activeStream?.infoHash);
 
     await gqlServer.executeOperation<
-      BlacklistActiveStreamMutation,
-      BlacklistActiveStreamMutationVariables
+      BlacklistActiveStreamResolverSpecMutation,
+      BlacklistActiveStreamResolverSpecMutationVariables
     >(
       {
         query: BLACKLIST_ACTIVE_STREAM,

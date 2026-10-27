@@ -164,6 +164,10 @@ export class ItemRequestResolver {
       actions.add("request_more");
     }
 
+    if (itemRequest.type === "movie" && itemRequest.state === "completed") {
+      actions.add("blacklist_active_stream");
+    }
+
     actions.add("delete");
 
     return [...actions];

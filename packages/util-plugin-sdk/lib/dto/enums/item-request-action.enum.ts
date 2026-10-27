@@ -42,6 +42,11 @@ export const ItemRequestAction = z.enum([
   "delete",
 
   /**
+   * Action to blacklist the active stream
+   */
+  "blacklist_active_stream",
+
+  /**
    * Action to manually scrape item data
    */
   "manual_scrape",

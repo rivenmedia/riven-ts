@@ -1,5 +1,6 @@
-import { Pause, Play, RefreshCw, Trash2 } from "lucide-react";
+import { Pause, Play, RefreshCw, Trash2, CircleSlash } from "lucide-react";
 
+import { blacklistActiveStream } from "./actions/blacklist-active-stream/_actions/blacklist-active-stream.action.ts";
 import { deleteItem } from "./actions/delete-item/_actions/delete-item.action.ts";
 import { pauseItem } from "./actions/pause-item/_actions/pause-item.action.ts";
 import { resetItem } from "./actions/reset-item/_actions/reset-item.action.ts";
@@ -67,6 +68,16 @@ export const confirmItemActions: ConfirmItemActionConfig[] = [
     icon: <Pause />,
     successMessage: "Item paused successfully.",
     errorMessage: "Failed to pause the item.",
+  },
+  {
+    availableAction: "blacklist_active_stream",
+    target: "mediaItem",
+    action: blacklistActiveStream,
+    label: "Blacklist Active Stream",
+    pendingLabel: "Blacklisting",
+    icon: <CircleSlash />,
+    successMessage: "Active stream blacklisted successfully.",
+    errorMessage: "Failed to blacklist the active stream.",
   },
   {
     availableAction: "delete",
