@@ -2,6 +2,7 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
@@ -50,12 +51,12 @@ export class ItemRequestService extends BaseService {
     return persistRequestedShow(this.em, item);
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getItemRequestById(id: UUID) {
     return this.em.findOneOrFail(ItemRequest, id);
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getItemRequestByExternalIds({
     tmdbId,
     imdbId,
@@ -86,7 +87,7 @@ export class ItemRequestService extends BaseService {
     return itemRequest;
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   @Transactional()
   public async removeItemRequest(target: ItemRequest | Ref<ItemRequest>) {
     this.em.remove(target);

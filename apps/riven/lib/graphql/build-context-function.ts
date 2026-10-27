@@ -1,3 +1,5 @@
+import { RequestContext } from "@mikro-orm/core";
+
 import { database, services } from "#database/database.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
@@ -18,7 +20,7 @@ export const buildContextFunction: (
   (sendEvent, sendExternalEvent, validPlugins) => async () =>
     Promise.resolve({
       [CoreKey]: {
-        em: database.em.fork(),
+        em: RequestContext.getEntityManager() ?? database.em.fork(),
         services,
         sendEvent,
       },

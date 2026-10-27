@@ -65,7 +65,7 @@ export class MediaItemService extends BaseService {
     return settings.preferSeasonPacks;
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getMediaItemById<
     Hint extends string = never,
     Fields extends string = never,
@@ -81,7 +81,7 @@ export class MediaItemService extends BaseService {
    * Finds a root media item by the external ID Riven uses to request it:
    * the TMDB ID for movies, and the TVDB ID for shows.
    */
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getMediaItemByExternalId(
     externalId: string,
     type: TopLevelMediaItemType,
@@ -96,7 +96,7 @@ export class MediaItemService extends BaseService {
     }
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getSeasonByShowTvdbId(showTvdbId: string, seasonNumber: number) {
     return this.em.getRepository(Season).findOne({
       tvdbId: showTvdbId,
@@ -104,7 +104,7 @@ export class MediaItemService extends BaseService {
     });
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getEpisodeByShowTvdbId(
     showTvdbId: string,
     { seasonNumber, episodeNumber }: EpisodePosition,
@@ -145,7 +145,7 @@ export class MediaItemService extends BaseService {
     }
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   @Transactional()
   public async resetMediaItem(target: MediaItem) {
     return resetMediaItem(this.em, target);

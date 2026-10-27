@@ -61,7 +61,7 @@ export class StreamService extends BaseService {
     return blacklistStream(this.em, mediaItemId, infoHash, plugin, provider);
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   @Transactional()
   public async blacklistActiveStream({
     mediaItem,
