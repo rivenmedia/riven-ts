@@ -21,7 +21,6 @@ export interface SeasonCardProps {
    * The state of the season's media item, if the season has been indexed.
    */
   season?: SeasonState | undefined;
-  isLive?: boolean;
 }
 
 /**
@@ -33,7 +32,6 @@ export function SeasonCard({
   posterUrl,
   episodeCount,
   season,
-  isLive = false,
 }: SeasonCardProps) {
   const progressId = useId();
 
@@ -48,7 +46,6 @@ export function SeasonCard({
             <StatusBadge
               isRequested={season.isRequested}
               state={season.state}
-              isLive={isLive}
             />
           ) : (
             <StatusBadge isRequested={false} />

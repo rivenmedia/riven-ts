@@ -2,6 +2,7 @@ import { cn } from "cn";
 import { startCase } from "es-toolkit";
 
 import { Badge } from "#components/_ui/badge.tsx";
+import { useLiveContent } from "#components/providers/live-content-provider.tsx";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { HTMLAttributes } from "react";
@@ -10,7 +11,6 @@ export type StatusBadgeProps = Pick<
   HTMLAttributes<HTMLElement>,
   "className"
 > & {
-  isLive?: boolean;
   large?: boolean;
 } & (
     | {
@@ -32,15 +32,15 @@ export function StatusBadge({
   isRequested,
   large = false,
   className,
-  isLive = false,
 }: StatusBadgeProps) {
   const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
   const label = isRequested ? startCase(state) : "Unrequested";
+  const isLiveContent = useLiveContent();
 
   return (
     <Badge
       aria-label={label}
-      asChild={isLive}
+      asChild={isLiveContent}
       variant="secondary"
       className={cn(
         "inline-flex items-center justify-center backdrop-blur-sm",
@@ -61,7 +61,7 @@ export function StatusBadge({
         className,
       )}
     >
-      {isLive ? <output>{label}</output> : label}
+      {isLiveContent ? <output>{label}</output> : label}
     </Badge>
   );
 }

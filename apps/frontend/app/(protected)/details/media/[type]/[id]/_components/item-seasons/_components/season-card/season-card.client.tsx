@@ -2,15 +2,14 @@
 
 import { useSubscription } from "@apollo/client/react";
 
+import { LiveContentProvider } from "#components/providers/live-content-provider.tsx";
+
 import { ON_SEASON_UPDATED } from "../../_subscriptions/on-season-updated.subscription.ts";
 import { SeasonCard } from "./season-card.tsx";
 
 import type { SeasonCardProps, SeasonState } from "./season-card.tsx";
 
-interface LiveSeasonCardProps extends Omit<
-  SeasonCardProps,
-  "season" | "isLive"
-> {
+interface LiveSeasonCardProps extends Omit<SeasonCardProps, "season"> {
   /**
    * The Riven ID of the season's media item (**not** its external TMDB/TVDB ID).
    */
@@ -32,16 +31,17 @@ export function LiveSeasonCard({
   });
 
   return (
-    <SeasonCard
-      {...props}
-      season={{
-        isRequested: initialSeason.isRequested,
-        state: data?.seasonUpdated.state ?? initialSeason.state,
-        completedEpisodeCount:
-          data?.seasonUpdated.completedEpisodeCount ??
-          initialSeason.completedEpisodeCount,
-      }}
-      isLive
-    />
+    <LiveContentProvider>
+      <SeasonCard
+        {...props}
+        season={{
+          isRequested: initialSeason.isRequested,
+          state: data?.seasonUpdated.state ?? initialSeason.state,
+          completedEpisodeCount:
+            data?.seasonUpdated.completedEpisodeCount ??
+            initialSeason.completedEpisodeCount,
+        }}
+      />
+    </LiveContentProvider>
   );
 }

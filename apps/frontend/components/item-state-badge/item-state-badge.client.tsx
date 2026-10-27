@@ -3,6 +3,7 @@
 import { useSubscription } from "@apollo/client/react";
 
 import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
+import { LiveContentProvider } from "#components/providers/live-content-provider.tsx";
 
 import { ON_MEDIA_ITEM_STATE_CHANGED } from "./_subscriptions/on-media-item-state-changed.subscription.ts";
 
@@ -33,11 +34,12 @@ export function LiveItemStateBadge({
   });
 
   return (
-    <StatusBadge
-      {...props}
-      state={data?.mediaItemStateChanged.state ?? initialState}
-      isRequested={isRequested}
-      isLive
-    />
+    <LiveContentProvider>
+      <StatusBadge
+        {...props}
+        state={data?.mediaItemStateChanged.state ?? initialState}
+        isRequested={isRequested}
+      />
+    </LiveContentProvider>
   );
 }
