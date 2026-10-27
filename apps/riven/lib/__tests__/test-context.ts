@@ -323,8 +323,8 @@ export const it = testBase
   .extend(
     "gqlSubscribe",
     ({ gqlSchema, gqlContext }, { onCleanup }) =>
-      async <TData, TVariables extends Record<string, unknown>>(
-        document: TypedDocumentNode<TData, TVariables>,
+      async <TResult, TVariables extends Record<string, unknown>>(
+        document: TypedDocumentNode<TResult, TVariables>,
         variables: TVariables,
       ) => {
         // Vite resolves `graphql` to its ESM build, whereas type-graphql (loaded by Node)
@@ -358,7 +358,7 @@ export const it = testBase
 
             // Results are built from null-prototype objects,
             // which are cloned into plain objects for strict equality checks.
-            return structuredClone(value) as ExecutionResult<TData>;
+            return structuredClone(value) as ExecutionResult<TResult>;
           }),
         };
       },

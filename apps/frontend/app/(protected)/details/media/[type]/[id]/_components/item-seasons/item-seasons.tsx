@@ -18,7 +18,10 @@ import { SeasonCard } from "./_components/season-card/season-card.tsx";
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
 import { GET_ITEM_SEASON_STATES } from "./_queries/get-item-season-states.query.ts";
 
-import type { SeasonState } from "./_components/season-card/season-card.tsx";
+import type {
+  SeasonCardProps,
+  SeasonState,
+} from "./_components/season-card/season-card.tsx";
 import type { GetItemSeasonsQuery } from "./_queries/get-item-seasons.query.typegen.ts";
 
 interface SeasonCarouselProps {
@@ -34,11 +37,11 @@ function SeasonCarousel({ seasons, seasonStates }: SeasonCarouselProps) {
     <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
       <CarouselContent>
         {seasons.map(({ episodes, id, number, posterUrl }) => {
-          const props = {
+          const seasonCardProps = {
             title: number === 0 ? "Specials" : `Season ${number.toString()}`,
             posterUrl,
             episodeCount: episodes.length,
-          };
+          } as const satisfies SeasonCardProps;
 
           const seasonState = seasonStates.get(number);
 
@@ -46,12 +49,12 @@ function SeasonCarousel({ seasons, seasonStates }: SeasonCarouselProps) {
             <CarouselItem key={id} className="basis-auto">
               {seasonState ? (
                 <LiveSeasonCard
-                  {...props}
+                  {...seasonCardProps}
                   id={seasonState.id}
                   initialSeason={seasonState}
                 />
               ) : (
-                <SeasonCard {...props} />
+                <SeasonCard {...seasonCardProps} />
               )}
             </CarouselItem>
           );

@@ -92,9 +92,13 @@ export class MediaItemStateChangeSubscriber implements EventSubscriber<MediaItem
 
     const { logger } = await import("#utilities/logger/logger.ts");
 
-    for (const [id, { fullTitle, stateChange }] of changes.mediaItems) {
-      const [previousState, nextState] = stateChange;
-
+    for (const [
+      id,
+      {
+        fullTitle,
+        stateChange: [previousState, nextState],
+      },
+    ] of changes.mediaItems) {
       logger.debug(
         `${chalk.bold(fullTitle)} state change: ${chalk.red(previousState)} ${chalk.dim("→")} ${chalk.green(nextState)}`,
       );

@@ -36,20 +36,20 @@ const it = baseIt.extend(
       indexedAt,
     });
 
-    const episodes = await Promise.all(
-      [1, 2, 3].map((number) =>
-        episodeFactory.createOne({
-          season,
-          show,
-          itemRequest: show.itemRequest,
-          number,
-          isSpecial: false,
-          isRequested: true,
-          releaseDate: pastReleaseDate,
-          indexedAt,
-        }),
-      ),
-    );
+    const episodes = await episodeFactory
+      .each((entity, i) => {
+        entity.absoluteNumber = i + 1;
+        entity.number = i + 1;
+      })
+      .create(3, {
+        season,
+        show,
+        itemRequest: show.itemRequest,
+        isSpecial: false,
+        isRequested: true,
+        releaseDate: pastReleaseDate,
+        indexedAt,
+      });
 
     const completeEpisode = async (episode: Episode) => {
       episode.filesystemEntries.add(

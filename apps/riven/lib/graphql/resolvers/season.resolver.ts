@@ -29,7 +29,8 @@ export class SeasonResolver {
     @Root() seasonId: UUID,
     @CoreContext() { em }: CoreContext,
   ) {
-    // A subscription's context lives as long as the subscription, so a fresh fork
+    // A subscription's context lives as long as the subscription,
+    // (e.g. the entire duration a user is on a page), so a fresh fork
     // is used for each event to avoid resolving stale data from its identity map.
     return em.fork().findOneOrFail(Season, seasonId);
   }
