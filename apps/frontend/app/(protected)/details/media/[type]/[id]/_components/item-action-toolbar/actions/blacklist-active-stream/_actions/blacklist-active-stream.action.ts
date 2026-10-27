@@ -21,6 +21,6 @@ export const blacklistActiveStream = permissionActionClient
     });
 
     return {
-      success: Boolean(data?.removeItemRequest),
+      success: Boolean(data?.blacklistActiveStream),
     };
   });

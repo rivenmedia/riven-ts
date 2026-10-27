@@ -1,16 +1,16 @@
 import { gql } from "@apollo/client";
 
 import type {
-  DeleteItemRequestMutation,
-  DeleteItemRequestMutationVariables,
-} from "./delete-item-request.mutation.typegen";
+  BlacklistActiveStreamMutation,
+  BlacklistActiveStreamMutationVariables,
+} from "./blacklist-active-stream.mutation.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const BLACKLIST_ACTIVE_STREAM: TypedDocumentNode<
-  DeleteItemRequestMutation,
-  DeleteItemRequestMutationVariables
+  BlacklistActiveStreamMutation,
+  BlacklistActiveStreamMutationVariables
 > = gql`
   mutation BlacklistActiveStream($id: ID!) {
-    removeItemRequest(itemRequestId: $id)
+    blacklistActiveStream(mediaItemId: $id)
   }
 `;
