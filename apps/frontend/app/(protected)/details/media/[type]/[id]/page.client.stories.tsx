@@ -869,7 +869,7 @@ CompletedMovie.test(
     ).toBeInTheDocument();
 
     await expect(
-      canvas.findByRole("status", { name: /scraped/iu }),
+      await canvas.findByRole("status", { name: /scraped/iu }),
     ).toBeInTheDocument();
   },
 );
