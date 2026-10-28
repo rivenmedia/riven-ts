@@ -54,13 +54,13 @@ const pausableStates = [
 
 const nonPausableStates = ItemRequestState.exclude(pausableStates).options;
 
-it("returns reset and delete for a completed movie", async ({
+it("returns reset, delete, and blacklist_active_stream for a completed movie", async ({
   completedMovieContext: { completedMovie },
   getAvailableActions,
 }) => {
   await expect(
     getAvailableActions({ tmdbId: completedMovie.tmdbId }),
-  ).resolves.toStrictEqual(["reset", "delete"]);
+  ).resolves.toStrictEqual(["reset", "blacklist_active_stream", "delete"]);
 });
 
 it("returns reset, pause and delete for a movie that is being processed", async ({
