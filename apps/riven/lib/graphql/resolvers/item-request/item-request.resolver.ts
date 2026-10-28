@@ -135,40 +135,14 @@ export class ItemRequestResolver {
   }
 
   @FieldResolver(() => [ItemRequestAction.enum])
-  public async availableActions(
+  public availableActions(
     @Root() itemRequest: ItemRequest,
-  ): Promise<ItemRequestAction[]> {
-    const actions = new Set<ItemRequestAction>(["reset"]);
-    const primaryMediaItem = await itemRequest.primaryMediaItem();
-
-    if (primaryMediaItem?.state === "failed") {
-      actions.add("retry");
-    }
-
-    const pausableStates = ItemRequestState.exclude([
-      "failed",
-      "completed",
-      "paused",
-      "unreleased",
-    ]);
-
-    if (pausableStates.safeParse(itemRequest.state).success) {
-      actions.add("pause");
-    }
-
-    if (itemRequest.state === "paused") {
-      actions.add("resume");
-    }
+  ): ItemRequestAction[] {
+    const actions = new Set<ItemRequestAction>();
 
     if (itemRequest.type === "show" && itemRequest.isPartialRequest) {
       actions.add("request_more");
     }
-
-    if (itemRequest.type === "movie" && itemRequest.state === "completed") {
-      actions.add("blacklist_active_stream");
-    }
-
-    actions.add("delete");
 
     return [...actions];
   }

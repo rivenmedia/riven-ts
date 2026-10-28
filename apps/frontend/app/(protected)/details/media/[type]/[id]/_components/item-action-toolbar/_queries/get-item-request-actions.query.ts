@@ -10,14 +10,25 @@ export const GET_ITEM_REQUEST_ACTIONS: TypedDocumentNode<
   GetItemRequestActionsQuery,
   GetItemRequestActionsQueryVariables
 > = gql`
-  query GetItemRequestActions($tmdbId: String, $tvdbId: String) {
+  query GetItemRequestActions(
+    $tmdbId: String
+    $tvdbId: String
+    $type: MediaItemType!
+    $episodeNumber: Int
+    $seasonNumber: Int
+  ) {
     itemRequestByExternalIds(tmdbId: $tmdbId, tvdbId: $tvdbId) {
       id
       seasons
       availableActions
-      primaryMediaItem {
+      mediaItem(
+        type: $type
+        episodeNumber: $episodeNumber
+        seasonNumber: $seasonNumber
+      ) {
         ... on MediaItem {
           id
+          availableActions
         }
       }
     }

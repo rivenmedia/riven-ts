@@ -7,6 +7,7 @@ import React, { Suspense } from "react";
 import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 
+import { ItemActionToolbar } from "../../../../../_components/item-action-toolbar/item-action-toolbar.tsx";
 import { formatEpisodeDetails } from "../../../_utilities/format-episode-details.ts";
 import { formatSeasonTitle } from "../../../_utilities/format-season-title.ts";
 import { EpisodeStateBadge } from "./episode-state-badge.tsx";
@@ -83,18 +84,27 @@ export function EpisodeOverview({ show, episode }: EpisodeOverviewProps) {
           <h1 className="text-foreground text-3xl font-black tracking-tight drop-shadow-md sm:text-4xl lg:text-5xl">
             {episode.title}
           </h1>
-          <ErrorFallback message="Failed to load episode state.">
-            <Suspense fallback={null}>
-              <EpisodeStateBadge
-                className="px-3 py-1.5 text-sm font-medium inline-block h-8"
-                showId={show.id}
-                seasonNumber={episode.seasonNumber}
-                episodeNumber={episode.number}
-                large
-              />
-            </Suspense>
-          </ErrorFallback>
+          <div className="flex flex-col">
+            <ErrorFallback message="Failed to load episode state.">
+              <Suspense fallback={null}>
+                <EpisodeStateBadge
+                  className="px-3 py-1.5 text-sm font-medium inline-block h-8"
+                  showId={show.id}
+                  seasonNumber={episode.seasonNumber}
+                  episodeNumber={episode.number}
+                  large
+                />
+              </Suspense>
+            </ErrorFallback>
+          </div>
         </div>
+        <ItemActionToolbar
+          title={episode.title}
+          externalId={show.id}
+          mediaType="episode"
+          episodeNumber={episode.number}
+          seasonNumber={episode.seasonNumber}
+        />
         <div
           className={cn(
             "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",

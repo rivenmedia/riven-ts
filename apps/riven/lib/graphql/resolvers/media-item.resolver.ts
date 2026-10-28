@@ -10,6 +10,7 @@ import {
   Stream,
   SubtitleEntry,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
@@ -389,5 +390,43 @@ export class MediaItemResolver {
     );
 
     return baseTimestamp.plus({ milliseconds: scrapeJob.job.delay }).toJSDate();
+  }
+
+  @FieldResolver(() => [MediaItemAction.enum])
+  public availableActions(@Root() item: MediaItem) {
+    if (!item.isRequested) {
+      return [];
+    }
+
+    const actions = new Set<MediaItemAction>(["reset"]);
+
+    if (item.state === "failed") {
+      actions.add("retry");
+    }
+
+    const pausableStates = MediaItemState.exclude([
+      "failed",
+      "completed",
+      "paused",
+      "unreleased",
+    ]);
+
+    if (pausableStates.safeParse(item.state).success) {
+      actions.add("pause");
+    }
+
+    if (item.state === "paused") {
+      actions.add("resume");
+    }
+
+    if (item.activeStream) {
+      actions.add("blacklist_active_stream");
+    }
+
+    if (item.type !== "episode") {
+      actions.add("delete");
+    }
+
+    return [...actions];
   }
 }
