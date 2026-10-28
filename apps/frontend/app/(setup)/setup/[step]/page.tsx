@@ -18,7 +18,7 @@ import { SetupQualityStep } from "./_steps/quality.tsx";
 import { SetupReviewStep } from "./_steps/review.tsx";
 import { SetupWelcomeStep } from "./_steps/welcome.tsx";
 
-import type { ParamsOf } from "../../../../.next/types/routes";
+import type { ParamsOf } from "#.next/types/routes.d.ts";
 import type { Step } from "./_hooks/use-steps.tsx";
 
 const steps = [

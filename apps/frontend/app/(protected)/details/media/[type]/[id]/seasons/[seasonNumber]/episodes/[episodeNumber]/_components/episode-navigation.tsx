@@ -5,7 +5,7 @@ import Link from "next/link";
 import { fly } from "#components/_animations/fly.ts";
 import { Button } from "#components/_ui/button.tsx";
 
-import type { GetSeasonQuery } from "../../../_queries/get-season.query.typegen.ts";
+import type { GetSeasonQuery } from "../../../_queries/get-season.query.typegen";
 
 type Episode = NonNullable<
   GetSeasonQuery["tmdbItem"]["season"]

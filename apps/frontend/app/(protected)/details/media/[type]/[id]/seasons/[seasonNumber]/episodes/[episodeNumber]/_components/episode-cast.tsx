@@ -1,8 +1,8 @@
 import { cacheLife } from "next/cache";
 
+import { CastSection } from "#app/(protected)/details/media/_components/cast-section.tsx";
 import { query } from "#lib/graphql/client.ts";
 
-import { CastSection } from "../../../../../../../_components/cast-section.tsx";
 import { GET_EPISODE_CAST } from "../_queries/get-episode-cast.query.ts";
 
 async function fetchEpisodeCast(

@@ -16,7 +16,7 @@ export async function fetchSeasonState(tvdbId: string, seasonNumber: number) {
 
   const { data, error } = await query({
     query: GET_SEASON_STATE,
-    variables: { tvdbId },
+    variables: { tvdbId, number: seasonNumber },
   });
 
   if (error) {
@@ -29,5 +29,5 @@ export async function fetchSeasonState(tvdbId: string, seasonNumber: number) {
     return null;
   }
 
-  return show.seasons.find(({ number }) => number === seasonNumber) ?? null;
+  return show.season;
 }

@@ -1,7 +1,7 @@
 import { LiveItemStateBadge } from "#components/item-state-badge/item-state-badge.client.tsx";
 import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 
-import { fetchSeasonState } from "../../../_data-access/fetch-season-state.ts";
+import { fetchSeasonState } from "../../../_data-access/fetch-season-state";
 
 import type { StatusBadgeProps } from "#components/media/status-badge/status-badge.tsx";
 

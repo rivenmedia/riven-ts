@@ -1,5 +1,10 @@
 import { DateTime } from "luxon";
 
+interface FormatEpisodeDetailsOptions {
+  airDate?: string | null | undefined;
+  runtime?: number | null | undefined;
+}
+
 /**
  * Formats an episode's air date and runtime for display, e.g. `["Jan 20, 2008", "58m"]`.
  *
@@ -9,10 +14,7 @@ import { DateTime } from "luxon";
 export function formatEpisodeDetails({
   airDate,
   runtime,
-}: {
-  airDate?: string | null | undefined;
-  runtime?: number | null | undefined;
-}) {
+}: FormatEpisodeDetailsOptions) {
   const details: string[] = [];
 
   if (airDate) {

@@ -10,13 +10,13 @@ export const GET_SEASON_STATE: TypedDocumentNode<
   GetSeasonStateQuery,
   GetSeasonStateQueryVariables
 > = gql`
-  query GetSeasonState($tvdbId: String!) {
+  query GetSeasonState($tvdbId: String!, $number: Int!) {
     itemRequestByExternalIds(tvdbId: $tvdbId) {
       id
       primaryMediaItem {
         ... on Show {
           id
-          seasons(includeSpecials: true, includeUnrequestedSeasons: true) {
+          season(number: $number) {
             id
             number
             isRequested
