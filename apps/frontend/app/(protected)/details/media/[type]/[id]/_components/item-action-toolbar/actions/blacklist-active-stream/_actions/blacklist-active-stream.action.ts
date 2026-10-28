@@ -20,7 +20,11 @@ export const blacklistActiveStream = permissionActionClient
       variables: { id },
     });
 
+    if (!data?.blacklistActiveStream) {
+      throw new Error("Failed to blacklist active stream");
+    }
+
     return {
-      success: Boolean(data?.blacklistActiveStream),
+      success: true,
     };
   });

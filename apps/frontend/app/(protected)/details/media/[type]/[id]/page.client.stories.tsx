@@ -873,6 +873,42 @@ CompletedMovie.test(
     ).toBeInTheDocument();
   },
 );
+
+CompletedMovie.test(
+  'Shows an error when the "Blacklist Active Stream" action fails',
+  async ({ args, canvas, canvasElement, msw, userEvent, context }) => {
+    expect.assert(args.data.mediaItem);
+
+    msw.use(
+      mockMutationWithIdEqualityCheck(
+        BLACKLIST_ACTIVE_STREAM,
+        args.data.mediaItem.id,
+        { blacklistActiveStream: false },
+      ),
+    );
+
+    await confirmItemAction(context, /blacklist active stream/iu);
+
+    await expect(
+      await within(canvasElement.ownerDocument.body).findByText(
+        /failed to blacklist the active stream/iu,
+      ),
+    ).toBeInTheDocument();
+
+    const dialog = await within(canvasElement.ownerDocument.body).findByRole(
+      "alertdialog",
+      { name: /blacklisting/iu },
+    );
+
+    await userEvent.click(
+      within(dialog).getByRole("button", { name: /cancel/iu }),
+    );
+
+    await expect(
+      await canvas.findByRole("status", { name: /completed/iu }),
+    ).toBeInTheDocument();
+  },
+);
 //#endregion
 
 //#region Paused movie
