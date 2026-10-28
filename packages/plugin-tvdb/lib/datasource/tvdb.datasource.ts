@@ -13,6 +13,7 @@ import type { EpisodeBaseRecordSchema } from "../__generated__/zod/episodeBaseRe
 import type { TvdbSettings } from "../tvdb-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 import type { RateLimiterOptions } from "@repo/util-plugin-sdk";
+import type { IndexerSeason } from "@repo/util-plugin-sdk/dto/types/indexer-season.type";
 
 class TvdbAPIError extends Error {
   public override name = "TvdbAPIError";
@@ -86,6 +87,52 @@ export class TvdbAPI extends BaseDataSource<TvdbSettings> {
     } while (nextUrl);
 
     return allEpisodes;
+  }
+
+  /**
+   * Retrieve all seasons in official order by querying the
+   * series and filtering out non-officially ordered seasons.
+   *
+   * @see {@link https://thetvdb.github.io/v4-api/#/Series/getSeriesExtended}
+   *
+   * @param id The TVDB id of the series to retrieve seasons for
+   */
+  public async getAllSeasonsInOfficialOrder(id: string) {
+    const series = await this.getSeries(id);
+    const sortedSeasons =
+      series.seasons?.toSorted((a, b) => (a.number ?? 0) - (b.number ?? 0)) ??
+      [];
+
+    if (sortedSeasons.length === 0) {
+      return null;
+    }
+
+    const seasons = new Map<number, IndexerSeason>();
+
+    for (const season of sortedSeasons) {
+      if (season.type?.type !== "official") {
+        continue;
+      }
+
+      if (typeof season.number !== "number") {
+        continue;
+      }
+
+      if (typeof season.id !== "number") {
+        continue;
+      }
+
+      seasons.set(season.number, {
+        episodes: [],
+        id: season.id.toString(),
+        number: season.number,
+        rootId: id,
+        title: season.name ?? `Season ${season.number.toString()}`,
+        posterUrl: season.image ?? null,
+      });
+    }
+
+    return [...seasons.values()];
   }
 
   /**

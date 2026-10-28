@@ -34,46 +34,6 @@ export class TvdbTmdbIndexerDataResolver {
       return null;
     }
 
-    const episodes = await api.getAllEpisodesInOfficialOrder(
-      tmdbIndexerData.id,
-    );
-
-    const seasons = new Map<number, IndexerSeason>();
-
-    for (const episode of episodes) {
-      if (
-        !episode.seasonNumber ||
-        typeof episode.number !== "number" ||
-        typeof episode.absoluteNumber !== "number" ||
-        !episode.seriesId
-      ) {
-        continue;
-      }
-
-      if (!seasons.has(episode.seasonNumber)) {
-        seasons.set(episode.seasonNumber, {
-          rootId: episode.seriesId.toString(),
-          number: episode.seasonNumber,
-          id:
-            episode.seasons
-              ?.find((season) => season.number === episode.seasonNumber)
-              ?.id?.toString() ?? `season-${episode.seasonNumber.toString()}`,
-          title:
-            episode.seasonName ?? `Season ${episode.seasonNumber.toString()}`,
-          episodes: [],
-        });
-      }
-
-      seasons.get(episode.seasonNumber)?.episodes.push({
-        rootId: episode.seriesId.toString(),
-        id: episode.id?.toString() ?? `episode-${episode.number.toString()}`,
-        title: episode.name ?? `Episode ${episode.number.toString()}`,
-        number: episode.number,
-        seasonNumber: episode.seasonNumber,
-        posterUrl: episode.image ?? null,
-      });
-    }
-
-    return seasons.values().toArray();
+    return api.getAllSeasonsInOfficialOrder(tmdbIndexerData.id);
   }
 }
