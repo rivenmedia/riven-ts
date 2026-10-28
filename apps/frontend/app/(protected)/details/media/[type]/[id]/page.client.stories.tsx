@@ -1224,6 +1224,15 @@ UnrequestedShow.test(
     ).toBeInTheDocument();
   },
 );
+
+UnrequestedShow.test(
+  "Links each season to its season page",
+  async ({ canvas }) => {
+    await expect(
+      await canvas.findByRole("link", { name: /season 2/iu }),
+    ).toHaveAttribute("href", "/details/media/show/unrequested-show/seasons/2");
+  },
+);
 //#endregion
 
 //#region Completed show

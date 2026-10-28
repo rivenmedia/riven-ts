@@ -13,6 +13,7 @@ import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-sk
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 import { query } from "#lib/graphql/client.ts";
 
+import { formatSeasonTitle } from "../../seasons/[seasonNumber]/_utilities/format-season-title.ts";
 import { LiveSeasonCard } from "./_components/season-card/season-card.client.tsx";
 import { SeasonCard } from "./_components/season-card/season-card.tsx";
 import { fetchItemSeasons } from "./_data-access/fetch-item-seasons";
@@ -25,6 +26,7 @@ import type {
 import type { GetItemSeasonsQuery } from "./_queries/get-item-seasons.query.typegen.ts";
 
 interface SeasonCarouselProps {
+  showId: string;
   seasons: NonNullable<GetItemSeasonsQuery["tmdbItem"]["seasons"]>;
   /**
    * The states of the indexed seasons, keyed by season number.
@@ -32,13 +34,18 @@ interface SeasonCarouselProps {
   seasonStates: Map<number, SeasonState & { id: string }>;
 }
 
-function SeasonCarousel({ seasons, seasonStates }: SeasonCarouselProps) {
+function SeasonCarousel({
+  showId,
+  seasons,
+  seasonStates,
+}: SeasonCarouselProps) {
   return (
     <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
       <CarouselContent>
         {seasons.map(({ episodes, id, number, posterUrl }) => {
           const seasonCardProps = {
-            title: number === 0 ? "Specials" : `Season ${number.toString()}`,
+            title: formatSeasonTitle(number),
+            href: `/details/media/show/${showId}/seasons/${number.toString()}`,
             posterUrl,
             episodeCount: episodes.length,
           } as const satisfies SeasonCardProps;
@@ -95,7 +102,9 @@ async function ItemSeasonsLoader({ id }: ItemSeasonsLoaderProps) {
       : [],
   );
 
-  return <SeasonCarousel seasons={seasons} seasonStates={seasonStates} />;
+  return (
+    <SeasonCarousel showId={id} seasons={seasons} seasonStates={seasonStates} />
+  );
 }
 
 interface ItemSeasonsProps {

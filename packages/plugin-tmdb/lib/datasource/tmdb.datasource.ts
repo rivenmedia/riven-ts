@@ -8,6 +8,8 @@ import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIds
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
 import { movieReleaseDates200Schema } from "../__generated__/zod/movieReleaseDatesSchema.ts";
 import { trendingMovies200Schema } from "../__generated__/zod/trendingMoviesSchema.ts";
+import { EpisodeCredits } from "../schemas/episode-credits.schema.ts";
+import { FindEpisodesByExternalId } from "../schemas/find-episodes-by-external-id.schema.ts";
 import { FindShowsByExternalId } from "../schemas/find-shows-by-external-id.schema.ts";
 import { MediaImages } from "../schemas/media-images.schema.ts";
 import { MediaVideos } from "../schemas/media-videos.schema.ts";
@@ -106,6 +108,27 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const { tv_results: tvResults } = FindShowsByExternalId.parse(response);
 
     return tvResults[0]?.id.toString() ?? null;
+  }
+
+  /**
+   * Resolve an episode's location on TMDB from its TVDB ID.
+   *
+   * TMDB's season and episode numbering can differ from TVDB's, so this is preferred over matching by number.
+   *
+   * @returns The episode's TMDB show ID, season number and episode number, or `null` if TMDB has no episode with that TVDB ID
+   */
+  public async getEpisodeFromTvdbId(tvdbId: string) {
+    const response = await this.get<unknown>(`find/${tvdbId}`, {
+      params: {
+        external_source: "tvdb_id",
+      },
+      cacheOptions: externalIdCacheOptions,
+    });
+
+    const { tv_episode_results: episodeResults } =
+      FindEpisodesByExternalId.parse(response);
+
+    return episodeResults[0] ?? null;
   }
 
   public async findById(externalId: string, params: FindByIdQueryParams) {
@@ -275,6 +298,24 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     });
 
     return ShowAggregateCredits.parse(response);
+  }
+
+  public async getLocalisedEpisodeCredits(
+    showId: string,
+    seasonNumber: number,
+    episodeNumber: number,
+    language: string,
+  ) {
+    const response = await this.get<unknown>(
+      `tv/${showId}/season/${seasonNumber.toString()}/episode/${episodeNumber.toString()}/credits`,
+      {
+        params: {
+          language,
+        },
+      },
+    );
+
+    return EpisodeCredits.parse(response);
   }
 
   public async getLocalisedImages(

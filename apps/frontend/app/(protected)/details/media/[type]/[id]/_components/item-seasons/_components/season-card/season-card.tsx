@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { useId } from "react";
 
 import { Field, FieldLabel } from "#components/_ui/field.tsx";
@@ -6,6 +7,7 @@ import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
+import type { LinkProps } from "next/link";
 
 export interface SeasonState {
   isRequested: boolean;
@@ -18,40 +20,56 @@ export interface SeasonCardProps {
   posterUrl: string | null;
   episodeCount: number;
   /**
+   * The season's details page.
+   */
+  href?: LinkProps<`/details/media/show/${string}`>["href"];
+  /**
    * The state of the season's media item, if the season has been indexed.
    */
   season?: SeasonState | undefined;
 }
 
 /**
- * Season poster with its state badge and completed episode progress,
- * or an "Unrequested" badge if the season hasn't been indexed.
+ * Season poster, optionally linking to the season's page, with its state
+ * badge and completed episode progress, or an "Unrequested" badge if the
+ * season hasn't been indexed.
  */
 export function SeasonCard({
   title,
   posterUrl,
   episodeCount,
+  href,
   season,
 }: SeasonCardProps) {
   const progressId = useId();
 
+  const card = (
+    <PortraitCard
+      title={title}
+      image={posterUrl}
+      className="w-28 md:w-32 lg:w-36"
+      topRight={
+        season ? (
+          <StatusBadge isRequested={season.isRequested} state={season.state} />
+        ) : (
+          <StatusBadge isRequested={false} />
+        )
+      }
+    />
+  );
+
   return (
     <>
-      <PortraitCard
-        title={title}
-        image={posterUrl}
-        className="w-28 md:w-32 lg:w-36"
-        topRight={
-          season ? (
-            <StatusBadge
-              isRequested={season.isRequested}
-              state={season.state}
-            />
-          ) : (
-            <StatusBadge isRequested={false} />
-          )
-        }
-      />
+      {href ? (
+        <Link
+          href={href}
+          className="focus-visible:ring-primary block rounded-xl outline-none focus-visible:ring-2"
+        >
+          {card}
+        </Link>
+      ) : (
+        card
+      )}
       {season && episodeCount > 0 && (
         <Field>
           <FieldLabel className="sr-only" id={progressId}>

@@ -2,7 +2,9 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { IndexerSeason } from "@repo/util-plugin-sdk/dto/types/indexer-season.type";
 
 import {
+  Arg,
   FieldResolver,
+  Int,
   Resolver,
   Root,
   getMetadataStorage,
@@ -35,5 +37,22 @@ export class TvdbTmdbIndexerDataResolver {
     }
 
     return api.getAllSeasonsInOfficialOrder(tmdbIndexerData.id);
+  }
+
+  @FieldResolver(() => IndexerSeason, {
+    nullable: true,
+    description:
+      "A single season of the show in official order, including its episodes. Specials are season 0.",
+  })
+  public async season(
+    @Root() tmdbIndexerData: IndexerData,
+    @Arg("number", () => Int) number: number,
+    @PluginDataSource(pluginConfig.name, TvdbAPI) api: TvdbAPI,
+  ): Promise<IndexerSeason | null> {
+    if (tmdbIndexerData.type !== "show") {
+      return null;
+    }
+
+    return api.getSeasonInOfficialOrder(tmdbIndexerData.id, number);
   }
 }
