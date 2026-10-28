@@ -16,3 +16,5 @@ export const EpisodeCredits = z.object({
   cast: z.array(EpisodeCastMember),
   guest_stars: z.array(EpisodeCastMember),
 });
+
+export type EpisodeCredits = z.infer<typeof EpisodeCredits>;

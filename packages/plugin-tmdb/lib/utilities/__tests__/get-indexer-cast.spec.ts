@@ -15,7 +15,7 @@ const castMember = (id: number, name: string, character: string) => ({
   order: id,
 });
 
-it.describe("getEpisodeCast", () => {
+it.describe(getEpisodeCast, () => {
   const episode = {
     id: "349232",
     rootId: "81189",
