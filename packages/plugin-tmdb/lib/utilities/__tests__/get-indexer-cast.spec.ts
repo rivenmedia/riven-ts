@@ -15,14 +15,16 @@ const castMember = (id: number, name: string, character: string) => ({
   order: id,
 });
 
-it.describe(getEpisodeCast, () => {
-  const episode = {
+function createEpisode() {
+  return {
     id: "349232",
     rootId: "81189",
     seasonNumber: 1,
     number: 1,
   };
+}
 
+it.describe(getEpisodeCast, () => {
   it("returns the episode's cast followed by its guest stars, using TMDB's numbering", async ({
     server,
     dataSourceMap,
@@ -60,7 +62,7 @@ it.describe(getEpisodeCast, () => {
 
     const cast = await getEpisodeCast(
       dataSourceMap.get(TmdbAPI),
-      episode,
+      createEpisode(),
       "en-US",
     );
 
@@ -75,6 +77,8 @@ it.describe(getEpisodeCast, () => {
     server,
     dataSourceMap,
   }) => {
+    const episode = createEpisode();
+
     server.use(
       http.get("https://api.themoviedb.org/3/find/:externalId", ({ params }) =>
         HttpResponse.json(
@@ -134,7 +138,7 @@ it.describe(getEpisodeCast, () => {
 
     const cast = await getEpisodeCast(
       dataSourceMap.get(TmdbAPI),
-      episode,
+      createEpisode(),
       "en-US",
     );
 

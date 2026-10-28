@@ -53,16 +53,14 @@ export function createSeasonStateHandlers(
             primaryMediaItem: {
               __typename: "Show",
               id: crypto.randomUUID(),
-              seasons: [
-                {
-                  __typename: "Season",
-                  id: seasonState.id,
-                  number: seasonState.number,
-                  isRequested: seasonState.isRequested,
-                  state: seasonState.state,
-                  episodes: toEpisodes(seasonState),
-                },
-              ],
+              season: {
+                __typename: "Season",
+                id: seasonState.id,
+                number: seasonState.number,
+                isRequested: seasonState.isRequested,
+                state: seasonState.state,
+                episodes: toEpisodes(seasonState),
+              },
             },
           },
         },
