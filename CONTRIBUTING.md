@@ -89,6 +89,13 @@ mkdir -p packages/plugin-seerr/docker-data/seerr
 sudo chown -R $UID:$GID packages/plugin-seerr/docker-data
 ```
 
+If running `silo`, copy `packages/plugin-silo/.env.silo.example` to `packages/plugin-silo/.env.silo` and set `SECRET_KEY` - Silo refuses to start without it:
+
+```bash
+cp packages/plugin-silo/.env.silo.example packages/plugin-silo/.env.silo
+sed -i "s|^SECRET_KEY=.*|SECRET_KEY=\"$(openssl rand -base64 48)\"|" packages/plugin-silo/.env.silo
+```
+
 ```bash
 turbo codegen:api-schemas
 ```
@@ -108,6 +115,7 @@ This will run the services & analytics:
 - `stremthru`
 - `seerr` - for requesting media - <http://localhost:5055>
 - `plex` - media server - <http://localhost:32400>
+- `silo` - media server, with its own `silo-db` and `silo-cache` - <http://localhost:8090>
 
 Then, you can start the riven app in dev mode,
 

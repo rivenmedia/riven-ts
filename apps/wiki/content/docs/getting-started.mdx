@@ -11,7 +11,7 @@ import { Step, Steps } from "fumadocs-ui/components/steps";
 - Linux host with **FUSE** support and `/dev/fuse` available
 - **Docker Engine 24+** with Compose V2
 - A **debrid service** account (Real-Debrid, AllDebrid, TorBox, …)
-- A **media server** (Plex or Jellyfin)
+- A **media server** (Plex, Jellyfin or Silo)
 - A **TMDB API key** (free at [themoviedb.org](https://www.themoviedb.org/settings/api))
 
 <Callout type="warn">
@@ -212,11 +212,13 @@ Add `/mnt/riven` as a library:
 
 - **Plex**: Add Library → Movies/TV Shows → Browse for media folder
 - **Jellyfin**: Dashboard → Libraries → Add Media Library
+- **Silo**: Settings → Libraries → Add Library
 
 <Callout>
   If the media server also runs in Docker, mount the same path with `rslave`
   propagation — `/mnt/riven:/mount:rslave,z` — and set the plugin's
-  `plexLibraryPath` / `jellyfinLibraryPath` to the container-side path.
+  `plexLibraryPath` / `jellyfinLibraryPath` / `siloLibraryPath` to the
+  container-side path.
 </Callout>
 
 </Step>

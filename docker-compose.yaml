@@ -87,6 +87,30 @@ services:
       - all
       - services
 
+  silo:
+    extends:
+      file: ./packages/plugin-silo/docker-compose.yaml
+      service: silo
+    profiles:
+      - all
+      - services
+
+  silo-db:
+    extends:
+      file: ./packages/plugin-silo/docker-compose.yaml
+      service: silo-db
+    profiles:
+      - all
+      - services
+
+  silo-cache:
+    extends:
+      file: ./packages/plugin-silo/docker-compose.yaml
+      service: silo-cache
+    profiles:
+      - all
+      - services
+
   spotlight:
     container_name: spotlight
     image: ghcr.io/getsentry/spotlight:latest
