@@ -5,6 +5,8 @@ import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hoo
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 
+import { logger } from "#lib/logger.ts";
+
 import { BaseItemAction } from "../_components/base-item-action";
 import { useActionDialog } from "../_hooks/use-action-dialog";
 import { requestItem } from "./_actions/request-item.action";
@@ -17,7 +19,7 @@ import type { ExternalIds } from "./_schemas/external-ids.schema";
 import type { ComponentProps } from "react";
 
 interface RequestShowActionProps extends Pick<BaseItemActionProps, "title"> {
-  seasons: ComponentProps<typeof SeasonSelector>["seasons"];
+  seasons: ComponentProps<typeof SeasonSelector>["seasons"] | null;
   requestedSeasons: Set<number>;
   externalIds: ExternalIds;
 }
@@ -54,6 +56,14 @@ export function RequestShowAction({
       actionProps: callbacks,
     },
   );
+
+  if (!seasons) {
+    logger.warn(
+      "RequestShowAction expected seasons to be available: received null",
+    );
+
+    return null;
+  }
 
   return (
     <BaseItemAction

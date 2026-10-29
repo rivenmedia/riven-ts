@@ -71,9 +71,6 @@ export async function ItemActionToolbar({
     mediaItem: data?.itemRequestByExternalIds?.mediaItem?.id,
   };
 
-  const seasons =
-    mediaType === "movie" ? null : await fetchItemSeasons(externalId);
-
   return (
     <>
       <RefreshOnItemRequestChange externalIds={externalIds} />
@@ -89,15 +86,14 @@ export async function ItemActionToolbar({
           )}
           {(availableActions.has("request_multiple") ||
             availableActions.has("request_more")) &&
-            mediaType !== "movie" &&
-            seasons && (
+            mediaType !== "movie" && (
               <RequestShowAction
                 title={title}
                 externalIds={externalIds}
                 requestedSeasons={
                   new Set(data?.itemRequestByExternalIds?.seasons)
                 }
-                seasons={seasons}
+                seasons={await fetchItemSeasons(externalId)}
               />
             )}
           {confirmItemActions.map(
