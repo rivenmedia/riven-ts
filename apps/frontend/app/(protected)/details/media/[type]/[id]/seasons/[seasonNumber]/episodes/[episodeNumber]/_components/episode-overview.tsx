@@ -99,15 +99,13 @@ export function EpisodeOverview({ show, episode }: EpisodeOverviewProps) {
           </div>
         </div>
         <ErrorFallback message="Failed to load item action toolbar.">
-          <Suspense fallback={null}>
-            <ItemActionToolbar
-              title={episode.title}
-              externalId={show.id}
-              mediaType="episode"
-              episodeNumber={episode.number}
-              seasonNumber={episode.seasonNumber}
-            />
-          </Suspense>
+          <ItemActionToolbar
+            title={episode.title}
+            externalId={show.id}
+            mediaType="episode"
+            episodeNumber={episode.number}
+            seasonNumber={episode.seasonNumber}
+          />
         </ErrorFallback>
         <div
           className={cn(

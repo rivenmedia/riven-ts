@@ -76,14 +76,12 @@ export function SeasonOverview({ show, season }: SeasonOverviewProps) {
           </ErrorFallback>
         </div>
         <ErrorFallback message="Failed to load item action toolbar.">
-          <Suspense fallback={null}>
-            <ItemActionToolbar
-              externalId={show.id}
-              mediaType="season"
-              title={season.title}
-              seasonNumber={season.number}
-            />
-          </Suspense>
+          <ItemActionToolbar
+            externalId={show.id}
+            mediaType="season"
+            title={season.title}
+            seasonNumber={season.number}
+          />
         </ErrorFallback>
         <div
           className={cn(
