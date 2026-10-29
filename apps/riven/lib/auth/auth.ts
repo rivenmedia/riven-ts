@@ -20,6 +20,7 @@ import { withLogContext } from "#utilities/logger/log-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { settings } from "#utilities/settings.ts";
 
+import { generateSecret } from "./generate-secret.ts";
 import { getGenericOAuthProviders } from "./oauth-utils.ts";
 import { defaultPlexOptions, plexOAuth } from "./plex-oauth.ts";
 
@@ -46,7 +47,7 @@ const transformLogLevel = (): Exclude<LogLevel, "success"> => {
 };
 
 export const authConfig = {
-  secret: frontendSettings.authSecret,
+  secret: frontendSettings.authSecret ?? generateSecret(),
   baseURL: `http://${settings.host}:${settings.port.toString()}`,
   logger: {
     disabled: !settings.loggingEnabled,

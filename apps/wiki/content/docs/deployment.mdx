@@ -41,7 +41,7 @@ jellyfin:
 ## Reverse Proxy
 
 Riven serves GraphQL on port 3000. Make sure
-`RIVEN_SETTING__gqlHost="0.0.0.0"` is set, or the proxy will get connection
+`RIVEN_SETTING__host="0.0.0.0"` is set, or the proxy will get connection
 refused.
 
 ```yaml title="Traefik"
