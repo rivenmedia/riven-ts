@@ -1,16 +1,16 @@
 import { gql } from "@apollo/client";
 
 import type {
-  GetItemRequestActionsQuery,
-  GetItemRequestActionsQueryVariables,
-} from "./get-item-request-actions.query.typegen";
+  GetMediaItemActionsQuery,
+  GetMediaItemActionsQueryVariables,
+} from "./get-media-item-actions.query.typegen";
 import type { TypedDocumentNode } from "@apollo/client";
 
-export const GET_ITEM_REQUEST_ACTIONS: TypedDocumentNode<
-  GetItemRequestActionsQuery,
-  GetItemRequestActionsQueryVariables
+export const GET_MEDIA_ITEM_ACTIONS: TypedDocumentNode<
+  GetMediaItemActionsQuery,
+  GetMediaItemActionsQueryVariables
 > = gql`
-  query GetItemRequestActions(
+  query GetMediaItemActions(
     $tmdbId: String
     $tvdbId: String
     $type: MediaItemType!

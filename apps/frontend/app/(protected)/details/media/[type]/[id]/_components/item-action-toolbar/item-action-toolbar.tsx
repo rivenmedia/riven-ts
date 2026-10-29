@@ -6,7 +6,7 @@ import { query } from "#lib/graphql/client.ts";
 
 import { fetchItemSeasons } from "../item-seasons/_data-access/fetch-item-seasons.ts";
 import { RefreshOnItemRequestChange } from "./_components/refresh-on-item-request-change.tsx";
-import { GET_ITEM_REQUEST_ACTIONS } from "./_queries/get-item-request-actions.query.ts";
+import { GET_MEDIA_ITEM_ACTIONS } from "./_queries/get-media-item-actions.query.ts";
 import { ConfirmItemAction } from "./actions/_components/confirm-item-action.tsx";
 import { RequestMovieAction } from "./actions/request-item/request-movie-action.tsx";
 import { RequestShowAction } from "./actions/request-item/request-show-action.tsx";
@@ -51,7 +51,7 @@ export async function ItemActionToolbar({
     mediaType === "movie" ? { tmdbId: externalId } : { tvdbId: externalId };
 
   const { data } = await query({
-    query: GET_ITEM_REQUEST_ACTIONS,
+    query: GET_MEDIA_ITEM_ACTIONS,
     variables: {
       type: mediaType,
       ...(episodeNumber === undefined ? {} : { episodeNumber }),

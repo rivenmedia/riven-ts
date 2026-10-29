@@ -4,7 +4,7 @@ import { startTransition, useEffect, useState } from "react";
 import { expect, waitFor, within } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { GET_ITEM_REQUEST_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-item-request-actions.query.ts";
+import { GET_MEDIA_ITEM_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-media-item-actions.query.ts";
 import { ON_ITEM_REQUEST_CHANGED } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_subscriptions/on-item-request-changed.subscription.ts";
 import { DELETE_ITEM_REQUEST } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/delete-item/_mutations/delete-item-request.mutation.ts";
 import { PAUSE_ITEM } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/actions/pause-item/_mutations/pause-item.mutation.ts";
@@ -158,7 +158,7 @@ const mockRequestedMovie = ({
     primaryMediaItemId,
     publishState: itemState.publishState,
     handlers: [
-      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_MEDIA_ITEM_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
@@ -256,7 +256,7 @@ const mockRequestedShow = ({
     primaryMediaItemId,
     publishState: itemState.publishState,
     handlers: [
-      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_MEDIA_ITEM_ACTIONS, () =>
         HttpResponse.json({
           data: {
             itemRequestByExternalIds: {
@@ -664,7 +664,7 @@ export const UnrequestedMovie = meta.story({
           },
         }),
       ),
-      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_MEDIA_ITEM_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
@@ -756,7 +756,7 @@ export const CompletedMovie = UnrequestedMovie.extend({
         { removeItemRequest: true },
         () => {
           msw.use(
-            api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+            api.query(GET_MEDIA_ITEM_ACTIONS, () =>
               HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
             ),
             mockMediaItemQuery(args.data, null),
@@ -1165,7 +1165,7 @@ export const UnrequestedShow = meta.story({
           },
         }),
       ),
-      api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+      api.query(GET_MEDIA_ITEM_ACTIONS, () =>
         HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
       ),
     );
@@ -1272,7 +1272,7 @@ export const CompletedShow = UnrequestedShow.extend({
         { removeItemRequest: true },
         () => {
           msw.use(
-            api.query(GET_ITEM_REQUEST_ACTIONS, () =>
+            api.query(GET_MEDIA_ITEM_ACTIONS, () =>
               HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
             ),
             mockMediaItemQuery(args.data, null),
