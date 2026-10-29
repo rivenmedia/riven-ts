@@ -8,6 +8,7 @@ import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
+import { ItemActionToolbar } from "../../../_components/item-action-toolbar/item-action-toolbar.tsx";
 import { formatSeasonTitle } from "../_utilities/format-season-title.ts";
 import { SeasonStateBadge } from "./season-state-badge.tsx";
 
@@ -74,6 +75,12 @@ export function SeasonOverview({ show, season }: SeasonOverviewProps) {
             </Suspense>
           </ErrorFallback>
         </div>
+        <ItemActionToolbar
+          externalId={show.id}
+          mediaType="season"
+          title={season.title}
+          seasonNumber={season.number}
+        />
         <div
           className={cn(
             "text-muted-foreground flex items-center gap-x-2.5 text-sm animation-duration-400 delay-200",

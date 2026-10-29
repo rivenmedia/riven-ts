@@ -20,7 +20,6 @@ export const GET_ITEM_REQUEST_ACTIONS: TypedDocumentNode<
     itemRequestByExternalIds(tmdbId: $tmdbId, tvdbId: $tvdbId) {
       id
       seasons
-      availableActions
       mediaItem(
         type: $type
         episodeNumber: $episodeNumber

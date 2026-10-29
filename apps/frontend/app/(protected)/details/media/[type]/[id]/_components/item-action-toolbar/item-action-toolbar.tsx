@@ -13,7 +13,6 @@ import { RequestShowAction } from "./actions/request-item/request-show-action.ts
 import { confirmItemActions } from "./confirm-item-actions.tsx";
 
 import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
-import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
 import type { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 
 type ItemActionToolbarProps = {
@@ -61,12 +60,11 @@ export async function ItemActionToolbar({
     },
   });
 
-  const availableActions = new Set<ItemRequestAction | MediaItemAction>([
-    ...(data?.itemRequestByExternalIds?.availableActions ?? [
+  const availableActions = new Set<MediaItemAction>(
+    data?.itemRequestByExternalIds?.mediaItem?.availableActions ?? [
       mediaType === "movie" ? "request_single" : "request_multiple",
-    ]),
-    ...(data?.itemRequestByExternalIds?.mediaItem?.availableActions ?? []),
-  ]);
+    ],
+  );
 
   const targetIds = {
     itemRequest: data?.itemRequestByExternalIds?.id,

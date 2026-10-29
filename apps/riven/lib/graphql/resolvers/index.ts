@@ -8,7 +8,7 @@ import { IndexerSeasonResolver } from "./indexer-season.resolver.ts";
 import { InstanceResolver } from "./instance/instance.resolver.ts";
 import { ItemRequestResolver } from "./item-request/item-request.resolver.ts";
 import { MediaEntryResolver } from "./media-entry.resolver.ts";
-import { MediaItemResolver } from "./media-item.resolver.ts";
+import { MediaItemResolver } from "./media-item/media-item.resolver.ts";
 import { MovieResolver } from "./movie.resolver.ts";
 import { SeasonResolver } from "./season.resolver.ts";
 import { ShareLogsResolver } from "./share-logs.resolver.ts";

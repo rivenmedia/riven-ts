@@ -31,7 +31,7 @@ import type { SeasonState } from "#app/(protected)/details/media/[type]/[id]/_co
 import type { GetItemSeasonStatesQuery } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-season-states.query.typegen.ts";
 import type { GetMediaItemQuery } from "#app/(protected)/details/media/[type]/[id]/_queries/get-media-item.query.typegen.ts";
 import type {
-  ItemRequestAction,
+  MediaItemAction,
   MediaItem,
 } from "#app/_types/__generated__/graphql.ts";
 import type { query, resetClient } from "#lib/graphql/__mocks__/client.ts";
@@ -146,7 +146,7 @@ const mockRequestedMovie = ({
   availableActions,
   mediaItem,
 }: {
-  availableActions: ItemRequestAction[];
+  availableActions: MediaItemAction[];
   mediaItem: RequestedMediaItem;
 }) => {
   const itemRequestId = crypto.randomUUID();
@@ -164,10 +164,10 @@ const mockRequestedMovie = ({
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
               id: itemRequestId,
-              availableActions,
-              primaryMediaItem: {
+              mediaItem: {
                 __typename: "Movie",
                 id: primaryMediaItemId,
+                availableActions,
               },
               seasons: null,
             },
@@ -240,7 +240,7 @@ const mockRequestedShow = ({
   mediaItem,
   seasons,
 }: {
-  availableActions: ItemRequestAction[];
+  availableActions: MediaItemAction[];
   mediaItem: RequestedMediaItem;
   /**
    * The state of each season's media item, or `null` if the season hasn't been indexed
@@ -262,10 +262,10 @@ const mockRequestedShow = ({
             itemRequestByExternalIds: {
               __typename: "ItemRequest",
               id: itemRequestId,
-              availableActions,
-              primaryMediaItem: {
+              mediaItem: {
                 __typename: "Show",
                 id: primaryMediaItemId,
+                availableActions,
               },
               seasons: null,
             },

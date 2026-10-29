@@ -1,12 +1,9 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
-import { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
-import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 
 import {
   Arg,
   Args,
   Ctx,
-  FieldResolver,
   ID,
   Mutation,
   Query,
@@ -132,18 +129,5 @@ export class ItemRequestResolver {
 
       throw error;
     }
-  }
-
-  @FieldResolver(() => [ItemRequestAction.enum])
-  public availableActions(
-    @Root() itemRequest: ItemRequest,
-  ): ItemRequestAction[] {
-    const actions = new Set<ItemRequestAction>();
-
-    if (itemRequest.type === "show" && itemRequest.isPartialRequest) {
-      actions.add("request_more");
-    }
-
-    return [...actions];
   }
 }

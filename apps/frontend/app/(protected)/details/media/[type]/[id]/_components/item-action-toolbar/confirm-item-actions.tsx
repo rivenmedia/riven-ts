@@ -8,7 +8,7 @@ import { resumeItem } from "./actions/resume-item/_actions/resume-item.action.ts
 import { retryItem } from "./actions/retry-item/_actions/retry-item.action.ts";
 
 import type { ConfirmItemActionProps } from "./actions/_components/confirm-item-action.tsx";
-import type { ItemRequestAction } from "@repo/util-plugin-sdk/dto/enums/item-request-action.enum";
+import type { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 import type { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 import type { SafeActionFn } from "next-safe-action";
 
@@ -17,7 +17,7 @@ interface ConfirmItemActionConfig extends Omit<
   "action" | "title"
 > {
   /** The available action that enables this item action. */
-  availableAction: ItemRequestAction;
+  availableAction: MediaItemAction;
   /** The entity whose ID is bound to the action. */
   target: "itemRequest" | "mediaItem";
   action: SafeActionFn<unknown, undefined, [typeof UUID], unknown, unknown>;

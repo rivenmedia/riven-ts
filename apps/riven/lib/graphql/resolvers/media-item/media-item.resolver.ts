@@ -393,12 +393,19 @@ export class MediaItemResolver {
   }
 
   @FieldResolver(() => [MediaItemAction.enum])
-  public availableActions(@Root() item: MediaItem) {
+  public async availableActions(@Root() item: MediaItem) {
     if (!item.isRequested) {
       return [];
     }
 
     const actions = new Set<MediaItemAction>(["reset"]);
+
+    if (
+      item.type === "show" &&
+      (await item.itemRequest.loadProperty("isPartialRequest"))
+    ) {
+      actions.add("request_more");
+    }
 
     if (item.state === "failed") {
       actions.add("retry");
@@ -423,7 +430,7 @@ export class MediaItemResolver {
       actions.add("blacklist_active_stream");
     }
 
-    if (item.type !== "episode") {
+    if (item.type !== "episode" && item.type !== "season") {
       actions.add("delete");
     }
 
