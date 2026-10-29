@@ -79,7 +79,7 @@ export const Unrequested = meta.story();
 
 Unrequested.test("Shows the episode's details", async ({ canvas }) => {
   await expect(
-    canvas.getByRole("heading", {
+    await canvas.findByRole("heading", {
       level: 1,
       name: "Some Mysteries Are Better Left Unsolved",
     }),
@@ -99,10 +99,9 @@ Unrequested.test("Shows the episode's cast", async ({ canvas }) => {
 });
 
 Unrequested.test("Links back to the show and season", async ({ canvas }) => {
-  await expect(canvas.getByRole("link", { name: "Arcane" })).toHaveAttribute(
-    "href",
-    "/details/media/show/371028",
-  );
+  await expect(
+    await canvas.findByRole("link", { name: "Arcane" }),
+  ).toHaveAttribute("href", "/details/media/show/371028");
 
   await expect(canvas.getByRole("link", { name: "Season 1" })).toHaveAttribute(
     "href",
@@ -114,7 +113,7 @@ Unrequested.test(
   "Links to the previous and next episodes",
   async ({ canvas }) => {
     await expect(
-      canvas.getByRole("link", { name: /welcome to the playground/iu }),
+      await canvas.findByRole("link", { name: /welcome to the playground/iu }),
     ).toHaveAttribute(
       "href",
       "/details/media/show/371028/seasons/1/episodes/1",
@@ -138,7 +137,9 @@ export const FirstEpisode = meta.story({
 });
 
 FirstEpisode.test("Only links to the next episode", async ({ canvas }) => {
-  const navigation = canvas.getByRole("navigation", { name: "Episodes" });
+  const navigation = await canvas.findByRole("navigation", {
+    name: "Episodes",
+  });
 
   await expect(navigation.querySelectorAll("a")).toHaveLength(1);
 

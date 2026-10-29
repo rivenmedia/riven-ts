@@ -41,7 +41,7 @@ export const Unrequested = meta.story();
 
 Unrequested.test("Shows the season and its episodes", async ({ canvas }) => {
   await expect(
-    canvas.getByRole("heading", { level: 1, name: "Season 1" }),
+    await canvas.findByRole("heading", { level: 1, name: "Season 1" }),
   ).toBeInTheDocument();
 
   await expect(canvas.getByText("9 episodes")).toBeInTheDocument();
@@ -53,10 +53,9 @@ Unrequested.test("Shows the season and its episodes", async ({ canvas }) => {
 });
 
 Unrequested.test("Links back to the show", async ({ canvas }) => {
-  await expect(canvas.getByRole("link", { name: "Arcane" })).toHaveAttribute(
-    "href",
-    "/details/media/show/371028",
-  );
+  await expect(
+    await canvas.findByRole("link", { name: "Arcane" }),
+  ).toHaveAttribute("href", "/details/media/show/371028");
 });
 
 Unrequested.test("Links each episode to its page", async ({ canvas }) => {
