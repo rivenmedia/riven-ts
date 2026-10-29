@@ -1,10 +1,14 @@
 import { HttpResponse } from "msw";
 
+import { GET_MEDIA_ITEM_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-media-item-actions.query.ts";
+import { ON_ITEM_REQUEST_CHANGED } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_subscriptions/on-item-request-changed.subscription.ts";
 import { GET_SEASON_STATE } from "#app/(protected)/details/media/[type]/[id]/seasons/[seasonNumber]/_queries/get-season-state.query.ts";
 import { ON_SEASON_EPISODES_UPDATED } from "#app/(protected)/details/media/[type]/[id]/seasons/[seasonNumber]/_subscriptions/on-season-episodes-updated.subscription.ts";
 import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subscriptions/on-media-item-state-changed.subscription.ts";
 import { api } from "#mocks/graphql.ts";
 
+import type { GetMediaItemActionsQueryVariables } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-media-item-actions.query.typegen.ts";
+import type { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 interface MockedItemState {
@@ -34,7 +38,61 @@ const toEpisodes = (
   }));
 
 /**
- * Mocks the Riven state of a season and its episodes, and the subscriptions
+ * Mirrors the actions Riven makes available for a season or episode.
+ */
+const toAvailableActions = ({
+  isRequested,
+  state,
+}: MockedItemState): MediaItemAction[] => {
+  if (!isRequested) {
+    return [];
+  }
+
+  return [
+    "reset",
+    ...(state === "failed" ? (["retry"] as const) : []),
+    ...(["failed", "completed", "paused", "unreleased"].includes(state)
+      ? []
+      : (["pause"] as const)),
+    ...(state === "paused" ? (["resume"] as const) : []),
+  ];
+};
+
+/**
+ * Resolves the season or episode that the item actions are queried for.
+ */
+const toMediaItem = (
+  seasonState: MockedSeasonState,
+  { type, seasonNumber, episodeNumber }: GetMediaItemActionsQueryVariables,
+) => {
+  if (seasonNumber !== seasonState.number) {
+    return null;
+  }
+
+  if (type === "season") {
+    return {
+      __typename: "Season" as const,
+      id: seasonState.id,
+      availableActions: toAvailableActions(seasonState),
+    };
+  }
+
+  const episode =
+    type === "episode" && episodeNumber != null
+      ? seasonState.episodes.get(episodeNumber)
+      : undefined;
+
+  return episode
+    ? {
+        __typename: "Episode" as const,
+        id: episode.id,
+        availableActions: toAvailableActions(episode),
+      }
+    : null;
+};
+
+/**
+ * Mocks the Riven state of a season and its episodes, their available actions, and the subscriptions
  * to their changes. A `null` season state mocks a season that hasn't been indexed.
  *
  * @param episodeStateChanges The episode states, keyed by episode number, to publish once subscribed to
@@ -66,6 +124,25 @@ export function createSeasonStateHandlers(
         },
       }),
     ),
+    api.query(GET_MEDIA_ITEM_ACTIONS, ({ variables }) => {
+      if (!seasonState) {
+        return HttpResponse.json({ data: { itemRequestByExternalIds: null } });
+      }
+
+      return HttpResponse.json({
+        data: {
+          itemRequestByExternalIds: {
+            __typename: "ItemRequest",
+            id: crypto.randomUUID(),
+            seasons: [seasonState.number],
+            mediaItem: toMediaItem(seasonState, variables),
+          },
+        },
+      });
+    }),
+    api.subscription(ON_ITEM_REQUEST_CHANGED, () => {
+      // The item request doesn't change
+    }),
     api.subscription(ON_MEDIA_ITEM_STATE_CHANGED, ({ subscription }) => {
       const changedEpisode =
         seasonState &&

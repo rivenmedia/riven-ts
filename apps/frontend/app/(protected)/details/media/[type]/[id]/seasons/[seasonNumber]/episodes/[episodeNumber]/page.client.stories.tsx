@@ -2,6 +2,7 @@ import { HttpResponse } from "msw";
 import { expect, waitFor } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
+import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-seasons.query.ts";
 import { api } from "#mocks/graphql.ts";
 import { createSeasonStateHandlers } from "#mocks/handlers/season-state.handler.ts";
 
@@ -35,6 +36,18 @@ const meta = preview.meta({
   beforeEach({ args, msw }) {
     msw.use(
       ...createSeasonStateHandlers(null),
+      api.query(GET_ITEM_SEASONS, () =>
+        HttpResponse.json({
+          data: {
+            tmdbItem: {
+              __typename: "TmdbIndexerData",
+              id: show.id,
+              type: show.type,
+              seasons: [season],
+            },
+          },
+        }),
+      ),
       api.query(GET_EPISODE_CAST, ({ variables }) =>
         HttpResponse.json({
           data: {

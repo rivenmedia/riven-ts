@@ -1,6 +1,6 @@
 import { cn } from "cn";
 import { startCase } from "es-toolkit";
-import React from "react";
+import React, { Suspense } from "react";
 
 import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
@@ -64,11 +64,13 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           )}
         </div>
         <ErrorFallback message="Failed to load item action toolbar.">
-          <ItemActionToolbar
-            title={data.title}
-            externalId={data.id}
-            mediaType={data.type}
-          />
+          <Suspense fallback={null}>
+            <ItemActionToolbar
+              title={data.title}
+              externalId={data.id}
+              mediaType={data.type}
+            />
+          </Suspense>
         </ErrorFallback>
         <div
           className={cn(
