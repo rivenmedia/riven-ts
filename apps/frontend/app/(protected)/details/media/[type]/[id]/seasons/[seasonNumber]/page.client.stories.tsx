@@ -35,6 +35,11 @@ const meta = preview.meta({
       ),
     );
   },
+  async play({ canvas }) {
+    // The page suspends until all of its server components (e.g. the item action toolbar) have loaded,
+    // so wait for it before testing anything that loads after it
+    await canvas.findByRole("heading", { level: 1 });
+  },
 });
 
 export const Unrequested = meta.story();
