@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { ButtonGroup } from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import { Field, FieldError, FieldLabel } from "#components/_ui/field.tsx";
 import { Input } from "#components/_ui/input.tsx";
 

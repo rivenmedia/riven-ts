@@ -8,7 +8,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "#components/_ui/alert-dialog.tsx";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 import { DeleteAccountConfirmationButton } from "./_components/delete-account-confirmation-button";
 

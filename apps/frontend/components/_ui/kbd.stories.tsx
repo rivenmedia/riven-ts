@@ -2,7 +2,7 @@ import { SearchIcon } from "lucide-react";
 
 import { preview } from "#.storybook/preview.tsx";
 import { ButtonGroup } from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import {
   InputGroup,
   InputGroupAddon,

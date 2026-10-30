@@ -12,7 +12,7 @@ import {
   useState,
 } from "react";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 import type { UseEmblaCarouselType } from "embla-carousel-react";
 import type { ComponentProps } from "react";

@@ -8,7 +8,7 @@ import {
   AlertDialogFooter,
   AlertDialogCancel,
 } from "#components/_ui/alert-dialog.tsx";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 import { DeleteUserConfirmationButton } from "./delete-user-confirmation-button";
 

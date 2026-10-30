@@ -3,7 +3,7 @@
 import { kebabCase } from "es-toolkit";
 import Link from "next/link";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 export interface Step {
   id: string;

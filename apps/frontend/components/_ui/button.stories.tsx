@@ -1,13 +1,13 @@
 import { LoaderCircle, Mail } from "lucide-react";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 /**
  * Displays a button or a component that looks like a button.
  */
 const meta = preview.meta({
-  title: "ui/ButtonMoved",
+  title: "ui/Button",
   component: Button,
   tags: ["autodocs"],
   argTypes: {

@@ -6,7 +6,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 /** Page navigation with previous/next, page links and an ellipsis. */
 function Pagination({ className, ...props }: React.ComponentProps<"nav">) {

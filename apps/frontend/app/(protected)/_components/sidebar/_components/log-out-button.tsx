@@ -3,7 +3,7 @@
 import { LogOut } from "lucide-react";
 
 import { logout } from "#app/(protected)/_actions/logout.action.ts";
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 export function LogOutButton() {
   return (

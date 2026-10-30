@@ -1,7 +1,7 @@
 import { cn } from "cn";
 import { Check, Palette } from "lucide-react";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,

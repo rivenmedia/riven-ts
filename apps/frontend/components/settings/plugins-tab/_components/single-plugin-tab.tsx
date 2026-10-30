@@ -1,6 +1,6 @@
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import {
   Card,
   CardAction,

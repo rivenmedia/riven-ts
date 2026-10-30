@@ -4,7 +4,7 @@ import { useAction } from "next-safe-action/hooks";
 import { startTransition } from "react";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 import { useActionDialog } from "../_hooks/use-action-dialog";
 import { BaseItemAction } from "./base-item-action";

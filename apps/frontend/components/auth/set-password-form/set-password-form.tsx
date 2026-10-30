@@ -6,7 +6,7 @@ import { LoaderCircle } from "lucide-react";
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button-moved.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { ToggleablePasswordField } from "../_components/toggleable-password-field.tsx";
