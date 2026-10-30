@@ -15,14 +15,22 @@ const MODES = ["side-by-side", "swipe", "onion", "diff"] as const;
 
 const THEMES = ["auto", "light", "dark"] as const;
 
-const STATUS_FILTERS = ["all", "changed", "new"] as const;
+const STATUS_FILTERS = ["all", "changed", "new", "renamed", "removed"] as const;
 
 type Mode = (typeof MODES)[number];
 
 const STATUS_LABELS: Record<SnapshotStatus, string> = {
   changed: "Changed",
   new: "New baseline",
+  renamed: "Renamed",
+  removed: "Removed",
 };
+
+/** Labels renamed snapshots with their similarity, as git does */
+const statusLabel = (snapshot: Snapshot) =>
+  snapshot.status === "renamed" && snapshot.similarity !== null
+    ? `${STATUS_LABELS.renamed} · ${String(snapshot.similarity)}% similar`
+    : STATUS_LABELS[snapshot.status];
 
 const readPreference = <T extends string>(
   key: string,
@@ -188,7 +196,24 @@ const renderBody = (snapshot: Snapshot) => {
   const body = element("div", { class: "snapshot-body" });
   const { baseline, result, diff } = snapshot;
 
+  if (!result) {
+    if (baseline) {
+      body.append(
+        element("div", { class: "panes" }, [pane("Baseline", baseline)]),
+      );
+    }
+
+    return body;
+  }
+
   if (!baseline) {
+    body.append(element("div", { class: "panes" }, [pane("Result", result)]));
+
+    return body;
+  }
+
+  // Identical images are only shown once, as there is nothing to compare
+  if (snapshot.similarity === 100) {
     body.append(element("div", { class: "panes" }, [pane("Result", result)]));
 
     return body;
@@ -231,9 +256,14 @@ const renderCard = (snapshot: Snapshot) => {
         ]),
         element("span", {
           class: `badge ${snapshot.status}`,
-          text: STATUS_LABELS[snapshot.status],
+          text: statusLabel(snapshot),
         }),
-        element("span", { class: "snapshot-path muted", text: snapshot.id }),
+        element("span", {
+          class: "snapshot-path muted",
+          text: snapshot.renamedFrom
+            ? `${snapshot.renamedFrom} → ${snapshot.id}`
+            : snapshot.id,
+        }),
       ]),
       renderBody(snapshot),
     ],
@@ -262,7 +292,7 @@ const renderNav = (snapshots: Snapshot[]) =>
               "a",
               {
                 href: anchorFor(snapshot),
-                title: STATUS_LABELS[snapshot.status],
+                title: statusLabel(snapshot),
               },
               [
                 element("span", { class: `badge-dot ${snapshot.status}` }),
@@ -277,7 +307,9 @@ const renderNav = (snapshots: Snapshot[]) =>
 
 const matches = (snapshot: Snapshot) =>
   (state.status === "all" || snapshot.status === state.status) &&
-  snapshot.id.toLowerCase().includes(state.query);
+  [snapshot.id, snapshot.renamedFrom ?? ""].some((id) =>
+    id.toLowerCase().includes(state.query),
+  );
 
 const applyFilters = (snapshots: Snapshot[]) => {
   let visibleCount = 0;
@@ -308,7 +340,7 @@ const applyFilters = (snapshots: Snapshot[]) => {
   empty.hidden = visibleCount > 0;
   empty.textContent =
     snapshots.length === 0
-      ? "No visual regressions or new baselines were found."
+      ? "No visual regressions or baseline changes were found."
       : "No snapshots match the filter.";
 };
 
@@ -381,10 +413,7 @@ const step = (direction: 1 | -1) => {
 };
 
 const renderSummary = (manifest: Manifest) => {
-  const changed = manifest.snapshots.filter(
-    ({ status }) => status === "changed",
-  ).length;
-  const added = manifest.snapshots.length - changed;
+  const counts = Object.groupBy(manifest.snapshots, ({ status }) => status);
   const pullRequestNumber =
     new URL(manifest.pullRequestUrl).pathname.split("/").findLast(Boolean) ??
     "";
@@ -394,7 +423,7 @@ const renderSummary = (manifest: Manifest) => {
     `Visual regressions in PR #${pullRequestNumber}`;
 
   query("#summary").append(
-    `${String(changed)} changed · ${String(added)} new · `,
+    `${String(counts.changed?.length ?? 0)} changed · ${String(counts.new?.length ?? 0)} new · ${String(counts.renamed?.length ?? 0)} renamed · ${String(counts.removed?.length ?? 0)} removed · `,
     element("a", { href: manifest.pullRequestUrl, text: "pull request" }),
     " · ",
     element("a", {

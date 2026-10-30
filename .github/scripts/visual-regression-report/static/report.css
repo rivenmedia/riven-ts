@@ -11,6 +11,10 @@
   --changed-bg: #fdeee4;
   --new: #19723d;
   --new-bg: #e3f5ea;
+  --renamed: #2b5fb8;
+  --renamed-bg: #e4ecfb;
+  --removed: #b42318;
+  --removed-bg: #fdeceb;
   --checker-a: #ffffff;
   --checker-b: #e7e9ed;
   --radius: 8px;
@@ -32,6 +36,14 @@
     --changed-bg: #3a2416;
     --new: #6fd39a;
     --new-bg: #16301f;
+    --renamed: #8ab4f8;
+    --renamed-bg: #18263d;
+    --removed: #f28b82;
+    --removed-bg: #3b1a18;
+    --renamed: #8ab4f8;
+    --renamed-bg: #18263d;
+    --removed: #f28b82;
+    --removed-bg: #3b1a18;
     --checker-a: #23272e;
     --checker-b: #1c1f25;
   }
@@ -50,6 +62,10 @@
   --changed-bg: #3a2416;
   --new: #6fd39a;
   --new-bg: #16301f;
+  --renamed: #8ab4f8;
+  --renamed-bg: #18263d;
+  --removed: #f28b82;
+  --removed-bg: #3b1a18;
   --checker-a: #23272e;
   --checker-b: #1c1f25;
 }
@@ -308,6 +324,24 @@ main {
 
 .badge-dot.new {
   background: var(--new);
+}
+
+.badge.renamed {
+  color: var(--renamed);
+  background: var(--renamed-bg);
+}
+
+.badge-dot.renamed {
+  background: var(--renamed);
+}
+
+.badge.removed {
+  color: var(--removed);
+  background: var(--removed-bg);
+}
+
+.badge-dot.removed {
+  background: var(--removed);
 }
 
 .snapshot-body {

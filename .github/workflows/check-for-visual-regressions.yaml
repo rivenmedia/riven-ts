@@ -259,7 +259,7 @@ jobs:
     name: Publish visual regression report
     needs: check-for-diffs
     # Fork PRs have no access to secrets, so their report is published by the "Inspect Visual Regression report from fork" workflow
-    if: ${{ (needs.check-for-diffs.outputs.diffs-count != '0' || needs.check-for-diffs.outputs.new-baselines-count != '0') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
+    if: ${{ (needs.check-for-diffs.outputs.diffs-count != '0' || needs.check-for-diffs.outputs.new-baselines-count != '0' || needs.check-for-diffs.outputs.unused-baselines-count != '0') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -302,6 +302,7 @@ jobs:
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr-number }}/commits/${{ inputs.head-sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run-id }}
           HEAD_SHA: ${{ inputs.head-sha }}
+          HAS_COMPLETE_REPORT: ${{ needs.check-for-diffs.outputs.has-complete-report }}
         run: |
           node --disable-warning=ExperimentalWarning .github/scripts/visual-regression-report/build-report.ts \
             --report-dir "$REPORT_DIR" \
@@ -309,7 +310,8 @@ jobs:
             --pr-url "$PR_URL" \
             --commit-url "$COMMIT_URL" \
             --run-url "$RUN_URL" \
-            --head-sha "$HEAD_SHA"
+            --head-sha "$HEAD_SHA" \
+            --complete-report "$HAS_COMPLETE_REPORT"
 
           echo '{ "version": 3 }' > "$OUTPUT_DIR/config.json"
 

@@ -5,9 +5,14 @@
  * the expected `__vis__` layout are read, and they are copied under a content
  * hash rather than their original path.
  *
+ * Unused baselines can only be found when every component test shard uploaded
+ * its results, so they are only reported with `--complete-report true`. Like
+ * git, an unused baseline that looks like a new snapshot is reported as renamed.
+ *
  * Usage:
  *   node build-report.ts --report-dir <dir> --out-dir <dir> \
- *     --pr-url <url> --commit-url <url> --run-url <url> --head-sha <sha>
+ *     --pr-url <url> --commit-url <url> --run-url <url> --head-sha <sha> \
+ *     --complete-report <true|false>
  */
 import { createHash } from "node:crypto";
 import {
@@ -23,7 +28,11 @@ import { stripTypeScriptTypes } from "node:module";
 import path from "node:path";
 import { parseArgs } from "node:util";
 
+import { diffImages, similarity } from "./compare.ts";
+import { PNG_SIGNATURE, decodePng, encodePng } from "./png.ts";
+
 import type { Manifest, ReportImage, Snapshot } from "./manifest.ts";
+import type { DecodedImage } from "./png.ts";
 
 const STATIC_DIR = path.join(import.meta.dirname, "static");
 
@@ -31,9 +40,8 @@ const CLIENT_SCRIPT = path.join(import.meta.dirname, "client", "report.ts");
 
 const MAX_IMAGE_BYTES = 20 * 1024 * 1024;
 
-const PNG_SIGNATURE = Buffer.from([
-  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
-]);
+/** The share of pixels a new snapshot must have in common with an unused baseline to be reported as renamed, as in git */
+const RENAME_THRESHOLD = 0.5;
 
 const SEGMENT_PATTERN = /^[\w.-]+$/u;
 
@@ -44,6 +52,7 @@ const ARG_NAMES = [
   "commit-url",
   "run-url",
   "head-sha",
+  "complete-report",
 ] as const;
 
 type ArgName = (typeof ARG_NAMES)[number];
@@ -81,6 +90,12 @@ const headSha = requireArg("head-sha");
 
 if (!/^[\da-f]{40}$/u.test(headSha)) {
   throw new Error("--head-sha must be a full commit SHA");
+}
+
+const completeReport = requireArg("complete-report");
+
+if (completeReport !== "true" && completeReport !== "false") {
+  throw new Error("--complete-report must be true or false");
 }
 
 const isMissingError = (error: unknown) =>
@@ -131,10 +146,18 @@ const isRegularFile = async (filePath: string) => {
   }
 };
 
-const copiedImages = new Map<string, ReportImage>();
+const isDirectory = async (directoryPath: string) => {
+  try {
+    const stats = await lstat(directoryPath);
 
-/** Validates a PNG and copies it into the report, returning its content-addressed path and dimensions */
-const addImage = async (imagePath: string) => {
+    return stats.isDirectory();
+  } catch {
+    return false;
+  }
+};
+
+/** Reads and validates a PNG from the report */
+const readImage = async (imagePath: string) => {
   const stats = await lstat(imagePath);
 
   if (!stats.isFile()) {
@@ -158,6 +181,13 @@ const addImage = async (imagePath: string) => {
     throw new Error(`${imagePath} is not a PNG`);
   }
 
+  return contents;
+};
+
+const copiedImages = new Map<string, ReportImage>();
+
+/** Writes a validated PNG into the report, returning its content-addressed path and dimensions */
+const storeImage = async (contents: Buffer) => {
   const hash = createHash("sha256").update(contents).digest("hex").slice(0, 32);
   const existing = copiedImages.get(hash);
 
@@ -178,48 +208,287 @@ const addImage = async (imagePath: string) => {
   return image;
 };
 
-/** Collects the snapshots in a platform directory that differ from, or have no, baseline */
+const addImage = async (imagePath: string) => {
+  const contents = await readImage(imagePath);
+
+  return storeImage(contents);
+};
+
+/** Lists the PNGs below a snapshot directory, relative to it */
+const listSnapshots = async (directory: string) => {
+  const files = await listFiles(directory);
+
+  return files.filter(
+    (relativePath) =>
+      relativePath.endsWith(".png") && !relativePath.split("/").includes(".."),
+  );
+};
+
+interface RenameCandidate {
+  relativePath: string;
+  contents: Buffer;
+}
+
+interface RenamePair {
+  result: RenameCandidate;
+  baseline: RenameCandidate;
+  similarity: number;
+}
+
+/** Decodes each candidate once, as each is compared against several others */
+const createDecoder = () => {
+  const decoded = new Map<RenameCandidate, Promise<DecodedImage | null>>();
+
+  return async (candidate: RenameCandidate) => {
+    const image = decoded.get(candidate) ?? decodePng(candidate.contents);
+
+    decoded.set(candidate, image);
+
+    return image;
+  };
+};
+
+/** Scores each pair of new snapshot and unused baseline that are at least as similar as the threshold */
+const scoreRenamePairs = async (
+  added: RenameCandidate[],
+  removed: RenameCandidate[],
+  decode: ReturnType<typeof createDecoder>,
+) => {
+  const pairs: RenamePair[] = [];
+
+  const score = async (result: RenameCandidate, baseline: RenameCandidate) => {
+    if (result.contents.equals(baseline.contents)) {
+      return 1;
+    }
+
+    const resultImage = await decode(result);
+    const baselineImage = await decode(baseline);
+
+    return resultImage && baselineImage
+      ? similarity(baselineImage, resultImage, RENAME_THRESHOLD)
+      : null;
+  };
+
+  for (const result of added) {
+    for (const baseline of removed) {
+      const pairSimilarity = await score(result, baseline);
+
+      if (pairSimilarity !== null) {
+        pairs.push({ result, baseline, similarity: pairSimilarity });
+      }
+    }
+  }
+
+  return pairs;
+};
+
+/** Counts the path segments two snapshots share, from the file name up and then from the root down */
+const pathAffinity = ({ result, baseline }: RenamePair) => {
+  const resultSegments = result.relativePath.split("/");
+  const baselineSegments = baseline.relativePath.split("/");
+
+  const sharedSegments = (fromEnd: boolean) => {
+    const length = Math.min(resultSegments.length, baselineSegments.length);
+    const at = (segments: string[], i: number) =>
+      segments.at(fromEnd ? -1 - i : i);
+    let shared = 0;
+
+    while (
+      shared < length &&
+      at(resultSegments, shared) === at(baselineSegments, shared)
+    ) {
+      shared += 1;
+    }
+
+    return shared;
+  };
+
+  return [sharedSegments(true), sharedSegments(false)] as const;
+};
+
+/**
+ * Orders the most similar pairs first. Snapshots often look identical, such as a story and its play function
+ * tests, so equally similar pairs are ordered by their paths, as git prefers renames that keep the file name.
+ */
+const compareRenamePairs = (a: RenamePair, b: RenamePair) => {
+  const [aFromEnd, aFromRoot] = pathAffinity(a);
+  const [bFromEnd, bFromRoot] = pathAffinity(b);
+
+  return (
+    Math.floor(b.similarity * 100) - Math.floor(a.similarity * 100) ||
+    bFromEnd - aFromEnd ||
+    bFromRoot - aFromRoot ||
+    a.result.relativePath.localeCompare(b.result.relativePath) ||
+    a.baseline.relativePath.localeCompare(b.baseline.relativePath)
+  );
+};
+
+/** Matches new snapshots to unused baselines they look like, in the way git detects renamed files */
+const detectRenames = async (
+  added: RenameCandidate[],
+  removed: RenameCandidate[],
+) => {
+  const decode = createDecoder();
+  const pairs = await scoreRenamePairs(added, removed, decode);
+  const renames = new Map<RenameCandidate, RenamePair>();
+  const matchedBaselines = new Set<RenameCandidate>();
+
+  // The most similar pairs are matched first, and each snapshot is only matched once, as in git
+  for (const pair of pairs.toSorted(compareRenamePairs)) {
+    if (!renames.has(pair.result) && !matchedBaselines.has(pair.baseline)) {
+      renames.set(pair.result, pair);
+      matchedBaselines.add(pair.baseline);
+    }
+  }
+
+  const diffs = new Map<RenameCandidate, Buffer>();
+
+  for (const { result, baseline, similarity: score } of renames.values()) {
+    const resultImage = await decode(result);
+    const baselineImage = await decode(baseline);
+
+    if (score < 1 && resultImage && baselineImage) {
+      diffs.set(
+        result,
+        await encodePng(diffImages(baselineImage, resultImage)),
+      );
+    }
+  }
+
+  return { renames, matchedBaselines, diffs };
+};
+
+interface SnapshotDirectories {
+  workspace: string;
+  platform: string;
+  platformDir: string;
+  resultsDir: string;
+  baselinesDir: string;
+}
+
+/** Describes a snapshot by the repository path of its baseline */
+const describeSnapshot = (
+  { workspace, platform }: SnapshotDirectories,
+  relativePath: string,
+) => ({
+  // Matches the baseline paths listed in the step summary and PR comment
+  id: `${workspace}/__vis__/${platform}/__baselines__/${relativePath}`,
+  workspace,
+  platform,
+  file: path.posix.dirname(relativePath),
+  name: path.posix.basename(relativePath, ".png"),
+});
+
+/** Collects the results that differ from their baseline, and the results that have none */
+const collectResults = async (directories: SnapshotDirectories) => {
+  const { platformDir, resultsDir, baselinesDir } = directories;
+  const changed: Snapshot[] = [];
+  const added: RenameCandidate[] = [];
+
+  for (const relativePath of await listSnapshots(resultsDir)) {
+    const baselinePath = path.join(baselinesDir, relativePath);
+    const diffPath = path.join(platformDir, "__diffs__", relativePath);
+    const resultPath = path.join(resultsDir, relativePath);
+
+    if (!(await isRegularFile(baselinePath))) {
+      added.push({ relativePath, contents: await readImage(resultPath) });
+    } else if (await isRegularFile(diffPath)) {
+      // Results that match their baseline are not part of the review
+      changed.push({
+        ...describeSnapshot(directories, relativePath),
+        status: "changed",
+        renamedFrom: null,
+        similarity: null,
+        baseline: await addImage(baselinePath),
+        result: await addImage(resultPath),
+        diff: await addImage(diffPath),
+      });
+    }
+  }
+
+  return { changed, added };
+};
+
+/**
+ * Collects the baselines without a result, which belong to removed snapshots as every snapshot taken writes one.
+ * Only the snapshot directories with results are checked, as in the workflow.
+ */
+const collectUnusedBaselines = async ({
+  resultsDir,
+  baselinesDir,
+}: SnapshotDirectories) => {
+  const removed: RenameCandidate[] = [];
+
+  if (completeReport !== "true" || !(await isDirectory(resultsDir))) {
+    return removed;
+  }
+
+  for (const relativePath of await listSnapshots(baselinesDir)) {
+    if (!(await isRegularFile(path.join(resultsDir, relativePath)))) {
+      removed.push({
+        relativePath,
+        contents: await readImage(path.join(baselinesDir, relativePath)),
+      });
+    }
+  }
+
+  return removed;
+};
+
+/** Collects the snapshots in a platform directory that differ from, have no, or no longer use a baseline */
 const collectPlatformSnapshots = async (
   workspace: string,
   platform: string,
 ) => {
   const platformDir = path.join(reportDir, workspace, "__vis__", platform);
-  const resultsDir = path.join(platformDir, "__results__");
-  const snapshots: Snapshot[] = [];
+  const directories: SnapshotDirectories = {
+    workspace,
+    platform,
+    platformDir,
+    resultsDir: path.join(platformDir, "__results__"),
+    baselinesDir: path.join(platformDir, "__baselines__"),
+  };
 
-  for (const relativePath of await listFiles(resultsDir)) {
-    if (
-      !relativePath.endsWith(".png") ||
-      relativePath.split("/").includes("..")
-    ) {
-      continue;
-    }
+  const { changed, added } = await collectResults(directories);
+  const removed = await collectUnusedBaselines(directories);
+  const { renames, matchedBaselines, diffs } = await detectRenames(
+    added,
+    removed,
+  );
+  const snapshots = [...changed];
 
-    const baselinePath = path.join(platformDir, "__baselines__", relativePath);
-    const diffPath = path.join(platformDir, "__diffs__", relativePath);
-    const hasBaseline = await isRegularFile(baselinePath);
-    const hasDiff = await isRegularFile(diffPath);
-
-    // Results that match their baseline are not part of the review
-    if (hasBaseline && !hasDiff) {
-      continue;
-    }
+  for (const result of added) {
+    const rename = renames.get(result);
+    const diff = diffs.get(result);
 
     snapshots.push({
-      // Matches the baseline paths listed in the step summary and PR comment
-      id: `${workspace}/__vis__/${platform}/__baselines__/${relativePath}`,
-      status: hasBaseline ? "changed" : "new",
-      workspace,
-      platform,
-      file: path.posix.dirname(relativePath),
-      name: path.posix.basename(relativePath, ".png"),
-      baseline: hasBaseline ? await addImage(baselinePath) : null,
-      result: await addImage(path.join(resultsDir, relativePath)),
-      diff: hasDiff ? await addImage(diffPath) : null,
+      ...describeSnapshot(directories, result.relativePath),
+      status: rename ? "renamed" : "new",
+      renamedFrom: rename
+        ? describeSnapshot(directories, rename.baseline.relativePath).id
+        : null,
+      similarity: rename ? Math.floor(rename.similarity * 100) : null,
+      baseline: rename ? await storeImage(rename.baseline.contents) : null,
+      result: await storeImage(result.contents),
+      diff: diff ? await storeImage(diff) : null,
     });
   }
 
-  return snapshots;
+  for (const baseline of removed.filter(
+    (candidate) => !matchedBaselines.has(candidate),
+  )) {
+    snapshots.push({
+      ...describeSnapshot(directories, baseline.relativePath),
+      status: "removed",
+      renamedFrom: null,
+      similarity: null,
+      baseline: await storeImage(baseline.contents),
+      result: null,
+      diff: null,
+    });
+  }
+
+  return snapshots.toSorted((a, b) => a.id.localeCompare(b.id));
 };
 
 const collectSnapshots = async () => {
@@ -280,10 +549,8 @@ const manifest: Manifest = {
 
 await writeFile(path.join(outDir, "manifest.json"), JSON.stringify(manifest));
 
-const changedCount = snapshots.filter(
-  ({ status }) => status === "changed",
-).length;
+const counts = Object.groupBy(snapshots, ({ status }) => status);
 
 console.debug(
-  `Built a report of ${String(changedCount)} visual regressions and ${String(snapshots.length - changedCount)} new baselines in ${outDir}`,
+  `Built a report of ${String(counts.changed?.length ?? 0)} visual regressions, ${String(counts.new?.length ?? 0)} new baselines, ${String(counts.renamed?.length ?? 0)} renamed baselines and ${String(counts.removed?.length ?? 0)} removed baselines in ${outDir}`,
 );
