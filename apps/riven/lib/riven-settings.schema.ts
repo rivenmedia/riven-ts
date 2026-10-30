@@ -149,14 +149,28 @@ export const RivenSettings = z.object({
     .int()
     .positive()
     .optional()
-    .describe("The minimum average bitrate for movies.")
+    .describe("The minimum average bitrate for movies in kbps.")
+    .meta({ "wiki.section": "scraping" }),
+  maximumAverageBitrateMovies: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe("The maximum average bitrate for movies in kbps.")
     .meta({ "wiki.section": "scraping" }),
   minimumAverageBitrateEpisodes: z.coerce
     .number()
     .int()
     .positive()
     .optional()
-    .describe("The minimum average bitrate for episodes.")
+    .describe("The minimum average bitrate for episodes in kbps.")
+    .meta({ "wiki.section": "scraping" }),
+  maximumAverageBitrateEpisodes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe("The maximum average bitrate for episodes in kbps.")
     .meta({ "wiki.section": "scraping" }),
   preferSeasonPacks: z
     .stringbool()

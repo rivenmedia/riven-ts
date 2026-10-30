@@ -95,6 +95,7 @@ const GET_VALIDATE_TORRENT_FILES_EPISODE_QUERY: TypedDocumentNode<
       season {
         number
       }
+      runtime
     }
   }
 `;
@@ -135,15 +136,28 @@ function getValidMovieFiles(
 
       assert.ok(parseData.type === "movie", "File must be a movie");
 
-      if (item.runtime && settings.minimumAverageBitrateMovies) {
+      if (
+        item.runtime &&
+        (settings.minimumAverageBitrateMovies ||
+          settings.maximumAverageBitrateMovies)
+      ) {
         const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
-        // TODO: If this assertion fails, we can probably skip checking all other files.
-        // Average bitrate is proportional to the file size, and the files are ordered by size.
-        assert.ok(
-          bitrate >= settings.minimumAverageBitrateMovies,
-          `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
-        );
+        if (settings.minimumAverageBitrateMovies) {
+          // TODO: If this assertion fails, we can probably skip checking all other files.
+          // Average bitrate is proportional to the file size, and the files are ordered by size.
+          assert.ok(
+            bitrate >= settings.minimumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
+
+        if (settings.maximumAverageBitrateMovies) {
+          assert.ok(
+            bitrate <= settings.maximumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
       }
 
       return [
@@ -227,13 +241,26 @@ async function getMatchedEpisodeId(
         episode.season.number === item.season.number,
       `Incorrect episode for ${item.fullTitle}`,
     );
+  }
 
-    if (item.runtime && settings.minimumAverageBitrateEpisodes) {
-      const bitrate = calculateAverageBitrate(file.size, item.runtime);
+  if (
+    episode.runtime &&
+    (settings.minimumAverageBitrateEpisodes ||
+      settings.maximumAverageBitrateEpisodes)
+  ) {
+    const bitrate = calculateAverageBitrate(file.size, episode.runtime);
 
+    if (settings.minimumAverageBitrateEpisodes) {
       assert.ok(
         bitrate >= settings.minimumAverageBitrateEpisodes,
         `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+      );
+    }
+
+    if (settings.maximumAverageBitrateEpisodes) {
+      assert.ok(
+        bitrate <= settings.maximumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateEpisodes.toString()} for episodes`,
       );
     }
   }
