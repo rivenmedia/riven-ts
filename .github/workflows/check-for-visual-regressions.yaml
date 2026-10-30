@@ -56,7 +56,7 @@ jobs:
       contents: read
     outputs:
       has-report: ${{ steps.artifacts.outputs.has-report }}
-      has-complete-report: ${{ steps.artifacts.outputs.has-complete-report }}
+      has-complete-report: ${{ steps.snapshots.outputs.has-complete-report || 'false' }}
       requires-update: ${{ steps.requires-update.outputs.requires-update }}
       diffs-count: ${{ steps.changes.outputs.diffs-count || 0 }}
       new-baselines-count: ${{ steps.changes.outputs.new-baselines-count || 0 }}
@@ -121,12 +121,57 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ inputs.run-id }}
 
+      # A test that fails before taking its snapshot writes no result, so its baseline would look unused
+      # Each shard records whether it took every snapshot, so the report is only complete if they all did
+      - name: Check every snapshot was taken
+        id: snapshots
+        if: ${{ steps.artifacts.outputs.has-report == 'true' }}
+        working-directory: ${{ runner.temp }}/visual-regression-report
+        env:
+          HAS_ALL_REPORTS: ${{ steps.artifacts.outputs.has-complete-report }}
+          SHARD_COUNT: ${{ steps.artifacts.outputs.shard-count }}
+        run: |
+          shopt -s nullglob
+
+          if [[ "$HAS_ALL_REPORTS" != "true" ]]; then
+            echo "has-complete-report=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          ALL_SNAPSHOTS_TAKEN=true
+
+          for VIS_DIR in {apps,packages}/*/__vis__; do
+            # Only workspaces with results ran their component tests
+            RESULTS_DIRS=("$VIS_DIR"/*/__results__)
+
+            (( ${#RESULTS_DIRS[@]} > 0 )) || continue
+
+            RUNS=("$VIS_DIR"/component-test-run-*-of-"$SHARD_COUNT".json)
+
+            # A shard that crashed records nothing
+            if (( ${#RUNS[@]} != SHARD_COUNT )); then
+              echo "Only ${#RUNS[@]} of $SHARD_COUNT component test shards recorded their run in $VIS_DIR"
+              ALL_SNAPSHOTS_TAKEN=false
+            fi
+
+            for RUN in "${RUNS[@]}"; do
+              if ! jq -e '.allSnapshotsTaken == true' "$RUN" > /dev/null 2>&1; then
+                echo "Not every snapshot was taken in $RUN, missing snapshots from:"
+                jq -c '.testFilesMissingSnapshots' "$RUN" 2>&1 || true
+                ALL_SNAPSHOTS_TAKEN=false
+              fi
+            done
+          done
+
+          echo "all-snapshots-taken=$ALL_SNAPSHOTS_TAKEN" >> $GITHUB_OUTPUT
+          echo "has-complete-report=$ALL_SNAPSHOTS_TAKEN" >> $GITHUB_OUTPUT
+
       - name: Check for visual regression diffs
         id: changes
         if: ${{ steps.artifacts.outputs.has-report == 'true' }}
         working-directory: ${{ runner.temp }}/visual-regression-report
         env:
-          HAS_COMPLETE_REPORT: ${{ steps.artifacts.outputs.has-complete-report }}
+          HAS_COMPLETE_REPORT: ${{ steps.snapshots.outputs.has-complete-report }}
         run: |
           shopt -s globstar nullglob
 
@@ -142,7 +187,8 @@ jobs:
           done
 
           # Every snapshot taken writes a result, so a baseline without one belongs to a removed snapshot
-          # A partial report omits cached shards, which uploaded no results, so unused baselines can only be found in a complete one
+          # A partial report omits cached shards, which uploaded no results, and tests that failed before taking their snapshots
+          # Unused baselines can only be found in a complete report
           # Only the snapshot directories CI writes results to are checked, so baselines for other platforms are kept
           if [[ "$HAS_COMPLETE_REPORT" == "true" ]]; then
             for RESULTS_DIR in {apps,packages}/*/__vis__/*/__results__; do
@@ -191,7 +237,8 @@ jobs:
         id: summary
         env:
           HAS_REPORT: ${{ steps.artifacts.outputs.has-report }}
-          HAS_COMPLETE_REPORT: ${{ steps.artifacts.outputs.has-complete-report }}
+          HAS_ALL_REPORTS: ${{ steps.artifacts.outputs.has-complete-report }}
+          ALL_SNAPSHOTS_TAKEN: ${{ steps.snapshots.outputs.all-snapshots-taken }}
           REPORT_COUNT: ${{ steps.artifacts.outputs.report-count }}
           SHARD_COUNT: ${{ steps.artifacts.outputs.shard-count }}
           REQUIRES_UPDATE: ${{ steps.requires-update.outputs.requires-update }}
@@ -228,9 +275,13 @@ jobs:
               echo "> [!NOTE]"
               echo "> No visual regression report was uploaded, as the component tests were cached or unaffected."
               echo
-            elif [[ "$HAS_COMPLETE_REPORT" != "true" ]]; then
+            elif [[ "$HAS_ALL_REPORTS" != "true" ]]; then
               echo "> [!NOTE]"
               echo "> Only $REPORT_COUNT of ${SHARD_COUNT:-an unknown number of} component test shards uploaded a report. The others were cached, so passed against their baselines."
+              echo
+            elif [[ "$ALL_SNAPSHOTS_TAKEN" != "true" ]]; then
+              echo "> [!NOTE]"
+              echo "> Some component tests failed before taking their snapshots, so unused baselines were not checked."
               echo
             fi
 
@@ -508,7 +559,8 @@ jobs:
           done
 
           # Baselines changed outside of this deployment are replaced with the test result, or removed if no longer used
-          # A partial report omits cached shards, which passed against their baselines, so those are kept as they are
+          # A partial report omits cached shards, which passed against their baselines, and tests that failed before taking
+          # their snapshots, so baselines without a result are kept as they are
           jq -r '.[]' <<< "$UNATTESTED_BASELINES" | while read -r BASELINE; do
             RESULT="${BASELINE/\/__baselines__\///__results__/}"
 
@@ -517,7 +569,7 @@ jobs:
             elif [[ "$HAS_COMPLETE_REPORT" == "true" ]]; then
               rm "$GITHUB_WORKSPACE/$BASELINE"
             else
-              echo "::warning::Keeping $BASELINE, as its shard was cached and uploaded no result"
+              echo "::warning::Keeping $BASELINE, as the report is partial and has no result for it"
             fi
           done
 

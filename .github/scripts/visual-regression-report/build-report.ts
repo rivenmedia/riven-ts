@@ -6,7 +6,8 @@
  * hash rather than their original path.
  *
  * Unused baselines can only be found when every component test shard uploaded
- * its results, so they are only reported with `--complete-report true`. Like
+ * its results and took all of its snapshots, so they are only reported with
+ * `--complete-report true`. Like
  * git, an unused baseline that looks like a new snapshot is reported as renamed.
  *
  * Usage:
