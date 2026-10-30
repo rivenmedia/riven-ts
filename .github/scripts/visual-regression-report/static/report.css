@@ -161,6 +161,53 @@ kbd {
   cursor: pointer;
 }
 
+.toggle {
+  padding: 6px 10px;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font: inherit;
+  cursor: pointer;
+}
+
+.toggle[aria-pressed="true"] {
+  color: var(--accent-text);
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+.progress {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.progress progress {
+  width: 80px;
+  height: 6px;
+  overflow: hidden;
+  appearance: none;
+  background: var(--border);
+  border: 0;
+  border-radius: 999px;
+}
+
+.progress progress::-webkit-progress-bar {
+  background: var(--border);
+}
+
+.progress progress::-webkit-progress-value {
+  background: var(--new);
+}
+
+.progress progress::-moz-progress-bar {
+  background: var(--new);
+}
+
 .segmented button + button {
   border-left: 1px solid var(--border);
 }
@@ -231,6 +278,16 @@ nav li a {
   border-radius: 4px;
 }
 
+nav li.viewed a {
+  color: var(--muted);
+}
+
+nav li.viewed a::after {
+  margin-left: auto;
+  color: var(--new);
+  content: "✓";
+}
+
 nav li a:hover,
 nav li a[aria-current="true"] {
   background: var(--surface);
@@ -270,6 +327,59 @@ main {
   align-items: baseline;
   padding: 12px 16px;
   border-bottom: 1px solid var(--border);
+}
+
+.snapshot.viewed .snapshot-header {
+  background: var(--bg);
+}
+
+.snapshot-header:has(+ .snapshot-body[hidden]) {
+  border-bottom: 0;
+}
+
+.collapse-toggle {
+  align-self: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  color: var(--muted);
+  background: none;
+  border: 0;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.collapse-toggle:hover {
+  background: var(--bg);
+}
+
+.collapse-toggle::before {
+  display: inline-block;
+  content: "▾";
+  transition: transform 0.1s;
+}
+
+.collapse-toggle[aria-expanded="false"]::before {
+  transform: rotate(-90deg);
+}
+
+.viewed-toggle {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  margin-left: auto;
+  padding: 2px 8px;
+  color: var(--muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  font-size: 12px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.snapshot.viewed .viewed-toggle {
+  color: var(--new);
+  border-color: var(--new);
 }
 
 .snapshot-header h2 {
