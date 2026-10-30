@@ -23,8 +23,14 @@ export class InvalidTorrentError extends Error {
   public override name = "InvalidTorrentError";
 }
 
+/**
+ * Calculates the average bitrate of a file in kbps.
+ *
+ * @param fileSize The file size in bytes
+ * @param runtime The runtime in minutes
+ */
 function calculateAverageBitrate(fileSize: number, runtime: number) {
-  return fileSize / runtime / (1024 * 1024);
+  return (fileSize * 8) / (runtime * 60) / 1000;
 }
 
 const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<

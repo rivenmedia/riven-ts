@@ -117,10 +117,10 @@ it("falls back to a smaller file when the largest file exceeds the maximum", asy
 
   await em.persist(indexedMovie).flush();
 
-  mockBitrateSettings({ maximum: 60 });
+  mockBitrateSettings({ maximum: 20_000 });
 
-  const largeFile = buildMovieFile(indexedMovie.title, 70);
-  const smallFile = buildMovieFile(indexedMovie.title, 50);
+  const largeFile = buildMovieFile(indexedMovie.title, 25_000);
+  const smallFile = buildMovieFile(indexedMovie.title, 15_000);
 
   const mappedFiles = {
     movies: { 0: largeFile, 1: smallFile },
@@ -141,10 +141,10 @@ it("skips the bitrate check if the movie has no runtime", async ({
 
   await em.persist(indexedMovie).flush();
 
-  mockBitrateSettings({ minimum: 40, maximum: 60 });
+  mockBitrateSettings({ minimum: 5000, maximum: 15_000 });
 
   const mappedFiles = {
-    movies: { 0: buildMovieFile(indexedMovie.title, 1000) },
+    movies: { 0: buildMovieFile(indexedMovie.title, 1_000_000) },
     episodes: {},
   } satisfies MappedFiles;
 

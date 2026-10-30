@@ -113,11 +113,11 @@ it("skips the bitrate check if the episode has no runtime", async ({
 
   await em.persist(episode).flush();
 
-  mockBitrateSettings({ minimum: 40, maximum: 60 });
+  mockBitrateSettings({ minimum: 5000, maximum: 15_000 });
 
   const mappedFiles = {
     movies: {},
-    episodes: await buildEpisodeFiles([episode], () => 1000),
+    episodes: await buildEpisodeFiles([episode], () => 1_000_000),
   } satisfies MappedFiles;
 
   await expect(
@@ -151,7 +151,7 @@ it.for(["show", "season"] as const)(
 
     await em.persist(episodes).flush();
 
-    mockBitrateSettings({ minimum: 40, maximum: 60 });
+    mockBitrateSettings({ minimum: 5000, maximum: 15_000 });
 
     const [tooLow, tooHigh] = episodes;
 
@@ -161,14 +161,14 @@ it.for(["show", "season"] as const)(
       movies: {},
       episodes: await buildEpisodeFiles(episodes, (episode) => {
         if (episode === tooLow) {
-          return 39;
+          return 4999;
         }
 
         if (episode === tooHigh) {
-          return 61;
+          return 15_001;
         }
 
-        return 50;
+        return 10_000;
       }),
     } satisfies MappedFiles;
 
