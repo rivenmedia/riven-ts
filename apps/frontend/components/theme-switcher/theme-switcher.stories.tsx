@@ -51,6 +51,11 @@ Default.test(
           themeValue,
         );
       });
+
+      // The menu returns focus to the button once it has closed, opening its tooltip, so wait for it to settle
+      await waitFor(async () => {
+        await expect(button).toHaveFocus();
+      });
     }
   },
 );

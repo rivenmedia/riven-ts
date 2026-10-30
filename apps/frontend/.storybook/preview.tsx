@@ -19,6 +19,7 @@ import { i18n } from "#.storybook/i18n.ts";
 import { fontMono, fontSansSerif, fontSerif } from "#app/fonts.ts";
 import { Providers } from "#components/providers.tsx";
 import { getSessionHandler } from "#mocks/handlers/get-session.handler.ts";
+import { remoteAssetHandlers } from "#mocks/handlers/remote-assets.handler.ts";
 
 import { WithI18n } from "./decorators/with-i18n.tsx";
 import { WithReducedMotionCheck } from "./decorators/with-reduced-motion-check.tsx";
@@ -99,7 +100,7 @@ export const preview = definePreview({
     mswAddon(async () => {
       const worker = setupWorker(
         getSessionHandler,
-        http.get("https://picsum.photos/seed/:id/:width/:height", passthrough),
+        ...remoteAssetHandlers,
         http.get("http://localhost:6006/*", passthrough),
       );
 
