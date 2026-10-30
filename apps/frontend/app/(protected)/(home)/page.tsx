@@ -2,7 +2,7 @@ import { cn } from "cn";
 
 import { fly } from "#components/_animations/fly.ts";
 
-import { RecentlyAdded } from "./_components/recently-added.tsx";
+import { RecentlyAdded } from "./_components/recently-added/recently-added.tsx";
 import { TMDBNowPlaying } from "./_components/tmdb-now-playing/tmdb-now-playing.tsx";
 import { TMDBTrendingMovies } from "./_components/tmdb-trending-movies/tmdb-trending-movies.tsx";
 import { TMDBTrendingShows } from "./_components/tmdb-trending-shows/tmdb-trending-shows.tsx";

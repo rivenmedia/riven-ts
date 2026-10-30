@@ -15,5 +15,3 @@ export const SetPasswordFormSchema = z
     message: "New password and confirmation do not match.",
     path: ["confirmNewPassword"],
   });
-
-export type SetPasswordFormValues = z.infer<typeof SetPasswordFormSchema>;

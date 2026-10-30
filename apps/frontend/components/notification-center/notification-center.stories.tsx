@@ -117,9 +117,9 @@ export const WithNotifications = meta.story({
       );
 
       return (
-        <NotificationsContext.Provider value={value}>
+        <NotificationsContext value={value}>
           <Story />
-        </NotificationsContext.Provider>
+        </NotificationsContext>
       );
     },
   ],
@@ -201,9 +201,9 @@ export const ErroredConnectionStatus = meta.story({
       );
 
       return (
-        <NotificationsContext.Provider value={value}>
+        <NotificationsContext value={value}>
           <Story />
-        </NotificationsContext.Provider>
+        </NotificationsContext>
       );
     },
   ],

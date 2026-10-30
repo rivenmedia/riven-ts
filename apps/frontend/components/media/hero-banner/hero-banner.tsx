@@ -7,15 +7,7 @@ import { useState } from "react";
 
 import { Button } from "#components/_ui/button.tsx";
 
-import type { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
-
-export interface Trailer {
-  id?: string | number;
-  name: string;
-  site: string | null;
-  key: string;
-  url?: string | null;
-}
+import type { ItemImage, Trailer } from "#app/_types/__generated__/graphql.ts";
 
 export interface HeroBannerProps {
   backdropUrl: string | null | undefined;

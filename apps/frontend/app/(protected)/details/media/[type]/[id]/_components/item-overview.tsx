@@ -101,20 +101,26 @@ export function ItemOverview({ data }: ItemOverviewProps) {
           </div>
         )}
         <RatingsRow
-          scores={[
-            {
-              name: "IMDb",
-              image: "imdb.svg",
-              score: "7.6",
-              url: "",
-            },
-            {
-              name: "TMDb",
-              image: "tmdb.svg",
-              score: "9.2",
-              url: "",
-            },
-          ]}
+          scores={
+            new Map([
+              [
+                "IMDb",
+                {
+                  logo: "imdb.svg",
+                  score: "7.6",
+                  url: "",
+                },
+              ],
+              [
+                "TMDb",
+                {
+                  logo: "tmdb.svg",
+                  score: "9.2",
+                  url: "",
+                },
+              ],
+            ])
+          }
           loading={false}
         />
         <p

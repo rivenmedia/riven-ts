@@ -3,15 +3,10 @@ import Image from "next/image";
 
 import { fly } from "#components/_animations/fly.ts";
 
-export interface Rating {
-  name: string;
-  image?: string;
-  score: string;
-  url: string;
-}
+import type { Rating } from "#app/_types/__generated__/graphql.ts";
 
 export interface RatingsRowProps {
-  scores: Rating[] | null | undefined;
+  scores: Map<string, Rating> | null;
   loading: boolean;
 }
 
@@ -30,6 +25,10 @@ export function RatingsRow({ loading, scores }: RatingsRowProps) {
     );
   }
 
+  if (!scores) {
+    return null;
+  }
+
   return (
     <div
       className={cn(
@@ -37,18 +36,18 @@ export function RatingsRow({ loading, scores }: RatingsRowProps) {
         fly,
       )}
     >
-      {scores?.map((score) => (
+      {[...scores.entries()].map(([key, score]) => (
         <a
-          key={score.name}
+          key={key}
           href={score.url}
           target="_blank"
           rel="external noopener noreferrer"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-2 transition-colors"
         >
-          {score.image && (
+          {score.logo && (
             <Image
-              src={`/rating-logos/${score.image}`}
-              alt={score.name}
+              src={`/rating-logos/${score.logo}`}
+              alt={`${key} logo`}
               className="h-6 w-6 object-contain"
               width={24}
               height={24}
