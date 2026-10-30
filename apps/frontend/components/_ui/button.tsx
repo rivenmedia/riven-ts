@@ -63,7 +63,7 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }), "text-xl")}
+      className={cn(buttonVariants({ variant, size, className }))}
       type={type}
       {...props}
     />
