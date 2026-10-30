@@ -242,6 +242,158 @@ const waitForNextFrame = () =>
     });
   });
 
+/** The declaration Storybook uses to pause animations on their last frame once a story finishes */
+const PAUSE_DECLARATION = "animation-play-state: paused !important";
+
+/** The declaration Storybook briefly applies first, so the paused animations restart from their first frame */
+const RESTART_DECLARATION = "animation: none !important";
+
+/** Storybook's pause styles, held back until {@link releaseAnimationPause} */
+const heldPauseStyles = new Set<HTMLStyleElement>();
+
+const findAnimationPauseStyles = () =>
+  [...document.head.querySelectorAll("style:not([id])")].filter((style) =>
+    style.textContent.includes(PAUSE_DECLARATION),
+  );
+
+/**
+ * Holds back the styles Storybook adds to pause animations once a story finishes, so they can play out before the snapshot.
+ *
+ * Storybook pauses them on their last frame as the story's play function ends, which doesn't render the same as finishing:
+ * - An exit animation never ends, so its element stays mounted, e.g. a closed dialog never returns focus to its trigger
+ * - Transitions are cut short, so e.g. an element that was moving can be rasterised at a different subpixel offset
+ *
+ * As the play function can end at any point in an animation, snapshots would vary between runs.
+ * Storybook adds the styles synchronously and immediately applies them, so they must be disabled as they're added.
+ */
+export const holdAnimationPause = () => {
+  const { head } = document;
+  const appendChild = head.appendChild.bind(head);
+
+  head.appendChild = <T extends Node>(node: T) => {
+    const appended = appendChild(node);
+
+    if (
+      node instanceof HTMLStyleElement &&
+      node.sheet &&
+      [PAUSE_DECLARATION, RESTART_DECLARATION].some((declaration) =>
+        node.textContent.includes(declaration),
+      )
+    ) {
+      node.sheet.disabled = true;
+
+      if (node.textContent.includes(PAUSE_DECLARATION)) {
+        heldPauseStyles.add(node);
+      }
+    }
+
+    return appended;
+  };
+};
+
+/**
+ * Lets the short animations still running when the story finished play out, so the snapshot doesn't depend on how far they got.
+ *
+ * Longer animations are left to {@link releaseAnimationPause} instead, as they often time something else,
+ * e.g. a carousel's autoplay progress ends as it moves to the next slide.
+ */
+const finishRunningAnimations = async ({
+  maxDurationMs = 2000,
+  timeoutMs = 5000,
+} = {}) => {
+  const startedAt = performance.now();
+
+  const getShortAnimations = () =>
+    document
+      .getAnimations()
+      .filter(
+        (animation) =>
+          animation.playState === "running" &&
+          Number(animation.effect?.getComputedTiming().endTime) <=
+            maxDurationMs,
+      );
+
+  // Animations can start as others finish, e.g. a tooltip opening once a closed menu has returned focus to its trigger
+  while (performance.now() - startedAt < timeoutMs) {
+    let shortAnimations = getShortAnimations();
+
+    if (shortAnimations.length === 0) {
+      // Gives a finished exit animation time to unmount its element, and anything that follows to start
+      await waitForNextFrame();
+
+      shortAnimations = getShortAnimations();
+
+      if (shortAnimations.length === 0) {
+        return;
+      }
+    }
+
+    await Promise.race([
+      Promise.allSettled(
+        shortAnimations.map(async (animation) => animation.finished),
+      ),
+      new Promise((resolve) => {
+        setTimeout(resolve, timeoutMs - (performance.now() - startedAt));
+      }),
+    ]);
+  }
+};
+
+/**
+ * Applies Storybook's held back pause styles, so animations that are infinite (e.g. spinners) or too long to wait for
+ * are captured on their last frame, as Storybook would have.
+ */
+const releaseAnimationPause = () => {
+  const restartStyle = document.createElement("style");
+
+  restartStyle.textContent = `*, *::before, *::after { ${RESTART_DECLARATION}; }`;
+
+  // Restarts the animations, so they're paused on the same frame whatever point they had reached
+  document.head.append(restartStyle);
+  document.body.getBoundingClientRect();
+  restartStyle.remove();
+
+  for (const style of heldPauseStyles) {
+    if (style.sheet) {
+      style.sheet.disabled = false;
+    }
+  }
+
+  heldPauseStyles.clear();
+};
+
+/**
+ * Removes infinite animations (e.g. spinners), so their elements are captured in their unanimated pose.
+ *
+ * Paused on a frame, they're still composited separately, which occasionally rasterises them differently between runs.
+ * Cancelled CSS animations stay removed until their element's `animation` changes.
+ */
+const cancelInfiniteAnimations = () => {
+  for (const animation of document.getAnimations()) {
+    if (!Number.isFinite(animation.effect?.getComputedTiming().endTime)) {
+      animation.cancel();
+    }
+  }
+};
+
+/**
+ * Repaints elements with a backdrop filter from scratch.
+ *
+ * They're rasterised separately, and Chromium keeps the raster from while they were moving (e.g. as their container's
+ * padding transitioned), so their text could be captured at a slightly different subpixel offset between runs.
+ */
+const repaintBackdropFilters = async () => {
+  const style = document.createElement("style");
+
+  style.textContent =
+    "*, *::before, *::after { backdrop-filter: none !important; }";
+
+  document.head.append(style);
+  await waitForNextFrame();
+  style.remove();
+  await waitForNextFrame();
+};
+
 /**
  * Runs immediately before each automatic snapshot.
  *
@@ -259,6 +411,11 @@ export const prepareAutoSnapshot: Extract<
   if (fullPage === false) {
     clipBodyToViewport();
   }
+
+  await finishRunningAnimations();
+  releaseAnimationPause();
+  cancelInfiniteAnimations();
+  await repaintBackdropFilters();
 
   // Fonts use `display: swap`, so the fallback font may still be showing
   await document.fonts.ready;
@@ -292,6 +449,10 @@ export const prepareAutoSnapshot: Extract<
     await waitForNextFrame();
   }
 
+  // Spinners may have mounted since the animations were paused
+  cancelInfiniteAnimations();
+  await waitForNextFrame();
+
   return true;
 };
 
@@ -302,11 +463,11 @@ export const prepareAutoSnapshot: Extract<
  * Elements that unmount once their exit animation ends (e.g. a closing accordion item) then never unmount.
  */
 const removeLeakedAnimationPause = () => {
-  for (const style of document.head.querySelectorAll("style:not([id])")) {
-    if (style.textContent.includes("animation-play-state: paused !important")) {
-      style.remove();
-    }
+  for (const style of findAnimationPauseStyles()) {
+    style.remove();
   }
+
+  heldPauseStyles.clear();
 };
 
 /** Undoes any page changes made by {@link prepareAutoSnapshot}, as stories in the same file share a document */

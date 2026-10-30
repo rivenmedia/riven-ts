@@ -29,7 +29,7 @@ on:
         default: false
     outputs:
       requires-update:
-        description: Whether the baselines do not match the component test results or were changed outside of the deployment, or empty if they could not be checked
+        description: Whether the baselines do not match the component test results, are no longer used, or were changed outside of the deployment, or empty if they could not be checked
         value: ${{ jobs.check-for-diffs.outputs.requires-update }}
 
 permissions: {}
@@ -56,10 +56,12 @@ jobs:
       contents: read
     outputs:
       has-report: ${{ steps.artifacts.outputs.has-report }}
-      has-complete-report: ${{ steps.artifacts.outputs.has-complete-report }}
+      has-complete-report: ${{ steps.snapshots.outputs.has-complete-report || 'false' }}
       requires-update: ${{ steps.requires-update.outputs.requires-update }}
       diffs-count: ${{ steps.changes.outputs.diffs-count || 0 }}
       new-baselines-count: ${{ steps.changes.outputs.new-baselines-count || 0 }}
+      unused-baselines-count: ${{ steps.changes.outputs.unused-baselines-count || 0 }}
+      unused-baselines: ${{ steps.changes.outputs.unused-baselines || '[]' }}
       unattested-baselines-count: ${{ steps.requires-update.outputs.unattested-baselines-count }}
       update-instructions: ${{ steps.summary.outputs.update-instructions }}
     steps:
@@ -119,15 +121,63 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           run-id: ${{ inputs.run-id }}
 
+      # A test that fails before taking its snapshot writes no result, so its baseline would look unused
+      # Each shard records whether it took every snapshot, so the report is only complete if they all did
+      - name: Check every snapshot was taken
+        id: snapshots
+        if: ${{ steps.artifacts.outputs.has-report == 'true' }}
+        working-directory: ${{ runner.temp }}/visual-regression-report
+        env:
+          HAS_ALL_REPORTS: ${{ steps.artifacts.outputs.has-complete-report }}
+          SHARD_COUNT: ${{ steps.artifacts.outputs.shard-count }}
+        run: |
+          shopt -s nullglob
+
+          if [[ "$HAS_ALL_REPORTS" != "true" ]]; then
+            echo "has-complete-report=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          ALL_SNAPSHOTS_TAKEN=true
+
+          for VIS_DIR in {apps,packages}/*/__vis__; do
+            # Only workspaces with results ran their component tests
+            RESULTS_DIRS=("$VIS_DIR"/*/__results__)
+
+            (( ${#RESULTS_DIRS[@]} > 0 )) || continue
+
+            RUNS=("$VIS_DIR"/component-test-run-*-of-"$SHARD_COUNT".json)
+
+            # A shard that crashed records nothing
+            if (( ${#RUNS[@]} != SHARD_COUNT )); then
+              echo "Only ${#RUNS[@]} of $SHARD_COUNT component test shards recorded their run in $VIS_DIR"
+              ALL_SNAPSHOTS_TAKEN=false
+            fi
+
+            for RUN in "${RUNS[@]}"; do
+              if ! jq -e '.allSnapshotsTaken == true' "$RUN" > /dev/null 2>&1; then
+                echo "Not every snapshot was taken in $RUN, missing snapshots from:"
+                jq -c '.testFilesMissingSnapshots' "$RUN" 2>&1 || true
+                ALL_SNAPSHOTS_TAKEN=false
+              fi
+            done
+          done
+
+          echo "all-snapshots-taken=$ALL_SNAPSHOTS_TAKEN" >> $GITHUB_OUTPUT
+          echo "has-complete-report=$ALL_SNAPSHOTS_TAKEN" >> $GITHUB_OUTPUT
+
       - name: Check for visual regression diffs
         id: changes
         if: ${{ steps.artifacts.outputs.has-report == 'true' }}
         working-directory: ${{ runner.temp }}/visual-regression-report
+        env:
+          HAS_COMPLETE_REPORT: ${{ steps.snapshots.outputs.has-complete-report }}
         run: |
           shopt -s globstar nullglob
 
           DIFFS=({apps,packages}/*/__vis__/*/__diffs__/**/*.png)
           NEW_BASELINES=()
+          UNUSED_BASELINES=()
 
           # CI fails on missing baselines rather than creating them, so these are the results without one
           for RESULT in {apps,packages}/*/__vis__/*/__results__/**/*.png; do
@@ -136,26 +186,45 @@ jobs:
             [[ -e "$GITHUB_WORKSPACE/$BASELINE" ]] || NEW_BASELINES+=("$BASELINE")
           done
 
+          # Every snapshot taken writes a result, so a baseline without one belongs to a removed snapshot
+          # A partial report omits cached shards, which uploaded no results, and tests that failed before taking their snapshots
+          # Unused baselines can only be found in a complete report
+          # Only the snapshot directories CI writes results to are checked, so baselines for other platforms are kept
+          if [[ "$HAS_COMPLETE_REPORT" == "true" ]]; then
+            for RESULTS_DIR in {apps,packages}/*/__vis__/*/__results__; do
+              for BASELINE in "$GITHUB_WORKSPACE/${RESULTS_DIR%/__results__}/__baselines__"/**/*.png; do
+                BASELINE="${BASELINE#"$GITHUB_WORKSPACE/"}"
+
+                [[ -e "${BASELINE/\/__baselines__\///__results__/}" ]] || UNUSED_BASELINES+=("$BASELINE")
+              done
+            done
+          fi
+
           echo "Diffs (${#DIFFS[@]}):"
           printf '  %s\n' "${DIFFS[@]}"
           echo "New baselines (${#NEW_BASELINES[@]}):"
           printf '  %s\n' "${NEW_BASELINES[@]}"
+          echo "Unused baselines (${#UNUSED_BASELINES[@]}):"
+          printf '  %s\n' "${UNUSED_BASELINES[@]}"
 
           echo "diffs-count=${#DIFFS[@]}" >> $GITHUB_OUTPUT
           echo "new-baselines-count=${#NEW_BASELINES[@]}" >> $GITHUB_OUTPUT
+          echo "unused-baselines-count=${#UNUSED_BASELINES[@]}" >> $GITHUB_OUTPUT
           echo "diffs=$(printf '%s\n' "${DIFFS[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> $GITHUB_OUTPUT
           echo "new-baselines=$(printf '%s\n' "${NEW_BASELINES[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> $GITHUB_OUTPUT
+          echo "unused-baselines=$(printf '%s\n' "${UNUSED_BASELINES[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> $GITHUB_OUTPUT
 
       - name: Check if an update is required
         id: requires-update
         env:
           DIFFS_COUNT: ${{ steps.changes.outputs.diffs-count || 0 }}
           NEW_BASELINES_COUNT: ${{ steps.changes.outputs.new-baselines-count || 0 }}
+          UNUSED_BASELINES_COUNT: ${{ steps.changes.outputs.unused-baselines-count || 0 }}
           UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
         run: |
           UNATTESTED_BASELINES_COUNT=$(jq length <<< "$UNATTESTED_BASELINES")
 
-          if (( DIFFS_COUNT + NEW_BASELINES_COUNT + UNATTESTED_BASELINES_COUNT > 0 )); then
+          if (( DIFFS_COUNT + NEW_BASELINES_COUNT + UNUSED_BASELINES_COUNT + UNATTESTED_BASELINES_COUNT > 0 )); then
             REQUIRES_UPDATE=true
           else
             REQUIRES_UPDATE=false
@@ -168,12 +237,14 @@ jobs:
         id: summary
         env:
           HAS_REPORT: ${{ steps.artifacts.outputs.has-report }}
-          HAS_COMPLETE_REPORT: ${{ steps.artifacts.outputs.has-complete-report }}
+          HAS_ALL_REPORTS: ${{ steps.artifacts.outputs.has-complete-report }}
+          ALL_SNAPSHOTS_TAKEN: ${{ steps.snapshots.outputs.all-snapshots-taken }}
           REPORT_COUNT: ${{ steps.artifacts.outputs.report-count }}
           SHARD_COUNT: ${{ steps.artifacts.outputs.shard-count }}
           REQUIRES_UPDATE: ${{ steps.requires-update.outputs.requires-update }}
           DIFFS: ${{ steps.changes.outputs.diffs || '[]' }}
           NEW_BASELINES: ${{ steps.changes.outputs.new-baselines || '[]' }}
+          UNUSED_BASELINES: ${{ steps.changes.outputs.unused-baselines || '[]' }}
           UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
           UPDATE_INSTRUCTIONS: ${{ inputs.head-repository != github.repository && 'Baselines for pull requests from forks are updated by a maintainer once the changes have been reviewed.' || inputs.draft && 'Mark this PR as ready for review to request the `update-visual-regression-baselines` deployment, which commits the updated baselines to this branch.' || 'Approve the `update-visual-regression-baselines` deployment on this PR to commit the updated baselines to this branch.' }}
         run: |
@@ -204,9 +275,13 @@ jobs:
               echo "> [!NOTE]"
               echo "> No visual regression report was uploaded, as the component tests were cached or unaffected."
               echo
-            elif [[ "$HAS_COMPLETE_REPORT" != "true" ]]; then
+            elif [[ "$HAS_ALL_REPORTS" != "true" ]]; then
               echo "> [!NOTE]"
               echo "> Only $REPORT_COUNT of ${SHARD_COUNT:-an unknown number of} component test shards uploaded a report. The others were cached, so passed against their baselines."
+              echo
+            elif [[ "$ALL_SNAPSHOTS_TAKEN" != "true" ]]; then
+              echo "> [!NOTE]"
+              echo "> Some component tests failed before taking their snapshots, so unused baselines were not checked."
               echo
             fi
 
@@ -215,12 +290,14 @@ jobs:
               echo "| --- | --: |"
               echo "| Visual regressions | $(jq length <<< "$DIFFS") |"
               echo "| New baselines | $(jq length <<< "$NEW_BASELINES") |"
+              echo "| Unused baselines | $(jq length <<< "$UNUSED_BASELINES") |"
               echo "| Baselines changed outside of the \`update-visual-regression-baselines\` deployment | $(jq length <<< "$UNATTESTED_BASELINES") |"
               echo
 
               # Diffs are listed by the baseline they no longer match
               list_baselines "Visual regressions" "$(jq -c 'map(sub("/__diffs__/"; "/__baselines__/"))' <<< "$DIFFS")"
               list_baselines "New baselines" "$NEW_BASELINES"
+              list_baselines "Unused baselines" "$UNUSED_BASELINES"
               list_baselines "Baselines changed outside of the deployment" "$UNATTESTED_BASELINES"
 
               echo "$UPDATE_INSTRUCTIONS"
@@ -233,11 +310,12 @@ jobs:
     name: Publish visual regression report
     needs: check-for-diffs
     # Fork PRs have no access to secrets, so their report is published by the "Inspect Visual Regression report from fork" workflow
-    if: ${{ (needs.check-for-diffs.outputs.diffs-count != '0' || needs.check-for-diffs.outputs.new-baselines-count != '0') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
+    if: ${{ (needs.check-for-diffs.outputs.diffs-count != '0' || needs.check-for-diffs.outputs.new-baselines-count != '0' || needs.check-for-diffs.outputs.unused-baselines-count != '0') && (github.event_name != 'pull_request' || inputs.head-repository == github.repository) }}
     runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
+      pull-requests: read
     environment:
       name: publish-visual-regression-report
       url: ${{ steps.deploy.outputs.url }}
@@ -276,6 +354,7 @@ jobs:
           COMMIT_URL: ${{ github.server_url }}/${{ github.repository }}/pull/${{ inputs.pr-number }}/commits/${{ inputs.head-sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ inputs.run-id }}
           HEAD_SHA: ${{ inputs.head-sha }}
+          HAS_COMPLETE_REPORT: ${{ needs.check-for-diffs.outputs.has-complete-report }}
         run: |
           node --disable-warning=ExperimentalWarning .github/scripts/visual-regression-report/build-report.ts \
             --report-dir "$REPORT_DIR" \
@@ -283,7 +362,8 @@ jobs:
             --pr-url "$PR_URL" \
             --commit-url "$COMMIT_URL" \
             --run-url "$RUN_URL" \
-            --head-sha "$HEAD_SHA"
+            --head-sha "$HEAD_SHA" \
+            --complete-report "$HAS_COMPLETE_REPORT"
 
           echo '{ "version": 3 }' > "$OUTPUT_DIR/config.json"
 
@@ -291,11 +371,64 @@ jobs:
         id: deploy
         working-directory: ${{ runner.temp }}/vercel
         env:
+          VERCEL_PACKAGE_VERSION: "63.1.0"
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          HEAD_SHA: ${{ inputs.head-sha }}
+          # A domain with a wildcard record on Vercel, such as vr.example.com, or empty to use a vercel.app subdomain
+          REPORT_DOMAIN: ${{ vars.VR_REPORT_DOMAIN }}
         run: |
-          URL=$(npx --yes vercel@63.1.0 deploy --prebuilt --yes)
+          URL=$(npx --yes vercel@"$VERCEL_PACKAGE_VERSION" deploy --prebuilt --yes)
+
+          # Each deployment has its own URL, so the pull request's subdomain keeps the report at the same origin across pushes
+          # This lets the report remember which snapshots were viewed, as browser storage is kept per origin
+          if [[ -n "$REPORT_DOMAIN" ]]; then
+            ALIAS="pr-$PR_NUMBER.$REPORT_DOMAIN"
+          else
+            ALIAS="$(printf '%s' "${GITHUB_REPOSITORY,,}" | tr -cs 'a-z0-9' '-')-vr-pr-$PR_NUMBER.vercel.app"
+          fi
+
+          # Calls the Vercel API as the team, printing the error if the call fails
+          # The CLI's alias command looks up the token's user first, which fails for tokens that belong to a team
+          vercel_api() {
+            local RESPONSE
+
+            if ! RESPONSE=$(curl --silent --show-error --fail-with-body \
+              --header "Authorization: Bearer $VERCEL_TOKEN" \
+              --header "Content-Type: application/json" \
+              "${@:2}" "https://api.vercel.com$1?teamId=$VERCEL_ORG_ID"); then
+              echo "$1: $(jq -r '.error.message // .' <<< "$RESPONSE" 2> /dev/null || echo "$RESPONSE")" >&2
+              return 1
+            fi
+
+            echo "$RESPONSE"
+          }
+
+          assign_alias() {
+            local DEPLOYMENT DEPLOYMENT_ID
+
+            DEPLOYMENT=$(vercel_api "/v13/deployments/${URL#https://}") || return 1
+            DEPLOYMENT_ID=$(jq -r .id <<< "$DEPLOYMENT")
+
+            vercel_api "/v2/deployments/$DEPLOYMENT_ID/aliases" \
+              --request POST \
+              --data "$(jq -nc --arg alias "$ALIAS" '{ alias: $alias }')" > /dev/null
+          }
+
+          # A run for an older commit can finish last, so only the report for the pull request's head takes the subdomain
+          PR_HEAD_SHA=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+
+          if [[ "$PR_HEAD_SHA" != "$HEAD_SHA" ]]; then
+            echo "::notice::Not assigning $ALIAS, as PR #$PR_NUMBER has moved on from $HEAD_SHA to $PR_HEAD_SHA"
+          elif assign_alias; then
+            URL="https://$ALIAS"
+          else
+            # The report is still available at its deployment URL, but viewed snapshots are not kept across pushes
+            echo "::warning::Could not assign $ALIAS to the report, so it is only available at $URL"
+          fi
 
           echo "url=$URL" >> $GITHUB_OUTPUT
 
@@ -327,6 +460,7 @@ jobs:
           message-failure: |
             **${{ needs.check-for-diffs.outputs.diffs-count }} visual regressions found.**
             **${{ needs.check-for-diffs.outputs.new-baselines-count }} new baselines found.**
+            **${{ needs.check-for-diffs.outputs.unused-baselines-count }} unused baselines found.**
             **${{ needs.check-for-diffs.outputs.unattested-baselines-count }} baselines changed outside of the `update-visual-regression-baselines` deployment.**
 
             ${{ needs.publish-report.outputs.url && format('[View the visual regression report]({0})', needs.publish-report.outputs.url) || '' }}
@@ -401,6 +535,7 @@ jobs:
         if: ${{ needs.check-for-diffs.outputs.has-report == 'true' }}
         working-directory: ${{ runner.temp }}/visual-regression-report
         env:
+          UNUSED_BASELINES: ${{ needs.check-for-diffs.outputs.unused-baselines }}
           UNATTESTED_BASELINES: ${{ needs.check-baseline-provenance.outputs.unattested-baselines }}
           HAS_COMPLETE_REPORT: ${{ needs.check-for-diffs.outputs.has-complete-report }}
         run: |
@@ -424,7 +559,8 @@ jobs:
           done
 
           # Baselines changed outside of this deployment are replaced with the test result, or removed if no longer used
-          # A partial report omits cached shards, which passed against their baselines, so those are kept as they are
+          # A partial report omits cached shards, which passed against their baselines, and tests that failed before taking
+          # their snapshots, so baselines without a result are kept as they are
           jq -r '.[]' <<< "$UNATTESTED_BASELINES" | while read -r BASELINE; do
             RESULT="${BASELINE/\/__baselines__\///__results__/}"
 
@@ -433,8 +569,14 @@ jobs:
             elif [[ "$HAS_COMPLETE_REPORT" == "true" ]]; then
               rm "$GITHUB_WORKSPACE/$BASELINE"
             else
-              echo "::warning::Keeping $BASELINE, as its shard was cached and uploaded no result"
+              echo "::warning::Keeping $BASELINE, as the report is partial and has no result for it"
             fi
+          done
+
+          # Baselines without a result belong to removed snapshots, so are only found in a complete report
+          # These may also be unattested, in which case they have already been removed
+          jq -r '.[]' <<< "$UNUSED_BASELINES" | while read -r BASELINE; do
+            rm -f "$GITHUB_WORKSPACE/$BASELINE"
           done
 
       - uses: EndBug/add-and-commit@v10

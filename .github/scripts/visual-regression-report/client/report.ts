@@ -15,14 +15,22 @@ const MODES = ["side-by-side", "swipe", "onion", "diff"] as const;
 
 const THEMES = ["auto", "light", "dark"] as const;
 
-const STATUS_FILTERS = ["all", "changed", "new"] as const;
+const STATUS_FILTERS = ["all", "changed", "new", "renamed", "removed"] as const;
 
 type Mode = (typeof MODES)[number];
 
 const STATUS_LABELS: Record<SnapshotStatus, string> = {
   changed: "Changed",
   new: "New baseline",
+  renamed: "Renamed",
+  removed: "Removed",
 };
+
+/** Labels renamed snapshots with their similarity, as git does */
+const statusLabel = (snapshot: Snapshot) =>
+  snapshot.status === "renamed" && snapshot.similarity !== null
+    ? `${STATUS_LABELS.renamed} · ${String(snapshot.similarity)}% similar`
+    : STATUS_LABELS[snapshot.status];
 
 const readPreference = <T extends string>(
   key: string,
@@ -51,7 +59,63 @@ const state = {
   theme: readPreference("theme", THEMES, "auto"),
   status: "all" as (typeof STATUS_FILTERS)[number],
   query: "",
+  hideViewed:
+    readPreference("hide-viewed", ["true", "false"], "false") === "true",
+  /** The view keys of the snapshots marked as viewed */
+  viewed: new Set<string>(),
+  /** The IDs of the snapshots whose images are hidden */
+  collapsed: new Set<string>(),
 };
+
+/**
+ * Identifies a snapshot by its images as well as its paths, as the image paths are content hashes.
+ * A snapshot is then no longer viewed once a later commit changes it, as on GitHub.
+ */
+const viewKey = (snapshot: Snapshot) =>
+  [
+    snapshot.renamedFrom ?? "",
+    snapshot.id,
+    snapshot.baseline?.src ?? "",
+    snapshot.result?.src ?? "",
+  ].join("\n");
+
+/** Viewed snapshots are stored per pull request, so reports for other pull requests on the same origin are kept */
+const viewedStorageKey = (manifest: Manifest) =>
+  `visual-regression-report:viewed:${manifest.pullRequestUrl}`;
+
+/** Reads the viewed snapshots, dropping any that are no longer in the report */
+const readViewed = (manifest: Manifest) => {
+  const keys = new Set(manifest.snapshots.map((snapshot) => viewKey(snapshot)));
+
+  try {
+    const stored: unknown = JSON.parse(
+      localStorage.getItem(viewedStorageKey(manifest)) ?? "[]",
+    );
+
+    return new Set(
+      Array.isArray(stored)
+        ? stored.filter(
+            (key): key is string => typeof key === "string" && keys.has(key),
+          )
+        : [],
+    );
+  } catch {
+    return new Set<string>();
+  }
+};
+
+const writeViewed = (manifest: Manifest) => {
+  try {
+    localStorage.setItem(
+      viewedStorageKey(manifest),
+      JSON.stringify([...state.viewed]),
+    );
+  } catch {
+    // Viewed snapshots are a convenience, so they are not saved when storage is unavailable
+  }
+};
+
+const isViewed = (snapshot: Snapshot) => state.viewed.has(viewKey(snapshot));
 
 const cards = new Map<string, HTMLElement>();
 
@@ -124,6 +188,25 @@ const pane = (label: string, image: ReportImage) =>
     ),
   ]);
 
+/**
+ * Labels an image in a comparison, sized by how much of it is shown.
+ * The labels sit above the images rather than over them, so they never hide a change.
+ */
+const comparisonLabel = (image: "baseline" | "result") => {
+  const text = element("span");
+  const label = element("span", { class: `comparison-label ${image}` }, [text]);
+
+  const setShare = (share: number, withPercentage: boolean) => {
+    const name = image === "baseline" ? "Baseline" : "Result";
+
+    label.hidden = share === 0;
+    label.style.flexBasis = `${String(share)}%`;
+    text.textContent = withPercentage ? `${name} ${String(share)}%` : name;
+  };
+
+  return { label, setShare };
+};
+
 const comparison = (
   baseline: ReportImage,
   result: ReportImage,
@@ -131,12 +214,21 @@ const comparison = (
 ) => {
   const maxWidth = Math.max(baseline.width, result.width);
   const top = imageElement(result, "Result", maxWidth);
+  const baselineLabel = comparisonLabel("baseline");
+  const resultLabel = comparisonLabel("result");
   const stack = element("div", { class: `well stack ${mode}` }, [
     imageElement(baseline, "Baseline", maxWidth),
     top,
   ]);
+  const view = element("div", { class: "comparison-view" }, [
+    element("div", { class: "comparison-legend", "aria-hidden": "true" }, [
+      baselineLabel.label,
+      resultLabel.label,
+    ]),
+    stack,
+  ]);
 
-  stack.style.width = `${String(maxWidth)}px`;
+  view.style.width = `${String(maxWidth)}px`;
 
   const slider = element("input", {
     type: "range",
@@ -146,12 +238,50 @@ const comparison = (
     "aria-label": mode === "swipe" ? "Swipe position" : "Result opacity",
   });
 
+  // Swiping right reveals more of the baseline on the left, whereas fading in reveals more of the result
+  const positions = {
+    baseline: mode === "swipe" ? 100 : 0,
+    both: 50,
+    result: mode === "swipe" ? 0 : 100,
+  };
+
+  const showOptions = ["baseline", "both", "result"] as const;
+
+  const showButtons = showOptions.map((showing) =>
+    element("button", {
+      type: "button",
+      "data-show": showing,
+      title:
+        showing === "both" ? "Show both images" : `Show only the ${showing}`,
+      text: { baseline: "Baseline", both: "Both", result: "Result" }[showing],
+    }),
+  );
+
   const update = () => {
+    const position = slider.valueAsNumber;
+
     if (mode === "swipe") {
-      top.style.clipPath = `inset(0 0 0 ${slider.value}%)`;
-      stack.style.setProperty("--swipe-position", `${slider.value}%`);
+      top.style.clipPath = `inset(0 0 0 ${String(position)}%)`;
+      stack.style.setProperty("--swipe-position", `${String(position)}%`);
+      // The labels meet above the divider, so each spans the part of the image it is shown in
+      baselineLabel.setShare(position, false);
+      resultLabel.setShare(100 - position, false);
     } else {
-      top.style.opacity = String(slider.valueAsNumber / 100);
+      top.style.opacity = String(position / 100);
+      baselineLabel.setShare(100 - position, true);
+      resultLabel.setShare(position, true);
+    }
+
+    const showing =
+      (["baseline", "result"] as const).find(
+        (image) => position === positions[image],
+      ) ?? "both";
+
+    for (const button of showButtons) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset["show"] === showing),
+      );
     }
   };
 
@@ -169,6 +299,13 @@ const comparison = (
     update();
   };
 
+  for (const [i, button] of showButtons.entries()) {
+    button.addEventListener("click", () => {
+      slider.valueAsNumber = positions[showOptions[i] ?? "both"];
+      update();
+    });
+  }
+
   stack.addEventListener("pointerdown", drag);
   stack.addEventListener("pointermove", drag);
   slider.addEventListener("input", update);
@@ -176,19 +313,39 @@ const comparison = (
 
   return element("div", { class: "compare" }, [
     element("div", { class: "compare-controls" }, [
-      element("span", { text: "Baseline" }),
+      element(
+        "div",
+        { class: "segmented", role: "group", "aria-label": "Show" },
+        showButtons,
+      ),
       slider,
-      element("span", { text: "Result" }),
     ]),
-    stack,
+    view,
   ]);
 };
 
-const renderBody = (snapshot: Snapshot) => {
+const renderImages = (snapshot: Snapshot) => {
   const body = element("div", { class: "snapshot-body" });
   const { baseline, result, diff } = snapshot;
 
+  if (!result) {
+    if (baseline) {
+      body.append(
+        element("div", { class: "panes" }, [pane("Baseline", baseline)]),
+      );
+    }
+
+    return body;
+  }
+
   if (!baseline) {
+    body.append(element("div", { class: "panes" }, [pane("Result", result)]));
+
+    return body;
+  }
+
+  // Identical images are only shown once, as there is nothing to compare
+  if (snapshot.similarity === 100) {
     body.append(element("div", { class: "panes" }, [pane("Result", result)]));
 
     return body;
@@ -220,20 +377,58 @@ const renderBody = (snapshot: Snapshot) => {
   return body;
 };
 
+const bodyId = (snapshot: Snapshot) => `${snapshot.id}:images`;
+
+const renderBody = (snapshot: Snapshot) => {
+  const body = renderImages(snapshot);
+
+  body.id = bodyId(snapshot);
+  // Hidden images are not loaded, as they are lazy
+  body.hidden = state.collapsed.has(snapshot.id);
+
+  return body;
+};
+
 const renderCard = (snapshot: Snapshot) => {
+  const viewed = isViewed(snapshot);
+  const checkbox = element("input", {
+    type: "checkbox",
+    "data-viewed": snapshot.id,
+  });
+
+  checkbox.checked = viewed;
+
   const card = element(
     "article",
-    { class: "snapshot", id: snapshot.id, tabindex: -1 },
+    {
+      class: viewed ? "snapshot viewed" : "snapshot",
+      id: snapshot.id,
+      tabindex: -1,
+    },
     [
       element("header", { class: "snapshot-header" }, [
+        element("button", {
+          type: "button",
+          class: "collapse-toggle",
+          "data-collapse": snapshot.id,
+          "aria-expanded": String(!state.collapsed.has(snapshot.id)),
+          "aria-controls": bodyId(snapshot),
+          "aria-label": `Show the images of ${snapshot.name}`,
+        }),
         element("h2", {}, [
           element("a", { href: anchorFor(snapshot), text: snapshot.name }),
         ]),
         element("span", {
           class: `badge ${snapshot.status}`,
-          text: STATUS_LABELS[snapshot.status],
+          text: statusLabel(snapshot),
         }),
-        element("span", { class: "snapshot-path muted", text: snapshot.id }),
+        element("label", { class: "viewed-toggle" }, [checkbox, "Viewed"]),
+        element("span", {
+          class: "snapshot-path muted",
+          text: snapshot.renamedFrom
+            ? `${snapshot.renamedFrom} → ${snapshot.id}`
+            : snapshot.id,
+        }),
       ]),
       renderBody(snapshot),
     ],
@@ -257,27 +452,56 @@ const renderNav = (snapshots: Snapshot[]) =>
         "ul",
         {},
         items.map((snapshot) =>
-          element("li", { "data-id": snapshot.id }, [
-            element(
-              "a",
-              {
-                href: anchorFor(snapshot),
-                title: STATUS_LABELS[snapshot.status],
-              },
-              [
-                element("span", { class: `badge-dot ${snapshot.status}` }),
-                snapshot.name,
-              ],
-            ),
-          ]),
+          element(
+            "li",
+            {
+              "data-id": snapshot.id,
+              ...(isViewed(snapshot) && { class: "viewed" }),
+            },
+            [
+              element(
+                "a",
+                {
+                  href: anchorFor(snapshot),
+                  title: statusLabel(snapshot),
+                },
+                [
+                  element("span", { class: `badge-dot ${snapshot.status}` }),
+                  snapshot.name,
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     ]),
   );
 
+/** The height covered by the masthead, which only sticks to the top on wide screens */
+const mastheadHeight = () => {
+  const masthead = query(".masthead");
+
+  return getComputedStyle(masthead).position === "sticky"
+    ? masthead.getBoundingClientRect().height
+    : 0;
+};
+
 const matches = (snapshot: Snapshot) =>
   (state.status === "all" || snapshot.status === state.status) &&
-  snapshot.id.toLowerCase().includes(state.query);
+  !(state.hideViewed && isViewed(snapshot)) &&
+  [snapshot.id, snapshot.renamedFrom ?? ""].some((id) =>
+    id.toLowerCase().includes(state.query),
+  );
+
+const emptyMessage = (snapshots: Snapshot[]) => {
+  if (snapshots.length === 0) {
+    return "No visual regressions or baseline changes were found.";
+  }
+
+  return state.hideViewed && state.viewed.size > 0
+    ? "Every snapshot matching the filter has been viewed."
+    : "No snapshots match the filter.";
+};
 
 const applyFilters = (snapshots: Snapshot[]) => {
   let visibleCount = 0;
@@ -306,10 +530,77 @@ const applyFilters = (snapshots: Snapshot[]) => {
   const empty = query("#empty");
 
   empty.hidden = visibleCount > 0;
-  empty.textContent =
-    snapshots.length === 0
-      ? "No visual regressions or new baselines were found."
-      : "No snapshots match the filter.";
+  empty.textContent = emptyMessage(snapshots);
+};
+
+const renderProgress = (snapshots: Snapshot[]) => {
+  const progress = query("#progress");
+  const bar = progress.querySelector("progress");
+  const label = progress.querySelector("span");
+
+  if (bar && label) {
+    bar.max = snapshots.length;
+    bar.value = state.viewed.size;
+    label.textContent = `${String(state.viewed.size)} / ${String(snapshots.length)} viewed`;
+  }
+};
+
+const setCollapsed = (snapshot: Snapshot, collapsed: boolean) => {
+  const card = cards.get(snapshot.id);
+  const body = card?.querySelector<HTMLElement>(".snapshot-body");
+
+  if (collapsed) {
+    state.collapsed.add(snapshot.id);
+  } else {
+    state.collapsed.delete(snapshot.id);
+  }
+
+  if (body) {
+    body.hidden = collapsed;
+  }
+
+  card
+    ?.querySelector(".collapse-toggle")
+    ?.setAttribute("aria-expanded", String(!collapsed));
+};
+
+/** Marks a snapshot as viewed, which hides its images as on GitHub */
+const setViewed = (snapshot: Snapshot, viewed: boolean, manifest: Manifest) => {
+  const card = cards.get(snapshot.id);
+  const checkbox = card?.querySelector<HTMLInputElement>("input[data-viewed]");
+
+  if (viewed) {
+    state.viewed.add(viewKey(snapshot));
+  } else {
+    state.viewed.delete(viewKey(snapshot));
+  }
+
+  writeViewed(manifest);
+  setCollapsed(snapshot, viewed);
+  card?.classList.toggle("viewed", viewed);
+  query(`#nav li[data-id="${CSS.escape(snapshot.id)}"]`).classList.toggle(
+    "viewed",
+    viewed,
+  );
+
+  if (checkbox) {
+    checkbox.checked = viewed;
+  }
+
+  renderProgress(manifest.snapshots);
+
+  if (state.hideViewed) {
+    applyFilters(manifest.snapshots);
+  }
+
+  // Hiding the images can move the snapshot above the viewport, so it is scrolled back into view
+  if (
+    card &&
+    !card.hidden &&
+    card.getBoundingClientRect().top < mastheadHeight()
+  ) {
+    card.scrollIntoView({ block: "start" });
+  }
 };
 
 const setPressed = (attribute: string, value: string) => {
@@ -348,19 +639,28 @@ const setTheme = (theme: (typeof THEMES)[number]) => {
   }
 };
 
-/** The height covered by the masthead, which only sticks to the top on wide screens */
-const mastheadHeight = () => {
-  const masthead = query(".masthead");
-
-  return getComputedStyle(masthead).position === "sticky"
-    ? masthead.getBoundingClientRect().height
-    : 0;
-};
-
 const focusCard = (card: HTMLElement) => {
   card.scrollIntoView({ block: "start" });
   card.focus({ preventScroll: true });
   history.replaceState(null, "", `#${encodeURIComponent(card.id)}`);
+};
+
+/** The focused snapshot, or else the first one in view */
+const currentCard = () => {
+  const focused =
+    document.activeElement instanceof HTMLElement
+      ? document.activeElement.closest<HTMLElement>(".snapshot")
+      : null;
+
+  if (focused && !focused.hidden) {
+    return focused;
+  }
+
+  const offset = mastheadHeight();
+
+  return [...cards.values()].find(
+    (card) => !card.hidden && card.getBoundingClientRect().bottom > offset,
+  );
 };
 
 /** Moves to the next or previous visible snapshot, relative to the top of the viewport */
@@ -381,10 +681,7 @@ const step = (direction: 1 | -1) => {
 };
 
 const renderSummary = (manifest: Manifest) => {
-  const changed = manifest.snapshots.filter(
-    ({ status }) => status === "changed",
-  ).length;
-  const added = manifest.snapshots.length - changed;
+  const counts = Object.groupBy(manifest.snapshots, ({ status }) => status);
   const pullRequestNumber =
     new URL(manifest.pullRequestUrl).pathname.split("/").findLast(Boolean) ??
     "";
@@ -394,7 +691,7 @@ const renderSummary = (manifest: Manifest) => {
     `Visual regressions in PR #${pullRequestNumber}`;
 
   query("#summary").append(
-    `${String(changed)} changed · ${String(added)} new · `,
+    `${String(counts.changed?.length ?? 0)} changed · ${String(counts.new?.length ?? 0)} new · ${String(counts.renamed?.length ?? 0)} renamed · ${String(counts.removed?.length ?? 0)} removed · `,
     element("a", { href: manifest.pullRequestUrl, text: "pull request" }),
     " · ",
     element("a", {
@@ -411,10 +708,23 @@ const main = async () => {
   // Written by the build script alongside this file
   const manifest = (await response.json()) as Manifest;
   const { snapshots } = manifest;
+  const snapshotsById = new Map(
+    snapshots.map((snapshot) => [snapshot.id, snapshot]),
+  );
+
+  state.viewed = readViewed(manifest);
+
+  for (const snapshot of snapshots) {
+    if (isViewed(snapshot)) {
+      state.collapsed.add(snapshot.id);
+    }
+  }
 
   renderSummary(manifest);
+  renderProgress(snapshots);
   setTheme(state.theme);
   setPressed("mode", state.mode);
+  query("#hide-viewed").setAttribute("aria-pressed", String(state.hideViewed));
 
   query("#nav").append(...renderNav(snapshots));
   query("#snapshots").append(
@@ -452,8 +762,16 @@ const main = async () => {
     const status = STATUS_FILTERS.find(
       (option) => option === button?.dataset["status"],
     );
+    const collapsible = snapshotsById.get(button?.dataset["collapse"] ?? "");
 
-    if (mode) {
+    if (collapsible) {
+      setCollapsed(collapsible, !state.collapsed.has(collapsible.id));
+    } else if (button?.id === "hide-viewed") {
+      state.hideViewed = !state.hideViewed;
+      writePreference("hide-viewed", String(state.hideViewed));
+      button.setAttribute("aria-pressed", String(state.hideViewed));
+      applyFilters(snapshots);
+    } else if (mode) {
       setMode(mode, snapshots);
     } else if (theme) {
       setTheme(theme);
@@ -461,6 +779,18 @@ const main = async () => {
       state.status = status;
       setPressed("status", status);
       applyFilters(snapshots);
+    }
+  });
+
+  document.addEventListener("change", (event) => {
+    const checkbox = event.target;
+
+    if (checkbox instanceof HTMLInputElement) {
+      const snapshot = snapshotsById.get(checkbox.dataset["viewed"] ?? "");
+
+      if (snapshot) {
+        setViewed(snapshot, checkbox.checked, manifest);
+      }
     }
   });
 
@@ -480,6 +810,19 @@ const main = async () => {
       step(1);
     } else if (event.key === "k") {
       step(-1);
+    } else if (event.key === "v") {
+      const snapshot = snapshotsById.get(currentCard()?.id ?? "");
+
+      if (snapshot) {
+        const viewed = !isViewed(snapshot);
+
+        setViewed(snapshot, viewed, manifest);
+
+        // Moves on once a snapshot is reviewed, as its images are now hidden
+        if (viewed) {
+          step(1);
+        }
+      }
     } else if (event.key === "/") {
       event.preventDefault();
       filter.focus();

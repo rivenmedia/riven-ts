@@ -6,7 +6,7 @@
     "RUNNER_ARCH", // Used to cache bust CI matrices
     "RUNNER_OS" // Used to cache bust CI matrices
   ],
-  "globalPassThroughEnv": ["DEBUG", "CI"],
+  "globalPassThroughEnv": ["DEBUG", "CI", "GITHUB_ACTIONS"],
   "globalDependencies": [".node-version"],
   "futureFlags": {
     "affectedUsingTaskInputs": true,
@@ -74,6 +74,7 @@
       ],
       "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
+        ".github/workflows/check-for-visual-regressions.yaml", // Bust the cache if the VR check workflow changes
         "**/__baselines__/**",
         "!**/__vis__/local/**",
         "**/public/**",

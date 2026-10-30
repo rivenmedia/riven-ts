@@ -44,7 +44,28 @@
           <button type="button" data-status="new" aria-pressed="false">
             New
           </button>
+          <button type="button" data-status="renamed" aria-pressed="false">
+            Renamed
+          </button>
+          <button type="button" data-status="removed" aria-pressed="false">
+            Removed
+          </button>
         </div>
+
+        <div id="progress" class="progress">
+          <progress max="0" value="0"></progress>
+          <span></span>
+        </div>
+
+        <button
+          id="hide-viewed"
+          class="toggle"
+          type="button"
+          aria-pressed="false"
+          title="Hide the snapshots marked as viewed"
+        >
+          Hide viewed
+        </button>
 
         <div class="segmented" role="group" aria-label="View">
           <button
@@ -120,7 +141,7 @@
           <kbd>j</kbd>/<kbd>k</kbd> next/previous snapshot · <kbd>1</kbd>–<kbd
             >4</kbd
           >
-          change view · <kbd>/</kbd> filter
+          change view · <kbd>v</kbd> mark viewed · <kbd>/</kbd> filter
         </p>
       </main>
     </div>
