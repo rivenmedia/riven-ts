@@ -341,18 +341,9 @@ catalogs:
     '@tailwindcss/postcss':
       specifier: ^4.3.0
       version: 4.3.0
-    '@testing-library/dom':
-      specifier: ^10.4.1
-      version: 10.4.1
     '@testing-library/jest-dom':
       specifier: ^6.9.1
       version: 6.9.1
-    '@testing-library/react':
-      specifier: ^16.3.2
-      version: 16.3.2
-    '@testing-library/user-event':
-      specifier: ^14.6.1
-      version: 14.6.5
     '@tsconfig/node-ts':
       specifier: ^23.6.4
       version: 23.6.4
@@ -909,6 +900,9 @@ importers:
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
+      msw:
+        specifier: 'catalog:'
+        version: 3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       next:
         specifier: 'catalog:'
         version: 16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -1009,18 +1003,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: 'catalog:'
         version: 4.3.0
-      '@testing-library/dom':
-        specifier: 'catalog:'
-        version: 10.4.1
       '@testing-library/jest-dom':
         specifier: 'catalog:'
         version: 6.9.1
-      '@testing-library/react':
-        specifier: 'catalog:'
-        version: 16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@testing-library/user-event':
-        specifier: 'catalog:'
-        version: 14.6.5(@testing-library/dom@10.4.1)
       '@types/luxon':
         specifier: 'catalog:'
         version: 3.7.1
@@ -1057,9 +1042,6 @@ importers:
       jsdom:
         specifier: 'catalog:'
         version: 29.1.1(@noble/hashes@2.3.0)
-      msw:
-        specifier: 'catalog:'
-        version: 3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
       msw-storybook-addon:
         specifier: 'catalog:'
         version: 3.0.3(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(storybook@10.6.3(@types/react@19.3.0)(react@19.3.0))
@@ -7614,21 +7596,6 @@ packages:
   '@testing-library/jest-dom@6.9.1':
     resolution: {integrity: sha512-zIcONa+hVtVSSep9UT3jZ5rizo2BsxgyDYU7WFD5eICBE7no3881HGeb/QkGfsJs6JTkY1aQhT7rIPC7e+0nnA==}
     engines: {node: '>=14', npm: '>=6', yarn: '>=1'}
-
-  '@testing-library/react@16.3.2':
-    resolution: {integrity: sha512-XU5/SytQM+ykqMnAnvB2umaJNIOsLF3PVv//1Ew4CTcpz0/BRyy/af40qqrt7SjKpDdT1saBMc42CUok5gaw+g==}
-    engines: {node: '>=18'}
-    peerDependencies:
-      '@testing-library/dom': ^10.0.0
-      '@types/react': ^18.0.0 || ^19.0.0
-      '@types/react-dom': ^18.0.0 || ^19.0.0
-      react: ^18.0.0 || ^19.0.0
-      react-dom: ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@types/react':
-        optional: true
-      '@types/react-dom':
-        optional: true
 
   '@testing-library/user-event@14.6.5':
     resolution: {integrity: sha512-FhqjldLTpteueBaKflhNFlMT3+PM0O5fiBUivht6b9CZ1eesJyy7+g3Jr7XwJzt/Hip3ZG5hWwK1MX1FuDiE4w==}
@@ -18634,16 +18601,6 @@ snapshots:
       dom-accessibility-api: 0.6.3
       picocolors: 1.1.1
       redent: 3.0.0
-
-  '@testing-library/react@16.3.2(@testing-library/dom@10.4.1)(@types/react-dom@19.3.0(@types/react@19.3.0))(@types/react@19.3.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)':
-    dependencies:
-      '@babel/runtime': 7.29.7
-      '@testing-library/dom': 10.4.1
-      react: 19.3.0
-      react-dom: 19.3.0(react@19.3.0)
-    optionalDependencies:
-      '@types/react': 19.3.0
-      '@types/react-dom': 19.3.0(@types/react@19.3.0)
 
   '@testing-library/user-event@14.6.5(@testing-library/dom@10.4.1)':
     dependencies:

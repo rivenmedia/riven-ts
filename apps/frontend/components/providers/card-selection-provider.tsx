@@ -55,7 +55,7 @@ export function CardSelectionProvider({
   );
 
   return (
-    <CardSelectionContext.Provider value={value}>
+    <CardSelectionContext value={value}>
       {children}
       {selectedItems.size > 0 && (
         <SelectionActionBar
@@ -67,7 +67,7 @@ export function CardSelectionProvider({
           }}
         />
       )}
-    </CardSelectionContext.Provider>
+    </CardSelectionContext>
   );
 }
 

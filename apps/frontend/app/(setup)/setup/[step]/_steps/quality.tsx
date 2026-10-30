@@ -21,14 +21,14 @@ import { SettingField } from "#components/settings/setting-field/setting-field.t
 
 import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
-export interface Profile {
+interface Profile {
   id: string;
   label: string;
   description: string;
   enabled: boolean;
 }
 
-export interface GeneralSection {
+interface GeneralSection {
   title: string;
   description: string;
   fields: SettingFieldProps[];

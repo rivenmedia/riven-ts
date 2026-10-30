@@ -33,7 +33,7 @@ const themeConfig = createThemes({
 export const {
   ThemeProvider,
   useTheme,
-  ThemedImage,
-  useThemeEffect,
-  useThemeValue,
+  // ThemedImage,
+  // useThemeEffect,
+  // useThemeValue,
 } = themeConfig;

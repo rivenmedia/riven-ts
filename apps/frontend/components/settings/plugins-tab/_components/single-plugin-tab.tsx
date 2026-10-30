@@ -16,11 +16,11 @@ import { SettingField } from "#components/settings/setting-field/setting-field.t
 
 import type { PluginTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 
-export interface SinglePluginTabProps {
+interface SinglePluginTabProps {
   plugin: PluginTab;
 }
 
-export function SinglePluginTab({ plugin }: { plugin: PluginTab }) {
+export function SinglePluginTab({ plugin }: SinglePluginTabProps) {
   const defaultValues: {
     [key: string]: unknown;
     isEnabled: boolean;

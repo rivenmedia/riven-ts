@@ -3,17 +3,38 @@ import { http, HttpResponse } from "msw";
 import { expect, spyOn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { LoginPage } from "#app/(public)/login/page.client.tsx";
+import LoginPage from "#app/(public)/login/page.tsx";
+import { api } from "#mocks/graphql.ts";
+
+import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query";
 
 const meta = preview.meta({
   title: "Pages / Login",
   component: LoginPage,
-  beforeEach() {
+  beforeEach({ msw }) {
     // oxlint-disable-next-line typescript/no-extraneous-class
     class PublicKeyCredentialMock {}
 
     spyOn(globalThis, "PublicKeyCredential", "get").mockReturnValue(
       PublicKeyCredentialMock as typeof PublicKeyCredential,
+    );
+
+    msw.use(
+      api.query(GET_AUTH_PROVIDERS, () =>
+        HttpResponse.json({
+          data: {
+            authProviders: [
+              {
+                __typename: "AuthProvider",
+                disableSignup: false,
+                enabled: true,
+                key: "credential",
+                name: "Email and Password",
+              },
+            ],
+          },
+        }),
+      ),
     );
   },
 });
@@ -43,7 +64,9 @@ CredentialsEnabled.test(
   },
   async ({ canvas, userEvent, step }) => {
     await step("Switch to the login tab", async () => {
-      await userEvent.click(canvas.getByRole("tab", { name: /login/iu }));
+      await userEvent.click(
+        await canvas.findByRole("tab", { name: /login/iu }),
+      );
 
       await expect(
         await canvas.findByRole("tabpanel", { name: /login/iu }),
@@ -78,7 +101,9 @@ CredentialsEnabled.test(
   },
   async ({ canvas, userEvent, step }) => {
     await step("Switch to the login tab", async () => {
-      await userEvent.click(canvas.getByRole("tab", { name: /login/iu }));
+      await userEvent.click(
+        await canvas.findByRole("tab", { name: /login/iu }),
+      );
 
       await expect(
         await canvas.findByRole("tabpanel", { name: /login/iu }),
@@ -115,7 +140,9 @@ CredentialsEnabled.test(
   },
   async ({ canvas, userEvent, step }) => {
     await step("Switch to the register tab", async () => {
-      await userEvent.click(canvas.getByRole("tab", { name: /register/iu }));
+      await userEvent.click(
+        await canvas.findByRole("tab", { name: /register/iu }),
+      );
 
       await expect(
         await canvas.findByRole("tabpanel", { name: /register/iu }),
@@ -158,7 +185,9 @@ CredentialsEnabled.test(
   },
   async ({ canvas, userEvent, step }) => {
     await step("Switch to the register tab", async () => {
-      await userEvent.click(canvas.getByRole("tab", { name: /register/iu }));
+      await userEvent.click(
+        await canvas.findByRole("tab", { name: /register/iu }),
+      );
 
       await expect(
         await canvas.findByRole("tabpanel", { name: /register/iu }),
@@ -191,53 +220,86 @@ CredentialsEnabled.test(
 );
 
 export const PasskeysUnsupported = meta.story({
-  beforeEach() {
+  beforeEach({ msw }) {
     spyOn(globalThis, "PublicKeyCredential", "get").mockReturnValue(
       undefined as never,
     );
-  },
-  args: {
-    authProviders: [
-      {
-        key: "credential",
-        enabled: true,
-        disableSignup: false,
-      },
-      {
-        key: "plex",
-        enabled: true,
-        disableSignup: false,
-      },
-    ],
+
+    msw.use(
+      api.query(GET_AUTH_PROVIDERS, () =>
+        HttpResponse.json({
+          data: {
+            authProviders: [
+              {
+                __typename: "AuthProvider",
+                name: "Email and Password",
+                key: "credential",
+                enabled: true,
+                disableSignup: false,
+              },
+              {
+                __typename: "AuthProvider",
+                name: "Plex",
+                key: "plex",
+                enabled: true,
+                disableSignup: false,
+              },
+            ],
+          },
+        }),
+      ),
+    );
   },
 });
 
 export const WithOAuthProviders = meta.story({
   name: "With OAuth Providers",
-  args: {
-    authProviders: [
-      {
-        key: "credential",
-        enabled: true,
-        disableSignup: false,
-      },
-      {
-        key: "plex",
-        enabled: true,
-        disableSignup: false,
-      },
-    ],
+  beforeEach({ msw }) {
+    msw.use(
+      api.query(GET_AUTH_PROVIDERS, () =>
+        HttpResponse.json({
+          data: {
+            authProviders: [
+              {
+                __typename: "AuthProvider",
+                name: "Email and Password",
+                key: "credential",
+                enabled: true,
+                disableSignup: false,
+              },
+              {
+                __typename: "AuthProvider",
+                name: "Plex",
+                key: "plex",
+                enabled: true,
+                disableSignup: false,
+              },
+            ],
+          },
+        }),
+      ),
+    );
   },
 });
 
 export const SignupDisabled = meta.story({
-  args: {
-    authProviders: [
-      {
-        key: "credential",
-        enabled: true,
-        disableSignup: true,
-      },
-    ],
+  beforeEach({ msw }) {
+    msw.use(
+      api.query(GET_AUTH_PROVIDERS, () =>
+        HttpResponse.json({
+          data: {
+            authProviders: [
+              {
+                __typename: "AuthProvider",
+                name: "Email and Password",
+                key: "credential",
+                enabled: true,
+                disableSignup: true,
+              },
+            ],
+          },
+        }),
+      ),
+    );
   },
 });

@@ -35,7 +35,7 @@ export default async function LoginPage() {
     ({ key }) => key === "credential",
   );
 
-  const isCredentialProviderEnabled =
+  const isCredentialSignupEnabled =
     (credentialProvider?.enabled && !credentialProvider.disableSignup) ?? false;
 
   const lastLoginMethod = authClient.getLastUsedLoginMethod();
@@ -47,11 +47,11 @@ export default async function LoginPage() {
         <LoginForm
           authProviders={authProviders}
           lastLoginMethod={lastLoginMethod}
-          isCredentialLoginEnabled={isCredentialProviderEnabled}
+          isCredentialLoginEnabled={credentialProvider?.enabled ?? false}
         />
       ),
     },
-    ...(isCredentialProviderEnabled
+    ...(isCredentialSignupEnabled
       ? [
           {
             label: "Register",
