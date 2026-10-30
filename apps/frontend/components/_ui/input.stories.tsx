@@ -1,7 +1,7 @@
 import { expect, userEvent } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Input } from "#components/_ui/input.tsx";
 import { Label } from "#components/_ui/label.tsx";
 

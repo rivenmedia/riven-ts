@@ -2,7 +2,7 @@ import { Trash } from "lucide-react";
 import { useId } from "react";
 import { useFieldArray, useFormContext } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Input } from "#components/_ui/input.tsx";
 import { Label } from "#components/_ui/label.tsx";
 import {

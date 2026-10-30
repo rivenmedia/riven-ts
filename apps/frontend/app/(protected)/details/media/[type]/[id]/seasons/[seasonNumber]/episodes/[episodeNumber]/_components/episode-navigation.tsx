@@ -3,7 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import Link from "next/link";
 
 import { fly } from "#components/_animations/fly.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 import type { GetSeasonQuery } from "../../../_queries/get-season.query.typegen";
 

@@ -2,7 +2,7 @@ import { RankingModelSchemaMetadata } from "@repo/util-rank-torrent-name";
 
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { RankingModelSchema } from "#components/settings/ranking-tab/ranking-tab.form-schema.ts";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 

@@ -2,7 +2,7 @@ import { createSettings, SettingsSchema } from "@repo/util-rank-torrent-name";
 
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { buildSettingsConfigFromZodSchema } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 

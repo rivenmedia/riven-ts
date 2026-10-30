@@ -5,7 +5,7 @@ import { use } from "react";
 import { browser } from "react-dom";
 
 import { browserSupportsPasskeys } from "#app/(public)/login/_utils/browser-supports-passkeys.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 interface PasskeySigninButtonProps {
   lastLoginMethod: string | null;

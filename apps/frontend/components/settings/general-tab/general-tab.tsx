@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { startCase } from "es-toolkit";
 import { FormProvider, useForm } from "react-hook-form";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import { GeneralTabFormSchema } from "./general-tab.form-schema.ts";

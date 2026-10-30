@@ -1,7 +1,7 @@
 import { Star } from "lucide-react";
 import Image from "next/image";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 export interface OauthProviderButtonProps {
   isLastUsed: boolean;

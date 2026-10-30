@@ -1,7 +1,7 @@
 import { BellRing } from "lucide-react";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Card,
   CardAction,

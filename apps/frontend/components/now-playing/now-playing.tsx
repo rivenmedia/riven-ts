@@ -10,7 +10,7 @@ import React, { startTransition, useEffect, useState } from "react";
 import { useHoverDirty } from "react-use";
 
 import { fly } from "#components/_animations/fly.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Carousel,
   CarouselContent,

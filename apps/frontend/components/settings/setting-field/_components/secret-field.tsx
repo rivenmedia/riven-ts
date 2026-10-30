@@ -3,7 +3,7 @@ import { useId, useState } from "react";
 import { useFormContext } from "react-hook-form";
 
 import { ButtonGroup } from "#components/_ui/button-group.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Input } from "#components/_ui/input.tsx";
 import { Label } from "#components/_ui/label.tsx";
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { logout } from "#app/(protected)/_actions/logout.action.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 export function LogoutButton() {
   return (

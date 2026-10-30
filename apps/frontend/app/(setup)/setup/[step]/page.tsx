@@ -4,7 +4,7 @@ import { cn } from "cn";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Card,
   CardContent,

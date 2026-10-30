@@ -3,7 +3,7 @@
 import { cva } from "class-variance-authority";
 import { cn } from "cn";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Input } from "#components/_ui/input.tsx";
 import { Textarea } from "#components/_ui/textarea.tsx";
 

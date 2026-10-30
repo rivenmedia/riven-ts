@@ -7,7 +7,7 @@ import { toast } from "sonner";
 
 import { registerUser } from "#app/(public)/login/_actions/register.action.ts";
 import { registerSchema } from "#app/(public)/login/_form-schemas/register.schema.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Card,
   CardContent,

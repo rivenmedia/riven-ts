@@ -10,7 +10,7 @@ import { loginUser } from "#app/(public)/login/_actions/login.action.ts";
 import { OAuthProviders } from "#app/(public)/login/_components/oauth-providers.tsx";
 import { loginSchema } from "#app/(public)/login/_form-schemas/login.schema.ts";
 import { browserSupportsPasskeys } from "#app/(public)/login/_utils/browser-supports-passkeys.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Card,
   CardContent,

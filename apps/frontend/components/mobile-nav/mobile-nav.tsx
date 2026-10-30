@@ -4,7 +4,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { fly } from "#components/_animations/fly.ts";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 
 import type { AppRoutes } from "../../.next/types/routes";

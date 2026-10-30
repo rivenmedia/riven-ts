@@ -3,7 +3,7 @@ import Image from "next/image";
 import React, { useState } from "react";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { authClient } from "#lib/auth/client.ts";
 
 import { PasskeySigninButton } from "./passkey-signin-button.tsx";

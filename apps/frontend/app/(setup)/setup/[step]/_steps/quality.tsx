@@ -8,7 +8,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "#components/_ui/accordion.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Field,
   FieldContent,

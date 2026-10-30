@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { AnimatedToggle } from "#components/animated-toggle/animated-toggle.tsx";
 
 import type { ToggleOption } from "#components/animated-toggle/animated-toggle.tsx";

@@ -4,7 +4,7 @@ import { Link2Off } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { toast } from "sonner";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 import { unlinkAccount } from "../_actions/unlink-account.action.ts";
 

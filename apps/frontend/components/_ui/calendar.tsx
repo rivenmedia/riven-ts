@@ -9,7 +9,7 @@ import {
 import { useEffect, useRef } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
 
-import { Button, buttonVariants } from "#components/_ui/button.tsx";
+import { Button, buttonVariants } from "#components/_ui/button-moved.tsx";
 
 import type { ComponentProps } from "react";
 import type { CustomComponents, DayButton, Locale } from "react-day-picker";

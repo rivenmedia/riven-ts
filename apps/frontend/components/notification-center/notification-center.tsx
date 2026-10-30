@@ -3,7 +3,7 @@ import { Bell, BellRing, Check, CheckCheck, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 
 import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import {
   Popover,
   PopoverContent,

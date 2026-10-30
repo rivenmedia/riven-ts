@@ -4,7 +4,7 @@ import { Fingerprint } from "lucide-react";
 import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 import { usePasskeyForm } from "./passkey-form-provider.tsx";

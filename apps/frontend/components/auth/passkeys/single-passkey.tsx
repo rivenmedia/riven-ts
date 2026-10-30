@@ -3,7 +3,7 @@ import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hoo
 import { Check, Fingerprint, Pencil, X } from "lucide-react";
 import { DateTime } from "luxon";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Input } from "#components/_ui/input.tsx";
 import { Spinner } from "#components/_ui/spinner.tsx";
 import {

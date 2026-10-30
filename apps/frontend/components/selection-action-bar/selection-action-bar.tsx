@@ -2,7 +2,7 @@ import { cn } from "cn";
 import { X, LoaderCircle } from "lucide-react";
 import { startTransition, ViewTransition } from "react";
 
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 
 import type { ComponentType, SVGProps } from "react";
 

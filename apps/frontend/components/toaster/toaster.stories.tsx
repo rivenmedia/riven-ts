@@ -1,7 +1,7 @@
 import { toast } from "sonner";
 
 import { preview } from "#.storybook/preview.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Toaster } from "#components/toaster/toaster.tsx";
 
 const meta = preview.meta({

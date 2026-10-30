@@ -11,7 +11,7 @@ import { useMemo, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 
 import { Badge } from "#components/_ui/badge.tsx";
-import { Button } from "#components/_ui/button.tsx";
+import { Button } from "#components/_ui/button-moved.tsx";
 import { Label } from "#components/_ui/label.tsx";
 import {
   Popover,
