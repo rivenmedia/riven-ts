@@ -340,12 +340,39 @@ jobs:
             ALIAS="$(printf '%s' "${GITHUB_REPOSITORY,,}" | tr -cs 'a-z0-9' '-')-vr-pr-$PR_NUMBER.vercel.app"
           fi
 
+          # Calls the Vercel API as the team, printing the error if the call fails
+          # The CLI's alias command looks up the token's user first, which fails for tokens that belong to a team
+          vercel_api() {
+            local RESPONSE
+
+            if ! RESPONSE=$(curl --silent --show-error --fail-with-body \
+              --header "Authorization: Bearer $VERCEL_TOKEN" \
+              --header "Content-Type: application/json" \
+              "${@:2}" "https://api.vercel.com$1?teamId=$VERCEL_ORG_ID"); then
+              echo "$1: $(jq -r '.error.message // .' <<< "$RESPONSE" 2> /dev/null || echo "$RESPONSE")" >&2
+              return 1
+            fi
+
+            echo "$RESPONSE"
+          }
+
+          assign_alias() {
+            local DEPLOYMENT DEPLOYMENT_ID
+
+            DEPLOYMENT=$(vercel_api "/v13/deployments/${URL#https://}") || return 1
+            DEPLOYMENT_ID=$(jq -r .id <<< "$DEPLOYMENT")
+
+            vercel_api "/v2/deployments/$DEPLOYMENT_ID/aliases" \
+              --request POST \
+              --data "$(jq -nc --arg alias "$ALIAS" '{ alias: $alias }')" > /dev/null
+          }
+
           # A run for an older commit can finish last, so only the report for the pull request's head takes the subdomain
           PR_HEAD_SHA=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
 
           if [[ "$PR_HEAD_SHA" != "$HEAD_SHA" ]]; then
             echo "::notice::Not assigning $ALIAS, as PR #$PR_NUMBER has moved on from $HEAD_SHA to $PR_HEAD_SHA"
-          elif npx --yes vercel@"$VERCEL_PACKAGE_VERSION" alias set "$URL" "$ALIAS"; then
+          elif assign_alias; then
             URL="https://$ALIAS"
           else
             # The report is still available at its deployment URL, but viewed snapshots are not kept across pushes
