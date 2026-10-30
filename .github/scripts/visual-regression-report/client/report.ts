@@ -188,6 +188,25 @@ const pane = (label: string, image: ReportImage) =>
     ),
   ]);
 
+/**
+ * Labels an image in a comparison, sized by how much of it is shown.
+ * The labels sit above the images rather than over them, so they never hide a change.
+ */
+const comparisonLabel = (image: "baseline" | "result") => {
+  const text = element("span");
+  const label = element("span", { class: `comparison-label ${image}` }, [text]);
+
+  const setShare = (share: number, withPercentage: boolean) => {
+    const name = image === "baseline" ? "Baseline" : "Result";
+
+    label.hidden = share === 0;
+    label.style.flexBasis = `${String(share)}%`;
+    text.textContent = withPercentage ? `${name} ${String(share)}%` : name;
+  };
+
+  return { label, setShare };
+};
+
 const comparison = (
   baseline: ReportImage,
   result: ReportImage,
@@ -195,12 +214,21 @@ const comparison = (
 ) => {
   const maxWidth = Math.max(baseline.width, result.width);
   const top = imageElement(result, "Result", maxWidth);
+  const baselineLabel = comparisonLabel("baseline");
+  const resultLabel = comparisonLabel("result");
   const stack = element("div", { class: `well stack ${mode}` }, [
     imageElement(baseline, "Baseline", maxWidth),
     top,
   ]);
+  const view = element("div", { class: "comparison-view" }, [
+    element("div", { class: "comparison-legend", "aria-hidden": "true" }, [
+      baselineLabel.label,
+      resultLabel.label,
+    ]),
+    stack,
+  ]);
 
-  stack.style.width = `${String(maxWidth)}px`;
+  view.style.width = `${String(maxWidth)}px`;
 
   const slider = element("input", {
     type: "range",
@@ -210,12 +238,50 @@ const comparison = (
     "aria-label": mode === "swipe" ? "Swipe position" : "Result opacity",
   });
 
+  // Swiping right reveals more of the baseline on the left, whereas fading in reveals more of the result
+  const positions = {
+    baseline: mode === "swipe" ? 100 : 0,
+    both: 50,
+    result: mode === "swipe" ? 0 : 100,
+  };
+
+  const showOptions = ["baseline", "both", "result"] as const;
+
+  const showButtons = showOptions.map((showing) =>
+    element("button", {
+      type: "button",
+      "data-show": showing,
+      title:
+        showing === "both" ? "Show both images" : `Show only the ${showing}`,
+      text: { baseline: "Baseline", both: "Both", result: "Result" }[showing],
+    }),
+  );
+
   const update = () => {
+    const position = slider.valueAsNumber;
+
     if (mode === "swipe") {
-      top.style.clipPath = `inset(0 0 0 ${slider.value}%)`;
-      stack.style.setProperty("--swipe-position", `${slider.value}%`);
+      top.style.clipPath = `inset(0 0 0 ${String(position)}%)`;
+      stack.style.setProperty("--swipe-position", `${String(position)}%`);
+      // The labels meet above the divider, so each spans the part of the image it is shown in
+      baselineLabel.setShare(position, false);
+      resultLabel.setShare(100 - position, false);
     } else {
-      top.style.opacity = String(slider.valueAsNumber / 100);
+      top.style.opacity = String(position / 100);
+      baselineLabel.setShare(100 - position, true);
+      resultLabel.setShare(position, true);
+    }
+
+    const showing =
+      (["baseline", "result"] as const).find(
+        (image) => position === positions[image],
+      ) ?? "both";
+
+    for (const button of showButtons) {
+      button.setAttribute(
+        "aria-pressed",
+        String(button.dataset["show"] === showing),
+      );
     }
   };
 
@@ -233,6 +299,13 @@ const comparison = (
     update();
   };
 
+  for (const [i, button] of showButtons.entries()) {
+    button.addEventListener("click", () => {
+      slider.valueAsNumber = positions[showOptions[i] ?? "both"];
+      update();
+    });
+  }
+
   stack.addEventListener("pointerdown", drag);
   stack.addEventListener("pointermove", drag);
   slider.addEventListener("input", update);
@@ -240,11 +313,14 @@ const comparison = (
 
   return element("div", { class: "compare" }, [
     element("div", { class: "compare-controls" }, [
-      element("span", { text: "Baseline" }),
+      element(
+        "div",
+        { class: "segmented", role: "group", "aria-label": "Show" },
+        showButtons,
+      ),
       slider,
-      element("span", { text: "Result" }),
     ]),
-    stack,
+    view,
   ]);
 };
 

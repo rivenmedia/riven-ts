@@ -264,6 +264,7 @@ jobs:
     permissions:
       actions: read
       contents: read
+      pull-requests: read
     environment:
       name: publish-visual-regression-report
       url: ${{ steps.deploy.outputs.url }}
@@ -319,11 +320,37 @@ jobs:
         id: deploy
         working-directory: ${{ runner.temp }}/vercel
         env:
+          VERCEL_PACKAGE_VERSION: "63.1.0"
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ inputs.pr-number }}
+          HEAD_SHA: ${{ inputs.head-sha }}
+          # A domain with a wildcard record on Vercel, such as vr.example.com, or empty to use a vercel.app subdomain
+          REPORT_DOMAIN: ${{ vars.VR_REPORT_DOMAIN }}
         run: |
-          URL=$(npx --yes vercel@63.1.0 deploy --prebuilt --yes)
+          URL=$(npx --yes vercel@"$VERCEL_PACKAGE_VERSION" deploy --prebuilt --yes)
+
+          # Each deployment has its own URL, so the pull request's subdomain keeps the report at the same origin across pushes
+          # This lets the report remember which snapshots were viewed, as browser storage is kept per origin
+          if [[ -n "$REPORT_DOMAIN" ]]; then
+            ALIAS="pr-$PR_NUMBER.$REPORT_DOMAIN"
+          else
+            ALIAS="$(printf '%s' "${GITHUB_REPOSITORY,,}" | tr -cs 'a-z0-9' '-')-vr-pr-$PR_NUMBER.vercel.app"
+          fi
+
+          # A run for an older commit can finish last, so only the report for the pull request's head takes the subdomain
+          PR_HEAD_SHA=$(gh pr view "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --json headRefOid --jq .headRefOid)
+
+          if [[ "$PR_HEAD_SHA" != "$HEAD_SHA" ]]; then
+            echo "::notice::Not assigning $ALIAS, as PR #$PR_NUMBER has moved on from $HEAD_SHA to $PR_HEAD_SHA"
+          elif npx --yes vercel@"$VERCEL_PACKAGE_VERSION" alias set "$URL" "$ALIAS"; then
+            URL="https://$ALIAS"
+          else
+            # The report is still available at its deployment URL, but viewed snapshots are not kept across pushes
+            echo "::warning::Could not assign $ALIAS to the report, so it is only available at $URL"
+          fi
 
           echo "url=$URL" >> $GITHUB_OUTPUT
 
