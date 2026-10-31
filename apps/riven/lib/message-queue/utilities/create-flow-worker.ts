@@ -1,9 +1,13 @@
 import { captureException } from "@sentry/node";
-import { UnrecoverableError, Worker } from "bullmq";
+import { UnrecoverableError, WaitingChildrenError, Worker } from "bullmq";
 import { AbortError, toMerged } from "es-toolkit";
 import assert from "node:assert";
 import os from "node:os";
 
+import {
+  publishMediaItemProcessingState,
+  trackMediaItemProcessingState,
+} from "#message-queue/flows/process-media-item/utilities/track-media-item-processing-state.ts";
 import { withLogContext } from "#utilities/logger/log-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { settings } from "#utilities/settings.ts";
@@ -85,6 +89,11 @@ export function createFlowWorker<
                 },
               );
             } catch (error) {
+              if (error instanceof WaitingChildrenError) {
+                // Moving to `waiting-children` does not emit a worker event, so the state change is published here
+                void publishMediaItemProcessingState(job);
+              }
+
               captureException(error);
 
               if (error instanceof Error) {
@@ -118,6 +127,8 @@ export function createFlowWorker<
   queue.on("error", (error) => {
     logger.error(`${flowName} queue error`, { err: error });
   });
+
+  trackMediaItemProcessingState(worker);
 
   worker.on("error", (error) => {
     logger.error(`${flowName} worker error`, { err: error });

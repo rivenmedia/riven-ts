@@ -4,6 +4,7 @@ import { GET_MEDIA_ITEM_ACTIONS } from "#app/(protected)/details/media/[type]/[i
 import { ON_ITEM_REQUEST_CHANGED } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_subscriptions/on-item-request-changed.subscription.ts";
 import { GET_SEASON_STATE } from "#app/(protected)/details/media/[type]/[id]/seasons/[seasonNumber]/_queries/get-season-state.query.ts";
 import { ON_SEASON_EPISODES_UPDATED } from "#app/(protected)/details/media/[type]/[id]/seasons/[seasonNumber]/_subscriptions/on-season-episodes-updated.subscription.ts";
+import { ON_MEDIA_ITEM_IS_PROCESSING } from "#app/(protected)/details/media/_components/processing-label/_subscriptions/on-media-item-processing-state-change.subscription.ts";
 import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subscriptions/on-media-item-state-changed.subscription.ts";
 import { api } from "#mocks/graphql.ts";
 
@@ -96,10 +97,12 @@ const toMediaItem = (
  * to their changes. A `null` season state mocks a season that hasn't been indexed.
  *
  * @param episodeStateChanges The episode states, keyed by episode number, to publish once subscribed to
+ * @param processingItemIds The IDs of the season or episodes that are currently being processed
  */
 export function createSeasonStateHandlers(
   seasonState: MockedSeasonState | null,
   episodeStateChanges = new Map<number, MediaItemState>(),
+  processingItemIds = new Set<string>(),
 ) {
   return [
     api.query(GET_SEASON_STATE, () =>
@@ -161,6 +164,15 @@ export function createSeasonStateHandlers(
           },
         });
       }
+    }),
+    api.subscription(ON_MEDIA_ITEM_IS_PROCESSING, ({ subscription }) => {
+      subscription.publish({
+        data: {
+          mediaItemIsProcessing: processingItemIds.has(
+            subscription.variables.id,
+          ),
+        },
+      });
     }),
     api.subscription(ON_SEASON_EPISODES_UPDATED, ({ subscription }) => {
       if (!seasonState || subscription.variables.id !== seasonState.id) {

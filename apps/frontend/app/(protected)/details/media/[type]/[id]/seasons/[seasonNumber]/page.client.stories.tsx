@@ -140,3 +140,39 @@ EpisodeStateChanged.test(
     });
   },
 );
+
+const processingSeasonState = createIndexedSeasonState();
+
+export const Processing = meta.story({
+  beforeEach({ msw }) {
+    msw.use(
+      ...createSeasonStateHandlers(
+        processingSeasonState,
+        new Map(),
+        new Set([
+          processingSeasonState.id,
+          ...[...processingSeasonState.episodes]
+            .filter(([number]) => number > 3)
+            .map(([, { id }]) => id),
+        ]),
+      ),
+    );
+  },
+});
+
+Processing.test(
+  "Shows the season and its processing episodes as processing",
+  async ({ canvas }) => {
+    await waitFor(async () => {
+      await expect(
+        canvas.getAllByRole("status", { name: /^processing/iu }),
+      ).toHaveLength(7);
+    });
+
+    const episodeList = await canvas.findByRole("list");
+
+    await expect(
+      within(episodeList).getAllByRole("status", { name: /^processing/iu }),
+    ).toHaveLength(6);
+  },
+);

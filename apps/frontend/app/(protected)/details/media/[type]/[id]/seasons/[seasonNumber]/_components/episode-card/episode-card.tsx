@@ -2,6 +2,7 @@ import { Mountain } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+import { ProcessingLabel } from "#app/(protected)/details/media/_components/processing-label/processing-label.tsx";
 import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 
 import { formatEpisodeDetails } from "../../_utilities/format-episode-details.ts";
@@ -11,6 +12,10 @@ import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-
 import type { LinkProps } from "next/link";
 
 export interface EpisodeState {
+  /**
+   * The Riven ID of the episode's media item (**not** its external TVDB ID).
+   */
+  id: string;
   isRequested: boolean;
   state: MediaItemState;
 }
@@ -62,7 +67,13 @@ export function EpisodeCard({ episode, href, state }: EpisodeCardProps) {
             {episode.title}
           </h3>
           {state ? (
-            <StatusBadge isRequested={state.isRequested} state={state.state} />
+            <>
+              <StatusBadge
+                isRequested={state.isRequested}
+                state={state.state}
+              />
+              <ProcessingLabel id={state.id} />
+            </>
           ) : (
             <StatusBadge isRequested={false} />
           )}

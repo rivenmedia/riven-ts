@@ -33,8 +33,12 @@ import {
 } from "type-graphql";
 
 import { PaginationArgs } from "#graphql/args/pagination.args.ts";
+import { CoreKey } from "#graphql/context.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
+import { pubSub } from "#graphql/pubsub.ts";
 import { createCursorType } from "#graphql/types/create-cursor-type.ts";
+import { withInitialValue } from "#graphql/utilities/with-initial-value.ts";
+import { isMediaItemProcessing } from "#message-queue/flows/process-media-item/utilities/is-media-item-processing.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 
@@ -49,6 +53,30 @@ const MediaItemCursor = createCursorType<MediaItem>(
 
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
+  @Subscription(() => Boolean, {
+    description:
+      "Emits whether the media item for the given ID is currently being processed, followed by any changes to its processing state.",
+    subscribe: ({
+      args,
+      context,
+    }: SubscribeResolverData<unknown, { id: UUID }, ApolloServerContext>) =>
+      withInitialValue(
+        pubSub.subscribe("MEDIA_ITEM_PROCESSING_STATE_CHANGED", args.id),
+        async () =>
+          isMediaItemProcessing(
+            await context[CoreKey].services.mediaItemService.getMediaItemById(
+              args.id,
+            ),
+          ),
+      ),
+  })
+  public mediaItemIsProcessing(
+    @Arg("id", () => ID) _id: UUID,
+    @Root() isProcessing: boolean,
+  ) {
+    return isProcessing;
+  }
+
   @Subscription(() => MediaItemUnion, {
     description:
       "Emits the media item for the given ID whenever its state changes.",

@@ -10,6 +10,7 @@ import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
 import { ItemActionToolbar } from "../../../_components/item-action-toolbar/item-action-toolbar.tsx";
 import { formatSeasonTitle } from "../_utilities/format-season-title.ts";
+import { SeasonProcessingLabel } from "./season-processing-label.tsx";
 import { SeasonStateBadge } from "./season-state-badge.tsx";
 
 import type { GetSeasonQuery } from "../_queries/get-season.query.typegen.ts";
@@ -71,6 +72,10 @@ export function SeasonOverview({ show, season }: SeasonOverviewProps) {
                 showId={show.id}
                 seasonNumber={season.number}
                 large
+              />
+              <SeasonProcessingLabel
+                showId={show.id}
+                seasonNumber={season.number}
               />
             </Suspense>
           </ErrorFallback>

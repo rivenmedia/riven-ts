@@ -7,6 +7,10 @@ export const pubSub = createPubSub<{
   MEDIA_ITEM_STATE_CHANGED: [mediaItemId: UUID, mediaItemId: UUID];
   SEASON_UPDATED: [seasonId: UUID, seasonId: UUID];
   ITEM_REQUEST_CHANGED: [externalIdTopic: string, itemRequestId: UUID];
+  MEDIA_ITEM_PROCESSING_STATE_CHANGED: [
+    mediaItemId: UUID,
+    isProcessing: boolean,
+  ];
 }>();
 
 /**

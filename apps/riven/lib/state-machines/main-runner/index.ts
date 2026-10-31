@@ -273,7 +273,6 @@ export const mainRunnerMachine = setup({
             publishableEvents: input.publishableEvents,
             pluginQueues: input.pluginQueues,
             pluginWorkers: input.pluginWorkers,
-
             flowWorkers: {
               "process-item-request": createFlowWorker(
                 ProcessItemRequestFlow,
@@ -367,7 +366,6 @@ export const mainRunnerMachine = setup({
                 input.plugins,
               ),
             },
-
             sandboxedWorkers: {
               "scrape-item.parse-scrape-results": createSandboxedWorker(
                 ParseScrapeResultsSandboxedJob,

@@ -3,6 +3,7 @@ import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
 
+import { trackMediaItemProcessingState } from "#message-queue/flows/process-media-item/utilities/track-media-item-processing-state.ts";
 import { createQueue } from "#message-queue/utilities/create-queue.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { settings } from "#utilities/settings.ts";
@@ -67,6 +68,8 @@ export function createSandboxedWorker(
       workerOptions,
     ),
   );
+
+  trackMediaItemProcessingState(worker);
 
   worker.on("error", (error) => {
     logger.error(`${sandboxedJobName} worker error`, { err: error });

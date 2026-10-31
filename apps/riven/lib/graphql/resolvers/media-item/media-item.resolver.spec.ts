@@ -1,16 +1,20 @@
 import { BlacklistedStream } from "@repo/util-plugin-sdk/dto/entities";
 
 import { gql } from "@apollo/client";
+import { Worker } from "bullmq";
 import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 import { createQueue } from "#message-queue/utilities/create-queue.ts";
+import { settings } from "#utilities/settings.ts";
 
 import type {
   BlacklistActiveStreamResolverSpecMutation,
   BlacklistActiveStreamResolverSpecMutationVariables,
   GetMediaItemsQuery,
   GetMediaItemsQueryVariables,
+  MediaItemIsProcessingSubscription,
+  MediaItemIsProcessingSubscriptionVariables,
   MediaItemStateChangedSubscription,
   MediaItemStateChangedSubscriptionVariables,
 } from "./media-item.resolver.spec.typegen.ts";
@@ -212,5 +216,66 @@ describe("mediaItemStateChanged", () => {
         state: "scraped",
       },
     });
+  });
+});
+
+describe("mediaItemIsProcessing", () => {
+  const MEDIA_ITEM_IS_PROCESSING: TypedDocumentNode<
+    MediaItemIsProcessingSubscription,
+    MediaItemIsProcessingSubscriptionVariables
+  > = gql`
+    subscription MediaItemIsProcessing($id: ID!) {
+      mediaItemIsProcessing(id: $id)
+    }
+  `;
+
+  it("emits false if the media item is not being processed", async ({
+    gqlSubscribe,
+    indexedMovieContext: { indexedMovie },
+  }) => {
+    createQueue("process-media-item");
+
+    const { nextEvent } = await gqlSubscribe(MEDIA_ITEM_IS_PROCESSING, {
+      id: indexedMovie.id,
+    });
+
+    const { data, errors } = await nextEvent;
+
+    expect(errors).toBeUndefined();
+    expect(data).toStrictEqual({ mediaItemIsProcessing: false });
+  });
+
+  it("emits true if the media item is being processed", async ({
+    gqlSubscribe,
+    indexedMovieContext: { indexedMovie },
+    onTestFinished,
+  }) => {
+    await createQueue("process-media-item").add(
+      "Process media item",
+      {},
+      {
+        deduplication: {
+          id: `process-${indexedMovie.type}-${indexedMovie.id}`,
+        },
+      },
+    );
+
+    const worker = new Worker("process-media-item", null, {
+      autorun: false,
+      connection: { url: settings.redisUrl },
+    });
+
+    onTestFinished(async () => worker.close());
+
+    await worker.getNextJob("test-token");
+
+    const { nextEvent } = await gqlSubscribe(MEDIA_ITEM_IS_PROCESSING, {
+      id: indexedMovie.id,
+    });
+
+    const { data, errors } = await nextEvent;
+
+    expect(errors).toBeUndefined();
+    expect(data).toStrictEqual({ mediaItemIsProcessing: true });
   });
 });

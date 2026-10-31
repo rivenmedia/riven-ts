@@ -5,6 +5,7 @@ import { Worker } from "bullmq";
 import { AbortError } from "es-toolkit";
 import assert from "node:assert";
 
+import { trackMediaItemProcessingState } from "#message-queue/flows/process-media-item/utilities/track-media-item-processing-state.ts";
 import { withLogContext } from "#utilities/logger/log-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { settings } from "#utilities/settings.ts";
@@ -92,6 +93,8 @@ export function createPluginWorker<
   queue.on("error", (error) => {
     logger.error(`${queueName} queue error`, { err: error });
   });
+
+  trackMediaItemProcessingState(worker);
 
   worker.on("error", (error) => {
     logger.error(`${queueName} worker error`, { err: error });
