@@ -1,9 +1,11 @@
 import { DateTime, Info, Settings } from "luxon";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import { getCurrentMonthInterval } from "../utilities/get-current-month-interval";
 
 export function useCalendar() {
+  const router = useRouter();
   const today = DateTime.local();
   const currentMonth = today.startOf("month", { useLocaleWeeks: true });
 
@@ -12,6 +14,12 @@ export function useCalendar() {
   useEffect(() => {
     setSelectedMonth(selectedMonth.setLocale(Settings.defaultLocale));
   }, [Settings.defaultLocale]);
+
+  useEffect(() => {
+    router.push(
+      `/calendar?month=${selectedMonth.month.toString()}&year=${selectedMonth.year.toString()}`,
+    );
+  }, [selectedMonth]);
 
   const currentMonthDays = getCurrentMonthInterval(selectedMonth).splitBy({
     days: 1,

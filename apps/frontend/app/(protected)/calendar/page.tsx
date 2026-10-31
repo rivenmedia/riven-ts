@@ -1,8 +1,10 @@
 import { DateTime } from "luxon";
-import { io } from "next/cache";
+import { headers } from "next/headers";
+import { z } from "zod";
 
 import { getCurrentMonthInterval } from "#components/calendar/utilities/get-current-month-interval.ts";
 import { query } from "#lib/graphql/client.ts";
+import { resolveLocale } from "#lib/utils/resolve-locale.ts";
 
 import { GET_CALENDAR_DATA } from "./_queries/get-calendar-data.query";
 import { CalendarPage as CalendarPageClient } from "./page.client";
@@ -29,10 +31,25 @@ function toEntertainmentItem(
   }
 }
 
-export default async function CalendarPage() {
-  await io();
+export default async function CalendarPage({
+  searchParams,
+}: PageProps<"/calendar">) {
+  const headersList = await headers();
+  const acceptLanguage = headersList.get("accept-language");
+  const locale = resolveLocale(acceptLanguage);
+  const now = DateTime.local({ locale });
 
-  const { start, end } = getCurrentMonthInterval(DateTime.now());
+  const { month, year } = z
+    .object({
+      month: z.coerce.number().int().min(1).max(12).prefault(now.month),
+      year: z.coerce.number().int().prefault(now.year),
+    })
+    .parse(await searchParams);
+
+  const { start, end } = getCurrentMonthInterval(
+    DateTime.fromObject({ month, year }).setLocale(locale),
+  );
+
   const { data } = await query({
     query: GET_CALENDAR_DATA,
     variables: {
