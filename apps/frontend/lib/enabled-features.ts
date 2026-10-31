@@ -1,5 +1,5 @@
 const enabledFeatures = {
-  calendarPage: false,
+  calendarPage: true,
   dashboardPage: false,
   settingsPage: false,
   logsPage: false,

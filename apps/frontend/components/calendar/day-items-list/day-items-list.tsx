@@ -32,14 +32,14 @@ export function DayItemsList({
     <div className="space-y-1.5">
       {itemsToShow.map((item) => (
         <EntertainmentItem
-          key={item.itemId}
+          key={item.id}
           item={item}
           compact={limit !== Infinity}
         />
       ))}
       {showMore && day.items.length > limit && (
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <button
               className="text-muted-foreground hover:text-foreground w-full rounded-md px-2 py-1 text-left text-xs font-medium transition-colors hover:bg-white/5"
               type="button"
@@ -58,7 +58,7 @@ export function DayItemsList({
             </DialogHeader>
             <div className="mt-4 max-h-96 space-y-2 overflow-y-auto">
               {day.items.map((item) => (
-                <EntertainmentItem key={item.itemId} item={item} />
+                <EntertainmentItem key={item.id} item={item} />
               ))}
             </div>
           </DialogContent>
