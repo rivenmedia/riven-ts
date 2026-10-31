@@ -9,38 +9,38 @@ const meta = preview.meta({
 });
 
 const movie: EntertainmentItemData = {
-  itemId: "0000-0000-0000-0000-0000",
-  tvdbId: "",
-  tmdbId: "603692",
-  showTitle: "John Wick: Chapter 4",
-  itemType: "movie",
-  airedAt: "2023-03-24",
+  id: "0000-0000-0000-0000-0000",
+  primaryExternalId: "603692",
+  title: "John Wick: Chapter 4",
+  type: "movie",
+  releaseDate: "2023-03-24",
+  state: "indexed",
 };
 
 const episode: EntertainmentItemData = {
-  itemId: "0000-0000-0000-0000-0001",
-  tvdbId: "121361",
-  tmdbId: "1399",
-  showTitle: "Game of Thrones",
-  itemType: "episode",
-  airedAt: "2019-04-14",
-  season: 8,
-  episode: 1,
+  id: "0000-0000-0000-0000-0001",
+  primaryExternalId: "121361",
+  title: "Game of Thrones",
+  type: "episode",
+  releaseDate: "2019-04-14",
+  seasonNumber: 8,
+  number: 1,
+  state: "indexed",
 };
 
 const show: EntertainmentItemData = {
-  itemId: "0000-0000-0000-0000-0002",
-  tvdbId: "371572",
-  tmdbId: "94605",
-  showTitle: "Arcane",
-  itemType: "show",
-  airedAt: "2024-11-09",
+  id: "0000-0000-0000-0000-0002",
+  primaryExternalId: "371572",
+  title: "Arcane",
+  type: "show",
+  releaseDate: "2024-11-09",
+  state: "indexed",
 };
 
 const completedEpisode: EntertainmentItemData = {
   ...episode,
-  itemId: "0000-0000-0000-0000-0003",
-  lastState: "Completed",
+  id: "0000-0000-0000-0000-0003",
+  state: "completed",
 };
 
 export const Movie = meta.story({

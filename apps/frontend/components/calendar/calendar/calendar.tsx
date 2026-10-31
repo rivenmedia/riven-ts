@@ -12,6 +12,7 @@ import { TypeFilterChips } from "#components/calendar/type-filter-chips/type-fil
 
 import { useCalendar } from "./use-calendar.ts";
 
+import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
 import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 
 export interface CalendarProps {
@@ -43,18 +44,21 @@ export function Calendar({ items }: CalendarProps) {
   ] as const;
 
   const [selectedFilters, setSelectedFilters] = useState(
-    Object.fromEntries(filterOptions.map(({ type }) => [type, true])),
+    Object.fromEntries(filterOptions.map(({ type }) => [type, true])) as Record<
+      MediaItemType,
+      boolean
+    >,
   );
 
   const filteredItems = useMemo(() => {
     const result: Record<string, EntertainmentItemData[]> = {};
 
     for (const item of items) {
-      if (selectedFilters[item.itemType] === false) {
+      if (!selectedFilters[item.type]) {
         continue;
       }
 
-      const dateKey = DateTime.fromISO(item.airedAt).startOf("day").toISO();
+      const dateKey = DateTime.fromISO(item.releaseDate).startOf("day").toISO();
       const dayItems = (result[dateKey] ??= []);
 
       dayItems.push(item);

@@ -1,5 +1,7 @@
-import { DateTime, Info, Interval, Settings } from "luxon";
+import { DateTime, Info, Settings } from "luxon";
 import { useEffect, useMemo, useState } from "react";
+
+import { getCurrentMonthInterval } from "../utilities/get-current-month-interval";
 
 export function useCalendar() {
   const today = DateTime.local();
@@ -11,17 +13,9 @@ export function useCalendar() {
     setSelectedMonth(selectedMonth.setLocale(Settings.defaultLocale));
   }, [Settings.defaultLocale]);
 
-  const endOfMonth = selectedMonth.endOf("month", { useLocaleWeeks: true });
-
-  const intervalEnd = DateTime.max(
-    endOfMonth,
-    endOfMonth.endOf("week", { useLocaleWeeks: true }),
-  );
-
-  const currentMonthDays = Interval.fromDateTimes(
-    selectedMonth.startOf("week", { useLocaleWeeks: true }),
-    intervalEnd,
-  ).splitBy({ days: 1 });
+  const currentMonthDays = getCurrentMonthInterval(selectedMonth).splitBy({
+    days: 1,
+  });
 
   function isToday(date: DateTime) {
     return date.hasSame(today, "day");

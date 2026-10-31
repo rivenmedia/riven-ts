@@ -1,4 +1,5 @@
 import { AuthService } from "./services/auth/auth.service.ts";
+import { CalendarService } from "./services/calendar/calendar.service.ts";
 import { DownloaderService } from "./services/downloader/downloader.service.ts";
 import { IndexerService } from "./services/indexer/indexer.service.ts";
 import { ItemRequestService } from "./services/item-request/item-request.service.ts";
@@ -20,6 +21,7 @@ export interface Database {
 
 export interface Services {
   authService: AuthService;
+  calendarService: CalendarService;
   downloaderService: DownloaderService;
   indexerService: IndexerService;
   itemRequestService: ItemRequestService;
@@ -60,6 +62,7 @@ export async function initORM(options: Partial<Options>) {
 
   services = {
     authService: new AuthService(orm),
+    calendarService: new CalendarService(orm),
     downloaderService: new DownloaderService(orm),
     indexerService: new IndexerService(orm),
     itemRequestService: new ItemRequestService(orm),

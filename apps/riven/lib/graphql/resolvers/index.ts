@@ -1,4 +1,5 @@
 import { AuthResolver } from "./auth/auth.resolver.ts";
+import { CalendarResolver } from "./calendar/calendar.resolver.ts";
 import { EpisodeResolver } from "./episode.resolver.ts";
 import { FileSystemEntryResolver } from "./filesystem-entry/filesystem-entry.resolver.ts";
 import { IndexerDataResolver } from "./indexer-data.resolver.ts";
@@ -34,4 +35,5 @@ export const resolvers = [
   IndexerEpisodeResolver,
   AuthResolver,
   InstanceResolver,
+  CalendarResolver,
 ] as const satisfies Constructor<object>[];
