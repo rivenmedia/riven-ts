@@ -18,6 +18,8 @@ export const GET_CALENDAR_DATA: TypedDocumentNode<
         releaseDate
         type
         primaryExternalId
+        state
+        fullTitle
       }
 
       ... on Season {

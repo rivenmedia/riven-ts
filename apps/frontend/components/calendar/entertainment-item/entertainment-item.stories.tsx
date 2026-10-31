@@ -11,7 +11,7 @@ const meta = preview.meta({
 const movie: EntertainmentItemData = {
   id: "0000-0000-0000-0000-0000",
   primaryExternalId: "603692",
-  title: "John Wick: Chapter 4",
+  fullTitle: "John Wick: Chapter 4",
   type: "movie",
   releaseDate: "2023-03-24",
   state: "indexed",
@@ -20,7 +20,7 @@ const movie: EntertainmentItemData = {
 const episode: EntertainmentItemData = {
   id: "0000-0000-0000-0000-0001",
   primaryExternalId: "121361",
-  title: "Game of Thrones",
+  fullTitle: "Game of Thrones - S08E01",
   type: "episode",
   releaseDate: "2019-04-14",
   seasonNumber: 8,
@@ -31,7 +31,7 @@ const episode: EntertainmentItemData = {
 const show: EntertainmentItemData = {
   id: "0000-0000-0000-0000-0002",
   primaryExternalId: "371572",
-  title: "Arcane",
+  fullTitle: "Arcane",
   type: "show",
   releaseDate: "2024-11-09",
   state: "indexed",

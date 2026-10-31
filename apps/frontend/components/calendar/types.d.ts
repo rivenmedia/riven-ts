@@ -7,7 +7,7 @@ import type { ComponentType, HTMLAttributes } from "react";
 
 export type EntertainmentItemData = Pick<
   MediaItem,
-  "id" | "primaryExternalId" | "title" | "type" | "releaseDate" | "state"
+  "id" | "primaryExternalId" | "type" | "releaseDate" | "state" | "fullTitle"
 > &
   (
     | {

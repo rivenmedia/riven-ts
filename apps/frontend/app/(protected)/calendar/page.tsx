@@ -7,6 +7,28 @@ import { query } from "#lib/graphql/client.ts";
 import { GET_CALENDAR_DATA } from "./_queries/get-calendar-data.query";
 import { CalendarPage as CalendarPageClient } from "./page.client";
 
+import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
+import type { GetCalendarDataQuery } from "./_queries/get-calendar-data.query.typegen";
+
+function toEntertainmentItem(
+  item: GetCalendarDataQuery["calendar"][number],
+): EntertainmentItemData {
+  switch (item.__typename) {
+    case "Movie": {
+      return { ...item, type: "movie" };
+    }
+    case "Show": {
+      return { ...item, type: "show" };
+    }
+    case "Season": {
+      return { ...item, type: "season" };
+    }
+    case "Episode": {
+      return { ...item, type: "episode" };
+    }
+  }
+}
+
 export default async function CalendarPage() {
   await io();
 
@@ -14,15 +36,15 @@ export default async function CalendarPage() {
   const { data } = await query({
     query: GET_CALENDAR_DATA,
     variables: {
-      from: start,
-      to: end,
+      from: start.toISO(),
+      to: end.toISO(),
     },
   });
 
   return (
     <CalendarPageClient
       calendar={{
-        data: data?.calendar ?? [],
+        data: data?.calendar.map(toEntertainmentItem) ?? [],
       }}
     />
   );

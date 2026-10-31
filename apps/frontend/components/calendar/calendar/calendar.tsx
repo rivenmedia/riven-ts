@@ -54,7 +54,7 @@ export function Calendar({ items }: CalendarProps) {
     const result: Record<string, EntertainmentItemData[]> = {};
 
     for (const item of items) {
-      if (!selectedFilters[item.type]) {
+      if (!item.releaseDate || !selectedFilters[item.type]) {
         continue;
       }
 

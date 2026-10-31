@@ -7,19 +7,7 @@ import { getTypeStyle } from "#components/calendar/utilities/get-type-style.ts";
 
 import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 
-function formatEpisodeLabel(item: EntertainmentItemData) {
-  if (item.type !== "episode") {
-    return "";
-  }
-
-  const { seasonNumber, number } = item;
-
-  const episodeLabel = number ? `E${number.toString()}` : "";
-
-  return ` S${seasonNumber.toString()}${episodeLabel}`;
-}
-
-function itemUrl(item: EntertainmentItemData) {
+function buildItemPath(item: EntertainmentItemData) {
   switch (item.type) {
     case "movie":
     case "show": {
@@ -80,13 +68,7 @@ export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
               compact ? "truncate font-medium" : "font-semibold",
             )}
           >
-            {item.title}{" "}
-            {item.type === "episode" && item.seasonNumber && compact && (
-              <>
-                S{item.seasonNumber}
-                {item.number && <>E{item.number}</>}
-              </>
-            )}
+            {item.fullTitle}
           </div>
           {item.type === "episode" &&
             item.seasonNumber &&
@@ -110,12 +92,8 @@ export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
     "no-underline",
   );
 
-  const title = compact
-    ? `${item.title} ${formatEpisodeLabel(item)}`
-    : undefined;
-
   return (
-    <Link href={itemUrl(item)} className={classes} title={title}>
+    <Link href={buildItemPath(item)} className={classes} title={item.fullTitle}>
       {compact && (
         <span className={cn("size-1.5 shrink-0 rounded-full", style.dot)} />
       )}

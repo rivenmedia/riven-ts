@@ -19,7 +19,7 @@ const meta = preview.meta({
         {
           id: UUID.parse(crypto.randomUUID()),
           primaryExternalId: "603692",
-          title: "John Wick: Chapter 4",
+          fullTitle: "John Wick: Chapter 4",
           type: "movie",
           releaseDate: "2024-06-12",
           state: "completed",
@@ -27,7 +27,7 @@ const meta = preview.meta({
         {
           id: UUID.parse(crypto.randomUUID()),
           primaryExternalId: "121361",
-          title: "Game of Thrones",
+          fullTitle: "Game of Thrones - S08E01 - Winterfell",
           type: "episode",
           releaseDate: "2024-06-12",
           seasonNumber: 8,
