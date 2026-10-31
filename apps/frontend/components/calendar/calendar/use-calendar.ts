@@ -4,12 +4,23 @@ import { useEffect, useMemo, useState } from "react";
 
 import { getCurrentMonthInterval } from "../utilities/get-current-month-interval";
 
-export function useCalendar() {
+export interface CalendarMonth {
+  month: number;
+  year: number;
+}
+
+export function useCalendar(initialMonth?: CalendarMonth) {
   const router = useRouter();
   const today = DateTime.local();
   const currentMonth = today.startOf("month", { useLocaleWeeks: true });
 
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth);
+  const [selectedMonth, setSelectedMonth] = useState(() =>
+    initialMonth
+      ? DateTime.fromObject(initialMonth).startOf("month", {
+          useLocaleWeeks: true,
+        })
+      : currentMonth,
+  );
 
   useEffect(() => {
     setSelectedMonth(selectedMonth.setLocale(Settings.defaultLocale));

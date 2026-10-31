@@ -38,6 +38,10 @@ const meta = preview.meta({
           state: "completed" as const,
         },
       ],
+      month: {
+        month: DateTime.now().month,
+        year: DateTime.now().year,
+      },
     },
   },
 });

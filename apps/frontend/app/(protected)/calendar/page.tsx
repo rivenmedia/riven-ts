@@ -62,6 +62,7 @@ export default async function CalendarPage({
     <CalendarPageClient
       calendar={{
         data: data?.calendar.map(toEntertainmentItem) ?? [],
+        month: { month, year },
       }}
     />
   );
