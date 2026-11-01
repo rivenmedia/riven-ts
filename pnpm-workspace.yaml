@@ -134,6 +134,7 @@ catalog:
   "@typescript/native": npm:typescript@^7.0.2
   "@viren070/parse-torrent-title": ^0.7.6
   "@vitejs/plugin-react": ^6.0.3
+  "@wallabyjs/cli": ^1.0.29
   "@wrksz/themes": ^2.0.2
   "@zkochan/fuse-native": ^0.1.0
   better-auth: ^1.6.22

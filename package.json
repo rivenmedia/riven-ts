@@ -33,6 +33,7 @@
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "@vitest/browser": "catalog:vitest",
+    "@wallabyjs/cli": "catalog:",
     "es-toolkit": "catalog:",
     "execa": "catalog:",
     "husky": "catalog:",

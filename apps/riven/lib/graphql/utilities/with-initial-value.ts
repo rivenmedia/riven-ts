@@ -11,25 +11,30 @@ import { Repeater } from "@graphql-yoga/subscription";
  * @returns An iterator that emits the initial value, followed by any updates
  */
 export function withInitialValue<T>(
-  updates: AsyncIterable<T>,
+  updates: AsyncIterableIterator<T>,
   getInitialValue: () => Promise<T>,
 ) {
-  const state = { hasReceivedUpdate: false };
+  return new Repeater<T>(async (push, stop) => {
+    const state = { hasReceivedUpdate: false };
 
-  return Repeater.merge([
-    (async function* emitInitialValue() {
-      const initialValue = await getInitialValue();
+    // Returning the updates iterator ends any pending wait for the next update,
+    // which an async generator would otherwise block on until an update is received
+    void stop.then(async () => updates.return?.());
 
-      if (!state.hasReceivedUpdate) {
-        yield initialValue;
-      }
-    })(),
-    (async function* emitUpdates() {
+    const forwardingUpdates = (async () => {
       for await (const update of updates) {
         state.hasReceivedUpdate = true;
 
-        yield update;
+        await push(update);
       }
-    })(),
-  ]);
+    })();
+
+    const initialValue = await getInitialValue();
+
+    if (!state.hasReceivedUpdate) {
+      await push(initialValue);
+    }
+
+    await forwardingUpdates;
+  });
 }

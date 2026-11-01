@@ -395,6 +395,9 @@ catalogs:
     '@vitejs/plugin-react':
       specifier: ^6.0.3
       version: 6.0.5
+    '@wallabyjs/cli':
+      specifier: ^1.0.29
+      version: 1.0.29
     '@wrksz/themes':
       specifier: ^2.0.2
       version: 2.0.2
@@ -783,6 +786,9 @@ importers:
       '@vitest/browser':
         specifier: catalog:vitest
         version: 4.1.12(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@4.1.12)
+      '@wallabyjs/cli':
+        specifier: 'catalog:'
+        version: 1.0.29
       es-toolkit:
         specifier: 'catalog:'
         version: 1.46.1
@@ -8112,6 +8118,11 @@ packages:
 
   '@vitest/utils@4.1.12':
     resolution: {integrity: sha512-Q3awXrwOfEV+qc3WmO5ONyE0yO7Q1gQ9/oyHxGLZ/pl7N3NO/ZztqQwKLuwMkV+CA1JYSIeO3gkHnRDIo4AVaA==}
+
+  '@wallabyjs/cli@1.0.29':
+    resolution: {integrity: sha512-b3wJdga0wrXChTuZNOLHaeDSBVOQVibkVwaIj3L+5g/4r3/nNNfG9XkQTw1ZrryneoJpX+l8fZJ0aP8qNwGA8Q==}
+    engines: {node: '>=22'}
+    hasBin: true
 
   '@webcontainer/env@1.1.1':
     resolution: {integrity: sha512-6aN99yL695Hi9SuIk1oC88l9o0gmxL1nGWWQ/kNy81HigJ0FoaoTXpytCj6ItzgyCEwA9kF1wixsTuv5cjsgng==}
@@ -19195,6 +19206,8 @@ snapshots:
       '@vitest/pretty-format': 4.1.12
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
+
+  '@wallabyjs/cli@1.0.29': {}
 
   '@webcontainer/env@1.1.1': {}
 

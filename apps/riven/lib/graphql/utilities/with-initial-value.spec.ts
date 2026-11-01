@@ -64,3 +64,23 @@ it("discards the initial value if an update is received first", async ({
 
   await expect(secondValue).resolves.toStrictEqual({ done: false, value: 3 });
 });
+
+it("stops listening for updates when returned while waiting for an update", async () => {
+  const pubSub = createPubSub<{ VALUE_CHANGED: [value: number] }>();
+  const iterator = withInitialValue(pubSub.subscribe("VALUE_CHANGED"), () =>
+    Promise.resolve(1),
+  );
+
+  await iterator.next();
+
+  const nextValue = iterator.next();
+
+  await expect(iterator.return()).resolves.toStrictEqual({
+    done: true,
+    value: undefined,
+  });
+  await expect(nextValue).resolves.toStrictEqual({
+    done: true,
+    value: undefined,
+  });
+});
