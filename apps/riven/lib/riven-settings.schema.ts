@@ -86,6 +86,13 @@ export const RivenSettings = z.object({
       "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
     )
     .meta({ "wiki.section": "danger-zone" }),
+  unsafeWipeUsersOnStartup: z
+    .stringbool()
+    .default(false)
+    .describe(
+      "**UNSAFE**.\n \nIf true, all user data will be removed on application startup.",
+    )
+    .meta({ "wiki.section": "danger-zone" }),
   enabledLogTransports: json(z.array(z.enum(["console", "file"])))
     .default(["console", "file"])
     .describe("The enabled logging transports.")
@@ -110,17 +117,17 @@ export const RivenSettings = z.object({
       "Whether to show detailed stack traces when unexpected errors occur.",
     )
     .meta({ "wiki.section": "logging" }),
-  gqlHost: z
+  host: z
     .string()
     .default("localhost")
-    .describe("The GraphQL server host.")
-    .meta({ "wiki.section": "graphql" }),
-  gqlPort: z.coerce
+    .describe("The API server host.")
+    .meta({ "wiki.section": "server" }),
+  port: z.coerce
     .number()
     .int()
     .default(3000)
-    .describe("The GraphQL server port.")
-    .meta({ "wiki.section": "graphql" }),
+    .describe("The API server port.")
+    .meta({ "wiki.section": "server" }),
   dubbedAnimeOnly: z
     .stringbool()
     .default(false)
@@ -142,14 +149,28 @@ export const RivenSettings = z.object({
     .int()
     .positive()
     .optional()
-    .describe("The minimum average bitrate for movies.")
+    .describe("The minimum average bitrate for movies in kbps.")
+    .meta({ "wiki.section": "scraping" }),
+  maximumAverageBitrateMovies: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe("The maximum average bitrate for movies in kbps.")
     .meta({ "wiki.section": "scraping" }),
   minimumAverageBitrateEpisodes: z.coerce
     .number()
     .int()
     .positive()
     .optional()
-    .describe("The minimum average bitrate for episodes.")
+    .describe("The minimum average bitrate for episodes in kbps.")
+    .meta({ "wiki.section": "scraping" }),
+  maximumAverageBitrateEpisodes: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .describe("The maximum average bitrate for episodes in kbps.")
     .meta({ "wiki.section": "scraping" }),
   preferSeasonPacks: z
     .stringbool()
@@ -212,6 +233,25 @@ export const RivenSettings = z.object({
       "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
     )
     .meta({ "wiki.section": "debugging" }),
+  adminUserCredentials: z
+    .templateLiteral([z.string().min(1), z.literal(":"), z.string().min(1)])
+    .optional()
+    .transform((val) => {
+      if (!val) {
+        return null;
+      }
+
+      const [username, password] = val.split(":");
+
+      if (!username || !password) {
+        throw new Error(
+          "Invalid admin user credentials format. Expected 'username:password'",
+        );
+      }
+
+      return { username, password };
+    })
+    .describe("The admin user credentials - in the format username:password"),
   retryLibraryIntervalSeconds: z.coerce
     .number()
     .int()

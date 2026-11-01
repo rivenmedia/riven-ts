@@ -1,24 +1,24 @@
-import preview from "@/.storybook/preview";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { faker } from "@faker-js/faker";
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 
-import { GET_DISCOVERY_ITEMS } from "../_components/trending-discovery-page/_components/trending-discovery-item-list";
-import TrendingShowsPage from "./page";
-
-import type { UUID } from "node:crypto";
+import preview from "#.storybook/preview.tsx";
+import { GET_FILTERED_TMDB_TRENDING_SHOWS } from "#app/(protected)/lists/trending/shows/_queries/get-tmdb-trending-shows.query.ts";
+import TrendingShowsPage from "#app/(protected)/lists/trending/shows/page.tsx";
+import { api } from "#mocks/graphql.ts";
 
 const meta = preview.meta({
   title: "Pages / Trending / Shows",
   component: TrendingShowsPage,
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_DISCOVERY_ITEMS, () =>
+      api.query(GET_FILTERED_TMDB_TRENDING_SHOWS, () =>
         HttpResponse.json({
           data: {
-            discoveryItems: Array.from({ length: 50 }).map(() => ({
+            tmdbTrendingShows: Array.from({ length: 50 }).map(() => ({
               __typename: "TmdbIndexerData",
-              id: faker.string.uuid() as UUID,
+              id: UUID.parse(faker.string.uuid()),
               posterUrl: faker.image.urlPicsumPhotos({
                 width: 200,
                 height: 300,
@@ -26,6 +26,9 @@ const meta = preview.meta({
               title: faker.lorem.words(3),
               type: "show",
               year: faker.date.past({ years: 10 }).getFullYear(),
+              releaseDate: faker.date.past({ years: 10 }).toISOString(),
+              overview: faker.lorem.paragraph(),
+              isRequestable: true,
             })),
           },
         }),
@@ -33,7 +36,7 @@ const meta = preview.meta({
     );
   },
   parameters: {
-    screenshot: {
+    snapshot: {
       fullPage: false,
     },
   },

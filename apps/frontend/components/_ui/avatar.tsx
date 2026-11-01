@@ -3,6 +3,7 @@
 import { cn } from "cn";
 import { Avatar as AvatarPrimitive } from "radix-ui";
 
+/** User image with a text fallback, in several sizes. */
 function Avatar({
   className,
   size = "default",

@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { RatingsRow } from "./ratings-row";
+import { preview } from "#.storybook/preview.tsx";
+import { RatingsRow } from "#components/media/ratings-row/ratings-row.tsx";
 
 const meta = preview.meta({
   title: "Media / RatingsRow",
@@ -10,33 +9,39 @@ const meta = preview.meta({
 export const Default = meta.story({
   args: {
     loading: false,
-    scores: [
-      {
-        name: "TMDB",
-        score: "7.8",
-        url: "https://www.themoviedb.org",
-        image: "tmdb.svg",
-      },
-      {
-        name: "IMDb",
-        score: "8.1",
-        url: "https://www.imdb.com",
-        image: "imdb.svg",
-      },
-    ],
+    scores: new Map([
+      [
+        "TMDB",
+        {
+          name: "TMDB",
+          score: "7.8",
+          url: "https://www.themoviedb.org",
+          logo: "tmdb.svg",
+        },
+      ],
+      [
+        "IMDb",
+        {
+          name: "IMDb",
+          score: "8.1",
+          url: "https://www.imdb.com",
+          logo: "imdb.svg",
+        },
+      ],
+    ]),
   },
 });
 
 export const Loading = meta.story({
   args: {
     loading: true,
-    scores: null,
+    scores: new Map(),
   },
 });
 
 export const Empty = meta.story({
   args: {
     loading: false,
-    scores: [],
+    scores: new Map(),
   },
 });

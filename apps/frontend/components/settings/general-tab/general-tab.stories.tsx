@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { GeneralTab } from "./general-tab";
+import { preview } from "#.storybook/preview.tsx";
+import { GeneralTab } from "#components/settings/general-tab/general-tab.tsx";
 
 const meta = preview.meta({
   title: "Settings / GeneralTab",

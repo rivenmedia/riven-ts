@@ -1,1 +1,26 @@
+# Baselines are committed by the update-visual-regression-baselines deployment, which attests them.
+# Baselines staged unchanged from a commit being merged, cherry-picked or rebased came from there, so are allowed.
+GIT_DIR=$(git rev-parse --git-dir)
+
+# Husky runs this with `sh -e`, so the missing files must not fail it
+SOURCES=$(cat "$GIT_DIR/MERGE_HEAD" "$GIT_DIR/CHERRY_PICK_HEAD" "$GIT_DIR/REBASE_HEAD" 2> /dev/null || true)
+
+BASELINES=$(git diff --cached --name-only --no-renames --diff-filter=AM -- ':(glob)**/__vis__/*/__baselines__/**' | while IFS= read -r BASELINE; do
+  STAGED=$(git rev-parse ":$BASELINE")
+
+  for SOURCE in $SOURCES; do
+    if [ "$(git rev-parse -q --verify "$SOURCE:$BASELINE")" = "$STAGED" ]; then
+      continue 2
+    fi
+  done
+
+  echo "$BASELINE"
+done)
+
+if [ -n "$BASELINES" ]; then
+  echo "Visual regression baselines are committed by the update-visual-regression-baselines deployment. Unstage these files:" >&2
+  echo "$BASELINES" >&2
+  exit 1
+fi
+
 pnpm lint-staged

@@ -1,0 +1,139 @@
+---
+title: Getting Started
+description: Add Riven's web frontend to your Docker setup.
+---
+
+This guide adds the frontend to the Docker Compose setup from
+[Getting Started](/docs/getting-started). Get Riven running first, then come
+back here.
+
+The examples assume you'll open the frontend at `http://192.168.1.10:9000`.
+Swap in your own host's address, or your domain if you put it behind a
+[reverse proxy](#reverse-proxy).
+
+<Steps>
+<Step>
+
+### Configure Riven for the frontend
+
+Add these to Riven's `.env`:
+
+```bash title=".env"
+# Bind the API to all interfaces so the frontend container can reach it
+RIVEN_SETTING__host="0.0.0.0"
+
+# Creates an admin account on first boot, as username:password
+RIVEN_SETTING__adminUserCredentials="admin:CHANGEME"
+
+# The URL you'll open the frontend at - must match ORIGIN below
+RIVEN_FRONTEND_SETTING__origin="http://192.168.1.10:9000"
+
+# Signs session cookies. Generate one with: openssl rand -base64 32
+RIVEN_FRONTEND_SETTING__authSecret="your-generated-secret"
+
+# Anyone who can reach the login page can sign up while this is true
+RIVEN_FRONTEND_SETTING__enableEmailPasswordSignup="false"
+```
+
+<Callout type="warn">
+  If `authSecret` isn't set, Riven generates a random one on every start, which
+  signs everyone out each time Riven restarts.
+</Callout>
+
+</Step>
+<Step>
+
+### Add the frontend service
+
+Add a `riven-frontend` service to your `docker-compose.yml`:
+
+```yaml title="docker-compose.yml"
+services:
+  # ...riven, postgres and redis from Getting Started
+
+  riven-frontend:
+    image: ghcr.io/rivenmedia/riven-ts-frontend:main
+    container_name: riven-frontend
+    restart: unless-stopped
+    environment:
+      # The URL you'll open the frontend at
+      ORIGIN: http://192.168.1.10:9000
+      # Where the frontend reaches Riven, over the Compose network
+      BACKEND_URL: http://riven:3000
+    ports:
+      - 9000:9000
+    depends_on:
+      - riven
+```
+
+Like Riven's image, there is no `latest` tag - use `:main` or pin a version.
+
+</Step>
+<Step>
+
+### Start the frontend
+
+Restart Riven so it picks up the new settings, then start the frontend:
+
+```bash
+docker compose up -d riven riven-frontend
+docker compose logs -f riven-frontend
+```
+
+</Step>
+<Step>
+
+### Sign in
+
+Open `http://192.168.1.10:9000` and sign in with the username and password
+from `RIVEN_SETTING__adminUserCredentials`.
+
+Riven only creates the admin account when no admin exists yet, so changing
+the credentials later won't change the password of an existing admin.
+
+</Step>
+</Steps>
+
+## Reverse proxy
+
+To serve the frontend from a domain, point your proxy at port `9000` and set
+both `ORIGIN` and `RIVEN_FRONTEND_SETTING__origin` to the public URL, e.g.
+`https://riven.example.com`.
+
+```nginx title="Nginx"
+server {
+    server_name riven.example.com;
+
+    location / {
+        proxy_pass http://localhost:9000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
+        proxy_set_header Host $host;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+```
+
+The `Upgrade` headers matter: live updates use a WebSocket on `/graphql`,
+which the frontend forwards to Riven.
+
+<Callout type="warn">
+  The frontend makes some auth requests to its own `ORIGIN` from inside the
+  container. If `ORIGIN` is a domain, make sure the container can resolve and
+  reach it.
+</Callout>
+
+## Troubleshooting
+
+**Redirected back to the login page after signing in** - `ORIGIN` and
+`RIVEN_FRONTEND_SETTING__origin` don't match the URL in your browser's address
+bar. Scheme, host and port all have to match.
+
+**Everyone gets signed out when Riven restarts** - set
+`RIVEN_FRONTEND_SETTING__authSecret` to a fixed value.
+
+**Frontend can't connect to Riven** - check that `RIVEN_SETTING__host` is
+`0.0.0.0` and that `BACKEND_URL` uses Riven's service name (`riven`), not
+`localhost`. Inside the frontend container, `localhost` is the frontend itself.

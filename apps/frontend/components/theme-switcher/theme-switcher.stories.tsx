@@ -1,9 +1,8 @@
-import preview from "@/.storybook/preview";
-
 import { expect, waitFor, within } from "storybook/test";
 
-import { defaultTheme } from "../providers/theme-provider";
-import { ThemeSwitcher } from "./theme-switcher";
+import preview from "#.storybook/preview.tsx";
+import { defaultTheme } from "#components/providers/theme-provider.tsx";
+import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
 
 const meta = preview.meta({
   title: "Components/Theme Switcher",
@@ -51,6 +50,11 @@ Default.test(
           "data-theme",
           themeValue,
         );
+      });
+
+      // The menu returns focus to the button once it has closed, opening its tooltip, so wait for it to settle
+      await waitFor(async () => {
+        await expect(button).toHaveFocus();
       });
     }
   },

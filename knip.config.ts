@@ -44,6 +44,9 @@ export default {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
       ignoreBinaries: ["tail", "jq"],
+      ignoreDependencies: [
+        "@vitest/browser", // `@vitest/browser` is installed at the root so Wallaby can resolve and patch it - it's never imported.
+      ],
     },
     "apps/wiki": {
       entry: [

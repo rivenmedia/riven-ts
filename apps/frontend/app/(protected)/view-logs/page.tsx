@@ -1,3 +1,5 @@
+import { LogsPage as LogsPageClient } from "./page.client";
+
 export default function LogsPage() {
-  return <h1>Logs</h1>;
+  return <LogsPageClient />;
 }

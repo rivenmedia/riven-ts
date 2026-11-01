@@ -1,11 +1,10 @@
-import { preview } from "@/.storybook/preview";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { DateTime, Settings } from "luxon";
 import { expect, within } from "storybook/test";
 
-import { Calendar } from "./calendar";
-
-import type { UUID } from "node:crypto";
+import { preview } from "#.storybook/preview.tsx";
+import { Calendar } from "#components/calendar/calendar/calendar.tsx";
 
 const meta = preview.meta({
   title: "Calendar / Calendar",
@@ -13,33 +12,42 @@ const meta = preview.meta({
   args: {
     items: [
       {
-        itemId: "1" as UUID,
-        tvdbId: "1",
-        tmdbId: "94605",
-        showTitle: "Arcane",
-        itemType: "episode" as const,
-        airedAt: DateTime.fromObject({ year: 2026, month: 9, day: 4 }).toISO(),
-        season: 2,
-        episode: 3,
-        lastState: "Completed",
+        id: UUID.parse(crypto.randomUUID()),
+        primaryExternalId: "94605",
+        fullTitle: "Arcane - S02E03 - Finally Got the Name Right",
+        type: "episode" as const,
+        releaseDate: DateTime.fromObject({
+          year: 2026,
+          month: 9,
+          day: 4,
+        }).toISO(),
+        seasonNumber: 2,
+        number: 3,
+        state: "completed" as const,
       },
       {
-        itemId: "2" as UUID,
-        tvdbId: "2",
-        tmdbId: "603692",
-        showTitle: "John Wick: Chapter 4",
-        itemType: "movie" as const,
-        airedAt: DateTime.fromObject({ year: 2026, month: 9, day: 6 }).toISO(),
-        lastState: "Completed",
+        id: UUID.parse(crypto.randomUUID()),
+        primaryExternalId: "603692",
+        fullTitle: "John Wick: Chapter 4",
+        type: "movie" as const,
+        releaseDate: DateTime.fromObject({
+          year: 2026,
+          month: 9,
+          day: 6,
+        }).toISO(),
+        state: "completed" as const,
       },
       {
-        itemId: "3" as UUID,
-        tvdbId: "3",
-        tmdbId: "1399",
-        showTitle: "Game of Thrones",
-        itemType: "show" as const,
-        airedAt: DateTime.fromObject({ year: 2026, month: 8, day: 4 }).toISO(),
-        lastState: "Completed",
+        id: UUID.parse(crypto.randomUUID()),
+        primaryExternalId: "1399",
+        fullTitle: "Game of Thrones",
+        type: "show" as const,
+        releaseDate: DateTime.fromObject({
+          year: 2026,
+          month: 8,
+          day: 4,
+        }).toISO(),
+        state: "completed" as const,
       },
     ],
   },

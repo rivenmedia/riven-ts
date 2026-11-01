@@ -33,14 +33,16 @@ export let client: ApolloClient;
 
 export function initApolloClient(uri: URL, signal?: AbortSignal) {
   // oxlint-disable-next-line typescript/no-unnecessary-condition
-  if (client) {
-    return client;
-  }
-
-  client = new ApolloClient({
+  client ??= new ApolloClient({
     cache: new InMemoryCache({
       possibleTypes: {
         MediaItem: ["Movie", "Show", "Season", "Episode"],
+        ShowLikeMediaItem: ["Show", "Season", "Episode"],
+      },
+      typePolicies: {
+        TmdbIndexerData: {
+          keyFields: ["type", "id"],
+        },
       },
     }),
     dataMasking: true,

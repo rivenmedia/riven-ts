@@ -1,4 +1,7 @@
-import { Button } from "@/components/_ui/button";
+import { cn } from "cn";
+import { Check, Palette } from "lucide-react";
+
+import { Button } from "#components/_ui/button.tsx";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -7,17 +10,15 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/_ui/dropdown-menu";
+} from "#components/_ui/dropdown-menu.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/_ui/tooltip";
-import { themes, useTheme } from "@/components/providers/theme-provider";
+} from "#components/_ui/tooltip.tsx";
+import { themes, useTheme } from "#components/providers/theme-provider.tsx";
 
-import { cn } from "cn";
-import { Check, Palette } from "lucide-react";
-
+/** Icon button that opens a dropdown for switching the app's colour theme. */
 export function ThemeSwitcher() {
   const { setTheme, theme } = useTheme();
 

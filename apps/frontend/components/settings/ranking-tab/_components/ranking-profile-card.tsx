@@ -1,13 +1,13 @@
-import { Button } from "@/components/_ui/button";
+import { Check } from "lucide-react";
+
+import { Button } from "#components/_ui/button.tsx";
 import {
   Card,
   CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
-} from "@/components/_ui/card";
-
-import { Check } from "lucide-react";
+} from "#components/_ui/card.tsx";
 
 interface RankingProfileCardProps {
   title: string;

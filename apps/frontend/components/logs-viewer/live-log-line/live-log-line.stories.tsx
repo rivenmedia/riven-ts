@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { LiveLogLine } from "./live-log-line";
+import { preview } from "#.storybook/preview.tsx";
+import { LiveLogLine } from "#components/logs-viewer/live-log-line/live-log-line.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / LiveLogLine",

@@ -3,15 +3,16 @@ import {
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/_ui/tabs";
+} from "#components/_ui/tabs.tsx";
 
-import { RankingProfilesTab } from "./_components/ranking-profiles-tab";
-import { RankingSettingsTab } from "./_components/ranking-settings-tab";
+import { RankingProfilesTab } from "./_components/ranking-profiles-tab.tsx";
+import { RankingSettingsTab } from "./_components/ranking-settings-tab.tsx";
 
 export interface RankingTabProps {
   selectedProfile: string;
 }
 
+/** Tabs for choosing a ranking profile and adjusting ranking settings. */
 export function RankingTab({ selectedProfile }: RankingTabProps) {
   return (
     <Tabs defaultValue="ranking-profiles" className="space-y-4">

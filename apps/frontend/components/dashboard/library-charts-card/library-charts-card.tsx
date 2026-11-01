@@ -1,20 +1,21 @@
+import { useMemo } from "react";
+import { Pie, PieChart } from "recharts";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/_ui/chart";
-import { Spinner } from "@/components/_ui/spinner";
+} from "#components/_ui/chart.tsx";
+import { Spinner } from "#components/_ui/spinner.tsx";
 
-import { useMemo } from "react";
-import { Pie, PieChart } from "recharts";
-
-import type { DashboardStatistics } from "../types";
+import type { DashboardStatistics } from "#components/dashboard/types.d.ts";
 
 export interface LibraryChartsCardProps {
   statistics: DashboardStatistics | undefined;
   isLoading: boolean;
 }
 
+/** Card charting the library's breakdown by media type and by item state. */
 export function LibraryChartsCard({
   statistics,
   isLoading,

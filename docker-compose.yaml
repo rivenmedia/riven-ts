@@ -18,6 +18,15 @@ services:
             command: pnpm install
     profiles:
       - all
+      - core
+
+  riven-frontend:
+    extends:
+      file: ./apps/frontend/docker-compose.yaml
+      service: riven-frontend
+    profiles:
+      - all
+      - core
 
   riven-db:
     extends:
@@ -25,6 +34,7 @@ services:
       service: riven-db
     profiles:
       - all
+      - core
       - services
       - analytics
 
@@ -34,6 +44,7 @@ services:
       service: riven-cache
     profiles:
       - all
+      - core
       - services
       - analytics
 

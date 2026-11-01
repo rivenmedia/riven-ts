@@ -1,19 +1,19 @@
+import { Mountain } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/_ui/tabs";
-import { authClient } from "@/lib/auth/client";
-import { query } from "@/lib/graphql/client";
+} from "#components/_ui/tabs.tsx";
+import { authClient } from "#lib/auth/client.ts";
+import { query } from "#lib/graphql/client.ts";
 
-import { Mountain } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-
-import { LoginForm } from "./_forms/login-form";
-import { RegisterForm } from "./_forms/register-form";
-import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query";
+import { LoginForm } from "./_forms/login-form.tsx";
+import { RegisterForm } from "./_forms/register-form.tsx";
+import { GET_AUTH_PROVIDERS } from "./_queries/get-auth-providers.query.ts";
 
 interface TabData {
   label: string;
@@ -35,7 +35,7 @@ export default async function LoginPage() {
     ({ key }) => key === "credential",
   );
 
-  const isCredentialProviderEnabled =
+  const isCredentialSignupEnabled =
     (credentialProvider?.enabled && !credentialProvider.disableSignup) ?? false;
 
   const lastLoginMethod = authClient.getLastUsedLoginMethod();
@@ -47,11 +47,11 @@ export default async function LoginPage() {
         <LoginForm
           authProviders={authProviders}
           lastLoginMethod={lastLoginMethod}
-          isCredentialLoginEnabled={isCredentialProviderEnabled}
+          isCredentialLoginEnabled={credentialProvider?.enabled ?? false}
         />
       ),
     },
-    ...(isCredentialProviderEnabled
+    ...(isCredentialSignupEnabled
       ? [
           {
             label: "Register",

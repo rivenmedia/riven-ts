@@ -4,7 +4,7 @@ import { animated, useSpring } from "@react-spring/web";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useEvent, useMount } from "react-use";
 
-import { Button } from "../_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 
 export interface ToggleOption<T extends string = string> {
   label: string;
@@ -17,6 +17,10 @@ interface AnimatedToggleProps<T extends string = string> {
   onChange: (selectedItem: T) => void;
 }
 
+/**
+ * Segmented control with a spring-animated indicator that slides to the
+ * selected option.
+ */
 export function AnimatedToggle<T extends string = string>({
   options,
   defaultValue = options[0].value,

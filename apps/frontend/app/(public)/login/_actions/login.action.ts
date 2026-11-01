@@ -1,13 +1,12 @@
 "use server";
 
-import { authClient } from "@/lib/auth/client";
-import { actionClient } from "@/lib/server-actions/action-client";
-
 import { redirect } from "next/navigation";
 import z from "zod";
 
-import { loginSchema } from "../_form-schemas/login.schema";
-import { loginLogger } from "../_utils/logger";
+import { loginSchema } from "#app/(public)/login/_form-schemas/login.schema.ts";
+import { loginLogger } from "#app/(public)/login/_utils/logger.ts";
+import { authClient } from "#lib/auth/client.ts";
+import { actionClient } from "#lib/server-actions/action-client.ts";
 
 export const loginUser = actionClient
   .inputSchema(loginSchema)

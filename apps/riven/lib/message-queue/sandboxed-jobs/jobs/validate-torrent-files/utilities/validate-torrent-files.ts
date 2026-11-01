@@ -23,8 +23,14 @@ export class InvalidTorrentError extends Error {
   public override name = "InvalidTorrentError";
 }
 
+/**
+ * Calculates the average bitrate of a file in kbps.
+ *
+ * @param fileSize The file size in bytes
+ * @param runtime The runtime in minutes
+ */
 function calculateAverageBitrate(fileSize: number, runtime: number) {
-  return fileSize / runtime / (1024 * 1024);
+  return (fileSize * 8) / (runtime * 60) / 1000;
 }
 
 const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
@@ -48,7 +54,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
       }
 
       ... on Episode {
-        tvdbId
         runtime
         lookupKeys
         number
@@ -59,7 +64,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Season {
         number
-        tvdbId
         episodes {
           lookupKeys
         }
@@ -67,7 +71,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Show {
         status
-        tvdbId
         seasons {
           totalEpisodes
           episodes {
@@ -98,6 +101,7 @@ const GET_VALIDATE_TORRENT_FILES_EPISODE_QUERY: TypedDocumentNode<
       season {
         number
       }
+      runtime
     }
   }
 `;
@@ -138,15 +142,28 @@ function getValidMovieFiles(
 
       assert.ok(parseData.type === "movie", "File must be a movie");
 
-      if (item.runtime && settings.minimumAverageBitrateMovies) {
+      if (
+        item.runtime &&
+        (settings.minimumAverageBitrateMovies ||
+          settings.maximumAverageBitrateMovies)
+      ) {
         const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
-        // TODO: If this assertion fails, we can probably skip checking all other files.
-        // Average bitrate is proportional to the file size, and the files are ordered by size.
-        assert.ok(
-          bitrate >= settings.minimumAverageBitrateMovies,
-          `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
-        );
+        if (settings.minimumAverageBitrateMovies) {
+          // TODO: If this assertion fails, we can probably skip checking all other files.
+          // Average bitrate is proportional to the file size, and the files are ordered by size.
+          assert.ok(
+            bitrate >= settings.minimumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
+
+        if (settings.maximumAverageBitrateMovies) {
+          assert.ok(
+            bitrate <= settings.maximumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
       }
 
       return [
@@ -230,13 +247,26 @@ async function getMatchedEpisodeId(
         episode.season.number === item.season.number,
       `Incorrect episode for ${item.fullTitle}`,
     );
+  }
 
-    if (item.runtime && settings.minimumAverageBitrateEpisodes) {
-      const bitrate = calculateAverageBitrate(file.size, item.runtime);
+  if (
+    episode.runtime &&
+    (settings.minimumAverageBitrateEpisodes ||
+      settings.maximumAverageBitrateEpisodes)
+  ) {
+    const bitrate = calculateAverageBitrate(file.size, episode.runtime);
 
+    if (settings.minimumAverageBitrateEpisodes) {
       assert.ok(
         bitrate >= settings.minimumAverageBitrateEpisodes,
         `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+      );
+    }
+
+    if (settings.maximumAverageBitrateEpisodes) {
+      assert.ok(
+        bitrate <= settings.maximumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateEpisodes.toString()} for episodes`,
       );
     }
   }

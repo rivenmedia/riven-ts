@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
-import { SectionHeading } from "../section-heading/section-heading";
-import { StatusBadge } from "./status-badge";
+import { preview } from "#.storybook/preview.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
+import { StatusBadge } from "#components/media/status-badge/status-badge.tsx";
 
 const meta = preview.meta({
   title: "Media / StatusBadge",
@@ -22,13 +22,11 @@ const meta = preview.meta({
         "requested",
       ],
     },
-    large: {
-      control: "boolean",
-    },
   },
   args: {
     state: "completed" as const,
     large: true,
+    isRequested: true,
   },
 });
 
@@ -42,7 +40,7 @@ export const AllStates = meta.story({
           <SectionHeading title="Large Status Badges" />
           <div className="flex flex-wrap gap-2">
             {MediaItemState.options.map((state) => (
-              <StatusBadge key={state} state={state} large />
+              <StatusBadge key={state} state={state} isRequested large />
             ))}
           </div>
         </div>
@@ -50,7 +48,12 @@ export const AllStates = meta.story({
           <SectionHeading title="Small Status Badges" />
           <div className="flex flex-wrap gap-2">
             {MediaItemState.options.map((state) => (
-              <StatusBadge key={state} state={state} large={false} />
+              <StatusBadge
+                key={state}
+                state={state}
+                isRequested
+                large={false}
+              />
             ))}
           </div>
         </div>

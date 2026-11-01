@@ -6,6 +6,7 @@ import { Tabs as TabsPrimitive } from "radix-ui";
 
 import type { VariantProps } from "class-variance-authority";
 
+/** Tabbed panels where one view is visible at a time. */
 function Tabs({
   className,
   orientation = "horizontal",

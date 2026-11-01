@@ -11,7 +11,7 @@ export const PasswordChangeFormSchema = z
       .string()
       .trim()
       .min(1, "Confirm new password is required"),
-    revokeSessions: z.boolean().optional(),
+    revokeOtherSessions: z.boolean().optional(),
   })
   .refine((data) => data.newPassword === data.confirmNewPassword, {
     message: "New password and confirmation do not match.",
@@ -21,5 +21,3 @@ export const PasswordChangeFormSchema = z
     message: "New password must be different from current password.",
     path: ["newPassword"],
   });
-
-export type PasswordChangeFormValues = z.infer<typeof PasswordChangeFormSchema>;

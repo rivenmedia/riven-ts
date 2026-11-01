@@ -1,5 +1,5 @@
-import { preview } from "@/.storybook/preview";
-import { Badge } from "@/components/_ui/badge";
+import { preview } from "#.storybook/preview.tsx";
+import { Badge } from "#components/_ui/badge.tsx";
 
 /**
  * Displays a badge or a component that looks like a badge.

@@ -1,11 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { DateTime } from "luxon";
 import { fn } from "storybook/test";
 
-import { FileInformationPanel } from "./file-information-panel";
-
-import type { UUID } from "node:crypto";
+import { preview } from "#.storybook/preview.tsx";
+import { FileInformationPanel } from "#components/media/file-information-panel/file-information-panel.tsx";
 
 const meta = preview.meta({
   title: "Media / FileInformationPanel",
@@ -62,7 +59,7 @@ export const MinimalFields = meta.story({
   args: {
     entries: [
       {
-        id: "1234" as UUID,
+        id: "1234",
         originalFilename: "movie.mkv",
       },
     ],

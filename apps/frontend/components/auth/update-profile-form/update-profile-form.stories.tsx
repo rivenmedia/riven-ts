@@ -1,8 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
+import { http, HttpResponse } from "msw";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import { UpdateProfileForm } from "./update-profile-form";
+import { preview } from "#.storybook/preview.tsx";
+import { UpdateProfileForm } from "#components/auth/update-profile-form/update-profile-form.tsx";
 
 const meta = preview.meta({
   title: "Auth / UpdateProfileForm",
@@ -16,6 +16,13 @@ export const Default = meta.story({
       username: "",
       avatar: "",
     },
+  },
+  beforeEach({ msw }) {
+    msw.use(
+      http.post("**/api/auth/update-user", () =>
+        HttpResponse.json({ success: true }),
+      ),
+    );
   },
 });
 

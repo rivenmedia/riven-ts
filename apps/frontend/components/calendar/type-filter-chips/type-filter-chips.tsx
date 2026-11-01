@@ -1,18 +1,19 @@
-import { Checkbox } from "@/components/_ui/checkbox";
-import { Label } from "@/components/_ui/label";
-
 import { cn } from "cn";
 
-import { getTypeStyle } from "../utilities/get-type-style";
+import { Checkbox } from "#components/_ui/checkbox.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { getTypeStyle } from "#components/calendar/utilities/get-type-style.ts";
 
-import type { FilterOption } from "../types";
+import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
+import type { FilterOption } from "#components/calendar/types.d.ts";
 
 export interface TypeFilterChipsProps {
   options: readonly FilterOption[];
-  filters: Record<string, boolean>;
-  onChange: (filters: Record<string, boolean>) => void;
+  filters: Record<MediaItemType, boolean>;
+  onChange: (filters: Record<MediaItemType, boolean>) => void;
 }
 
+/** Checkbox chips for showing or hiding calendar items by media type. */
 export function TypeFilterChips({
   options,
   filters,
@@ -21,7 +22,7 @@ export function TypeFilterChips({
   return (
     <section className="flex flex-wrap items-center gap-2">
       {options.map(({ icon: Icon, id, label, type }) => {
-        const isSelected = filters[type] !== false;
+        const isSelected = filters[type];
         const style = getTypeStyle(type);
 
         return (

@@ -198,7 +198,9 @@ export class Show extends ShowLikeMediaItem {
         isRequested: true,
         isSpecial: false,
         episodes: {
-          state: ["indexed", "scraped"],
+          state: {
+            $in: ["indexed", "scraped"],
+          },
         },
       },
     });

@@ -1,23 +1,22 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { useId } from "react";
+import { toast } from "sonner";
+
+import { registerUser } from "#app/(public)/login/_actions/register.action.ts";
+import { registerSchema } from "#app/(public)/login/_form-schemas/register.schema.ts";
+import { Button } from "#components/_ui/button.tsx";
 import {
   Card,
   CardContent,
   CardDescription,
   CardHeader,
   CardTitle,
-} from "@/components/_ui/card";
-import { Field, FieldError, FieldLabel } from "@/components/_ui/field";
-import { Input } from "@/components/_ui/input";
-
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { useId } from "react";
-import { toast } from "sonner";
-
-import { registerUser } from "../_actions/register.action";
-import { registerSchema } from "../_form-schemas/register.schema";
+} from "#components/_ui/card.tsx";
+import { Field, FieldError, FieldLabel } from "#components/_ui/field.tsx";
+import { Input } from "#components/_ui/input.tsx";
 
 interface RegisterFormProps {
   isSignupEnabled: boolean;

@@ -2,6 +2,7 @@ export interface LiveLogLineProps {
   line: string;
 }
 
+/** One raw line in the live log stream. */
 export function LiveLogLine({ line }: LiveLogLineProps) {
   return (
     <div className="border-border/50 hover:bg-muted/20 border-b transition-colors last:border-b-0">

@@ -1,3 +1,6 @@
+import { Loader2 } from "lucide-react";
+import { useState } from "react";
+
 import {
   AlertDialog,
   AlertDialogAction,
@@ -8,12 +11,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/_ui/alert-dialog";
-import { Button } from "@/components/_ui/button";
+} from "#components/_ui/alert-dialog.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
-import { Loader2 } from "lucide-react";
-import { useState } from "react";
-
+/**
+ * Settings section for destructive actions, such as resetting the library,
+ * behind a confirmation dialog.
+ */
 export function DangerZone() {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,12 +55,8 @@ export function DangerZone() {
           </div>
 
           <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
-            <AlertDialogTrigger>
-              <Button
-                variant="destructive"
-                className="shrink-0 w-full"
-                type="button"
-              >
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" type="button">
                 Reset library
               </Button>
             </AlertDialogTrigger>

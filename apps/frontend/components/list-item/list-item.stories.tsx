@@ -1,11 +1,10 @@
-import preview from "@/.storybook/preview";
-
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
-import { fn } from "storybook/test";
+import { expect, fn } from "storybook/test";
 
-import { CardSelectionProvider } from "../providers/card-selection-provider";
-import { ListItem } from "./list-item";
+import preview from "#.storybook/preview.tsx";
+import { ListItem } from "#components/list-item/list-item.tsx";
+import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / List Item",
@@ -49,20 +48,11 @@ export const Default = meta.story({
       type: "movie",
       year: 1999,
     },
-    indexer: "tmdb",
   },
 });
 
-export const WithBadge = meta.story({
+export const WithBadge = Default.extend({
   args: {
-    mediaItem: {
-      id: "1",
-      title: "The Matrix",
-      posterUrl: faker.image.url(),
-      type: "movie",
-      year: 1999,
-    },
-    indexer: "tmdb",
     badge: {
       text: "New",
       variant: "success",
@@ -70,16 +60,42 @@ export const WithBadge = meta.story({
   },
 });
 
-export const Selectable = meta.story({
+export const WithHref = Default.extend({
+  args: {
+    href: `/details/media/movie/1`,
+  },
+});
+
+WithHref.test("Links to the correct page", async ({ args, canvas }) => {
+  const link = await canvas.findByRole("link");
+
+  await expect(link).toHaveAttribute("href", args.href);
+});
+
+export const NotRequestable = Default.extend({
   args: {
     mediaItem: {
-      id: "1",
-      title: "The Matrix",
+      id: "tmdb-1",
+      title: "Show Without A TVDB ID",
       posterUrl: faker.image.url(),
-      type: "movie",
-      year: 1999,
+      type: "show",
+      year: 2024,
+      isRequestable: false,
     },
+    href: `/details/media/show/tmdb-1`,
+  },
+});
+
+NotRequestable.test(
+  "Does not link to a details page, and shows a badge",
+  async ({ canvas }) => {
+    await expect(canvas.queryByRole("link")).not.toBeInTheDocument();
+    await expect(await canvas.findByText("Not requestable")).toBeVisible();
+  },
+);
+
+export const Selectable = Default.extend({
+  args: {
     isSelectable: true,
-    indexer: "tmdb",
   },
 });

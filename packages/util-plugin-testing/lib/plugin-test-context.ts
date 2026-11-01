@@ -32,9 +32,7 @@ export const it = baseIt
       });
     }
 
-    server.listen({
-      onUnhandledRequest: "error",
-    });
+    server.listen({ onUnhandledFrame: "error" });
 
     onCleanup(() => {
       server.close();
@@ -55,7 +53,9 @@ export const it = baseIt
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer<GraphQLContext>(plugin.resolvers);
+    const mockServer = await buildMockServer<GraphQLContext>({
+      resolvers: plugin.resolvers,
+    });
 
     await mockServer.start();
 

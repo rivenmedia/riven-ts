@@ -1,5 +1,6 @@
 import { cn } from "cn";
 
+/** Pulsing placeholder shown while content loads. */
 function Skeleton({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

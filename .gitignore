@@ -34,3 +34,6 @@ docker-compose.override.yml
 .next/
 next-env.d.ts
 out/
+
+# Docker deploy output (may be created when testing Docker builds locally)
+pruned/

@@ -1,18 +1,18 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-} from "@/components/_ui/input-group";
-import { Kbd } from "@/components/_ui/kbd";
-
 import { Menu, Search } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
 import { useDebounce, useEvent, useLifecycles, useUnmount } from "react-use";
+
+import { Button } from "#components/_ui/button.tsx";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "#components/_ui/input-group.tsx";
+import { Kbd } from "#components/_ui/kbd.tsx";
 
 import type { RedirectType } from "next/dist/client/components/redirect-error";
 
@@ -20,6 +20,10 @@ interface HeaderProps {
   modifierKey: "⌘" | "⌃";
 }
 
+/**
+ * Top bar with the global search input (focused with ⌘/Ctrl+K) that navigates
+ * to the explore page.
+ */
 export function Header({ modifierKey }: HeaderProps) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -27,7 +31,6 @@ export function Header({ modifierKey }: HeaderProps) {
 
   // Local input value state to decouple from URL updates while typing
   const inputRef = useRef<HTMLInputElement | null>(null);
-  const formRef = useRef<HTMLFormElement | null>(null);
 
   const form = useForm({
     defaultValues: { query: searchParams.get("query") ?? "" },
@@ -65,23 +68,12 @@ export function Header({ modifierKey }: HeaderProps) {
       urlQuery !== form.getValues("query") &&
       inputRef.current !== document.activeElement
     ) {
-      form.setValue("query", urlQuery);
+      form.reset({ query: urlQuery });
     }
   }, [searchParams, form]);
 
   function navigateToSearch(query: string) {
-    // Read directly from local state
     const isExplorePage = pathname === "/explore";
-
-    // Client-first search: Immediately update store if we're on the explore page
-    // This avoids waiting for the server round-trip (goto -> load -> data -> effect)
-    // and fixes reactivity issues when typing quickly.
-
-    // if (isExplorePage) {
-    //   const parsed = parseSearchQuery(query);
-    //   searchStore.syncQuery(parsed);
-    // }
-
     const navigationType: RedirectType = isExplorePage ? "replace" : "push";
     const navigationUrl =
       `/explore?query=${encodeURIComponent(query)}` as const;
@@ -122,7 +114,6 @@ export function Header({ modifierKey }: HeaderProps) {
     <header className="pointer-events-none absolute top-0 left-0 z-50 h-20 w-full items-center bg-linear-to-b from-black/50 to-transparent px-4 transition-all duration-500 md:flex md:px-16">
       <div className="pointer-events-auto flex w-full items-center justify-between gap-6">
         <form
-          ref={formRef}
           className="mx-auto w-full max-w-lg transition-all duration-300 focus-within:max-w-xl"
           onSubmit={() => void onSubmit()}
         >

@@ -1,4 +1,4 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 import {
   Pagination,
   PaginationContent,
@@ -7,7 +7,7 @@ import {
   PaginationLink,
   PaginationNext,
   PaginationPrevious,
-} from "@/components/_ui/pagination";
+} from "#components/_ui/pagination.tsx";
 
 /**
  * Pagination with page navigation, next and previous links.

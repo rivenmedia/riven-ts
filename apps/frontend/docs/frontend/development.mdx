@@ -1,0 +1,86 @@
+---
+title: Development
+description: Run the frontend from source to work on it.
+---
+
+This page covers running the frontend locally while working on it. Set up the
+monorepo and Riven first by following
+[CONTRIBUTING.md](https://github.com/rivenmedia/riven-ts/blob/main/CONTRIBUTING.md) -
+the frontend needs a running Riven, along with its PostgreSQL and Redis.
+
+## Running the dev server
+
+From the root of the monorepo:
+
+```bash
+turbo @repo/frontend#dev
+```
+
+This starts three things together:
+
+- the frontend dev server at **https://localhost:9000**
+- Riven itself (`@repo/riven#dev`), on `http://localhost:3000`
+- GraphQL codegen in watch mode, so types update as you edit queries
+
+The dev server runs over HTTPS with a self-signed certificate, generated into
+`apps/frontend/certificates/` on first run. Accept the browser warning the
+first time you open it.
+
+The defaults for `ORIGIN` (`https://localhost:9000`) and `BACKEND_URL`
+(`http://localhost:3000`) already match this setup, and Riven trusts
+`https://localhost:9000` out of the box, so no extra configuration is needed.
+Set `RIVEN_SETTING__adminUserCredentials` in `apps/riven/.env.riven` to get an
+account to sign in with.
+
+## Environment variables
+
+Next.js loads `apps/frontend/.env.development` (and `.env.local`) in dev. As
+well as `ORIGIN` and `BACKEND_URL` from
+[Configuration](/docs/frontend/configuration#frontend-container), these are
+available:
+
+| Variable                  | Description                                                        | Default |
+| ------------------------- | ------------------------------------------------------------------ | ------- |
+| `ENABLE_MOCKS`            | Starts an [MSW](https://mswjs.io) server for server-side requests. | `false` |
+| `NEXT_PUBLIC_LOG_LEVEL`   | Log verbosity, as a number.                                        | `3`     |
+| `NEXT_PUBLIC_LOG_DATE`    | Include timestamps in logs.                                        | `true`  |
+| `NEXT_PUBLIC_LOG_COLORS`  | Colour log output.                                                 | `true`  |
+| `NEXT_PUBLIC_LOG_COMPACT` | Use compact log output.                                            | `false` |
+
+<Callout type="info">
+  `NEXT_PUBLIC_` variables are baked in at build time, so they can't be changed
+  on the published Docker image.
+</Callout>
+
+## Storybook
+
+Components and pages have Storybook stories, with GraphQL mocked by MSW:
+
+```bash
+turbo @repo/frontend#storybook
+```
+
+Storybook runs at http://localhost:6006.
+
+## Tests
+
+Run these from `apps/frontend`:
+
+| Command               | Runs                                                    |
+| --------------------- | ------------------------------------------------------- |
+| `pnpm test`           | Unit tests                                              |
+| `pnpm test:component` | Storybook stories as component tests, in a real browser |
+| `pnpm e2e:headless`   | Playwright end-to-end tests                             |
+| `pnpm e2e`            | Playwright end-to-end tests, in Playwright's UI         |
+| `pnpm lint`           | oxlint, with type checking                              |
+
+## Building the Docker image
+
+The image is built from the monorepo root:
+
+```bash
+docker build -f apps/frontend/Dockerfile -t riven-frontend .
+```
+
+Then run it with `ORIGIN` and `BACKEND_URL` set, as in
+[Getting Started](/docs/frontend/getting-started).

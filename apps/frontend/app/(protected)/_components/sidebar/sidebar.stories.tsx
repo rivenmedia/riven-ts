@@ -1,6 +1,3 @@
-import { preview } from "@/.storybook/preview";
-import { NotificationsProvider } from "@/components/providers/notifications-provider";
-
 import {
   CalendarDays,
   FileClock,
@@ -13,7 +10,9 @@ import {
 } from "lucide-react";
 import { DateTime } from "luxon";
 
-import { Sidebar } from "./sidebar";
+import { preview } from "#.storybook/preview.tsx";
+import { Sidebar } from "#app/(protected)/_components/sidebar/sidebar.tsx";
+import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / Sidebar",

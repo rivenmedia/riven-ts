@@ -1,60 +1,53 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
-import { Badge } from "@/components/_ui/badge";
-import { Button } from "@/components/_ui/button";
-import { Separator } from "@/components/_ui/separator";
-import { AccountLinks } from "@/components/auth/account-links/account-links";
-import { CreateUserForm } from "@/components/auth/create-user-form/create-user-form";
-import { EmailChangeForm } from "@/components/auth/email-change-form/email-change-form";
-import { PasskeyFormProvider } from "@/components/auth/passkeys/passkey-form-provider";
-import { Passkeys } from "@/components/auth/passkeys/passkeys";
-import { PasswordChangeForm } from "@/components/auth/password-change-form/password-change-form";
-import { SetPasswordForm } from "@/components/auth/set-password-form/set-password-form";
-import { UpdateProfileForm } from "@/components/auth/update-profile-form/update-profile-form";
-import { UserManagement } from "@/components/auth/user-management/user-management";
-import { PageShell } from "@/components/page-shell/page-shell";
-import { authClient } from "@/lib/auth/client";
-import { getInitials } from "@/lib/utils";
-
 import { DateTime } from "luxon";
-import { useRouter } from "next/navigation";
 
-import type { User } from "@/lib/auth/client";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#components/_ui/avatar.tsx";
+import { Badge } from "#components/_ui/badge.tsx";
+import { Separator } from "#components/_ui/separator.tsx";
+import { AccountLinks } from "#components/auth/account-links/account-links.tsx";
+import { ChangeEmailForm } from "#components/auth/change-email-form/change-email-form.tsx";
+import { CreateUserForm } from "#components/auth/create-user-form/create-user-form.tsx";
+import { PasskeyFormProvider } from "#components/auth/passkeys/passkey-form-provider.tsx";
+import { Passkeys } from "#components/auth/passkeys/passkeys.tsx";
+import { PasswordChangeForm } from "#components/auth/password-change-form/password-change-form.tsx";
+import { SetPasswordForm } from "#components/auth/set-password-form/set-password-form.tsx";
+import { UpdateProfileForm } from "#components/auth/update-profile-form/update-profile-form.tsx";
+import { UserManagement } from "#components/auth/user-management/user-management.tsx";
+import { getInitials } from "#lib/utils.ts";
+
+import { DeleteAccountConfirmationDialog } from "./_components/delete-account-confirmation-dialog/delete-account-confirmation-dialog";
+import { LogoutButton } from "./_components/logout-button/logout-button";
+
+import type { AuthProvider } from "#app/_types/__generated__/graphql.ts";
+import type { User } from "#lib/auth/client.ts";
+import type { Account } from "better-auth";
 
 interface ProfilePageProps {
+  accounts: Account[];
   hasCredentialProvider: boolean;
   canManageUsers: boolean;
   user: User;
+  users: User[];
+  providers: Record<string, AuthProvider>;
 }
 
+/**
+ * Profile route with account settings, security options, linked accounts and
+ * admin user management.
+ */
 export function ProfilePage({
+  accounts,
   hasCredentialProvider,
   canManageUsers,
   user,
+  users,
+  providers,
 }: ProfilePageProps) {
-  const router = useRouter();
-
-  async function handleLogout() {
-    await authClient.signOut({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/login");
-        },
-      },
-    });
-  }
-
-  async function handleDeleteAccount() {
-    await authClient.deleteUser({
-      fetchOptions: {
-        onSuccess: () => {
-          router.push("/login");
-        },
-      },
-    });
-  }
-
   return (
-    <PageShell className="mx-auto w-full max-w-5xl">
+    <>
       <section className="border-border/60 flex flex-col gap-5 border-b pb-6 lg:flex-row lg:items-start lg:justify-between">
         <div className="flex items-start gap-4">
           <Avatar className="h-16 w-16 text-xl">
@@ -100,35 +93,15 @@ export function ProfilePage({
             </dl>
           </div>
         </div>
-
         <div className="flex flex-col gap-2 sm:flex-row">
-          <Button
-            variant="secondary"
-            className="w-full sm:w-auto"
-            onClick={() => {
-              void handleLogout();
-            }}
-            type="button"
-          >
-            Logout
-          </Button>
-
-          <Button
-            variant="destructive"
-            className="w-full sm:w-auto"
-            onClick={() => {
-              void handleDeleteAccount();
-            }}
-            type="button"
-          >
-            Delete Account
-          </Button>
+          <LogoutButton />
+          <DeleteAccountConfirmationDialog />
         </div>
       </section>
 
       {hasCredentialProvider ? <PasswordChangeForm /> : <SetPasswordForm />}
       <Separator />
-      <EmailChangeForm />
+      <ChangeEmailForm />
       <Separator />
       <UpdateProfileForm
         data={{
@@ -142,15 +115,15 @@ export function ProfilePage({
         <>
           <CreateUserForm />
           <Separator />
-          <UserManagement currentUserId={user.id} users={[]} />
+          <UserManagement currentUserId={user.id} users={users} />
           <Separator />
         </>
       )}
-      <AccountLinks accounts={[]} providers={{}} />
+      <AccountLinks accounts={accounts} providers={providers} />
       <Separator />
       <PasskeyFormProvider>
         <Passkeys />
       </PasskeyFormProvider>
-    </PageShell>
+    </>
   );
 }

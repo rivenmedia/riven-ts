@@ -108,6 +108,11 @@ vi.mock(import("#database/database.ts"), async (importOriginal) => {
     },
   });
 
+  // Auth entities live in the `auth_db` schema, which SQLite models as an attached database.
+  await database.orm.em
+    .getConnection()
+    .execute("attach database ':memory:' as auth_db");
+
   await database.orm.schema.create();
 
   return {

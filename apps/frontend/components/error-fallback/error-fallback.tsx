@@ -3,7 +3,7 @@
 import { cn } from "cn";
 import { catchError } from "next/error";
 
-import { Button } from "../_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 
 import type { HTMLAttributes } from "react";
 
@@ -14,6 +14,10 @@ export interface ErrorFallbackProps extends Pick<
   message: string;
 }
 
+/**
+ * Error-boundary fallback that shows a message and a Retry button that resets
+ * the boundary.
+ */
 export const ErrorFallback = catchError<ErrorFallbackProps>(
   ({ className, message }, { retry }) => (
     <div

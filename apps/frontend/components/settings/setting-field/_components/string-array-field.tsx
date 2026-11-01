@@ -1,3 +1,6 @@
+import React, { useId, useState } from "react";
+import { useFormContext } from "react-hook-form";
+
 import {
   Combobox,
   ComboboxChips,
@@ -9,13 +12,10 @@ import {
   ComboboxValue,
   useComboboxAnchor,
   ComboboxChip,
-} from "@/components/_ui/combobox";
-import { Label } from "@/components/_ui/label";
+} from "#components/_ui/combobox.tsx";
+import { Label } from "#components/_ui/label.tsx";
 
-import React, { useId, useState } from "react";
-import { useFormContext } from "react-hook-form";
-
-import type { CommonSettingFieldProps } from "../setting-field";
+import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";
 
 export interface SettingsStringArrayFieldProps extends CommonSettingFieldProps {

@@ -4,6 +4,10 @@ import { cn } from "cn";
 import { ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Accordion as AccordionPrimitive } from "radix-ui";
 
+/**
+ * Vertically stacked sections that expand and collapse, in single or multiple
+ * mode.
+ */
 function Accordion({
   className,
   ...props

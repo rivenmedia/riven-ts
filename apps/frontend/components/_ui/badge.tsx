@@ -27,6 +27,10 @@ const badgeVariants = cva(
   },
 );
 
+/**
+ * Small inline label for status or metadata, in default, secondary, destructive
+ * and outline variants.
+ */
 function Badge({
   className,
   variant = "default",

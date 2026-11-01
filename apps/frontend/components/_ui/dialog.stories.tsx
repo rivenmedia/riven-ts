@@ -1,4 +1,6 @@
-import preview from "@/.storybook/preview";
+import { expect, userEvent, within } from "storybook/test";
+
+import preview from "#.storybook/preview.tsx";
 import {
   Dialog,
   DialogClose,
@@ -8,9 +10,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/_ui/dialog";
-
-import { expect, userEvent, within } from "storybook/test";
+} from "#components/_ui/dialog.tsx";
 
 /**
  * A window overlaid on either the primary window or another dialog window,

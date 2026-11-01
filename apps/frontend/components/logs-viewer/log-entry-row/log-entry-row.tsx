@@ -1,4 +1,4 @@
-import type { LogLevel } from "@/app/_types/__generated__/graphql";
+import type { LogLevel } from "#app/_types/__generated__/graphql.ts";
 
 export interface LogEntryRowProps {
   log: {
@@ -9,6 +9,10 @@ export interface LogEntryRowProps {
   };
 }
 
+/**
+ * One historical log entry showing timestamp, colour-coded level, source and
+ * message.
+ */
 export function LogEntryRow({ log }: LogEntryRowProps) {
   const levelColors: Partial<Record<Lowercase<LogLevel>, string>> = {
     error: "text-red-400",

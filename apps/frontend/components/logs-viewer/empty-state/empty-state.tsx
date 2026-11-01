@@ -4,6 +4,9 @@ export interface EmptyStateProps {
   actionFn?: () => void;
 }
 
+/**
+ * Placeholder message for an empty log view, with an optional action button.
+ */
 export function EmptyState({ message, actionText, actionFn }: EmptyStateProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center p-8">

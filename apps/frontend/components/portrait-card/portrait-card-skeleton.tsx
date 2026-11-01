@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { Skeleton } from "../_ui/skeleton";
+import { Skeleton } from "#components/_ui/skeleton.tsx";
 
 export function PortraitCardSkeleton({
   className,

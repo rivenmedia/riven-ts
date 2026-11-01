@@ -1,14 +1,13 @@
-import { preview } from "@/.storybook/preview";
-
-import { BirthdayConfetti } from "./birthday-confetti";
+import { preview } from "#.storybook/preview.tsx";
+import { BirthdayConfetti } from "#components/effects/birthday-confetti/birthday-confetti.tsx";
 
 const meta = preview.meta({
   title: "Effects / BirthdayConfetti",
   component: BirthdayConfetti,
   parameters: {
     layout: "fullscreen",
-    screenshot: {
-      skip: true,
+    snapshot: {
+      enabled: false,
     },
   },
 });

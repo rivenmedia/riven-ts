@@ -1,20 +1,20 @@
-import { preview } from "@/.storybook/preview";
-import { Button } from "@/components/_ui/button";
-import { ButtonGroup } from "@/components/_ui/button-group";
+import { SearchIcon } from "lucide-react";
+
+import { preview } from "#.storybook/preview.tsx";
+import { ButtonGroup } from "#components/_ui/button-group.tsx";
+import { Button } from "#components/_ui/button.tsx";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
-} from "@/components/_ui/input-group";
-import { Kbd, KbdGroup } from "@/components/_ui/kbd";
+} from "#components/_ui/input-group.tsx";
+import { Kbd, KbdGroup } from "#components/_ui/kbd.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/_ui/tooltip";
-
-import { SearchIcon } from "lucide-react";
+} from "#components/_ui/tooltip.tsx";
 
 /**
  * Used to display textual user input from keyboard.

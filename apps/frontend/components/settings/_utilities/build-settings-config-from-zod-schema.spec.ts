@@ -1,9 +1,9 @@
 import { it, expect, describe } from "vitest";
 import { z } from "zod";
 
-import { buildSettingsConfigFromZodSchema } from "./build-settings-config-from-zod-schema";
+import { buildSettingsConfigFromZodSchema } from "./build-settings-config-from-zod-schema.ts";
 
-import type { SettingFieldProps } from "../setting-field/setting-field";
+import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 describe(buildSettingsConfigFromZodSchema, () => {
   describe("numeric schemas", () => {

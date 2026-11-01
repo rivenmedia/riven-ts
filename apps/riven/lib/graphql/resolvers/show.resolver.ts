@@ -23,6 +23,24 @@ export class ShowResolver {
     });
   }
 
+  @FieldResolver(() => Season)
+  public async season(
+    @Root() show: Show,
+    @Arg("number", () => Int) number: number,
+  ) {
+    const [season] = await show.seasons.matching({
+      where: { number },
+    });
+
+    if (!season) {
+      throw new Error(
+        `Season ${number.toString()} not found for show ${show.id}`,
+      );
+    }
+
+    return season;
+  }
+
   @FieldResolver(() => Int)
   public async expectedFileCount(@Root() show: Show) {
     return show.getExpectedFileCount();

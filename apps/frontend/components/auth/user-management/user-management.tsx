@@ -1,4 +1,6 @@
-import { Badge } from "@/components/_ui/badge";
+import { DateTime } from "luxon";
+
+import { Badge } from "#components/_ui/badge.tsx";
 import {
   Table,
   TableBody,
@@ -6,20 +8,22 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/_ui/table";
+} from "#components/_ui/table.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import { DateTime } from "luxon";
+import { DeleteUserConfirmationDialog } from "./components/delete-user-confirmation-dialog.tsx";
 
-import { FormBase } from "../form-base/form-base";
-import { DeleteUserConfirmationDialog } from "./components/delete-user-confirmation-dialog";
-
-import type { User } from "@/lib/auth/client";
+import type { User } from "#lib/auth/client.ts";
 
 export interface UserManagementProps {
   currentUserId: string;
   users: User[];
 }
 
+/**
+ * Admin table of users with their role and creation date, plus per-user delete
+ * actions.
+ */
 export function UserManagement({ currentUserId, users }: UserManagementProps) {
   return (
     <FormBase
@@ -44,9 +48,7 @@ export function UserManagement({ currentUserId, users }: UserManagementProps) {
                     aria-labelledby={`user-${user.email}`}
                   >
                     <TableCell>
-                      <div className="font-medium">
-                        {user.username ?? user.name}
-                      </div>
+                      <div className="font-medium">{user.name}</div>
                       <div
                         className="text-muted-foreground text-xs"
                         id={`user-${user.email}`}

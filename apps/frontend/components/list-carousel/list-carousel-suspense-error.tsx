@@ -1,8 +1,11 @@
-import { Button } from "@/components/_ui/button";
-import { logger } from "@/lib/logger";
+import { Button } from "#components/_ui/button.tsx";
+import { logger } from "#lib/logger.ts";
 
 import type { FallbackProps } from "react-error-boundary";
 
+/**
+ * Error state for a `ListCarousel` that failed to load, with a retry action.
+ */
 export function ListCarouselSuspenseError({
   error,
   resetErrorBoundary: handleReset,

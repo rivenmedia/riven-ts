@@ -8,7 +8,6 @@ import {
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 
 import { wrap } from "@mikro-orm/core";
-import chalk from "chalk";
 
 import type {
   ChangeSet,
@@ -36,25 +35,6 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       entity.state = "indexed";
     } else if (entity.state !== "unreleased" && !entity.isReleased) {
       entity.state = "unreleased";
-    }
-  }
-
-  public async afterFlush({ uow }: FlushEventArgs): Promise<void> {
-    const { logger } = await import("#utilities/logger/logger.ts");
-
-    for (const changeSet of uow.getChangeSets()) {
-      if (
-        changeSet.entity instanceof MediaItem &&
-        changeSet.originalEntity &&
-        changeSet.payload["state"]
-      ) {
-        const previousState = changeSet.originalEntity["state"] as string;
-        const nextState = changeSet.payload["state"] as string;
-
-        logger.debug(
-          `${chalk.bold(changeSet.originalEntity["fullTitle"] as string)} state change: ${chalk.red(previousState)} ${chalk.dim("->")} ${chalk.green(nextState)}`,
-        );
-      }
     }
   }
 
@@ -141,6 +121,26 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
         uow,
         nextStatesMap,
       );
+    }
+
+    this.#restorePendingStates(uow, nextStatesMap);
+  }
+
+  /**
+   * Loading an item's children (e.g. a show's seasons) merges their database state into any already-loaded children,
+   * which reverts the states updated during this flush, so the pending states are restored before persisting.
+   */
+  #restorePendingStates(uow: UnitOfWork, nextStatesMap: NextStatesMap) {
+    for (const { entity } of uow.getChangeSets()) {
+      if (!(entity instanceof MediaItem)) {
+        continue;
+      }
+
+      const nextState = nextStatesMap.get(entity.id);
+
+      if (nextState) {
+        entity.state = nextState;
+      }
     }
   }
 

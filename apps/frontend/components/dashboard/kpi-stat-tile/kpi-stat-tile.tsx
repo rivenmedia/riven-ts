@@ -6,6 +6,10 @@ export interface KpiStatTileProps {
   tone?: "default" | "warning";
 }
 
+/**
+ * Compact tile showing one headline metric with a title and an optional warning
+ * tone.
+ */
 export function KpiStatTile({
   title,
   value = "N/A",

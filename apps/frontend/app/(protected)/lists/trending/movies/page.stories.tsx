@@ -1,24 +1,24 @@
-import preview from "@/.storybook/preview";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { faker } from "@faker-js/faker";
-import { graphql, HttpResponse } from "msw";
+import { HttpResponse } from "msw";
 
-import { GET_DISCOVERY_ITEMS } from "../_components/trending-discovery-page/_components/trending-discovery-item-list";
-import TrendingMoviesPage from "./page";
-
-import type { UUID } from "node:crypto";
+import preview from "#.storybook/preview.tsx";
+import { GET_FILTERED_TMDB_TRENDING_MOVIES } from "#app/(protected)/lists/trending/movies/_queries/get-tmdb-trending-movies.query.ts";
+import TrendingMoviesPage from "#app/(protected)/lists/trending/movies/page.tsx";
+import { api } from "#mocks/graphql.ts";
 
 const meta = preview.meta({
   title: "Pages / Trending / Movies",
   component: TrendingMoviesPage,
   beforeEach({ msw }) {
     msw.use(
-      graphql.query(GET_DISCOVERY_ITEMS, () =>
+      api.query(GET_FILTERED_TMDB_TRENDING_MOVIES, () =>
         HttpResponse.json({
           data: {
-            discoveryItems: Array.from({ length: 50 }).map(() => ({
+            tmdbTrendingMovies: Array.from({ length: 50 }).map(() => ({
               __typename: "TmdbIndexerData",
-              id: faker.string.uuid() as UUID,
+              id: UUID.parse(faker.string.uuid()),
               posterUrl: faker.image.urlPicsumPhotos({
                 width: 200,
                 height: 300,
@@ -26,6 +26,8 @@ const meta = preview.meta({
               title: faker.lorem.words(3),
               type: "movie",
               year: faker.date.past({ years: 10 }).getFullYear(),
+              overview: faker.lorem.paragraph(),
+              releaseDate: faker.date.past({ years: 10 }).toISOString(),
             })),
           },
         }),
@@ -33,7 +35,7 @@ const meta = preview.meta({
     );
   },
   parameters: {
-    screenshot: {
+    snapshot: {
       fullPage: false,
     },
   },

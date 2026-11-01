@@ -1,28 +1,48 @@
-import { Badge } from "@/components/_ui/badge";
+"use client";
 
 import { cn } from "cn";
 import { startCase } from "es-toolkit";
 
+import { Badge } from "#components/_ui/badge.tsx";
+import { useLiveContent } from "#components/providers/live-content-provider.tsx";
+
 import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { HTMLAttributes } from "react";
 
-export interface StatusBadgeProps extends Pick<
+export type StatusBadgeProps = Pick<
   HTMLAttributes<HTMLElement>,
   "className"
-> {
-  state: MediaItemState;
+> & {
   large?: boolean;
-}
+} & (
+    | {
+        isRequested: boolean;
+        state: MediaItemState;
+      }
+    | {
+        isRequested: false;
+        state?: never;
+      }
+  );
 
+/**
+ * Badge showing a media item's state, or "Unrequested" if it hasn't been
+ * requested.
+ */
 export function StatusBadge({
   state,
+  isRequested,
   large = false,
   className,
 }: StatusBadgeProps) {
   const sizeClasses = large ? "px-2.5 py-1 text-xs" : "px-2 py-0.5 text-xs";
+  const label = isRequested ? startCase(state) : "Unrequested";
+  const isLiveContent = useLiveContent();
 
   return (
     <Badge
+      aria-label={label}
+      asChild={isLiveContent}
       variant="secondary"
       className={cn(
         "inline-flex items-center justify-center backdrop-blur-sm",
@@ -39,10 +59,11 @@ export function StatusBadge({
         state === "paused" &&
           "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         state === "failed" && "bg-red-600/80 text-red-50 hover:bg-red-600/70",
+        !isRequested && "bg-slate-500/80 text-slate-50 hover:bg-slate-500/70",
         className,
       )}
     >
-      {startCase(state)}
+      {isLiveContent ? <output>{label}</output> : label}
     </Badge>
   );
 }

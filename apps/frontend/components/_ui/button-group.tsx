@@ -1,8 +1,8 @@
-import { Separator } from "@/components/_ui/separator";
-
 import { cva } from "class-variance-authority";
 import { cn } from "cn";
 import { Slot } from "radix-ui";
+
+import { Separator } from "#components/_ui/separator.tsx";
 
 import type { VariantProps } from "class-variance-authority";
 
@@ -23,6 +23,10 @@ const buttonGroupVariants = cva(
   },
 );
 
+/**
+ * Joins related buttons, inputs or menus into one segmented control,
+ * horizontally or vertically.
+ */
 function ButtonGroup({
   className,
   orientation,

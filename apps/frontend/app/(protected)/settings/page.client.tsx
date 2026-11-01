@@ -1,17 +1,20 @@
+"use client";
+
+import { useState } from "react";
+
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
-} from "@/components/_ui/tabs";
-import { PageShell } from "@/components/page-shell/page-shell";
-import { DangerZone } from "@/components/settings/danger-zone/danger-zone";
-import { GeneralTab } from "@/components/settings/general-tab/general-tab";
-import { PluginsTab } from "@/components/settings/plugins-tab/plugins-tab";
-import { RankingTab } from "@/components/settings/ranking-tab/ranking-tab";
+} from "#components/_ui/tabs.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
+import { DangerZone } from "#components/settings/danger-zone/danger-zone.tsx";
+import { GeneralTab } from "#components/settings/general-tab/general-tab.tsx";
+import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
+import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 
-import { useState } from "react";
-
+/** Settings route with General, Plugins and Ranking tabs. */
 export function SettingsPage() {
   const [activeTab, setActiveTab] = useState("general");
 

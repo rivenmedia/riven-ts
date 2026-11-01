@@ -9,22 +9,44 @@ import Link from "next/link";
 import React, { startTransition, useEffect, useState } from "react";
 import { useHoverDirty } from "react-use";
 
-import { fly } from "../_animations/fly";
-import { Button } from "../_ui/button";
-import { Carousel, CarouselContent, CarouselItem } from "../_ui/carousel";
-import { getAlignmentClasses } from "./_utilities/get-alignment-classes";
+import { fly } from "#components/_animations/fly.ts";
+import { Button } from "#components/_ui/button.tsx";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+} from "#components/_ui/carousel.tsx";
 
-import type { CarouselApi } from "../_ui/carousel";
-import type { IndexerData, Rating } from "@/app/_types/__generated__/graphql";
+import { getAlignmentClasses } from "./_utilities/get-alignment-classes.ts";
+
+import type { IndexerData, Rating } from "#app/_types/__generated__/graphql.ts";
+import type { CarouselApi } from "#components/_ui/carousel.tsx";
 import type { RefObject } from "react";
 
 export interface NowPlayingProps {
-  data: IndexerData[];
+  data: Pick<
+    IndexerData,
+    | "id"
+    | "title"
+    | "backdropUrl"
+    | "type"
+    | "ratings"
+    | "logo"
+    | "certification"
+    | "language"
+    | "voteAverage"
+    | "overview"
+    | "genres"
+    | "seasonLabel"
+  >[];
   autoplayDelay?: number;
   alignment?: "left" | "center" | "right";
   heightClass?: string;
 }
 
+/**
+ * Autoplaying, fading hero carousel of now-playing titles that pauses on hover.
+ */
 export function NowPlaying({
   data,
   alignment = "left",
@@ -143,10 +165,13 @@ export function NowPlaying({
                         animationClass,
                       )}
                     >
-                      {item.logoUrl ? (
-                        <div className="mb-4 relative w-full h-[10vw] max-h-35 max-w-125">
+                      {item.logo ? (
+                        <div
+                          className="mb-4 relative w-full h-[10vw] max-h-35 max-w-125 flex"
+                          style={{ aspectRatio: item.logo.aspectRatio }}
+                        >
                           <Image
-                            src={item.logoUrl}
+                            src={item.logo.url}
                             alt={item.title}
                             className={cn(
                               "max-h-full max-w-[80%] drop-shadow-2xl object-contain",
@@ -154,7 +179,8 @@ export function NowPlaying({
                               alignment === "right" && "object-bottom-right",
                               alignment === "center" && "object-bottom",
                             )}
-                            fill
+                            height={item.logo.height}
+                            width={item.logo.width}
                           />
                         </div>
                       ) : (
@@ -181,12 +207,14 @@ export function NowPlaying({
                           </span>
                         </>
                       )}
-                      <span className="text-white/40">|</span>
-                      <span className="text-white drop-shadow-md">
-                        {/* {getSeasonAndYear(
-                            item.releaseDate ?? item.firstAirDate ?? "",
-                          )} */}
-                      </span>
+                      {item.seasonLabel && (
+                        <>
+                          <span className="text-white/40">|</span>
+                          <span className="text-white drop-shadow-md">
+                            {item.seasonLabel}
+                          </span>
+                        </>
+                      )}
                       {item.language && (
                         <>
                           <span className="text-white/40">|</span>

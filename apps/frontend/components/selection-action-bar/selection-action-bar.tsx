@@ -2,7 +2,7 @@ import { cn } from "cn";
 import { X, LoaderCircle } from "lucide-react";
 import { startTransition, ViewTransition } from "react";
 
-import { Button } from "../_ui/button";
+import { Button } from "#components/_ui/button.tsx";
 
 import type { ComponentType, SVGProps } from "react";
 
@@ -20,6 +20,10 @@ export interface SelectionActionBarProps {
   onClear: () => void;
 }
 
+/**
+ * Floating bar showing how many items are selected, with bulk actions and a
+ * clear button.
+ */
 export function SelectionActionBar({
   actions,
   count,
@@ -71,6 +75,7 @@ export function SelectionActionBar({
               });
             }}
             type="button"
+            aria-label="Clear selection"
           >
             <X className="h-4 w-4" />
           </Button>

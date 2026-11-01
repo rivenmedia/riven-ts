@@ -11,6 +11,10 @@ import { Toaster as SonnerToaster } from "sonner";
 
 import type { CSSProperties } from "react";
 
+/**
+ * App-wide toast container (Sonner) using the app's popover colours and status
+ * icons.
+ */
 export function Toaster() {
   return (
     <SonnerToaster

@@ -1,11 +1,11 @@
-import { preview } from "@/.storybook/preview";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { DateTime } from "luxon";
 
-import { CalendarMobileDayCard } from "./calendar-mobile-day-card";
+import { preview } from "#.storybook/preview.tsx";
+import { CalendarMobileDayCard } from "#components/calendar/calendar-mobile-day-card/calendar-mobile-day-card.tsx";
 
-import type { CalendarDay } from "../types";
-import type { UUID } from "node:crypto";
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 
 const meta = preview.meta({
   title: "Calendar / CalendarMobileDayCard",
@@ -17,22 +17,22 @@ const meta = preview.meta({
       isCurrentMonth: true,
       items: [
         {
-          itemId: crypto.randomUUID() as UUID,
-          tvdbId: "",
-          tmdbId: "603692",
-          showTitle: "John Wick: Chapter 4",
-          itemType: "movie",
-          airedAt: "2024-06-12",
+          id: UUID.parse(crypto.randomUUID()),
+          primaryExternalId: "603692",
+          fullTitle: "John Wick: Chapter 4",
+          type: "movie",
+          releaseDate: "2024-06-12",
+          state: "completed",
         },
         {
-          itemId: crypto.randomUUID() as UUID,
-          tvdbId: "121361",
-          tmdbId: "1399",
-          showTitle: "Game of Thrones",
-          itemType: "episode",
-          airedAt: "2024-06-12",
-          season: 8,
-          episode: 1,
+          id: UUID.parse(crypto.randomUUID()),
+          primaryExternalId: "121361",
+          fullTitle: "Game of Thrones - S08E01 - Winterfell",
+          type: "episode",
+          releaseDate: "2024-06-12",
+          seasonNumber: 8,
+          number: 1,
+          state: "completed",
         },
       ],
     } satisfies CalendarDay,

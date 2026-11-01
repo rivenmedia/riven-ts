@@ -1,8 +1,7 @@
-import { preview } from "@/.storybook/preview";
-
 import { fn } from "storybook/test";
 
-import GlobalErrorPage from "./global-error";
+import { preview } from "#.storybook/preview.tsx";
+import GlobalErrorPage from "#app/global-error.tsx";
 
 const meta = preview.meta({
   title: "Components / GlobalErrorPage",

@@ -1,5 +1,9 @@
-import { preview } from "@/.storybook/preview";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
+import { preview } from "#.storybook/preview.tsx";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#components/_ui/avatar.tsx";
 
 /**
  * An image element with a fallback for representing the user.

@@ -1,15 +1,23 @@
-import { preview } from "@/.storybook/preview";
-
+import { http, HttpResponse } from "msw";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import { PasswordChangeForm } from "./password-change-form";
+import { preview } from "#.storybook/preview.tsx";
+import { PasswordChangeForm } from "#components/auth/password-change-form/password-change-form.tsx";
 
 const meta = preview.meta({
   title: "Auth / PasswordChangeForm",
   component: PasswordChangeForm,
 });
 
-export const Default = meta.story();
+export const Default = meta.story({
+  beforeEach({ msw }) {
+    msw.use(
+      http.post("**/api/auth/change-password", () =>
+        HttpResponse.json({ success: true }),
+      ),
+    );
+  },
+});
 
 Default.test(
   '"Change Password" button is disabled when form is pristine',

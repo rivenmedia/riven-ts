@@ -1,28 +1,24 @@
 import { cn } from "cn";
 
-import { fly } from "../_animations/fly";
+import { fly } from "#components/_animations/fly.ts";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-} from "../_ui/carousel";
-import { ListItem } from "../list-item/list-item";
+} from "#components/_ui/carousel.tsx";
+import { ListItem } from "#components/list-item/list-item.tsx";
 
 import type { ComponentProps } from "react";
 
 interface ListCarouselProps {
   items: ComponentProps<typeof ListItem>["mediaItem"][];
-  indexer: string | undefined;
   ignoreAnimation?: boolean;
 }
 
-export function ListCarousel({
-  items,
-  indexer,
-  ignoreAnimation,
-}: ListCarouselProps) {
+/** Horizontally scrollable carousel of `ListItem` posters. */
+export function ListCarousel({ items, ignoreAnimation }: ListCarouselProps) {
   return (
     <Carousel
       opts={{
@@ -43,8 +39,8 @@ export function ListCarousel({
           >
             <ListItem
               mediaItem={item}
-              indexer={indexer}
               className="w-36 md:w-44 lg:w-48"
+              href={`/details/media/${item.type}/${item.id}`}
             />
           </CarouselItem>
         ))}

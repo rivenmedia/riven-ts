@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { PluginsTab } from "./plugins-tab";
+import { preview } from "#.storybook/preview.tsx";
+import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 
 const meta = preview.meta({
   title: "Settings / PluginsTab",

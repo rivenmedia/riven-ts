@@ -5,12 +5,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/_ui/dialog";
+} from "#components/_ui/dialog.tsx";
+import { EntertainmentItem } from "#components/calendar/entertainment-item/entertainment-item.tsx";
+import { formatDayTitle } from "#components/calendar/utilities/format-day-title.ts";
 
-import { EntertainmentItem } from "../entertainment-item/entertainment-item";
-import { formatDayTitle } from "../utilities/format-day-title";
-
-import type { CalendarDay } from "../types";
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 
 export interface DayItemsListProps {
   day: CalendarDay;
@@ -18,6 +17,10 @@ export interface DayItemsListProps {
   showMore?: boolean;
 }
 
+/**
+ * List of releases for one day, with an optional limit and a "+N more" dialog
+ * for the rest.
+ */
 export function DayItemsList({
   day,
   limit = Infinity,
@@ -29,14 +32,14 @@ export function DayItemsList({
     <div className="space-y-1.5">
       {itemsToShow.map((item) => (
         <EntertainmentItem
-          key={item.itemId}
+          key={item.id}
           item={item}
           compact={limit !== Infinity}
         />
       ))}
       {showMore && day.items.length > limit && (
         <Dialog>
-          <DialogTrigger>
+          <DialogTrigger asChild>
             <button
               className="text-muted-foreground hover:text-foreground w-full rounded-md px-2 py-1 text-left text-xs font-medium transition-colors hover:bg-white/5"
               type="button"
@@ -55,7 +58,7 @@ export function DayItemsList({
             </DialogHeader>
             <div className="mt-4 max-h-96 space-y-2 overflow-y-auto">
               {day.items.map((item) => (
-                <EntertainmentItem key={item.itemId} item={item} />
+                <EntertainmentItem key={item.id} item={item} />
               ))}
             </div>
           </DialogContent>

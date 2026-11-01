@@ -7,12 +7,13 @@ import { settings } from "#utilities/settings.ts";
 export interface ClearPreviousInstanceStateInput {
   wipeRedis: boolean;
   wipeDatabase: boolean;
+  wipeUsers: boolean;
 }
 
 export const clearPreviousInstanceState = fromPromise<
   undefined,
   ClearPreviousInstanceStateInput
->(async ({ input: { wipeRedis, wipeDatabase } }) => {
+>(async ({ input: { wipeRedis, wipeDatabase, wipeUsers } }) => {
   if (wipeRedis) {
     const { RedisConnection } = await import("bullmq");
     const connection = new RedisConnection({
@@ -34,13 +35,27 @@ export const clearPreviousInstanceState = fromPromise<
     }
   }
 
+  if (wipeUsers) {
+    logger.warn(
+      "Clearing all user data due to RIVEN_SETTING__unsafeWipeUsersOnStartup being enabled. " +
+        "This may lead to data loss if there are pending items in the database.",
+    );
+
+    await database.orm.schema.refresh({ schema: "auth_db" });
+
+    logger.info("Users cleared.");
+  }
+
   if (wipeDatabase) {
     logger.warn(
       "Clearing all database data due to RIVEN_SETTING__unsafeWipeDatabaseOnStartup being enabled. " +
         "This may lead to data loss if there are pending items in the database.",
     );
 
-    await database.orm.schema.refresh();
+    await database.orm.schema.refresh({
+      // Target the `public` schema to avoid wiping users.
+      schema: "public",
+    });
 
     logger.info("Database cleared.");
   }

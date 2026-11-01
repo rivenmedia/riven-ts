@@ -1,15 +1,10 @@
-import { GET_AUTH_PROVIDERS } from "@/app/(public)/login/_queries/get-auth-providers.query";
-import { GET_INSTANCE_SETUP_REQUIRED } from "@/app/_queries/get-instance-setup-required.query";
-import {
-  HttpResponse,
-  expect,
-  graphql,
-  http,
-  test,
-} from "@/playwright/fixtures";
-import { serialiseCookie } from "@/playwright/serialise-cookie";
-
 import assert from "node:assert";
+
+import { GET_AUTH_PROVIDERS } from "#app/(public)/login/_queries/get-auth-providers.query.ts";
+import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
+import { api } from "#mocks/graphql.ts";
+import { HttpResponse, expect, http, test } from "#playwright/fixtures.ts";
+import { serialiseCookie } from "#playwright/serialise-cookie.ts";
 
 import type { UserWithRole } from "better-auth/client/plugins";
 import type { TestCookie } from "better-auth/plugins";
@@ -18,7 +13,7 @@ test.use({
   mswHandlers: async ({ mswHandlers }, use) =>
     use([
       ...mswHandlers,
-      graphql.query(GET_AUTH_PROVIDERS, () =>
+      api.query(GET_AUTH_PROVIDERS, () =>
         HttpResponse.json({
           data: {
             authProviders: [
@@ -90,7 +85,7 @@ test("does not navigate to the setup page after non-admin user login if setup is
   context,
 }) => {
   msw.use(
-    graphql.query(GET_INSTANCE_SETUP_REQUIRED, () =>
+    api.query(GET_INSTANCE_SETUP_REQUIRED, () =>
       HttpResponse.json({
         data: {
           instanceStatus: {
@@ -147,7 +142,7 @@ test("navigates to the setup page after admin user login if setup is required", 
   context,
 }) => {
   msw.use(
-    graphql.query(GET_INSTANCE_SETUP_REQUIRED, () =>
+    api.query(GET_INSTANCE_SETUP_REQUIRED, () =>
       HttpResponse.json({
         data: {
           instanceStatus: {

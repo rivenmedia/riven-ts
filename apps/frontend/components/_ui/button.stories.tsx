@@ -1,7 +1,7 @@
-import { preview } from "@/.storybook/preview";
-import { Button } from "@/components/_ui/button";
-
 import { LoaderCircle, Mail } from "lucide-react";
+
+import { preview } from "#.storybook/preview.tsx";
+import { Button } from "#components/_ui/button.tsx";
 
 /**
  * Displays a button or a component that looks like a button.
@@ -115,7 +115,7 @@ export const Loading = meta.story({
     </Button>
   ),
   args: {
-    ...Outline.composed.args,
+    ...Outline.input.args,
     disabled: true,
   },
 });
@@ -131,7 +131,7 @@ export const WithIcon = meta.story({
     </Button>
   ),
   args: {
-    ...Secondary.composed.args,
+    ...Secondary.input.args,
   },
 });
 
@@ -160,7 +160,7 @@ export const Large = meta.story({
  */
 export const Icon = meta.story({
   args: {
-    ...Secondary.composed.args,
+    ...Secondary.input.args,
     size: "icon",
     title: "Mail",
     children: <Mail />,

@@ -1,8 +1,18 @@
-import { Field, Float, ID, Int, InterfaceType } from "type-graphql";
+import { Field, Float, Int, InterfaceType } from "type-graphql";
 
-import { MediaItemType } from "../enums/media-item-type.enum.ts";
+import { IndexerDataStatus } from "../enums/indexer-data-status.enum.ts";
+import { TopLevelMediaItemType } from "../enums/top-level-media-item-type.enum.ts";
+import { CastMember } from "./cast-member.type.ts";
 import { Genre } from "./genre.type.ts";
+import { IndexerBaseItem } from "./indexer-base-item.type.ts";
+import { IndexerSeason } from "./indexer-season.type.ts";
+import { ItemImage } from "./item-image.type.ts";
+import { ProductionCompany } from "./production-company.type.ts";
 import { Ratings } from "./ratings.type.ts";
+import { SpokenLanguage } from "./spoken-language.type.ts";
+import { Trailer } from "./trailer.type.ts";
+
+import type { Duration } from "luxon";
 
 /**
  * Represents a media item returned from an indexer.
@@ -20,31 +30,14 @@ import { Ratings } from "./ratings.type.ts";
  */
 @InterfaceType({
   description: "Represents a media item returned from an indexer.",
+  implements: IndexerBaseItem,
 })
-export abstract class IndexerData {
-  /**
-   * The unique identifier for the media item on the indexer.
-   */
-  @Field(() => ID)
-  public id!: string;
-
-  /**
-   * The title of the media item.
-   */
-  @Field()
-  public title!: string;
-
+export abstract class IndexerData extends IndexerBaseItem {
   /**
    * The overview or summary of the media item.
    */
   @Field()
   public overview!: string;
-
-  /**
-   * The URL of the poster image for the media item.
-   */
-  @Field(() => String, { nullable: true })
-  public posterUrl?: string | null;
 
   /**
    * The URL of the backdrop image for the media item.
@@ -55,8 +48,8 @@ export abstract class IndexerData {
   /**
    * The URL of the logo image for the media item.
    */
-  @Field(() => String, { nullable: true })
-  public logoUrl?: string | null;
+  @Field(() => ItemImage, { nullable: true })
+  public logo?: ItemImage | null;
 
   /**
    * The language of the media item.
@@ -92,9 +85,100 @@ export abstract class IndexerData {
   @Field(() => Ratings, { nullable: true })
   public ratings?: Ratings | null;
 
-  @Field(() => MediaItemType.enum)
-  public type!: MediaItemType;
+  @Field(() => TopLevelMediaItemType.enum)
+  public type!: TopLevelMediaItemType;
+
+  /**
+   * Whether the media item can be requested in Riven.
+   *
+   * Items are not requestable when the indexer cannot provide the external ID
+   * that Riven uses to request that media type, e.g. a show without a TVDB ID.
+   */
+  @Field()
+  public isRequestable!: boolean;
 
   @Field(() => Int, { nullable: true })
-  public year?: number | null;
+  public get year() {
+    if (!this.releaseDate) {
+      return null;
+    }
+
+    return this.releaseDate.getFullYear();
+  }
+
+  @Field(() => String, { nullable: true })
+  public get seasonLabel() {
+    if (!this.releaseDate) {
+      return null;
+    }
+
+    const seasonLabels = ["Spring", "Summer", "Fall", "Winter"];
+
+    const month = this.releaseDate.getMonth();
+    const seasonIndex = Math.floor((month + 1) / 3) % 4;
+
+    const seasonLabel = seasonLabels[seasonIndex];
+    const { year } = this;
+
+    if (!seasonLabel || !year) {
+      return null;
+    }
+
+    return `${seasonLabel} ${year.toString()}`;
+  }
+
+  @Field(() => Trailer, { nullable: true })
+  public trailer?: Trailer | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public recommendations?: IndexerData[] | null;
+
+  @Field(() => [IndexerData], { nullable: true })
+  public similarItems?: IndexerData[] | null;
+
+  @Field(() => [CastMember], { nullable: true })
+  public cast?: CastMember[] | null;
+
+  /**
+   * Used to calculate the formatted runtime
+   *
+   * @internal
+   */
+  public rawRuntime?: Duration | null;
+
+  @Field(() => String, { nullable: true })
+  public get runtime() {
+    if (!this.rawRuntime) {
+      return null;
+    }
+
+    return this.rawRuntime.toHuman();
+  }
+
+  @Field(() => IndexerDataStatus.out.unwrap().enum)
+  public status!: IndexerDataStatus;
+
+  @Field(() => Int, { nullable: true })
+  public budget?: number | null;
+
+  @Field(() => Int, { nullable: true })
+  public revenue?: number | null;
+
+  @Field(() => [String], { nullable: true })
+  public originCountry?: string[] | null;
+
+  @Field(() => [SpokenLanguage], { nullable: true })
+  public spokenLanguages?: SpokenLanguage[] | null;
+
+  @Field(() => [ProductionCompany], { nullable: true })
+  public productionCompanies?: ProductionCompany[] | null;
+
+  @Field(() => String, { nullable: true })
+  public homepage?: string | null;
+
+  @Field(() => String, { nullable: true })
+  public imdbId?: string | null;
+
+  @Field(() => [IndexerSeason], { nullable: true })
+  public seasons?: IndexerSeason[] | null;
 }

@@ -6,7 +6,7 @@
     "RUNNER_ARCH", // Used to cache bust CI matrices
     "RUNNER_OS" // Used to cache bust CI matrices
   ],
-  "globalPassThroughEnv": ["DEBUG", "CI"],
+  "globalPassThroughEnv": ["DEBUG", "CI", "GITHUB_ACTIONS"],
   "globalDependencies": [".node-version"],
   "futureFlags": {
     "affectedUsingTaskInputs": true,
@@ -69,8 +69,16 @@
       "dependsOn": ["codegen:api-schemas", "transit:source-files"]
     },
     "test:component": {
+      "env": [
+        "CI" // Baseline screenshots aren't updated in CI
+      ],
       "dependsOn": ["codegen:api-schemas", "transit:source-files"],
       "inputs": [
+        ".github/workflows/check-for-visual-regressions.yaml", // Bust the cache if the VR check workflow changes
+        "**/__baselines__/**",
+        "!**/__vis__/local/**",
+        "**/public/**",
+        "**/*.css",
         "**/*.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx,json,jsonc,json5}",
         "!**/*.spec.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}", // Component tests use Storybook stories, not test files
         "!**/*.test.{ts,tsx,mts,mtsx,cts,ctsx,js,jsx,mjs,mjsx,cjs,cjsx}", // Component tests use Storybook stories, not test files
@@ -133,7 +141,7 @@
     "codegen:nextjs-types": {
       "env": ["NODE_ENV"],
       "inputs": ["app/**/{page,layout}.tsx"],
-      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.d.ts"]
+      "outputs": ["next-env.d.ts", ".next/{types,dev/types}/*.ts"]
     }
   }
 }

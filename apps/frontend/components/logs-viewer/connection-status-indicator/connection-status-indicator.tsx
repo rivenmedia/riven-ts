@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { getConnectionStatusText } from "../_utilities/get-connection-status-text";
+import { getConnectionStatusText } from "#components/logs-viewer/_utilities/get-connection-status-text.ts";
 
 export type ConnectionStatus =
   | "connecting"
@@ -14,6 +14,10 @@ export interface ConnectionStatusIndicatorProps {
   maxReconnectAttempts: number;
 }
 
+/**
+ * Coloured dot and label for the log stream connection status, including
+ * reconnect attempts.
+ */
 export function ConnectionStatusIndicator({
   connectionStatus,
   maxReconnectAttempts,
