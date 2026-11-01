@@ -1,3 +1,5 @@
+"use client";
+
 import { FormProvider, useForm } from "react-hook-form";
 
 import { Button } from "#components/_ui/button.tsx";
