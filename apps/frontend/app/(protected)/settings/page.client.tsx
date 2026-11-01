@@ -1,6 +1,4 @@
-"use client";
-
-import { useState } from "react";
+import { Suspense } from "react";
 
 import {
   Tabs,
@@ -8,18 +6,20 @@ import {
   TabsList,
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
-import { DangerZone } from "#components/settings/danger-zone/danger-zone.tsx";
-import { GeneralTab } from "#components/settings/general-tab/general-tab.tsx";
 import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 
+import { DangerZone } from "./_components/danger-zone/danger-zone";
+import { GeneralTab } from "./_components/general-tab/general-tab";
+
+interface SettingsPageProps {
+  canManageSettings: boolean;
+}
+
 /** Settings route with General, Plugins and Ranking tabs. */
-export function SettingsPage() {
-  const [activeTab, setActiveTab] = useState("general");
-
-  const canManageSettings = true as boolean;
-
+export function SettingsPage({ canManageSettings }: SettingsPageProps) {
   return (
     <PageShell>
       <div className="mx-auto w-full max-w-5xl">
@@ -29,20 +29,18 @@ export function SettingsPage() {
             Configure Riven, plugins, and ranking preferences.
           </p>
         </div>
-        <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <Tabs defaultValue="general">
           <TabsList className="mb-6 w-full justify-start">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="plugins">Plugins</TabsTrigger>
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <GeneralTab
-              data={{
-                enableNotifications: true,
-                instanceName: "",
-                logLevel: "DEBUG",
-              }}
-            />
+            <ErrorFallback message="Failed to load settings">
+              <Suspense fallback={<div>Loading...</div>}>
+                <GeneralTab />
+              </Suspense>
+            </ErrorFallback>
             {canManageSettings && (
               <div className="mt-8">
                 <DangerZone />

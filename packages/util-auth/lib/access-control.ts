@@ -12,6 +12,10 @@ export const ItemPermission = z.enum([
   "scrape",
 ]);
 
+export const LibraryPermission = z.enum(["reset"]);
+
+export const InstancePermission = z.enum(["manage-settings"]);
+
 export const UserPermission = z.enum([...defaultStatements.user]);
 
 export const SessionPermission = z.enum([...defaultStatements.session]);
@@ -19,25 +23,33 @@ export const SessionPermission = z.enum([...defaultStatements.session]);
 const statement = {
   ...defaultStatements,
   item: ItemPermission.options,
+  library: LibraryPermission.options,
+  instance: InstancePermission.options,
 } as const;
 
 export const ac = createAccessControl(statement);
 
 export const admin = ac.newRole({
   item: ItemPermission.options,
+  library: LibraryPermission.options,
+  instance: InstancePermission.options,
   ...adminAc.statements,
 });
 
 export const user = ac.newRole({
-  session: [],
   user: ["set-email", "set-password"],
   item: [ItemPermission.enum.request],
+  session: [],
+  instance: [],
+  library: [],
 });
 
 export const manager = ac.newRole({
-  session: [],
   user: ["set-email", "set-password"],
   item: ItemPermission.options,
+  session: [],
+  instance: [],
+  library: [],
 });
 
 export const UserRole = z.enum(["user", "manager", "admin"]);

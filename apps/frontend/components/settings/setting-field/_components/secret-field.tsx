@@ -1,3 +1,5 @@
+"use client";
+
 import { Eye, EyeOff } from "lucide-react";
 import { useId, useState } from "react";
 import { useFormContext } from "react-hook-form";

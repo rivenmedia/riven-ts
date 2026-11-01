@@ -159,7 +159,7 @@ function buildArraySetting(
   const commonConfig = buildCommonConfig(schema, key);
   const { element } = schema;
 
-  if (element instanceof ZodString) {
+  if (element instanceof ZodString || element instanceof ZodEnum) {
     return [
       commonConfig.name,
       {

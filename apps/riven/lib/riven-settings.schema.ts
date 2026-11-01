@@ -198,9 +198,9 @@ export const RivenSettings = z.object({
     .default([2, 6, 24])
     .describe(
       dedent`
-      The cooldown periods (in hours) to apply after failed scrape attempts,
-      in the format [> 2 attempts, > 5 attempts, > 10 attempts].
-    `,
+        The cooldown periods (in hours) to apply after failed scrape attempts,
+        in the format [> 2 attempts, > 5 attempts, > 10 attempts].
+      `,
     )
     .meta({ "wiki.section": "scraping" }),
   unknownAirDateOffsetDays: z.coerce
