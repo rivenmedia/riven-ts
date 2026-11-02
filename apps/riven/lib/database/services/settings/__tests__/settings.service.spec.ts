@@ -122,9 +122,9 @@ describe("settingsService", () => {
     });
 
     const readUpdatedAt = async () => {
-      const rows = await em
+      const rows: { updated_at: Date }[] = await em
         .getConnection()
-        .execute<{ updated_at: Date }[]>(
+        .execute(
           `select updated_at from setting where namespace = 'ns-h' and key = 'a'`,
         );
 
@@ -133,13 +133,15 @@ describe("settingsService", () => {
 
     const first = await readUpdatedAt();
 
-    await new Promise((resolve) => setTimeout(resolve, 20));
+    await new Promise<void>((resolve) => {
+      setTimeout(resolve, 20);
+    });
 
     await services.settingsService.writeValues("ns-h", {
       upsert: { a: 2 },
       delete: [],
     });
 
-    expect(await readUpdatedAt()).toBeGreaterThan(first);
+    await expect(readUpdatedAt()).resolves.toBeGreaterThan(first);
   });
 });
