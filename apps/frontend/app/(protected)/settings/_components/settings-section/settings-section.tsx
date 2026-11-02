@@ -59,7 +59,8 @@ async function SettingsSectionLoader({ id }: SettingsSectionLoaderProps) {
   );
 }
 
-function SettingsSectionSkeleton() {
+/** Placeholder shown while a settings section loads. */
+export function SettingsSectionSkeleton() {
   return (
     <div className="space-y-4 rounded-lg border p-4">
       <Skeleton className="h-6 w-40" />
