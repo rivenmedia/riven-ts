@@ -14,6 +14,13 @@ it.each([
   ["info", LogLevelLike, "info"],
   ["not-json", z.boolean(), "not-json"],
   ["abc", z.string().default("x"), "abc"],
+  ["12345", z.string().nullable(), "12345"],
+  ["null", z.string().nullable(), "null"],
+  ["true", z.string().nullable().default(null), "true"],
+  ["a", z.enum(["a", "b"]).nullable(), "a"],
+  ["a", z.literal("a").nullable(), "a"],
+  ["5", z.int().nullable(), 5],
+  ["null", z.int().nullable(), null],
   ["foo-1", z.templateLiteral(["foo-", z.number()]), "foo-1"],
 ])("decodes %s", (raw, schema, expected) => {
   expect(decodeEnvValue(raw, schema)).toStrictEqual(expected);
