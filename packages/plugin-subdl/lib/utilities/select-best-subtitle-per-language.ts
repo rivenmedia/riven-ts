@@ -47,13 +47,14 @@ function normalizeLanguage(language: string) {
   if (
     words.length === 2 &&
     words[1] === "portuguese" &&
-    isWithinOneEdit(words[0]!, "brazilian")
+    isWithinOneEdit(words[0] ?? "", "brazilian")
   ) {
     return "pt-BR";
   }
 
   return normalized;
 }
+
 /**
  * Picks the best subtitle per language (first matching result per language)
  */
