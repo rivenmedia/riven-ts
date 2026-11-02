@@ -182,6 +182,9 @@ export const pluginRegistrarMachine = setup({
     output: {} as PluginRegistrarMachineOutput,
   },
   actions: {
+    raiseError: (_, error: Error) => {
+      throw error;
+    },
     registerPlugins: assign({
       pendingPlugins: (_, parsedPlugins: ParsedPlugins) => {
         const { validPlugins, pluginSettings } = parsedPlugins;
@@ -437,6 +440,23 @@ export const pluginRegistrarMachine = setup({
               },
             ],
           },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to collect plugins for registration.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
         },
       },
       Validating: {
@@ -483,6 +503,9 @@ export const pluginRegistrarMachine = setup({
         },
       },
       Validated: {
+        type: "final",
+      },
+      Errored: {
         type: "final",
       },
     },
