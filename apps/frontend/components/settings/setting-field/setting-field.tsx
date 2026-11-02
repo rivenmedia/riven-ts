@@ -5,6 +5,7 @@ import { SettingsCustomRankField } from "./_components/custom-rank-field.tsx";
 import { SettingsDictionaryField } from "./_components/dictionary-field.tsx";
 import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field.tsx";
 import { SettingsNumberField } from "./_components/number-field.tsx";
+import { SettingsPasswordField } from "./_components/password-field.tsx";
 import { SettingsSecretField } from "./_components/secret-field.tsx";
 import { SettingsSelectField } from "./_components/select-field.tsx";
 import { SettingGroup } from "./_components/setting-group.tsx";
@@ -18,11 +19,15 @@ export interface CommonSettingFieldProps {
   name: string;
   label: string;
   description?: string;
+  locked?: boolean;
 }
+
+export type SecretState = "default" | "custom" | "env" | "unset";
 
 type SettingsFieldType =
   | "group"
   | "text"
+  | "password"
   | "secret"
   | "number"
   | "boolean"
@@ -36,6 +41,7 @@ type SettingsFieldType =
 const settingFieldComponents = {
   group: SettingGroup,
   text: SettingsTextField,
+  password: SettingsPasswordField,
   secret: SettingsSecretField,
   number: SettingsNumberField,
   boolean: SettingsBooleanField,
@@ -76,7 +82,16 @@ export function SettingField({
 
   return (
     <div className={cn("space-y-3", !nested && "rounded-lg border p-4")}>
-      <Component {...config} name={name} />
+      {"locked" in config && config.locked ? (
+        <fieldset disabled className="space-y-3">
+          <Component {...config} name={name} />
+          <p className="text-muted-foreground text-sm">
+            Set by environment variable
+          </p>
+        </fieldset>
+      ) : (
+        <Component {...config} name={name} />
+      )}
     </div>
   );
 }

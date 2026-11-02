@@ -1,4 +1,4 @@
-import { it, expect, describe } from "vitest";
+import { it, expect, describe, vi } from "vitest";
 import { z } from "zod";
 
 import { buildSettingsConfigFromZodSchema } from "./build-settings-config-from-zod-schema.ts";
@@ -397,6 +397,64 @@ describe(buildSettingsConfigFromZodSchema, () => {
           ],
         ]),
       );
+    });
+
+    it("sets the secret state and reset handler from the context", () => {
+      const schema = z.string().meta({ title: "API Key", secret: true });
+      const onResetSecret = vi.fn<(path: string) => void>();
+
+      const field = buildSettingsConfigFromZodSchema(
+        schema,
+        "apiKey",
+        true,
+        {},
+        {
+          secretStates: new Map([["apiKey", "custom"]]),
+          onResetSecret,
+        },
+      );
+
+      expect(field.get("apiKey")).toStrictEqual({
+        type: "secret",
+        config: expect.objectContaining({
+          secretState: "custom",
+          onReset: expect.any(Function),
+        }),
+      });
+
+      const setting = field.get("apiKey");
+
+      if (setting?.type === "secret") {
+        setting.config.onReset?.();
+      }
+
+      expect(onResetSecret).toHaveBeenCalledExactlyOnceWith("apiKey");
+    });
+
+    it("marks fields as locked when listed in the context", () => {
+      const schema = z.object({
+        port: z.number(),
+        host: z.string(),
+        nested: z.object({ inner: z.string() }),
+      });
+
+      const fields = buildSettingsConfigFromZodSchema(
+        schema,
+        undefined,
+        true,
+        {},
+        { lockedFields: new Set(["port", "nested.inner"]) },
+      );
+
+      expect(fields.get("port")?.config).toMatchObject({ locked: true });
+      expect(fields.get("host")?.config).not.toHaveProperty("locked", true);
+
+      const group = fields.get("nested");
+
+      expect(group?.type).toBe("group");
+      expect(
+        group?.type === "group" ? group.config.schema[0]?.config : undefined,
+      ).toMatchObject({ locked: true });
     });
 
     it("sets size constraints if provided on the schema", () => {

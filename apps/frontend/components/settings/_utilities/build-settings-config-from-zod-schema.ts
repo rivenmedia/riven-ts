@@ -16,6 +16,7 @@ import {
 
 import type {
   CommonSettingFieldProps,
+  SecretState,
   SettingFieldProps,
 } from "#components/settings/setting-field/setting-field.tsx";
 import type { Constructor } from "type-fest";
@@ -30,9 +31,16 @@ function getSchemaMetadata(schema: $ZodType): GlobalMeta {
   return {};
 }
 
+export interface BuildSettingsContext {
+  lockedFields?: ReadonlySet<string>;
+  secretStates?: ReadonlyMap<string, SecretState>;
+  onResetSecret?: (path: string) => void;
+}
+
 function buildCommonConfig(
   meta: GlobalMeta,
   key?: string,
+  context?: BuildSettingsContext,
 ): CommonSettingFieldProps {
   if (!key) {
     throw new Error("A key must be provided for non-object schemas");
@@ -42,6 +50,7 @@ function buildCommonConfig(
     label: meta.title ?? key,
     name: key,
     ...(meta.description && { description: meta.description }),
+    ...(context?.lockedFields?.has(key) && { locked: true }),
   };
 }
 
@@ -63,18 +72,32 @@ function buildStringSetting(
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
+  context?: BuildSettingsContext,
 ): SettingEntry {
   const { minLength, maxLength } = schema;
-  const commonConfig = buildCommonConfig(meta, key);
+  const commonConfig = buildCommonConfig(meta, key, context);
 
   if (meta.secret) {
+    const secretState = context?.secretStates?.get(commonConfig.name);
+    const { onResetSecret } = context ?? {};
+
     return [
       commonConfig.name,
       {
         type: "secret",
         config: {
           ...commonConfig,
-          registerOptions: { required },
+          // Secrets are write-only, so a blank input means "unchanged"
+          // whenever a value is already in effect.
+          registerOptions: {
+            required: required && (!secretState || secretState === "unset"),
+          },
+          ...(secretState && { secretState }),
+          ...(onResetSecret && {
+            onReset: () => {
+              onResetSecret(commonConfig.name);
+            },
+          }),
         },
       },
     ];
@@ -100,8 +123,9 @@ function buildBooleanSetting(
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
+  context?: BuildSettingsContext,
 ): SettingEntry {
-  const commonConfig = buildCommonConfig(meta, key);
+  const commonConfig = buildCommonConfig(meta, key, context);
 
   if (!required) {
     return [
@@ -133,8 +157,9 @@ function buildEnumSetting(
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
+  context?: BuildSettingsContext,
 ): SettingEntry {
-  const commonConfig = buildCommonConfig(meta, key);
+  const commonConfig = buildCommonConfig(meta, key, context);
   const { enum: enumValues } = schema;
 
   return [
@@ -158,8 +183,9 @@ function buildArraySetting(
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
+  context?: BuildSettingsContext,
 ): SettingEntry {
-  const commonConfig = buildCommonConfig(meta, key);
+  const commonConfig = buildCommonConfig(meta, key, context);
   const { element } = schema;
 
   if (element instanceof ZodString || element instanceof ZodEnum) {
@@ -191,8 +217,9 @@ function buildNumberSetting(
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
+  context?: BuildSettingsContext,
 ): SettingEntry {
-  const commonConfig = buildCommonConfig(meta, key);
+  const commonConfig = buildCommonConfig(meta, key, context);
 
   const { multipleOf, minimum, maximum, type } = z.toJSONSchema(schema);
   const hasMinConstraint = minimum != null && Number.isFinite(minimum);
@@ -221,6 +248,7 @@ export function buildSettingsConfigFromZodSchema(
   key?: string,
   required = true,
   wrapperMeta: GlobalMeta = {},
+  context?: BuildSettingsContext,
 ): Map<string, SettingFieldProps> {
   const settings = new Map<string, SettingFieldProps>();
   const meta = { ...getSchemaMetadata(schema), ...wrapperMeta };
@@ -229,14 +257,20 @@ export function buildSettingsConfigFromZodSchema(
     case "string": {
       assertSchemaType(schema, ZodString);
 
-      const [name, setting] = buildStringSetting(schema, key, required, meta);
+      const [name, setting] = buildStringSetting(
+        schema,
+        key,
+        required,
+        meta,
+        context,
+      );
 
       return settings.set(name, setting);
     }
     case "boolean": {
       assertSchemaType(schema, ZodBoolean);
 
-      const [name, setting] = buildBooleanSetting(key, required, meta);
+      const [name, setting] = buildBooleanSetting(key, required, meta, context);
 
       return settings.set(name, setting);
     }
@@ -244,28 +278,46 @@ export function buildSettingsConfigFromZodSchema(
     case "number": {
       assertSchemaType(schema, ZodNumber);
 
-      const [name, setting] = buildNumberSetting(schema, key, required, meta);
+      const [name, setting] = buildNumberSetting(
+        schema,
+        key,
+        required,
+        meta,
+        context,
+      );
 
       return settings.set(name, setting);
     }
     case "enum": {
       assertSchemaType(schema, ZodEnum);
 
-      const [name, setting] = buildEnumSetting(schema, key, required, meta);
+      const [name, setting] = buildEnumSetting(
+        schema,
+        key,
+        required,
+        meta,
+        context,
+      );
 
       return settings.set(name, setting);
     }
     case "array": {
       assertSchemaType(schema, ZodArray);
 
-      const [name, setting] = buildArraySetting(schema, key, required, meta);
+      const [name, setting] = buildArraySetting(
+        schema,
+        key,
+        required,
+        meta,
+        context,
+      );
 
       return settings.set(name, setting);
     }
     case "record": {
       assertSchemaType(schema, ZodRecord);
 
-      const commonConfig = buildCommonConfig(meta, key);
+      const commonConfig = buildCommonConfig(meta, key, context);
       const { keyType, valueType } = schema;
 
       if (!(keyType instanceof ZodString)) {
@@ -279,6 +331,8 @@ export function buildSettingsConfigFromZodSchema(
           valueType,
           `${commonConfig.name}.value`,
           required,
+          {},
+          context,
         ).values(),
       ];
 
@@ -298,12 +352,18 @@ export function buildSettingsConfigFromZodSchema(
         throw new Error(`Tuple rest elements are not supported`);
       }
 
-      const commonConfig = buildCommonConfig(meta, key);
+      const commonConfig = buildCommonConfig(meta, key, context);
 
       const itemFields = schema.def.items.flatMap((element, index) => {
         const itemName = `${commonConfig.name}.${index.toString()}`;
 
-        return buildSettingsConfigFromZodSchema(element, itemName, required)
+        return buildSettingsConfigFromZodSchema(
+          element,
+          itemName,
+          required,
+          {},
+          context,
+        )
           .values()
           .map((itemField) => {
             // An untitled element falls back to its key as the label, so
@@ -336,6 +396,8 @@ export function buildSettingsConfigFromZodSchema(
             fieldSchema,
             [key, fieldKey].filter(Boolean).join("."),
             required,
+            {},
+            context,
           )
             .entries()
             .toArray(),
@@ -362,21 +424,39 @@ export function buildSettingsConfigFromZodSchema(
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(innerSchema, key, false, meta);
+      return buildSettingsConfigFromZodSchema(
+        innerSchema,
+        key,
+        false,
+        meta,
+        context,
+      );
     }
     case "optional": {
       assertSchemaType(schema, ZodOptional);
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(innerSchema, key, false, meta);
+      return buildSettingsConfigFromZodSchema(
+        innerSchema,
+        key,
+        false,
+        meta,
+        context,
+      );
     }
     case "nullable": {
       assertSchemaType(schema, ZodNullable);
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(innerSchema, key, false, meta);
+      return buildSettingsConfigFromZodSchema(
+        innerSchema,
+        key,
+        false,
+        meta,
+        context,
+      );
     }
     case "any":
     case "bigint":
