@@ -60,6 +60,64 @@ describe(resolveSettings, () => {
     expect(result.ignoredStored).toStrictEqual([]);
   });
 
+  describe("with an issue that cannot be attributed to a leaf", () => {
+    const refined = z.object({
+      range: z
+        .object({ min: z.int().default(1), max: z.int().default(10) })
+        .refine(({ min, max }) => min <= max, "min must not exceed max"),
+      flag: z.boolean().default(false),
+    });
+
+    it("drops every stored leaf and resolves from env and defaults", () => {
+      const result = resolveSettings({
+        schema: refined,
+        stored: { min: 20, flag: true },
+        env: {},
+      });
+
+      expect(result.value).toStrictEqual({
+        range: { min: 1, max: 10 },
+        flag: false,
+      });
+      expect(result.ignoredStored).toStrictEqual([
+        {
+          path: "range.min",
+          message: expect.stringContaining("min must not exceed max"),
+        },
+        {
+          path: "flag",
+          message: expect.stringContaining("min must not exceed max"),
+        },
+      ]);
+    });
+
+    it("keeps env values when dropping stored leaves", () => {
+      const result = resolveSettings({
+        schema: refined,
+        stored: { min: 20 },
+        env: { max: "15" },
+      });
+
+      expect(result.value.range).toStrictEqual({ min: 1, max: 15 });
+      expect(result.ignoredStored).toStrictEqual([
+        { path: "range.min", message: expect.any(String) },
+      ]);
+    });
+
+    it("throws when env and defaults alone are invalid", () => {
+      expect(() =>
+        resolveSettings({ schema: refined, stored: {}, env: { min: "20" } }),
+      ).toThrow(ZodError);
+      expect(() =>
+        resolveSettings({
+          schema: refined,
+          stored: { max: 30 },
+          env: { min: "40" },
+        }),
+      ).toThrow(ZodError);
+    });
+  });
+
   it("throws ZodError for invalid env values", () => {
     expect(() =>
       resolveSettings({ schema, stored: {}, env: { limit: "bad" } }),
