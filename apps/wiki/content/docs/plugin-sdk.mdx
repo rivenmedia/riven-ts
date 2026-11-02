@@ -107,16 +107,18 @@ Users set these as
 `RIVEN_PLUGIN_SETTING__REPO_PLUGIN_MY_SERVICE__apiKey="..."`.
 
 Settings are typed: declare fields with their real types (`z.number()`,
-`z.boolean()`, `z.array(...)`) rather than `z.coerce`, `z.stringbool()` or
-`z.json()`. Environment values for non-string fields are parsed as JSON, for
+`z.boolean()`, `z.array(...)`). String-codec helpers such as `z.coerce`,
+`z.stringbool()` and `z.json()` aren't needed, because environment values are
+decoded automatically. Environment values for non-string fields are parsed as JSON, for
 example `true`, `30` or `["a","b"]`. Aliases such as `yes` or `on` (previously
 accepted via `z.stringbool`) are no longer valid.
 
 Plugin settings can also be edited from the Riven UI and are stored in the
 database. Precedence is environment variable, then database value, then the
 schema default. A setting supplied through the environment always wins and is
-locked in the UI. Invalid environment values fail startup; invalid stored values
-are ignored.
+locked in the UI. Invalid stored values are ignored (the default is used). If a
+required setting still has no valid value, or an environment value is invalid,
+the plugin is skipped. Invalid core environment values fail startup.
 
 </Step>
 <Step>
