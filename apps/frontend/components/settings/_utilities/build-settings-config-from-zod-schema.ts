@@ -87,11 +87,7 @@ function buildStringSetting(
         type: "secret",
         config: {
           ...commonConfig,
-          // Secrets are write-only, so a blank input means "unchanged"
-          // whenever a value is already in effect.
-          registerOptions: {
-            required: required && (!secretState || secretState === "unset"),
-          },
+          registerOptions: { required },
           ...(secretState && { secretState }),
           ...(onResetSecret && {
             onReset: () => {

@@ -84,7 +84,12 @@ const onSecretReset = fn();
 export const SecretDefault = meta.story({
   args: {
     type: "secret",
-    config: { label: "API Key", name: "api-key", secretState: "default" },
+    config: {
+      label: "API Key",
+      name: "api-key",
+      secretState: "default",
+      registerOptions: { required: false },
+    },
   },
   decorators: [createFormDecorator({ progressive: true })],
 });
@@ -109,6 +114,7 @@ export const SecretCustom = meta.story({
       label: "API Key",
       name: "api-key",
       secretState: "custom",
+      registerOptions: { required: false },
       onReset: onSecretReset,
     },
   },
@@ -156,6 +162,7 @@ export const SecretEnv = meta.story({
       label: "API Key",
       name: "api-key",
       secretState: "env",
+      registerOptions: { required: false },
       locked: true,
     },
   },
