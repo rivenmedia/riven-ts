@@ -219,6 +219,64 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
+    it('returns a "boolean" field when the schema has a default', () => {
+      const schema = z
+        .boolean()
+        .default(false)
+        .meta({ title: "Boolean Field" });
+      const field = buildSettingsConfigFromZodSchema(schema, "booleanField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "booleanField",
+            {
+              type: "boolean",
+              config: {
+                label: "Boolean Field",
+                name: "booleanField",
+                registerOptions: { required: false },
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it('returns a "boolean" field when the schema is optional', () => {
+      const schema = z.boolean().optional();
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "booleanField",
+      ).values();
+
+      expect(field?.type).toBe("boolean");
+    });
+
+    it('returns a "nullable_boolean" field for a nullable schema without other wrappers', () => {
+      const schema = z.boolean().nullable();
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "booleanField",
+      ).values();
+
+      expect(field?.type).toBe("nullable_boolean");
+    });
+
+    it('returns a "boolean" field for a defaulted boolean served as JSON Schema', () => {
+      const schema = z.fromJSONSchema(
+        z.toJSONSchema(
+          z.object({ dubbedAnimeOnly: z.boolean().default(false) }),
+          {
+            io: "input",
+          },
+        ),
+      );
+      const [field] = buildSettingsConfigFromZodSchema(schema).values();
+
+      expect(field?.type).toBe("boolean");
+    });
+
     it('returns a "nullable_boolean" field when the schema is nullable', () => {
       const schema = z
         .boolean()
@@ -269,7 +327,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "recordField.value",
+                      label: "Value",
                       name: "recordField.value",
                       registerOptions: { required: true },
                     },
@@ -302,7 +360,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "recordField.value",
+                      label: "Value",
                       name: "recordField.value",
                       registerOptions: { required: true },
                     },
@@ -340,7 +398,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "optionalRecordField.value",
+                      label: "Value",
                       name: "optionalRecordField.value",
                       registerOptions: { required: false },
                     },
@@ -776,7 +834,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
             {
               type: "string_array",
               config: {
-                label: "require",
+                label: "Require",
                 name: "require",
                 registerOptions: { required: true },
               },
@@ -792,7 +850,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "boolean",
                     config: {
-                      label: "resolutions.r2160p",
+                      label: "R2160p",
                       name: "resolutions.r2160p",
                       registerOptions: { required: true },
                     },
@@ -800,7 +858,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "boolean",
                     config: {
-                      label: "resolutions.r1080p",
+                      label: "R1080p",
                       name: "resolutions.r1080p",
                       registerOptions: { required: true },
                     },
@@ -920,6 +978,31 @@ describe(buildSettingsConfigFromZodSchema, () => {
       expect(() => buildSettingsConfigFromZodSchema(schema, "t")).toThrow(
         /tuple rest elements are not supported/iu,
       );
+    });
+  });
+
+  describe("labels", () => {
+    it("prefers the title", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string().meta({ title: "API Key" }),
+        "plugin.apiKey",
+      ).values();
+
+      expect(field?.config).toMatchObject({ label: "API Key" });
+    });
+
+    it.each([
+      ["scraping.dubbedAnimeOnly", "Dubbed anime only"],
+      ["apiKey", "Api key"],
+      ["resolutions.r2160p", "R2160p"],
+      ["url", "Url"],
+    ])("humanises the last segment of an untitled %s", (key, label) => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string(),
+        key,
+      ).values();
+
+      expect(field?.config).toMatchObject({ label });
     });
   });
 

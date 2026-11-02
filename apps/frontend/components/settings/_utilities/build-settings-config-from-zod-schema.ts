@@ -1,3 +1,4 @@
+import { upperFirst } from "es-toolkit";
 import {
   ZodArray,
   ZodString,
@@ -37,6 +38,18 @@ export interface BuildSettingsContext {
   onResetSecret?: (path: string) => void;
 }
 
+/**
+ * Turns an untitled field's key into a label, from its last path segment
+ * (e.g. `scraping.dubbedAnimeOnly` becomes "Dubbed anime only").
+ */
+function humaniseKey(key: string) {
+  const segment = key.split(".").at(-1) ?? key;
+
+  return upperFirst(
+    segment.replaceAll(/(?<=[a-z\d])(?=[A-Z])/gu, " ").toLowerCase(),
+  );
+}
+
 function buildCommonConfig(
   meta: GlobalMeta,
   key?: string,
@@ -47,7 +60,7 @@ function buildCommonConfig(
   }
 
   return {
-    label: meta.title ?? key,
+    label: meta.title ?? humaniseKey(key),
     name: key,
     ...(meta.description && { description: meta.description }),
     ...(context?.lockedFields?.has(key) && { locked: true }),
@@ -118,12 +131,13 @@ function buildStringSetting(
 function buildBooleanSetting(
   key: string | undefined,
   required: boolean,
+  nullable: boolean,
   meta: GlobalMeta,
   context?: BuildSettingsContext,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(meta, key, context);
 
-  if (!required) {
+  if (nullable) {
     return [
       commonConfig.name,
       {
@@ -142,7 +156,7 @@ function buildBooleanSetting(
       type: "boolean",
       config: {
         ...commonConfig,
-        registerOptions: { required: true },
+        registerOptions: { required },
       },
     },
   ];
@@ -239,12 +253,17 @@ function buildNumberSetting(
   ];
 }
 
+/**
+ * @param nullable Whether a `.nullable()` wrapper was unwrapped on the way to this schema, so `null` is a valid value.
+ *   Unlike `required`, a default or optional wrapper doesn't set it.
+ */
 export function buildSettingsConfigFromZodSchema(
   schema: $ZodType,
   key?: string,
   required = true,
   wrapperMeta: GlobalMeta = {},
   context?: BuildSettingsContext,
+  nullable = false,
 ): Map<string, SettingFieldProps> {
   const settings = new Map<string, SettingFieldProps>();
   const meta = { ...getSchemaMetadata(schema), ...wrapperMeta };
@@ -266,7 +285,13 @@ export function buildSettingsConfigFromZodSchema(
     case "boolean": {
       assertSchemaType(schema, ZodBoolean);
 
-      const [name, setting] = buildBooleanSetting(key, required, meta, context);
+      const [name, setting] = buildBooleanSetting(
+        key,
+        required,
+        nullable,
+        meta,
+        context,
+      );
 
       return settings.set(name, setting);
     }
@@ -366,7 +391,7 @@ export function buildSettingsConfigFromZodSchema(
             // replace that with a positional label.
             if (
               "label" in itemField.config &&
-              itemField.config.label === itemName
+              itemField.config.label === humaniseKey(itemName)
             ) {
               itemField.config.label = `${commonConfig.label} ${(index + 1).toString()}`;
             }
@@ -426,6 +451,7 @@ export function buildSettingsConfigFromZodSchema(
         false,
         meta,
         context,
+        nullable,
       );
     }
     case "optional": {
@@ -439,6 +465,7 @@ export function buildSettingsConfigFromZodSchema(
         false,
         meta,
         context,
+        nullable,
       );
     }
     case "nullable": {
@@ -452,6 +479,7 @@ export function buildSettingsConfigFromZodSchema(
         false,
         meta,
         context,
+        true,
       );
     }
     case "any":

@@ -2,19 +2,21 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { pick } from "es-toolkit/compat";
+import { pick, set } from "es-toolkit/compat";
 import { useAction } from "next-safe-action/hooks";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { FormProvider } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
 import { Button } from "#components/_ui/button.tsx";
+import { FieldError } from "#components/_ui/field.tsx";
 import { buildSettingsConfigFromZodSchema } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
 import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import { resetSettingsFields } from "./_actions/reset-settings-fields.action";
 import { updateSettingsSection } from "./_actions/update-settings-section.action";
+import { validationErrorsToIssues } from "./_utilities/validation-errors-to-issues";
 
 import type { BuildSettingsContext } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
 import type {
@@ -22,13 +24,28 @@ import type {
   SettingFieldProps,
 } from "#components/settings/setting-field/setting-field.tsx";
 
-/** The form paths of every rendered field, without the groups around them. */
-function getFieldNames(fields: SettingFieldProps[]): string[] {
+interface SettingsIssue {
+  path: string;
+  message: string;
+}
+
+/** Every rendered field, without the groups around them. */
+function getFields(fields: SettingFieldProps[]): SettingFieldProps[] {
   return fields.flatMap((field) =>
-    field.type === "group"
-      ? getFieldNames(field.config.schema)
-      : [field.config.name],
+    field.type === "group" ? getFields(field.config.schema) : [field],
   );
+}
+
+/** Whether an issue's path belongs to a rendered field (or an item within one). */
+function isFieldPath(path: string, fieldNames: string[]) {
+  return fieldNames.some(
+    (name) => path === name || path.startsWith(`${name}.`),
+  );
+}
+
+/** Formats an issue that can't be shown against a field. */
+function formatSectionIssue({ path, message }: SettingsIssue) {
+  return path ? `${path}: ${message}` : message;
 }
 
 export interface SettingsSectionFormProps {
@@ -38,7 +55,7 @@ export interface SettingsSectionFormProps {
   values: Record<string, unknown>;
   lockedFields: string[];
   secretStates: { path: string; state: SecretState }[];
-  issues: { path: string; message: string }[];
+  issues: SettingsIssue[];
 }
 
 /**
@@ -79,7 +96,15 @@ export function SettingsSectionForm({
       toast.success("Setting reset. Restart Riven to apply it.");
     },
     onError({ error }) {
-      toast.error(error.serverError ?? "Failed to reset the setting");
+      const resetIssues = validationErrorsToIssues(error.validationErrors);
+
+      if (resetIssues.length === 0) {
+        toast.error(error.serverError ?? "Failed to reset the setting");
+      }
+
+      for (const issue of resetIssues) {
+        toast.error(formatSectionIssue(issue));
+      }
     },
   });
 
@@ -105,11 +130,37 @@ export function SettingsSectionForm({
     ];
   }, [schema, lockedFields, secretStates, executeReset]);
 
+  const [fieldNames, secretFieldNames] = useMemo(() => {
+    const leafFields = getFields(fields);
+
+    return [
+      leafFields.map(({ config }) => config.name),
+      leafFields
+        .filter(({ type }) => type === "secret")
+        .map(({ config }) => config.name),
+    ] as const;
+  }, [fields]);
+
   // Only rendered fields are submitted, so values for fields that can't be
-  // rendered (e.g. unions) are never sent back
-  const defaultValues = useMemo(
-    () => pick(values, getFieldNames(fields)),
-    [values, fields],
+  // rendered (e.g. unions) are never sent back. Secrets are write-only, so they
+  // start blank, which the backend treats as unchanged.
+  const defaultValues = useMemo(() => {
+    const renderedValues = pick(values, fieldNames);
+
+    for (const name of secretFieldNames) {
+      set(renderedValues, name, "");
+    }
+
+    return renderedValues;
+  }, [values, fieldNames, secretFieldNames]);
+
+  // Issues that can't be shown against a field are shown for the section
+  const storedSectionIssues = useMemo(
+    () => issues.filter(({ path }) => !isFieldPath(path, fieldNames)),
+    [issues, fieldNames],
+  );
+  const [savedSectionIssues, setSavedSectionIssues] = useState<SettingsIssue[]>(
+    [],
   );
 
   const { form, action, handleSubmitWithAction } = useHookFormAction(
@@ -120,30 +171,52 @@ export function SettingsSectionForm({
     {
       formProps: { defaultValues },
       actionProps: {
+        onExecute() {
+          setSavedSectionIssues([]);
+        },
         onSuccess() {
           toast.success("Settings saved. Restart Riven to apply them.");
+
+          // Start clean from the saved values, with secrets blanked again as
+          // they're write-only
+          const savedValues = structuredClone(form.getValues());
+
+          for (const name of secretFieldNames) {
+            set(savedValues, name, "");
+          }
+
+          form.reset(savedValues);
         },
         onError({ error }) {
           if (error.serverError) {
             toast.error(error.serverError);
           }
+
+          setSavedSectionIssues(
+            validationErrorsToIssues(error.validationErrors).filter(
+              ({ path }) => !isFieldPath(path, fieldNames),
+            ),
+          );
         },
       },
     },
   );
 
   useEffect(() => {
-    // A save revalidates the page with the stored values, so the form starts
-    // clean from them (which also blanks any secret that was just typed)
-    form.reset(defaultValues);
+    // Revalidating the page (e.g. after a secret reset) brings new stored
+    // values, which mustn't discard edits that haven't been saved yet
+    form.reset(defaultValues, { keepDirtyValues: true });
 
     // Issues with the stored values are shown before any submit
     for (const { path, message } of issues) {
-      form.setError(path, { type: "server", message });
+      if (isFieldPath(path, fieldNames)) {
+        form.setError(path, { type: "server", message });
+      }
     }
-  }, [form, defaultValues, issues]);
+  }, [form, defaultValues, issues, fieldNames]);
 
   const { isDirty } = form.formState;
+  const sectionIssues = [...storedSectionIssues, ...savedSectionIssues];
 
   return (
     <form
@@ -154,6 +227,13 @@ export function SettingsSectionForm({
       <FormProvider {...form}>
         <div className="space-y-8">
           <SettingField type="group" config={{ name: title, schema: fields }} />
+          {sectionIssues.length > 0 && (
+            <FieldError
+              errors={sectionIssues.map((issue) => ({
+                message: formatSectionIssue(issue),
+              }))}
+            />
+          )}
           <Button disabled={!isDirty || action.isPending} type="submit">
             Save
           </Button>

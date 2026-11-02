@@ -1,4 +1,5 @@
 import { HttpResponse } from "msw";
+import { useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { z } from "zod";
 
@@ -15,6 +16,7 @@ import type {
   UpdateSettingsSectionMutation,
   UpdateSettingsSectionMutationVariables,
 } from "./_mutations/update-settings-section.mutation.typegen";
+import type { SettingsSectionFormProps } from "./settings-section-form";
 
 /** Serves a Zod schema the way the backend does. */
 const toServedJsonSchema = (schema: z.ZodObject) =>
@@ -141,6 +143,13 @@ Default.test("Saves the changed values", async ({ canvas, step }) => {
       await canvas.findByText("Settings saved. Restart Riven to apply them."),
     ).toBeInTheDocument();
   });
+
+  await step("Starts clean from the saved values", async () => {
+    await expect(saveButton).toBeDisabled();
+    await expect(
+      canvas.getByRole("textbox", { name: "Log Directory" }),
+    ).toHaveValue("/var/log/riven");
+  });
 });
 
 Default.test(
@@ -178,6 +187,49 @@ Default.test(
   },
 );
 
+Default.test(
+  "Shows backend issues returned on save that have no field",
+  async ({ canvas, msw }) => {
+    msw.use(
+      api.mutation(UPDATE_SETTINGS_SECTION, () =>
+        HttpResponse.json({
+          data: {
+            updateSettingsSection: {
+              __typename: "SettingsMutationResult",
+              success: false,
+              issues: [
+                {
+                  __typename: "SettingsIssue",
+                  path: "",
+                  message: "Settings could not be saved",
+                },
+                {
+                  __typename: "SettingsIssue",
+                  path: "scraping.removedSetting",
+                  message: "Unrecognised setting",
+                },
+              ],
+            },
+          } satisfies UpdateSettingsSectionMutation,
+        }),
+      ),
+    );
+
+    await userEvent.type(
+      canvas.getByRole("textbox", { name: "Log Directory" }),
+      "/root",
+    );
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await expect(
+      await canvas.findByText("Settings could not be saved"),
+    ).toBeInTheDocument();
+    await expect(
+      await canvas.findByText("scraping.removedSetting: Unrecognised setting"),
+    ).toBeInTheDocument();
+  },
+);
+
 export const WithIssues = meta.story({
   args: {
     issues: [
@@ -194,6 +246,27 @@ WithIssues.test(
   async ({ canvas }) => {
     await expect(
       await canvas.findByText("Too big: expected number to be <=10"),
+    ).toBeInTheDocument();
+  },
+);
+
+export const WithSectionIssues = meta.story({
+  args: {
+    issues: [
+      { path: "", message: "Stored settings are invalid" },
+      { path: "scraping.removedSetting", message: "Unrecognised setting" },
+    ],
+  },
+});
+
+WithSectionIssues.test(
+  "Shows stored issues that have no field before any submit",
+  async ({ canvas }) => {
+    await expect(
+      await canvas.findByText("Stored settings are invalid"),
+    ).toBeInTheDocument();
+    await expect(
+      await canvas.findByText("scraping.removedSetting: Unrecognised setting"),
     ).toBeInTheDocument();
   },
 );
@@ -256,6 +329,108 @@ WithCustomSecret.test(
         paths: ["apiKey"],
       }),
     );
+  },
+);
+
+WithCustomSecret.test(
+  "Shows the backend issue when a reset fails",
+  async ({ canvas, canvasElement, msw }) => {
+    msw.use(
+      api.mutation(RESET_SETTINGS_FIELDS, () =>
+        HttpResponse.json({
+          data: {
+            resetSettingsFields: {
+              __typename: "SettingsMutationResult",
+              success: false,
+              issues: [
+                {
+                  __typename: "SettingsIssue",
+                  path: "apiKey",
+                  message: "API Key has no default to reset to",
+                },
+              ],
+            },
+          } satisfies ResetSettingsFieldsMutation,
+        }),
+      ),
+    );
+
+    const body = within(canvasElement.ownerDocument.body);
+
+    await userEvent.click(canvas.getByRole("button", { name: "Reset" }));
+    await userEvent.click(
+      within(await body.findByRole("alertdialog")).getByRole("button", {
+        name: "Reset",
+      }),
+    );
+
+    await expect(
+      await canvas.findByText("apiKey: API Key has no default to reset to"),
+    ).toBeInTheDocument();
+  },
+);
+
+WithCustomSecret.test(
+  "Blanks the typed secret after saving",
+  async ({ canvas }) => {
+    const apiKey = canvas.getByLabelText("API Key");
+
+    await userEvent.type(apiKey, "new-api-key");
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(getLastSubmittedValues()).toStrictEqual({
+        url: "https://comet.example.com",
+        apiKey: "new-api-key",
+      }),
+    );
+    await waitFor(() => expect(apiKey).toHaveValue(""));
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
+  },
+);
+
+/** Re-renders the form with new stored values, as a revalidation of the page does. */
+function RevalidatingForm(props: SettingsSectionFormProps) {
+  const [values, setValues] = useState(props.values);
+
+  return (
+    <>
+      <SettingsSectionForm {...props} values={values} />
+      <button
+        type="button"
+        onClick={() => {
+          setValues({
+            scraping: { dubbedAnimeOnly: false, maximumFailedAttempts: 7 },
+            logging: { logDirectory: "./logs" },
+          });
+        }}
+      >
+        Revalidate
+      </button>
+    </>
+  );
+}
+
+export const WithRevalidation = meta.story({
+  render: (args) => <RevalidatingForm {...args} />,
+});
+
+WithRevalidation.test(
+  "Keeps unsaved edits when the stored values change",
+  async ({ canvas }) => {
+    const logDirectory = canvas.getByRole("textbox", { name: "Log Directory" });
+
+    await userEvent.clear(logDirectory);
+    await userEvent.type(logDirectory, "/var/log/riven");
+    await userEvent.click(canvas.getByRole("button", { name: "Revalidate" }));
+
+    await waitFor(() =>
+      expect(
+        canvas.getByRole("spinbutton", { name: "Maximum Failed Attempts" }),
+      ).toHaveValue(7),
+    );
+    await expect(logDirectory).toHaveValue("/var/log/riven");
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeEnabled();
   },
 );
 
