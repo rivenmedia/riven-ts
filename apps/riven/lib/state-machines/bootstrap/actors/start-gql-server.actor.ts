@@ -29,7 +29,7 @@ import type {
   mainRunnerMachine,
   MainRunnerMachineIntake,
 } from "#state-machines/main-runner/index.ts";
-import type { ValidPluginMap } from "#types/plugins.ts";
+import type { InstalledPlugin, ValidPluginMap } from "#types/plugins.ts";
 import type { MikroORM } from "@mikro-orm/core";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
@@ -41,6 +41,10 @@ export interface StartGQLServerInput {
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
   pluginSettings: PluginSettings;
   validPlugins: ValidPluginMap;
+  /** Every installed plugin, enabled or not. */
+  installedPlugins: InstalledPlugin[];
+  /** The raw plugin environment settings, keyed by package name. */
+  pluginEnvironment: ReadonlyMap<string, Readonly<Record<string, string>>>;
 }
 
 export interface StartGQLServerOutput {

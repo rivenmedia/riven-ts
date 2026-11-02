@@ -13,7 +13,7 @@ it.override("settings", () =>
   createMockPluginSettings(PlexSettings, {
     plexServerUrl: "http://localhost:32400",
     plexToken: "test-plex-token",
-    watchlistEnabled: "true",
+    watchlistEnabled: true,
   }),
 );
 

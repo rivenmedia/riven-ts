@@ -19,6 +19,7 @@ import type { ApolloServerContext } from "#graphql/context.ts";
 import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 import type { PluginRegistrarMachineOutput } from "#state-machines/plugin-registrar/index.ts";
 import type {
+  InstalledPlugin,
   InvalidPluginMap,
   PluginQueueMap,
   PluginWorkerMap,
@@ -48,6 +49,8 @@ export interface BootstrapMachineContext {
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
   pluginSettings: PluginSettings | null;
+  installedPlugins: InstalledPlugin[];
+  pluginEnvironment: PluginRegistrarMachineOutput["pluginEnvironment"];
   mockScenario: MockScenario | undefined;
   requiresAdminUserCreation: boolean;
 }
@@ -114,6 +117,8 @@ export const bootstrapMachine = setup({
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
       pluginSettings: (_, { pluginSettings }) => pluginSettings,
+      installedPlugins: (_, { installedPlugins }) => installedPlugins,
+      pluginEnvironment: (_, { pluginEnvironment }) => pluginEnvironment,
     }),
   },
   actors: {
@@ -150,6 +155,8 @@ export const bootstrapMachine = setup({
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
       pluginSettings: null,
+      installedPlugins: [],
+      pluginEnvironment: new Map(),
       mockScenario: input.mockScenario,
       requiresAdminUserCreation: false,
     }),
@@ -391,7 +398,14 @@ export const bootstrapMachine = setup({
         invoke: {
           id: "pluginRegistrarMachine",
           src: "pluginRegistrarMachine",
-          input: ({ context: { rootRef } }) => ({ rootRef }),
+          input: ({ context: { rootRef, services } }) => {
+            assert.ok(
+              services,
+              "Services not available when bootstrapping plugins. Ensure the database connection has been initialised first.",
+            );
+
+            return { rootRef, settingsService: services.settingsService };
+          },
           onDone: [
             {
               target: "Initialising services",
@@ -460,6 +474,8 @@ export const bootstrapMachine = setup({
                       mainRunnerRef,
                       validPlugins,
                       pluginSettings,
+                      installedPlugins,
+                      pluginEnvironment,
                     },
                   }) => {
                     assert.ok(
@@ -477,6 +493,8 @@ export const bootstrapMachine = setup({
                       mainRunnerRef,
                       pluginSettings,
                       validPlugins,
+                      installedPlugins,
+                      pluginEnvironment,
                     };
                   },
                   onDone: {

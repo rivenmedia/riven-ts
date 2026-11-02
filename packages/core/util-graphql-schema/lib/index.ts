@@ -1,8 +1,3 @@
-import {
-  CoreSettingsResolver,
-  RivenSettingsResolver,
-} from "@repo/feature-settings/resolver";
-
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
@@ -18,13 +13,15 @@ export const buildSchema = async (
 ) => {
   registerEnums();
 
+  const [firstResolver, ...otherResolvers] = options.resolvers ?? [];
+
+  if (!firstResolver) {
+    throw new Error("At least one resolver is required to build the schema.");
+  }
+
   return baseBuildSchema({
     ...options,
-    resolvers: [
-      CoreSettingsResolver,
-      RivenSettingsResolver,
-      ...(options.resolvers ?? []),
-    ],
+    resolvers: [firstResolver, ...otherResolvers],
     scalarsMap: [
       { type: BigInt, scalar: BigIntResolver },
       { type: Object, scalar: JSONObjectResolver },
