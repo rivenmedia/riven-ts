@@ -156,6 +156,14 @@ export class SettingsManager {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;
 
+    const issues = this.#findIgnoredStored(definition, stored, env, leaves);
+    const ignoredLeaves = new Set(
+      issues.map((issue) => findIssueLeaf(leaves, issue)),
+    );
+    const effectiveStored = Object.fromEntries(
+      Object.entries(stored).filter(([leaf]) => !ignoredLeaves.has(leaf)),
+    );
+
     const flatValues: Record<string, unknown> = {};
     const secretStates = new Map<string, SecretState>();
 
@@ -163,7 +171,10 @@ export class SettingsManager {
       const defaultValue = getLeafDefault(schema, leaf);
 
       if (isSecretLeaf(schema, leaf)) {
-        secretStates.set(leaf, getSecretState(leaf, stored, env, defaultValue));
+        secretStates.set(
+          leaf,
+          getSecretState(leaf, effectiveStored, env, defaultValue),
+        );
       } else if (leaf in env) {
         flatValues[leaf] = env[leaf];
       } else if (leaf in stored) {
@@ -183,7 +194,7 @@ export class SettingsManager {
         .entries()
         .map(([leaf, state]) => ({ path: toDottedPath(leaves, leaf), state }))
         .toArray(),
-      issues: this.#findIgnoredStored(definition, stored, env, leaves),
+      issues,
     };
   }
 

@@ -199,6 +199,29 @@ describe("getSection", () => {
     expect(jsonSchema.required).not.toContain("apiKey");
   });
 
+  it("does not report an ignored stored secret as custom", async ({
+    services,
+  }) => {
+    await services.settingsService.writeValues(FAKE_NAMESPACE, {
+      upsert: { apiKey: "", token: 123 },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    const view = await manager.getSection("fake");
+    const jsonSchema = view.jsonSchema as unknown as JsonSchemaNode;
+
+    expect(view.secretStates).toStrictEqual([
+      { path: "apiKey", state: "unset" },
+      { path: "token", state: "default" },
+    ]);
+    expect(jsonSchema.required).toContain("apiKey");
+    expect(view.issues.map(({ path }) => path)).toStrictEqual(
+      expect.arrayContaining(["apiKey", "token"]),
+    );
+  });
+
   it("locks env-set fields and keeps env values private", async ({
     services,
   }) => {
