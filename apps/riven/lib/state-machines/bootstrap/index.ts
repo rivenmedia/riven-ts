@@ -30,7 +30,6 @@ import type {
 import type { ApolloServer } from "@apollo/server";
 import type { MikroORM } from "@mikro-orm/core";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 import type { AnyActorRef } from "xstate";
 
@@ -48,7 +47,6 @@ export interface BootstrapMachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
-  pluginSettings: PluginSettings | null;
   installedPlugins: InstalledPlugin[];
   pluginEnvironment: PluginRegistrarMachineOutput["pluginEnvironment"];
   mockScenario: MockScenario | undefined;
@@ -116,7 +114,6 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { pluginSettings }) => pluginSettings,
       installedPlugins: (_, { installedPlugins }) => installedPlugins,
       pluginEnvironment: (_, { pluginEnvironment }) => pluginEnvironment,
     }),
@@ -154,7 +151,6 @@ export const bootstrapMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
-      pluginSettings: null,
       installedPlugins: [],
       pluginEnvironment: new Map(),
       mockScenario: input.mockScenario,
@@ -490,16 +486,10 @@ export const bootstrapMachine = setup({
                       orm,
                       mainRunnerRef,
                       validPlugins,
-                      pluginSettings,
                       installedPlugins,
                       pluginEnvironment,
                     },
                   }) => {
-                    assert.ok(
-                      pluginSettings,
-                      "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                    );
-
                     assert.ok(
                       orm,
                       "ORM not available when starting GraphQL server. Ensure the connection has been initialised first.",
@@ -508,7 +498,6 @@ export const bootstrapMachine = setup({
                     return {
                       orm,
                       mainRunnerRef,
-                      pluginSettings,
                       validPlugins,
                       installedPlugins,
                       pluginEnvironment,

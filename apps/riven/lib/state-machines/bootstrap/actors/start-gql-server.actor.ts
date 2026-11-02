@@ -35,14 +35,12 @@ import type {
 import type { InstalledPlugin, ValidPluginMap } from "#types/plugins.ts";
 import type { MikroORM } from "@mikro-orm/core";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type { RequestHandler } from "express";
 import type { ActorRefFromLogic } from "xstate";
 
 export interface StartGQLServerInput {
   orm: MikroORM;
   mainRunnerRef: ActorRefFromLogic<typeof mainRunnerMachine>;
-  pluginSettings: PluginSettings;
   validPlugins: ValidPluginMap;
   /** Every installed plugin, enabled or not. */
   installedPlugins: InstalledPlugin[];
