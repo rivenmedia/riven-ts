@@ -220,6 +220,33 @@ LockedText.test(
   },
 );
 
+export const TextWithError = meta.story({
+  args: {
+    type: "text",
+    config: { label: "Log Directory", name: "logging.logDirectory" },
+  },
+  decorators: [
+    createFormDecorator({
+      progressive: true,
+      defaultValues: { logging: { logDirectory: "/root" } },
+      errors: {
+        logging: {
+          logDirectory: {
+            type: "validate",
+            message: "Directory is not writable",
+          },
+        },
+      },
+    }),
+  ],
+});
+
+TextWithError.test("Shows the field's validation error", async ({ canvas }) => {
+  await expect(canvas.getByRole("alert")).toHaveTextContent(
+    "Directory is not writable",
+  );
+});
+
 export const NumberField = meta.story({
   name: "Number",
   args: {

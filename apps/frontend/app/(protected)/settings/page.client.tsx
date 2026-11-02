@@ -1,18 +1,15 @@
-import { Suspense } from "react";
-
 import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
-import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 
 import { DangerZone } from "./_components/danger-zone/danger-zone";
-import { SettingsGroup } from "./_components/settings-group/settings-group";
+import { SettingsSection } from "./_components/settings-section/settings-section";
 
 /** Settings route with General, Plugins and Ranking tabs. */
 export function SettingsPage() {
@@ -32,11 +29,7 @@ export function SettingsPage() {
             <TabsTrigger value="ranking">Ranking</TabsTrigger>
           </TabsList>
           <TabsContent value="general">
-            <ErrorFallback message="Failed to load settings">
-              <Suspense fallback={<div>Loading...</div>}>
-                <SettingsGroup name="General" />
-              </Suspense>
-            </ErrorFallback>
+            <SettingsSection id="general" />
             <div className="mt-8">
               <DangerZone />
             </div>
