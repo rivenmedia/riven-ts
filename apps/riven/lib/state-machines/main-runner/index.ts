@@ -34,6 +34,7 @@ import { createFlowWorker } from "#message-queue/utilities/create-flow-worker.ts
 import { normaliseConcurrency } from "#message-queue/utilities/normalise-concurrency.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
 import { logger } from "#utilities/logger/logger.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 import { settings } from "#utilities/settings.ts";
 
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
@@ -303,7 +304,8 @@ export const mainRunnerMachine = setup({
                   settings: {
                     backoffStrategy: (attemptsMade) => {
                       const [after2, after5, after10] =
-                        settings.scrapeCooldownHours;
+                        getRuntimeSettings().general.scraping
+                          .scrapeCooldownHours;
 
                       if (attemptsMade >= 10) {
                         return Duration.fromObject({ hours: after10 }).as(

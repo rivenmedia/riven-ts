@@ -1,8 +1,8 @@
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
+import { overrideRuntimeSettings } from "#__tests__/utilities/override-runtime-settings.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import * as settingsModule from "#utilities/settings.ts";
 
 import { validateTorrentFiles } from "../utilities/validate-torrent-files.ts";
 import {
@@ -20,10 +20,13 @@ function mockBitrateSettings({
   minimum,
   maximum,
 }: Pick<BitrateCase, "minimum" | "maximum">) {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    minimumAverageBitrateMovies: minimum,
-    maximumAverageBitrateMovies: maximum,
+  overrideRuntimeSettings({
+    general: {
+      scraping: {
+        minimumAverageBitrateMovies: minimum,
+        maximumAverageBitrateMovies: maximum,
+      },
+    },
   });
 }
 

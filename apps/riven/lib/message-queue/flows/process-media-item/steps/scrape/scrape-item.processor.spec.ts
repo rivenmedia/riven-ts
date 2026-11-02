@@ -7,8 +7,7 @@ import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import * as settingsModule from "#utilities/settings.ts";
-import { settings } from "#utilities/settings.ts";
+import { overrideRuntimeSettings } from "#__tests__/utilities/override-runtime-settings.ts";
 
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
@@ -108,9 +107,8 @@ it("throws an UnrecoverableError if the item exceeds the maximum failed attempts
   seeders: { seedIndexedMovie },
   services,
 }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settings,
-    maximumFailedAttempts: 1,
+  overrideRuntimeSettings({
+    general: { scraping: { maximumFailedAttempts: 1 } },
   });
 
   const indexedMovie = await seedIndexedMovie();

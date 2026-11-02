@@ -7,7 +7,7 @@ import { services } from "#database/database.ts";
 import { enqueueProcessItemRequest } from "#message-queue/flows/process-item-request/enqueue-process-item-request.ts";
 import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import type { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
@@ -22,11 +22,11 @@ export const scheduleReindex = fromPromise<undefined, ScheduleReindexInput>(
 
     if (!isReleaseDateKnown) {
       logger.verbose(
-        `No known release date for "${chalk(item.fullTitle)}". Using fallback of ${settings.unknownAirDateOffsetDays.toString()} days.`,
+        `No known release date for "${chalk(item.fullTitle)}". Using fallback of ${getRuntimeSettings().general.scheduling.unknownAirDateOffsetDays.toString()} days.`,
       );
     } else if (isReleaseDateInPast) {
       logger.verbose(
-        `Release date for "${chalk(item.fullTitle)}" is in the past. Will attempt to reindex in ${settings.scheduleOffsetMinutes.toString()} minutes.`,
+        `Release date for "${chalk(item.fullTitle)}" is in the past. Will attempt to reindex in ${getRuntimeSettings().general.scheduling.scheduleOffsetMinutes.toString()} minutes.`,
       );
     }
 

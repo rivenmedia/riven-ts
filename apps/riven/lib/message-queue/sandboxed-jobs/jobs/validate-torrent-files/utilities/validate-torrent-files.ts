@@ -7,7 +7,7 @@ import assert, { AssertionError } from "node:assert";
 import { client } from "#graphql/apollo-client.ts";
 import { MatchedFile } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import type { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import type {
@@ -131,6 +131,7 @@ function getValidMovieFiles(
   groupMap: Map<string, TorrentFile>,
   isCacheCheck: boolean,
 ): MatchedFile[] {
+  const { scraping } = getRuntimeSettings().general;
   const files = groupMap
     .values()
     .toArray()
@@ -144,24 +145,24 @@ function getValidMovieFiles(
 
       if (
         item.runtime &&
-        (settings.minimumAverageBitrateMovies ||
-          settings.maximumAverageBitrateMovies)
+        (scraping.minimumAverageBitrateMovies ||
+          scraping.maximumAverageBitrateMovies)
       ) {
         const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
-        if (settings.minimumAverageBitrateMovies) {
+        if (scraping.minimumAverageBitrateMovies) {
           // TODO: If this assertion fails, we can probably skip checking all other files.
           // Average bitrate is proportional to the file size, and the files are ordered by size.
           assert.ok(
-            bitrate >= settings.minimumAverageBitrateMovies,
-            `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
+            bitrate >= scraping.minimumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${scraping.minimumAverageBitrateMovies.toString()} for movies`,
           );
         }
 
-        if (settings.maximumAverageBitrateMovies) {
+        if (scraping.maximumAverageBitrateMovies) {
           assert.ok(
-            bitrate <= settings.maximumAverageBitrateMovies,
-            `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateMovies.toString()} for movies`,
+            bitrate <= scraping.maximumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${scraping.maximumAverageBitrateMovies.toString()} for movies`,
           );
         }
       }
@@ -206,6 +207,7 @@ async function getMatchedEpisodeId(
   item: ShowLikeValidateTorrentFilesItem,
   file: TorrentFile,
 ) {
+  const { scraping } = getRuntimeSettings().general;
   const parseData = parseFilePath(file.path);
 
   assert.ok(
@@ -251,22 +253,22 @@ async function getMatchedEpisodeId(
 
   if (
     episode.runtime &&
-    (settings.minimumAverageBitrateEpisodes ||
-      settings.maximumAverageBitrateEpisodes)
+    (scraping.minimumAverageBitrateEpisodes ||
+      scraping.maximumAverageBitrateEpisodes)
   ) {
     const bitrate = calculateAverageBitrate(file.size, episode.runtime);
 
-    if (settings.minimumAverageBitrateEpisodes) {
+    if (scraping.minimumAverageBitrateEpisodes) {
       assert.ok(
-        bitrate >= settings.minimumAverageBitrateEpisodes,
-        `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+        bitrate >= scraping.minimumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${scraping.minimumAverageBitrateEpisodes.toString()} for episodes`,
       );
     }
 
-    if (settings.maximumAverageBitrateEpisodes) {
+    if (scraping.maximumAverageBitrateEpisodes) {
       assert.ok(
-        bitrate <= settings.maximumAverageBitrateEpisodes,
-        `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${settings.maximumAverageBitrateEpisodes.toString()} for episodes`,
+        bitrate <= scraping.maximumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${scraping.maximumAverageBitrateEpisodes.toString()} for episodes`,
       );
     }
   }

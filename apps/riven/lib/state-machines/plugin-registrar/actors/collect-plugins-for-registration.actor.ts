@@ -8,6 +8,7 @@ import z from "zod";
 
 import { CorePlugins } from "#schemas/core-plugins.schema.ts";
 import { logger } from "#utilities/logger/logger.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 import { settings } from "#utilities/settings.ts";
 
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
@@ -69,7 +70,9 @@ export const collectPluginsForRegistration = fromPromise(async () => {
 
     if (
       !permanentlyEnabledPlugins.has(validatedPluginName.data) &&
-      !settings.enabledPlugins.includes(validatedPluginName.data)
+      !getRuntimeSettings().plugins.enabledPlugins.includes(
+        validatedPluginName.data,
+      )
     ) {
       logger.info(
         `Plugin ${chalk.bold(pluginName)} is not enabled, skipping registration.`,

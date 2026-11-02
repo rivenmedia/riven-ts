@@ -4,13 +4,14 @@ import { assign, setup } from "xstate";
 
 import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
-import { settings } from "#utilities/settings.ts";
+import { coreEnvironment, settings } from "#utilities/settings.ts";
 
 import { applyMockScenario } from "./actors/apply-mock-scenario.actor.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
 import { createAdminUser } from "./actors/create-admin-user.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
+import { loadRuntimeSettings } from "./actors/load-runtime-settings.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { Services } from "#database/database.ts";
@@ -74,6 +75,7 @@ export const bootstrapMachine = setup({
     children: {} as {
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      loadRuntimeSettings: "loadRuntimeSettings";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
@@ -120,6 +122,7 @@ export const bootstrapMachine = setup({
     createAdminUser,
     initialiseDatabaseConnection,
     initialiseVfs,
+    loadRuntimeSettings,
     pluginRegistrarMachine,
     startGqlServer,
   },
@@ -253,7 +256,7 @@ export const bootstrapMachine = setup({
               },
             },
             {
-              target: "Bootstrapping plugins",
+              target: "Loading runtime settings",
             },
           ],
           onError: {
@@ -296,7 +299,7 @@ export const bootstrapMachine = setup({
             return { mockScenario };
           },
           onDone: {
-            target: "Bootstrapping plugins",
+            target: "Loading runtime settings",
             actions: {
               type: "log",
               params: ({ context: { mockScenario } }) => {
@@ -315,6 +318,55 @@ export const bootstrapMachine = setup({
                 type: "log",
                 params: ({ event: { error } }) => ({
                   message: "Failed to apply mock scenario during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Loading runtime settings": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Loading runtime settings...",
+          },
+        },
+        invoke: {
+          id: "loadRuntimeSettings",
+          src: "loadRuntimeSettings",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when loading runtime settings. Ensure the database connection has been initialised first.",
+            );
+
+            return {
+              settingsService: services.settingsService,
+              environment: coreEnvironment,
+            };
+          },
+          onDone: {
+            target: "Bootstrapping plugins",
+            actions: {
+              type: "log",
+              params: {
+                message: "Runtime settings loaded.",
+              },
+            },
+          },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to load runtime settings during bootstrap.",
                   level: "error",
                   error,
                 }),

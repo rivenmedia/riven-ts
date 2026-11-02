@@ -14,7 +14,7 @@ import {
 
 import { services } from "#database/database.ts";
 import { BaseService } from "#database/services/core/base-service.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { resetMediaItem } from "./utilities/reset-media-item.ts";
 
@@ -30,13 +30,13 @@ interface EpisodePosition {
 }
 
 export class MediaItemService extends BaseService {
-  readonly #rootItemTypes = new Set<MediaItemType>([
-    "movie",
-    settings.preferSeasonPacks ? "season" : "show",
-  ]);
-
   public get rootItemTypes() {
-    return new Set(this.#rootItemTypes);
+    return new Set<MediaItemType>([
+      "movie",
+      getRuntimeSettings().general.scraping.preferSeasonPacks
+        ? "season"
+        : "show",
+    ]);
   }
 
   #shouldFanOut(item: MediaItem) {
@@ -62,7 +62,7 @@ export class MediaItemService extends BaseService {
       return true;
     }
 
-    return settings.preferSeasonPacks;
+    return getRuntimeSettings().general.scraping.preferSeasonPacks;
   }
 
   @EnsureRequestContext()
