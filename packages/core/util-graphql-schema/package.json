@@ -24,6 +24,7 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "graphql": "catalog:",
     "graphql-scalars": "catalog:",
+    "reflect-metadata": "catalog:",
     "type-graphql": "catalog:"
   },
   "devDependencies": {

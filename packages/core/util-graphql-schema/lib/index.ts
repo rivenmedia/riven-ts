@@ -1,6 +1,7 @@
 import { BigIntResolver, JSONObjectResolver } from "graphql-scalars";
 import { buildSchema as baseBuildSchema } from "type-graphql";
 
+import { LogLevelAnchor } from "./log-level-anchor.type.ts";
 import { registerEnums } from "./register-enums.ts";
 
 import type { BuildSchemaOptions } from "type-graphql";
@@ -22,6 +23,7 @@ export const buildSchema = async (
   return baseBuildSchema({
     ...options,
     resolvers: [firstResolver, ...otherResolvers],
+    orphanedTypes: [...(options.orphanedTypes ?? []), LogLevelAnchor],
     scalarsMap: [
       { type: BigInt, scalar: BigIntResolver },
       { type: Object, scalar: JSONObjectResolver },
