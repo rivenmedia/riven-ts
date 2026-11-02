@@ -111,4 +111,35 @@ describe("settingsService", () => {
     expect(grouped.get("ns-g")).toStrictEqual({ a: 2 });
     expect(grouped.get("ns-empty") ?? {}).toStrictEqual({});
   });
+
+  it("refreshes updatedAt when an existing value is overwritten", async ({
+    services,
+    em,
+  }) => {
+    await services.settingsService.writeValues("ns-h", {
+      upsert: { a: 1 },
+      delete: [],
+    });
+
+    const readUpdatedAt = async () => {
+      const rows = await em
+        .getConnection()
+        .execute<{ updated_at: Date }[]>(
+          `select updated_at from setting where namespace = 'ns-h' and key = 'a'`,
+        );
+
+      return new Date(rows[0]?.updated_at ?? 0).getTime();
+    };
+
+    const first = await readUpdatedAt();
+
+    await new Promise((resolve) => setTimeout(resolve, 20));
+
+    await services.settingsService.writeValues("ns-h", {
+      upsert: { a: 2 },
+      delete: [],
+    });
+
+    expect(await readUpdatedAt()).toBeGreaterThan(first);
+  });
 });

@@ -11,6 +11,7 @@ export class Setting {
   @Property({ primary: true })
   public namespace!: string;
 
+  // Row existence (not a non-null value) means "overridden"; null is an explicit null.
   @Property({ type: "jsonb", nullable: true })
   public value!: unknown;
 
