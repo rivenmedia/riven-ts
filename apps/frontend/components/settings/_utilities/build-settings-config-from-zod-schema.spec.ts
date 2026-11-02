@@ -731,6 +731,115 @@ describe(buildSettingsConfigFromZodSchema, () => {
     });
   });
 
+  describe("tuple schemas", () => {
+    it("builds a tuple field with an item field per element", () => {
+      const schema = z
+        .tuple([z.int(), z.string(), z.int()])
+        .meta({ title: "T" });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "t",
+            {
+              type: "tuple",
+              config: {
+                label: "T",
+                name: "t",
+                itemFields: [
+                  {
+                    type: "number",
+                    config: {
+                      label: "T 1",
+                      name: "t.0",
+                      registerOptions: {
+                        required: true,
+                        max: Number.MAX_SAFE_INTEGER,
+                        min: Number.MIN_SAFE_INTEGER,
+                        valueAsNumber: true,
+                      },
+                      step: 1,
+                    },
+                  },
+                  {
+                    type: "text",
+                    config: {
+                      label: "T 2",
+                      name: "t.1",
+                      registerOptions: { required: true },
+                    },
+                  },
+                  {
+                    type: "number",
+                    config: {
+                      label: "T 3",
+                      name: "t.2",
+                      registerOptions: {
+                        required: true,
+                        max: Number.MAX_SAFE_INTEGER,
+                        min: Number.MIN_SAFE_INTEGER,
+                        valueAsNumber: true,
+                      },
+                      step: 1,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it("carries element constraints over to the item fields", () => {
+      const schema = z.tuple([z.int().min(1).max(5)]);
+
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+      const [tuple] = field.values();
+
+      expect(tuple).toMatchObject({
+        type: "tuple",
+        config: {
+          itemFields: [{ config: { registerOptions: { min: 1, max: 5 } } }],
+        },
+      });
+    });
+
+    it("marks defaulted elements as not required", () => {
+      const schema = z.tuple([z.int().default(2)]);
+
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+      const [tuple] = field.values();
+
+      expect(tuple).toMatchObject({
+        config: {
+          itemFields: [{ config: { registerOptions: { required: false } } }],
+        },
+      });
+    });
+
+    it("uses an element's title as its item label", () => {
+      const schema = z.tuple([z.int().meta({ title: "After 2 attempts" })]);
+
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+      const [tuple] = field.values();
+
+      expect(tuple).toMatchObject({
+        config: { itemFields: [{ config: { label: "After 2 attempts" } }] },
+      });
+    });
+
+    it("throws for tuples with a rest element", () => {
+      const schema = z.tuple([z.int()]).rest(z.int());
+
+      expect(() => buildSettingsConfigFromZodSchema(schema, "t")).toThrow(
+        /Unsupported tuple rest element/u,
+      );
+    });
+  });
+
   describe("default schemas", () => {
     it("unwraps the inner type correctly", () => {
       const schema = z
