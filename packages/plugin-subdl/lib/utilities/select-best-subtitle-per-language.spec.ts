@@ -55,3 +55,26 @@ it("normalizes correctly spelled Brazilian Portuguese variants too", () => {
 
   expect([...selected.keys()]).toStrictEqual(["pt-BR"]);
 });
+
+it.each([
+  ["brasilian portuguese", "pt-BR"],
+  ["Brazilian_Portuguese", "pt-BR"],
+  ["Brazilian   Portuguese", "pt-BR"],
+  ["Portuguese", "portuguese"],
+  ["Australian Portuguese", "australian portuguese"],
+  ["Brazilian Esperanto", "brazilian esperanto"],
+])("maps language %s to %s", (language, expectedLanguage) => {
+  const selected = selectBestSubtitlePerLanguage(
+    [
+      {
+        release_name: "Release A",
+        name: "Subtitle A",
+        lang: language,
+        url: "/subtitle-a.zip",
+      },
+    ],
+    metadata,
+  );
+
+  expect([...selected.keys()]).toStrictEqual([expectedLanguage]);
+});
