@@ -1,4 +1,5 @@
-import { expect, userEvent, within } from "storybook/test";
+import { FormProvider, useForm } from "react-hook-form";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
 import { preview } from "#.storybook/preview.tsx";
@@ -468,3 +469,101 @@ export const SettingGroup = meta.story({
     }),
   ],
 });
+
+const onTupleSubmit = fn();
+
+export const Tuple = meta.story({
+  args: {
+    type: "tuple",
+    config: {
+      label: "Retry Schedule",
+      name: "tuple",
+      description: "Hours to wait before each retry",
+      itemFields: [
+        {
+          type: "number",
+          config: {
+            label: "After 2 attempts",
+            name: "tuple.0",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+        {
+          type: "number",
+          config: {
+            label: "After 5 attempts",
+            name: "tuple.1",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+        {
+          type: "number",
+          config: {
+            label: "After 10 attempts",
+            name: "tuple.2",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+      ],
+    },
+  },
+  decorators: [
+    (Story) => {
+      const form = useForm({
+        defaultValues: { tuple: [2, 6, 24] },
+        progressive: true,
+      });
+
+      return (
+        <FormProvider {...form}>
+          <form
+            onSubmit={(event) => void form.handleSubmit(onTupleSubmit)(event)}
+          >
+            <Story />
+            <button type="submit">Save</button>
+          </form>
+        </FormProvider>
+      );
+    },
+  ],
+  beforeEach: () => {
+    onTupleSubmit.mockClear();
+  },
+});
+
+Tuple.test(
+  "Editing one item submits the full tuple as numbers",
+  async ({ canvas }) => {
+    const input = canvas.getByRole("spinbutton", {
+      name: /after 5 attempts/iu,
+    });
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "7");
+    await userEvent.click(canvas.getByRole("button", { name: /save/iu }));
+
+    await expect(onTupleSubmit).toHaveBeenCalledWith(
+      { tuple: [2, 7, 24] },
+      expect.anything(),
+    );
+  },
+);
+
+Tuple.test(
+  "An invalid item is flagged without affecting the others",
+  async ({ canvas }) => {
+    const inputs = canvas.getAllByRole("spinbutton");
+    const [first, second, third] = inputs;
+
+    expect.assert(first && second && third);
+
+    await userEvent.clear(second);
+    await userEvent.type(second, "-1");
+    await userEvent.click(canvas.getByRole("button", { name: /save/iu }));
+
+    await expect(second).toBeInvalid();
+    await expect(first).toBeValid();
+    await expect(third).toBeValid();
+    await expect(onTupleSubmit).not.toHaveBeenCalled();
+  },
+);
