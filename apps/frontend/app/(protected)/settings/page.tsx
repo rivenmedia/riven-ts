@@ -24,5 +24,5 @@ export default async function SettingsPage() {
     unauthorized();
   }
 
-  return <SettingsPageClient canManageSettings />;
+  return <SettingsPageClient />;
 }

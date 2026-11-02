@@ -6,6 +6,8 @@ export const resetLibrary = permissionActionClient
       library: ["reset"],
     },
   })
-  .action(() => {
+  // oxlint-disable-next-line typescript/require-await
+  .action(async () => {
+    // oxlint-disable-next-line no-console
     console.log("Resetting library...");
   });

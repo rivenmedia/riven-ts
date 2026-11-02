@@ -14,12 +14,8 @@ import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 import { DangerZone } from "./_components/danger-zone/danger-zone";
 import { SettingsGroup } from "./_components/settings-group/settings-group";
 
-interface SettingsPageProps {
-  canManageSettings: boolean;
-}
-
 /** Settings route with General, Plugins and Ranking tabs. */
-export function SettingsPage({ canManageSettings }: SettingsPageProps) {
+export function SettingsPage() {
   return (
     <PageShell>
       <div className="mx-auto w-full max-w-5xl">
@@ -41,11 +37,9 @@ export function SettingsPage({ canManageSettings }: SettingsPageProps) {
                 <SettingsGroup name="General" />
               </Suspense>
             </ErrorFallback>
-            {canManageSettings && (
-              <div className="mt-8">
-                <DangerZone />
-              </div>
-            )}
+            <div className="mt-8">
+              <DangerZone />
+            </div>
           </TabsContent>
           <TabsContent value="plugins">
             <PluginsTab
