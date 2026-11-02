@@ -1,8 +1,16 @@
 import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
+import { Setting } from "#database/entities/setting.entity.ts";
 
 describe("settingsService", () => {
+  it("keys settings by namespace first", ({ orm }) => {
+    expect(orm.getMetadata().get(Setting).primaryKeys).toStrictEqual([
+      "namespace",
+      "key",
+    ]);
+  });
+
   it("stores and returns upserted values", async ({ services }) => {
     await services.settingsService.writeValues("ns-a", {
       upsert: { a: 1 },

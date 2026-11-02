@@ -3,7 +3,7 @@ import { Migration } from "@mikro-orm/migrations";
 export class Migration20261102182208 extends Migration {
   override up(): void | Promise<void> {
     this.addSql(
-      `create table "setting" ("key" text not null, "namespace" text not null, "value" jsonb null, "updated_at" timestamptz not null, primary key ("key", "namespace"));`,
+      `create table "setting" ("namespace" text not null, "key" text not null, "value" jsonb null, "updated_at" timestamptz not null, primary key ("namespace", "key"));`,
     );
   }
 

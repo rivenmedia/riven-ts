@@ -2824,8 +2824,8 @@
       "name": "setting",
       "schema": "public",
       "columns": {
-        "key": {
-          "name": "key",
+        "namespace": {
+          "name": "namespace",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -2841,8 +2841,8 @@
           "enumItems": [],
           "mappedType": "text"
         },
-        "namespace": {
-          "name": "namespace",
+        "key": {
+          "name": "key",
           "type": "text",
           "unsigned": false,
           "autoincrement": false,
@@ -2895,7 +2895,7 @@
       },
       "indexes": [
         {
-          "columnNames": ["key", "namespace"],
+          "columnNames": ["namespace", "key"],
           "composite": true,
           "constraint": true,
           "keyName": "setting_pkey",

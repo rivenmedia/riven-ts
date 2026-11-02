@@ -3,13 +3,13 @@ import { Entity, Property } from "@mikro-orm/decorators/legacy";
 
 @Entity()
 export class Setting {
-  public [PrimaryKeyProp]?: ["key", "namespace"];
-
-  @Property({ primary: true })
-  public key!: string;
+  public [PrimaryKeyProp]?: ["namespace", "key"];
 
   @Property({ primary: true })
   public namespace!: string;
+
+  @Property({ primary: true })
+  public key!: string;
 
   // Row existence (not a non-null value) means "overridden"; null is an explicit null.
   @Property({ type: "jsonb", nullable: true })
