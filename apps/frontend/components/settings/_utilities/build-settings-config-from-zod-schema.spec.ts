@@ -135,6 +135,66 @@ describe(buildSettingsConfigFromZodSchema, () => {
         ]),
       );
     });
+
+    it("unwraps default schemas correctly", () => {
+      const schema = z.number().default(1).meta({
+        title: "Number Field",
+        description: "A number field with a default",
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "numberField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "numberField",
+            {
+              type: "number",
+              config: {
+                label: "Number Field",
+                description: "A number field with a default",
+                name: "numberField",
+                registerOptions: {
+                  required: false,
+                  valueAsNumber: true,
+                },
+                step: 0.01,
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it("keeps metadata applied to an optional wrapper", () => {
+      const schema = z.number().optional().meta({
+        title: "Number Field",
+        description: "An optional number field",
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "numberField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "numberField",
+            {
+              type: "number",
+              config: {
+                label: "Number Field",
+                description: "An optional number field",
+                name: "numberField",
+                registerOptions: {
+                  required: false,
+                  valueAsNumber: true,
+                },
+                step: 0.01,
+              },
+            },
+          ],
+        ]),
+      );
+    });
   });
 
   describe("boolean schemas", () => {
@@ -675,7 +735,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
     it("unwraps the inner type correctly", () => {
       const schema = z
         .string()
-        .meta({ title: "Default String Field" })
+        .meta({
+          title: "Default String Field",
+          description: "A default string field",
+        })
         .default("default value");
 
       const field = buildSettingsConfigFromZodSchema(
@@ -691,8 +754,39 @@ describe(buildSettingsConfigFromZodSchema, () => {
               type: "text",
               config: {
                 label: "Default String Field",
+                description: "A default string field",
                 name: "defaultStringField",
-                registerOptions: { required: true },
+                registerOptions: { required: false },
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it("keeps metadata applied to the wrapper", () => {
+      const schema = z.number().default(10).meta({
+        title: "Number Field",
+        description: "An optional number field",
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "numberField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "numberField",
+            {
+              type: "number",
+              config: {
+                label: "Number Field",
+                description: "An optional number field",
+                name: "numberField",
+                registerOptions: {
+                  required: false,
+                  valueAsNumber: true,
+                },
+                step: 0.01,
               },
             },
           ],
