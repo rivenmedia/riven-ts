@@ -12,7 +12,7 @@ import { PluginsTab } from "#components/settings/plugins-tab/plugins-tab.tsx";
 import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
 
 import { DangerZone } from "./_components/danger-zone/danger-zone";
-import { GeneralTab } from "./_components/general-tab/general-tab";
+import { SettingsGroup } from "./_components/settings-group/settings-group";
 
 interface SettingsPageProps {
   canManageSettings: boolean;
@@ -38,7 +38,7 @@ export function SettingsPage({ canManageSettings }: SettingsPageProps) {
           <TabsContent value="general">
             <ErrorFallback message="Failed to load settings">
               <Suspense fallback={<div>Loading...</div>}>
-                <GeneralTab />
+                <SettingsGroup name="General" />
               </Suspense>
             </ErrorFallback>
             {canManageSettings && (
