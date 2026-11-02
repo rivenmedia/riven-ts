@@ -62,6 +62,11 @@
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
+    "./utilities/settings": {
+      "types": "./dist/utilities/settings/index.d.ts",
+      "production": "./dist/utilities/settings/index.js",
+      "default": "./lib/utilities/settings/index.ts"
+    },
     "./utilities/*": {
       "types": "./dist/utilities/*.d.ts",
       "production": "./dist/utilities/*.js",
