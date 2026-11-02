@@ -73,6 +73,18 @@ describe("leaf helpers", () => {
     expect(getLeafDefault(schema, "limit")).toBeUndefined();
   });
 
+  it("returns the input default of a transformed leaf", () => {
+    const transformed = z.object({
+      attempts: z
+        .int()
+        .default(10)
+        .transform((value) => value * 2)
+        .describe("Attempts"),
+    });
+
+    expect(getLeafDefault(transformed, "attempts")).toBe(10);
+  });
+
   it("returns the leaf schema", () => {
     expect(getLeafSchema(schema, "limit")).toBeInstanceOf(z.ZodString);
   });

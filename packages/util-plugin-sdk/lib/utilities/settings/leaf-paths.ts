@@ -88,8 +88,15 @@ export function getLeafSchema(schema: z.ZodObject, leaf: string): z.ZodType {
   return found;
 }
 
+/**
+ * Returns the leaf's schema default, in input shape (a transform's input side is used).
+ */
 export function getLeafDefault(schema: z.ZodObject, leaf: string): unknown {
-  const field = getLeafSchema(schema, leaf);
+  let field = getLeafSchema(schema, leaf);
+
+  while (field instanceof z.ZodPipe) {
+    field = field.in as z.ZodType;
+  }
 
   return field instanceof z.ZodDefault ? field.def.defaultValue : undefined;
 }
