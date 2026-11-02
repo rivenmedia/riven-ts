@@ -71,6 +71,23 @@ describe(buildSectionJsonSchema, () => {
     },
   );
 
+  it("removes the default of a secret wrapped in a transform", () => {
+    const transformed = z.object({
+      token: z
+        .string()
+        .default("secret-default")
+        .meta({ secret: true })
+        .transform((value) => value.trim()),
+    });
+
+    const jsonSchema = buildSectionJsonSchema(
+      transformed,
+      new Map([["token", "default"]]),
+    );
+
+    expect(JSON.stringify(jsonSchema)).not.toContain("secret-default");
+  });
+
   it("keeps non-secret required fields", () => {
     const jsonSchema = build({
       apiKey: "custom",

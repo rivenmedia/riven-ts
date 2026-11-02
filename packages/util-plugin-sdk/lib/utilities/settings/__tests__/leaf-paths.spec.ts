@@ -102,4 +102,37 @@ describe("leaf helpers", () => {
     expect(isSecretLeaf(custom, "wrapped")).toBe(true);
     expect(isSecretLeaf(custom, "plain")).toBe(false);
   });
+
+  const secret = z.string().default("secret-default").meta({ secret: true });
+
+  it.for<[string, z.ZodType]>([
+    ["default", z.string().meta({ secret: true }).default("secret-default")],
+    ["transform", secret.transform((value) => value.trim())],
+    ["pipe (output side)", z.string().pipe(z.string().meta({ secret: true }))],
+    ["readonly", secret.readonly()],
+    ["catch", secret.catch("fallback")],
+    ["prefault", z.string().meta({ secret: true }).prefault("secret-default")],
+    ["optional().nonoptional()", secret.optional().nonoptional()],
+    ["lazy", z.lazy(() => secret)],
+    ["lazy inside optional", z.lazy(() => secret).optional()],
+  ])("detects a secret leaf through %s", ([, field]) => {
+    expect(isSecretLeaf(z.object({ field }), "field")).toBe(true);
+  });
+
+  it("does not loop on a self-referencing lazy leaf", () => {
+    const cyclic: z.ZodType = z.lazy(() => cyclic.optional());
+
+    expect(isSecretLeaf(z.object({ cyclic }), "cyclic")).toBe(false);
+  });
+
+  it.for<[string, z.ZodType]>([
+    ["readonly", z.int().default(7).readonly()],
+    ["catch", z.int().default(7).catch(0)],
+    ["prefault", z.int().prefault(7)],
+    ["optional().nonoptional()", z.int().default(7).optional().nonoptional()],
+    ["lazy", z.lazy(() => z.int().default(7))],
+    ["pipe input", z.int().default(7).pipe(z.int())],
+  ])("returns the default through %s", ([, field]) => {
+    expect(getLeafDefault(z.object({ field }), "field")).toBe(7);
+  });
 });

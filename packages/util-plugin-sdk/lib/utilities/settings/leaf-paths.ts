@@ -6,16 +6,48 @@ function isDisplayGroup(schema: z.ZodType): schema is z.ZodObject {
   return schema instanceof z.ZodObject;
 }
 
-function unwrapOnce(schema: z.ZodType): z.ZodType | undefined {
-  if (
-    schema instanceof z.ZodDefault ||
-    schema instanceof z.ZodOptional ||
-    schema instanceof z.ZodNullable
-  ) {
-    return schema.unwrap() as z.ZodType;
+/**
+ * Returns the schemas a wrapper delegates to: the inner type of wrappers such as
+ * `.optional()`, `.default()`, `.readonly()` or `.catch()`, both sides of a pipe
+ * (`.transform()`, `.pipe()`), and the target of `z.lazy()`.
+ *
+ * Pass `inputOnly` to follow only the input side of a pipe.
+ */
+function getWrappedSchemas(schema: z.ZodType, inputOnly = false): z.ZodType[] {
+  if (schema instanceof z.ZodPipe) {
+    return inputOnly
+      ? [schema.in as z.ZodType]
+      : [schema.in as z.ZodType, schema.out as z.ZodType];
   }
 
-  return undefined;
+  if (schema instanceof z.ZodLazy) {
+    return [schema.unwrap() as z.ZodType];
+  }
+
+  const { innerType } = schema._zod.def as { innerType?: z.ZodType };
+
+  return innerType ? [innerType] : [];
+}
+
+/** Yields the schema and every schema it wraps, outermost first, once each. */
+function* unwrapAll(
+  schema: z.ZodType,
+  inputOnly = false,
+): Generator<z.ZodType> {
+  const seen = new Set<z.ZodType>();
+  const queue = [schema];
+
+  for (let current = queue.shift(); current; current = queue.shift()) {
+    if (seen.has(current)) {
+      continue;
+    }
+
+    seen.add(current);
+
+    yield current;
+
+    queue.push(...getWrappedSchemas(current, inputOnly));
+  }
 }
 
 function walkLeaves(
@@ -89,30 +121,23 @@ export function getLeafSchema(schema: z.ZodObject, leaf: string): z.ZodType {
 }
 
 /**
- * Returns the leaf's schema default, in input shape (a transform's input side is used).
+ * Returns the leaf's schema default (from `.default()` or `.prefault()`), in input
+ * shape: only the input side of a transform or pipe is searched.
  */
 export function getLeafDefault(schema: z.ZodObject, leaf: string): unknown {
-  let field = getLeafSchema(schema, leaf);
-
-  while (field instanceof z.ZodPipe) {
-    field = field.in as z.ZodType;
+  for (const field of unwrapAll(getLeafSchema(schema, leaf), true)) {
+    if (field instanceof z.ZodDefault || field instanceof z.ZodPrefault) {
+      return field.def.defaultValue;
+    }
   }
 
-  return field instanceof z.ZodDefault ? field.def.defaultValue : undefined;
+  return undefined;
 }
 
 export function isSecretLeaf(schema: z.ZodObject, leaf: string): boolean {
-  let current: z.ZodType | undefined = getLeafSchema(schema, leaf);
-
-  while (current) {
-    if (current.meta()?.secret) {
-      return true;
-    }
-
-    current = unwrapOnce(current);
-  }
-
-  return false;
+  return unwrapAll(getLeafSchema(schema, leaf)).some(
+    (field) => field.meta()?.secret === true,
+  );
 }
 
 /**

@@ -45,6 +45,21 @@ describe(resolveSettings, () => {
     ]);
   });
 
+  it("round-trips a stored explicit null", () => {
+    const nullable = z.object({
+      grp: z.object({ url: z.string().nullable().default("https://x") }),
+    });
+
+    const result = resolveSettings({
+      schema: nullable,
+      stored: { url: null },
+      env: {},
+    });
+
+    expect(result.value.grp.url).toBeNull();
+    expect(result.ignoredStored).toStrictEqual([]);
+  });
+
   it("throws ZodError for invalid env values", () => {
     expect(() =>
       resolveSettings({ schema, stored: {}, env: { limit: "bad" } }),
