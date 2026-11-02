@@ -6,7 +6,7 @@ import { plugin as testPlugin } from "@repo/plugin-test";
 import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
 
 import { GraphQLError } from "graphql";
-import { describe, expect } from "vitest";
+import { describe, expect, vi } from "vitest";
 import z from "zod";
 
 import { it } from "#__tests__/test-context.ts";
@@ -556,6 +556,25 @@ describe("setPluginEnabled", () => {
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({});
   });
+
+  it.for([true, false])(
+    "writes nothing when the plugin is already in the requested state (enabled: %s)",
+    async (enabled, { services }) => {
+      await services.settingsService.writeValues("riven", {
+        upsert: { enabledPlugins: enabled ? ["test"] : [] },
+        delete: [],
+      });
+
+      const manager = createManager(services);
+      const writeValues = vi.spyOn(services.settingsService, "writeValues");
+
+      await expect(
+        manager.setPluginEnabled("repo-plugin-test", enabled),
+      ).resolves.toStrictEqual([]);
+      expect(writeValues).not.toHaveBeenCalled();
+      expect(manager.restartRequired).toBe(false);
+    },
+  );
 
   it("throws NOT_FOUND for an unknown plugin", async ({ services }) => {
     const manager = createManager(services);

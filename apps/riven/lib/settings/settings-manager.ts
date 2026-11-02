@@ -313,6 +313,14 @@ export class SettingsManager {
       ];
     }
 
+    const next = enabled
+      ? [...new Set([...enabledPlugins, plugin.name])]
+      : enabledPlugins.filter((name) => name !== plugin.name);
+
+    if (isEqual(new Set(next), new Set(enabledPlugins))) {
+      return [];
+    }
+
     if (enabled) {
       const {
         definition,
@@ -329,10 +337,6 @@ export class SettingsManager {
         return issues;
       }
     }
-
-    const next = enabled
-      ? [...new Set([...enabledPlugins, plugin.name])]
-      : enabledPlugins.filter((name) => name !== plugin.name);
 
     const schema = coreSettingsSections.plugins;
     const isDefault = isEqual(next, getLeafDefault(schema, "enabledPlugins"));
