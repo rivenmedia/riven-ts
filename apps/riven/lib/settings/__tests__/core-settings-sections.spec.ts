@@ -28,6 +28,7 @@ it("defaults the general settings to the previous core defaults", () => {
     scheduling: {
       scheduleOffsetMinutes: 30,
       unknownAirDateOffsetDays: 7,
+      retryLibraryIntervalSeconds: 86_400,
     },
     logging: {
       loggingEnabled: true,

@@ -4,7 +4,7 @@ import { ZodError } from "zod";
 
 import { it } from "#__tests__/test-context.ts";
 import { CORE_NAMESPACE } from "#settings/core-settings-sections.ts";
-import { logger } from "#utilities/logger/logger.ts";
+import { configureLogger, logger } from "#utilities/logger/logger.ts";
 import {
   getRuntimeSettings,
   getRuntimeSettingsIssues,
@@ -84,6 +84,26 @@ it("loads the plugins section from stored values", async ({ services }) => {
   await runLoader(services);
 
   expect(getRuntimeSettings().plugins.enabledPlugins).toStrictEqual(["test"]);
+});
+
+it("reconfigures the logger from the loaded settings", async ({
+  services,
+  onTestFinished,
+}) => {
+  const previousLogging = getRuntimeSettings().general.logging;
+
+  onTestFinished(() => {
+    configureLogger(previousLogging);
+  });
+
+  await services.settingsService.writeValues(CORE_NAMESPACE, {
+    upsert: { logLevel: "warn" },
+    delete: [],
+  });
+
+  await runLoader(services);
+
+  expect(logger.level).toBe("warn");
 });
 
 it("rejects when an environment value is invalid", async ({ services }) => {

@@ -240,25 +240,9 @@ export const bootstrapMachine = setup({
             wipeUsers: settings.unsafeWipeUsersOnStartup,
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
-          onDone: [
-            {
-              target: "Applying mock scenario",
-              guard: "hasMockScenario",
-              actions: {
-                type: "log",
-                params: ({ context: { mockScenario } }) => {
-                  assert.ok(mockScenario);
-
-                  return {
-                    message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
-                  };
-                },
-              },
-            },
-            {
-              target: "Loading runtime settings",
-            },
-          ],
+          onDone: {
+            target: "Loading runtime settings",
+          },
           onError: {
             target: "Errored",
             actions: [
@@ -267,57 +251,6 @@ export const bootstrapMachine = setup({
                 params: ({ event: { error } }) => ({
                   message:
                     "Failed to clear previous instance state during bootstrap.",
-                  level: "error",
-                  error,
-                }),
-              },
-              {
-                type: "raiseError",
-                params: ({ event }) => event.error as Error,
-              },
-            ],
-          },
-        },
-      },
-      "Applying mock scenario": {
-        entry: {
-          type: "log",
-          params: ({ context: { mockScenario } }) => {
-            assert.ok(mockScenario);
-
-            return {
-              message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
-            };
-          },
-        },
-        invoke: {
-          id: "applyMockScenario",
-          src: "applyMockScenario",
-          input: ({ context: { mockScenario } }) => {
-            assert.ok(mockScenario);
-
-            return { mockScenario };
-          },
-          onDone: {
-            target: "Loading runtime settings",
-            actions: {
-              type: "log",
-              params: ({ context: { mockScenario } }) => {
-                assert.ok(mockScenario);
-
-                return {
-                  message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
-                };
-              },
-            },
-          },
-          onError: {
-            target: "Errored",
-            actions: [
-              {
-                type: "log",
-                params: ({ event: { error } }) => ({
-                  message: "Failed to apply mock scenario during bootstrap.",
                   level: "error",
                   error,
                 }),
@@ -351,12 +284,79 @@ export const bootstrapMachine = setup({
               environment: coreEnvironment,
             };
           },
+          onDone: [
+            {
+              target: "Applying mock scenario",
+              guard: "hasMockScenario",
+              actions: {
+                type: "log",
+                params: ({ context: { mockScenario } }) => {
+                  assert.ok(mockScenario);
+
+                  return {
+                    message: `Runtime settings loaded. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
+                  };
+                },
+              },
+            },
+            {
+              target: "Bootstrapping plugins",
+              actions: {
+                type: "log",
+                params: {
+                  message: "Runtime settings loaded.",
+                },
+              },
+            },
+          ],
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to load runtime settings during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Applying mock scenario": {
+        entry: {
+          type: "log",
+          params: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return {
+              message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
+            };
+          },
+        },
+        invoke: {
+          id: "applyMockScenario",
+          src: "applyMockScenario",
+          input: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return { mockScenario };
+          },
           onDone: {
             target: "Bootstrapping plugins",
             actions: {
               type: "log",
-              params: {
-                message: "Runtime settings loaded.",
+              params: ({ context: { mockScenario } }) => {
+                assert.ok(mockScenario);
+
+                return {
+                  message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
+                };
               },
             },
           },
@@ -366,7 +366,7 @@ export const bootstrapMachine = setup({
               {
                 type: "log",
                 params: ({ event: { error } }) => ({
-                  message: "Failed to load runtime settings during bootstrap.",
+                  message: "Failed to apply mock scenario during bootstrap.",
                   level: "error",
                   error,
                 }),

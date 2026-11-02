@@ -35,7 +35,6 @@ import { normaliseConcurrency } from "#message-queue/utilities/normalise-concurr
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
-import { settings } from "#utilities/settings.ts";
 
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
@@ -426,19 +425,18 @@ export const mainRunnerMachine = setup({
               pluginQueues,
             }),
           },
-          ...(settings.retryLibraryIntervalSeconds > 0
-            ? [
-                {
-                  id: "createRetryLibraryScheduler",
-                  src: "createEventScheduler",
-                  input: {
-                    event: "riven-internal.retry-library",
-                    interval: settings.retryLibraryIntervalSeconds * 1000,
-                    runImmediately: false,
-                  },
-                } as const,
-              ]
-            : []),
+          {
+            id: "createRetryLibraryScheduler",
+            src: "createEventScheduler",
+            // A non-positive interval disables the scheduler.
+            input: () => ({
+              event: "riven-internal.retry-library",
+              interval:
+                getRuntimeSettings().general.scheduling
+                  .retryLibraryIntervalSeconds * 1000,
+              runImmediately: false,
+            }),
+          },
         ],
         always: [
           {

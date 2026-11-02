@@ -2,7 +2,6 @@
 
 import { json } from "@repo/util-plugin-sdk/validation";
 
-import { Duration } from "luxon";
 import { readFileSync } from "node:fs";
 import z from "zod";
 
@@ -124,15 +123,6 @@ export const RivenSettings = z.object({
       return { username, password };
     })
     .describe("The admin user credentials - in the format username:password"),
-  retryLibraryIntervalSeconds: z.coerce
-    .number()
-    .int()
-    .nonnegative()
-    .default(Duration.fromObject({ days: 1 }).as("seconds"))
-    .describe(
-      "The interval in seconds for retrying the library. Set to 0 to disable.",
-    )
-    .meta({ "wiki.section": "scheduling" }),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

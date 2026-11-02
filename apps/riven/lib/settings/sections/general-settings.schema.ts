@@ -1,4 +1,5 @@
 import dedent from "dedent";
+import { Duration } from "luxon";
 import z from "zod";
 
 import { LogLevel } from "#utilities/logger/log-levels.ts";
@@ -87,6 +88,13 @@ export const GeneralSettings = z
           .default(7)
           .describe(
             "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
+          ),
+        retryLibraryIntervalSeconds: z
+          .int()
+          .nonnegative()
+          .default(Duration.fromObject({ days: 1 }).as("seconds"))
+          .describe(
+            "The interval in seconds for retrying the library. Set to 0 to disable.",
           ),
       })
       .meta({ title: "Scheduling" }),
