@@ -1,6 +1,8 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
 
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+
 import {
   SettingsSection,
   SettingsSectionSkeleton,
@@ -24,9 +26,12 @@ async function PluginSettings({
 export default function PluginSettingsPage({
   params,
 }: PageProps<"/settings/plugins/[plugin]">) {
+  // The boundary lets `notFound()` through to the not found page
   return (
-    <Suspense fallback={<SettingsSectionSkeleton />}>
-      <PluginSettings params={params} />
-    </Suspense>
+    <ErrorFallback message="Failed to load settings">
+      <Suspense fallback={<SettingsSectionSkeleton />}>
+        <PluginSettings params={params} />
+      </Suspense>
+    </ErrorFallback>
   );
 }

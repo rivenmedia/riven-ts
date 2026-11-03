@@ -1,6 +1,8 @@
 import { redirect } from "next/navigation";
 import { Suspense } from "react";
 
+import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
+
 import { fetchSettingsPlugins } from "./_data-access/fetch-settings-plugins";
 
 async function FirstPluginRedirect() {
@@ -18,9 +20,12 @@ async function FirstPluginRedirect() {
 }
 
 export default function PluginsSettingsPage() {
+  // The boundary lets `redirect()` through
   return (
-    <Suspense>
-      <FirstPluginRedirect />
-    </Suspense>
+    <ErrorFallback message="Failed to load settings">
+      <Suspense>
+        <FirstPluginRedirect />
+      </Suspense>
+    </ErrorFallback>
   );
 }

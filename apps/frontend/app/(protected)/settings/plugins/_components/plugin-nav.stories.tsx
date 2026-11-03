@@ -90,6 +90,15 @@ Default.test("Links to each plugin's settings", async ({ canvas }) => {
   ).not.toHaveAttribute("aria-current");
 });
 
+Default.test("Doesn't show the locked note", async ({ canvas }) => {
+  await expect(
+    canvas.queryByText("Set by environment variable"),
+  ).not.toBeInTheDocument();
+  await expect(
+    canvas.getByRole("switch", { name: "Enable Comet" }),
+  ).not.toHaveAccessibleDescription();
+});
+
 Default.test(
   "Disables the switch for an always-enabled plugin",
   async ({ canvas }) => {
@@ -138,6 +147,18 @@ export const Locked = meta.story({
 Locked.test("Disables every switch", async ({ canvas }) => {
   for (const name of ["Enable TMDB", "Enable Comet", "Enable StremThru"]) {
     await expect(canvas.getByRole("switch", { name })).toBeDisabled();
+  }
+});
+
+Locked.test("Explains why the switches are locked", async ({ canvas }) => {
+  await expect(canvas.getByText("Set by environment variable")).toBeVisible();
+
+  for (const name of ["Enable TMDB", "Enable Comet", "Enable StremThru"]) {
+    await expect(
+      canvas.getByRole("switch", { name }),
+    ).toHaveAccessibleDescription(
+      "Set by environment variable Enabled plugins are set by the RIVEN_SETTING__enabledPlugins environment variable, so they can't be changed here.",
+    );
   }
 });
 

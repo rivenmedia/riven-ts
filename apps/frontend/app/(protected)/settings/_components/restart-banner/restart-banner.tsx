@@ -4,6 +4,7 @@ import { Suspense } from "react";
 
 import { query } from "#lib/graphql/client.ts";
 
+import { HideOnError } from "./_components/hide-on-error";
 import { INSTANCE_RESTART_STATUS } from "./_queries/instance-restart-status.query";
 
 async function RestartBannerLoader() {
@@ -23,11 +24,17 @@ async function RestartBannerLoader() {
   );
 }
 
-/** Tells the user to restart Riven when changed settings haven't applied yet. */
+/**
+ * Tells the user to restart Riven when changed settings haven't applied yet.
+ *
+ * The banner is optional, so it's hidden if the restart status can't load.
+ */
 export function RestartBanner() {
   return (
-    <Suspense>
-      <RestartBannerLoader />
-    </Suspense>
+    <HideOnError>
+      <Suspense>
+        <RestartBannerLoader />
+      </Suspense>
+    </HideOnError>
   );
 }

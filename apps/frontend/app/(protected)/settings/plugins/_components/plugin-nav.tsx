@@ -3,6 +3,7 @@
 import { useOptimisticAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { useSelectedLayoutSegment } from "next/navigation";
+import { useId } from "react";
 import { toast } from "sonner";
 
 import { Button } from "#components/_ui/button.tsx";
@@ -30,6 +31,7 @@ export interface PluginNavProps {
  */
 export function PluginNav({ plugins, enabledPluginsLocked }: PluginNavProps) {
   const activePlugin = useSelectedLayoutSegment();
+  const lockedNoteId = useId();
 
   const { execute, optimisticState } = useOptimisticAction(setPluginEnabled, {
     currentState: plugins,
@@ -80,6 +82,9 @@ export function PluginNav({ plugins, enabledPluginsLocked }: PluginNavProps) {
                 id={switchId}
                 checked={plugin.enabled}
                 disabled={plugin.alwaysEnabled || enabledPluginsLocked}
+                aria-describedby={
+                  enabledPluginsLocked ? lockedNoteId : undefined
+                }
                 onCheckedChange={(enabled) => {
                   execute({ id: plugin.id, enabled });
                 }}
@@ -88,6 +93,21 @@ export function PluginNav({ plugins, enabledPluginsLocked }: PluginNavProps) {
           );
         })}
       </ul>
+      {enabledPluginsLocked && (
+        <div
+          id={lockedNoteId}
+          className="text-muted-foreground mt-3 space-y-1 text-sm"
+        >
+          <p>Set by environment variable</p>
+          <p>
+            Enabled plugins are set by the{" "}
+            <code className="font-mono text-xs">
+              RIVEN_SETTING__enabledPlugins
+            </code>{" "}
+            environment variable, so they can&apos;t be changed here.
+          </p>
+        </div>
+      )}
     </nav>
   );
 }
