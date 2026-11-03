@@ -10,6 +10,7 @@ import { SettingsSelectField } from "./_components/select-field.tsx";
 import { SettingGroup } from "./_components/setting-group.tsx";
 import { SettingsStringArrayField } from "./_components/string-array-field.tsx";
 import { SettingsTextField } from "./_components/text-field.tsx";
+import { SettingsTupleField } from "./_components/tuple-field.tsx";
 
 import type { ComponentProps, ComponentType } from "react";
 
@@ -29,7 +30,8 @@ type SettingsFieldType =
   | "select"
   | "string_array"
   | "custom_rank"
-  | "dictionary";
+  | "dictionary"
+  | "tuple";
 
 const settingFieldComponents = {
   group: SettingGroup,
@@ -42,6 +44,7 @@ const settingFieldComponents = {
   string_array: SettingsStringArrayField,
   custom_rank: SettingsCustomRankField,
   dictionary: SettingsDictionaryField,
+  tuple: SettingsTupleField,
 } as const satisfies Record<SettingsFieldType, React.ComponentType<never>>;
 
 export type SettingFieldProps = (
@@ -57,7 +60,7 @@ export type SettingFieldProps = (
 
 /**
  * Renders the right input for a schema-driven setting (text, secret, number,
- * boolean, select, array, rank, dictionary or group).
+ * boolean, select, array, rank, dictionary, tuple or group).
  */
 export function SettingField({
   type,
