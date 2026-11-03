@@ -35,6 +35,10 @@ const generalJsonSchema = toServedJsonSchema(
           description:
             "The maximum number of scrape attempts before giving up on an item.",
         }),
+        // Optional with no default, so it has no stored value
+        minimumAverageBitrateMovies: z.int().positive().optional().meta({
+          title: "Minimum Average Bitrate (Movies)",
+        }),
       })
       .meta({ title: "Scraping" }),
     logging: z
@@ -138,6 +142,12 @@ Default.test("Saves the changed values", async ({ canvas, step }) => {
     );
   });
 
+  await step("Leaves out an optional number that has no value", async () => {
+    await expect(getLastSubmittedValues()).not.toHaveProperty(
+      "scraping.minimumAverageBitrateMovies",
+    );
+  });
+
   await step("Tells the user to restart Riven", async () => {
     await expect(
       await canvas.findByText("Settings saved. Restart Riven to apply them."),
@@ -151,6 +161,31 @@ Default.test("Saves the changed values", async ({ canvas, step }) => {
     ).toHaveValue("/var/log/riven");
   });
 });
+
+Default.test(
+  "Submits a typed optional number as a number",
+  async ({ canvas }) => {
+    const minimumAverageBitrate = canvas.getByRole("spinbutton", {
+      name: "Minimum Average Bitrate (Movies)",
+    });
+
+    await expect(minimumAverageBitrate).toHaveValue(null);
+
+    await userEvent.type(minimumAverageBitrate, "2500");
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(getLastSubmittedValues()).toStrictEqual({
+        scraping: {
+          dubbedAnimeOnly: false,
+          maximumFailedAttempts: 10,
+          minimumAverageBitrateMovies: 2500,
+        },
+        logging: { logDirectory: "./logs" },
+      }),
+    );
+  },
+);
 
 Default.test(
   "Shows backend issues returned on save against their fields",
@@ -479,16 +514,27 @@ export const WithUnsupportedField = meta.story({
           .union([z.int(), z.string()])
           .optional()
           .meta({ title: "Retention" }),
+        notificationUrls: z
+          .array(z.union([z.url(), z.email()]))
+          .optional()
+          .meta({ title: "Notification URLs" }),
       }),
     ),
-    values: { logDirectory: "./logs", retention: "7d" },
+    values: {
+      logDirectory: "./logs",
+      retention: "7d",
+      notificationUrls: ["https://example.com/hook"],
+    },
   },
 });
 
 WithUnsupportedField.test(
-  "Skips the unsupported field when rendering and saving",
+  "Skips the unsupported fields when rendering and saving",
   async ({ canvas }) => {
     await expect(canvas.queryByText("Retention")).not.toBeInTheDocument();
+    await expect(
+      canvas.queryByText("Notification URLs"),
+    ).not.toBeInTheDocument();
 
     const logDirectory = canvas.getByRole("textbox", {
       name: "Log Directory",

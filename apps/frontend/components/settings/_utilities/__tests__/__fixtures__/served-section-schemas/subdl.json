@@ -1,0 +1,23 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Your Subdl API Key",
+      "secret": true
+    },
+    "languages": {
+      "default": ["en"],
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "description": "List of languages to download"
+    }
+  },
+  "required": ["apiKey"],
+  "title": "SubDL"
+}

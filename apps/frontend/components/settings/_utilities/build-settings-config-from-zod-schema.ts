@@ -12,6 +12,7 @@ import {
   ZodOptional,
   ZodNullable,
   ZodBoolean,
+  ZodUnion,
   z,
 } from "zod";
 
@@ -188,31 +189,40 @@ function buildEnumSetting(
   ];
 }
 
+/** Builds a string array field, or nothing for arrays of any other element type. */
 function buildArraySetting(
   schema: ZodArray,
   key: string | undefined,
   required: boolean,
   meta: GlobalMeta,
   context?: BuildSettingsContext,
-): SettingEntry {
-  const commonConfig = buildCommonConfig(meta, key, context);
+): SettingEntry | undefined {
   const { element } = schema;
 
-  if (element instanceof ZodString || element instanceof ZodEnum) {
-    return [
-      commonConfig.name,
-      {
-        type: "string_array",
-        config: {
-          ...commonConfig,
-          registerOptions: { required },
-        },
-      },
-    ];
+  if (!(element instanceof ZodString || element instanceof ZodEnum)) {
+    return undefined;
   }
 
-  throw new Error(`Unsupported array element type: ${element._zod.def.type}`);
+  const commonConfig = buildCommonConfig(meta, key, context);
+
+  return [
+    commonConfig.name,
+    {
+      type: "string_array",
+      config: {
+        ...commonConfig,
+        registerOptions: { required },
+      },
+    },
+  ];
 }
+
+/**
+ * Parses a number input's value, leaving an empty input as `undefined` so an
+ * optional number with no value is left out rather than submitted as `NaN`.
+ */
+const parseNumberInput = (value: unknown) =>
+  value === "" || value == null ? undefined : Number(value);
 
 function getNumberStep(multipleOf: unknown, isInt: boolean) {
   if (typeof multipleOf === "number" && Number.isFinite(multipleOf)) {
@@ -245,7 +255,7 @@ function buildNumberSetting(
           ...(hasMinConstraint ? { min: minimum } : {}),
           ...(hasMaxConstraint ? { max: maximum } : {}),
           required,
-          valueAsNumber: true,
+          setValueAs: parseNumberInput,
         },
         step: getNumberStep(multipleOf, type === "integer"),
       },
@@ -325,25 +335,21 @@ export function buildSettingsConfigFromZodSchema(
     case "array": {
       assertSchemaType(schema, ZodArray);
 
-      const [name, setting] = buildArraySetting(
-        schema,
-        key,
-        required,
-        meta,
-        context,
-      );
+      const entry = buildArraySetting(schema, key, required, meta, context);
 
-      return settings.set(name, setting);
+      return entry ? settings.set(...entry) : settings;
     }
     case "record": {
       assertSchemaType(schema, ZodRecord);
 
-      const commonConfig = buildCommonConfig(meta, key, context);
       const { keyType, valueType } = schema;
 
+      // Only string keys can be typed in, so other records render nothing
       if (!(keyType instanceof ZodString)) {
-        throw new Error("Only string keys are supported for record schemas");
+        return settings;
       }
+
+      const commonConfig = buildCommonConfig(meta, key, context);
 
       const { title: keyTitle } = keyType.meta() ?? {};
 
@@ -369,8 +375,9 @@ export function buildSettingsConfigFromZodSchema(
     case "tuple": {
       assertSchemaType(schema, ZodTuple);
 
+      // A rest element has no fixed number of inputs, so it renders nothing
       if (schema.def.rest) {
-        throw new Error(`Tuple rest elements are not supported`);
+        return settings;
       }
 
       const commonConfig = buildCommonConfig(meta, key, context);
@@ -482,6 +489,30 @@ export function buildSettingsConfigFromZodSchema(
         true,
       );
     }
+    case "union": {
+      assertSchemaType(schema, ZodUnion);
+
+      // A served `.nullable()` comes back from JSON Schema as a union with
+      // null, so it's built as the other member with null allowed
+      const { options } = schema;
+      const nonNullOptions = options.filter(
+        (option) => option._zod.def.type !== "null",
+      );
+      const [innerSchema] = nonNullOptions;
+
+      if (options.length !== 2 || nonNullOptions.length !== 1 || !innerSchema) {
+        return settings;
+      }
+
+      return buildSettingsConfigFromZodSchema(
+        innerSchema,
+        key,
+        false,
+        meta,
+        context,
+        true,
+      );
+    }
     case "any":
     case "bigint":
     case "catch":
@@ -498,7 +529,6 @@ export function buildSettingsConfigFromZodSchema(
     case "set":
     case "symbol":
     case "undefined":
-    case "union":
     case "unknown":
     case "file":
     case "intersection":

@@ -1,0 +1,12 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "description": "The TVDB API key used to request a token.",
+      "secret": true,
+      "type": "string"
+    }
+  },
+  "title": "TVDB"
+}

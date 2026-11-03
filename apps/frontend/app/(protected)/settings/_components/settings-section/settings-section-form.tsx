@@ -2,7 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { pick, set } from "es-toolkit/compat";
+import { has, pick, set } from "es-toolkit/compat";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useMemo, useState } from "react";
 import { FormProvider } from "react-hook-form";
@@ -146,6 +146,14 @@ export function SettingsSectionForm({
   // start blank, which the backend treats as unchanged.
   const defaultValues = useMemo(() => {
     const renderedValues = pick(values, fieldNames);
+
+    // A field with no value (e.g. an optional number) registers as
+    // `undefined`, so it's seeded as that to keep the form from starting dirty
+    for (const name of fieldNames) {
+      if (!has(renderedValues, name)) {
+        set(renderedValues, name, undefined);
+      }
+    }
 
     for (const name of secretFieldNames) {
       set(renderedValues, name, "");

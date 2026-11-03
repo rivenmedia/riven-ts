@@ -29,7 +29,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   max: Number.MAX_SAFE_INTEGER,
                   min: Number.MIN_SAFE_INTEGER,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 1,
               },
@@ -61,7 +61,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   min: 0,
                   max: 10,
                   required: true,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 1,
               },
@@ -93,7 +93,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   max: Number.MAX_SAFE_INTEGER,
                   min: Number.MIN_SAFE_INTEGER,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 5,
               },
@@ -126,7 +126,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -156,7 +156,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -186,13 +186,86 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
             },
           ],
         ]),
+      );
+    });
+  });
+
+  describe("number input values", () => {
+    const getSetValueAs = () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.int().optional(),
+        "numberField",
+      ).values();
+
+      if (field?.type !== "number") {
+        throw new Error("Expected a number field");
+      }
+
+      return field.config.registerOptions?.setValueAs;
+    };
+
+    it.each([[""], [undefined], [null]])(
+      "leaves an empty input (%o) as undefined",
+      (value) => {
+        expect(getSetValueAs()?.(value)).toBeUndefined();
+      },
+    );
+
+    it.each([
+      ["5", 5],
+      ["0", 0],
+      ["-2.5", -2.5],
+      [7, 7],
+    ])("parses %o as a number", (value, expected) => {
+      expect(getSetValueAs()?.(value)).toBe(expected);
+    });
+  });
+
+  describe("unions with null", () => {
+    it.each([
+      ["number", z.union([z.int(), z.null()]), "number"],
+      ["boolean", z.union([z.boolean(), z.null()]), "nullable_boolean"],
+    ])(
+      "builds a %s union with null as its non-null member",
+      (_, schema, type) => {
+        const [field] = buildSettingsConfigFromZodSchema(
+          schema.meta({ title: "Field" }),
+          "field",
+        ).values();
+
+        expect(field).toMatchObject({
+          type,
+          config: { label: "Field", name: "field" },
+        });
+      },
+    );
+
+    it("marks the non-null member as not required", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.union([z.null(), z.string()]),
+        "field",
+      ).values();
+
+      expect(field).toMatchObject({
+        type: "text",
+        config: { registerOptions: { required: false } },
+      });
+    });
+
+    it.each([
+      ["of non-null members", z.union([z.int(), z.string()])],
+      ["of more than two members", z.union([z.int(), z.string(), z.null()])],
+      ["of only null", z.union([z.null(), z.null()])],
+    ])("skips other unions %s", (_, schema) => {
+      expect(buildSettingsConfigFromZodSchema(schema, "field")).toStrictEqual(
+        new Map(),
       );
     });
   });
@@ -409,6 +482,16 @@ describe(buildSettingsConfigFromZodSchema, () => {
           ],
         ]),
       );
+    });
+  });
+
+  describe("record schemas with non-string keys", () => {
+    it("skips them", () => {
+      const schema = z.record(z.enum(["a", "b"]), z.string());
+
+      const field = buildSettingsConfigFromZodSchema(schema, "recordField");
+
+      expect(field).toStrictEqual(new Map());
     });
   });
 
@@ -721,12 +804,24 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
-    it("throws an error for unsupported array element types", () => {
-      const schema = z.number().array().meta({ title: "Number Array Field" });
+    it.each([
+      ["number", z.number().array()],
+      ["union", z.array(z.union([z.url(), z.email()]))],
+    ])("skips arrays of %s elements", (_, schema) => {
+      const field = buildSettingsConfigFromZodSchema(schema, "unsupported");
 
-      expect(() =>
-        buildSettingsConfigFromZodSchema(schema, "numberArrayField"),
-      ).toThrow(/unsupported array element type: number/iu);
+      expect(field).toStrictEqual(new Map());
+    });
+
+    it("skips an unsupported array without affecting its siblings", () => {
+      const schema = z.object({
+        urls: z.array(z.union([z.url(), z.email()])),
+        name: z.string(),
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema);
+
+      expect([...field.keys()]).toStrictEqual(["name"]);
     });
 
     it("unwraps optional schemas correctly", () => {
@@ -791,7 +886,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "field2",
                 registerOptions: {
                   required: true,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -899,7 +994,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                         required: true,
                         max: Number.MAX_SAFE_INTEGER,
                         min: Number.MIN_SAFE_INTEGER,
-                        valueAsNumber: true,
+                        setValueAs: expect.any(Function),
                       },
                       step: 1,
                     },
@@ -921,7 +1016,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                         required: true,
                         max: Number.MAX_SAFE_INTEGER,
                         min: Number.MIN_SAFE_INTEGER,
-                        valueAsNumber: true,
+                        setValueAs: expect.any(Function),
                       },
                       step: 1,
                     },
@@ -972,12 +1067,12 @@ describe(buildSettingsConfigFromZodSchema, () => {
       });
     });
 
-    it("throws for tuples with a rest element", () => {
+    it("skips tuples with a rest element", () => {
       const schema = z.tuple([z.int()]).rest(z.int());
 
-      expect(() => buildSettingsConfigFromZodSchema(schema, "t")).toThrow(
-        /tuple rest elements are not supported/iu,
-      );
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+
+      expect(field).toStrictEqual(new Map());
     });
   });
 
@@ -1059,7 +1154,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
