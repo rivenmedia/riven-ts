@@ -16,32 +16,35 @@ function isWithinOneEdit(value: string, target: string): boolean {
 
   while (valueIndex < value.length && targetIndex < target.length) {
     if (value[valueIndex] === target[targetIndex]) {
-      valueIndex++;
-      targetIndex++;
+      valueIndex += 1;
+      targetIndex += 1;
       continue;
     }
 
-    if (++edits > 1) {
+    edits += 1;
+
+    if (edits > 1) {
       return false;
     }
 
     if (value.length >= target.length) {
-      valueIndex++;
+      valueIndex += 1;
     }
 
     if (value.length <= target.length) {
-      targetIndex++;
+      targetIndex += 1;
     }
   }
 
-  return (
-    edits + Number(valueIndex < value.length || targetIndex < target.length) <= 1
-  );
+  const hasTrailingCharacter =
+    valueIndex < value.length || targetIndex < target.length;
+
+  return edits + Number(hasTrailingCharacter) <= 1;
 }
 
 function normalizeLanguage(language: string) {
   const normalized = language.toLowerCase();
-  const words = normalized.trim().split(/[\s_-]+/);
+  const words = normalized.trim().split(/[\s_-]+/u);
 
   // Other languages (including generic Portuguese) are left unchanged.
   if (
