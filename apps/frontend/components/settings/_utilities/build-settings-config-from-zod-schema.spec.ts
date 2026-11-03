@@ -860,7 +860,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
       const schema = z.tuple([z.int()]).rest(z.int());
 
       expect(() => buildSettingsConfigFromZodSchema(schema, "t")).toThrow(
-        /Unsupported tuple rest element/u,
+        /tuple rest elements are not supported/iu,
       );
     });
   });

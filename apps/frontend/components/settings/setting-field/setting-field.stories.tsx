@@ -1,4 +1,3 @@
-import { FormProvider, useForm } from "react-hook-form";
 import { expect, fn, userEvent, within } from "storybook/test";
 
 import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
@@ -508,23 +507,13 @@ export const Tuple = meta.story({
     },
   },
   decorators: [
-    (Story) => {
-      const form = useForm({
+    createFormDecorator(
+      {
         defaultValues: { tuple: [2, 6, 24] },
         progressive: true,
-      });
-
-      return (
-        <FormProvider {...form}>
-          <form
-            onSubmit={(event) => void form.handleSubmit(onTupleSubmit)(event)}
-          >
-            <Story />
-            <button type="submit">Save</button>
-          </form>
-        </FormProvider>
-      );
-    },
+      },
+      onTupleSubmit,
+    ),
   ],
   beforeEach: () => {
     onTupleSubmit.mockClear();

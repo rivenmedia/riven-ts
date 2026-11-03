@@ -295,9 +295,7 @@ export function buildSettingsConfigFromZodSchema(
       assertSchemaType(schema, ZodTuple);
 
       if (schema.def.rest) {
-        throw new Error(
-          `Unsupported tuple rest element: ${schema.def.rest._zod.def.type}`,
-        );
+        throw new Error(`Tuple rest elements are not supported`);
       }
 
       const commonConfig = buildCommonConfig(meta, key);
@@ -305,24 +303,21 @@ export function buildSettingsConfigFromZodSchema(
       const itemFields = schema.def.items.flatMap((element, index) => {
         const itemName = `${commonConfig.name}.${index.toString()}`;
 
-        return [
-          ...buildSettingsConfigFromZodSchema(
-            element,
-            itemName,
-            required,
-          ).values(),
-        ].map((itemField) => {
-          // An untitled element falls back to its key as the label, so
-          // replace that with a positional label.
-          if (
-            "label" in itemField.config &&
-            itemField.config.label === itemName
-          ) {
-            itemField.config.label = `${commonConfig.label} ${(index + 1).toString()}`;
-          }
+        return buildSettingsConfigFromZodSchema(element, itemName, required)
+          .values()
+          .map((itemField) => {
+            // An untitled element falls back to its key as the label, so
+            // replace that with a positional label.
+            if (
+              "label" in itemField.config &&
+              itemField.config.label === itemName
+            ) {
+              itemField.config.label = `${commonConfig.label} ${(index + 1).toString()}`;
+            }
 
-          return itemField;
-        });
+            return itemField;
+          })
+          .toArray();
       });
 
       return settings.set(commonConfig.name, {
