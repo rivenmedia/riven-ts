@@ -123,6 +123,27 @@ function getSecretState(
   return defaultValue === undefined ? "unset" : "default";
 }
 
+/** Maps dotted field paths to leaves, reporting each unknown path as an issue. */
+function resolveResetPaths(leaves: LeafPathMap, paths: string[]) {
+  const leafByPath = new Map(
+    leaves.entries().map(([leaf, path]) => [path.join("."), leaf]),
+  );
+  const resetLeaves = new Set<string>();
+  const issues: SettingsIssue[] = [];
+
+  for (const path of paths) {
+    const leaf = leafByPath.get(path);
+
+    if (leaf === undefined) {
+      issues.push({ path, message: `Unknown setting "${path}"` });
+    } else {
+      resetLeaves.add(leaf);
+    }
+  }
+
+  return { resetLeaves, issues };
+}
+
 function findIssueLeaf(leaves: LeafPathMap, issue: SettingsIssue) {
   return issue.path.split(".").find((segment) => leaves.has(segment));
 }
@@ -198,11 +219,16 @@ export class SettingsManager {
     };
   }
 
+  /**
+   * Saves submitted values and removes the overrides of the `reset` paths, validating
+   * the resulting namespace as a whole. Nothing is written if there are any issues.
+   */
   public async updateSection(
     id: string,
     values: Record<string, unknown>,
+    reset: string[] = [],
   ): Promise<SettingsIssue[]> {
-    const { definition, stored, env } = await this.#loadSection(id);
+    const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;
 
     const submitted = Object.fromEntries(
@@ -216,8 +242,35 @@ export class SettingsManager {
       ),
     );
 
+    const { resetLeaves, issues: pathIssues } = resolveResetPaths(
+      leaves,
+      reset,
+    );
+
+    for (const leaf of resetLeaves) {
+      if (leaf in submitted) {
+        const path = toDottedPath(leaves, leaf);
+
+        pathIssues.push({
+          path,
+          message: `Setting "${path}" cannot be both saved and reset`,
+        });
+      }
+    }
+
+    if (pathIssues.length > 0) {
+      return pathIssues;
+    }
+
+    const clearedLeaves = new Set(
+      [...resetLeaves].filter((leaf) => !(leaf in env)),
+    );
+    const remaining = Object.fromEntries(
+      Object.entries(stored).filter(([leaf]) => !clearedLeaves.has(leaf)),
+    );
+
     const issues = validateSettings(schema, {
-      ...stored,
+      ...remaining,
       ...submitted,
       ...env,
     });
@@ -227,7 +280,7 @@ export class SettingsManager {
     }
 
     const upsert: Record<string, unknown> = {};
-    const toDelete: string[] = [];
+    const toDelete = [...clearedLeaves].filter((leaf) => leaf in stored);
 
     for (const [leaf, value] of Object.entries(submitted)) {
       if (isEqual(value, getLeafDefault(schema, leaf))) {
@@ -250,21 +303,10 @@ export class SettingsManager {
   ): Promise<SettingsIssue[]> {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
 
-    const leafByPath = new Map(
-      leaves.entries().map(([leaf, path]) => [path.join("."), leaf]),
+    const { resetLeaves, issues: unknownPaths } = resolveResetPaths(
+      leaves,
+      paths,
     );
-    const resetLeaves = new Set<string>();
-    const unknownPaths: SettingsIssue[] = [];
-
-    for (const path of paths) {
-      const leaf = leafByPath.get(path);
-
-      if (leaf === undefined) {
-        unknownPaths.push({ path, message: `Unknown setting "${path}"` });
-      } else {
-        resetLeaves.add(leaf);
-      }
-    }
 
     if (unknownPaths.length > 0) {
       return unknownPaths;

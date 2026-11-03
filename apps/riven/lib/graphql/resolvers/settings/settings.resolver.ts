@@ -32,14 +32,19 @@ export class SettingsResolver {
 
   @Mutation(() => SettingsMutationResult, {
     description:
-      "Saves the given values for a settings section. Nothing is saved if any value is invalid.",
+      "Saves the given values for a settings section and resets the `reset` fields to their defaults. Nothing is saved if any value is invalid.",
   })
   public async updateSettingsSection(
     @CoreContext() { settingsManager }: CoreContext,
     @Arg("id", () => ID) id: string,
     @Arg("values", () => Object) values: Record<string, unknown>,
+    @Arg("reset", () => [String], {
+      defaultValue: [],
+      description: "Dotted paths of fields whose stored values are removed.",
+    })
+    reset: string[],
   ) {
-    return toResult(await settingsManager.updateSection(id, values));
+    return toResult(await settingsManager.updateSection(id, values, reset));
   }
 
   @Mutation(() => SettingsMutationResult, {

@@ -1,12 +1,16 @@
 // The `n` leaf name comes from the settings backend plan fixture.
 // oxlint-disable id-length
 import { plugin as cometPlugin } from "@repo/plugin-comet";
+import { plugin as notificationsPlugin } from "@repo/plugin-notifications";
 import { plugin as plexPlugin } from "@repo/plugin-plex";
 import { plugin as testPlugin } from "@repo/plugin-test";
 import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
+import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 
+import { constantCase } from "es-toolkit";
 import { GraphQLError } from "graphql";
 import { describe, expect, vi } from "vitest";
+import { createLogger } from "winston";
 import z from "zod";
 
 import { it } from "#__tests__/test-context.ts";
@@ -27,6 +31,17 @@ const FakeSettings = z
     nested: z.object({ n: z.int().default(1) }),
   })
   .meta({ title: "Fake" });
+
+const CLEAR_NAMESPACE = "@repo/plugin-clear";
+
+const ClearSettings = z
+  .object({
+    url: z.string().min(1),
+    limit: z.int().optional(),
+    retries: z.int().default(3),
+    interval: z.int().nullable().default(60),
+  })
+  .meta({ title: "Clear" });
 
 const installedPlugins: InstalledPlugin[] = [
   {
@@ -68,6 +83,7 @@ function createManager(
   services: Services,
   options: {
     fakeEnvironment?: Record<string, string>;
+    clearEnvironment?: Record<string, string>;
     coreEnvironment?: Record<string, string>;
   } = {},
 ) {
@@ -84,6 +100,14 @@ function createManager(
     title: "Fake",
     schema: FakeSettings,
     environment: options.fakeEnvironment ?? {},
+  });
+
+  sections.set("clear", {
+    id: "clear",
+    namespace: CLEAR_NAMESPACE,
+    title: "Clear",
+    schema: ClearSettings,
+    environment: options.clearEnvironment ?? {},
   });
 
   return new SettingsManager({
@@ -400,6 +424,156 @@ describe("updateSection", () => {
   });
 });
 
+describe("updateSection with reset", () => {
+  it("removes a stored override for a reset field", async ({ services }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test", limit: 5, retries: 7 },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("clear", { url: "https://b.test" }, [
+        "limit",
+        "retries",
+      ]),
+    ).resolves.toStrictEqual([]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://b.test" });
+
+    const view = await manager.getSection("clear");
+
+    expect(view.values).toStrictEqual({
+      url: "https://b.test",
+      retries: 3,
+      interval: 60,
+    });
+  });
+
+  it("does not write when resetting a field with no stored row", async ({
+    services,
+  }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test" },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("clear", {}, ["limit"]),
+    ).resolves.toStrictEqual([]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://a.test" });
+    expect(manager.restartRequired).toBe(false);
+  });
+
+  it("validates reset fields together with the submitted values", async ({
+    services,
+  }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test", limit: 5 },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("clear", { retries: 4 }, ["url", "limit"]),
+    ).resolves.toStrictEqual([
+      { path: "url", message: expect.any(String) as string },
+    ]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://a.test", limit: 5 });
+    expect(manager.restartRequired).toBe(false);
+  });
+
+  it("returns an issue for an unknown reset path", async ({ services }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test" },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("clear", { retries: 4 }, ["nope"]),
+    ).resolves.toStrictEqual([
+      { path: "nope", message: 'Unknown setting "nope"' },
+    ]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://a.test" });
+  });
+
+  it("returns an issue for a path that is both submitted and reset", async ({
+    services,
+  }) => {
+    await services.settingsService.writeValues(FAKE_NAMESPACE, {
+      upsert: { apiKey: "secret", n: 3 },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("fake", { nested: { n: 4 } }, ["nested.n"]),
+    ).resolves.toStrictEqual([
+      { path: "nested.n", message: expect.any(String) as string },
+    ]);
+    await expect(
+      services.settingsService.getStoredValues(FAKE_NAMESPACE),
+    ).resolves.toStrictEqual({ apiKey: "secret", n: 3 });
+    expect(manager.restartRequired).toBe(false);
+  });
+
+  it("ignores env-locked reset fields", async ({ services }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test", limit: 5 },
+      delete: [],
+    });
+
+    const manager = createManager(services, {
+      clearEnvironment: { limit: "9" },
+    });
+
+    await expect(
+      manager.updateSection("clear", {}, ["limit"]),
+    ).resolves.toStrictEqual([]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://a.test", limit: 5 });
+    expect(manager.restartRequired).toBe(false);
+  });
+
+  it("stores an explicit null for a nullable field and reads it back", async ({
+    services,
+  }) => {
+    await services.settingsService.writeValues(CLEAR_NAMESPACE, {
+      upsert: { url: "https://a.test" },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    await expect(
+      manager.updateSection("clear", { interval: null }),
+    ).resolves.toStrictEqual([]);
+    await expect(
+      services.settingsService.getStoredValues(CLEAR_NAMESPACE),
+    ).resolves.toStrictEqual({ url: "https://a.test", interval: null });
+
+    const view = await manager.getSection("clear");
+
+    expect(view.values).toMatchObject({ interval: null });
+    expect(view.issues).toStrictEqual([]);
+  });
+});
+
 describe("resetFields", () => {
   it("deletes the row and restores the default state", async ({ services }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -663,5 +837,60 @@ describe("listPlugins", () => {
     expect(plugins.find(({ id }) => id === "repo-plugin-test")).toMatchObject({
       enabled: true,
     });
+  });
+});
+
+describe("plugin env settings", () => {
+  it("resolves notifications urls from env and locks the field", async ({
+    services,
+  }) => {
+    const packageName = "@repo/plugin-notifications";
+    const prefix = constantCase(packageName);
+    const environment = {
+      [`RIVEN_PLUGIN_SETTING__${prefix}__urls`]: '["discord://id/token"]',
+    };
+    const pluginSettings = new PluginSettings(
+      environment,
+      [prefix],
+      createLogger({ silent: true }),
+      false,
+    );
+    const pluginEnvironment = new Map([
+      [packageName, pluginSettings.getEnvironmentSnapshot().get(prefix) ?? {}],
+    ]);
+
+    const resolved = pluginSettings.set(
+      prefix,
+      notificationsPlugin.settingsSchema,
+      {},
+    );
+
+    expect(resolved.value).toStrictEqual({ urls: ["discord://id/token"] });
+    expect(resolved.lockedLeaves).toStrictEqual(new Set(["urls"]));
+
+    const notificationsInstall: InstalledPlugin = {
+      sectionId: "repo-plugin-notifications",
+      packageName,
+      name: "notifications",
+      plugin: notificationsPlugin,
+      enabled: true,
+      alwaysEnabled: false,
+    };
+    const manager = new SettingsManager({
+      settingsService: services.settingsService,
+      sections: buildSettingsSections({
+        installedPlugins: [notificationsInstall],
+        pluginEnvironment,
+        coreEnvironment: {},
+      }),
+      installedPlugins: [notificationsInstall],
+      coreEnvironment: {},
+    });
+
+    const view = await manager.getSection("repo-plugin-notifications");
+
+    expect(view.lockedFields).toStrictEqual(["urls"]);
+    expect(view.values).toStrictEqual({ urls: ["discord://id/token"] });
+    expect(view.issues).toStrictEqual([]);
   });
 });

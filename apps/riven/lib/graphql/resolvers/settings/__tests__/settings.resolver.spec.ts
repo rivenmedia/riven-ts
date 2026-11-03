@@ -45,8 +45,9 @@ const UPDATE_SETTINGS_SECTION: TypedDocumentNode<
   mutation SettingsResolverSpecUpdateSettingsSection(
     $id: ID!
     $values: JSONObject!
+    $reset: [String!]
   ) {
-    updateSettingsSection(id: $id, values: $values) {
+    updateSettingsSection(id: $id, values: $values, reset: $reset) {
       success
       issues {
         path
@@ -198,4 +199,40 @@ it("flags a restart as required after a valid update", async ({
   expect(after.body.singleResult.data?.instanceStatus.restartRequired).toBe(
     true,
   );
+});
+
+it("resets the given fields while saving a section", async ({
+  gqlContext,
+  gqlServer,
+  services,
+}) => {
+  await services.settingsService.writeValues("riven", {
+    upsert: { maximumFailedAttempts: 5 },
+    delete: [],
+  });
+
+  const update = await gqlServer.executeOperation<
+    SettingsResolverSpecUpdateSettingsSectionMutation,
+    SettingsResolverSpecUpdateSettingsSectionMutationVariables
+  >(
+    {
+      query: UPDATE_SETTINGS_SECTION,
+      variables: {
+        id: "general",
+        values: {},
+        reset: ["scraping.maximumFailedAttempts"],
+      },
+    },
+    { contextValue: gqlContext },
+  );
+
+  expect.assert(update.body.kind === "single");
+  expect(update.body.singleResult.errors).toBeUndefined();
+  expect(update.body.singleResult.data?.updateSettingsSection).toMatchObject({
+    success: true,
+    issues: [],
+  });
+  await expect(
+    services.settingsService.getStoredValues("riven"),
+  ).resolves.not.toHaveProperty("maximumFailedAttempts");
 });

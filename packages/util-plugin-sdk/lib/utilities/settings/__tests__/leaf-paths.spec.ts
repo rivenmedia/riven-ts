@@ -58,6 +58,17 @@ describe("unflattenSettings / flattenSettings", () => {
     });
   });
 
+  it("keeps explicit null leaves when flattening", () => {
+    const nullable = z.object({
+      group: z.object({ interval: z.int().nullable() }),
+      timeout: z.int().nullable().default(5),
+    });
+
+    expect(
+      flattenSettings(nullable, { group: { interval: null }, timeout: null }),
+    ).toStrictEqual({ interval: null, timeout: null });
+  });
+
   it("flatten is the inverse of unflatten", () => {
     const flat = { limit: "value", flag: 2 };
 
