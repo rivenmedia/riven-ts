@@ -8,7 +8,7 @@ import { deepFreeze } from "./deep-freeze.ts";
 
 import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
 import type { SettingsIssue } from "@repo/util-plugin-sdk/utilities/settings";
-import type { Jsonifiable, ReadonlyDeep } from "type-fest";
+import type { ReadonlyDeep } from "type-fest";
 
 const ENVIRONMENT_DATA_KEY = "runtimeSettings";
 
@@ -25,9 +25,7 @@ export function initialiseRuntimeSettings(
   value: RuntimeSettings,
   issues: ReadonlyMap<string, SettingsIssue[]>,
 ) {
-  runtimeSettings = deepFreeze(
-    value as unknown as Jsonifiable,
-  ) as ReadonlyDeep<RuntimeSettings>;
+  runtimeSettings = deepFreeze(value);
   runtimeSettingsIssues = new Map(issues);
 
   setEnvironmentData(ENVIRONMENT_DATA_KEY, runtimeSettings);
@@ -47,9 +45,7 @@ export function getRuntimeSettings(): ReadonlyDeep<RuntimeSettings> {
       | undefined;
 
     if (workerSettings) {
-      runtimeSettings = deepFreeze(
-        workerSettings as unknown as Jsonifiable,
-      ) as ReadonlyDeep<RuntimeSettings>;
+      runtimeSettings = deepFreeze(workerSettings);
     }
   }
 

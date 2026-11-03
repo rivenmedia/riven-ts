@@ -14,7 +14,7 @@ export interface SettingsIssue {
 }
 
 export interface ResolvedSettings<T extends z.ZodObject> {
-  value: z.output<T>;
+  value: z.infer<T>;
   lockedLeaves: ReadonlySet<string>;
   ignoredStored: SettingsIssue[];
 }

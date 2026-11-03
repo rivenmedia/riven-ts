@@ -13,7 +13,7 @@ export const coreSettingsSections = {
 } as const;
 
 export type RuntimeSettings = {
-  [K in keyof typeof coreSettingsSections]: z.output<
+  [K in keyof typeof coreSettingsSections]: z.infer<
     (typeof coreSettingsSections)[K]
   >;
 };

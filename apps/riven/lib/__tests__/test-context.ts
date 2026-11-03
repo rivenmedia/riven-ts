@@ -21,6 +21,7 @@ import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
+import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type {
   InstalledPlugin,
@@ -32,6 +33,7 @@ import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type * as GraphQL from "graphql";
 import type { ExecutionResult } from "graphql";
+import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
 
@@ -294,6 +296,30 @@ export const it = testBase
     const Sentry = await import("@sentry/node");
 
     return new Sentry.Scope();
+  })
+  .extend("overrideRuntimeSettings", async ({}, { onCleanup }) => {
+    const { toMerged } = await import("es-toolkit");
+    const { getRuntimeSettings, initialiseRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
+
+    let originalSettings: RuntimeSettings | null = null;
+
+    onCleanup(() => {
+      if (originalSettings) {
+        initialiseRuntimeSettings(originalSettings, new Map());
+      }
+    });
+
+    // Replaces the current runtime settings with a copy that has the given overrides applied.
+    return (overrides: PartialDeep<RuntimeSettings>) => {
+      originalSettings ??= structuredClone(
+        getRuntimeSettings(),
+      ) as RuntimeSettings;
+
+      const current = structuredClone(getRuntimeSettings());
+
+      initialiseRuntimeSettings(toMerged(current, overrides), new Map());
+    };
   })
   .extend("apolloServerInstance", { scope: "file" }, async () => {
     const { buildMockServer } =

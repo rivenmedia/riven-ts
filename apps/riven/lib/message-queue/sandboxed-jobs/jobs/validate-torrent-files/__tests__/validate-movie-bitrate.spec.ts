@@ -1,7 +1,6 @@
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
-import { overrideRuntimeSettings } from "#__tests__/utilities/override-runtime-settings.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import { validateTorrentFiles } from "../utilities/validate-torrent-files.ts";
@@ -16,19 +15,20 @@ import type { BitrateCase } from "./helpers/bitrate-test-cases.ts";
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-function mockBitrateSettings({
-  minimum,
-  maximum,
-}: Pick<BitrateCase, "minimum" | "maximum">) {
-  overrideRuntimeSettings({
-    general: {
-      scraping: {
-        minimumAverageBitrateMovies: minimum,
-        maximumAverageBitrateMovies: maximum,
-      },
+const it = baseIt.extend(
+  "mockBitrateSettings",
+  ({ overrideRuntimeSettings }) =>
+    ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
+      overrideRuntimeSettings({
+        general: {
+          scraping: {
+            minimumAverageBitrateMovies: minimum,
+            maximumAverageBitrateMovies: maximum,
+          },
+        },
+      });
     },
-  });
-}
+);
 
 it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
@@ -49,7 +49,7 @@ it.for(rejectedBitrateCases)(
   "rejects a file $label",
   async (
     { minimum, maximum, bitrate, reason },
-    { em, indexedMovieContext: { indexedMovie }, stream },
+    { em, indexedMovieContext: { indexedMovie }, mockBitrateSettings, stream },
   ) => {
     indexedMovie.runtime = runtime;
 
@@ -85,7 +85,7 @@ it.for(acceptedBitrateCases)(
   "accepts a file $label",
   async (
     { minimum, maximum, bitrate },
-    { em, indexedMovieContext: { indexedMovie }, stream },
+    { em, indexedMovieContext: { indexedMovie }, mockBitrateSettings, stream },
   ) => {
     indexedMovie.runtime = runtime;
 
@@ -114,6 +114,7 @@ it.for(acceptedBitrateCases)(
 it("falls back to a smaller file when the largest file exceeds the maximum", async ({
   em,
   indexedMovieContext: { indexedMovie },
+  mockBitrateSettings,
   stream,
 }) => {
   indexedMovie.runtime = runtime;
@@ -138,6 +139,7 @@ it("falls back to a smaller file when the largest file exceeds the maximum", asy
 it("skips the bitrate check if the movie has no runtime", async ({
   em,
   indexedMovieContext: { indexedMovie },
+  mockBitrateSettings,
   stream,
 }) => {
   indexedMovie.runtime = null;

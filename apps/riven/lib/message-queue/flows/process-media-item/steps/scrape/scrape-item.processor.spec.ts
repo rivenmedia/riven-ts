@@ -7,7 +7,6 @@ import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { overrideRuntimeSettings } from "#__tests__/utilities/override-runtime-settings.ts";
 
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
@@ -104,6 +103,7 @@ it("sends a 'riven.media-item.scrape.error.no-streams-found' event if no streams
 it("throws an UnrecoverableError if the item exceeds the maximum failed attempts", async ({
   createMockJob,
   mockSentryScope,
+  overrideRuntimeSettings,
   seeders: { seedIndexedMovie },
   services,
 }) => {

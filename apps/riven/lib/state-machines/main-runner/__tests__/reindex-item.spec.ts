@@ -1,7 +1,6 @@
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { overrideRuntimeSettings } from "#__tests__/utilities/override-runtime-settings.ts";
 import { flow } from "#message-queue/flows/producer.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
@@ -10,6 +9,7 @@ import { it } from "./helpers/test-context.ts";
 it("enqueues a job to reindex the item after the next episode air date if the item is a show", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
   factories: { mediaEntryFactory },
 }) => {
@@ -146,6 +146,7 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the item is a show and has no next episode air date", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
 }) => {
   vi.useFakeTimers({
@@ -206,6 +207,7 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
 it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item is a show and the next air date is in the past", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
 }) => {
   vi.useFakeTimers({
