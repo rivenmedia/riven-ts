@@ -49,10 +49,10 @@ it("lists disabled plugins as installed without registering them", async ({
     getRuntimeSettings(),
   ) as RuntimeSettings;
 
-  initialiseRuntimeSettings(
-    { ...runtimeSettings, plugins: { enabledPlugins: [] } },
-    new Map(),
-  );
+  initialiseRuntimeSettings({
+    ...runtimeSettings,
+    plugins: { enabledPlugins: [] },
+  });
 
   const actor = createActor(collectPluginsForRegistration, {
     input: { settingsService: services.settingsService },

@@ -14,7 +14,6 @@ import { initialiseRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
-import type { SettingsIssue } from "@repo/util-plugin-sdk/utilities/settings";
 import type { z } from "zod";
 
 export interface LoadRuntimeSettingsInput {
@@ -27,12 +26,8 @@ export const loadRuntimeSettings = fromPromise<
   LoadRuntimeSettingsInput
 >(async ({ input: { settingsService, environment } }) => {
   const stored = await settingsService.getStoredValues(CORE_NAMESPACE);
-  const issues = new Map<string, SettingsIssue[]>();
 
-  function resolveSection<T extends z.ZodObject>(
-    sectionId: keyof RuntimeSettings,
-    schema: T,
-  ) {
+  function resolveSection<T extends z.ZodObject>(schema: T) {
     const { value, ignoredStored } = resolveSettings({
       schema,
       stored,
@@ -49,16 +44,14 @@ export const loadRuntimeSettings = fromPromise<
       );
     }
 
-    issues.set(sectionId, ignoredStored);
-
     return value;
   }
 
   const runtimeSettings: RuntimeSettings = {
-    general: resolveSection("general", coreSettingsSections.general),
-    plugins: resolveSection("plugins", coreSettingsSections.plugins),
+    general: resolveSection(coreSettingsSections.general),
+    plugins: resolveSection(coreSettingsSections.plugins),
   };
 
-  initialiseRuntimeSettings(runtimeSettings, issues);
+  initialiseRuntimeSettings(runtimeSettings);
   configureLogger(runtimeSettings.general.logging);
 });

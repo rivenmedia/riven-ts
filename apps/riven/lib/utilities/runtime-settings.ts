@@ -7,13 +7,11 @@ import {
 import { deepFreeze } from "./deep-freeze.ts";
 
 import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
-import type { SettingsIssue } from "@repo/util-plugin-sdk/utilities/settings";
 import type { ReadonlyDeep } from "type-fest";
 
 const ENVIRONMENT_DATA_KEY = "runtimeSettings";
 
 let runtimeSettings: ReadonlyDeep<RuntimeSettings> | null = null;
-let runtimeSettingsIssues: ReadonlyMap<string, SettingsIssue[]> = new Map();
 
 /**
  * Stores the resolved runtime settings for the lifetime of the process,
@@ -21,12 +19,8 @@ let runtimeSettingsIssues: ReadonlyMap<string, SettingsIssue[]> = new Map();
  *
  * Calling this again replaces the previous value.
  */
-export function initialiseRuntimeSettings(
-  value: RuntimeSettings,
-  issues: ReadonlyMap<string, SettingsIssue[]>,
-) {
+export function initialiseRuntimeSettings(value: RuntimeSettings) {
   runtimeSettings = deepFreeze(value);
-  runtimeSettingsIssues = new Map(issues);
 
   setEnvironmentData(ENVIRONMENT_DATA_KEY, runtimeSettings);
 }
@@ -54,11 +48,4 @@ export function getRuntimeSettings(): ReadonlyDeep<RuntimeSettings> {
   }
 
   return runtimeSettings;
-}
-
-/**
- * Returns the stored values that were ignored for a section when loading the runtime settings.
- */
-export function getRuntimeSettingsIssues(sectionId: string): SettingsIssue[] {
-  return [...(runtimeSettingsIssues.get(sectionId) ?? [])];
 }

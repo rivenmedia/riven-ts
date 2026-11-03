@@ -5,10 +5,7 @@ import { ZodError } from "zod";
 import { it } from "#__tests__/test-context.ts";
 import { CORE_NAMESPACE } from "#settings/core-settings-sections.ts";
 import { configureLogger, logger } from "#utilities/logger/logger.ts";
-import {
-  getRuntimeSettings,
-  getRuntimeSettingsIssues,
-} from "#utilities/runtime-settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { loadRuntimeSettings } from "../load-runtime-settings.actor.ts";
 
@@ -25,7 +22,7 @@ async function runLoader(
   );
 }
 
-it("drops an invalid stored value, records the issue and continues", async ({
+it("drops an invalid stored value, logs a warning and continues", async ({
   services,
 }) => {
   await services.settingsService.writeValues(CORE_NAMESPACE, {
@@ -38,9 +35,6 @@ it("drops an invalid stored value, records the issue and continues", async ({
   await expect(runLoader(services)).resolves.toBeUndefined();
 
   expect(getRuntimeSettings().general.scraping.dubbedAnimeOnly).toBe(false);
-  expect(getRuntimeSettingsIssues("general")).toStrictEqual([
-    { path: "scraping.dubbedAnimeOnly", message: expect.any(String) },
-  ]);
   expect(warnSpy).toHaveBeenCalledWith(
     expect.stringContaining("dubbedAnimeOnly"),
     expect.objectContaining({
@@ -59,7 +53,6 @@ it("applies a valid stored value", async ({ services }) => {
   await runLoader(services);
 
   expect(getRuntimeSettings().general.scraping.dubbedAnimeOnly).toBe(true);
-  expect(getRuntimeSettingsIssues("general")).toStrictEqual([]);
 });
 
 it("prefers the environment value over the stored value", async ({

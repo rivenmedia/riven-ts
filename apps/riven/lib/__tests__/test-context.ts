@@ -41,7 +41,7 @@ import type { ZodObject } from "zod";
  * The test package.json mock makes `test` the only valid core plugin name,
  * so TMDB is included as a fixture with a secret that has a default value.
  */
-export const fixtureInstalledPlugins: InstalledPlugin[] = [
+const fixtureInstalledPlugins: InstalledPlugin[] = [
   {
     sectionId: "repo-plugin-test",
     packageName: "@repo/plugin-test",
@@ -306,7 +306,7 @@ export const it = testBase
 
     onCleanup(() => {
       if (originalSettings) {
-        initialiseRuntimeSettings(originalSettings, new Map());
+        initialiseRuntimeSettings(originalSettings);
       }
     });
 
@@ -318,7 +318,7 @@ export const it = testBase
 
       const current = structuredClone(getRuntimeSettings());
 
-      initialiseRuntimeSettings(toMerged(current, overrides), new Map());
+      initialiseRuntimeSettings(toMerged(current, overrides));
     };
   })
   .extend("apolloServerInstance", { scope: "file" }, async () => {
