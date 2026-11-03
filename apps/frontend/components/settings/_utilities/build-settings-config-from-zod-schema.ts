@@ -83,11 +83,8 @@ function assertSchemaType<T extends $ZodType>(
 
 const isEmptyInput = (value: unknown) => value === "" || value == null;
 
-/*
- * An emptied input saves as `null` for a nullable field, otherwise as
- * `undefined`, which leaves the field unset (or at its default).
- */
-
+// An emptied input saves as `null` for a nullable field, otherwise as
+// `undefined`, which leaves the field unset (or at its default)
 const parseTextInput = (value: unknown) =>
   isEmptyInput(value) ? undefined : value;
 
