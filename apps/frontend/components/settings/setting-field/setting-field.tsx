@@ -71,7 +71,7 @@ export type SettingFieldProps = (
  */
 export function SettingField({
   type,
-  config,
+  config: { locked = false, ...config },
   nested = false,
   parentName,
 }: SettingFieldProps) {
@@ -83,7 +83,7 @@ export function SettingField({
 
   return (
     <div className={cn("space-y-3", !nested && "rounded-lg border p-4")}>
-      {"locked" in config && config.locked ? (
+      {locked ? (
         <fieldset disabled className="space-y-3">
           <Component {...config} name={name} />
           <p className="text-muted-foreground text-sm">
