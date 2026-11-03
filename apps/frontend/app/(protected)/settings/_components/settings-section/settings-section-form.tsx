@@ -1,11 +1,11 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { groupBy } from "es-toolkit";
 import { has, pick, set } from "es-toolkit/compat";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect, useMemo, useState } from "react";
-import { FormProvider } from "react-hook-form";
+import { FormProvider, useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
 
@@ -16,6 +16,7 @@ import { SettingField } from "#components/settings/setting-field/setting-field.t
 
 import { resetSettingsFields } from "./_actions/reset-settings-fields.action";
 import { updateSettingsSection } from "./_actions/update-settings-section.action";
+import { toSectionSubmission } from "./_utilities/to-section-submission";
 import { validationErrorsToIssues } from "./_utilities/validation-errors-to-issues";
 
 import type { BuildSettingsContext } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
@@ -130,13 +131,17 @@ export function SettingsSectionForm({
     ];
   }, [schema, lockedFields, secretStates, executeReset]);
 
-  const [fieldNames, secretFieldNames] = useMemo(() => {
+  const [fieldNames, secretFieldNames, clearableFieldNames] = useMemo(() => {
     const leafFields = getFields(fields);
 
     return [
       leafFields.map(({ config }) => config.name),
       leafFields
         .filter(({ type }) => type === "secret")
+        .map(({ config }) => config.name),
+      // A blank secret is left unchanged, and a locked field can't be edited
+      leafFields
+        .filter(({ type, config }) => type !== "secret" && !config.locked)
         .map(({ config }) => config.name),
     ] as const;
   }, [fields]);
@@ -171,48 +176,73 @@ export function SettingsSectionForm({
     [],
   );
 
-  const { form, action, handleSubmitWithAction } = useHookFormAction(
-    updateSection,
+  const form = useForm({
+    defaultValues,
     // Raw values, so the served schema's defaults aren't filled in for fields
     // that aren't rendered
-    zodResolver(schema, undefined, { raw: true }),
-    {
-      formProps: { defaultValues },
-      actionProps: {
-        onExecute() {
-          setSavedSectionIssues([]);
-        },
-        onSuccess() {
-          toast.success("Settings saved. Restart Riven to apply them.");
+    resolver: zodResolver(schema, undefined, { raw: true }),
+  });
 
-          // Start clean from the saved values, with secrets blanked again as
-          // they're write-only
-          const savedValues = structuredClone(form.getValues());
-
-          for (const name of secretFieldNames) {
-            set(savedValues, name, "");
-          }
-
-          form.reset(savedValues);
-        },
-        onError({ error }) {
-          if (error.serverError) {
-            toast.error(error.serverError);
-          }
-
-          setSavedSectionIssues(
-            validationErrorsToIssues(error.validationErrors).filter(
-              ({ path }) => !isFieldPath(path, fieldNames),
-            ),
-          );
-        },
-      },
+  const action = useAction(updateSection, {
+    onExecute() {
+      setSavedSectionIssues([]);
     },
-  );
+    onSuccess() {
+      toast.success("Settings saved. Restart Riven to apply them.");
+
+      // Start clean from the saved values, with secrets blanked again as
+      // they're write-only
+      const savedValues = structuredClone(form.getValues());
+
+      for (const name of secretFieldNames) {
+        set(savedValues, name, "");
+      }
+
+      // A reset field is left empty, which the revalidated stored values
+      // fill in with the value it now has (e.g. its default)
+      form.reset(savedValues);
+    },
+    onError({ error }) {
+      if (error.serverError) {
+        toast.error(error.serverError);
+      }
+
+      // Issues are keyed by the form's field paths, not the action's input
+      const savedIssues = validationErrorsToIssues(error.validationErrors);
+      const fieldIssues = groupBy(
+        savedIssues.filter(({ path }) => isFieldPath(path, fieldNames)),
+        ({ path }) => path,
+      );
+
+      for (const [path, pathIssues] of Object.entries(fieldIssues)) {
+        form.setError(path, {
+          type: "server",
+          message: pathIssues.map(({ message }) => message).join(" "),
+        });
+      }
+
+      setSavedSectionIssues(
+        savedIssues.filter(({ path }) => !isFieldPath(path, fieldNames)),
+      );
+    },
+  });
+
+  // An emptied field is reset, rather than saved, so it returns to its
+  // default or becomes unset
+  const handleSubmit = form.handleSubmit(async (formValues) => {
+    await action.executeAsync(
+      toSectionSubmission(
+        formValues,
+        form.formState.defaultValues ?? {},
+        clearableFieldNames,
+      ),
+    );
+  });
 
   useEffect(() => {
     // Revalidating the page (e.g. after a secret reset) brings new stored
-    // values, which mustn't discard edits that haven't been saved yet
+    // values, which mustn't discard edits that haven't been saved yet. An
+    // emptied field has no value to keep, so it takes the new stored value.
     form.reset(defaultValues, { keepDirtyValues: true });
 
     // Issues with the stored values are shown before any submit
@@ -229,7 +259,7 @@ export function SettingsSectionForm({
   return (
     <form
       onSubmit={(event) => {
-        void handleSubmitWithAction(event);
+        void handleSubmit(event);
       }}
     >
       <FormProvider {...form}>

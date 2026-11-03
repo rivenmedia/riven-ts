@@ -81,10 +81,24 @@ function assertSchemaType<T extends $ZodType>(
   }
 }
 
+const isEmptyInput = (value: unknown) => value === "" || value == null;
+
+/*
+ * An emptied input saves as `null` for a nullable field, otherwise as
+ * `undefined`, which leaves the field unset (or at its default).
+ */
+
+const parseTextInput = (value: unknown) =>
+  isEmptyInput(value) ? undefined : value;
+
+const parseNullableTextInput = (value: unknown) =>
+  isEmptyInput(value) ? null : value;
+
 function buildStringSetting(
   schema: ZodString,
   key: string | undefined,
   required: boolean,
+  nullable: boolean,
   meta: GlobalMeta,
   context?: BuildSettingsContext,
 ): SettingEntry {
@@ -123,6 +137,7 @@ function buildStringSetting(
           ...(minLength == null ? {} : { minLength }),
           ...(maxLength == null ? {} : { maxLength }),
           required,
+          setValueAs: nullable ? parseNullableTextInput : parseTextInput,
         },
       },
     },
@@ -217,12 +232,12 @@ function buildArraySetting(
   ];
 }
 
-/**
- * Parses a number input's value, leaving an empty input as `undefined` so an
- * optional number with no value is left out rather than submitted as `NaN`.
- */
+/** Parses a number input's value, so an emptied input is never submitted as `NaN`. */
 const parseNumberInput = (value: unknown) =>
-  value === "" || value == null ? undefined : Number(value);
+  isEmptyInput(value) ? undefined : Number(value);
+
+const parseNullableNumberInput = (value: unknown) =>
+  isEmptyInput(value) ? null : Number(value);
 
 function getNumberStep(multipleOf: unknown, isInt: boolean) {
   if (typeof multipleOf === "number" && Number.isFinite(multipleOf)) {
@@ -236,6 +251,7 @@ function buildNumberSetting(
   schema: ZodNumber,
   key: string | undefined,
   required: boolean,
+  nullable: boolean,
   meta: GlobalMeta,
   context?: BuildSettingsContext,
 ): SettingEntry {
@@ -255,7 +271,7 @@ function buildNumberSetting(
           ...(hasMinConstraint ? { min: minimum } : {}),
           ...(hasMaxConstraint ? { max: maximum } : {}),
           required,
-          setValueAs: parseNumberInput,
+          setValueAs: nullable ? parseNullableNumberInput : parseNumberInput,
         },
         step: getNumberStep(multipleOf, type === "integer"),
       },
@@ -286,6 +302,7 @@ export function buildSettingsConfigFromZodSchema(
         schema,
         key,
         required,
+        nullable,
         meta,
         context,
       );
@@ -313,6 +330,7 @@ export function buildSettingsConfigFromZodSchema(
         schema,
         key,
         required,
+        nullable,
         meta,
         context,
       );

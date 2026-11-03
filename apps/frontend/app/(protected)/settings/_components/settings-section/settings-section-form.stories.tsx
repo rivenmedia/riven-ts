@@ -1,5 +1,5 @@
-import { HttpResponse } from "msw";
-import { useState } from "react";
+import { delay, HttpResponse } from "msw";
+import { useEffect, useState } from "react";
 import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { z } from "zod";
 
@@ -113,6 +113,9 @@ const meta = preview.meta({
 const getLastSubmittedValues = () =>
   updateSettingsSectionRequest.mock.lastCall?.[0].values;
 
+const getLastResetFields = () =>
+  updateSettingsSectionRequest.mock.lastCall?.[0].reset;
+
 export const Default = meta.story();
 
 Default.test("Saves the changed values", async ({ canvas, step }) => {
@@ -138,6 +141,7 @@ Default.test("Saves the changed values", async ({ canvas, step }) => {
           scraping: { dubbedAnimeOnly: false, maximumFailedAttempts: 10 },
           logging: { logDirectory: "/var/log/riven" },
         },
+        reset: [],
       }),
     );
   });
@@ -146,6 +150,7 @@ Default.test("Saves the changed values", async ({ canvas, step }) => {
     await expect(getLastSubmittedValues()).not.toHaveProperty(
       "scraping.minimumAverageBitrateMovies",
     );
+    await expect(getLastResetFields()).toStrictEqual([]);
   });
 
   await step("Tells the user to restart Riven", async () => {
@@ -595,5 +600,220 @@ WithTuple.test(
         scrapeCooldownHours: [2, 6, 24],
       }),
     );
+  },
+);
+
+const clearableJsonSchema = toServedJsonSchema(
+  z.object({
+    url: z.string().min(1).meta({ title: "URL" }),
+    limit: z.int().positive().optional().meta({ title: "Limit" }),
+    minimumBitrate: z
+      .int()
+      .positive()
+      .optional()
+      .meta({ title: "Minimum Bitrate" }),
+    retries: z.int().nonnegative().default(3).meta({ title: "Retries" }),
+    // `null` disables updates
+    updateIntervalSeconds: z
+      .int()
+      .nonnegative()
+      .nullable()
+      .default(60)
+      .meta({ title: "Update Interval" }),
+  }),
+);
+
+const clearableValues = {
+  url: "https://example.com",
+  limit: 5,
+  retries: 7,
+  updateIntervalSeconds: 120,
+};
+
+/** The stored values once `retries` has been reset to its default. */
+const resetRetriesValues = { ...clearableValues, retries: 3 };
+
+const clearableArgs = {
+  id: "repo-plugin-clearable",
+  title: "Clearable",
+  jsonSchema: clearableJsonSchema,
+  values: clearableValues,
+};
+
+export const WithClearableFields = meta.story({ args: clearableArgs });
+
+WithClearableFields.test(
+  "Resets an emptied optional number with no default",
+  async ({ canvas }) => {
+    await userEvent.clear(canvas.getByRole("spinbutton", { name: "Limit" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(updateSettingsSectionRequest).toHaveBeenCalledWith({
+        id: "repo-plugin-clearable",
+        values: {
+          url: "https://example.com",
+          retries: 7,
+          updateIntervalSeconds: 120,
+        },
+        reset: ["limit"],
+      }),
+    );
+  },
+);
+
+WithClearableFields.test(
+  "Resets an emptied field that has a default",
+  async ({ canvas }) => {
+    await userEvent.clear(canvas.getByRole("spinbutton", { name: "Retries" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(getLastResetFields()).toStrictEqual(["retries"]),
+    );
+    await expect(getLastSubmittedValues()).not.toHaveProperty("retries");
+  },
+);
+
+WithClearableFields.test(
+  "Saves an emptied nullable number as null",
+  async ({ canvas }) => {
+    await userEvent.clear(
+      canvas.getByRole("spinbutton", { name: "Update Interval" }),
+    );
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(getLastSubmittedValues()).toStrictEqual({
+        url: "https://example.com",
+        limit: 5,
+        retries: 7,
+        updateIntervalSeconds: null,
+      }),
+    );
+    await expect(getLastResetFields()).toStrictEqual([]);
+  },
+);
+
+WithClearableFields.test(
+  "Refuses to save an emptied required field",
+  async ({ canvas }) => {
+    await userEvent.clear(canvas.getByRole("textbox", { name: "URL" }));
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await expect(
+      await canvas.findByText(/expected string, received undefined/u),
+    ).toBeInTheDocument();
+    await expect(updateSettingsSectionRequest).not.toHaveBeenCalled();
+  },
+);
+
+WithClearableFields.test(
+  "Neither saves nor resets an untouched field with no value",
+  async ({ canvas }) => {
+    const limit = canvas.getByRole("spinbutton", { name: "Limit" });
+
+    await userEvent.clear(limit);
+    await userEvent.type(limit, "6");
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(getLastSubmittedValues()).toStrictEqual({
+        url: "https://example.com",
+        limit: 6,
+        retries: 7,
+        updateIntervalSeconds: 120,
+      }),
+    );
+    await expect(getLastResetFields()).toStrictEqual([]);
+  },
+);
+
+/** Updates the form's stored values, as revalidating the page does. */
+let revalidateClearableForm: ((values: typeof clearableValues) => void) | null =
+  null;
+
+/** Re-renders the form with the stored values it's revalidated with. */
+function RevalidatingClearableForm(props: SettingsSectionFormProps) {
+  const [values, setValues] = useState(props.values);
+
+  useEffect(() => {
+    revalidateClearableForm = setValues;
+
+    return () => {
+      revalidateClearableForm = null;
+    };
+  }, []);
+
+  return (
+    <>
+      <SettingsSectionForm {...props} values={values} />
+      <button
+        type="button"
+        onClick={() => {
+          setValues(resetRetriesValues);
+        }}
+      >
+        Revalidate
+      </button>
+    </>
+  );
+}
+
+export const WithClearedFieldRevalidation = meta.story({
+  args: clearableArgs,
+  render: (args) => <RevalidatingClearableForm {...args} />,
+});
+
+WithClearedFieldRevalidation.test(
+  "Shows the default of a reset field when the page revalidates during the save",
+  async ({ canvas, msw }) => {
+    msw.use(
+      api.mutation(UPDATE_SETTINGS_SECTION, async () => {
+        revalidateClearableForm?.(resetRetriesValues);
+
+        // Lets the revalidated values render before the save succeeds
+        await delay(100);
+
+        return HttpResponse.json({
+          data: {
+            updateSettingsSection: {
+              __typename: "SettingsMutationResult",
+              success: true,
+              issues: [],
+            },
+          } satisfies UpdateSettingsSectionMutation,
+        });
+      }),
+    );
+
+    const retries = canvas.getByRole("spinbutton", { name: "Retries" });
+
+    await userEvent.clear(retries);
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await expect(
+      await canvas.findByText("Settings saved. Restart Riven to apply them."),
+    ).toBeInTheDocument();
+    await waitFor(() => expect(retries).toHaveValue(3));
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
+  },
+);
+
+WithClearedFieldRevalidation.test(
+  "Shows the default of a reset field when the page revalidates after the save",
+  async ({ canvas }) => {
+    const retries = canvas.getByRole("spinbutton", { name: "Retries" });
+
+    await userEvent.clear(retries);
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await expect(
+      await canvas.findByText("Settings saved. Restart Riven to apply them."),
+    ).toBeInTheDocument();
+    await userEvent.click(canvas.getByRole("button", { name: "Revalidate" }));
+
+    await waitFor(() => expect(retries).toHaveValue(3));
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
   },
 );

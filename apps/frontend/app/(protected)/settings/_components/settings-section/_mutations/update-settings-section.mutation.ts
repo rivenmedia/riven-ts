@@ -10,8 +10,12 @@ export const UPDATE_SETTINGS_SECTION: TypedDocumentNode<
   UpdateSettingsSectionMutation,
   UpdateSettingsSectionMutationVariables
 > = gql`
-  mutation UpdateSettingsSection($id: ID!, $values: JSONObject!) {
-    updateSettingsSection(id: $id, values: $values) {
+  mutation UpdateSettingsSection(
+    $id: ID!
+    $values: JSONObject!
+    $reset: [String!]!
+  ) {
+    updateSettingsSection(id: $id, values: $values, reset: $reset) {
       success
       issues {
         path

@@ -198,9 +198,9 @@ describe(buildSettingsConfigFromZodSchema, () => {
   });
 
   describe("number input values", () => {
-    const getSetValueAs = () => {
+    const getSetValueAs = (schema: z.ZodType = z.int().optional()) => {
       const [field] = buildSettingsConfigFromZodSchema(
-        z.int().optional(),
+        schema,
         "numberField",
       ).values();
 
@@ -210,6 +210,18 @@ describe(buildSettingsConfigFromZodSchema, () => {
 
       return field.config.registerOptions?.setValueAs;
     };
+
+    it.each([
+      ["a nullable number", z.int().nullable()],
+      ["a defaulted nullable number", z.int().nullable().default(60)],
+      ["a served nullable number", z.union([z.int(), z.null()]).default(60)],
+    ])("leaves an emptied input as null for %s", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeNull();
+    });
+
+    it("leaves an emptied input as undefined for a defaulted number", () => {
+      expect(getSetValueAs(z.int().default(3))?.("")).toBeUndefined();
+    });
 
     it.each([[""], [undefined], [null]])(
       "leaves an empty input (%o) as undefined",
@@ -402,7 +414,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                     config: {
                       label: "Value",
                       name: "recordField.value",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -435,7 +450,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                     config: {
                       label: "Value",
                       name: "recordField.value",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -473,7 +491,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                     config: {
                       label: "Value",
                       name: "optionalRecordField.value",
-                      registerOptions: { required: false },
+                      registerOptions: {
+                        required: false,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -510,7 +531,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Text Field",
                 name: "textField",
-                registerOptions: { required: true },
+                registerOptions: {
+                  required: true,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
@@ -620,6 +644,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   minLength: 5,
                   maxLength: 10,
+                  setValueAs: expect.any(Function),
                 },
               },
             },
@@ -647,12 +672,61 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Optional Text Field",
                 name: "optionalTextField",
-                registerOptions: { required: false },
+                registerOptions: {
+                  required: false,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
         ]),
       );
+    });
+  });
+
+  describe("text input values", () => {
+    const getSetValueAs = (schema: z.ZodType) => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "textField",
+      ).values();
+
+      if (field?.type !== "text") {
+        throw new Error("Expected a text field");
+      }
+
+      return field.config.registerOptions?.setValueAs;
+    };
+
+    it.each([
+      ["an optional", z.string().optional()],
+      ["a defaulted", z.string().default("./logs")],
+      ["a required", z.string()],
+    ])("leaves an emptied input as undefined for %s string", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeUndefined();
+    });
+
+    it.each([
+      ["a nullable", z.string().nullable()],
+      ["a served nullable", z.union([z.string(), z.null()]).default("x")],
+    ])("leaves an emptied input as null for %s string", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeNull();
+    });
+
+    it("keeps a typed value", () => {
+      expect(getSetValueAs(z.string().optional())?.("/var/log")).toBe(
+        "/var/log",
+      );
+    });
+
+    it("keeps an emptied secret as blank, which leaves it unchanged", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string().optional().meta({ secret: true }),
+        "secretField",
+      ).values();
+
+      expect(field?.type).toBe("secret");
+      expect(field?.config).not.toHaveProperty("registerOptions.setValueAs");
     });
   });
 
@@ -873,7 +947,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Field 1",
                 name: "field1",
-                registerOptions: { required: true },
+                registerOptions: {
+                  required: true,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
@@ -1004,7 +1081,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                     config: {
                       label: "T 2",
                       name: "t.1",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                   {
@@ -1126,7 +1206,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 label: "Default String Field",
                 description: "A default string field",
                 name: "defaultStringField",
-                registerOptions: { required: false },
+                registerOptions: {
+                  required: false,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],

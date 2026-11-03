@@ -12,40 +12,46 @@ import { issuesToValidationErrors } from "../_utilities/issues-to-validation-err
 
 import type { ValidationErrors } from "next-safe-action";
 
-const inputSchema = z.record(z.string(), z.unknown());
+const inputSchema = z.object({
+  values: z.record(z.string(), z.unknown()),
+  /** Dotted paths of fields whose stored values are removed. */
+  reset: z.array(z.string()),
+});
 
 export const updateSettingsSection = permissionActionClient
   .metadata({ permissions: { instance: ["manage-settings"] } })
   .bindArgsSchemas([z.string()])
   .inputSchema(inputSchema)
-  .action(async ({ bindArgsParsedInputs: [id], parsedInput }) => {
-    const { data } = await getClient().mutate({
-      mutation: UPDATE_SETTINGS_SECTION,
-      variables: { id, values: parsedInput },
-    });
+  .action(
+    async ({ bindArgsParsedInputs: [id], parsedInput: { values, reset } }) => {
+      const { data } = await getClient().mutate({
+        mutation: UPDATE_SETTINGS_SECTION,
+        variables: { id, values, reset },
+      });
 
-    if (!data) {
-      throw new Error("Failed to save settings");
-    }
+      if (!data) {
+        throw new Error("Failed to save settings");
+      }
 
-    const { issues, success } = data.updateSettingsSection;
+      const { issues, success } = data.updateSettingsSection;
 
-    if (issues.length > 0) {
-      // The record schema can't type nested section paths, but the errors are
-      // only read by mapping them onto the form's fields
-      returnValidationErrors(
-        inputSchema,
-        issuesToValidationErrors(issues) as ValidationErrors<
-          typeof inputSchema
-        >,
-      );
-    }
+      if (issues.length > 0) {
+        // Issues are keyed by the form's field paths rather than the input's
+        // shape, as the errors are only read by mapping them onto the fields
+        returnValidationErrors(
+          inputSchema,
+          issuesToValidationErrors(issues) as ValidationErrors<
+            typeof inputSchema
+          >,
+        );
+      }
 
-    if (!success) {
-      throw new Error("Failed to save settings");
-    }
+      if (!success) {
+        throw new Error("Failed to save settings");
+      }
 
-    revalidatePath("/settings", "layout");
+      revalidatePath("/settings", "layout");
 
-    return { success };
-  });
+      return { success };
+    },
+  );
