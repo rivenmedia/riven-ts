@@ -580,6 +580,31 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
+    it('returns a "string_array" field for an enum array schema', () => {
+      const schema = z
+        .enum(["option-1", "option-2", "option-3"])
+        .array()
+        .meta({ title: "Enum Array Field" });
+
+      const field = buildSettingsConfigFromZodSchema(schema, "enumArrayField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "enumArrayField",
+            {
+              type: "string_array",
+              config: {
+                label: "Enum Array Field",
+                name: "enumArrayField",
+                registerOptions: { required: true },
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
     it("throws an error for unsupported array element types", () => {
       const schema = z.number().array().meta({ title: "Number Array Field" });
 
