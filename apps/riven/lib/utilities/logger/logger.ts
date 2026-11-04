@@ -1,5 +1,3 @@
-import { resolveSettings } from "@repo/util-plugin-sdk/utilities/settings";
-
 import { ecsFormat as baseEcsFormat } from "@elastic/ecs-winston-format";
 import path from "node:path";
 import { isMainThread } from "node:worker_threads";
@@ -7,6 +5,7 @@ import { createLogger, format, transports } from "winston";
 import DailyRotateFile from "winston-daily-rotate-file";
 
 import { GeneralSettings } from "#settings/sections/general-settings.schema.ts";
+import { resolveSettings } from "#settings/utilities/resolve-settings.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 import { coreEnvironment } from "#utilities/settings.ts";
 

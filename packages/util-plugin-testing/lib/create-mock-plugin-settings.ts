@@ -1,14 +1,13 @@
 import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
-import { flattenSettings } from "@repo/util-plugin-sdk/utilities/settings";
 
 import { mockLogger } from "./create-mock-logger.ts";
 
 import type { ZodObject, z } from "zod";
 
 /**
- * Creates a {@link PluginSettings} instance with the given settings applied as stored values.
+ * Creates a {@link PluginSettings} instance with the given settings applied.
  *
- * @throws if any of the given settings are invalid for the schema
+ * @throws {z.ZodError} if any of the given settings are invalid for the schema
  */
 export const createMockPluginSettings = <T extends ZodObject>(
   schema: T,
@@ -23,19 +22,7 @@ export const createMockPluginSettings = <T extends ZodObject>(
     false,
   );
 
-  const { ignoredStored } = pluginSettings.set(
-    mockPluginKey,
-    schema,
-    flattenSettings(schema, settings as Record<string, unknown>),
-  );
-
-  if (ignoredStored.length > 0) {
-    const invalidSettingsMessage = ignoredStored
-      .map(({ path, message }) => `${path}: ${message}`)
-      .join(", ");
-
-    throw new Error(`Invalid mock plugin settings: ${invalidSettingsMessage}`);
-  }
+  pluginSettings.set(mockPluginKey, schema, schema.parse(settings), []);
 
   return pluginSettings;
 };

@@ -1,11 +1,10 @@
-import { resolveSettings } from "@repo/util-plugin-sdk/utilities/settings";
-
 import { fromPromise } from "xstate";
 
 import {
   CORE_NAMESPACE,
   RuntimeSettings,
 } from "#settings/core-settings-sections.ts";
+import { resolveSettings } from "#settings/utilities/resolve-settings.ts";
 import { configureLogger, logger } from "#utilities/logger/logger.ts";
 import { initialiseRuntimeSettings } from "#utilities/runtime-settings.ts";
 

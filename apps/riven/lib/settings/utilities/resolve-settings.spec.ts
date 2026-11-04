@@ -5,7 +5,7 @@ import {
   findIgnoredStored,
   resolveSettings,
   validateSettings,
-} from "../resolve-settings.ts";
+} from "./resolve-settings.ts";
 
 const schema = z.object({
   group: z.object({

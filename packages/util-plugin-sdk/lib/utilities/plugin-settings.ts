@@ -1,6 +1,3 @@
-import { getLeafPaths, resolveSettings } from "./settings/index.ts";
-
-import type { ResolvedSettings } from "./settings/index.ts";
 import type { Jsonifiable, ReadonlyDeep } from "type-fest";
 import type { Logger } from "winston";
 import type { z, ZodObject } from "zod";
@@ -170,22 +167,24 @@ export class PluginSettings {
   }
 
   /**
-   * Resolves and persists settings for a given schema, using env > stored > schema default.
+   * Persists the resolved settings for a given schema.
+   *
+   * Resolution (env > stored > schema default) is performed by core before calling this.
    *
    * @internal
    *
    * @param configPrefix The config prefix associated with the plugin.
-   * @param schema The schema that should be used to parse the settings.
-   * @param stored The stored (database) values for the plugin, keyed by leaf.
-   * @returns The resolved settings, including any stored values that were ignored.
+   * @param schema The schema the settings were resolved against.
+   * @param value The resolved settings.
+   * @param consumedKeys The environment setting keys consumed by the schema, so they aren't reported as unused.
    * @throws {Error} if settings are locked
-   * @throws {z.ZodError} if the settings are invalid
    */
   public set<T extends ZodObject>(
     configPrefix: string,
     schema: T,
-    stored: Record<string, unknown>,
-  ): ResolvedSettings<T> {
+    value: z.infer<T>,
+    consumedKeys: Iterable<string>,
+  ): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }
@@ -198,26 +197,18 @@ export class PluginSettings {
       );
     }
 
-    const resolved = resolveSettings({
-      schema,
-      stored,
-      env: Object.fromEntries(rawPluginSettings),
-    });
+    this.#settingsMap.set(schema, value);
 
-    this.#settingsMap.set(schema, resolved.value);
-
-    for (const key of getLeafPaths(schema).keys()) {
+    for (const key of consumedKeys) {
       rawPluginSettings.delete(key);
     }
 
     if (this.#printConfig) {
       console.debug("#################");
       console.debug(`Effective ${configPrefix} configuration:`);
-      console.debug(resolved.value);
+      console.debug(value);
       console.debug("#################");
     }
-
-    return resolved;
   }
 
   /**

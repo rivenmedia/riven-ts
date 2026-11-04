@@ -1,9 +1,6 @@
-import {
-  getLeafPaths,
-  isSecretLeaf,
-} from "@repo/util-plugin-sdk/utilities/settings";
-
 import z from "zod";
+
+import { getLeafPaths, isSecretLeaf } from "./leaf-paths.ts";
 
 import type { SecretState } from "#types/__generated__/graphql.ts";
 import type { JSONSchema } from "zod/v4/core";

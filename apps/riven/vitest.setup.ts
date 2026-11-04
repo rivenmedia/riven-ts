@@ -212,7 +212,7 @@ beforeAll(() => {
 
 beforeEach(async () => {
   const { resolveSettings } =
-    await import("@repo/util-plugin-sdk/utilities/settings");
+    await import("#settings/utilities/resolve-settings.ts");
   const { RuntimeSettings } =
     await import("#settings/core-settings-sections.ts");
   const { initialiseRuntimeSettings } =

@@ -8,7 +8,7 @@ import {
   getLeafSchema,
   isSecretLeaf,
   unflattenSettings,
-} from "../leaf-paths.ts";
+} from "./leaf-paths.ts";
 
 const schema = z.object({
   group: z.object({ limit: z.string() }),

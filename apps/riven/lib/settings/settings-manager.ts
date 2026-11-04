@@ -1,31 +1,30 @@
-import {
-  decodeEnvValue,
-  findIgnoredStored,
-  flattenSettings,
-  getLeafDefault,
-  getLeafPaths,
-  getLeafSchema,
-  isSecretLeaf,
-  resolveSettings,
-  unflattenSettings,
-  validateSettings,
-} from "@repo/util-plugin-sdk/utilities/settings";
-
 import { isEqual } from "es-toolkit";
 import { GraphQLError } from "graphql";
 
 import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
 import { buildSectionJsonSchema } from "./utilities/build-section-json-schema.ts";
+import { decodeEnvValue } from "./utilities/decode-env-value.ts";
+import {
+  flattenSettings,
+  getLeafDefault,
+  getLeafPaths,
+  getLeafSchema,
+  isSecretLeaf,
+  unflattenSettings,
+} from "./utilities/leaf-paths.ts";
+import {
+  findIgnoredStored,
+  resolveSettings,
+  validateSettings,
+} from "./utilities/resolve-settings.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { PluginSummary } from "#graphql/resolvers/settings/types/plugin-summary.type.ts";
 import type { SettingsSection } from "#graphql/resolvers/settings/types/settings-section.type.ts";
 import type { SecretState } from "#types/__generated__/graphql.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
-import type {
-  LeafPathMap,
-  SettingsIssue,
-} from "@repo/util-plugin-sdk/utilities/settings";
+import type { LeafPathMap } from "./utilities/leaf-paths.ts";
+import type { SettingsIssue } from "./utilities/resolve-settings.ts";
 import type { z } from "zod";
 
 type Schema = z.ZodObject;

@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import z from "zod";
 
-import { decodeEnvValue } from "../decode-env-value.ts";
+import { decodeEnvValue } from "./decode-env-value.ts";
 
 const LogLevelLike = z.enum(["error", "info", "debug"]);
 

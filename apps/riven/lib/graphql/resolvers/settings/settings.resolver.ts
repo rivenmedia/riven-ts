@@ -6,7 +6,7 @@ import { PluginList } from "./types/plugin-list.type.ts";
 import { SettingsMutationResult } from "./types/settings-mutation-result.type.ts";
 import { SettingsSection } from "./types/settings-section.type.ts";
 
-import type { SettingsIssue } from "@repo/util-plugin-sdk/utilities/settings";
+import type { SettingsIssue } from "#settings/utilities/resolve-settings.ts";
 
 const toResult = (issues: SettingsIssue[]): SettingsMutationResult => ({
   success: issues.length === 0,

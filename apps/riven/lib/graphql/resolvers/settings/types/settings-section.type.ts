@@ -3,6 +3,8 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { SecretFieldState } from "./secret-field-state.type.ts";
 import { SettingsIssue } from "./settings-issue.type.ts";
 
+import type { ZodStandardJSONSchemaPayload } from "zod/v4/core";
+
 @ObjectType()
 export class SettingsSection {
   @Field(() => ID)
@@ -12,7 +14,7 @@ export class SettingsSection {
   public title!: string;
 
   @Field(() => Object)
-  public jsonSchema!: Record<string, unknown>;
+  public jsonSchema!: ZodStandardJSONSchemaPayload<z.ZodObject>;
 
   @Field(() => Object)
   public values!: Record<string, unknown>;

@@ -5,6 +5,8 @@ import { assign, enqueueActions, setup } from "xstate";
 import { ZodError } from "zod";
 
 import packageJson from "#package.json" with { type: "json" };
+import { getLeafPaths } from "#settings/utilities/leaf-paths.ts";
+import { resolveSettings } from "#settings/utilities/resolve-settings.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { redisCache } from "#utilities/redis-cache.ts";
@@ -79,6 +81,7 @@ function registerPluginSettings(
   {
     installedPlugins,
     pluginConfigPrefixMap,
+    pluginEnvironment,
     pluginSettings,
     storedPluginSettings,
   }: ParsedPlugins,
@@ -104,10 +107,17 @@ function registerPluginSettings(
       );
     }
 
-    const { ignoredStored } = pluginSettings.set(
+    const { value, ignoredStored } = resolveSettings({
+      schema: plugin.settingsSchema,
+      stored: storedPluginSettings.get(packageName) ?? {},
+      env: { ...pluginEnvironment.get(packageName) },
+    });
+
+    pluginSettings.set(
       pluginConfigPrefix,
       plugin.settingsSchema,
-      storedPluginSettings.get(packageName) ?? {},
+      value,
+      getLeafPaths(plugin.settingsSchema).keys(),
     );
 
     for (const { leaf, message } of ignoredStored) {

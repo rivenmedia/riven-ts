@@ -62,11 +62,6 @@
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
-    "./utilities/settings": {
-      "types": "./dist/utilities/settings/index.d.ts",
-      "production": "./dist/utilities/settings/index.js",
-      "default": "./lib/utilities/settings/index.ts"
-    },
     "./utilities/datasource-map": {
       "types": "./dist/utilities/datasource-map.d.ts",
       "production": "./dist/utilities/datasource-map.js",

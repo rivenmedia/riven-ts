@@ -17,6 +17,8 @@ import { it } from "#__tests__/test-context.ts";
 
 import { SettingsManager } from "./settings-manager.ts";
 import { buildSettingsSections } from "./settings-sections.ts";
+import { getLeafPaths } from "./utilities/leaf-paths.ts";
+import { resolveSettings } from "./utilities/resolve-settings.ts";
 
 import type { Services } from "#database/database.ts";
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
@@ -118,11 +120,6 @@ function createManager(
   });
 }
 
-interface JsonSchemaNode {
-  properties: Record<string, Record<string, unknown>>;
-  required?: string[];
-}
-
 describe("getSection", () => {
   it("throws NOT_FOUND for an unknown section", async ({ services }) => {
     const manager = createManager(services);
@@ -191,7 +188,7 @@ describe("getSection", () => {
     const manager = createManager(services);
 
     const view = await manager.getSection("fake");
-    const jsonSchema = view.jsonSchema as unknown as JsonSchemaNode;
+    const { jsonSchema } = view;
 
     expect(view.values).not.toHaveProperty("apiKey");
     expect(view.values).not.toHaveProperty("token");
@@ -199,7 +196,7 @@ describe("getSection", () => {
       { path: "apiKey", state: "unset" },
       { path: "token", state: "default" },
     ]);
-    expect(jsonSchema.properties["token"]?.["default"]).toBeUndefined();
+    expect(jsonSchema.properties?.["token"]).not.toHaveProperty("default");
     expect(jsonSchema.required).toContain("apiKey");
   });
 
@@ -214,7 +211,7 @@ describe("getSection", () => {
     const manager = createManager(services);
 
     const view = await manager.getSection("fake");
-    const jsonSchema = view.jsonSchema as unknown as JsonSchemaNode;
+    const { jsonSchema } = view;
 
     expect(view.secretStates).toContainEqual({
       path: "apiKey",
@@ -234,7 +231,7 @@ describe("getSection", () => {
     const manager = createManager(services);
 
     const view = await manager.getSection("fake");
-    const jsonSchema = view.jsonSchema as unknown as JsonSchemaNode;
+    const { jsonSchema } = view;
 
     expect(view.secretStates).toStrictEqual([
       { path: "apiKey", state: "unset" },
@@ -287,7 +284,7 @@ describe("getSection", () => {
     const view = await manager.getSection("fake");
 
     expect(view.issues).toStrictEqual([
-      { leaf: "n", path: "nested.n", message: expect.any(String) as string },
+      { leaf: "n", path: "nested.n", message: expect.any(String) },
     ]);
   });
 });
@@ -382,7 +379,7 @@ describe("updateSection", () => {
     await expect(
       manager.updateSection("fake", { nested: { n: "nope" } }),
     ).resolves.toStrictEqual([
-      { path: "nested.n", message: expect.any(String) as string },
+      { path: "nested.n", message: expect.any(String) },
     ]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
@@ -407,7 +404,7 @@ describe("updateSection", () => {
     ).resolves.toStrictEqual([
       {
         path: "scraping.maximumFailedAttempts",
-        message: expect.any(String) as string,
+        message: expect.any(String),
       },
     ]);
     await expect(
@@ -483,9 +480,7 @@ describe("updateSection with reset", () => {
 
     await expect(
       manager.updateSection("clear", { retries: 4 }, ["url", "limit"]),
-    ).resolves.toStrictEqual([
-      { path: "url", message: expect.any(String) as string },
-    ]);
+    ).resolves.toStrictEqual([{ path: "url", message: expect.any(String) }]);
     await expect(
       services.settingsService.getStoredValues(CLEAR_NAMESPACE),
     ).resolves.toStrictEqual({ url: "https://a.test", limit: 5 });
@@ -523,7 +518,7 @@ describe("updateSection with reset", () => {
     await expect(
       manager.updateSection("fake", { nested: { n: 4 } }, ["nested.n"]),
     ).resolves.toStrictEqual([
-      { path: "nested.n", message: expect.any(String) as string },
+      { path: "nested.n", message: expect.any(String) },
     ]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
@@ -626,9 +621,7 @@ describe("resetFields", () => {
 
     await expect(
       manager.resetFields("fake", ["apiKey"]),
-    ).resolves.toStrictEqual([
-      { path: "apiKey", message: expect.any(String) as string },
-    ]);
+    ).resolves.toStrictEqual([{ path: "apiKey", message: expect.any(String) }]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
     ).resolves.toStrictEqual({ apiKey: "secret" });
@@ -638,7 +631,7 @@ describe("resetFields", () => {
     const manager = createManager(services);
 
     await expect(manager.resetFields("fake", ["nope"])).resolves.toStrictEqual([
-      { path: "nope", message: expect.any(String) as string },
+      { path: "nope", message: expect.any(String) },
     ]);
   });
 });
@@ -672,7 +665,7 @@ describe("setPluginEnabled", () => {
       manager.setPluginEnabled("repo-plugin-plex", true),
     ).resolves.toContainEqual({
       path: "plexToken",
-      message: expect.any(String) as string,
+      message: expect.any(String),
     });
     await expect(
       services.settingsService.getStoredValues("riven"),
@@ -686,7 +679,7 @@ describe("setPluginEnabled", () => {
     await expect(
       manager.setPluginEnabled("repo-plugin-tmdb", false),
     ).resolves.toStrictEqual([
-      { path: "enabled", message: expect.any(String) as string },
+      { path: "enabled", message: expect.any(String) },
     ]);
   });
 
@@ -700,7 +693,7 @@ describe("setPluginEnabled", () => {
     await expect(
       manager.setPluginEnabled("repo-plugin-comet", true),
     ).resolves.toStrictEqual([
-      { path: "enabled", message: expect.any(String) as string },
+      { path: "enabled", message: expect.any(String) },
     ]);
   });
 
@@ -710,6 +703,7 @@ describe("setPluginEnabled", () => {
     await expect(
       manager.setPluginEnabled("repo-plugin-test", true),
     ).resolves.toStrictEqual([]);
+
     await expect(
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({ enabledPlugins: ["test"] });
@@ -723,6 +717,7 @@ describe("setPluginEnabled", () => {
       upsert: { plexToken: "token", plexServerUrl: "http://localhost:32400" },
       delete: [],
     });
+
     await services.settingsService.writeValues("riven", {
       upsert: { enabledPlugins: ["test"] },
       delete: [],
@@ -733,6 +728,7 @@ describe("setPluginEnabled", () => {
     await expect(
       manager.setPluginEnabled("repo-plugin-plex", true),
     ).resolves.toStrictEqual([]);
+
     await expect(
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({ enabledPlugins: ["test", "plex"] });
@@ -749,6 +745,7 @@ describe("setPluginEnabled", () => {
     await expect(
       manager.setPluginEnabled("repo-plugin-test", false),
     ).resolves.toStrictEqual([]);
+
     await expect(
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({});
@@ -768,6 +765,7 @@ describe("setPluginEnabled", () => {
       await expect(
         manager.setPluginEnabled("repo-plugin-test", enabled),
       ).resolves.toStrictEqual([]);
+
       expect(writeValues).not.toHaveBeenCalled();
       expect(manager.restartRequired).toBe(false);
     },
@@ -849,20 +847,29 @@ describe("plugin env settings", () => {
     const environment = {
       [`RIVEN_PLUGIN_SETTING__${prefix}__urls`]: '["discord://id/token"]',
     };
+
     const pluginSettings = new PluginSettings(
       environment,
       [prefix],
       createLogger({ silent: true }),
       false,
     );
+
     const pluginEnvironment = new Map([
       [packageName, pluginSettings.getEnvironmentSnapshot().get(prefix) ?? {}],
     ]);
 
-    const resolved = pluginSettings.set(
+    const resolved = resolveSettings({
+      schema: notificationsPlugin.settingsSchema,
+      stored: {},
+      env: { ...pluginSettings.getEnvironmentSnapshot().get(prefix) },
+    });
+
+    pluginSettings.set(
       prefix,
       notificationsPlugin.settingsSchema,
-      {},
+      resolved.value,
+      getLeafPaths(notificationsPlugin.settingsSchema).keys(),
     );
 
     expect(resolved.value).toStrictEqual({ urls: ["discord://id/token"] });
@@ -876,6 +883,7 @@ describe("plugin env settings", () => {
       enabled: true,
       alwaysEnabled: false,
     };
+
     const manager = new SettingsManager({
       settingsService: services.settingsService,
       sections: buildSettingsSections({
