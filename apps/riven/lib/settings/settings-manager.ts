@@ -18,6 +18,8 @@ import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
 import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
+import type { PluginSummary } from "#graphql/resolvers/settings/types/plugin-summary.type.ts";
+import type { SettingsSection } from "#graphql/resolvers/settings/types/settings-section.type.ts";
 import type { SecretState } from "#types/__generated__/graphql.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
 import type {
@@ -25,35 +27,16 @@ import type {
   SettingsIssue,
 } from "@repo/util-plugin-sdk/utilities/settings";
 
+type Schema = z.ZodObject;
+
 export interface SettingsSectionDefinition {
   id: string;
   /** The settings owner: `riven` or the plugin package name. */
   namespace: string;
   title: string;
-  schema: z.ZodObject;
+  schema: Schema;
   /** Raw env values keyed by leaf. Never exposed outside the settings manager. */
   environment: Readonly<Record<string, string>>;
-}
-
-export interface SettingsSectionView {
-  id: string;
-  title: string;
-  jsonSchema: Record<string, unknown>;
-  /** Nested input shape: stored ∪ env ∪ defaults, with secrets omitted. */
-  values: Record<string, unknown>;
-  /** Dotted paths of env-set fields. */
-  lockedFields: string[];
-  secretStates: { path: string; state: SecretState }[];
-  /** Stored values that are currently being ignored. */
-  issues: SettingsIssue[];
-}
-
-export interface PluginSummary {
-  /** The plugin's settings section id. */
-  id: string;
-  title: string;
-  enabled: boolean;
-  alwaysEnabled: boolean;
 }
 
 export interface SettingsManagerDeps {
@@ -169,7 +152,7 @@ export class SettingsManager {
     return this.#restartRequired;
   }
 
-  public async getSection(id: string): Promise<SettingsSectionView> {
+  public async getSection(id: string): Promise<SettingsSection> {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;
 

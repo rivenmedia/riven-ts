@@ -6,18 +6,12 @@ import {
 import z from "zod";
 
 import type { SecretState } from "#types/__generated__/graphql.ts";
+import type { JSONSchema } from "zod/v4/core";
 
-interface JsonSchemaNode {
-  properties?: Record<string, JsonSchemaNode>;
-  required?: string[];
-  anyOf?: JsonSchemaNode[];
-  oneOf?: JsonSchemaNode[];
-  allOf?: JsonSchemaNode[];
-  [key: string]: unknown;
-}
+type JSONSchemaRoot = JSONSchema.JSONSchema;
 
 /** Removes `key` from the node and from every union/intersection member. */
-function removeKeyword(node: JsonSchemaNode, key: string) {
+function removeKeyword(node: JSONSchemaRoot, key: string) {
   // oxlint-disable-next-line typescript/no-dynamic-delete
   delete node[key];
 
@@ -31,7 +25,7 @@ function removeKeyword(node: JsonSchemaNode, key: string) {
 }
 
 /** Finds a leaf's JSON Schema node and the object node that declares it. */
-function findLeafNode(root: JsonSchemaNode, path: readonly string[]) {
+function findLeafNode(root: JSONSchemaRoot, path: readonly string[]) {
   let parent = root;
 
   for (const segment of path.slice(0, -1)) {
@@ -39,6 +33,10 @@ function findLeafNode(root: JsonSchemaNode, path: readonly string[]) {
 
     if (!group) {
       throw new Error(`Missing JSON schema group "${segment}"`);
+    }
+
+    if (typeof group !== "object") {
+      throw new TypeError(`Invalid JSON schema group "${segment}"`);
     }
 
     parent = group;
@@ -54,7 +52,7 @@ function findLeafNode(root: JsonSchemaNode, path: readonly string[]) {
   return { parent, key, node };
 }
 
-function removeRequired(parent: JsonSchemaNode, key: string) {
+function removeRequired(parent: JSONSchemaRoot, key: string) {
   const required = parent.required?.filter((name) => name !== key) ?? [];
 
   if (required.length > 0) {
@@ -74,11 +72,11 @@ function removeRequired(parent: JsonSchemaNode, key: string) {
 export function buildSectionJsonSchema(
   schema: z.ZodObject,
   secretStates: Map<string, SecretState>,
-): Record<string, unknown> {
+) {
   const jsonSchema = z.toJSONSchema(schema, {
     io: "input",
     unrepresentable: "any",
-  }) as JsonSchemaNode;
+  });
 
   for (const [leaf, path] of getLeafPaths(schema)) {
     if (!isSecretLeaf(schema, leaf)) {
@@ -86,6 +84,10 @@ export function buildSectionJsonSchema(
     }
 
     const { parent, key, node } = findLeafNode(jsonSchema, path);
+
+    if (typeof node !== "object") {
+      continue;
+    }
 
     removeKeyword(node, "default");
 

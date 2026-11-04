@@ -109,7 +109,7 @@ it("never exposes a secret default, only its state", async ({
     structuredClone(
       response.body.singleResult.data?.settingsSection.secretStates,
     ),
-  ).toStrictEqual([{ path: "apiKey", state: "DEFAULT" }]);
+  ).toStrictEqual([{ path: "apiKey", state: "default" }]);
 });
 
 it("fails with NOT_FOUND for an unknown section", async ({
