@@ -335,26 +335,30 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (): ApolloServerContext => ({
-        [CoreKey]: {
-          em: orm.em.fork(),
-          services,
-          sendEvent: vi.fn<MainRunnerMachineIntake>(),
-          settingsManager: new SettingsManager({
-            settingsService: services.settingsService,
-            sections: buildSettingsSections({
-              installedPlugins: fixtureInstalledPlugins,
-              pluginEnvironment: new Map(),
-              coreEnvironment: {},
-            }),
+      (): ApolloServerContext => {
+        const settingsManager = new SettingsManager({
+          settingsService: services.settingsService,
+          sections: buildSettingsSections({
             installedPlugins: fixtureInstalledPlugins,
+            pluginEnvironment: new Map(),
             coreEnvironment: {},
           }),
-        },
-        logger,
-        sendEvent: vi.fn<MainRunnerMachineIntake>(),
-        plugins: new Map(),
-      }),
+          installedPlugins: fixtureInstalledPlugins,
+          coreEnvironment: {},
+        });
+
+        return {
+          [CoreKey]: {
+            em: orm.em.fork(),
+            services,
+            sendEvent: vi.fn<MainRunnerMachineIntake>(),
+            settingsManager,
+          },
+          logger,
+          sendEvent: vi.fn<MainRunnerMachineIntake>(),
+          plugins: new Map(),
+        };
+      },
   )
   .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(
