@@ -7,6 +7,6 @@ export class SecretFieldState {
   @Field()
   public path!: string;
 
-  @Field(() => SecretState)
+  @Field(() => SecretState.enum)
   public state!: SecretState;
 }

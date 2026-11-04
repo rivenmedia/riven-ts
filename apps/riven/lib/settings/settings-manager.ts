@@ -18,13 +18,12 @@ import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
 import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
+import type { SecretState } from "#types/__generated__/graphql.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
 import type {
   LeafPathMap,
   SettingsIssue,
 } from "@repo/util-plugin-sdk/utilities/settings";
-
-export type SecretState = "default" | "custom" | "env" | "unset";
 
 export interface SettingsSectionDefinition {
   id: string;

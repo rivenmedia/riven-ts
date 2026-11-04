@@ -5,7 +5,7 @@ import {
 
 import z from "zod";
 
-import type { SecretState } from "./settings-manager.ts";
+import type { SecretState } from "#types/__generated__/graphql.ts";
 
 interface JsonSchemaNode {
   properties?: Record<string, JsonSchemaNode>;

@@ -5,7 +5,7 @@ import z from "zod";
 
 import { buildSectionJsonSchema } from "../build-section-json-schema.ts";
 
-import type { SecretState } from "../settings-manager.ts";
+import type { SecretState } from "#types/__generated__/graphql.ts";
 
 const FakeSettings = z.object({
   apiKey: z.string().min(1).meta({ secret: true }),
