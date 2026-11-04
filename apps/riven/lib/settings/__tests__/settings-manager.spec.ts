@@ -287,7 +287,7 @@ describe("getSection", () => {
     const view = await manager.getSection("fake");
 
     expect(view.issues).toStrictEqual([
-      { path: "nested.n", message: expect.any(String) as string },
+      { leaf: "n", path: "nested.n", message: expect.any(String) as string },
     ]);
   });
 });

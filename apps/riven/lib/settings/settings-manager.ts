@@ -1,5 +1,6 @@
 import {
   decodeEnvValue,
+  findIgnoredStored,
   flattenSettings,
   getLeafDefault,
   getLeafPaths,
@@ -12,7 +13,6 @@ import {
 
 import { isEqual } from "es-toolkit";
 import { GraphQLError } from "graphql";
-import z from "zod";
 
 import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
 import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
@@ -26,6 +26,7 @@ import type {
   LeafPathMap,
   SettingsIssue,
 } from "@repo/util-plugin-sdk/utilities/settings";
+import type { z } from "zod";
 
 type Schema = z.ZodObject;
 
@@ -123,10 +124,6 @@ function resolveResetPaths(leaves: LeafPathMap, paths: string[]) {
   return { resetLeaves, issues };
 }
 
-function findIssueLeaf(leaves: LeafPathMap, issue: SettingsIssue) {
-  return issue.path.split(".").find((segment) => leaves.has(segment));
-}
-
 /**
  * The settings domain layer: section views, saving, resetting and enabling plugins.
  *
@@ -156,10 +153,12 @@ export class SettingsManager {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;
 
-    const issues = this.#findIgnoredStored(definition, stored, env, leaves);
-    const ignoredLeaves = new Set(
-      issues.map((issue) => findIssueLeaf(leaves, issue)),
-    );
+    const issues = findIgnoredStored({
+      schema,
+      stored,
+      env: pickLeaves(leaves, definition.environment),
+    });
+    const ignoredLeaves = new Set(issues.map(({ leaf }) => leaf));
     const effectiveStored = Object.fromEntries(
       Object.entries(stored).filter(([leaf]) => !ignoredLeaves.has(leaf)),
     );
@@ -444,39 +443,6 @@ export class SettingsManager {
       locked: lockedLeaves.has("enabledPlugins"),
       stored,
     };
-  }
-
-  /**
-   * Returns the stored values that fail validation and are therefore ignored.
-   *
-   * Falls back to filtering a plain validation when resolution fails for reasons
-   * unrelated to stored values (e.g. a required field with no value yet).
-   */
-  #findIgnoredStored(
-    definition: SettingsSectionDefinition,
-    stored: Record<string, unknown>,
-    env: Record<string, unknown>,
-    leaves: LeafPathMap,
-  ): SettingsIssue[] {
-    try {
-      return resolveSettings({
-        schema: definition.schema,
-        stored,
-        env: pickLeaves(leaves, definition.environment),
-      }).ignoredStored;
-    } catch (error) {
-      if (!(error instanceof z.ZodError)) {
-        throw error;
-      }
-
-      return validateSettings(definition.schema, { ...stored, ...env }).filter(
-        (issue) => {
-          const leaf = findIssueLeaf(leaves, issue);
-
-          return leaf !== undefined && leaf in stored && !(leaf in env);
-        },
-      );
-    }
   }
 
   async #write(

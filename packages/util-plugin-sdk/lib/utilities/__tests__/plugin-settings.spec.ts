@@ -70,7 +70,7 @@ describe(PluginSettings, () => {
 
     expect(resolved.value.url).toBe("https://example.com");
     expect(resolved.ignoredStored).toStrictEqual([
-      { path: "url", message: expect.any(String) as string },
+      { leaf: "url", path: "url", message: expect.any(String) as string },
     ]);
   });
 

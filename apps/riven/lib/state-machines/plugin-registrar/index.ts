@@ -1,5 +1,4 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
-import { getLeafPaths } from "@repo/util-plugin-sdk/utilities/settings";
 
 import chalk from "chalk";
 import { assign, enqueueActions, setup } from "xstate";
@@ -110,14 +109,11 @@ function registerPluginSettings(
       plugin.settingsSchema,
       storedPluginSettings.get(packageName) ?? {},
     );
-    const leaves = getLeafPaths(plugin.settingsSchema);
 
-    for (const issue of ignoredStored) {
-      const key = issue.path.split(".").find((segment) => leaves.has(segment));
-
+    for (const { leaf, message } of ignoredStored) {
       logger.warn(
-        `Ignoring invalid stored setting "${key ?? issue.path}" for plugin ${packageName}: ${issue.message}`,
-        { namespace: packageName, key },
+        `Ignoring invalid stored setting "${leaf}" for plugin ${packageName}: ${message}`,
+        { namespace: packageName, key: leaf },
       );
     }
 

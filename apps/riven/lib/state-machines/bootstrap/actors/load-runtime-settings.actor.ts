@@ -1,7 +1,4 @@
-import {
-  getLeafPaths,
-  resolveSettings,
-} from "@repo/util-plugin-sdk/utilities/settings";
+import { resolveSettings } from "@repo/util-plugin-sdk/utilities/settings";
 
 import { fromPromise } from "xstate";
 
@@ -30,14 +27,11 @@ export const loadRuntimeSettings = fromPromise<
     stored,
     env: environment,
   });
-  const leaves = getLeafPaths(RuntimeSettings);
 
-  for (const issue of ignoredStored) {
-    const key = issue.path.split(".").find((segment) => leaves.has(segment));
-
+  for (const { leaf, message } of ignoredStored) {
     logger.warn(
-      `Ignoring invalid stored setting "${key ?? issue.path}" in namespace "${CORE_NAMESPACE}": ${issue.message}`,
-      { namespace: CORE_NAMESPACE, key },
+      `Ignoring invalid stored setting "${leaf}" in namespace "${CORE_NAMESPACE}": ${message}`,
+      { namespace: CORE_NAMESPACE, key: leaf },
     );
   }
 

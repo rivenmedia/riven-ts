@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import z, { ZodError } from "zod";
 
-import { resolveSettings, validateSettings } from "../resolve-settings.ts";
+import {
+  findIgnoredStored,
+  resolveSettings,
+  validateSettings,
+} from "../resolve-settings.ts";
 
 const schema = z.object({
   group: z.object({
@@ -41,7 +45,7 @@ describe(resolveSettings, () => {
 
     expect(result.value.group.limit).toBe(5);
     expect(result.ignoredStored).toStrictEqual([
-      { path: "group.limit", message: expect.any(String) },
+      { leaf: "limit", path: "group.limit", message: expect.any(String) },
     ]);
   });
 
@@ -81,10 +85,12 @@ describe(resolveSettings, () => {
       });
       expect(result.ignoredStored).toStrictEqual([
         {
+          leaf: "min",
           path: "range.min",
           message: expect.stringContaining("min must not exceed max"),
         },
         {
+          leaf: "flag",
           path: "flag",
           message: expect.stringContaining("min must not exceed max"),
         },
@@ -100,7 +106,7 @@ describe(resolveSettings, () => {
 
       expect(result.value.range).toStrictEqual({ min: 1, max: 15 });
       expect(result.ignoredStored).toStrictEqual([
-        { path: "range.min", message: expect.any(String) },
+        { leaf: "min", path: "range.min", message: expect.any(String) },
       ]);
     });
 
@@ -130,6 +136,35 @@ describe(resolveSettings, () => {
     expect(() =>
       resolveSettings({ schema: required, stored: {}, env: {} }),
     ).toThrow(ZodError);
+  });
+});
+
+describe(findIgnoredStored, () => {
+  const required = z.object({
+    grp: z.object({ req: z.string(), limit: z.int().default(5) }),
+    flag: z.boolean().default(false),
+  });
+
+  it("reports invalid stored leaves while a required leaf is missing", () => {
+    expect(
+      findIgnoredStored({
+        schema: required,
+        stored: { limit: "bad", flag: true },
+        env: {},
+      }),
+    ).toStrictEqual([
+      { leaf: "limit", path: "grp.limit", message: expect.any(String) },
+    ]);
+  });
+
+  it("does not report stored leaves for an invalid env value", () => {
+    expect(
+      findIgnoredStored({
+        schema,
+        stored: { label: "stored" },
+        env: { limit: "bad" },
+      }),
+    ).toStrictEqual([]);
   });
 });
 
