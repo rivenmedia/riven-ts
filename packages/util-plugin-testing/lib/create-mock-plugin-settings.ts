@@ -6,7 +6,7 @@ import { mockLogger } from "./create-mock-logger.ts";
 import type { ZodObject, z } from "zod";
 
 /**
- * Creates a `PluginSettings` instance with the given settings applied as stored values.
+ * Creates a {@link PluginSettings} instance with the given settings applied as stored values.
  *
  * @throws if any of the given settings are invalid for the schema
  */
@@ -30,11 +30,11 @@ export const createMockPluginSettings = <T extends ZodObject>(
   );
 
   if (ignoredStored.length > 0) {
-    throw new Error(
-      `Invalid mock plugin settings: ${ignoredStored
-        .map(({ path, message }) => `${path}: ${message}`)
-        .join(", ")}`,
-    );
+    const invalidSettingsMessage = ignoredStored
+      .map(({ path, message }) => `${path}: ${message}`)
+      .join(", ");
+
+    throw new Error(`Invalid mock plugin settings: ${invalidSettingsMessage}`);
   }
 
   return pluginSettings;

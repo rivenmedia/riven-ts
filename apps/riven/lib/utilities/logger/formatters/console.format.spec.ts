@@ -24,11 +24,11 @@ function render(info: Partial<TransformableInfo>, showStackTraces = true) {
 }
 
 it("omits the stack trace for expected errors", () => {
-  expect.assertions(2);
-
   const error = new UnrecoverableError(
     "Failed to download Big Buck Bunny: No valid torrent found after trying all downloaders",
   );
+
+  expect.assert(error.stack);
 
   const output = render({
     message: "download-item failed:",
@@ -36,7 +36,7 @@ it("omits the stack trace for expected errors", () => {
       name: error.name,
       type: error.name,
       message: error.message,
-      stack_trace: error.stack ?? "",
+      stack_trace: error.stack,
     },
   });
 
@@ -48,9 +48,9 @@ it("omits the stack trace for expected errors", () => {
 });
 
 it("keeps the stack trace for unexpected errors", () => {
-  expect.assertions(1);
-
   const error = new TypeError("Cannot read properties of undefined");
+
+  expect.assert(error.stack);
 
   const output = render({
     message: "download-item failed:",
@@ -58,7 +58,7 @@ it("keeps the stack trace for unexpected errors", () => {
       name: error.name,
       type: error.name,
       message: error.message,
-      stack_trace: error.stack ?? "",
+      stack_trace: error.stack,
     },
   });
 
@@ -66,9 +66,9 @@ it("keeps the stack trace for unexpected errors", () => {
 });
 
 it("omits the stack trace for unexpected errors when stack traces are disabled", () => {
-  expect.assertions(2);
-
   const error = new TypeError("Cannot read properties of undefined");
+
+  expect.assert(error.stack);
 
   const output = render(
     {
@@ -77,7 +77,7 @@ it("omits the stack trace for unexpected errors when stack traces are disabled",
         name: error.name,
         type: error.name,
         message: error.message,
-        stack_trace: error.stack ?? "",
+        stack_trace: error.stack,
       },
     },
     false,

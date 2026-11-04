@@ -3,7 +3,7 @@
 import { describe, expect, it } from "vitest";
 import z from "zod";
 
-import { buildSectionJsonSchema } from "../build-section-json-schema.ts";
+import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
 
 import type { SecretState } from "#types/__generated__/graphql.ts";
 

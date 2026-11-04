@@ -7,7 +7,7 @@ import { fromPromise } from "xstate";
 import z from "zod";
 
 import { CorePlugins } from "#schemas/core-plugins.schema.ts";
-import { toPluginSectionId } from "#settings/plugin-section-id.ts";
+import { toPluginSectionId } from "#settings/utilities/to-plugin-section-id.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 import { settings } from "#utilities/settings.ts";

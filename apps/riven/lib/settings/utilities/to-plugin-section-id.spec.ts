@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { toPluginSectionId } from "../plugin-section-id.ts";
+import { toPluginSectionId } from "./to-plugin-section-id.ts";
 
 it.for([
   { packageName: "@repo/plugin-comet", sectionId: "repo-plugin-comet" },

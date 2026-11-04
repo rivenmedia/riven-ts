@@ -15,8 +15,8 @@ import z from "zod";
 
 import { it } from "#__tests__/test-context.ts";
 
-import { SettingsManager } from "../settings-manager.ts";
-import { buildSettingsSections } from "../settings-sections.ts";
+import { SettingsManager } from "./settings-manager.ts";
+import { buildSettingsSections } from "./settings-sections.ts";
 
 import type { Services } from "#database/database.ts";
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";

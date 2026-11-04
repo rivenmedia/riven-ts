@@ -81,6 +81,7 @@ it("returns the general section with its default values", async ({
   );
 
   expect.assert(response.body.kind === "single");
+
   expect(response.body.singleResult.errors).toBeUndefined();
   expect(response.body.singleResult.data?.settingsSection).toMatchObject({
     id: "general",
@@ -101,6 +102,7 @@ it("never exposes a secret default, only its state", async ({
   );
 
   expect.assert(response.body.kind === "single");
+
   expect(response.body.singleResult.errors).toBeUndefined();
   expect(JSON.stringify(response.body.singleResult)).not.toContain(
     TMDB_DEFAULT_API_KEY_FRAGMENT,
@@ -125,6 +127,7 @@ it("fails with NOT_FOUND for an unknown section", async ({
   );
 
   expect.assert(response.body.kind === "single");
+
   expect(response.body.singleResult.errors?.[0]?.extensions?.["code"]).toBe(
     "NOT_FOUND",
   );
@@ -149,6 +152,7 @@ it("reports issues for an invalid update", async ({
   );
 
   expect.assert(response.body.kind === "single");
+
   expect(response.body.singleResult.errors).toBeUndefined();
   expect(response.body.singleResult.data?.updateSettingsSection).toMatchObject({
     success: false,
@@ -166,6 +170,7 @@ it("flags a restart as required after a valid update", async ({
   >({ query: INSTANCE_STATUS }, { contextValue: gqlContext });
 
   expect.assert(before.body.kind === "single");
+
   expect(before.body.singleResult.data?.instanceStatus.restartRequired).toBe(
     false,
   );
@@ -185,6 +190,7 @@ it("flags a restart as required after a valid update", async ({
   );
 
   expect.assert(update.body.kind === "single");
+
   expect(update.body.singleResult.data?.updateSettingsSection).toMatchObject({
     success: true,
     issues: [],
@@ -196,6 +202,7 @@ it("flags a restart as required after a valid update", async ({
   >({ query: INSTANCE_STATUS }, { contextValue: gqlContext });
 
   expect.assert(after.body.kind === "single");
+
   expect(after.body.singleResult.data?.instanceStatus.restartRequired).toBe(
     true,
   );
@@ -227,11 +234,13 @@ it("resets the given fields while saving a section", async ({
   );
 
   expect.assert(update.body.kind === "single");
+
   expect(update.body.singleResult.errors).toBeUndefined();
   expect(update.body.singleResult.data?.updateSettingsSection).toMatchObject({
     success: true,
     issues: [],
   });
+
   await expect(
     services.settingsService.getStoredValues("riven"),
   ).resolves.not.toHaveProperty("maximumFailedAttempts");

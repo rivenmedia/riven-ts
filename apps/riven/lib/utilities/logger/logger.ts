@@ -23,7 +23,7 @@ import {
 
 import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
 import type { ReadonlyDeep } from "type-fest";
-import type { transport as Transport } from "winston";
+import type { LoggerOptions, transport as Transport } from "winston";
 
 type LoggingSettings = ReadonlyDeep<RuntimeSettings["general"]["logging"]>;
 
@@ -39,7 +39,7 @@ const levels = {
   verbose: 4,
   debug: 5,
   silly: 6,
-};
+} as const satisfies LoggerOptions["levels"];
 
 const baseFormat = format.combine(
   sentryMetaFormat(),
@@ -64,19 +64,22 @@ export function getEcsSymlinkPath() {
 }
 
 function createTransports(
-  logging: LoggingSettings,
+  loggingSettings: LoggingSettings,
   logDir: string,
   ecsLogDir: string,
 ) {
   const loggerTransports: Transport[] = [];
   const exceptionHandlers: Transport[] = [];
 
-  if (!logging.loggingEnabled) {
-    return { loggerTransports, exceptionHandlers };
+  if (!loggingSettings.loggingEnabled) {
+    return {
+      loggerTransports,
+      exceptionHandlers,
+    };
   }
 
   const fileFormat = createFileFormat({
-    showStackTraces: logging.logShowStackTraces,
+    showStackTraces: loggingSettings.logShowStackTraces,
   });
 
   // ECS logs will always be created for debugging purposes
@@ -113,20 +116,22 @@ function createTransports(
     }),
   );
 
-  if (logging.enabledLogTransports.includes("console")) {
+  if (loggingSettings.enabledLogTransports.includes("console")) {
     loggerTransports.push(
       new transports.Console({
         format: format.combine(
           format.colorize({
             level: process.stdout.isTTY,
           }),
-          createConsoleFormat({ showStackTraces: logging.logShowStackTraces }),
+          createConsoleFormat({
+            showStackTraces: loggingSettings.logShowStackTraces,
+          }),
         ),
       }),
     );
   }
 
-  if (logging.enabledLogTransports.includes("file")) {
+  if (loggingSettings.enabledLogTransports.includes("file")) {
     loggerTransports.push(
       new transports.File({
         filename: "error.log",
@@ -175,11 +180,11 @@ function createTransports(
  *
  * Any previously configured transports are closed.
  */
-export function configureLogger(logging: LoggingSettings) {
-  const logDir = path.resolve(process.cwd(), logging.logDirectory);
+export function configureLogger(loggingSettings: LoggingSettings) {
+  const logDir = path.resolve(process.cwd(), loggingSettings.logDirectory);
   const ecsLogDir = path.join(logDir, "ecs");
   const { loggerTransports, exceptionHandlers } = createTransports(
-    logging,
+    loggingSettings,
     logDir,
     ecsLogDir,
   );
@@ -189,8 +194,8 @@ export function configureLogger(logging: LoggingSettings) {
     levels,
     format: baseFormat,
     exitOnError: false,
-    level: logging.logLevel,
-    silent: !logging.loggingEnabled,
+    level: loggingSettings.logLevel,
+    silent: !loggingSettings.loggingEnabled,
     transports: loggerTransports,
     ...(exceptionHandlers.length > 0 ? { exceptionHandlers } : {}),
   });

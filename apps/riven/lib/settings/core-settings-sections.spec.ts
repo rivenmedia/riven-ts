@@ -2,8 +2,8 @@ import { getLeafPaths } from "@repo/util-plugin-sdk/utilities/settings";
 
 import { expect, it } from "vitest";
 
-import { RuntimeSettings } from "../core-settings-sections.ts";
-import { GeneralSettings } from "../sections/general-settings.schema.ts";
+import { RuntimeSettings } from "./core-settings-sections.ts";
+import { GeneralSettings } from "./sections/general-settings.schema.ts";
 
 it("has no duplicate leaf keys across all core sections", () => {
   expect(() => getLeafPaths(RuntimeSettings)).not.toThrow();

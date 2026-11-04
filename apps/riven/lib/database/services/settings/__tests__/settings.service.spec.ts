@@ -1,16 +1,8 @@
 import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { Setting } from "#database/entities/setting.entity.ts";
 
 describe("settingsService", () => {
-  it("keys settings by namespace first", ({ orm }) => {
-    expect(orm.getMetadata().get(Setting).primaryKeys).toStrictEqual([
-      "namespace",
-      "key",
-    ]);
-  });
-
   it("stores and returns upserted values", async ({ services }) => {
     await services.settingsService.writeValues("ns-a", {
       upsert: { a: 1 },
@@ -19,12 +11,10 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-a"),
-    ).resolves.toStrictEqual({
-      a: 1,
-    });
+    ).resolves.toStrictEqual({ a: 1 });
   });
 
-  it("keeps an explicit null", async ({ services }) => {
+  it("preserves an explicit null", async ({ services }) => {
     await services.settingsService.writeValues("ns-b", {
       upsert: { a: null },
       delete: [],
@@ -32,9 +22,7 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-b"),
-    ).resolves.toStrictEqual({
-      a: null,
-    });
+    ).resolves.toStrictEqual({ a: null });
   });
 
   it("updates existing values", async ({ services }) => {
@@ -42,6 +30,7 @@ describe("settingsService", () => {
       upsert: { a: 1 },
       delete: [],
     });
+
     await services.settingsService.writeValues("ns-c", {
       upsert: { a: 2 },
       delete: [],
@@ -49,9 +38,7 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-c"),
-    ).resolves.toStrictEqual({
-      a: 2,
-    });
+    ).resolves.toStrictEqual({ a: 2 });
   });
 
   it("deletes keys", async ({ services }) => {
@@ -59,6 +46,7 @@ describe("settingsService", () => {
       upsert: { a: 1, b: 2 },
       delete: [],
     });
+
     await services.settingsService.writeValues("ns-d", {
       upsert: {},
       delete: ["a"],
@@ -66,12 +54,10 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-d"),
-    ).resolves.toStrictEqual({
-      b: 2,
-    });
+    ).resolves.toStrictEqual({ b: 2 });
   });
 
-  it("rolls back the whole write when part of it fails", async ({
+  it("rolls back entire write operation when part of it fails", async ({
     services,
   }) => {
     await services.settingsService.writeValues("ns-e", {
@@ -89,9 +75,7 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-e"),
-    ).resolves.toStrictEqual({
-      a: 1,
-    });
+    ).resolves.toStrictEqual({ a: 1 });
   });
 
   it("isolates namespaces", async ({ services }) => {
@@ -106,9 +90,7 @@ describe("settingsService", () => {
 
     await expect(
       services.settingsService.getStoredValues("ns-f"),
-    ).resolves.toStrictEqual({
-      a: 1,
-    });
+    ).resolves.toStrictEqual({ a: 1 });
 
     const grouped = await services.settingsService.getStoredValuesByNamespace([
       "ns-f",

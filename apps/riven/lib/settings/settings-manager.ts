@@ -14,8 +14,8 @@ import {
 import { isEqual } from "es-toolkit";
 import { GraphQLError } from "graphql";
 
-import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
 import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
+import { buildSectionJsonSchema } from "./utilities/build-section-json-schema.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { PluginSummary } from "#graphql/resolvers/settings/types/plugin-summary.type.ts";

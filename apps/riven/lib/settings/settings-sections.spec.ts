@@ -3,8 +3,8 @@ import { plugin as cometPlugin } from "@repo/plugin-comet";
 import { describe, expect, it } from "vitest";
 import z from "zod";
 
-import { GeneralSettings } from "../sections/general-settings.schema.ts";
-import { buildSettingsSections } from "../settings-sections.ts";
+import { GeneralSettings } from "./sections/general-settings.schema.ts";
+import { buildSettingsSections } from "./settings-sections.ts";
 
 import type { InstalledPlugin } from "#types/plugins.ts";
 
