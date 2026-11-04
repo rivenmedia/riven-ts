@@ -15,10 +15,7 @@ import { GraphQLError } from "graphql";
 import z from "zod";
 
 import { buildSectionJsonSchema } from "./build-section-json-schema.ts";
-import {
-  CORE_NAMESPACE,
-  coreSettingsSections,
-} from "./core-settings-sections.ts";
+import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
@@ -391,7 +388,7 @@ export class SettingsManager {
       }
     }
 
-    const schema = coreSettingsSections.plugins;
+    const schema = RuntimeSettings.shape.plugins;
     const isDefault = isEqual(next, getLeafDefault(schema, "enabledPlugins"));
 
     if (isDefault && !("enabledPlugins" in stored)) {
@@ -448,7 +445,7 @@ export class SettingsManager {
 
   /** The currently configured enabled plugins (stored + env), not the boot-time set. */
   async #loadEnabledPlugins() {
-    const schema = coreSettingsSections.plugins;
+    const schema = RuntimeSettings.shape.plugins;
     const stored = pickLeaves(
       getLeafPaths(schema),
       await this.#settingsService.getStoredValues(CORE_NAMESPACE),

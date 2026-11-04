@@ -1,13 +1,12 @@
 import { getLeafPaths } from "@repo/util-plugin-sdk/utilities/settings";
 
 import { expect, it } from "vitest";
-import z from "zod";
 
-import { coreSettingsSections } from "../core-settings-sections.ts";
+import { RuntimeSettings } from "../core-settings-sections.ts";
 import { GeneralSettings } from "../sections/general-settings.schema.ts";
 
 it("has no duplicate leaf keys across all core sections", () => {
-  expect(() => getLeafPaths(z.object(coreSettingsSections))).not.toThrow();
+  expect(() => getLeafPaths(RuntimeSettings)).not.toThrow();
 });
 
 it("defaults the general settings to the previous core defaults", () => {

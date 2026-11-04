@@ -213,7 +213,7 @@ beforeAll(() => {
 beforeEach(async () => {
   const { resolveSettings } =
     await import("@repo/util-plugin-sdk/utilities/settings");
-  const { coreSettingsSections } =
+  const { RuntimeSettings } =
     await import("#settings/core-settings-sections.ts");
   const { initialiseRuntimeSettings } =
     await import("#utilities/runtime-settings.ts");
@@ -221,18 +221,13 @@ beforeEach(async () => {
 
   // Runtime settings are normally loaded from the database during bootstrap.
   // Reset them to the env + default values before each test.
-  initialiseRuntimeSettings({
-    general: resolveSettings({
-      schema: coreSettingsSections.general,
+  initialiseRuntimeSettings(
+    resolveSettings({
+      schema: RuntimeSettings,
       stored: {},
       env: coreEnvironment,
     }).value,
-    plugins: resolveSettings({
-      schema: coreSettingsSections.plugins,
-      stored: {},
-      env: coreEnvironment,
-    }).value,
-  });
+  );
 });
 
 beforeEach(async () => {

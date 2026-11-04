@@ -1,7 +1,4 @@
-import {
-  CORE_NAMESPACE,
-  coreSettingsSections,
-} from "./core-settings-sections.ts";
+import { CORE_NAMESPACE, RuntimeSettings } from "./core-settings-sections.ts";
 
 import type { InstalledPlugin } from "#types/plugins.ts";
 import type { SettingsSectionDefinition } from "./settings-manager.ts";
@@ -21,7 +18,7 @@ export function buildSettingsSections({
   pluginEnvironment,
   coreEnvironment,
 }: BuildSettingsSectionsDeps): Map<string, SettingsSectionDefinition> {
-  const { general } = coreSettingsSections;
+  const { general } = RuntimeSettings.shape;
   const sections = new Map<string, SettingsSectionDefinition>([
     [
       "general",
