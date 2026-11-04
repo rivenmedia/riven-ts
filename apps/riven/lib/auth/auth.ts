@@ -53,7 +53,6 @@ export const authConfig = {
   secret: frontendSettings.authSecret ?? generateSecret(),
   baseURL: `http://${settings.host}:${settings.port.toString()}`,
   logger: {
-    // Getters defer reading the runtime settings until `initAuth` is called during bootstrap.
     get disabled() {
       return !getRuntimeSettings().general.logging.loggingEnabled;
     },
