@@ -64,7 +64,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
-    @Query()
+    @Query(() => Boolean)
     public testIsValid() {
       return true;
     }
