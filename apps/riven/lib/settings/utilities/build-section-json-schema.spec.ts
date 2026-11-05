@@ -25,7 +25,7 @@ function build(states: Record<string, SecretState>) {
   return buildSectionJsonSchema(
     FakeSettings,
     new Map(Object.entries(states)),
-  ) as unknown as JsonSchemaNode;
+  ) as JsonSchemaNode;
 }
 
 describe(buildSectionJsonSchema, () => {

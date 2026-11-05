@@ -20,11 +20,11 @@ import {
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { PluginSummary } from "#graphql/resolvers/settings/types/plugin-summary.type.ts";
+import type { SettingsIssue } from "#graphql/resolvers/settings/types/settings-issue.type.ts";
 import type { SettingsSection } from "#graphql/resolvers/settings/types/settings-section.type.ts";
 import type { SecretState } from "#types/__generated__/graphql.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
 import type { LeafPathMap } from "./utilities/leaf-paths.ts";
-import type { SettingsIssue } from "./utilities/resolve-settings.ts";
 import type { z } from "zod";
 
 type Schema = z.ZodObject;

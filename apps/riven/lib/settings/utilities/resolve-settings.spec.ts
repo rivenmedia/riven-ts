@@ -83,6 +83,7 @@ describe(resolveSettings, () => {
         range: { min: 1, max: 10 },
         flag: false,
       });
+
       expect(result.ignoredStored).toStrictEqual([
         {
           leaf: "min",
@@ -114,6 +115,7 @@ describe(resolveSettings, () => {
       expect(() =>
         resolveSettings({ schema: refined, stored: {}, env: { min: "20" } }),
       ).toThrow(ZodError);
+
       expect(() =>
         resolveSettings({
           schema: refined,

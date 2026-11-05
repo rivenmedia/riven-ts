@@ -1,15 +1,12 @@
 import z from "zod";
 
-interface JsonSchemaNode {
-  type?: unknown;
-  anyOf?: JsonSchemaNode[];
-}
+import type { JSONSchema } from "zod/v4/core";
 
 /**
  * True when the schema only accepts strings (ignoring `null`), so the raw
  * environment value must be used as-is rather than JSON-parsed.
  */
-function isStringTyped(node: JsonSchemaNode): boolean {
+function isStringTyped(node: JSONSchema.JSONSchema): boolean {
   if (node.type === "string") {
     return true;
   }
@@ -39,14 +36,14 @@ export function decodeEnvValue(raw: string, fieldSchema: z.ZodType): unknown {
   const jsonSchema = z.toJSONSchema(fieldSchema, {
     io: "input",
     unrepresentable: "any",
-  }) as JsonSchemaNode;
+  });
 
   if (isStringTyped(jsonSchema)) {
     return raw;
   }
 
   try {
-    return JSON.parse(raw) as unknown;
+    return JSON.parse(raw);
   } catch (error) {
     if (error instanceof SyntaxError) {
       return raw;

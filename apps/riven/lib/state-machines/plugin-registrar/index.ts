@@ -53,15 +53,16 @@ export interface PluginRegistrarMachineInput {
   settingsService: SettingsService;
 }
 
-export interface PluginRegistrarMachineOutput {
+export interface PluginRegistrarMachineOutput extends Pick<
+  ParsedPlugins,
+  "installedPlugins" | "pluginEnvironment"
+> {
   validPlugins: ValidPluginMap;
   invalidPlugins: InvalidPluginMap;
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: PublishableEventSet;
   pluginSettings: PluginSettings;
-  installedPlugins: ParsedPlugins["installedPlugins"];
-  pluginEnvironment: ParsedPlugins["pluginEnvironment"];
 }
 
 export type PluginRegistrarMachineEvent =

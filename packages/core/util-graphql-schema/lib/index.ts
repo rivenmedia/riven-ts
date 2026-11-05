@@ -4,13 +4,11 @@ import { buildSchema as baseBuildSchema } from "type-graphql";
 import { LogLevelAnchor } from "./log-level-anchor.type.ts";
 import { registerEnums } from "./register-enums.ts";
 
+import type { SetOptional } from "type-fest";
 import type { BuildSchemaOptions } from "type-graphql";
 
 export const buildSchema = async (
-  options: Omit<BuildSchemaOptions, "resolvers"> & {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-    resolvers?: readonly Function[] | undefined;
-  },
+  options: SetOptional<BuildSchemaOptions, "resolvers">,
 ) => {
   registerEnums();
 

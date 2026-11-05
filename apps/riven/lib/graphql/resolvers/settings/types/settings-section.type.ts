@@ -3,6 +3,7 @@ import { Field, ID, ObjectType } from "type-graphql";
 import { SecretFieldState } from "./secret-field-state.type.ts";
 import { SettingsIssue } from "./settings-issue.type.ts";
 
+import type { z } from "zod";
 import type { ZodStandardJSONSchemaPayload } from "zod/v4/core";
 
 @ObjectType()

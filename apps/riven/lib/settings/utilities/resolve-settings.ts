@@ -5,13 +5,9 @@ import {
   unflattenSettings,
 } from "./leaf-paths.ts";
 
+import type { SettingsIssue } from "#types/__generated__/graphql.ts";
 import type { LeafPathMap } from "./leaf-paths.ts";
 import type { z } from "zod";
-
-export interface SettingsIssue {
-  path: string;
-  message: string;
-}
 
 /** A stored value that failed validation and was ignored. */
 export interface IgnoredStoredSetting extends SettingsIssue {

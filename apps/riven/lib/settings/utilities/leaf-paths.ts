@@ -55,10 +55,7 @@ function walkLeaves(
   prefix: readonly string[],
   visit: (leaf: string, path: readonly string[], field: z.ZodType) => void,
 ) {
-  for (const [key, field] of Object.entries(schema.shape) as [
-    string,
-    z.ZodType,
-  ][]) {
+  for (const [key, field] of Object.entries<z.ZodType>(schema.shape)) {
     if (isDisplayGroup(field)) {
       walkLeaves(field, [...prefix, key], visit);
     } else {
@@ -99,6 +96,7 @@ function collectGroupPaths(
       const path = [...prefix, key];
 
       out.push(path);
+
       collectGroupPaths(field, path, out);
     }
   }

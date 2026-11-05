@@ -10,6 +10,7 @@ function expectRoutedPluginError(errorSpy: ReturnType<typeof vi.spyOn>) {
     "Failed to collect plugins for registration.",
     { err: expect.any(Error) as Error },
   );
+
   expect(errorSpy).toHaveBeenCalledWith(
     "Failed to register plugins during bootstrap.",
     { err: expect.any(Error) as Error },
@@ -31,6 +32,7 @@ describe("when plugins cannot be collected", () => {
     await expect(toPromise(actor.start())).rejects.toThrow(
       "Database unavailable",
     );
+
     expectRoutedPluginError(errorSpy);
   });
 
@@ -58,6 +60,7 @@ describe("when plugins cannot be collected", () => {
     await expect(toPromise(actor.start())).rejects.toThrow(
       'both resolve to the settings section id "repo-plugin-a-1"',
     );
+
     expectRoutedPluginError(errorSpy);
   });
 });
