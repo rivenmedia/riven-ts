@@ -20,7 +20,8 @@
     "@repo/util-plugin-sdk": "workspace:^",
     "bullmq": "catalog:",
     "redis-memory-server": "catalog:",
-    "winston": "catalog:"
+    "winston": "catalog:",
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@repo/core-util-oxlint-config": "workspace:^",
@@ -30,8 +31,7 @@
     "@typescript/native": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:vitest",
-    "zod": "catalog:"
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {
     "msw": "catalog:",

@@ -1,8 +1,8 @@
+import { LogLevel } from "@repo/util-plugin-sdk/dto/enums/log-level.enum";
+
 import dedent from "dedent";
 import { Duration } from "luxon";
 import z from "zod";
-
-import { LogLevel } from "#utilities/logger/log-levels.ts";
 
 export const GeneralSettings = z
   .object({

@@ -2,6 +2,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { RedisConnection } from "bullmq";
 import { it as baseIt, vi } from "vitest";
+import { z } from "zod";
 
 import { mockLogger } from "./create-mock-logger.ts";
 import { createMockPluginSettings } from "./create-mock-plugin-settings.ts";
@@ -50,11 +51,21 @@ export const it = baseIt
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
+    if (plugin.resolvers.length === 0) {
+      throw new Error(
+        `Plugin "${plugin.name.description ?? "unknown"}" does not register any resolvers, so there is no GraphQL schema to test against. Only use the \`gqlServer\` fixture in plugins that register at least one resolver.`,
+      );
+    }
+
+    const resolvers = z
+      .tuple([z.function()], z.function())
+      .parse(plugin.resolvers);
+
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
     const mockServer = await buildMockServer<GraphQLContext>({
-      resolvers: plugin.resolvers,
+      resolvers,
     });
 
     await mockServer.start();
