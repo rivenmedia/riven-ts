@@ -8,16 +8,6 @@ import { query } from "#lib/graphql/client.ts";
 import { SETTINGS_SECTION } from "./_queries/settings-section.query";
 import { SettingsSectionForm } from "./settings-section-form";
 
-import type { SecretState as GraphQLSecretState } from "#app/_types/__generated__/graphql.ts";
-import type { SecretState } from "#components/settings/setting-field/setting-field.tsx";
-
-const secretStates = {
-  DEFAULT: "default",
-  CUSTOM: "custom",
-  ENV: "env",
-  UNSET: "unset",
-} as const satisfies Record<GraphQLSecretState, SecretState>;
-
 interface SettingsSectionLoaderProps {
   id: string;
 }
@@ -49,7 +39,7 @@ async function SettingsSectionLoader({ id }: SettingsSectionLoaderProps) {
       lockedFields={settingsSection.lockedFields}
       secretStates={settingsSection.secretStates.map(({ path, state }) => ({
         path,
-        state: secretStates[state],
+        state,
       }))}
       issues={settingsSection.issues.map(({ path, message }) => ({
         path,
