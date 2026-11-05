@@ -123,13 +123,12 @@ export const collectPluginsForRegistration = fromPromise<
     const alwaysEnabled = permanentlyEnabledPlugins.has(
       validatedPluginName.data,
     );
+
     const enabled =
       alwaysEnabled || enabledPlugins.includes(validatedPluginName.data);
 
     try {
-      // Disabled plugins are imported too, so their settings schema is available.
       const plugin = (await import(pluginName)) as unknown;
-
       const validationResult = await RivenPluginPackage.safeParseAsync(plugin);
 
       if (!validationResult.success) {
