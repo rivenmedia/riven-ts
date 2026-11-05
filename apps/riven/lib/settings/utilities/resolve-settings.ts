@@ -108,7 +108,7 @@ function parseSettings<T extends z.ZodObject>({
   const isStoredInPlay = (leaf: string) =>
     leaf in stored && !(leaf in decodedEnv) && leaf in merged;
 
-  for (;;) {
+  while (true) {
     const result = schema.safeParse(unflattenSettings(schema, merged));
 
     if (result.success) {

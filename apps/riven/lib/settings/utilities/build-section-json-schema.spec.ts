@@ -1,5 +1,3 @@
-// The `n` leaf name comes from the settings backend plan fixture.
-// oxlint-disable id-length
 import { describe, expect, it } from "vitest";
 import z from "zod";
 
@@ -12,6 +10,7 @@ const FakeSettings = z.object({
   token: z.string().default("d").meta({ secret: true }),
   nested: z.object({
     password: z.string().min(1).nullable().optional().meta({ secret: true }),
+    // oxlint-disable-next-line id-length
     n: z.int().default(1),
   }),
 });

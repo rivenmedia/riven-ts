@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { loadEnvFile } from "node:process";
 import { setEnvironmentData } from "node:worker_threads";
+import { Query } from "type-graphql";
 import {
   afterAll,
   aroundEach,
@@ -63,6 +64,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
+    @Query()
     public testIsValid() {
       return true;
     }
