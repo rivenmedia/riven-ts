@@ -87,7 +87,7 @@ export class PluginSettings {
 
       if (!settingGroup) {
         this.#logger.warn(
-          `No setting group found for prefix: ${prefix} while processing environment variable: ${key}`,
+          `No setting group found for prefix: ${prefix} whilst processing environment variable: ${key}`,
         );
 
         continue;

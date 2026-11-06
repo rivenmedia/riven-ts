@@ -488,7 +488,7 @@ export const mainRunnerMachine = setup({
 
           "riven.item-request.create.error": {
             description:
-              "Indicates that an error occurred while attempting to create an item request.",
+              "Indicates that an error occurred whilst attempting to create an item request.",
             actions: [
               {
                 type: "log",

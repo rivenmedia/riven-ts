@@ -31,7 +31,7 @@ export const Default = meta.story({});
 
 /**
  * Use the `secondary` badge to call for less urgent information, blending
- * into the interface while still signaling minor updates or statuses.
+ * into the interface whilst still signaling minor updates or statuses.
  */
 export const Secondary = meta.story({
   args: {

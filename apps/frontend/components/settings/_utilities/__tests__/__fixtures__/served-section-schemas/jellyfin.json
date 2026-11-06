@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "jellyfinToken": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Jellyfin token for accessing the Jellyfin API.",
+      "secret": true
+    },
+    "jellyfinServerUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of your Jellyfin server, e.g., http://localhost:8096/"
+    },
+    "jellyfinLibraryPath": {
+      "default": "/mount",
+      "type": "string",
+      "minLength": 1,
+      "description": "The start of Jellyfin library paths, e.g. \"/mount\" in \"/mount/movies\""
+    }
+  },
+  "required": ["jellyfinToken", "jellyfinServerUrl"],
+  "title": "Jellyfin"
+}

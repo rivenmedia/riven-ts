@@ -326,7 +326,7 @@ export const WithTextarea = meta.story({
 });
 
 /**
- * Show loading indicators while processing input.
+ * Show loading indicators whilst processing input.
  */
 export const WithSpinner = meta.story({
   render: (args) => (

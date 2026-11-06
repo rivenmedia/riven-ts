@@ -139,7 +139,7 @@ export default defineConfig((config) => {
                   // Use the new Chromium headless mode
                   // https://vitest.dev/config/browser/playwright#launchoptions
                   channel: "chromium",
-                  // Text is antialiased in greyscale wherever it is composited separately (e.g. while animating), so use it everywhere,
+                  // Text is antialiased in greyscale wherever it is composited separately (e.g. whilst animating), so use it everywhere,
                   // rather than snapshots depending on whether an element had its own layer when captured
                   args: ["--disable-lcd-text"],
                 },

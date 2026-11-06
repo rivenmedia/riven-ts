@@ -1,0 +1,25 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "urls": {
+      "description": "Notification service URLs (Apprise-style, e.g. discord://id/token, json://host/path)",
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^discord:\\/\\/[\\s\\S]{1,}\\/[\\s\\S]{1,}$"
+          },
+          {
+            "type": "string",
+            "pattern": "^(json|jsons):\\/\\/[\\s\\S]{1,}$"
+          }
+        ]
+      }
+    }
+  },
+  "required": ["urls"],
+  "title": "Notifications"
+}

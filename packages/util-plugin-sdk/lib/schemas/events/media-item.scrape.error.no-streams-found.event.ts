@@ -6,7 +6,7 @@ import { createProgramEventErrorSchema } from "../utilities/create-program-event
 import { createProgramEventError } from "../utilities/create-program-event-error.ts";
 
 /**
- * Event emitted when there were no streams found while scraping a media item.
+ * Event emitted when there were no streams found whilst scraping a media item.
  */
 export const MediaItemScrapeErrorNoStreamsFoundEvent =
   createProgramEventErrorSchema(

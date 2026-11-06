@@ -208,7 +208,7 @@ it("flags a restart as required after a valid update", async ({
   );
 });
 
-it("resets the given fields while saving a section", async ({
+it("resets the given fields whilst saving a section", async ({
   gqlContext,
   gqlServer,
   services,

@@ -75,7 +75,7 @@ export const Ghost = meta.story({
 
 /**
  * Use the `secondary` button to call for less emphasized actions, styled to
- * complement the primary button while being less conspicuous.
+ * complement the primary button whilst being less conspicuous.
  */
 export const Secondary = meta.story({
   args: {
