@@ -18,15 +18,16 @@ export class ShareLogsResolver {
       "Uploads the last 24 hours of ECS logs to Elasticsearch and returns the session ID for lookup.",
   })
   public async shareLogs(): Promise<SessionID> {
-    const { settings } = await import("#utilities/settings.ts");
+    const { getRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
 
-    if (!settings.loggingEnabled) {
+    if (!getRuntimeSettings().general.logging.loggingEnabled) {
       throw new Error("Logging is disabled; cannot share logs.");
     }
 
-    const { ecsSymlinkPath } = await import("#utilities/logger/logger.ts");
+    const { getEcsSymlinkPath } = await import("#utilities/logger/logger.ts");
 
-    const logFileLines = this.#readLogFileLines(ecsSymlinkPath);
+    const logFileLines = this.#readLogFileLines(getEcsSymlinkPath());
     const action = JSON.stringify({ index: { _index: INDEX_NAME } });
 
     await this.#bulkIndex(action, logFileLines);

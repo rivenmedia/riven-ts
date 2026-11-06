@@ -4,7 +4,6 @@ import { TvMazeAPI } from "./datasource/tvmaze.datasource.ts";
 import { indexTVDBMediaItem } from "./hooks/index-tvdb-media-item.ts";
 import { TvdbIndexerSeasonResolver } from "./schema/indexer-season.resolver.ts";
 import { TvdbTmdbIndexerDataResolver } from "./schema/tmdb-indexer-data.resolver.ts";
-import { TvdbSettingsResolver } from "./schema/tvdb-settings.resolver.ts";
 import { TvdbResolver } from "./schema/tvdb.resolver.ts";
 import { pluginConfig } from "./tvdb-plugin.config.ts";
 import { TvdbSettings } from "./tvdb-settings.schema.ts";
@@ -17,7 +16,6 @@ export const plugin: RivenPlugin = {
   dataSources: [TvdbAPI, TvMazeAPI],
   resolvers: [
     TvdbResolver,
-    TvdbSettingsResolver,
     TvdbTmdbIndexerDataResolver,
     TvdbIndexerSeasonResolver,
   ],

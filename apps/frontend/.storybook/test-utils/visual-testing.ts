@@ -104,7 +104,7 @@ const trackedWorkers = new WeakSet<SetupWorker>();
 /**
  * Tracks the requests MSW is handling, so snapshots wait for them.
  *
- * A story can render nothing at all while a request is pending (e.g. a suspended component without a fallback),
+ * A story can render nothing at all whilst  a request is pending (e.g. a suspended component without a fallback),
  * so the DOM can stay unchanged for long enough to pass for settled.
  */
 export const trackPendingRequests = (worker: SetupWorker) => {
@@ -379,7 +379,7 @@ const cancelInfiniteAnimations = () => {
 /**
  * Repaints elements with a backdrop filter from scratch.
  *
- * They're rasterised separately, and Chromium keeps the raster from while they were moving (e.g. as their container's
+ * They're rasterised separately, and Chromium keeps the raster from whilst they were moving (e.g. as their container's
  * padding transitioned), so their text could be captured at a slightly different subpixel offset between runs.
  */
 const repaintBackdropFilters = async () => {
@@ -427,7 +427,7 @@ export const prepareAutoSnapshot: Extract<
   await setViewport(globalThis.innerWidth, globalThis.innerHeight);
 
   if (fullPage !== false) {
-    // Content may have grown while loading
+    // Content may have grown whilst loading
     await fitViewportToContent();
   }
 
@@ -457,7 +457,7 @@ export const prepareAutoSnapshot: Extract<
 };
 
 /**
- * Removes the style Storybook adds to pause animations while `afterEach` hooks run.
+ * Removes the style Storybook adds to pause animations whilst `afterEach` hooks run.
  *
  * Storybook only removes it once the hooks succeed, so a failed snapshot leaves animations paused for the test's retries.
  * Elements that unmount once their exit animation ends (e.g. a closing accordion item) then never unmount.

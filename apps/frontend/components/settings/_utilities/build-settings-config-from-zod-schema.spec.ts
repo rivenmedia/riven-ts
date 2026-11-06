@@ -1,4 +1,4 @@
-import { it, expect, describe } from "vitest";
+import { it, expect, describe, vi } from "vitest";
 import { z } from "zod";
 
 import { buildSettingsConfigFromZodSchema } from "./build-settings-config-from-zod-schema.ts";
@@ -29,7 +29,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   max: Number.MAX_SAFE_INTEGER,
                   min: Number.MIN_SAFE_INTEGER,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 1,
               },
@@ -61,7 +61,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   min: 0,
                   max: 10,
                   required: true,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 1,
               },
@@ -93,7 +93,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   max: Number.MAX_SAFE_INTEGER,
                   min: Number.MIN_SAFE_INTEGER,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 5,
               },
@@ -126,7 +126,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -156,7 +156,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -186,13 +186,98 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
             },
           ],
         ]),
+      );
+    });
+  });
+
+  describe("number input values", () => {
+    const getSetValueAs = (schema: z.ZodType = z.int().optional()) => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "numberField",
+      ).values();
+
+      if (field?.type !== "number") {
+        throw new Error("Expected a number field");
+      }
+
+      return field.config.registerOptions?.setValueAs;
+    };
+
+    it.each([
+      ["a nullable number", z.int().nullable()],
+      ["a defaulted nullable number", z.int().nullable().default(60)],
+      ["a served nullable number", z.union([z.int(), z.null()]).default(60)],
+    ])("leaves an emptied input as null for %s", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeNull();
+    });
+
+    it("leaves an emptied input as undefined for a defaulted number", () => {
+      expect(getSetValueAs(z.int().default(3))?.("")).toBeUndefined();
+    });
+
+    it.each([[""], [undefined], [null]])(
+      "leaves an empty input (%o) as undefined",
+      (value) => {
+        expect(getSetValueAs()?.(value)).toBeUndefined();
+      },
+    );
+
+    it.each([
+      ["5", 5],
+      ["0", 0],
+      ["-2.5", -2.5],
+      [7, 7],
+    ])("parses %o as a number", (value, expected) => {
+      expect(getSetValueAs()?.(value)).toBe(expected);
+    });
+  });
+
+  describe("unions with null", () => {
+    it.each([
+      ["number", z.union([z.int(), z.null()]), "number"],
+      ["boolean", z.union([z.boolean(), z.null()]), "nullable_boolean"],
+    ])(
+      "builds a %s union with null as its non-null member",
+      (_, schema, type) => {
+        const [field] = buildSettingsConfigFromZodSchema(
+          schema.meta({ title: "Field" }),
+          "field",
+        ).values();
+
+        expect(field).toMatchObject({
+          type,
+          config: { label: "Field", name: "field" },
+        });
+      },
+    );
+
+    it("marks the non-null member as not required", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.union([z.null(), z.string()]),
+        "field",
+      ).values();
+
+      expect(field).toMatchObject({
+        type: "text",
+        config: { registerOptions: { required: false } },
+      });
+    });
+
+    it.each([
+      ["of non-null members", z.union([z.int(), z.string()])],
+      ["of more than two members", z.union([z.int(), z.string(), z.null()])],
+      ["of only null", z.union([z.null(), z.null()])],
+    ])("skips other unions %s", (_, schema) => {
+      expect(buildSettingsConfigFromZodSchema(schema, "field")).toStrictEqual(
+        new Map(),
       );
     });
   });
@@ -217,6 +302,64 @@ describe(buildSettingsConfigFromZodSchema, () => {
           ],
         ]),
       );
+    });
+
+    it('returns a "boolean" field when the schema has a default', () => {
+      const schema = z
+        .boolean()
+        .default(false)
+        .meta({ title: "Boolean Field" });
+      const field = buildSettingsConfigFromZodSchema(schema, "booleanField");
+
+      expect(field).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "booleanField",
+            {
+              type: "boolean",
+              config: {
+                label: "Boolean Field",
+                name: "booleanField",
+                registerOptions: { required: false },
+              },
+            },
+          ],
+        ]),
+      );
+    });
+
+    it('returns a "boolean" field when the schema is optional', () => {
+      const schema = z.boolean().optional();
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "booleanField",
+      ).values();
+
+      expect(field?.type).toBe("boolean");
+    });
+
+    it('returns a "nullable_boolean" field for a nullable schema without other wrappers', () => {
+      const schema = z.boolean().nullable();
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "booleanField",
+      ).values();
+
+      expect(field?.type).toBe("nullable_boolean");
+    });
+
+    it('returns a "boolean" field for a defaulted boolean served as JSON Schema', () => {
+      const schema = z.fromJSONSchema(
+        z.toJSONSchema(
+          z.object({ dubbedAnimeOnly: z.boolean().default(false) }),
+          {
+            io: "input",
+          },
+        ),
+      );
+      const [field] = buildSettingsConfigFromZodSchema(schema).values();
+
+      expect(field?.type).toBe("boolean");
     });
 
     it('returns a "nullable_boolean" field when the schema is nullable', () => {
@@ -269,9 +412,12 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "recordField.value",
+                      label: "Value",
                       name: "recordField.value",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -302,9 +448,12 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "recordField.value",
+                      label: "Value",
                       name: "recordField.value",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -340,9 +489,12 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "text",
                     config: {
-                      label: "optionalRecordField.value",
+                      label: "Value",
                       name: "optionalRecordField.value",
-                      registerOptions: { required: false },
+                      registerOptions: {
+                        required: false,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                 ],
@@ -351,6 +503,16 @@ describe(buildSettingsConfigFromZodSchema, () => {
           ],
         ]),
       );
+    });
+  });
+
+  describe("record schemas with non-string keys", () => {
+    it("skips them", () => {
+      const schema = z.record(z.enum(["a", "b"]), z.string());
+
+      const field = buildSettingsConfigFromZodSchema(schema, "recordField");
+
+      expect(field).toStrictEqual(new Map());
     });
   });
 
@@ -369,7 +531,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Text Field",
                 name: "textField",
-                registerOptions: { required: true },
+                registerOptions: {
+                  required: true,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
@@ -399,6 +564,64 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
+    it("sets the secret state and reset handler from the context", () => {
+      const schema = z.string().meta({ title: "API Key", secret: true });
+      const onResetSecret = vi.fn<(path: string) => void>();
+
+      const field = buildSettingsConfigFromZodSchema(
+        schema,
+        "apiKey",
+        true,
+        {},
+        {
+          secretStates: new Map([["apiKey", "custom"]]),
+          onResetSecret,
+        },
+      );
+
+      expect(field.get("apiKey")).toStrictEqual({
+        type: "secret",
+        config: expect.objectContaining({
+          secretState: "custom",
+          onReset: expect.any(Function),
+        }),
+      });
+
+      const setting = field.get("apiKey");
+
+      if (setting?.type === "secret") {
+        setting.config.onReset?.();
+      }
+
+      expect(onResetSecret).toHaveBeenCalledExactlyOnceWith("apiKey");
+    });
+
+    it("marks fields as locked when listed in the context", () => {
+      const schema = z.object({
+        port: z.number(),
+        host: z.string(),
+        nested: z.object({ inner: z.string() }),
+      });
+
+      const fields = buildSettingsConfigFromZodSchema(
+        schema,
+        undefined,
+        true,
+        {},
+        { lockedFields: new Set(["port", "nested.inner"]) },
+      );
+
+      expect(fields.get("port")?.config).toMatchObject({ locked: true });
+      expect(fields.get("host")?.config).not.toHaveProperty("locked", true);
+
+      const group = fields.get("nested");
+
+      expect(group?.type).toBe("group");
+      expect(
+        group?.type === "group" ? group.config.schema[0]?.config : undefined,
+      ).toMatchObject({ locked: true });
+    });
+
     it("sets size constraints if provided on the schema", () => {
       const schema = z
         .string()
@@ -421,6 +644,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   required: true,
                   minLength: 5,
                   maxLength: 10,
+                  setValueAs: expect.any(Function),
                 },
               },
             },
@@ -448,12 +672,61 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Optional Text Field",
                 name: "optionalTextField",
-                registerOptions: { required: false },
+                registerOptions: {
+                  required: false,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
         ]),
       );
+    });
+  });
+
+  describe("text input values", () => {
+    const getSetValueAs = (schema: z.ZodType) => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        schema,
+        "textField",
+      ).values();
+
+      if (field?.type !== "text") {
+        throw new Error("Expected a text field");
+      }
+
+      return field.config.registerOptions?.setValueAs;
+    };
+
+    it.each([
+      ["an optional", z.string().optional()],
+      ["a defaulted", z.string().default("./logs")],
+      ["a required", z.string()],
+    ])("leaves an emptied input as undefined for %s string", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeUndefined();
+    });
+
+    it.each([
+      ["a nullable", z.string().nullable()],
+      ["a served nullable", z.union([z.string(), z.null()]).default("x")],
+    ])("leaves an emptied input as null for %s string", (_, schema) => {
+      expect(getSetValueAs(schema)?.("")).toBeNull();
+    });
+
+    it("keeps a typed value", () => {
+      expect(getSetValueAs(z.string().optional())?.("/var/log")).toBe(
+        "/var/log",
+      );
+    });
+
+    it("keeps an emptied secret as blank, which leaves it unchanged", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string().optional().meta({ secret: true }),
+        "secretField",
+      ).values();
+
+      expect(field?.type).toBe("secret");
+      expect(field?.config).not.toHaveProperty("registerOptions.setValueAs");
     });
   });
 
@@ -605,12 +878,24 @@ describe(buildSettingsConfigFromZodSchema, () => {
       );
     });
 
-    it("throws an error for unsupported array element types", () => {
-      const schema = z.number().array().meta({ title: "Number Array Field" });
+    it.each([
+      ["number", z.number().array()],
+      ["union", z.array(z.union([z.url(), z.email()]))],
+    ])("skips arrays of %s elements", (_, schema) => {
+      const field = buildSettingsConfigFromZodSchema(schema, "unsupported");
 
-      expect(() =>
-        buildSettingsConfigFromZodSchema(schema, "numberArrayField"),
-      ).toThrow(/unsupported array element type: number/iu);
+      expect(field).toStrictEqual(new Map());
+    });
+
+    it("skips an unsupported array without affecting its siblings", () => {
+      const schema = z.object({
+        urls: z.array(z.union([z.url(), z.email()])),
+        name: z.string(),
+      });
+
+      const field = buildSettingsConfigFromZodSchema(schema);
+
+      expect([...field.keys()]).toStrictEqual(["name"]);
     });
 
     it("unwraps optional schemas correctly", () => {
@@ -662,7 +947,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
               config: {
                 label: "Field 1",
                 name: "field1",
-                registerOptions: { required: true },
+                registerOptions: {
+                  required: true,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
@@ -675,7 +963,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "field2",
                 registerOptions: {
                   required: true,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },
@@ -718,7 +1006,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
             {
               type: "string_array",
               config: {
-                label: "require",
+                label: "Require",
                 name: "require",
                 registerOptions: { required: true },
               },
@@ -734,7 +1022,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "boolean",
                     config: {
-                      label: "resolutions.r2160p",
+                      label: "R2160p",
                       name: "resolutions.r2160p",
                       registerOptions: { required: true },
                     },
@@ -742,7 +1030,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                   {
                     type: "boolean",
                     config: {
-                      label: "resolutions.r1080p",
+                      label: "R1080p",
                       name: "resolutions.r1080p",
                       registerOptions: { required: true },
                     },
@@ -783,7 +1071,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                         required: true,
                         max: Number.MAX_SAFE_INTEGER,
                         min: Number.MIN_SAFE_INTEGER,
-                        valueAsNumber: true,
+                        setValueAs: expect.any(Function),
                       },
                       step: 1,
                     },
@@ -793,7 +1081,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                     config: {
                       label: "T 2",
                       name: "t.1",
-                      registerOptions: { required: true },
+                      registerOptions: {
+                        required: true,
+                        setValueAs: expect.any(Function),
+                      },
                     },
                   },
                   {
@@ -805,7 +1096,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                         required: true,
                         max: Number.MAX_SAFE_INTEGER,
                         min: Number.MIN_SAFE_INTEGER,
-                        valueAsNumber: true,
+                        setValueAs: expect.any(Function),
                       },
                       step: 1,
                     },
@@ -856,12 +1147,37 @@ describe(buildSettingsConfigFromZodSchema, () => {
       });
     });
 
-    it("throws for tuples with a rest element", () => {
+    it("skips tuples with a rest element", () => {
       const schema = z.tuple([z.int()]).rest(z.int());
 
-      expect(() => buildSettingsConfigFromZodSchema(schema, "t")).toThrow(
-        /tuple rest elements are not supported/iu,
-      );
+      const field = buildSettingsConfigFromZodSchema(schema, "t");
+
+      expect(field).toStrictEqual(new Map());
+    });
+  });
+
+  describe("labels", () => {
+    it("prefers the title", () => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string().meta({ title: "API Key" }),
+        "plugin.apiKey",
+      ).values();
+
+      expect(field?.config).toMatchObject({ label: "API Key" });
+    });
+
+    it.each([
+      ["scraping.dubbedAnimeOnly", "Dubbed anime only"],
+      ["apiKey", "Api key"],
+      ["resolutions.r2160p", "R2160p"],
+      ["url", "Url"],
+    ])("humanises the last segment of an untitled %s", (key, label) => {
+      const [field] = buildSettingsConfigFromZodSchema(
+        z.string(),
+        key,
+      ).values();
+
+      expect(field?.config).toMatchObject({ label });
     });
   });
 
@@ -890,7 +1206,10 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 label: "Default String Field",
                 description: "A default string field",
                 name: "defaultStringField",
-                registerOptions: { required: false },
+                registerOptions: {
+                  required: false,
+                  setValueAs: expect.any(Function),
+                },
               },
             },
           ],
@@ -918,7 +1237,7 @@ describe(buildSettingsConfigFromZodSchema, () => {
                 name: "numberField",
                 registerOptions: {
                   required: false,
-                  valueAsNumber: true,
+                  setValueAs: expect.any(Function),
                 },
                 step: 0.01,
               },

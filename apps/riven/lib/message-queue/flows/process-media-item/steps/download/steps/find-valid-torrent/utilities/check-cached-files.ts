@@ -1,7 +1,7 @@
 import chalk from "chalk";
 
 import { logger } from "#utilities/logger/logger.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { describeProvider } from "./describe-provider.ts";
 import { getCachedTorrentFiles } from "./get-cached-torrent-files.ts";
@@ -51,7 +51,7 @@ export async function checkCachedFiles(
     return true;
   }
 
-  if (settings.attemptUnknownDownloads) {
+  if (getRuntimeSettings().general.scraping.attemptUnknownDownloads) {
     return true;
   }
 

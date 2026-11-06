@@ -371,7 +371,7 @@ const mockMediaItemQuery = (
  *
  * Storybook can't re-render server components on a server, so the page is re-rendered in a transition instead,
  * with a fresh GraphQL client as `registerApolloClient` creates one per request. Like a real refresh, this keeps
- * the existing DOM (so mount animations don't replay) while the async components re-run.
+ * the existing DOM (so mount animations don't replay) whilst the async components re-run.
  */
 function RefreshablePage({ data: initialData }: { data: MediaDetailsData }) {
   const [data, setData] = useState(initialData);

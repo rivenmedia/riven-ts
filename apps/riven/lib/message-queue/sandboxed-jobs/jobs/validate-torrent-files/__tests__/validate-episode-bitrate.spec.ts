@@ -1,8 +1,7 @@
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import * as settingsModule from "#utilities/settings.ts";
 
 import { validateTorrentFiles } from "../utilities/validate-torrent-files.ts";
 import {
@@ -17,16 +16,20 @@ import type { Episode } from "@repo/util-plugin-sdk/dto/entities";
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-function mockBitrateSettings({
-  minimum,
-  maximum,
-}: Pick<BitrateCase, "minimum" | "maximum">) {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    minimumAverageBitrateEpisodes: minimum,
-    maximumAverageBitrateEpisodes: maximum,
-  });
-}
+const it = baseIt.extend(
+  "mockBitrateSettings",
+  ({ overrideRuntimeSettings }) =>
+    ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
+      overrideRuntimeSettings({
+        general: {
+          scraping: {
+            minimumAverageBitrateEpisodes: minimum,
+            maximumAverageBitrateEpisodes: maximum,
+          },
+        },
+      });
+    },
+);
 
 it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
@@ -56,7 +59,10 @@ async function buildEpisodeFiles(
 
 it.for(rejectedBitrateCases)(
   "rejects a file $label",
-  async ({ minimum, maximum, bitrate, reason }, { em, episode, stream }) => {
+  async (
+    { minimum, maximum, bitrate, reason },
+    { em, episode, mockBitrateSettings, stream },
+  ) => {
     episode.runtime = runtime;
 
     await em.persist(episode).flush();
@@ -84,7 +90,10 @@ it.for(rejectedBitrateCases)(
 
 it.for(acceptedBitrateCases)(
   "accepts a file $label",
-  async ({ minimum, maximum, bitrate }, { em, episode, stream }) => {
+  async (
+    { minimum, maximum, bitrate },
+    { em, episode, mockBitrateSettings, stream },
+  ) => {
     episode.runtime = runtime;
 
     await em.persist(episode).flush();
@@ -107,6 +116,7 @@ it.for(acceptedBitrateCases)(
 it("skips the bitrate check if the episode has no runtime", async ({
   em,
   episode,
+  mockBitrateSettings,
   stream,
 }) => {
   episode.runtime = null;
@@ -136,6 +146,7 @@ it.for(["show", "season"] as const)(
         seasons: [season],
         episodes: showEpisodes,
       },
+      mockBitrateSettings,
       stream,
     },
   ) => {

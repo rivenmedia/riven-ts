@@ -1,3 +1,5 @@
+import { plugin as testPluginConfig } from "@repo/plugin-test";
+import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { passthrough } from "msw";
@@ -10,21 +12,53 @@ import { test as testBase, vi } from "vitest";
 import { CoreKey } from "#graphql/context.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { queueNameFor } from "#message-queue/utilities/queue-name-for.ts";
+import { SettingsManager } from "#settings/settings-manager.ts";
+import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import type { Services } from "#database/database.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
+import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
+import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
-import type { ValidPlugin, ValidPluginMap } from "#types/plugins.ts";
+import type {
+  InstalledPlugin,
+  ValidPlugin,
+  ValidPluginMap,
+} from "#types/plugins.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type * as GraphQL from "graphql";
 import type { ExecutionResult } from "graphql";
+import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
+
+/**
+ * The test package.json mock makes `test` the only valid core plugin name,
+ * so TMDB is included as a fixture with a secret that has a default value.
+ */
+const fixtureInstalledPlugins: InstalledPlugin[] = [
+  {
+    sectionId: "repo-plugin-test",
+    packageName: "@repo/plugin-test",
+    name: "test" as CorePluginName,
+    plugin: testPluginConfig,
+    enabled: true,
+    alwaysEnabled: false,
+  },
+  {
+    sectionId: "repo-plugin-tmdb",
+    packageName: "@repo/plugin-tmdb",
+    name: "tmdb",
+    plugin: tmdbPlugin,
+    enabled: true,
+    alwaysEnabled: true,
+  },
+];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -263,6 +297,30 @@ export const it = testBase
 
     return new Sentry.Scope();
   })
+  .extend("overrideRuntimeSettings", async ({}, { onCleanup }) => {
+    const { toMerged } = await import("es-toolkit");
+    const { getRuntimeSettings, initialiseRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
+
+    let originalSettings: RuntimeSettings | null = null;
+
+    onCleanup(() => {
+      if (originalSettings) {
+        initialiseRuntimeSettings(originalSettings);
+      }
+    });
+
+    // Replaces the current runtime settings with a copy that has the given overrides applied.
+    return (overrides: PartialDeep<RuntimeSettings>) => {
+      originalSettings ??= structuredClone(
+        getRuntimeSettings(),
+      ) as RuntimeSettings;
+
+      const current = structuredClone(getRuntimeSettings());
+
+      initialiseRuntimeSettings(toMerged(current, overrides));
+    };
+  })
   .extend("apolloServerInstance", { scope: "file" }, async () => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
@@ -277,16 +335,30 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (): ApolloServerContext => ({
-        [CoreKey]: {
-          em: orm.em.fork(),
-          services,
+      (): ApolloServerContext => {
+        const settingsManager = new SettingsManager({
+          settingsService: services.settingsService,
+          sections: buildSettingsSections({
+            installedPlugins: fixtureInstalledPlugins,
+            pluginEnvironment: new Map(),
+            coreEnvironment: {},
+          }),
+          installedPlugins: fixtureInstalledPlugins,
+          coreEnvironment: {},
+        });
+
+        return {
+          [CoreKey]: {
+            em: orm.em.fork(),
+            services,
+            sendEvent: vi.fn<MainRunnerMachineIntake>(),
+            settingsManager,
+          },
+          logger,
           sendEvent: vi.fn<MainRunnerMachineIntake>(),
-        },
-        logger,
-        sendEvent: vi.fn<MainRunnerMachineIntake>(),
-        plugins: new Map(),
-      }),
+          plugins: new Map(),
+        };
+      },
   )
   .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(

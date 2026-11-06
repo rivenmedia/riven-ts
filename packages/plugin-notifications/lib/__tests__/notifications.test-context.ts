@@ -9,6 +9,6 @@ export const it: typeof pluginTestContext = pluginTestContext
   .override(
     "settings",
     createMockPluginSettings(NotificationsSettings, {
-      urls: JSON.stringify(["discord://webhook-id/webhook-token"]),
+      urls: ["discord://webhook-id/webhook-token"],
     }),
   );

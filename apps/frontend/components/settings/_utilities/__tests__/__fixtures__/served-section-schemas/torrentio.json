@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "filter": {
+      "default": "sort=qualitysize%7Cqualityfilter=threed,480p,scr,cam",
+      "type": "string"
+    }
+  },
+  "title": "Torrentio"
+}

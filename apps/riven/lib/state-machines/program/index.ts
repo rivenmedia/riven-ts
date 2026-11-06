@@ -228,7 +228,7 @@ export const rivenMachine = setup({
                         actions: {
                           type: "log",
                           params: ({ event: { error } }) => ({
-                            message: "Error while shutting down GQL server",
+                            message: "Error whilst shutting down GQL server",
                             level: "error",
                             error,
                           }),

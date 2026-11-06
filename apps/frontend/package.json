@@ -43,7 +43,6 @@
     "@hookform/resolvers": "catalog:",
     "@next-safe-action/adapter-react-hook-form": "catalog:",
     "@react-spring/web": "catalog:",
-    "@repo/feature-settings": "workspace:^",
     "@repo/util-auth": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",

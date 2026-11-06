@@ -5,8 +5,10 @@ import { SettingsCustomRankField } from "./_components/custom-rank-field.tsx";
 import { SettingsDictionaryField } from "./_components/dictionary-field.tsx";
 import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field.tsx";
 import { SettingsNumberField } from "./_components/number-field.tsx";
+import { SettingsPasswordField } from "./_components/password-field.tsx";
 import { SettingsSecretField } from "./_components/secret-field.tsx";
 import { SettingsSelectField } from "./_components/select-field.tsx";
+import { SettingFieldError } from "./_components/setting-field-error.tsx";
 import { SettingGroup } from "./_components/setting-group.tsx";
 import { SettingsStringArrayField } from "./_components/string-array-field.tsx";
 import { SettingsTextField } from "./_components/text-field.tsx";
@@ -18,24 +20,13 @@ export interface CommonSettingFieldProps {
   name: string;
   label: string;
   description?: string;
+  locked?: boolean;
 }
-
-type SettingsFieldType =
-  | "group"
-  | "text"
-  | "secret"
-  | "number"
-  | "boolean"
-  | "nullable_boolean"
-  | "select"
-  | "string_array"
-  | "custom_rank"
-  | "dictionary"
-  | "tuple";
 
 const settingFieldComponents = {
   group: SettingGroup,
   text: SettingsTextField,
+  password: SettingsPasswordField,
   secret: SettingsSecretField,
   number: SettingsNumberField,
   boolean: SettingsBooleanField,
@@ -45,7 +36,9 @@ const settingFieldComponents = {
   custom_rank: SettingsCustomRankField,
   dictionary: SettingsDictionaryField,
   tuple: SettingsTupleField,
-} as const satisfies Record<SettingsFieldType, React.ComponentType<never>>;
+} as const satisfies Record<string, React.ComponentType<never>>;
+
+type SettingsFieldType = keyof typeof settingFieldComponents;
 
 export type SettingFieldProps = (
   | { nested?: false; parentName?: never }
@@ -64,7 +57,7 @@ export type SettingFieldProps = (
  */
 export function SettingField({
   type,
-  config,
+  config: { locked = false, ...config },
   nested = false,
   parentName,
 }: SettingFieldProps) {
@@ -76,7 +69,17 @@ export function SettingField({
 
   return (
     <div className={cn("space-y-3", !nested && "rounded-lg border p-4")}>
-      <Component {...config} name={name} />
+      {locked ? (
+        <fieldset disabled className="space-y-3">
+          <Component {...config} name={name} />
+          <p className="text-muted-foreground text-sm">
+            Set by environment variable
+          </p>
+        </fieldset>
+      ) : (
+        <Component {...config} name={name} />
+      )}
+      {type !== "group" && <SettingFieldError name={name} />}
     </div>
   );
 }

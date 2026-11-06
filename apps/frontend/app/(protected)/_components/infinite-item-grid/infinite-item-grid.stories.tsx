@@ -186,7 +186,7 @@ export const FetchingMore = meta.story({
 });
 
 FetchingMore.test(
-  "Disables the button and shows a spinner while fetching",
+  "Disables the button and shows a spinner whilst fetching",
   async ({ canvas }) => {
     const button = await canvas.findByRole("button", { name: /loading/iu });
 

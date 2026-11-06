@@ -4,4 +4,7 @@ import { Field, ObjectType } from "type-graphql";
 export class InstanceStatus {
   @Field()
   public setupRequired!: boolean;
+
+  @Field()
+  public restartRequired!: boolean;
 }

@@ -1,4 +1,3 @@
-import { LogLevel } from "@repo/feature-settings/enums/log-level.enum";
 import {
   MediaItemContentRatingEnum,
   MovieContentRatingEnum,
@@ -9,6 +8,7 @@ import { FileSizeUnit } from "@repo/util-plugin-sdk/dto/enums/file-size-unit.enu
 import { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-status.enum";
 import { ItemRequestState } from "@repo/util-plugin-sdk/dto/enums/item-request-state.enum";
 import { ItemRequestType } from "@repo/util-plugin-sdk/dto/enums/item-request-type.enum";
+import { LogLevel } from "@repo/util-plugin-sdk/dto/enums/log-level.enum";
 import { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 import { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.enum";

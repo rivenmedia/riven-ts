@@ -14,11 +14,11 @@ it.override("settings", () =>
   createMockPluginSettings(PlexSettings, {
     plexServerUrl: "http://localhost:32400",
     plexToken: "test-plex-token",
-    watchlistEnabled: "true",
-    rssUrls: JSON.stringify([
+    watchlistEnabled: true,
+    rssUrls: [
       "https://rss.plex.tv/00000000-0000-0000-0000-000000000000",
       "https://rss.plex.tv/00000000-0000-0000-0000-000000000001",
-    ]),
+    ],
   }),
 );
 

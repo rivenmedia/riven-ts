@@ -453,8 +453,8 @@ catalogs:
       specifier: ^8.6.0
       version: 8.6.0
     es-toolkit:
-      specifier: ^1.46.1
-      version: 1.46.1
+      specifier: ^1.53.1
+      version: 1.53.1
     esbuild:
       specifier: ^0.28.2
       version: 0.28.2
@@ -785,7 +785,7 @@ importers:
         version: 4.1.12(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))(vitest@4.1.12)
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       execa:
         specifier: 'catalog:'
         version: 9.6.1
@@ -846,9 +846,6 @@ importers:
       '@react-spring/web':
         specifier: 'catalog:'
         version: 10.1.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../packages/feature-settings
       '@repo/util-auth':
         specifier: workspace:^
         version: link:../../packages/util-auth
@@ -887,7 +884,7 @@ importers:
         version: 8.6.0(react@19.3.0)
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       graphql:
         specifier: 'catalog:'
         version: 16.14.0
@@ -1212,7 +1209,7 @@ importers:
         version: 1.7.2
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       express:
         specifier: 'catalog:'
         version: 5.2.1(supports-color@10.2.2)
@@ -1628,9 +1625,6 @@ importers:
 
   packages/core/util-graphql-schema:
     dependencies:
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../feature-settings
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../util-plugin-sdk
@@ -1843,40 +1837,6 @@ importers:
       nyc:
         specifier: 'catalog:'
         version: 18.0.0(supports-color@10.2.2)
-      oxlint:
-        specifier: 'catalog:'
-        version: 1.74.0(oxlint-tsgolint@0.25.0)
-      typescript:
-        specifier: 'catalog:'
-        version: '@typescript/typescript6@6.0.2'
-      vitest:
-        specifier: catalog:vitest
-        version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
-
-  packages/feature-settings:
-    dependencies:
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../util-plugin-sdk
-      type-graphql:
-        specifier: 'catalog:'
-        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
-    devDependencies:
-      '@repo/core-util-oxlint-config':
-        specifier: workspace:^
-        version: link:../core/util-oxlint-config
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../core/util-typescript-config
-      '@repo/core-util-vitest-config':
-        specifier: workspace:^
-        version: link:../core/util-vitest-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.12.4
-      '@typescript/native':
-        specifier: 'catalog:'
-        version: typescript@7.0.2
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
@@ -2251,7 +2211,7 @@ importers:
         version: 0.14.3
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2658,7 +2618,7 @@ importers:
     dependencies:
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       fumadocs-mdx:
         specifier: 'catalog:'
         version: 14.3.2(@types/mdast@4.0.4)(@types/mdx@2.0.13)(@types/react@19.3.0)(fumadocs-core@16.8.12(@mdx-js/mdx@3.1.1(supports-color@10.2.2))(@types/estree-jsx@1.0.5)(@types/hast@3.0.4)(@types/mdast@4.0.4)(@types/react@19.3.0)(lucide-react@1.16.0(react@19.3.0))(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(supports-color@10.2.2)(zod@4.6.7))(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react@19.3.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.25.12)(jiti@2.7.0)(yaml@2.9.1))
@@ -2701,7 +2661,7 @@ importers:
         version: link:../util-rank-torrent-name
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       graphql-scalars:
         specifier: 'catalog:'
         version: 1.25.0(graphql@16.14.0)
@@ -2844,7 +2804,7 @@ importers:
         version: 0.7.6
       es-toolkit:
         specifier: 'catalog:'
-        version: 1.46.1
+        version: 1.53.1
       fastest-levenshtein:
         specifier: 'catalog:'
         version: 1.0.16
@@ -9295,8 +9255,8 @@ packages:
     resolution: {integrity: sha512-FGgH2h8zKNim9ljj7dankFPcICIK9Cp5bm+c2gQSYePhpaG5+esrLODihIorn+Pe6FGJzWhXQotPv73jTaldXA==}
     engines: {node: '>= 0.4'}
 
-  es-toolkit@1.46.1:
-    resolution: {integrity: sha512-5eNtXOs3tbfxXOj04tjjseeWkRWaoCjdEI+96DgwzZoe6c9juL49pXlzAFTI72aWC9Y8p7168g6XIKjh7k6pyQ==}
+  es-toolkit@1.53.1:
+    resolution: {integrity: sha512-VhMc6IXmexu8iYFfL2aaAww6IvJTdHlqBLruLoEUs33YD4IcP5DdZcLOybMsMmmLsiy1c8PsiLsrM0DdIuuRUA==}
 
   es5-ext@0.10.64:
     resolution: {integrity: sha512-p2snDhiLaXe6dahss1LddxqEm+SkuDvV8dnIQG0MWjyHpcMNfXKPE+/Cc0y+PhxJX3A4xGNeFCj5oc0BUh6deg==}
@@ -14506,7 +14466,7 @@ snapshots:
   '@commitlint/ensure@21.0.1':
     dependencies:
       '@commitlint/types': 21.0.1
-      es-toolkit: 1.46.1
+      es-toolkit: 1.53.1
 
   '@commitlint/execute-rule@21.0.1': {}
 
@@ -14535,7 +14495,7 @@ snapshots:
       '@commitlint/types': 21.0.1
       cosmiconfig: 9.0.1(@typescript/typescript6@6.0.2)
       cosmiconfig-typescript-loader: 6.3.0(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(cosmiconfig@9.0.1(@typescript/typescript6@6.0.2))
-      es-toolkit: 1.46.1
+      es-toolkit: 1.53.1
       is-plain-obj: 4.1.0
       picocolors: 1.1.1
     transitivePeerDependencies:
@@ -14564,7 +14524,7 @@ snapshots:
     dependencies:
       '@commitlint/config-validator': 21.0.1
       '@commitlint/types': 21.0.1
-      es-toolkit: 1.46.1
+      es-toolkit: 1.53.1
       global-directory: 5.0.0
       resolve-from: 5.0.0
 
@@ -20266,7 +20226,7 @@ snapshots:
     dependencies:
       es-errors: 1.3.0
 
-  es-toolkit@1.46.1: {}
+  es-toolkit@1.53.1: {}
 
   es5-ext@0.10.64:
     dependencies:
@@ -21500,7 +21460,7 @@ snapshots:
       cli-cursor: 4.0.0
       cli-truncate: 6.1.1
       code-excerpt: 4.0.0
-      es-toolkit: 1.46.1
+      es-toolkit: 1.53.1
       indent-string: 5.0.0
       is-in-ci: 2.0.0
       patch-console: 2.0.0
@@ -23978,7 +23938,7 @@ snapshots:
       '@reduxjs/toolkit': 2.12.0(react-redux@9.3.0(@types/react@19.3.0)(react@19.3.0)(redux@5.0.1))(react@19.3.0)
       clsx: 2.1.1
       decimal.js-light: 2.5.1
-      es-toolkit: 1.46.1
+      es-toolkit: 1.53.1
       eventemitter3: 5.0.1
       immer: 11.1.17
       react: 19.3.0
