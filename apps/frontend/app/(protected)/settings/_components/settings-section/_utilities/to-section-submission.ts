@@ -28,7 +28,6 @@ export function toSectionSubmission(
       get(defaultValues, name) !== undefined,
   );
 
-  // `unset` from es-toolkit/compat keeps a key whose value is `undefined`
   for (const name of reset) {
     const segments = name.split(".");
     const key = segments.pop() ?? name;

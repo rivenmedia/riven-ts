@@ -13,11 +13,10 @@ import type {
   SetPluginEnabledMutationVariables,
 } from "../_mutations/set-plugin-enabled.mutation.typegen";
 
-// `segments` sets the selected layout segment, but isn't in Storybook's types
 const navigation = {
   pathname: "/settings/plugins/repo-plugin-comet",
   segments: [["plugin", "repo-plugin-comet"]],
-};
+} as const;
 
 const setPluginEnabledRequest =
   fn<(variables: SetPluginEnabledMutationVariables) => void>();
