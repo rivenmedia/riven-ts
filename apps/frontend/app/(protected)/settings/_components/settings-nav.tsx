@@ -9,24 +9,27 @@ import {
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
 
-import type { ReactNode } from "react";
+import type { PropsWithChildren } from "react";
 
-const sections = [
-  { segment: "general", label: "General" },
-  { segment: "plugins", label: "Plugins" },
-  { segment: "ranking", label: "Ranking" },
-] as const;
+interface TabSection {
+  label: string;
+}
 
-export interface SettingsNavProps {
-  /** The active section's route. */
-  children: ReactNode;
+const sections = {
+  general: { label: "General" },
+  plugins: { label: "Plugins" },
+  ranking: { label: "Ranking" },
+} as const satisfies Record<string, TabSection>;
+
+function isValidSection(value: string): value is keyof typeof sections {
+  return value in sections;
 }
 
 /**
  * Tabs for switching between the settings routes, with the active route
  * rendered as the selected tab's panel.
  */
-export function SettingsNav({ children }: SettingsNavProps) {
+export function SettingsNav({ children }: PropsWithChildren) {
   const activeSegment = useSelectedLayoutSegment() ?? "";
   const router = useRouter();
 
@@ -34,15 +37,15 @@ export function SettingsNav({ children }: SettingsNavProps) {
     <Tabs
       value={activeSegment}
       onValueChange={(value) => {
-        const section = sections.find(({ segment }) => segment === value);
-
-        if (section) {
-          router.push(`/settings/${section.segment}`);
+        if (!isValidSection(value)) {
+          throw new Error(`Invalid section: ${value}`);
         }
+
+        router.push(`/settings/${value}`);
       }}
     >
       <TabsList className="mb-4 w-full justify-start">
-        {sections.map(({ segment, label }) => (
+        {Object.entries(sections).map(([segment, { label }]) => (
           <TabsTrigger key={segment} value={segment}>
             {label}
           </TabsTrigger>

@@ -30,26 +30,10 @@ async function SettingsSectionLoader({ id }: SettingsSectionLoaderProps) {
 
   const { settingsSection } = data;
 
-  return (
-    <SettingsSectionForm
-      id={settingsSection.id}
-      title={settingsSection.title}
-      jsonSchema={settingsSection.jsonSchema}
-      values={settingsSection.values}
-      lockedFields={settingsSection.lockedFields}
-      secretStates={settingsSection.secretStates.map(({ path, state }) => ({
-        path,
-        state,
-      }))}
-      issues={settingsSection.issues.map(({ path, message }) => ({
-        path,
-        message,
-      }))}
-    />
-  );
+  return <SettingsSectionForm {...settingsSection} />;
 }
 
-/** Placeholder shown while a settings section loads. */
+/** Placeholder shown whilst a settings section loads. */
 export function SettingsSectionSkeleton() {
   return (
     <div className="space-y-4 rounded-lg border p-4">

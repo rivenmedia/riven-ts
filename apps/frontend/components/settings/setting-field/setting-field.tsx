@@ -23,22 +23,6 @@ export interface CommonSettingFieldProps {
   locked?: boolean;
 }
 
-export type SecretState = "default" | "custom" | "env" | "unset";
-
-type SettingsFieldType =
-  | "group"
-  | "text"
-  | "password"
-  | "secret"
-  | "number"
-  | "boolean"
-  | "nullable_boolean"
-  | "select"
-  | "string_array"
-  | "custom_rank"
-  | "dictionary"
-  | "tuple";
-
 const settingFieldComponents = {
   group: SettingGroup,
   text: SettingsTextField,
@@ -52,7 +36,9 @@ const settingFieldComponents = {
   custom_rank: SettingsCustomRankField,
   dictionary: SettingsDictionaryField,
   tuple: SettingsTupleField,
-} as const satisfies Record<SettingsFieldType, React.ComponentType<never>>;
+} as const satisfies Record<string, React.ComponentType<never>>;
+
+type SettingsFieldType = keyof typeof settingFieldComponents;
 
 export type SettingFieldProps = (
   | { nested?: false; parentName?: never }

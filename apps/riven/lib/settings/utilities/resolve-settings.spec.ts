@@ -147,7 +147,7 @@ describe(findIgnoredStored, () => {
     flag: z.boolean().default(false),
   });
 
-  it("reports invalid stored leaves while a required leaf is missing", () => {
+  it("reports invalid stored leaves whilst a required leaf is missing", () => {
     expect(
       findIgnoredStored({
         schema: required,

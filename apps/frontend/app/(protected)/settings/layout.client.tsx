@@ -3,17 +3,13 @@ import { PageShell } from "#components/page-shell/page-shell.tsx";
 import { RestartBanner } from "./_components/restart-banner/restart-banner";
 import { SettingsNav } from "./_components/settings-nav";
 
-import type { ReactNode } from "react";
-
-export interface SettingsLayoutProps {
-  children: ReactNode;
-}
+import type { PropsWithChildren } from "react";
 
 /**
  * Settings routes, with tabs for the General, Plugins and Ranking sections
  * and a banner when Riven needs a restart.
  */
-export function SettingsLayout({ children }: SettingsLayoutProps) {
+export function SettingsLayout({ children }: PropsWithChildren) {
   return (
     <PageShell>
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">

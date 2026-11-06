@@ -1,4 +1,4 @@
-import { upperFirst } from "es-toolkit";
+import { sentenceCase } from "es-toolkit";
 import {
   ZodArray,
   ZodString,
@@ -16,9 +16,9 @@ import {
   z,
 } from "zod";
 
+import type { SecretState } from "#app/_types/__generated__/graphql.ts";
 import type {
   CommonSettingFieldProps,
-  SecretState,
   SettingFieldProps,
 } from "#components/settings/setting-field/setting-field.tsx";
 import type { Constructor } from "type-fest";
@@ -39,18 +39,6 @@ export interface BuildSettingsContext {
   onResetSecret?: (path: string) => void;
 }
 
-/**
- * Turns an untitled field's key into a label, from its last path segment
- * (e.g. `scraping.dubbedAnimeOnly` becomes "Dubbed anime only").
- */
-function humaniseKey(key: string) {
-  const segment = key.split(".").at(-1) ?? key;
-
-  return upperFirst(
-    segment.replaceAll(/(?<=[a-z\d])(?=[A-Z])/gu, " ").toLowerCase(),
-  );
-}
-
 function buildCommonConfig(
   meta: GlobalMeta,
   key?: string,
@@ -61,7 +49,7 @@ function buildCommonConfig(
   }
 
   return {
-    label: meta.title ?? humaniseKey(key),
+    label: meta.title ?? sentenceCase(key),
     name: key,
     ...(meta.description && { description: meta.description }),
     ...(context?.lockedFields?.has(key) && { locked: true }),
@@ -413,7 +401,7 @@ export function buildSettingsConfigFromZodSchema(
             // replace that with a positional label.
             if (
               "label" in itemField.config &&
-              itemField.config.label === humaniseKey(itemName)
+              itemField.config.label === sentenceCase(itemName)
             ) {
               itemField.config.label = `${commonConfig.label} ${(index + 1).toString()}`;
             }

@@ -177,7 +177,7 @@ export function resolveSettings<T extends z.ZodObject>(
 /**
  * Returns the stored values that {@link resolveSettings} ignores. Unlike
  * resolution, this never throws for invalid settings, so it also reports
- * ignored values while a required leaf is still missing.
+ * ignored values whilst a required leaf is still missing.
  */
 export function findIgnoredStored<T extends z.ZodObject>(
   input: ResolveSettingsInput<T>,

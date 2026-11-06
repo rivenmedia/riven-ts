@@ -20,7 +20,6 @@ async function FirstPluginRedirect() {
 }
 
 export default function PluginsSettingsPage() {
-  // The boundary lets `redirect()` through
   return (
     <ErrorFallback message="Failed to load settings">
       <Suspense>

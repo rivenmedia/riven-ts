@@ -13,16 +13,15 @@ import PluginSettingsPage from "./plugins/[plugin]/page";
 import { SETTINGS_PLUGINS } from "./plugins/_queries/settings-plugins.query";
 import PluginsSettingsLayout from "./plugins/layout";
 
-import type { InstanceRestartStatusQuery } from "./_components/restart-banner/_queries/instance-restart-status.query.typegen";
-import type { SettingsSectionQuery } from "./_components/settings-section/_queries/settings-section.query.typegen";
-import type { SettingsPluginsQuery } from "./plugins/_queries/settings-plugins.query.typegen";
-
 const restartStatusHandler = (restartRequired: boolean) =>
   api.query(INSTANCE_RESTART_STATUS, () =>
     HttpResponse.json({
       data: {
-        instanceStatus: { __typename: "InstanceStatus", restartRequired },
-      } satisfies InstanceRestartStatusQuery,
+        instanceStatus: {
+          __typename: "InstanceStatus",
+          restartRequired,
+        },
+      },
     }),
   );
 
@@ -30,12 +29,12 @@ const restartStatusHandler = (restartRequired: boolean) =>
 const generalNavigation = {
   pathname: "/settings/general",
   segments: ["general"],
-};
+} as const;
 
 const pluginNavigation = {
   pathname: "/settings/plugins/repo-plugin-comet",
   segments: ["plugins", ["plugin", "repo-plugin-comet"]],
-};
+} as const;
 
 const sectionTitles: Record<string, string> = {
   general: "General",
@@ -78,7 +77,7 @@ const meta = preview.meta({
               secretStates: [],
               issues: [],
             },
-          } satisfies SettingsSectionQuery,
+          },
         }),
       ),
       api.query(SETTINGS_PLUGINS, () =>
@@ -104,7 +103,7 @@ const meta = preview.meta({
                 },
               ],
             },
-          } satisfies SettingsPluginsQuery,
+          },
         }),
       ),
     );
@@ -117,12 +116,15 @@ Default.test("Shows the general settings", async ({ canvas }) => {
   await expect(
     await canvas.findByRole("tab", { name: "General", selected: true }),
   ).toBeInTheDocument();
+
   await expect(
     await canvas.findByRole("textbox", { name: "Log Directory" }),
   ).toBeInTheDocument();
+
   await expect(
     canvas.getByRole("heading", { name: "Danger zone" }),
   ).toBeInTheDocument();
+
   await expect(
     canvas.queryByText("Settings changed. Restart Riven to apply them."),
   ).not.toBeInTheDocument();
@@ -173,12 +175,15 @@ Plugins.test("Shows the plugin's settings", async ({ canvas }) => {
   await expect(
     await canvas.findByRole("tab", { name: "Plugins", selected: true }),
   ).toBeInTheDocument();
+
   await expect(
     await canvas.findByRole("switch", { name: "Enable Comet" }),
   ).toBeEnabled();
+
   await expect(
     canvas.getByRole("switch", { name: "Enable TMDB" }),
   ).toBeDisabled();
+
   await expect(
     await canvas.findByRole("textbox", { name: "Log Directory" }),
   ).toBeInTheDocument();

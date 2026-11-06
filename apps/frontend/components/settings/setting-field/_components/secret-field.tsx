@@ -15,10 +15,8 @@ import { Button } from "#components/_ui/button.tsx";
 
 import { SettingsPasswordField } from "./password-field.tsx";
 
-import type {
-  CommonSettingFieldProps,
-  SecretState,
-} from "#components/settings/setting-field/setting-field.tsx";
+import type { SecretState } from "#app/_types/__generated__/graphql.ts";
+import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";
 
 export interface SettingsSecretFieldProps extends CommonSettingFieldProps {

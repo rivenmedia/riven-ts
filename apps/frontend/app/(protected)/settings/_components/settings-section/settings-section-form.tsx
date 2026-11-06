@@ -19,11 +19,9 @@ import { updateSettingsSection } from "./_actions/update-settings-section.action
 import { toSectionSubmission } from "./_utilities/to-section-submission";
 import { validationErrorsToIssues } from "./_utilities/validation-errors-to-issues";
 
+import type { SettingsSection } from "#app/_types/__generated__/graphql.ts";
 import type { BuildSettingsContext } from "#components/settings/_utilities/build-settings-config-from-zod-schema.ts";
-import type {
-  SecretState,
-  SettingFieldProps,
-} from "#components/settings/setting-field/setting-field.tsx";
+import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 interface SettingsIssue {
   path: string;
@@ -49,15 +47,7 @@ function formatSectionIssue({ path, message }: SettingsIssue) {
   return path ? `${path}: ${message}` : message;
 }
 
-export interface SettingsSectionFormProps {
-  id: string;
-  title: string;
-  jsonSchema: Record<string, unknown>;
-  values: Record<string, unknown>;
-  lockedFields: string[];
-  secretStates: { path: string; state: SecretState }[];
-  issues: SettingsIssue[];
-}
+export type SettingsSectionFormProps = Omit<SettingsSection, "__typename">;
 
 /**
  * Renders a backend settings section as a form, built from the section's
@@ -82,7 +72,6 @@ export function SettingsSectionForm({
     [jsonSchema],
   );
 
-  // Bound once per section, as the hooks' callbacks change with the action
   const [updateSection, resetFields] = useMemo(
     () =>
       [
@@ -120,15 +109,15 @@ export function SettingsSectionForm({
       },
     };
 
-    return [
-      ...buildSettingsConfigFromZodSchema(
-        schema,
-        undefined,
-        true,
-        {},
-        context,
-      ).values(),
-    ];
+    return buildSettingsConfigFromZodSchema(
+      schema,
+      undefined,
+      true,
+      {},
+      context,
+    )
+      .values()
+      .toArray();
   }, [schema, lockedFields, secretStates, executeReset]);
 
   const [fieldNames, secretFieldNames, clearableFieldNames] = useMemo(() => {
@@ -178,9 +167,11 @@ export function SettingsSectionForm({
 
   const form = useForm({
     defaultValues,
-    // Raw values, so the served schema's defaults aren't filled in for fields
-    // that aren't rendered
-    resolver: zodResolver(schema, undefined, { raw: true }),
+    resolver: zodResolver(schema, undefined, {
+      // Raw values, so the served schema's defaults aren't filled in for fields
+      // that aren't rendered
+      raw: true,
+    }),
   });
 
   const action = useAction(updateSection, {
@@ -240,10 +231,12 @@ export function SettingsSectionForm({
   });
 
   useEffect(() => {
-    // Revalidating the page (e.g. after a secret reset) brings new stored
-    // values, which mustn't discard edits that haven't been saved yet. An
-    // emptied field has no value to keep, so it takes the new stored value.
-    form.reset(defaultValues, { keepDirtyValues: true });
+    form.reset(defaultValues, {
+      // Revalidating the page (e.g. after a secret reset) brings new stored
+      // values, which mustn't discard edits that haven't been saved yet. An
+      // emptied field has no value to keep, so it takes the new stored value.
+      keepDirtyValues: true,
+    });
 
     // Issues with the stored values are shown before any submit
     for (const { path, message } of issues) {
