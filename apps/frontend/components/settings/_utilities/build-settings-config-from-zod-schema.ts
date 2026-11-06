@@ -1,4 +1,4 @@
-import { sentenceCase } from "es-toolkit";
+import { upperFirst } from "es-toolkit";
 import {
   ZodArray,
   ZodString,
@@ -39,6 +39,21 @@ export interface BuildSettingsContext {
   onResetSecret?: (path: string) => void;
 }
 
+/**
+ * Turns an untitled field's key into a label, from its last path segment
+ * (e.g. `scraping.dubbedAnimeOnly` becomes "Dubbed anime only").
+ *
+ * sentenceCase from es-toolkit isn't usable here
+ * as it turns keys such as R2160p into "r 2160 p"
+ */
+function humaniseKey(key: string) {
+  const segment = key.split(".").at(-1) ?? key;
+
+  return upperFirst(
+    segment.replaceAll(/(?<=[a-z\d])(?=[A-Z])/gu, " ").toLowerCase(),
+  );
+}
+
 function buildCommonConfig(
   meta: GlobalMeta,
   key?: string,
@@ -49,7 +64,7 @@ function buildCommonConfig(
   }
 
   return {
-    label: meta.title ?? sentenceCase(key),
+    label: meta.title ?? humaniseKey(key),
     name: key,
     ...(meta.description && { description: meta.description }),
     ...(context?.lockedFields?.has(key) && { locked: true }),
@@ -401,7 +416,7 @@ export function buildSettingsConfigFromZodSchema(
             // replace that with a positional label.
             if (
               "label" in itemField.config &&
-              itemField.config.label === sentenceCase(itemName)
+              itemField.config.label === humaniseKey(itemName)
             ) {
               itemField.config.label = `${commonConfig.label} ${(index + 1).toString()}`;
             }
