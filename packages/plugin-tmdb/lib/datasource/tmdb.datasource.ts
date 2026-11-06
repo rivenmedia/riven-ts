@@ -3,6 +3,7 @@ import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
 import { findById200Schema } from "../__generated__/zod/findByIdSchema.ts";
 import { genreMovieList200Schema } from "../__generated__/zod/genreMovieListSchema.ts";
+import { movieAlternativeTitles200Schema } from "../__generated__/zod/movieAlternativeTitlesSchema.ts";
 import { movieDetails200Schema } from "../__generated__/zod/movieDetailsSchema.ts";
 import { movieExternalIds200Schema } from "../__generated__/zod/movieExternalIdsSchema.ts";
 import { movieNowPlayingList200Schema } from "../__generated__/zod/movieNowPlayingListSchema.ts";
@@ -143,6 +144,14 @@ export class TmdbAPI extends BaseDataSource<TmdbSettings> {
     const response = await this.get<unknown>(`movie/${movieId}`);
 
     return movieDetails200Schema.parse(response);
+  }
+
+  public async getMovieAlternativeTitles(movieId: string) {
+    const response = await this.get<unknown>(
+      `movie/${movieId}/alternative_titles`,
+    );
+
+    return movieAlternativeTitles200Schema.parse(response);
   }
 
   public async getShowDetails(showId: string) {

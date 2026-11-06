@@ -1,0 +1,13 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "url": {
+      "default": "https://comet.feels.legal",
+      "description": "The URL of the Comet instance to connect to.",
+      "type": "string",
+      "format": "uri"
+    }
+  },
+  "title": "Comet"
+}

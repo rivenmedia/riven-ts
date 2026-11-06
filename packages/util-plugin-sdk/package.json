@@ -62,10 +62,20 @@
       "production": "./dist/helpers/*.js",
       "default": "./lib/helpers/*.ts"
     },
-    "./utilities/*": {
-      "types": "./dist/utilities/*.d.ts",
-      "production": "./dist/utilities/*.js",
-      "default": "./lib/utilities/*.ts"
+    "./utilities/datasource-map": {
+      "types": "./dist/utilities/datasource-map.d.ts",
+      "production": "./dist/utilities/datasource-map.js",
+      "default": "./lib/utilities/datasource-map.ts"
+    },
+    "./utilities/plugin-settings": {
+      "types": "./dist/utilities/plugin-settings.d.ts",
+      "production": "./dist/utilities/plugin-settings.js",
+      "default": "./lib/utilities/plugin-settings.ts"
+    },
+    "./utilities/status-codes": {
+      "types": "./dist/utilities/status-codes.d.ts",
+      "production": "./dist/utilities/status-codes.js",
+      "default": "./lib/utilities/status-codes.ts"
     },
     "./validation": {
       "types": "./dist/validation/index.d.ts",

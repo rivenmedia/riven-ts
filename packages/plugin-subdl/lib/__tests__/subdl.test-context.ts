@@ -10,6 +10,6 @@ export const it: typeof pluginTestContext = pluginTestContext
     "settings",
     createMockPluginSettings(SubdlSettings, {
       apiKey: "mock-api-key",
-      languages: '["en", "es"]',
+      languages: ["en", "es"],
     }),
   );

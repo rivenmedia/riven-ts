@@ -4,25 +4,25 @@ import { mockLogger } from "./create-mock-logger.ts";
 
 import type { ZodObject, z } from "zod";
 
+/**
+ * Creates a {@link PluginSettings} instance with the given settings applied.
+ *
+ * @throws {z.ZodError} if any of the given settings are invalid for the schema
+ */
 export const createMockPluginSettings = <T extends ZodObject>(
   schema: T,
   settings: z.input<T>,
 ) => {
   const mockPluginKey = schema.constructor.name;
-  const env: Record<string, string> = {};
-
-  for (const [key, value] of Object.entries(settings)) {
-    env[`RIVEN_PLUGIN_SETTING__${mockPluginKey}__${key}`] = String(value);
-  }
 
   const pluginSettings = new PluginSettings(
-    env,
+    {},
     [mockPluginKey],
     mockLogger,
     false,
   );
 
-  pluginSettings.set(mockPluginKey, schema);
+  pluginSettings.set(mockPluginKey, schema, schema.parse(settings), []);
 
   return pluginSettings;
 };

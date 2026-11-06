@@ -10,47 +10,56 @@ import { deepFreeze } from "./deep-freeze.ts";
 
 import type { ReadonlyDeep } from "type-fest";
 
-class Settings {
-  public readonly settings: ReadonlyDeep<RivenSettings>;
+/**
+ * Extracts every `RIVEN_SETTING__<key>` entry from the environment,
+ * removing it from the environment so it cannot leak elsewhere.
+ */
+function extractCoreEnvironment(environment: NodeJS.ProcessEnv) {
+  const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/u;
 
-  public constructor(environment: NodeJS.ProcessEnv) {
-    const settingPattern = /^RIVEN_SETTING__(?<setting>.+)$/u;
+  const rawSettings: Record<string, string> = {};
 
-    const rawSettings: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(environment)) {
+    const match = settingPattern.exec(key);
 
-    for (const [key, value] of Object.entries(environment)) {
-      const match = settingPattern.exec(key);
-
-      if (!match?.groups?.["setting"] || !value) {
-        continue;
-      }
-
-      rawSettings[match.groups["setting"]] = value;
-
-      // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
-      delete environment[key];
+    if (!match?.groups?.["setting"] || !value) {
+      continue;
     }
 
-    this.settings = deepFreeze(RivenSettings.parse(rawSettings));
+    rawSettings[match.groups["setting"]] = value;
 
-    if (this.settings.printConfigurationOnStartup) {
-      console.debug("#################");
-      console.debug("Effective core configuration:");
-      console.debug(this.settings);
-      console.debug("#################");
-    }
-
-    setEnvironmentData("settings", rawSettings);
+    // eslint-disable-next-line @typescript-eslint/no-dynamic-delete
+    delete environment[key];
   }
+
+  setEnvironmentData("settings", rawSettings);
+
+  return rawSettings;
 }
 
-function getWorkerSettings() {
-  const rawEnvironmentData = getEnvironmentData("settings");
-  const parsedEnvironmentData = RivenSettings.parse(rawEnvironmentData);
+/**
+ * All raw `RIVEN_SETTING__` entries, captured before they were removed from the environment.
+ *
+ * Includes both bootstrap and runtime settings keys.
+ */
+export const coreEnvironment: Readonly<Record<string, string>> = Object.freeze(
+  isMainThread
+    ? extractCoreEnvironment(process.env)
+    : (getEnvironmentData("settings") as Record<string, string>),
+);
 
-  return deepFreeze(parsedEnvironmentData);
+function parseBootstrapSettings() {
+  const parsedSettings = deepFreeze(RivenSettings.parse(coreEnvironment));
+
+  if (isMainThread && parsedSettings.printConfigurationOnStartup) {
+    console.debug("#################");
+    console.debug("Effective core configuration:");
+    console.debug(parsedSettings);
+    console.debug("#################");
+  }
+
+  return parsedSettings;
 }
 
-export const settings: ReadonlyDeep<RivenSettings> = isMainThread
-  ? new Settings(process.env).settings
-  : getWorkerSettings();
+/** The env-only bootstrap settings, available as soon as this module loads. */
+export const settings: ReadonlyDeep<RivenSettings> = parseBootstrapSettings();

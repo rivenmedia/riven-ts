@@ -1,60 +1,75 @@
-import { Eye, EyeOff } from "lucide-react";
-import { useId, useState } from "react";
-import { useFormContext } from "react-hook-form";
+"use client";
 
-import { ButtonGroup } from "#components/_ui/button-group.tsx";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
-import { Input } from "#components/_ui/input.tsx";
-import { Label } from "#components/_ui/label.tsx";
 
+import { SettingsPasswordField } from "./password-field.tsx";
+
+import type { SecretState } from "#app/_types/__generated__/graphql.ts";
 import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 import type { RegisterOptions } from "react-hook-form";
 
 export interface SettingsSecretFieldProps extends CommonSettingFieldProps {
   registerOptions?: RegisterOptions;
+  secretState?: SecretState;
+  onReset?: () => void;
 }
 
+const placeholders = {
+  default: "Using default value",
+  custom: "Custom value set — type to replace",
+  env: "Set by environment variable",
+  unset: "Not set",
+} as const satisfies Record<SecretState, string>;
+
+/**
+ * Write-only secret input. The stored value is never shown; the placeholder
+ * reflects where the current value comes from, and a custom value can be
+ * reset back to its default.
+ */
 export function SettingsSecretField({
-  name,
-  label,
-  description,
+  secretState = "unset",
+  onReset,
   ...props
 }: SettingsSecretFieldProps) {
-  const id = useId();
-
-  const { register } = useFormContext();
-  const field = register(name, props.registerOptions);
-
-  const [isValueVisible, setIsValueVisible] = useState(false);
-
   return (
     <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      {description && (
-        <p className="text-muted-foreground text-sm">{description}</p>
+      <SettingsPasswordField
+        {...props}
+        placeholder={placeholders[secretState]}
+      />
+      {secretState === "custom" && onReset && (
+        <AlertDialog>
+          <AlertDialogTrigger asChild>
+            <Button type="button" variant="outline" size="sm">
+              Reset
+            </Button>
+          </AlertDialogTrigger>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reset to default?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This removes the custom value for {props.label} and falls back
+                to the default.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={onReset}>Reset</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       )}
-      <div className="flex max-w-xl items-center gap-2">
-        <Input
-          {...props}
-          {...field}
-          id={id}
-          type={isValueVisible ? "text" : "password"}
-          className="max-w-xl"
-        />
-        <ButtonGroup className="shrink-0">
-          <Button
-            aria-label={isValueVisible ? "Hide password" : "Show password"}
-            onClick={() => {
-              setIsValueVisible(!isValueVisible);
-            }}
-            variant="outline"
-            size="icon"
-            type="button"
-          >
-            {isValueVisible ? <EyeOff /> : <Eye />}
-          </Button>
-        </ButtonGroup>
-      </div>
     </div>
   );
 }

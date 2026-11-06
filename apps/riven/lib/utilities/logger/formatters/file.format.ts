@@ -1,5 +1,8 @@
 import { format } from "winston";
 
-import { consoleFormat } from "./console.format.ts";
+import { createConsoleFormat } from "./console.format.ts";
 
-export const fileFormat = format.combine(consoleFormat, format.uncolorize());
+import type { ConsoleFormatOptions } from "./console.format.ts";
+
+export const createFileFormat = (options: ConsoleFormatOptions) =>
+  format.combine(createConsoleFormat(options), format.uncolorize());

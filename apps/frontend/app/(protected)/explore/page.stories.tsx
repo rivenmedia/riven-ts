@@ -156,7 +156,7 @@ WithPluginErrors.test(
       "Some sources could not be searched: @repo/plugin-tvdb (Request timed out), @repo/plugin-trakt (Unauthorized)",
     );
 
-    // Suspense briefly hides the resolved page while the async component re-renders
+    // Suspense briefly hides the resolved page whilst the async component re-renders
     await waitFor(async () => {
       await expect(message).toBeVisible();
     });
@@ -177,7 +177,7 @@ export const NoResults = meta.story({
 NoResults.test("Shows a message naming the query", async ({ canvas }) => {
   const message = await canvas.findByText('No items found matching "zzzz"');
 
-  // Suspense briefly hides the resolved page while the async component re-renders
+  // Suspense briefly hides the resolved page whilst the async component re-renders
   await waitFor(async () => {
     await expect(message).toBeVisible();
   });
@@ -203,7 +203,7 @@ WithoutQuery.test(
       "Enter a search term to find movies and shows.",
     );
 
-    // Suspense briefly hides the resolved page while the async component re-renders
+    // Suspense briefly hides the resolved page whilst the async component re-renders
     await waitFor(async () => {
       await expect(message).toBeVisible();
     });

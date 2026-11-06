@@ -4,13 +4,14 @@ import { assign, setup } from "xstate";
 
 import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
-import { settings } from "#utilities/settings.ts";
+import { coreEnvironment, settings } from "#utilities/settings.ts";
 
 import { applyMockScenario } from "./actors/apply-mock-scenario.actor.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
 import { createAdminUser } from "./actors/create-admin-user.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
+import { loadRuntimeSettings } from "./actors/load-runtime-settings.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
 import type { Services } from "#database/database.ts";
@@ -18,6 +19,7 @@ import type { ApolloServerContext } from "#graphql/context.ts";
 import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 import type { PluginRegistrarMachineOutput } from "#state-machines/plugin-registrar/index.ts";
 import type {
+  InstalledPlugin,
   InvalidPluginMap,
   PluginQueueMap,
   PluginWorkerMap,
@@ -28,7 +30,6 @@ import type {
 import type { ApolloServer } from "@apollo/server";
 import type { MikroORM } from "@mikro-orm/core";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 import type { AnyActorRef } from "xstate";
 
@@ -46,7 +47,8 @@ export interface BootstrapMachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
-  pluginSettings: PluginSettings | null;
+  installedPlugins: InstalledPlugin[];
+  pluginEnvironment: PluginRegistrarMachineOutput["pluginEnvironment"];
   mockScenario: MockScenario | undefined;
   requiresAdminUserCreation: boolean;
 }
@@ -74,6 +76,7 @@ export const bootstrapMachine = setup({
     children: {} as {
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      loadRuntimeSettings: "loadRuntimeSettings";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
@@ -111,7 +114,8 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { pluginSettings }) => pluginSettings,
+      installedPlugins: (_, { installedPlugins }) => installedPlugins,
+      pluginEnvironment: (_, { pluginEnvironment }) => pluginEnvironment,
     }),
   },
   actors: {
@@ -120,6 +124,7 @@ export const bootstrapMachine = setup({
     createAdminUser,
     initialiseDatabaseConnection,
     initialiseVfs,
+    loadRuntimeSettings,
     pluginRegistrarMachine,
     startGqlServer,
   },
@@ -146,7 +151,8 @@ export const bootstrapMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
-      pluginSettings: null,
+      installedPlugins: [],
+      pluginEnvironment: new Map(),
       mockScenario: input.mockScenario,
       requiresAdminUserCreation: false,
     }),
@@ -237,6 +243,50 @@ export const bootstrapMachine = setup({
             wipeUsers: settings.unsafeWipeUsersOnStartup,
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
+          onDone: {
+            target: "Loading runtime settings",
+          },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Loading runtime settings": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Loading runtime settings...",
+          },
+        },
+        invoke: {
+          id: "loadRuntimeSettings",
+          src: "loadRuntimeSettings",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when loading runtime settings. Ensure the database connection has been initialised first.",
+            );
+
+            return {
+              settingsService: services.settingsService,
+              environment: coreEnvironment,
+            };
+          },
           onDone: [
             {
               target: "Applying mock scenario",
@@ -247,13 +297,19 @@ export const bootstrapMachine = setup({
                   assert.ok(mockScenario);
 
                   return {
-                    message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
+                    message: `Runtime settings loaded. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
                   };
                 },
               },
             },
             {
               target: "Bootstrapping plugins",
+              actions: {
+                type: "log",
+                params: {
+                  message: "Runtime settings loaded.",
+                },
+              },
             },
           ],
           onError: {
@@ -262,8 +318,7 @@ export const bootstrapMachine = setup({
               {
                 type: "log",
                 params: ({ event: { error } }) => ({
-                  message:
-                    "Failed to clear previous instance state during bootstrap.",
+                  message: "Failed to load runtime settings during bootstrap.",
                   level: "error",
                   error,
                 }),
@@ -339,7 +394,14 @@ export const bootstrapMachine = setup({
         invoke: {
           id: "pluginRegistrarMachine",
           src: "pluginRegistrarMachine",
-          input: ({ context: { rootRef } }) => ({ rootRef }),
+          input: ({ context: { rootRef, services } }) => {
+            assert.ok(
+              services,
+              "Services not available when bootstrapping plugins. Ensure the database connection has been initialised first.",
+            );
+
+            return { rootRef, settingsService: services.settingsService };
+          },
           onDone: [
             {
               target: "Initialising services",
@@ -383,6 +445,23 @@ export const bootstrapMachine = setup({
               ],
             },
           ],
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to register plugins during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
         },
       },
       "Initialising services": {
@@ -407,14 +486,10 @@ export const bootstrapMachine = setup({
                       orm,
                       mainRunnerRef,
                       validPlugins,
-                      pluginSettings,
+                      installedPlugins,
+                      pluginEnvironment,
                     },
                   }) => {
-                    assert.ok(
-                      pluginSettings,
-                      "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                    );
-
                     assert.ok(
                       orm,
                       "ORM not available when starting GraphQL server. Ensure the connection has been initialised first.",
@@ -423,8 +498,9 @@ export const bootstrapMachine = setup({
                     return {
                       orm,
                       mainRunnerRef,
-                      pluginSettings,
                       validPlugins,
+                      installedPlugins,
+                      pluginEnvironment,
                     };
                   },
                   onDone: {

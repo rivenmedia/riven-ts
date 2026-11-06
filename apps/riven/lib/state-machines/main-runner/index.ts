@@ -34,7 +34,7 @@ import { createFlowWorker } from "#message-queue/utilities/create-flow-worker.ts
 import { normaliseConcurrency } from "#message-queue/utilities/normalise-concurrency.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { createEventScheduler } from "./actors/event-scheduler.actor.ts";
 import { fanOutDownload } from "./actors/fan-out-download.actor.ts";
@@ -303,7 +303,8 @@ export const mainRunnerMachine = setup({
                   settings: {
                     backoffStrategy: (attemptsMade) => {
                       const [after2, after5, after10] =
-                        settings.scrapeCooldownHours;
+                        getRuntimeSettings().general.scraping
+                          .scrapeCooldownHours;
 
                       if (attemptsMade >= 10) {
                         return Duration.fromObject({ hours: after10 }).as(
@@ -424,19 +425,18 @@ export const mainRunnerMachine = setup({
               pluginQueues,
             }),
           },
-          ...(settings.retryLibraryIntervalSeconds > 0
-            ? [
-                {
-                  id: "createRetryLibraryScheduler",
-                  src: "createEventScheduler",
-                  input: {
-                    event: "riven-internal.retry-library",
-                    interval: settings.retryLibraryIntervalSeconds * 1000,
-                    runImmediately: false,
-                  },
-                } as const,
-              ]
-            : []),
+          {
+            id: "createRetryLibraryScheduler",
+            src: "createEventScheduler",
+            // A non-positive interval disables the scheduler.
+            input: () => ({
+              event: "riven-internal.retry-library",
+              interval:
+                getRuntimeSettings().general.scheduling
+                  .retryLibraryIntervalSeconds * 1000,
+              runImmediately: false,
+            }),
+          },
         ],
         always: [
           {
@@ -488,7 +488,7 @@ export const mainRunnerMachine = setup({
 
           "riven.item-request.create.error": {
             description:
-              "Indicates that an error occurred while attempting to create an item request.",
+              "Indicates that an error occurred whilst attempting to create an item request.",
             actions: [
               {
                 type: "log",

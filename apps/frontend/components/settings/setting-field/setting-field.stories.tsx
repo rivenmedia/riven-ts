@@ -1,4 +1,4 @@
-import { expect, userEvent, within } from "storybook/test";
+import { expect, fn, userEvent, within } from "storybook/test";
 
 import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
 import { preview } from "#.storybook/preview.tsx";
@@ -34,9 +34,9 @@ Text.test("Typing updates the input value", async ({ canvas }) => {
   await expect(input).toHaveValue("Lorem ipsum dolor sit amet");
 });
 
-export const Secret = meta.story({
+export const Password = meta.story({
   args: {
-    type: "secret",
+    type: "password",
     config: {
       label: "API Key",
       name: "api-key",
@@ -52,7 +52,7 @@ export const Secret = meta.story({
   ],
 });
 
-Secret.test(
+Password.test(
   "Clicking the eye icon toggles secret visibility",
   async ({ canvas, step }) => {
     const input = canvas.getByLabelText(/api key/iu);
@@ -78,6 +78,174 @@ Secret.test(
     });
   },
 );
+
+const onSecretReset = fn();
+
+export const SecretDefault = meta.story({
+  args: {
+    type: "secret",
+    config: {
+      label: "API Key",
+      name: "api-key",
+      secretState: "default",
+      registerOptions: { required: false },
+    },
+  },
+  decorators: [createFormDecorator({ progressive: true })],
+});
+
+SecretDefault.test(
+  "Shows the default-value placeholder",
+  async ({ canvas }) => {
+    await expect(canvas.getByLabelText(/api key/iu)).toHaveAttribute(
+      "placeholder",
+      "Using default value",
+    );
+    await expect(
+      canvas.queryByRole("button", { name: /^reset$/iu }),
+    ).not.toBeInTheDocument();
+  },
+);
+
+export const SecretCustom = meta.story({
+  args: {
+    type: "secret",
+    config: {
+      label: "API Key",
+      name: "api-key",
+      secretState: "custom",
+      registerOptions: { required: false },
+      onReset: onSecretReset,
+    },
+  },
+  decorators: [createFormDecorator({ progressive: true })],
+  beforeEach: () => {
+    onSecretReset.mockClear();
+  },
+});
+
+SecretCustom.test(
+  "Confirming the reset dialog calls onReset once",
+  async ({ canvas, canvasElement, step }) => {
+    const body = within(canvasElement.ownerDocument.body);
+
+    await step("Shows the custom-value placeholder", async () => {
+      await expect(canvas.getByLabelText(/api key/iu)).toHaveAttribute(
+        "placeholder",
+        "Custom value set — type to replace",
+      );
+    });
+
+    await step("Opens the confirmation dialog", async () => {
+      await userEvent.click(canvas.getByRole("button", { name: /^reset$/iu }));
+      await expect(
+        await body.findByText("Reset to default?"),
+      ).toBeInTheDocument();
+      await expect(onSecretReset).not.toHaveBeenCalled();
+    });
+
+    await step("Confirms the reset", async () => {
+      const dialog = await body.findByRole("alertdialog");
+
+      await userEvent.click(
+        within(dialog).getByRole("button", { name: /^reset$/iu }),
+      );
+      await expect(onSecretReset).toHaveBeenCalledOnce();
+    });
+  },
+);
+
+export const SecretEnv = meta.story({
+  args: {
+    type: "secret",
+    config: {
+      label: "API Key",
+      name: "api-key",
+      secretState: "env",
+      registerOptions: { required: false },
+      locked: true,
+    },
+  },
+  decorators: [createFormDecorator({ progressive: true })],
+});
+
+SecretEnv.test(
+  "Is disabled and notes the environment source",
+  async ({ canvas }) => {
+    await expect(canvas.getByLabelText(/api key/iu)).toBeDisabled();
+    await expect(canvas.getByLabelText(/api key/iu)).toHaveAttribute(
+      "placeholder",
+      "Set by environment variable",
+    );
+    await expect(
+      canvas.getByText("Set by environment variable"),
+    ).toBeInTheDocument();
+  },
+);
+
+export const SecretUnset = meta.story({
+  args: {
+    type: "secret",
+    config: { label: "API Key", name: "api-key", secretState: "unset" },
+  },
+  decorators: [createFormDecorator({ progressive: true })],
+});
+
+SecretUnset.test("Shows the not-set placeholder", async ({ canvas }) => {
+  await expect(canvas.getByLabelText(/api key/iu)).toHaveAttribute(
+    "placeholder",
+    "Not set",
+  );
+});
+
+export const LockedText = meta.story({
+  args: {
+    type: "text",
+    config: { label: "Port", name: "port", locked: true },
+  },
+  decorators: [
+    createFormDecorator({ progressive: true, defaultValues: { port: "8080" } }),
+  ],
+});
+
+LockedText.test(
+  "Disables the input and shows the locked note",
+  async ({ canvas }) => {
+    await expect(
+      canvas.getByRole("textbox", { name: /port/iu }),
+    ).toBeDisabled();
+    await expect(
+      canvas.getByText("Set by environment variable"),
+    ).toBeInTheDocument();
+  },
+);
+
+export const TextWithError = meta.story({
+  args: {
+    type: "text",
+    config: { label: "Log Directory", name: "logging.logDirectory" },
+  },
+  decorators: [
+    createFormDecorator({
+      progressive: true,
+      defaultValues: { logging: { logDirectory: "/root" } },
+      errors: {
+        logging: {
+          logDirectory: {
+            type: "validate",
+            message: "Directory is not writable",
+          },
+        },
+      },
+    }),
+  ],
+});
+
+TextWithError.test("Shows the field's validation error", async ({ canvas }) => {
+  await expect(canvas.getByRole("alert")).toHaveTextContent(
+    "Directory is not writable",
+  );
+});
 
 export const NumberField = meta.story({
   name: "Number",
@@ -468,3 +636,91 @@ export const SettingGroup = meta.story({
     }),
   ],
 });
+
+const onTupleSubmit = fn();
+
+export const Tuple = meta.story({
+  args: {
+    type: "tuple",
+    config: {
+      label: "Retry Schedule",
+      name: "tuple",
+      description: "Hours to wait before each retry",
+      itemFields: [
+        {
+          type: "number",
+          config: {
+            label: "After 2 attempts",
+            name: "tuple.0",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+        {
+          type: "number",
+          config: {
+            label: "After 5 attempts",
+            name: "tuple.1",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+        {
+          type: "number",
+          config: {
+            label: "After 10 attempts",
+            name: "tuple.2",
+            registerOptions: { min: 0, valueAsNumber: true },
+          },
+        },
+      ],
+    },
+  },
+  decorators: [
+    createFormDecorator(
+      {
+        defaultValues: { tuple: [2, 6, 24] },
+        progressive: true,
+      },
+      onTupleSubmit,
+    ),
+  ],
+  beforeEach: () => {
+    onTupleSubmit.mockClear();
+  },
+});
+
+Tuple.test(
+  "Editing one item submits the full tuple as numbers",
+  async ({ canvas }) => {
+    const input = canvas.getByRole("spinbutton", {
+      name: /after 5 attempts/iu,
+    });
+
+    await userEvent.clear(input);
+    await userEvent.type(input, "7");
+    await userEvent.click(canvas.getByRole("button", { name: /save/iu }));
+
+    await expect(onTupleSubmit).toHaveBeenCalledWith(
+      { tuple: [2, 7, 24] },
+      expect.anything(),
+    );
+  },
+);
+
+Tuple.test(
+  "An invalid item is flagged without affecting the others",
+  async ({ canvas }) => {
+    const inputs = canvas.getAllByRole("spinbutton");
+    const [first, second, third] = inputs;
+
+    expect.assert(first && second && third);
+
+    await userEvent.clear(second);
+    await userEvent.type(second, "-1");
+    await userEvent.click(canvas.getByRole("button", { name: /save/iu }));
+
+    await expect(second).toBeInvalid();
+    await expect(first).toBeValid();
+    await expect(third).toBeValid();
+    await expect(onTupleSubmit).not.toHaveBeenCalled();
+  },
+);

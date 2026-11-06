@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "stremThruUrl": {
+      "default": "https://stremthru.13377001.xyz/",
+      "description": "The URL of the StremThru instance to request",
+      "type": "string",
+      "format": "uri"
+    },
+    "storePriority": {
+      "description": "The priority order of stores to use.<br /><br />If unset, stores will attempt to download in alphabetical order.",
+      "minItems": 1,
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "alldebrid",
+          "debrider",
+          "debridlink",
+          "easydebrid",
+          "offcloud",
+          "pikpak",
+          "premiumize",
+          "realdebrid",
+          "torbox"
+        ]
+      }
+    },
+    "realdebridApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "alldebridApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "debriderApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "debridlinkApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "easydebridApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "offcloudApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "pikpakApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "premiumizeApiKey": {
+      "secret": true,
+      "type": "string"
+    },
+    "torboxApiKey": {
+      "secret": true,
+      "type": "string"
+    }
+  },
+  "title": "StremThru"
+}

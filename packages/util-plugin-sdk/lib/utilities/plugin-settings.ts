@@ -87,7 +87,7 @@ export class PluginSettings {
 
       if (!settingGroup) {
         this.#logger.warn(
-          `No setting group found for prefix: ${prefix} while processing environment variable: ${key}`,
+          `No setting group found for prefix: ${prefix} whilst processing environment variable: ${key}`,
         );
 
         continue;
@@ -139,15 +139,52 @@ export class PluginSettings {
   }
 
   /**
-   * Persists settings for a given schema.
+   * Returns a copy of the raw environment settings for each config prefix.
+   *
+   * Core uses this to compute locked fields after the settings have been locked;
+   * it is not available afterwards so plugins can never read it.
+   *
+   * @internal
+   *
+   * @throws {Error} if settings are locked
+   */
+  public getEnvironmentSnapshot(): ReadonlyMap<
+    string,
+    Readonly<Record<string, string>>
+  > {
+    if (this.#isLocked) {
+      throw new Error(
+        "The plugin environment is no longer available after the settings have been locked.",
+      );
+    }
+
+    return new Map(
+      [...this.#environmentSettingGroups].map(([prefix, settings]) => [
+        prefix,
+        Object.freeze(Object.fromEntries(settings)),
+      ]),
+    );
+  }
+
+  /**
+   * Persists the resolved settings for a given schema.
+   *
+   * Resolution (env > stored > schema default) is performed by core before calling this.
    *
    * @internal
    *
    * @param configPrefix The config prefix associated with the plugin.
-   * @param schema The schema that should be used to parse the settings.
+   * @param schema The schema the settings were resolved against.
+   * @param value The resolved settings.
+   * @param consumedKeys The environment setting keys consumed by the schema, so they aren't reported as unused.
    * @throws {Error} if settings are locked
    */
-  public set(configPrefix: string, schema: ZodObject): void {
+  public set<T extends ZodObject>(
+    configPrefix: string,
+    schema: T,
+    value: z.infer<T>,
+    consumedKeys: Iterable<string>,
+  ): void {
     if (this.#isLocked) {
       throw new Error("Settings are locked and cannot be modified.");
     }
@@ -160,22 +197,16 @@ export class PluginSettings {
       );
     }
 
-    const parsedSettings = schema.parse(
-      Object.fromEntries(
-        [...rawPluginSettings].map(([key, value]) => [key, value]),
-      ),
-    );
+    this.#settingsMap.set(schema, value);
 
-    this.#settingsMap.set(schema, parsedSettings);
-
-    for (const key of Object.keys(parsedSettings)) {
+    for (const key of consumedKeys) {
       rawPluginSettings.delete(key);
     }
 
     if (this.#printConfig) {
       console.debug("#################");
       console.debug(`Effective ${configPrefix} configuration:`);
-      console.debug(parsedSettings);
+      console.debug(value);
       console.debug("#################");
     }
   }
