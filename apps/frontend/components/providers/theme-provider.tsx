@@ -1,6 +1,6 @@
 "use client";
 
-import { createThemes } from "@wrksz/themes/client";
+import { createThemes } from "@wrksz/themes/next/create-themes";
 
 export const themes = {
   amberminimal: "Amber Minimal",
@@ -31,7 +31,7 @@ const themeConfig = createThemes({
 });
 
 export const {
-  ThemeProvider,
+  NextThemeProvider: ThemeProvider,
   useTheme,
   // ThemedImage,
   // useThemeEffect,
