@@ -79,6 +79,9 @@ FROM base AS builder
     COPY --from=prepare ${HOME}/out/pnpm-workspace.yaml ./
     COPY --from=prepare ${HOME}/out/json/patches ./patches
 
+    # `turbo prune` leaves out the pnpmfile, but the lockfile records its checksum
+    COPY --from=prepare ${HOME}/.pnpmfile.mjs ./
+
     RUN pnpm fetch
 
     COPY --from=prepare ${HOME}/out/full/ ./

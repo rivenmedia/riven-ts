@@ -78,6 +78,9 @@ FROM base AS builder
     COPY --from=prepare ${HOME}/out/pnpm-workspace.yaml ./
     COPY --from=prepare ${HOME}/out/json/patches ./patches
 
+    # `turbo prune` leaves out the pnpmfile, but the lockfile records its checksum
+    COPY --from=prepare ${HOME}/.pnpmfile.mjs ./
+
     RUN pnpm fetch
 
     COPY --from=prepare ${HOME}/out/full/ ./
@@ -103,7 +106,11 @@ FROM builder AS production-deploy
     ARG CI
     ENV CI=${CI}
 
-    RUN pnpm --filter @repo/riven --prod deploy pruned
+    # `.modules.yaml` records a `prunedAt` timestamp, which would make the
+    # `node_modules` layer differ on every build even when the dependencies don't.
+    # It's only read by pnpm, so it's safe to drop from the runtime image.
+    RUN pnpm --filter @repo/riven --prod deploy pruned && \
+        rm -f pruned/node_modules/.modules.yaml
 
 FROM node:${NODE_VERSION}-alpine AS runner
 
@@ -146,7 +153,11 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     USER ${PUID}:${PGID}
 
-    COPY --from=production-deploy ${HOME}/pruned .
+    # Copy dependencies and app code as separate layers, so a change to the app
+    # alone produces a small `dist` layer and the `node_modules` layer is reused.
+    COPY --from=production-deploy ${HOME}/pruned/node_modules ./node_modules
+    COPY --from=production-deploy ${HOME}/pruned/package.json ./
+    COPY --from=production-deploy ${HOME}/pruned/dist ./dist
 
     ENV NODE_ENV=production
 
