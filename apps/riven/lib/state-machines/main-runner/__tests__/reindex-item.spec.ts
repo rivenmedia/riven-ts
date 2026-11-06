@@ -3,13 +3,13 @@ import { expect, vi } from "vitest";
 
 import { flow } from "#message-queue/flows/producer.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
-import * as settingsModule from "#utilities/settings.ts";
 
 import { it } from "./helpers/test-context.ts";
 
 it("enqueues a job to reindex the item after the next episode air date if the item is a show", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
   factories: { mediaEntryFactory },
 }) => {
@@ -19,9 +19,8 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 
   const scheduleOffsetMinutes = 30;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    scheduleOffsetMinutes,
+  overrideRuntimeSettings({
+    general: { scheduling: { scheduleOffsetMinutes } },
   });
 
   const { show, episodes } = await seedOngoingShow();
@@ -147,6 +146,7 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the item is a show and has no next episode air date", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
 }) => {
   vi.useFakeTimers({
@@ -155,9 +155,8 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
 
   const unknownAirDateOffsetDays = 7;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    unknownAirDateOffsetDays,
+  overrideRuntimeSettings({
+    general: { scheduling: { unknownAirDateOffsetDays } },
   });
 
   const { show } = await seedOngoingShow();
@@ -208,6 +207,7 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
 it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item is a show and the next air date is in the past", async ({
   em,
   actor,
+  overrideRuntimeSettings,
   seeders: { seedOngoingShow },
 }) => {
   vi.useFakeTimers({
@@ -216,9 +216,8 @@ it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item i
 
   const scheduleOffsetMinutes = 30;
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settingsModule.settings,
-    scheduleOffsetMinutes,
+  overrideRuntimeSettings({
+    general: { scheduling: { scheduleOffsetMinutes } },
   });
 
   const { show } = await seedOngoingShow();

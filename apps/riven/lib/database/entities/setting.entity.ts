@@ -1,22 +1,24 @@
 import { PrimaryKeyProp } from "@mikro-orm/core";
 import { Entity, Property } from "@mikro-orm/decorators/legacy";
-import { JSONResolver } from "graphql-scalars";
-import { Field, ObjectType } from "type-graphql";
 
 @Entity()
-@ObjectType()
 export class Setting {
-  public [PrimaryKeyProp]?: ["key", "namespace"];
+  public [PrimaryKeyProp]?: ["namespace", "key"];
 
-  @Field()
+  @Property({ primary: true })
+  public namespace!: string;
+
   @Property({ primary: true })
   public key!: string;
 
-  @Field(() => JSONResolver, { nullable: true })
-  @Property({ type: "jsonb" })
-  public value?: unknown;
+  // Row existence (not a non-null value) means "overridden"; null is an explicit null.
+  @Property({ type: "jsonb", nullable: true })
+  public value!: unknown;
 
-  @Field()
-  @Property({ primary: true })
-  public namespace!: string;
+  @Property({
+    type: "datetime",
+    onCreate: () => new Date(),
+    onUpdate: () => new Date(),
+  })
+  public updatedAt!: Date;
 }

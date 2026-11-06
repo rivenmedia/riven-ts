@@ -5,7 +5,6 @@ import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 import packageJson from "../package.json" with { type: "json" };
 import { StremThruTorzAPI } from "./datasource/stremthru-torz.datasource.ts";
 import { StremThruTorznabAPI } from "./datasource/stremthru-torznab.datasource.ts";
-import { StremThruSettingsResolver } from "./schema/stremthru-settings.resolver.ts";
 import { StremThruResolver } from "./schema/stremthru.resolver.ts";
 import { Store } from "./schemas/store.schema.ts";
 import { pluginConfig } from "./stremthru-plugin.config.ts";
@@ -18,7 +17,7 @@ export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
   dataSources: [StremThruTorzAPI, StremThruTorznabAPI],
-  resolvers: [StremThruResolver, StremThruSettingsResolver],
+  resolvers: [StremThruResolver],
   hooks: {
     "riven.media-item.download.requested": async ({
       dataSources,

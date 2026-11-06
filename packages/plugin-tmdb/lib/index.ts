@@ -4,7 +4,6 @@ import { indexTMDBMediaItem } from "./hooks/index-tmdb-media-item.ts";
 import { searchTmdb } from "./query-handlers/search-tmdb.ts";
 import { TmdbIndexerDataResolver } from "./schema/tmdb-indexer-data.resolver.ts";
 import { TmdbIndexerEpisodeResolver } from "./schema/tmdb-indexer-episode.resolver.ts";
-import { TmdbSettingsResolver } from "./schema/tmdb-settings.resolver.ts";
 import { TmdbResolver } from "./schema/tmdb.resolver.ts";
 import { pluginConfig } from "./tmdb-plugin.config.ts";
 import { TmdbSettings } from "./tmdb-settings.schema.ts";
@@ -17,7 +16,6 @@ export const plugin: RivenPlugin = {
   dataSources: [TmdbAPI],
   resolvers: [
     TmdbResolver,
-    TmdbSettingsResolver,
     TmdbIndexerDataResolver,
     TmdbIndexerEpisodeResolver,
   ],

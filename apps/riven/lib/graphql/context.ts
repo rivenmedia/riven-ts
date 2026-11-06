@@ -1,4 +1,5 @@
 import type { services } from "#database/database.ts";
+import type { SettingsManager } from "#settings/settings-manager.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "#types/plugins.ts";
 import type { EntityManager } from "@mikro-orm/core";
@@ -12,5 +13,6 @@ export interface ApolloServerContext extends GraphQLContext {
     em: EntityManager;
     services: typeof services;
     sendEvent: MainRunnerMachineIntake;
+    settingsManager: SettingsManager;
   };
 }

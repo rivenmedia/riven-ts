@@ -379,9 +379,13 @@ export class MediaItemStateSubscriber implements EventSubscriber<MediaItem> {
       return item.state;
     }
 
-    const { settings } = await import("#utilities/settings.ts");
+    const { getRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
 
-    if (item.failedScrapeAttempts >= settings.maximumFailedAttempts) {
+    if (
+      item.failedScrapeAttempts >=
+      getRuntimeSettings().general.scraping.maximumFailedAttempts
+    ) {
       return "failed";
     }
 

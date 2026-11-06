@@ -7,7 +7,7 @@ import chalk from "chalk";
 import { SkippedTorrentError } from "#message-queue/sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
 import { rtnInstance } from "#ranking-config/ranking-config.ts";
 import { logger } from "#utilities/logger/logger.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
@@ -44,7 +44,11 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
 
         const { parsedData } = stream;
 
-        if (item.isAnime && settings.dubbedAnimeOnly && !parsedData.dubbed) {
+        if (
+          item.isAnime &&
+          getRuntimeSettings().general.scraping.dubbedAnimeOnly &&
+          !parsedData.dubbed
+        ) {
           throw new SkippedTorrentError(
             "Skipping non-dubbed anime torrent",
             itemTitle,

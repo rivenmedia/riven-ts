@@ -846,9 +846,6 @@ importers:
       '@react-spring/web':
         specifier: 'catalog:'
         version: 10.1.2(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../packages/feature-settings
       '@repo/util-auth':
         specifier: workspace:^
         version: link:../../packages/util-auth
@@ -1628,9 +1625,6 @@ importers:
 
   packages/core/util-graphql-schema:
     dependencies:
-      '@repo/feature-settings':
-        specifier: workspace:^
-        version: link:../../feature-settings
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../util-plugin-sdk
@@ -1843,40 +1837,6 @@ importers:
       nyc:
         specifier: 'catalog:'
         version: 18.0.0(supports-color@10.2.2)
-      oxlint:
-        specifier: 'catalog:'
-        version: 1.74.0(oxlint-tsgolint@0.25.0)
-      typescript:
-        specifier: 'catalog:'
-        version: '@typescript/typescript6@6.0.2'
-      vitest:
-        specifier: catalog:vitest
-        version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
-
-  packages/feature-settings:
-    dependencies:
-      '@repo/util-plugin-sdk':
-        specifier: workspace:^
-        version: link:../util-plugin-sdk
-      type-graphql:
-        specifier: 'catalog:'
-        version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
-    devDependencies:
-      '@repo/core-util-oxlint-config':
-        specifier: workspace:^
-        version: link:../core/util-oxlint-config
-      '@repo/core-util-typescript-config':
-        specifier: workspace:^
-        version: link:../core/util-typescript-config
-      '@repo/core-util-vitest-config':
-        specifier: workspace:^
-        version: link:../core/util-vitest-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.12.4
-      '@typescript/native':
-        specifier: 'catalog:'
-        version: typescript@7.0.2
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)
