@@ -1,0 +1,69 @@
+services:
+  silo:
+    image: ghcr.io/silo-server/silo-server:latest
+    container_name: silo
+    restart: unless-stopped
+    # Silo keeps serving in-flight requests for a while after being asked to stop
+    stop_grace_period: 2m
+    env_file: .env.silo
+    environment:
+      MODE: integrated
+      PORT: "8080"
+      DATABASE_URL: postgres://silo:silo@silo-db:5432/silo?sslmode=disable
+      REDIS_URL: redis://silo-cache:6379
+      SILO_PLUGIN_CACHE_DIR: /var/lib/silo/plugins
+    # 8080: native API and web UI (used by Riven)
+    # 8096: Jellyfin compatibility layer, e.g. for connecting Seerr - Riven does not use it
+    ports:
+      - 8090:8080
+      - 8096:8096
+    volumes:
+      - ./docker-data/silo/plugins:/var/lib/silo/plugins
+      - ./docker-data/silo/artwork:/var/lib/silo/artwork
+      - ./docker-data/silo/transcode:/tmp/silo-transcode
+      - ${HOST_VFS_MOUNT_PATH}:/mount:ro,rslave
+    healthcheck:
+      test: curl --connect-timeout 15 --silent --show-error --fail http://127.0.0.1:8080/api/v2/system/info
+      interval: 1m00s
+      timeout: 15s
+      retries: 3
+      start_period: 1m00s
+    depends_on:
+      silo-db:
+        condition: service_healthy
+      silo-cache:
+        condition: service_healthy
+
+  silo-db:
+    image: pgvector/pgvector:pg18
+    container_name: silo-db
+    restart: unless-stopped
+    shm_size: 1gb
+    environment:
+      POSTGRES_USER: silo
+      POSTGRES_PASSWORD: silo
+      POSTGRES_DB: silo
+    volumes:
+      - ./docker-data/silo/postgres:/var/lib/postgresql
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U silo
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  silo-cache:
+    image: redis:alpine
+    container_name: silo-cache
+    restart: unless-stopped
+    volumes:
+      - ./docker-data/silo/redis:/data
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      interval: 5s
+      timeout: 3s
+      retries: 5

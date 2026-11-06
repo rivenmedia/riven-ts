@@ -166,7 +166,7 @@ RIVEN_SETTING__redisUrl="redis://redis:6379"
 
 ## Media Server Issues
 
-### Plex/Jellyfin doesn't see new files
+### Plex/Jellyfin/Silo doesn't see new files
 
 1. Verify VFS is mounted: `ls /mnt/riven` should show files
 2. Check the media server volume mount uses `rslave`:
@@ -177,8 +177,10 @@ volumes:
 ```
 
 3. Trigger a library scan in your media server
-4. Ensure `plexLibraryPath` / `jellyfinLibraryPath` matches the path as the
-   **media server** sees it (`/mount` above)
+4. Ensure `plexLibraryPath` / `jellyfinLibraryPath` / `siloLibraryPath`
+   matches the path as the **media server** sees it (`/mount` above)
+5. For Silo, make sure the API key belongs to an administrator — Silo only
+   accepts scan requests from admins
 
 ## Docker Issues
 
