@@ -32,6 +32,6 @@
     "oxlint": "catalog:",
     "type-fest": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   }
 }

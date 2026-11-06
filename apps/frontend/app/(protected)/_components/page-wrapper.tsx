@@ -1,15 +1,15 @@
 "use client";
 
-import { ImmersiveBackground } from "@/components/immersive-background/immersive-background";
-import { PageShell } from "@/components/page-shell/page-shell";
-
 import { usePathname } from "next/navigation";
 
-import { Header } from "./header";
-import { Sidebar } from "./sidebar/sidebar";
+import { ImmersiveBackground } from "#components/immersive-background/immersive-background.tsx";
+import { PageShell } from "#components/page-shell/page-shell.tsx";
 
-import type { SidebarItem } from "./sidebar/sidebar";
-import type { User } from "@/lib/auth/types";
+import { Header } from "./header.tsx";
+import { Sidebar } from "./sidebar/sidebar.tsx";
+
+import type { User } from "#lib/auth/types.ts";
+import type { SidebarItem } from "./sidebar/sidebar.tsx";
 import type { PropsWithChildren } from "react";
 
 interface PageWrapperProps {
@@ -18,6 +18,10 @@ interface PageWrapperProps {
   sidebarItems: readonly SidebarItem[];
 }
 
+/**
+ * Authenticated app layout combining the sidebar, header, immersive background
+ * and main content.
+ */
 export function PageWrapper({
   children,
   sidebarItems,
@@ -30,9 +34,9 @@ export function PageWrapper({
     <div className="bg-background relative grid h-screen w-screen grid-cols-1 overflow-hidden md:grid-cols-[auto_1fr]">
       <Sidebar items={sidebarItems} currentPath={pathname} user={user} />
       <Header modifierKey={userAgentHeader?.includes("Mac") ? "⌘" : "⌃"} />
-      <PageShell>
+      <PageShell className="z-1">
         <ImmersiveBackground />
-        {children}
+        <main>{children}</main>
       </PageShell>
       {/* <MobileNav /> */}
     </div>

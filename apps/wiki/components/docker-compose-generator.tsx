@@ -350,7 +350,7 @@ function buildTSCompose(cfg: TSConfig): {
     `RIVEN_SETTING__redisUrl="redis://redis:6379"`,
     `RIVEN_SETTING__vfsMountPath="/mount"`,
     // Defaults to localhost, which is unreachable from outside the container.
-    `RIVEN_SETTING__gqlHost="0.0.0.0"`,
+    `RIVEN_SETTING__host="0.0.0.0"`,
     `RIVEN_SETTING__rankingConfigPath="/app/data/riven-ranking-config.json"`,
     `RIVEN_SETTING__logLevel="info"`,
     `RIVEN_SETTING__enabledLogTransports=["console"]`,

@@ -1,21 +1,20 @@
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import { Spinner } from "@/components/_ui/spinner";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { Check, Fingerprint, Pencil, X } from "lucide-react";
+import { DateTime } from "luxon";
+
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Spinner } from "#components/_ui/spinner.tsx";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
-} from "@/components/_ui/tooltip";
-import { authClient } from "@/lib/auth/client";
+} from "#components/_ui/tooltip.tsx";
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { Check, Fingerprint, Pencil, X } from "lucide-react";
-import { DateTime } from "luxon";
-import { useForm } from "react-hook-form";
-import { toast } from "sonner";
-
-import { usePasskeyForm } from "./passkey-form-provider";
-import { PasskeyFormSchema } from "./passkey.form-schema";
+import { updatePasskeyName } from "./_actions/update-passkey-name.action.ts";
+import { usePasskeyForm } from "./passkey-form-provider.tsx";
+import { PasskeyFormSchema } from "./passkey.form-schema.ts";
 
 import type { Passkey } from "@better-auth/passkey/client";
 
@@ -35,40 +34,30 @@ export function SinglePasskey({ passkey }: SinglePasskeyProps) {
 
   const isEditing = currentlyEditingPasskey?.id === passkey.id;
 
-  const form = useForm({
-    resolver: zodResolver(PasskeyFormSchema),
-    defaultValues: {
-      passkeyName: passkey.name ?? "",
+  const { form, handleSubmitWithAction } = useHookFormAction(
+    updatePasskeyName.bind(null, passkey.id),
+    zodResolver(PasskeyFormSchema),
+    {
+      actionProps: {
+        onSuccess() {
+          clearCurrentlyEditingPasskey();
+          reloadPasskeys();
+        },
+      },
+      formProps: {
+        defaultValues: {
+          passkeyName: passkey.name ?? "",
+        },
+        disabled: !isEditing,
+        shouldUseNativeValidation: true,
+      },
     },
-    disabled: !isEditing,
-    shouldUseNativeValidation: true,
-  });
-
-  const handleSubmit = form.handleSubmit(async (data) => {
-    try {
-      const { error } = await authClient.passkey.updatePasskey({
-        id: passkey.id,
-        name: data.passkeyName,
-      });
-
-      if (error) {
-        toast.error(error.message ?? "Failed to update passkey name");
-      } else {
-        toast.success("Passkey name updated successfully!");
-
-        clearCurrentlyEditingPasskey();
-
-        reloadPasskeys();
-      }
-    } catch {
-      toast.error("Failed to update passkey name");
-    }
-  });
+  );
 
   const { isSubmitting } = form.formState;
 
   return (
-    <form onSubmit={(event) => void handleSubmit(event)}>
+    <form onSubmit={(event) => void handleSubmitWithAction(event)}>
       <div className="border-border/60 flex items-center justify-between border-b py-3">
         <div className="flex flex-1 items-center gap-3">
           <Fingerprint className="text-muted-foreground h-5 w-5" />

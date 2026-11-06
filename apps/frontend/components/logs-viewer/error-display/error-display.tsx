@@ -4,6 +4,10 @@ export interface ErrorDisplayProps {
   buttonText?: string;
 }
 
+/**
+ * Error panel shown when logs fail to load, with the error message and a retry
+ * button.
+ */
 export function ErrorDisplay({
   errorMessage,
   retryAction,

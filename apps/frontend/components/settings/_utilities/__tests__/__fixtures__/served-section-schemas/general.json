@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "scraping": {
+      "type": "object",
+      "properties": {
+        "attemptUnknownDownloads": {
+          "default": false,
+          "description": "If true, Riven will attempt to download torrents whose contents cannot be verified without first attempting to download.\n\n**Note**: Enabling this will degrade performance as more download attempts will be made for all items,\nhowever it may be useful to enable if Riven's plugins are unable to find your requested items.",
+          "type": "boolean"
+        },
+        "dubbedAnimeOnly": {
+          "default": false,
+          "description": "Only scrape dubbed anime.",
+          "type": "boolean"
+        },
+        "maximumFailedAttempts": {
+          "description": "The maximum number of scrape attempts before giving up on an item. Set to 0 to allow unlimited attempts (not recommended).",
+          "default": 10,
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "minimumAverageBitrateMovies": {
+          "description": "The minimum average bitrate for movies in kbps.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumAverageBitrateMovies": {
+          "description": "The maximum average bitrate for movies in kbps.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "minimumAverageBitrateEpisodes": {
+          "description": "The minimum average bitrate for episodes in kbps.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "maximumAverageBitrateEpisodes": {
+          "description": "The maximum average bitrate for episodes in kbps.",
+          "type": "integer",
+          "exclusiveMinimum": 0,
+          "maximum": 9007199254740991
+        },
+        "preferSeasonPacks": {
+          "default": false,
+          "description": "If true, Riven will prefer to download season packs over show packs.",
+          "type": "boolean"
+        },
+        "scrapeCooldownHours": {
+          "default": [2, 6, 24],
+          "description": "The cooldown periods (in hours) to apply after failed scrape attempts,\nin the format [> 2 attempts, > 5 attempts, > 10 attempts].",
+          "type": "array",
+          "prefixItems": [
+            {
+              "default": 2,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "default": 6,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            },
+            {
+              "default": 24,
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9007199254740991
+            }
+          ],
+          "items": false,
+          "maxItems": 3
+        }
+      },
+      "title": "Scraping"
+    },
+    "scheduling": {
+      "type": "object",
+      "properties": {
+        "scheduleOffsetMinutes": {
+          "default": 30,
+          "description": "The number of minutes to wait after an item's air date before attempting to re-index it.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "unknownAirDateOffsetDays": {
+          "default": 7,
+          "description": "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        "retryLibraryIntervalSeconds": {
+          "default": 86400,
+          "description": "The interval in seconds for retrying the library. Set to 0 to disable.",
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        }
+      },
+      "title": "Scheduling"
+    },
+    "logging": {
+      "type": "object",
+      "properties": {
+        "loggingEnabled": {
+          "default": true,
+          "description": "Enable or disable logging for the application.",
+          "type": "boolean"
+        },
+        "logLevel": {
+          "default": "info",
+          "description": "The logging level for the application.",
+          "type": "string",
+          "enum": ["error", "warn", "info", "http", "verbose", "debug", "silly"]
+        },
+        "logDirectory": {
+          "default": "./logs",
+          "description": "The directory where log files will be stored.",
+          "type": "string"
+        },
+        "enabledLogTransports": {
+          "default": ["console", "file"],
+          "description": "The enabled logging transports.",
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": ["console", "file"]
+          }
+        },
+        "logShowStackTraces": {
+          "default": true,
+          "description": "Whether to show detailed stack traces when unexpected errors occur.",
+          "type": "boolean"
+        }
+      },
+      "title": "Logging"
+    }
+  },
+  "required": ["scraping", "scheduling", "logging"],
+  "title": "General"
+}

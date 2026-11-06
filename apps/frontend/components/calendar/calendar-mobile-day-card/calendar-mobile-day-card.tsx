@@ -1,15 +1,18 @@
 import { cn } from "cn";
 
-import { DayItemsList } from "../day-items-list/day-items-list";
-import { formatDayTitle } from "../utilities/format-day-title";
+import { DayItemsList } from "#components/calendar/day-items-list/day-items-list.tsx";
+import { formatDayTitle } from "#components/calendar/utilities/format-day-title.ts";
 
-import type { CalendarDay } from "../types";
+import type { CalendarDay } from "#components/calendar/types.d.ts";
 
 export interface CalendarMobileDayCardProps {
   day: CalendarDay;
   isToday: boolean;
 }
 
+/**
+ * Mobile calendar row showing a day's title, item count and full release list.
+ */
 export function CalendarMobileDayCard({
   day,
   isToday,

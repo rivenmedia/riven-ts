@@ -2,6 +2,7 @@
 
 import { cn } from "cn";
 
+/** Semantic data table with header, body, footer and caption parts. */
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
     <div

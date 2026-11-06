@@ -19,9 +19,12 @@ export class IndexedMovieSeeder extends BaseSeeder<IndexedMovieSeederContext> {
   ) {
     const itemRequest = await new MovieItemRequestFactory(em).createOne();
 
+    assert.ok(itemRequest.tmdbId);
+
     context.movie = await new MovieFactory(em).createOne({
       indexedAt: DateTime.utc().toJSDate(),
       releaseDate: DateTime.utc().minus({ years: 1 }).toISO(),
+      tmdbId: itemRequest.tmdbId,
       itemRequest,
     });
 

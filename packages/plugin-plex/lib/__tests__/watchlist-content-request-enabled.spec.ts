@@ -13,7 +13,7 @@ it.override("settings", () =>
   createMockPluginSettings(PlexSettings, {
     plexServerUrl: "http://localhost:32400",
     plexToken: "test-plex-token",
-    watchlistEnabled: "true",
+    watchlistEnabled: true,
   }),
 );
 
@@ -74,6 +74,43 @@ it("returns watchlist content", async ({
         tvdbId: "1234568",
       },
     ],
+    updateIntervalSeconds: 60,
+  });
+});
+
+it("handles an empty watchlist when Plex omits Metadata", async ({
+  dataSourceMap,
+  plugin,
+  server,
+  settings,
+  logger,
+}) => {
+  const providerListRequestedHook =
+    plugin.hooks["riven.content-service.requested"];
+
+  expect.assert(providerListRequestedHook);
+
+  server.use(
+    http.get("**/library/sections/watchlist/all", () =>
+      HttpResponse.json<z.input<typeof UserWatchlistResponse>>({
+        MediaContainer: {
+          size: 0,
+          totalSize: 0,
+        },
+      }),
+    ),
+  );
+
+  const response = await providerListRequestedHook({
+    dataSources: dataSourceMap,
+    settings,
+    event: {},
+    logger,
+  });
+
+  expect(response).toStrictEqual({
+    movies: [],
+    shows: [],
     updateIntervalSeconds: 60,
   });
 });

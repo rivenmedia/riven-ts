@@ -13,62 +13,14 @@ import { DateTime } from "luxon";
 import assert from "node:assert";
 
 import { flow } from "#message-queue/flows/producer.ts";
-import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
 import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
 import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
 import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "#utilities/logger/logger.ts";
 
 import { processItemRequestProcessorSchema } from "./process-item-request.schema.ts";
-
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import type {
-  MediaItemIndexRequestedMovieResponse,
-  MediaItemIndexRequestedShowResponse,
-} from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";
-
-/**
- * Merges the indexed item data returned by each indexer plugin into a single item.
- */
-function mergeIndexerResults(
-  results: (
-    | MediaItemIndexRequestedMovieResponse
-    | MediaItemIndexRequestedShowResponse
-    | undefined
-  )[],
-) {
-  type IndexedItem = NonNullable<
-    MediaItemIndexRequestedMovieResponse | MediaItemIndexRequestedShowResponse
-  >["item"];
-
-  const item = {} as IndexedItem;
-
-  for (const value of results) {
-    if (!value?.item) {
-      continue;
-    }
-
-    Object.assign(item, value.item);
-  }
-
-  return item;
-}
-
-async function clearProcessingJobs(items: MediaItem[]) {
-  for (const item of items) {
-    const wasCleared = await clearDeduplicationJob(
-      "process-media-item",
-      `process-${item.type}-${item.id}`,
-    );
-
-    if (wasCleared) {
-      logger.silly(
-        `Removed existing media item processing job for ${item.fullTitle}`,
-      );
-    }
-  }
-}
+import { clearProcessingJobs } from "./utilities/clear-processing-jobs.ts";
+import { mergeIndexerResults } from "./utilities/merge-indexer-results.ts";
 
 export const processItemRequestProcessor =
   processItemRequestProcessorSchema.implementAsync(
@@ -157,7 +109,7 @@ export const processItemRequestProcessor =
             const {
               item: updatedItem,
               isReindex,
-              isAdditionalSeasonRequest,
+              isAdditionalSeasonRequest = false,
             } = await indexerService.indexItem(item);
 
             const itemsToProcess = await mediaItemService.getItemsToProcess(
@@ -177,8 +129,7 @@ export const processItemRequestProcessor =
                     }
                   : {
                       type: "show",
-                      isAdditionalSeasonRequest:
-                        isAdditionalSeasonRequest ?? false,
+                      isAdditionalSeasonRequest,
                       isReindex,
                     },
             });
@@ -190,7 +141,7 @@ export const processItemRequestProcessor =
               sendEvent(error.payload);
 
               throw new UnrecoverableError(
-                `Failed to persist indexer data: ${error.message}`,
+                `Failed to persist indexer data for ${item.title}: ${error.message}`,
               );
             }
 

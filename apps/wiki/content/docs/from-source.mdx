@@ -18,7 +18,7 @@ you need to run on a host where FUSE-in-Docker is awkward, or you want to track
 
 ## Prerequisites
 
-- **Node.js 24.15+** and **pnpm 11.5+**
+- **Node.js 24.22+** and **pnpm 12.15+**
 - **PostgreSQL 17** and **Redis 8**, reachable from the host
 - **FUSE** libraries — Riven needs `libfuse.so.2` present
 
@@ -85,7 +85,7 @@ RIVEN_SETTING__enabledPlugins=["seerr","stremthru","torrentio","plex"]
 RIVEN_PLUGIN_SETTING__REPO_PLUGIN_TMDB__apiKey="your-tmdb-api-key"
 ```
 
-Unlike the Docker setup you do **not** need `gqlHost` — the default of
+Unlike the Docker setup you do **not** need `host` — the default of
 `localhost` is correct when nothing has to reach Riven across a network
 boundary. Set it to `0.0.0.0` only if other machines need the API.
 

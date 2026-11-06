@@ -1,67 +1,31 @@
-import { Button } from "@/components/_ui/button";
-import { authClient } from "@/lib/auth/client";
-
-import { Link2, Link2Off } from "lucide-react";
+import { startCase } from "es-toolkit";
 import Image from "next/image";
-import { useRouter } from "next/navigation";
-import { toast } from "sonner";
 
-import type { Account, Provider } from "./types";
+import { LinkAccountButton } from "./_components/link-account-button.tsx";
+import { UnlinkAccountButton } from "./_components/unlink-account-button.tsx";
 
-interface SingleAccountLinkProps {
-  account: Account | undefined;
+import type { AuthProvider } from "#app/_types/__generated__/graphql.ts";
+
+export interface SingleAccountLinkProps {
+  hasLinkedAccount: boolean;
   providerId: string;
-  provider: Provider;
+  provider: Pick<AuthProvider, "name" | "icon" | "enabled">;
 }
 
 export function SingleAccountLink({
-  account,
+  hasLinkedAccount,
   provider,
   providerId,
 }: SingleAccountLinkProps) {
-  const router = useRouter();
+  const providerName = provider.name ?? startCase(providerId);
 
   if (!provider.enabled || providerId === "credential") {
     return null;
   }
 
-  const providerName =
-    provider.name ?? providerId.charAt(0).toUpperCase() + providerId.slice(1);
-
-  async function handleLink() {
-    await authClient.linkSocial({
-      provider: providerId,
-      callbackURL: "/auth",
-    });
-
-    toast.success(`${providerId} linked successfully.`);
-  }
-
-  async function handleUnlink() {
-    const { data: accounts, error } = await authClient.listAccounts();
-
-    if (error) {
-      toast.error("Failed to fetch accounts.");
-
-      return;
-    }
-
-    const accountToUnlink = accounts.find(
-      (target) => target.providerId === providerId,
-    );
-
-    if (!accountToUnlink) {
-      toast.error("Account not found.");
-
-      return;
-    }
-
-    await authClient.unlinkAccount({ accountId: accountToUnlink.id });
-
-    toast.success(`${providerId} unlinked successfully.`);
-
-    router.refresh();
-  }
+  const ActionButton = hasLinkedAccount
+    ? UnlinkAccountButton
+    : LinkAccountButton;
 
   return (
     <div className="border-border/60 flex items-center justify-between border-t py-3">
@@ -75,30 +39,7 @@ export function SingleAccountLink({
         )}
         <span>{providerName}</span>
       </div>
-      {account?.providerId === providerId ? (
-        <Button
-          variant="destructive"
-          size="sm"
-          onClick={() => {
-            void handleUnlink();
-          }}
-          type="button"
-        >
-          <Link2Off className="mr-2 h-4 w-4" />
-          Unlink
-        </Button>
-      ) : (
-        <Button
-          size="sm"
-          onClick={() => {
-            void handleLink();
-          }}
-          type="button"
-        >
-          <Link2 className="mr-2 h-4 w-4" />
-          Link
-        </Button>
-      )}
+      <ActionButton providerId={providerId} providerName={providerName} />
     </div>
   );
 }

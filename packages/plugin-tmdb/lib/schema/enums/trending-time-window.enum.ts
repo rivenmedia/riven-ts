@@ -4,13 +4,14 @@ import { trendingMoviesPathParamsSchema } from "../../__generated__/zod/trending
 
 import type { z } from "zod";
 
-export const TmdbTrendingMoviesTimeWindow =
+/**
+ * The time window for TMDB trending endpoints.
+ */
+export const TmdbTrendingTimeWindow =
   trendingMoviesPathParamsSchema.shape.time_window.unwrap();
 
-export type TmdbTrendingMoviesTimeWindow = z.infer<
-  typeof TmdbTrendingMoviesTimeWindow
->;
+export type TmdbTrendingTimeWindow = z.infer<typeof TmdbTrendingTimeWindow>;
 
-registerEnumType(TmdbTrendingMoviesTimeWindow.enum, {
-  name: "TMDBTrendingMoviesTimeWindow",
+registerEnumType(TmdbTrendingTimeWindow.enum, {
+  name: "TMDBTrendingTimeWindow",
 });

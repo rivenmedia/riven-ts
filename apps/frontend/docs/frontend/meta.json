@@ -1,0 +1,5 @@
+{
+  "title": "Frontend",
+  "description": "Riven's web interface for browsing and managing your library",
+  "pages": ["overview", "getting-started", "configuration", "development"]
+}

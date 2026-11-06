@@ -1,7 +1,7 @@
 import { use } from "react";
 
-import { usePasskeyForm } from "./passkey-form-provider";
-import { SinglePasskey } from "./single-passkey";
+import { usePasskeyForm } from "./passkey-form-provider.tsx";
+import { SinglePasskey } from "./single-passkey.tsx";
 
 export function PasskeyList() {
   const { loadPasskeys } = usePasskeyForm();

@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { loadEnvFile } from "node:process";
 import { setEnvironmentData } from "node:worker_threads";
+import { Query } from "type-graphql";
 import {
   afterAll,
   aroundEach,
@@ -63,6 +64,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
+    @Query(() => Boolean)
     public testIsValid() {
       return true;
     }
@@ -107,6 +109,11 @@ vi.mock(import("#database/database.ts"), async (importOriginal) => {
       pathTs: "./seeders",
     },
   });
+
+  // Auth entities live in the `auth_db` schema, which SQLite models as an attached database.
+  await database.orm.em
+    .getConnection()
+    .execute("attach database ':memory:' as auth_db");
 
   await database.orm.schema.create();
 
@@ -203,6 +210,26 @@ aroundEach(async (runTest) =>
 
 beforeAll(() => {
   setEnvironmentData("riven.session.id", randomUUID());
+});
+
+beforeEach(async () => {
+  const { resolveSettings } =
+    await import("#settings/utilities/resolve-settings.ts");
+  const { RuntimeSettings } =
+    await import("#settings/core-settings-sections.ts");
+  const { initialiseRuntimeSettings } =
+    await import("#utilities/runtime-settings.ts");
+  const { coreEnvironment } = await import("#utilities/settings.ts");
+
+  // Runtime settings are normally loaded from the database during bootstrap.
+  // Reset them to the env + default values before each test.
+  initialiseRuntimeSettings(
+    resolveSettings({
+      schema: RuntimeSettings,
+      stored: {},
+      env: coreEnvironment,
+    }).value,
+  );
 });
 
 beforeEach(async () => {

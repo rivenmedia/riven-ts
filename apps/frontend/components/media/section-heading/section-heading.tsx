@@ -2,6 +2,7 @@ export interface SectionHeadingProps {
   title: string;
 }
 
+/** Accent-barred heading for sections of the media details page. */
 export function SectionHeading({ title }: SectionHeadingProps) {
   return (
     <div className="mb-4 flex items-center gap-3">

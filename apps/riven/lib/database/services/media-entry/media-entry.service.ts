@@ -1,6 +1,6 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-import { CreateRequestContext } from "@mikro-orm/decorators/legacy";
+import { EnsureRequestContext } from "@mikro-orm/decorators/legacy";
 
 import { BaseService } from "#database/services/core/base-service.ts";
 
@@ -8,7 +8,7 @@ import type { FindOneOrFailOptions } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
 export class MediaEntryService extends BaseService {
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getMediaEntryById<
     Hint extends string = never,
     Fields extends string = never,

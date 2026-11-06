@@ -28,6 +28,11 @@ export class EpisodeResolver {
     return episode.season.loadOrFail();
   }
 
+  @FieldResolver(() => Int)
+  public seasonNumber(@Root() episode: Episode) {
+    return episode.season.loadProperty("number");
+  }
+
   @FieldResolver(() => [String])
   public async lookupKeys(@Root() episode: Episode) {
     const seasonNumber = await episode.season.loadProperty("number");

@@ -1,5 +1,49 @@
 ---
 title: Overview
+description: What Riven's web frontend is and how it connects to Riven
 ---
 
-<Callout>Riven's UI is coming soon</Callout>
+<Callout>
+  The frontend is under active development. Some pages - such as the dashboard,
+  calendar, settings and logs - are not available yet.
+</Callout>
+
+The Riven frontend is a [Next.js](https://nextjs.org) web app for browsing and
+managing a running Riven instance. It ships as its own Docker image,
+separate from Riven itself, and talks to Riven over HTTP.
+
+## How it connects to Riven
+
+The frontend doesn't store any data of its own. Accounts, sessions and media
+all live in Riven:
+
+- **Accounts and sessions** are handled by Riven's auth API (`/api/auth`).
+- **Library data** comes from Riven's GraphQL API (`/graphql`).
+
+The frontend forwards requests for both of these paths on to Riven, so the
+browser can reach them through the frontend's own URL. Because of this, the
+frontend and Riven each need to know where the other is:
+
+| Side     | Setting                          | Points at                             |
+| -------- | -------------------------------- | ------------------------------------- |
+| Frontend | `BACKEND_URL`                    | Riven's API, e.g. `http://riven:3000` |
+| Frontend | `ORIGIN`                         | The URL you open the frontend at      |
+| Riven    | `RIVEN_FRONTEND_SETTING__origin` | The same URL as `ORIGIN`              |
+
+<Cards>
+  <Card
+    title="Getting Started"
+    href="/docs/frontend/getting-started"
+    description="Add the frontend to your Docker setup"
+  />
+  <Card
+    title="Configuration"
+    href="/docs/frontend/configuration"
+    description="Environment variables, sign-in methods and OAuth providers"
+  />
+  <Card
+    title="Development"
+    href="/docs/frontend/development"
+    description="Run the frontend from source"
+  />
+</Cards>

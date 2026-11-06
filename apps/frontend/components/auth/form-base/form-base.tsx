@@ -13,6 +13,10 @@ export interface FormBaseProps extends Pick<
   title: string;
 }
 
+/**
+ * Titled section layout used by the account forms, with optional description,
+ * content and footer slots.
+ */
 export function FormBase({
   content,
   description,

@@ -3,6 +3,7 @@ import { z } from "zod";
 import { DataSourceMap } from "../utilities/datasource-map.ts";
 import { PluginSettings } from "../utilities/plugin-settings.ts";
 import { RivenEventHandler } from "./events/index.ts";
+import { RivenQueryHandlers } from "./query-handlers/index.ts";
 
 import type {
   BaseDataSource,
@@ -67,8 +68,9 @@ export const RivenPlugin = z.object({
   ),
   name: z.symbol(),
   dataSources: z.tuple([dataSourceSchema]).rest(dataSourceSchema).optional(),
-  resolvers: z.array(z.instanceof(Function)).min(1),
+  resolvers: z.array(z.instanceof(Function)).default([]),
   hooks: z.object(RivenEventHandler).partial(),
+  queryHandlers: z.object(RivenQueryHandlers).partial().optional(),
   context: z
     .function({
       input: [

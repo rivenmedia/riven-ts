@@ -1,23 +1,29 @@
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/_ui/avatar";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipTrigger,
-} from "@/components/_ui/tooltip";
-import { NotificationCenter } from "@/components/notification-center/notification-center";
-import { ThemeSwitcher } from "@/components/theme-switcher/theme-switcher";
-import { getInitials } from "@/lib/utils";
-
 import { cn } from "cn";
 import { Mountain } from "lucide-react";
 import Link from "next/link";
 
-import { LogOutButton } from "./_components/log-out-button";
+import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
+} from "#components/_ui/avatar.tsx";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "#components/_ui/tooltip.tsx";
+import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
+import { ThemeSwitcher } from "#components/theme-switcher/theme-switcher.tsx";
+import { isFeatureEnabled } from "#lib/enabled-features.ts";
+import { getInitials } from "#lib/utils.ts";
 
-import type { User } from "@/lib/auth/types";
+import { LogOutButton } from "./_components/log-out-button.tsx";
+
+import type { User } from "#lib/auth/types.ts";
 import type { ComponentProps, ReactNode } from "react";
 
 export interface SidebarItem {
+  hidden?: boolean;
   href: Extract<ComponentProps<typeof Link>["href"], string>;
   icon: ReactNode;
   label: string;
@@ -29,6 +35,9 @@ interface SidebarProps {
   user: User | undefined;
 }
 
+/**
+ * Desktop icon sidebar with tooltipped main navigation links and the user menu.
+ */
 export function Sidebar({ currentPath, items, user }: SidebarProps) {
   return (
     <aside className="bg-background/40 top-0 left-0 z-50 hidden h-screen w-14 flex-col items-center border-r border-white/5 backdrop-blur-md md:flex">
@@ -42,6 +51,10 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
         aria-label="Main Navigation"
       >
         {items.map((item) => {
+          if (item.hidden) {
+            return null;
+          }
+
           const isCurrentPath = currentPath === item.href;
 
           return (
@@ -68,16 +81,19 @@ export function Sidebar({ currentPath, items, user }: SidebarProps) {
       </nav>
 
       <div className="mt-auto flex flex-col items-center gap-3.5 pb-4">
-        <NotificationCenter
-          buttonProps={{
-            variant: "ghost",
-            className: "hover:bg-accent/80 group rounded-md transition-colors",
-          }}
-          popoverProps={{
-            side: "right",
-            align: "end",
-          }}
-        />
+        {isFeatureEnabled("notificationCentre") && (
+          <NotificationCenter
+            buttonProps={{
+              variant: "ghost",
+              className:
+                "hover:bg-accent/80 group rounded-md transition-colors",
+            }}
+            popoverProps={{
+              side: "right",
+              align: "end",
+            }}
+          />
+        )}
         <ThemeSwitcher />
         {user ? (
           <>

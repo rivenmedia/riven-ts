@@ -1,7 +1,7 @@
-import { Button } from "@/components/_ui/button";
-
 import { Star } from "lucide-react";
 import Image from "next/image";
+
+import { Button } from "#components/_ui/button.tsx";
 
 export interface OauthProviderButtonProps {
   isLastUsed: boolean;
@@ -10,6 +10,10 @@ export interface OauthProviderButtonProps {
   onClick: () => void;
 }
 
+/**
+ * Sign-in button for an OAuth provider, with the provider's icon and a "last
+ * used" marker.
+ */
 export function OauthProviderButton({
   isLastUsed,
   onClick,

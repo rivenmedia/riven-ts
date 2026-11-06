@@ -3,10 +3,15 @@
   "version": "0.0.1",
   "private": true,
   "type": "module",
+  "imports": {
+    "#collections/*": "./.source/*",
+    "#*": "./*"
+  },
   "scripts": {
     "build": "next build",
+    "codegen:nextjs-types": "next typegen",
     "dev": "next dev --turbopack",
-    "lint": "oxlint",
+    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
     "lint:fix": "pnpm lint --fix",
     "postinstall": "fumadocs-mdx",
     "start": "next start"

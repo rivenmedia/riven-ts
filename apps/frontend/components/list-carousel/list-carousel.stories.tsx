@@ -1,13 +1,12 @@
-import preview from "@/.storybook/preview";
-
 import { faker } from "@faker-js/faker";
 import { ListChecks, Loader2, Trash } from "lucide-react";
 import { fn } from "storybook/test";
 
-import { CardSelectionProvider } from "../providers/card-selection-provider";
-import { ListCarousel } from "./list-carousel";
-import { ListCarouselSkeleton } from "./list-carousel-skeleton";
-import { ListCarouselSuspenseError } from "./list-carousel-suspense-error";
+import preview from "#.storybook/preview.tsx";
+import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
+import { ListCarouselSuspenseError } from "#components/list-carousel/list-carousel-suspense-error.tsx";
+import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
+import { CardSelectionProvider } from "#components/providers/card-selection-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / ListCarousel",
@@ -58,7 +57,6 @@ export const Default = meta.story({
       type: faker.helpers.arrayElement(["movie", "show"]),
       year: 2021,
     })),
-    indexer: "tmdb",
   },
 });
 

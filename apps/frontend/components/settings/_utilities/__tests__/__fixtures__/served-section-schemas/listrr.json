@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Your Listrr API Key",
+      "secret": true
+    },
+    "movieLists": {
+      "default": [],
+      "description": "List of Listrr movie lists to request",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "showLists": {
+      "default": [],
+      "description": "List of Listrr show lists to request",
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "updateIntervalSeconds": {
+      "default": 86400,
+      "description": "Interval in seconds to update content",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+    }
+  },
+  "required": ["apiKey"],
+  "title": "Listrr"
+}

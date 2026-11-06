@@ -1,10 +1,9 @@
-import { preview } from "@/.storybook/preview";
+import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { DateTime } from "luxon";
 
-import { CalendarPage } from "./page.client";
-
-import type { UUID } from "node:crypto";
+import { preview } from "#.storybook/preview.tsx";
+import { CalendarPage } from "#app/(protected)/calendar/page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Calendar",
@@ -13,35 +12,36 @@ const meta = preview.meta({
     calendar: {
       data: [
         {
-          itemId: "1" as UUID,
-          tvdbId: "1",
-          tmdbId: "94605",
-          showTitle: "Arcane",
-          itemType: "episode" as const,
-          airedAt: DateTime.now().toISO(),
-          season: 2,
-          episode: 3,
-          lastState: "Completed",
+          id: UUID.parse(crypto.randomUUID()),
+          primaryExternalId: "94605",
+          fullTitle: "Arcane - S02E03 - Finally Got the Name Right",
+          type: "episode" as const,
+          releaseDate: DateTime.now().toISO(),
+          seasonNumber: 2,
+          number: 3,
+          state: "completed" as const,
         },
         {
-          itemId: "2" as UUID,
-          tvdbId: "2",
-          tmdbId: "603692",
-          showTitle: "John Wick: Chapter 4",
-          itemType: "movie" as const,
-          airedAt: DateTime.now().plus({ days: 2 }).toISO(),
-          lastState: "Completed",
+          id: UUID.parse(crypto.randomUUID()),
+          primaryExternalId: "603692",
+          fullTitle: "John Wick: Chapter 4",
+          type: "movie" as const,
+          releaseDate: DateTime.now().plus({ days: 2 }).toISO(),
+          state: "completed" as const,
         },
         {
-          itemId: "3" as UUID,
-          tvdbId: "3",
-          tmdbId: "1399",
-          showTitle: "Game of Thrones",
-          itemType: "show" as const,
-          airedAt: DateTime.now().minus({ months: 1 }).toISO(),
-          lastState: "Completed",
+          id: UUID.parse(crypto.randomUUID()),
+          primaryExternalId: "1399",
+          fullTitle: "Game of Thrones",
+          type: "show" as const,
+          releaseDate: DateTime.now().minus({ months: 1 }).toISO(),
+          state: "completed" as const,
         },
       ],
+      month: {
+        month: DateTime.now().month,
+        year: DateTime.now().year,
+      },
     },
   },
 });

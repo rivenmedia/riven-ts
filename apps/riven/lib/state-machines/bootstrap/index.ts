@@ -4,18 +4,22 @@ import { assign, setup } from "xstate";
 
 import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
-import { settings } from "#utilities/settings.ts";
+import { coreEnvironment, settings } from "#utilities/settings.ts";
 
-import { applyMockScenario } from "./actors/apply-mock-scenario.ts";
+import { applyMockScenario } from "./actors/apply-mock-scenario.actor.ts";
 import { clearPreviousInstanceState } from "./actors/clear-previous-instance-state.actor.ts";
+import { createAdminUser } from "./actors/create-admin-user.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
+import { loadRuntimeSettings } from "./actors/load-runtime-settings.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
 
+import type { Services } from "#database/database.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 import type { PluginRegistrarMachineOutput } from "#state-machines/plugin-registrar/index.ts";
 import type {
+  InstalledPlugin,
   InvalidPluginMap,
   PluginQueueMap,
   PluginWorkerMap,
@@ -24,12 +28,14 @@ import type {
   ValidPluginMap,
 } from "#types/plugins.ts";
 import type { ApolloServer } from "@apollo/server";
+import type { MikroORM } from "@mikro-orm/core";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
-import type { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings";
 import type Fuse from "@zkochan/fuse-native";
 import type { AnyActorRef } from "xstate";
 
 export interface BootstrapMachineContext {
+  orm: MikroORM | null;
+  services: Services | null;
   error?: Error;
   mainRunnerRef: AnyActorRef;
   rootRef: AnyActorRef;
@@ -41,8 +47,10 @@ export interface BootstrapMachineContext {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
-  pluginSettings: PluginSettings | null;
+  installedPlugins: InstalledPlugin[];
+  pluginEnvironment: PluginRegistrarMachineOutput["pluginEnvironment"];
   mockScenario: MockScenario | undefined;
+  requiresAdminUserCreation: boolean;
 }
 
 export interface BootstrapMachineInput {
@@ -68,6 +76,7 @@ export const bootstrapMachine = setup({
     children: {} as {
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
+      loadRuntimeSettings: "loadRuntimeSettings";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
@@ -105,14 +114,17 @@ export const bootstrapMachine = setup({
       pluginQueues: (_, { pluginQueues }) => pluginQueues,
       pluginWorkers: (_, { pluginWorkers }) => pluginWorkers,
       publishableEvents: (_, { publishableEvents }) => publishableEvents,
-      pluginSettings: (_, { pluginSettings }) => pluginSettings,
+      installedPlugins: (_, { installedPlugins }) => installedPlugins,
+      pluginEnvironment: (_, { pluginEnvironment }) => pluginEnvironment,
     }),
   },
   actors: {
     applyMockScenario,
     clearPreviousInstanceState,
+    createAdminUser,
     initialiseDatabaseConnection,
     initialiseVfs,
+    loadRuntimeSettings,
     pluginRegistrarMachine,
     startGqlServer,
   },
@@ -120,6 +132,8 @@ export const bootstrapMachine = setup({
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
     hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
+    requiresAdminUserCreation: ({ context: { requiresAdminUserCreation } }) =>
+      requiresAdminUserCreation,
   },
 })
   .extend(withLogAction)
@@ -127,6 +141,8 @@ export const bootstrapMachine = setup({
     id: "Bootstrap",
     initial: "Bootstrapping database connection",
     context: ({ input }) => ({
+      orm: null,
+      services: null,
       mainRunnerRef: input.mainRunnerRef,
       rootRef: input.rootRef,
       validatingPlugins: new Map(),
@@ -135,8 +151,10 @@ export const bootstrapMachine = setup({
       pluginQueues: new Map(),
       pluginWorkers: new Map(),
       publishableEvents: new Set(),
-      pluginSettings: null,
+      installedPlugins: [],
+      pluginEnvironment: new Map(),
       mockScenario: input.mockScenario,
+      requiresAdminUserCreation: false,
     }),
     output: ({
       context: {
@@ -180,12 +198,21 @@ export const bootstrapMachine = setup({
           src: "initialiseDatabaseConnection",
           onDone: {
             target: "Clearing previous instance state",
-            actions: {
-              type: "log",
-              params: {
-                message: "Database connection bootstrap complete.",
+            actions: [
+              {
+                type: "log",
+                params: {
+                  message: "Database connection bootstrap complete.",
+                },
               },
-            },
+              assign(
+                ({
+                  event: {
+                    output: { orm, services, requiresAdminUserCreation },
+                  },
+                }) => ({ orm, services, requiresAdminUserCreation }),
+              ),
+            ],
           },
           onError: {
             target: "#Bootstrap.Errored",
@@ -213,8 +240,53 @@ export const bootstrapMachine = setup({
           src: "clearPreviousInstanceState",
           input: () => ({
             wipeDatabase: settings.unsafeWipeDatabaseOnStartup,
+            wipeUsers: settings.unsafeWipeUsersOnStartup,
             wipeRedis: settings.unsafeWipeRedisOnStartup,
           }),
+          onDone: {
+            target: "Loading runtime settings",
+          },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message:
+                    "Failed to clear previous instance state during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Loading runtime settings": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Loading runtime settings...",
+          },
+        },
+        invoke: {
+          id: "loadRuntimeSettings",
+          src: "loadRuntimeSettings",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when loading runtime settings. Ensure the database connection has been initialised first.",
+            );
+
+            return {
+              settingsService: services.settingsService,
+              environment: coreEnvironment,
+            };
+          },
           onDone: [
             {
               target: "Applying mock scenario",
@@ -225,13 +297,19 @@ export const bootstrapMachine = setup({
                   assert.ok(mockScenario);
 
                   return {
-                    message: `Database connection initialised. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
+                    message: `Runtime settings loaded. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
                   };
                 },
               },
             },
             {
               target: "Bootstrapping plugins",
+              actions: {
+                type: "log",
+                params: {
+                  message: "Runtime settings loaded.",
+                },
+              },
             },
           ],
           onError: {
@@ -240,8 +318,7 @@ export const bootstrapMachine = setup({
               {
                 type: "log",
                 params: ({ event: { error } }) => ({
-                  message:
-                    "Failed to clear previous instance state during bootstrap.",
+                  message: "Failed to load runtime settings during bootstrap.",
                   level: "error",
                   error,
                 }),
@@ -317,7 +394,14 @@ export const bootstrapMachine = setup({
         invoke: {
           id: "pluginRegistrarMachine",
           src: "pluginRegistrarMachine",
-          input: ({ context: { rootRef } }) => ({ rootRef }),
+          input: ({ context: { rootRef, services } }) => {
+            assert.ok(
+              services,
+              "Services not available when bootstrapping plugins. Ensure the database connection has been initialised first.",
+            );
+
+            return { rootRef, settingsService: services.settingsService };
+          },
           onDone: [
             {
               target: "Initialising services",
@@ -361,6 +445,23 @@ export const bootstrapMachine = setup({
               ],
             },
           ],
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to register plugins during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
         },
       },
       "Initialising services": {
@@ -381,18 +482,25 @@ export const bootstrapMachine = setup({
                   id: "startGqlServer",
                   src: "startGqlServer",
                   input: ({
-                    context: { mainRunnerRef, validPlugins, pluginSettings },
+                    context: {
+                      orm,
+                      mainRunnerRef,
+                      validPlugins,
+                      installedPlugins,
+                      pluginEnvironment,
+                    },
                   }) => {
-                    if (!pluginSettings) {
-                      throw new Error(
-                        "Plugin settings not available when starting GraphQL server. Ensure the plugin registrar has been run first.",
-                      );
-                    }
+                    assert.ok(
+                      orm,
+                      "ORM not available when starting GraphQL server. Ensure the connection has been initialised first.",
+                    );
 
                     return {
+                      orm,
                       mainRunnerRef,
-                      pluginSettings,
                       validPlugins,
+                      installedPlugins,
+                      pluginEnvironment,
                     };
                   },
                   onDone: {
@@ -453,7 +561,15 @@ export const bootstrapMachine = setup({
       },
       "Bootstrapping VFS": {
         initial: "Starting",
-        onDone: "Success",
+        onDone: [
+          {
+            target: "Create admin user",
+            guard: "requiresAdminUserCreation",
+          },
+          {
+            target: "Success",
+          },
+        ],
         states: {
           Starting: {
             entry: {
@@ -496,6 +612,52 @@ export const bootstrapMachine = setup({
               },
             },
             type: "final",
+          },
+        },
+      },
+      "Create admin user": {
+        onDone: "Success",
+        entry: {
+          type: "log",
+          params: {
+            message: "Creating admin account...",
+          },
+        },
+        invoke: {
+          id: "createAdminUser",
+          src: "createAdminUser",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when creating admin user. Ensure the database connection has been initialised first.",
+            );
+
+            assert.ok(
+              settings.adminUserCredentials,
+              "Admin user credentials not available. Ensure they are set in the configuration.",
+            );
+
+            return {
+              services,
+              username: settings.adminUserCredentials.username,
+              password: settings.adminUserCredentials.password,
+            };
+          },
+          onDone: {
+            actions: {
+              type: "log",
+              params: {
+                message: "Admin user successfully created!",
+              },
+            },
+            target: "Success",
+          },
+          onError: {
+            target: "#Bootstrap.Errored",
+            actions: {
+              type: "raiseError",
+              params: ({ event }) => event.error as Error,
+            },
           },
         },
       },

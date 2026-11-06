@@ -6,11 +6,8 @@ import type { BaseContext } from "@apollo/server";
 import "reflect-metadata";
 
 export const buildMockServer = async <Context extends BaseContext>(
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-function-type
-  resolvers?: readonly Function[],
+  options: Pick<Parameters<typeof buildSchema>[0], "resolvers" | "pubSub">,
 ) =>
   new ApolloServer<Context>({
-    schema: await buildSchema({
-      resolvers,
-    }),
+    schema: await buildSchema(options),
   });

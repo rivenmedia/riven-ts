@@ -1,4 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { userEvent, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -9,9 +11,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/_ui/alert-dialog";
-
-import { userEvent, within } from "storybook/test";
+} from "#components/_ui/alert-dialog.tsx";
 
 /**
  * A modal dialog that interrupts the user with important content and expects

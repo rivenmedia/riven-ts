@@ -1,16 +1,17 @@
 import { cn } from "cn";
 
-import { fly } from "../_animations/fly";
+import { fly } from "#components/_animations/fly.ts";
 
 import type { HTMLAttributes } from "react";
 
+/** Standard padded content container for a page's body. */
 export function PageShell({
   className,
   children,
   ...restProps
 }: HTMLAttributes<HTMLElement>) {
   return (
-    <main
+    <div
       className={cn(
         "mt-4 flex flex-col gap-6 p-4 pb-24 md:mt-14 md:gap-8 md:p-8 md:px-16 duration-600 overflow-y-scroll",
         fly,
@@ -19,6 +20,6 @@ export function PageShell({
       {...restProps}
     >
       {children}
-    </main>
+    </div>
   );
 }

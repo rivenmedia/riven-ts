@@ -1,6 +1,6 @@
 import { createConsola } from "consola";
 
-import { publicEnvironment } from "../environment/public-environment.schema";
+import { publicEnvironment } from "#environment/public-environment.schema.ts";
 
 /**
  * Centralized logger instance for the application.

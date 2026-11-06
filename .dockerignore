@@ -12,3 +12,4 @@
 **/*.env*
 **/elastic-local
 **/docker-compose*.yaml
+out

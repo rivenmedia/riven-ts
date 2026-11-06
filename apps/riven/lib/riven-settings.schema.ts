@@ -2,27 +2,10 @@
 
 import { json } from "@repo/util-plugin-sdk/validation";
 
-import dedent from "dedent";
-import { Duration } from "luxon";
 import { readFileSync } from "node:fs";
 import z from "zod";
 
-import { CorePlugins } from "./schemas/core-plugins.schema.ts";
-import { LogLevel } from "./utilities/logger/log-levels.ts";
-
 export const RivenSettings = z.object({
-  attemptUnknownDownloads: z
-    .stringbool()
-    .default(false)
-    .describe(
-      dedent`
-        If true, Riven will attempt to download torrents whose contents cannot be verified without first attempting to download.
-
-        **Note**: Enabling this will degrade performance as more download attempts will be made for all items,
-        however it may be useful to enable if Riven's plugins are unable to find your requested items.
-      `,
-    )
-    .meta({ "wiki.section": "scraping" }),
   databaseUrl: z
     .url()
     .describe("The database connection URL.")
@@ -86,115 +69,24 @@ export const RivenSettings = z.object({
       "**UNSAFE**.\n \nIf true, the database will be wiped on application startup.",
     )
     .meta({ "wiki.section": "danger-zone" }),
-  enabledLogTransports: json(z.array(z.enum(["console", "file"])))
-    .default(["console", "file"])
-    .describe("The enabled logging transports.")
-    .meta({ "wiki.section": "logging" }),
-  loggingEnabled: z
+  unsafeWipeUsersOnStartup: z
     .stringbool()
-    .default(true)
-    .describe("Enable or disable logging for the application.")
-    .meta({ "wiki.section": "logging" }),
-  logLevel: LogLevel.default("info")
-    .describe("The logging level for the application.")
-    .meta({ "wiki.section": "logging" }),
-  logDirectory: z
-    .string()
-    .default("./logs")
-    .describe("The directory where log files will be stored.")
-    .meta({ "wiki.section": "logging" }),
-  logShowStackTraces: z
-    .stringbool()
-    .default(true)
+    .default(false)
     .describe(
-      "Whether to show detailed stack traces when unexpected errors occur.",
+      "**UNSAFE**.\n \nIf true, all user data will be removed on application startup.",
     )
-    .meta({ "wiki.section": "logging" }),
-  gqlHost: z
+    .meta({ "wiki.section": "danger-zone" }),
+  host: z
     .string()
     .default("localhost")
-    .describe("The GraphQL server host.")
-    .meta({ "wiki.section": "graphql" }),
-  gqlPort: z.coerce
+    .describe("The API server host.")
+    .meta({ "wiki.section": "server" }),
+  port: z.coerce
     .number()
     .int()
     .default(3000)
-    .describe("The GraphQL server port.")
-    .meta({ "wiki.section": "graphql" }),
-  dubbedAnimeOnly: z
-    .stringbool()
-    .default(false)
-    .describe("Only scrape dubbed anime.")
-    .meta({ "wiki.section": "scraping" }),
-  maximumFailedAttempts: z.coerce
-    .number()
-    .int()
-    .nonnegative()
-    .max(10)
-    .default(10)
-    .transform((val) => (val === 0 ? Number.MAX_SAFE_INTEGER : val))
-    .describe(
-      "The maximum number of scrape attempts before giving up on an item. Set to 0 to allow unlimited attempts (not recommended).",
-    )
-    .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateMovies: z.coerce
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .describe("The minimum average bitrate for movies.")
-    .meta({ "wiki.section": "scraping" }),
-  minimumAverageBitrateEpisodes: z.coerce
-    .number()
-    .int()
-    .positive()
-    .optional()
-    .describe("The minimum average bitrate for episodes.")
-    .meta({ "wiki.section": "scraping" }),
-  preferSeasonPacks: z
-    .stringbool()
-    .default(false)
-    .describe(
-      "If true, Riven will prefer to download season packs over show packs.",
-    )
-    .meta({ "wiki.section": "scraping" }),
-  scheduleOffsetMinutes: z.coerce
-    .number()
-    .int()
-    .nonnegative()
-    .default(30)
-    .describe(
-      "The number of minutes to wait after an item's air date before attempting to re-index it.",
-    )
-    .meta({ "wiki.section": "scheduling" }),
-  scrapeCooldownHours: json(
-    z.tuple([
-      z.int().nonnegative().default(2),
-      z.int().nonnegative().default(6),
-      z.int().nonnegative().default(24),
-    ]),
-  )
-    .default([2, 6, 24])
-    .describe(
-      dedent`
-      The cooldown periods (in hours) to apply after failed scrape attempts,
-      in the format [> 2 attempts, > 5 attempts, > 10 attempts].
-    `,
-    )
-    .meta({ "wiki.section": "scraping" }),
-  unknownAirDateOffsetDays: z.coerce
-    .number()
-    .int()
-    .nonnegative()
-    .default(7)
-    .describe(
-      "When an episode has no air date, this number of days will be added to the current date to estimate a release date for scheduling purposes.",
-    )
-    .meta({ "wiki.section": "scheduling" }),
-  enabledPlugins: json(z.array(CorePlugins))
-    .default([])
-    .describe("A list of core plugins to enable.")
-    .meta({ "wiki.section": "plugins" }),
+    .describe("The API server port.")
+    .meta({ "wiki.section": "server" }),
   shutdownTimeoutSeconds: json(z.int().positive())
     .default(30)
     .describe("The timeout in seconds for shutting down the application."),
@@ -212,15 +104,25 @@ export const RivenSettings = z.object({
       "Whether to print the effective configuration on application startup. Useful for debugging configuration issues.",
     )
     .meta({ "wiki.section": "debugging" }),
-  retryLibraryIntervalSeconds: z.coerce
-    .number()
-    .int()
-    .nonnegative()
-    .default(Duration.fromObject({ days: 1 }).as("seconds"))
-    .describe(
-      "The interval in seconds for retrying the library. Set to 0 to disable.",
-    )
-    .meta({ "wiki.section": "scheduling" }),
+  adminUserCredentials: z
+    .templateLiteral([z.string().min(1), z.literal(":"), z.string().min(1)])
+    .optional()
+    .transform((val) => {
+      if (!val) {
+        return null;
+      }
+
+      const [username, password] = val.split(":");
+
+      if (!username || !password) {
+        throw new Error(
+          "Invalid admin user credentials format. Expected 'username:password'",
+        );
+      }
+
+      return { username, password };
+    })
+    .describe("The admin user credentials - in the format username:password"),
 });
 
 export type RivenSettings = z.infer<typeof RivenSettings>;

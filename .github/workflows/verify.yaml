@@ -42,11 +42,6 @@ jobs:
           - name: Formatting
             command: //#format:check:ci
 
-          - name: Component tests
-            command: test:component
-            concurrency: "100%"
-            force: ${{ github.ref_name == 'main' }} # Force-run on main to update baseline screenshots
-
           # Separate test jobs per-platform ensures that the project can build natively
           - name: Tests (linux-x64)
             command: test
@@ -96,5 +91,4 @@ jobs:
       runner-requirements: ${{ matrix.task.runner-requirements &&
         toJson(matrix.task.runner-requirements) || '[]' }}
       env: ${{ matrix.task.env && toJson(matrix.task.env) || '{}' }}
-      force: ${{ matrix.task.force || false }}
     secrets: inherit

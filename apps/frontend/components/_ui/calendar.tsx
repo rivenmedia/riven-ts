@@ -1,7 +1,5 @@
 "use client";
 
-import { Button, buttonVariants } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import {
   ChevronDownIcon,
@@ -10,6 +8,8 @@ import {
 } from "lucide-react";
 import { useEffect, useRef } from "react";
 import { DayPicker, getDefaultClassNames } from "react-day-picker";
+
+import { Button, buttonVariants } from "#components/_ui/button.tsx";
 
 import type { ComponentProps } from "react";
 import type { CustomComponents, DayButton, Locale } from "react-day-picker";
@@ -107,6 +107,9 @@ function WeekNumberComponent({
   );
 }
 
+/**
+ * Date grid for single, multiple or range selection, built on react-day-picker.
+ */
 function Calendar({
   className,
   classNames,
@@ -122,6 +125,23 @@ function Calendar({
 }) {
   const defaultClassNames = getDefaultClassNames();
 
+  function getDefaultMonth() {
+    if (!props.mode) {
+      return;
+    }
+
+    switch (props.mode) {
+      case "multiple":
+        return props.selected?.[0];
+      case "range":
+        return props.selected ? props.selected.from : undefined;
+      case "single":
+        return props.selected ? props.selected : undefined;
+    }
+  }
+
+  const defaultMonth = getDefaultMonth();
+
   return (
     <DayPicker
       showOutsideDays={showOutsideDays}
@@ -133,6 +153,7 @@ function Calendar({
       )}
       captionLayout={captionLayout}
       locale={locale}
+      {...(defaultMonth && { defaultMonth: defaultMonth })}
       formatters={{
         formatMonthDropdown: (date) =>
           date.toLocaleString(locale?.code, { month: "short" }),

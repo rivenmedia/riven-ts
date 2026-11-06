@@ -1,15 +1,16 @@
+import { XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
+
 import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
-} from "@/components/_ui/chart";
-
-import { XAxis, YAxis, BarChart, Bar, CartesianGrid } from "recharts";
+} from "#components/_ui/chart.tsx";
 
 export interface ReleaseYearCardProps {
   data: { year: number; count: number }[];
 }
 
+/** Bar chart of library items grouped by release year. */
 export function ReleaseYearCard({ data }: ReleaseYearCardProps) {
   return (
     <section className="border-border/60 border-b py-8">

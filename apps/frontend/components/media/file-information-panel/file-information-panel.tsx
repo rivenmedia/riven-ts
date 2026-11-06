@@ -1,15 +1,14 @@
 "use client";
 
-import { Badge } from "@/components/_ui/badge";
-
 import { useState } from "react";
 
-import { SectionHeading } from "../section-heading/section-heading";
+import { Badge } from "#components/_ui/badge.tsx";
+import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
 
 import type {
   MediaEntry,
   MediaMetadata,
-} from "@/app/_types/__generated__/graphql";
+} from "#app/_types/__generated__/graphql.ts";
 import type { UUID } from "node:crypto";
 import type { PartialDeep } from "type-fest";
 
@@ -35,6 +34,10 @@ export interface FileInformationPanelProps {
   onDeleteEntry: (id: UUID, label: string) => void | Promise<void>;
 }
 
+/**
+ * Shows video, audio and subtitle metadata for a media item's files, with a
+ * picker when there are several files.
+ */
 export function FileInformationPanel({
   entries,
   fallbackMediaMetadata,

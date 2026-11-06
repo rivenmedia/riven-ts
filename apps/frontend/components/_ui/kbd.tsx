@@ -1,5 +1,6 @@
 import { cn } from "cn";
 
+/** Keyboard key indicator for showing shortcuts. */
 function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
   return (
     <kbd

@@ -9,7 +9,6 @@ import { format } from "winston";
 import z, { ZodError } from "zod";
 
 import { ErrorSplat } from "#utilities/logger/schemas/error-splat.schema.ts";
-import { settings } from "#utilities/settings.ts";
 
 import type { TransformableInfo } from "logform";
 
@@ -34,13 +33,15 @@ function isUnexpectedError(error: Error | LoggedError) {
   );
 }
 
-function getErrorOutput(error: Error | LoggedError | null) {
+function getErrorOutput(
+  error: Error | LoggedError | null,
+  showStackTraces: boolean,
+) {
   if (!error) {
     return;
   }
 
-  const { logShowStackTraces } = settings;
-  const showStackTrace = logShowStackTraces && isUnexpectedError(error);
+  const showStackTrace = showStackTraces && isUnexpectedError(error);
 
   if (error instanceof ZodError) {
     // If we have a validation error, prettify the output if stack traces are disabled
@@ -55,37 +56,45 @@ function getErrorOutput(error: Error | LoggedError | null) {
   return showStackTrace ? error.stack_trace : error.message;
 }
 
-export const consoleFormat = format.printf(({ level, message, ...meta }) => {
-  const parsedSplat = Array.isArray(meta[SPLAT])
-    ? ErrorSplat.safeParse(meta[SPLAT][0])
-    : undefined;
+export interface ConsoleFormatOptions {
+  /** Whether to show stack traces for unexpected errors. */
+  showStackTraces: boolean;
+}
 
-  const renderedMessage = [
-    typeof message === "string" ? message : parsedSplat?.data?.message,
-    getErrorOutput(parsedSplat?.data ?? meta.error ?? null),
-  ]
-    .filter(Boolean)
-    .join(" ");
+export const createConsoleFormat = ({
+  showStackTraces,
+}: ConsoleFormatOptions) =>
+  format.printf(({ level, message, ...meta }) => {
+    const parsedSplat = Array.isArray(meta[SPLAT])
+      ? ErrorSplat.safeParse(meta[SPLAT][0])
+      : undefined;
 
-  const maybeColouredMessage =
-    meta["log.level"] === "error"
-      ? chalk.red(renderedMessage)
-      : renderedMessage;
+    const renderedMessage = [
+      typeof message === "string" ? message : parsedSplat?.data?.message,
+      getErrorOutput(parsedSplat?.data ?? meta.error ?? null, showStackTraces),
+    ]
+      .filter(Boolean)
+      .join(" ");
 
-  const formattedTimestamp = DateTime.fromISO(meta["@timestamp"]).toFormat(
-    "yyyy-LL-dd TT",
-  );
+    const maybeColouredMessage =
+      meta["log.level"] === "error"
+        ? chalk.red(renderedMessage)
+        : renderedMessage;
 
-  const tags = [
-    chalk.dim.black(formattedTimestamp),
-    ...[
-      meta["riven.log.source"],
-      meta["riven.plugin.name"],
-      meta["riven.worker.id"],
-    ].map((tag) => tag && chalk.dim(tag)),
-  ]
-    .filter(Boolean)
-    .join(" - ");
+    const formattedTimestamp = DateTime.fromISO(meta["@timestamp"]).toFormat(
+      "yyyy-LL-dd TT",
+    );
 
-  return `${tags} - ${level}: ${maybeColouredMessage}`;
-});
+    const tags = [
+      chalk.dim.black(formattedTimestamp),
+      ...[
+        meta["riven.log.source"],
+        meta["riven.plugin.name"],
+        meta["riven.worker.id"],
+      ].map((tag) => tag && chalk.dim(tag)),
+    ]
+      .filter(Boolean)
+      .join(" - ");
+
+    return `${tags} - ${level}: ${maybeColouredMessage}`;
+  });

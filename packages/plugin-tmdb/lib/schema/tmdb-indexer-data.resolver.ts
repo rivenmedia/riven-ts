@@ -1,123 +1,142 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
+import { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
+import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
-import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
+import { Arg, FieldResolver, Float, Int, Resolver, Root } from "type-graphql";
 
+import { movieAdapter } from "../adapters/movie.adapter.ts";
+import { showAdapter } from "../adapters/show.adapter.ts";
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
+import { resolveGenres } from "../utilities/resolve-genres.ts";
+import { selectLogo } from "../utilities/select-logo.ts";
+import { selectTrailer } from "../utilities/select-trailer.ts";
 import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 
+import type { TmdbMediaAdapter } from "../adapters/tmdb-media-adapter.ts";
 import type { ResolverInterface } from "type-graphql";
+
+const adapters = {
+  movie: movieAdapter,
+  show: showAdapter,
+} satisfies Record<TmdbIndexerData["type"], TmdbMediaAdapter>;
 
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
+  #getAdapter(tmdbIndexerData: TmdbIndexerData) {
+    return adapters[tmdbIndexerData.type];
+  }
+
   @FieldResolver(() => [Genre], { name: "genres" })
   public async genres(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @Arg("locale", { defaultValue: "en-US" }) locale: string,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<Genre[]> {
-    if (
-      tmdbIndexerData.genreIds?.length === 0 &&
-      tmdbIndexerData.genres.length === 0
-    ) {
-      return [];
-    }
-
-    if (tmdbIndexerData.genres.length > 0) {
-      return tmdbIndexerData.genres;
-    }
-
-    const localisedGenres = await api.getLocalisedGenres(locale);
-    const genreIdSet = new Set(tmdbIndexerData.genreIds);
-
-    return localisedGenres.filter((genre) =>
-      genreIdSet.has(Math.trunc(Number(genre.id))),
+    return resolveGenres(
+      api,
+      this.#getAdapter(tmdbIndexerData).mediaType,
+      tmdbIndexerData,
+      locale,
     );
   }
 
   @FieldResolver(() => String, { nullable: true })
-  public async certification(
+  public certification(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @Arg("locale", { defaultValue: "en-US" }) locale: string,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<string | null> {
-    const releaseDates = await api.getReleaseDates(tmdbIndexerData.id);
-
-    if (!releaseDates.results?.length) {
-      throw new Error(
-        `Unable to find release dates for TMDB ID ${tmdbIndexerData.id}`,
-      );
-    }
-
-    // Pull the iso_639_1 language & iso_3166_1 country codes from the locale, e.g. "en-GB" -> ["en", "gb"]
-    const [iso_639_1, iso_3166_1] = locale.includes("-")
-      ? locale.toLowerCase().split("-")
-      : [locale.toLowerCase()];
-    const fallbackLocaleId = "US".toLowerCase();
-
-    type ReleaseDatesList =
-      (typeof releaseDates.results)[number]["release_dates"];
-
-    let fallbackReleaseDates: ReleaseDatesList | null = null;
-    let matchedReleaseDates: ReleaseDatesList | null = null;
-
-    for (const result of releaseDates.results) {
-      if (result.iso_3166_1?.toLowerCase() === iso_3166_1) {
-        const releaseDatesForLanguage =
-          iso_639_1 && result.release_dates
-            ? result.release_dates.filter(
-                (localReleaseDate) =>
-                  localReleaseDate.iso_639_1?.toLowerCase() === iso_639_1,
-              )
-            : [];
-
-        matchedReleaseDates =
-          releaseDatesForLanguage.length > 0
-            ? releaseDatesForLanguage
-            : result.release_dates;
-
-        break;
-      }
-
-      // Pull the fallback release dates now in case the requested release dates are not available;
-      // it saves an additional loop through the results later if needed
-      if (result.iso_3166_1?.toLowerCase() === fallbackLocaleId) {
-        fallbackReleaseDates = result.release_dates ?? [];
-      }
-    }
-
-    const resolvedReleaseDates = matchedReleaseDates ?? fallbackReleaseDates;
-
-    if (!resolvedReleaseDates?.length) {
-      throw new Error(
-        `Unable to find release dates for TMDB ID ${tmdbIndexerData.id} in locale ${locale} or fallback locale ${fallbackLocaleId}`,
-      );
-    }
-
-    const allowedReleaseTypes = new Set([3, 4, 5]);
-    const { certification } =
-      resolvedReleaseDates.find(
-        (releaseDate) =>
-          releaseDate.certification &&
-          releaseDate.type != null &&
-          allowedReleaseTypes.has(releaseDate.type),
-      ) ?? {};
-
-    return certification ?? null;
+    return this.#getAdapter(tmdbIndexerData).getCertification(
+      api,
+      tmdbIndexerData,
+      locale,
+    );
   }
 
   @FieldResolver(() => String, { nullable: true })
-  public async imdbId(
+  public imdbId(
     @Root() tmdbIndexerData: TmdbIndexerData,
     @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
   ): Promise<string | null> {
-    if (tmdbIndexerData.imdbId) {
-      return tmdbIndexerData.imdbId;
-    }
+    return this.#getAdapter(tmdbIndexerData).getImdbId(api, tmdbIndexerData);
+  }
 
-    const externalIds = await api.getExternalIds(tmdbIndexerData.id);
+  @FieldResolver(() => Trailer, { nullable: true })
+  public async trailer(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+    @Arg("language", () => String, { nullable: true, defaultValue: "en-US" })
+    language: string,
+  ): Promise<Trailer | null> {
+    const { results: videos } = await api.getLocalisedVideos(
+      this.#getAdapter(tmdbIndexerData).mediaType,
+      tmdbIndexerData.tmdbId,
+      language,
+    );
 
-    return externalIds.imdb_id ?? null;
+    return selectTrailer(videos, language);
+  }
+
+  @FieldResolver(() => [TmdbIndexerData], { nullable: true })
+  public recommendations(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<TmdbIndexerData[] | null> {
+    return this.#getAdapter(tmdbIndexerData).getRecommendations(
+      api,
+      tmdbIndexerData,
+    );
+  }
+
+  @FieldResolver(() => [TmdbIndexerData], { nullable: true })
+  public similarItems(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<TmdbIndexerData[] | null> {
+    return this.#getAdapter(tmdbIndexerData).getSimilarItems(
+      api,
+      tmdbIndexerData,
+    );
+  }
+
+  @FieldResolver(() => [CastMember], { nullable: true })
+  public cast(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+    @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
+  ): Promise<CastMember[] | null> {
+    return this.#getAdapter(tmdbIndexerData).getCast(
+      api,
+      tmdbIndexerData,
+      language,
+    );
+  }
+
+  @FieldResolver(() => ItemImage, { nullable: true })
+  public async logo(
+    @Root() tmdbIndexerData: TmdbIndexerData,
+    @Arg("width", () => Int, {
+      defaultValue: null,
+      nullable: true,
+    })
+    width: number | null,
+    @Arg("aspectRatio", () => Float, {
+      defaultValue: null,
+      nullable: true,
+    })
+    aspectRatio: number | null,
+    @Arg("language", () => String, { defaultValue: "en-US" }) language: string,
+    @PluginDataSource(pluginConfig.name, TmdbAPI) api: TmdbAPI,
+  ): Promise<ItemImage | null> {
+    const { logos } = await api.getLocalisedImages(
+      this.#getAdapter(tmdbIndexerData).mediaType,
+      tmdbIndexerData.tmdbId,
+      language,
+    );
+
+    return selectLogo(logos, { width, aspectRatio, language });
   }
 }

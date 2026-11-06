@@ -1,6 +1,6 @@
 import { logger } from "#utilities/logger/logger.ts";
 
-import type { LogLevel } from "#utilities/logger/log-levels.ts";
+import type { LogLevel } from "@repo/util-plugin-sdk/dto/enums/log-level.enum";
 
 export const withLogAction = {
   actions: {

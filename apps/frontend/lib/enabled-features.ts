@@ -1,0 +1,16 @@
+const enabledFeatures = {
+  calendarPage: true,
+  dashboardPage: false,
+  settingsPage: true,
+  rankingTab: false,
+  dangerZone: false,
+  logsPage: false,
+  notificationCentre: false,
+  selectableLibraryItems: false,
+} as const satisfies Record<string, boolean>;
+
+export function isFeatureEnabled(
+  feature: keyof typeof enabledFeatures,
+): boolean {
+  return enabledFeatures[feature];
+}

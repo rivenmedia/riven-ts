@@ -3,7 +3,7 @@ import { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schemas/eve
 import { flow } from "#message-queue/flows/producer.ts";
 import { createParseScrapeResultsJob } from "#message-queue/sandboxed-jobs/jobs/parse-scrape-results/parse-scrape-results.schema.ts";
 import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
-import { settings } from "#utilities/settings.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
 import { createScrapeItemJob } from "./scrape-item.schema.ts";
 
@@ -24,7 +24,8 @@ export async function enqueueScrapeItem({
   isRootItem,
 }: EnqueueScrapeItemInput) {
   const attempts = isRootItem
-    ? settings.maximumFailedAttempts - item.failedScrapeAttempts
+    ? getRuntimeSettings().general.scraping.maximumFailedAttempts -
+      item.failedScrapeAttempts
     : 1;
 
   if (attempts <= 0) {

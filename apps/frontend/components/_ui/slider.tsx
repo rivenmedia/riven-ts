@@ -4,6 +4,7 @@ import { cn } from "cn";
 import { Slider as SliderPrimitive } from "radix-ui";
 import { useMemo } from "react";
 
+/** Range input with one or more draggable thumbs. */
 function Slider({
   className,
   defaultValue,

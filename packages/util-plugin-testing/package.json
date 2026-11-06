@@ -30,11 +30,11 @@
     "@typescript/native": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:",
+    "vitest": "catalog:vitest",
     "zod": "catalog:"
   },
   "peerDependencies": {
     "msw": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   }
 }

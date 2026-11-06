@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { LoadingSpinner } from "./loading-spinner";
+import { preview } from "#.storybook/preview.tsx";
+import { LoadingSpinner } from "#components/logs-viewer/loading-spinner/loading-spinner.tsx";
 
 const meta = preview.meta({
   title: "Logs Viewer / LoadingSpinner",
