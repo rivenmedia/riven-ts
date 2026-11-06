@@ -8,6 +8,7 @@ import {
   TabsList,
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
+import { isFeatureEnabled } from "#lib/enabled-features.ts";
 
 import type { PropsWithChildren } from "react";
 
@@ -18,7 +19,7 @@ interface TabSection {
 const sections = {
   general: { label: "General" },
   plugins: { label: "Plugins" },
-  ranking: { label: "Ranking" },
+  ...(isFeatureEnabled("rankingTab") ? { ranking: { label: "Ranking" } } : {}),
 } as const satisfies Record<string, TabSection>;
 
 function isValidSection(value: string): value is keyof typeof sections {
