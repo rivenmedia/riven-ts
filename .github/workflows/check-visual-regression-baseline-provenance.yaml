@@ -67,9 +67,8 @@ jobs:
           REPORT_ONLY: ${{ inputs.report-only }}
         run: |
           # Removed baselines are not checked, as a removed baseline that is still needed fails the component tests
-          CHANGED_BASELINES=$(git diff --name-only --no-renames --diff-filter=d "$MERGE_BASE" "$HEAD_SHA" -- ':(glob)**/__vis__/*/__baselines__/**')
-
-          mapfile -t CHANGED < <(grep . <<< "$CHANGED_BASELINES" || true)
+          # NUL-separated, so paths are compared unquoted with the ls-tree output below
+          mapfile -d '' -t CHANGED < <(git diff -z --name-only --no-renames --diff-filter=d "$MERGE_BASE" "$HEAD_SHA" -- ':(glob)**/__vis__/*/__baselines__/**')
 
           is_attested() {
             local ATTESTATIONS
@@ -80,40 +79,55 @@ jobs:
             (( ATTESTATIONS > 0 ))
           }
 
-          # The baselines in the most recently attested commit were all accepted by the deployment
-          ATTESTED=""
+          # Prints "<blob> <path>" for each of the changed baselines in a commit
+          list_baselines() {
+            git --literal-pathspecs ls-tree -r -z "$1" -- "${CHANGED[@]}" | while IFS= read -r -d '' ENTRY; do
+              META="${ENTRY%%$'\t'*}"
+              echo "${META##* } ${ENTRY#*$'\t'}"
+            done
+          }
+
+          # Every attested commit's baselines were accepted by the deployment, so a baseline is attested if it
+          # matches any of them, such as when a pull request merges branches whose baselines were attested separately
+          ATTESTED=()
 
           if (( ${#CHANGED[@]} > 0 )); then
             for COMMIT in $(git rev-list "$MERGE_BASE..$HEAD_SHA"); do
               if is_attested "$COMMIT"; then
-                ATTESTED="$COMMIT"
-                break
+                ATTESTED+=("$COMMIT")
               fi
             done
 
             # The deployment attests its commit just after pushing it, so wait when the head claims to be from it
-            if [[ "$ATTESTED" != "$HEAD_SHA" && "$(git log -1 --format=%an "$HEAD_SHA")" == "$ATTESTATION_CREATOR" ]]; then
+            if [[ "${ATTESTED[0]:-}" != "$HEAD_SHA" && "$(git log -1 --format=%an "$HEAD_SHA")" == "$ATTESTATION_CREATOR" ]]; then
               for _ in {1..12}; do
                 sleep 10
 
                 if is_attested "$HEAD_SHA"; then
-                  ATTESTED="$HEAD_SHA"
+                  ATTESTED=("$HEAD_SHA" "${ATTESTED[@]}")
                   break
                 fi
               done
             fi
           fi
 
-          echo "Most recently attested commit: ${ATTESTED:-none}"
+          echo "Attested commits (${#ATTESTED[@]}):"
+          printf '  %s\n' "${ATTESTED[@]}"
+
+          declare -A ATTESTED_BASELINES=()
+
+          for COMMIT in "${ATTESTED[@]}"; do
+            while IFS= read -r BASELINE; do
+              ATTESTED_BASELINES["$BASELINE"]=1
+            done < <(list_baselines "$COMMIT")
+          done
 
           UNATTESTED=()
 
           for BASELINE in "${CHANGED[@]}"; do
-            if [[ -n "$ATTESTED" && "$(git rev-parse "$HEAD_SHA:$BASELINE")" == "$(git rev-parse -q --verify "$ATTESTED:$BASELINE" || true)" ]]; then
-              continue
-            fi
+            HEAD_BLOB=$(git rev-parse "$HEAD_SHA:$BASELINE")
 
-            UNATTESTED+=("$BASELINE")
+            [[ -n "${ATTESTED_BASELINES["$HEAD_BLOB $BASELINE"]:-}" ]] || UNATTESTED+=("$BASELINE")
           done
 
           echo "Baselines changed outside of the deployment (${#UNATTESTED[@]}):"
