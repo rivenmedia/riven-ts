@@ -10,7 +10,7 @@ import { attrCache } from "./attr-cache.ts";
 export const invalidateAttrCache = (paths: string[]) => {
   const prefixes = paths.map((vfsPath) => path.posix.join("/", vfsPath));
 
-  const staleKeys = [...attrCache.keys()].filter((key) => {
+  const staleKeys = attrCache.keys().filter((key) => {
     const keyString = key.toString();
 
     return prefixes.some(
