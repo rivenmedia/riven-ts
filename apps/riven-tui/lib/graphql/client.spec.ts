@@ -15,7 +15,7 @@ const it = baseIt.extend("riven", async ({}, { onCleanup }) => {
     authorizationHeaders.push(request.headers.authorization);
 
     response.setHeader("content-type", "application/json");
-    response.end(JSON.stringify({ data: { __typename: "Query" } }));
+    response.end(JSON.stringify({ data: { authProviders: [] } }));
   });
 
   server.listen(0, "127.0.0.1");
@@ -64,7 +64,9 @@ describe("authorization header", () => {
     await client.query({
       query: gql`
         query Probe {
-          __typename
+          authProviders {
+            key
+          }
         }
       `,
     });
