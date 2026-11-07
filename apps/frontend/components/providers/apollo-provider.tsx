@@ -13,23 +13,20 @@ import { createClient } from "graphql-ws";
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
 function makeLink() {
-  const graphqlUrl = new URL(
-    `${privateEnvironment.BACKEND_URL}/graphql`,
-  ).toString();
-
-  const httpLink = new HttpLink({ uri: graphqlUrl });
-
   // Subscriptions are only established in the browser, so there's no need for a WebSocket during SSR.
   // This avoids `typeof window`, which Storybook's test runner compiles as if it were on the server
   if (!("window" in globalThis)) {
-    return httpLink;
+    return new HttpLink({ uri: `${privateEnvironment.BACKEND_URL}/graphql` });
   }
 
-  // `BACKEND_URL` is server-only, so the browser connects to its own origin and `proxy.ts` forwards the upgrade to the backend
-  const wsUrl = new URL("/graphql", globalThis.location.href);
+  // `BACKEND_URL` is server-only, so the browser connects to its own origin and `proxy.ts` forwards
+  // requests and upgrades to the backend, with the session cookie
+  const graphqlUrl = new URL("/graphql", globalThis.location.href);
+  const wsUrl = new URL(graphqlUrl);
 
   wsUrl.protocol = wsUrl.protocol.replace(/^http/u, "ws");
 
+  const httpLink = new HttpLink({ uri: graphqlUrl.toString() });
   const wsLink = new GraphQLWsLink(createClient({ url: wsUrl.toString() }));
 
   return ApolloLink.split(
