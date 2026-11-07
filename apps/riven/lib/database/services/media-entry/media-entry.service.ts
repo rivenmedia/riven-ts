@@ -19,4 +19,14 @@ export class MediaEntryService extends BaseService {
   ) {
     return this.em.getRepository(MediaEntry).findOneOrFail(id, options);
   }
+
+  @EnsureRequestContext()
+  public async getMediaEntriesByItemRequestId(itemRequestId: UUID) {
+    return this.em
+      .getRepository(MediaEntry)
+      .find(
+        { mediaItem: { itemRequest: itemRequestId } },
+        { populate: ["mediaItem"] },
+      );
+  }
 }
