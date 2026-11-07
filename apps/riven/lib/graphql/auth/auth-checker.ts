@@ -7,14 +7,14 @@ import { CoreKey } from "#graphql/context.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Principal } from "./principal.ts";
 import type { Permissions } from "@repo/util-auth/access-control";
-import type { AuthChecker } from "type-graphql";
+import type { AuthCheckerFn } from "type-graphql";
 
 /**
  * Whether `principal` may resolve a field that requires every statement in `required`.
  *
  * An empty list only requires a signed-in caller.
  */
-export function isAuthorized(principal: Principal, required: Permissions[]) {
+function isAuthorized(principal: Principal, required: Permissions[]) {
   switch (principal.kind) {
     case "anonymous": {
       return false;
@@ -30,7 +30,7 @@ export function isAuthorized(principal: Principal, required: Permissions[]) {
   }
 }
 
-export const authChecker: AuthChecker<ApolloServerContext, Permissions> = (
+export const authChecker: AuthCheckerFn<ApolloServerContext, Permissions> = (
   { context },
   required,
 ) => {

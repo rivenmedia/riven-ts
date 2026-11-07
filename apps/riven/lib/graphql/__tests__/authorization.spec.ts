@@ -5,7 +5,7 @@ import { getSessionCookie } from "better-auth/cookies";
 import { createClient } from "graphql-ws";
 import { http, passthrough } from "msw";
 import assert from "node:assert";
-import { describe, expect, vi } from "vitest";
+import { expect, vi } from "vitest";
 import { WebSocket } from "ws";
 import { createActor, createEmptyActor, toPromise } from "xstate";
 
@@ -188,251 +188,241 @@ const LIBRARY_AND_SETTINGS = /* GraphQL */ `
   }
 `;
 
-describe("scenario 1: a valid credential", () => {
-  it.for(["admin session token", "API key"] as const)(
-    "returns every authenticated field to the %s",
-    async (credential, { admin, movie, request }) => {
-      const authorization =
-        credential === "API key"
-          ? `Bearer ${settings.apiKey}`
-          : admin.authorization;
+it.for(["admin session token", "API key"] as const)(
+  "scenario 1, a valid credential, returns every authenticated field to the %s",
+  async (credential, { admin, movie, request }) => {
+    const authorization =
+      credential === "API key"
+        ? `Bearer ${settings.apiKey}`
+        : admin.authorization;
 
-      await expect(
-        request(LIBRARY_AND_SETTINGS, {
-          authorization,
-          variables: { id: movie.id },
-        }),
-      ).resolves.toStrictEqual({
-        data: {
-          mediaItems: { items: [{ __typename: "Movie" }] },
-          mediaItemById: {
-            mediaEntries: [
-              { originalFilename: movie.originalFilename, downloadUrl },
-            ],
-          },
-          settingsSection: { id: "general" },
-        },
-        errors: [],
-      });
-    },
-  );
-});
-
-describe("scenario 2: an invalid credential", () => {
-  it("returns public fields and denies every authenticated field", async ({
-    request,
-  }) => {
     await expect(
-      request(
-        /* GraphQL */ `
-          query PublicAndAuthenticated {
-            authProviders {
-              key
-            }
-            itemRequestByExternalIds(tmdbId: "550") {
-              id
-            }
-            vfsEntry(path: "/") {
-              __typename
-            }
-          }
-        `,
-        { authorization: "Bearer garbage" },
-      ),
-    ).resolves.toStrictEqual({
-      data: {
-        authProviders: expect.arrayContaining([{ key: "credential" }]),
-        itemRequestByExternalIds: null,
-        vfsEntry: null,
-      },
-      errors: [
-        { path: "itemRequestByExternalIds", code: "UNAUTHENTICATED" },
-        { path: "vfsEntry", code: "UNAUTHENTICATED" },
-      ],
-    });
-  });
-});
-
-describe("scenario 3: a partly authorised caller", () => {
-  it("returns the sibling fields the caller may read", async ({
-    movie: _movie,
-    request,
-    user,
-  }) => {
-    await expect(
-      request(
-        /* GraphQL */ `
-          query LibraryAndVfs {
-            mediaItems {
-              items {
-                __typename
-              }
-            }
-            vfsEntry(path: "/") {
-              __typename
-            }
-          }
-        `,
-        { authorization: user.authorization },
-      ),
+      request(LIBRARY_AND_SETTINGS, {
+        authorization,
+        variables: { id: movie.id },
+      }),
     ).resolves.toStrictEqual({
       data: {
         mediaItems: { items: [{ __typename: "Movie" }] },
-        vfsEntry: null,
-      },
-      errors: [{ path: "vfsEntry", code: "UNAUTHORIZED" }],
-    });
-  });
-
-  it("denies a nested field that its readable parent does not grant", async ({
-    movie,
-    request,
-    user,
-  }) => {
-    await expect(
-      request(
-        /* GraphQL */ `
-          query MediaEntries($id: ID!) {
-            mediaItemById(id: $id) {
-              ... on Movie {
-                mediaEntries {
-                  originalFilename
-                  downloadUrl
-                }
-              }
-            }
-          }
-        `,
-        { authorization: user.authorization, variables: { id: movie.id } },
-      ),
-    ).resolves.toStrictEqual({
-      data: {
         mediaItemById: {
           mediaEntries: [
-            { originalFilename: movie.originalFilename, downloadUrl: null },
+            { originalFilename: movie.originalFilename, downloadUrl },
           ],
         },
+        settingsSection: { id: "general" },
       },
-      errors: [
-        {
-          path: "mediaItemById.mediaEntries.0.downloadUrl",
-          code: "UNAUTHORIZED",
-        },
-      ],
+      errors: [],
     });
-  });
+  },
+);
 
-  it("runs the mutations the caller's role grants and no others", async ({
-    movie,
-    orm,
-    request,
-    user,
-  }) => {
-    await expect(
-      request(
-        /* GraphQL */ `
-          mutation RequestItem($input: RequestItemInput!) {
-            requestItem(input: $input)
-          }
-        `,
-        {
-          authorization: user.authorization,
-          variables: {
-            input: {
-              requestedBy: "user@riven.test",
-              tmdbId: "550",
-              type: "movie",
-            },
-          },
-        },
-      ),
-    ).resolves.toStrictEqual({ data: { requestItem: true }, errors: [] });
-
-    await expect(
-      request(
-        /* GraphQL */ `
-          mutation ResetMediaItem($id: ID!) {
-            resetMediaItem(mediaItemId: $id) {
-              __typename
-            }
-          }
-        `,
-        { authorization: user.authorization, variables: { id: movie.id } },
-      ),
-    ).resolves.toStrictEqual({
-      data: null,
-      errors: [{ path: "resetMediaItem", code: "UNAUTHORIZED" }],
-    });
-
-    await expect(
-      orm.em.fork().findOneOrFail(Movie, movie.id),
-    ).resolves.toMatchObject({ state: "completed" });
-  });
-});
-
-describe("scenario 4: no credential", () => {
-  it("returns public fields", async ({ request }) => {
-    await expect(
-      request(/* GraphQL */ `
-        query AuthProviders {
+it("scenario 2, an invalid credential, returns public fields and denies every authenticated field", async ({
+  request,
+}) => {
+  await expect(
+    request(
+      /* GraphQL */ `
+        query PublicAndAuthenticated {
           authProviders {
             key
           }
+          itemRequestByExternalIds(tmdbId: "550") {
+            id
+          }
+          vfsEntry(path: "/") {
+            __typename
+          }
         }
-      `),
-    ).resolves.toStrictEqual({
-      data: { authProviders: expect.arrayContaining([{ key: "credential" }]) },
-      errors: [],
-    });
+      `,
+      { authorization: "Bearer garbage" },
+    ),
+  ).resolves.toStrictEqual({
+    data: {
+      authProviders: expect.arrayContaining([{ key: "credential" }]),
+      itemRequestByExternalIds: null,
+      vfsEntry: null,
+    },
+    errors: [
+      { path: "itemRequestByExternalIds", code: "UNAUTHENTICATED" },
+      { path: "vfsEntry", code: "UNAUTHENTICATED" },
+    ],
   });
 });
 
-describe("subscriptions", () => {
-  const MEDIA_ITEM_STATE_CHANGED = /* GraphQL */ `
-    subscription AuthorizationMediaItemStateChanged($id: ID!) {
-      mediaItemStateChanged(id: $id) {
-        ... on Movie {
-          id
+it("scenario 3, a partly authorised caller, returns the sibling fields the caller may read", async ({
+  movie: _movie,
+  request,
+  user,
+}) => {
+  await expect(
+    request(
+      /* GraphQL */ `
+        query LibraryAndVfs {
+          mediaItems {
+            items {
+              __typename
+            }
+          }
+          vfsEntry(path: "/") {
+            __typename
+          }
+        }
+      `,
+      { authorization: user.authorization },
+    ),
+  ).resolves.toStrictEqual({
+    data: {
+      mediaItems: { items: [{ __typename: "Movie" }] },
+      vfsEntry: null,
+    },
+    errors: [{ path: "vfsEntry", code: "UNAUTHORIZED" }],
+  });
+});
+
+it("scenario 3, a partly authorised caller, denies a nested field that its readable parent does not grant", async ({
+  movie,
+  request,
+  user,
+}) => {
+  await expect(
+    request(
+      /* GraphQL */ `
+        query MediaEntries($id: ID!) {
+          mediaItemById(id: $id) {
+            ... on Movie {
+              mediaEntries {
+                originalFilename
+                downloadUrl
+              }
+            }
+          }
+        }
+      `,
+      { authorization: user.authorization, variables: { id: movie.id } },
+    ),
+  ).resolves.toStrictEqual({
+    data: {
+      mediaItemById: {
+        mediaEntries: [
+          { originalFilename: movie.originalFilename, downloadUrl: null },
+        ],
+      },
+    },
+    errors: [
+      {
+        path: "mediaItemById.mediaEntries.0.downloadUrl",
+        code: "UNAUTHORIZED",
+      },
+    ],
+  });
+});
+
+it("scenario 3, a partly authorised caller, runs the mutations the caller's role grants and no others", async ({
+  movie,
+  orm,
+  request,
+  user,
+}) => {
+  await expect(
+    request(
+      /* GraphQL */ `
+        mutation RequestItem($input: RequestItemInput!) {
+          requestItem(input: $input)
+        }
+      `,
+      {
+        authorization: user.authorization,
+        variables: {
+          input: {
+            requestedBy: "user@riven.test",
+            tmdbId: "550",
+            type: "movie",
+          },
+        },
+      },
+    ),
+  ).resolves.toStrictEqual({ data: { requestItem: true }, errors: [] });
+
+  await expect(
+    request(
+      /* GraphQL */ `
+        mutation ResetMediaItem($id: ID!) {
+          resetMediaItem(mediaItemId: $id) {
+            __typename
+          }
+        }
+      `,
+      { authorization: user.authorization, variables: { id: movie.id } },
+    ),
+  ).resolves.toStrictEqual({
+    data: null,
+    errors: [{ path: "resetMediaItem", code: "UNAUTHORIZED" }],
+  });
+
+  await expect(
+    orm.em.fork().findOneOrFail(Movie, movie.id),
+  ).resolves.toMatchObject({ state: "completed" });
+});
+
+it("scenario 4, no credential, returns public fields", async ({ request }) => {
+  await expect(
+    request(/* GraphQL */ `
+      query AuthProviders {
+        authProviders {
+          key
         }
       }
-    }
-  `;
+    `),
+  ).resolves.toStrictEqual({
+    data: { authProviders: expect.arrayContaining([{ key: "credential" }]) },
+    errors: [],
+  });
+});
 
-  it("denies a WebSocket subscription without a session cookie", async ({
-    movie,
-    subscribe,
-  }) => {
-    await expect(
-      subscribe(MEDIA_ITEM_STATE_CHANGED, { id: movie.id }),
-    ).resolves.toStrictEqual({
-      data: null,
-      errors: [{ path: "mediaItemStateChanged", code: "UNAUTHENTICATED" }],
+const MEDIA_ITEM_STATE_CHANGED = /* GraphQL */ `
+  subscription AuthorizationMediaItemStateChanged($id: ID!) {
+    mediaItemStateChanged(id: $id) {
+      ... on Movie {
+        id
+      }
+    }
+  }
+`;
+
+it("denies a WebSocket subscription without a session cookie", async ({
+  movie,
+  subscribe,
+}) => {
+  await expect(
+    subscribe(MEDIA_ITEM_STATE_CHANGED, { id: movie.id }),
+  ).resolves.toStrictEqual({
+    data: null,
+    errors: [{ path: "mediaItemStateChanged", code: "UNAUTHENTICATED" }],
+  });
+});
+
+it("streams events to a WebSocket subscription with a session cookie", async ({
+  movie,
+  subscribe,
+  user,
+}) => {
+  const firstEvent = subscribe(
+    MEDIA_ITEM_STATE_CHANGED,
+    { id: movie.id },
+    { cookie: user.cookie },
+  );
+
+  // The server starts the subscription asynchronously, so publish until an event arrives.
+  const publishing = setInterval(() => {
+    pubSub.publish("MEDIA_ITEM_STATE_CHANGED", movie.id, movie.id);
+  }, 50);
+
+  try {
+    await expect(firstEvent).resolves.toStrictEqual({
+      data: { mediaItemStateChanged: { id: movie.id } },
+      errors: [],
     });
-  });
-
-  it("streams events to a WebSocket subscription with a session cookie", async ({
-    movie,
-    subscribe,
-    user,
-  }) => {
-    const firstEvent = subscribe(
-      MEDIA_ITEM_STATE_CHANGED,
-      { id: movie.id },
-      { cookie: user.cookie },
-    );
-
-    // The server starts the subscription asynchronously, so publish until an event arrives.
-    const publishing = setInterval(() => {
-      pubSub.publish("MEDIA_ITEM_STATE_CHANGED", movie.id, movie.id);
-    }, 50);
-
-    try {
-      await expect(firstEvent).resolves.toStrictEqual({
-        data: { mediaItemStateChanged: { id: movie.id } },
-        errors: [],
-      });
-    } finally {
-      clearInterval(publishing);
-    }
-  });
+  } finally {
+    clearInterval(publishing);
+  }
 });
