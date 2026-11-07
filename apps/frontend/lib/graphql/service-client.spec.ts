@@ -1,7 +1,7 @@
 import { HttpResponse } from "msw";
 import { graphql } from "msw/graphql";
 import { setupServer } from "msw/node";
-import { it as baseIt, describe, expect, vi } from "vitest";
+import { it as baseIt, expect, vi } from "vitest";
 
 import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
@@ -57,41 +57,40 @@ const backend = graphql.link(
 
 const apiKey = "riven-api-key-0123456789abcdef0123456789";
 
-describe("with BACKEND_API_KEY set", () => {
-  it("sends the API key as a bearer token", async ({ server, loadQuery }) => {
-    const authorization = Promise.withResolvers<string | null>();
+it("with BACKEND_API_KEY set, sends the API key as a bearer token", async ({
+  server,
+  loadQuery,
+}) => {
+  const authorization = Promise.withResolvers<string | null>();
 
-    server.use(
-      backend.query(GET_INSTANCE_SETUP_REQUIRED, ({ request }) => {
-        authorization.resolve(request.headers.get("authorization"));
+  server.use(
+    backend.query(GET_INSTANCE_SETUP_REQUIRED, ({ request }) => {
+      authorization.resolve(request.headers.get("authorization"));
 
-        return HttpResponse.json({
-          data: {
-            instanceStatus: {
-              __typename: "InstanceStatus",
-              setupRequired: false,
-            },
+      return HttpResponse.json({
+        data: {
+          instanceStatus: {
+            __typename: "InstanceStatus",
+            setupRequired: false,
           },
-        });
-      }),
-    );
+        },
+      });
+    }),
+  );
 
-    const query = await loadQuery(apiKey);
+  const query = await loadQuery(apiKey);
 
-    await query({ query: GET_INSTANCE_SETUP_REQUIRED });
+  await query({ query: GET_INSTANCE_SETUP_REQUIRED });
 
-    await expect(authorization.promise).resolves.toBe(`Bearer ${apiKey}`);
-  });
+  await expect(authorization.promise).resolves.toBe(`Bearer ${apiKey}`);
 });
 
-describe("without BACKEND_API_KEY", () => {
-  it("fails the query with an error naming the variables", async ({
-    loadQuery,
-  }) => {
-    const query = await loadQuery(undefined);
+it("without BACKEND_API_KEY, fails the query with an error naming the variables", async ({
+  loadQuery,
+}) => {
+  const query = await loadQuery(undefined);
 
-    await expect(query({ query: GET_INSTANCE_SETUP_REQUIRED })).rejects.toThrow(
-      "BACKEND_API_KEY is not set. Set it to the value of Riven's RIVEN_SETTING__apiKey.",
-    );
-  });
+  await expect(query({ query: GET_INSTANCE_SETUP_REQUIRED })).rejects.toThrow(
+    "BACKEND_API_KEY is not set. Set it to the value of Riven's RIVEN_SETTING__apiKey.",
+  );
 });
