@@ -13,6 +13,7 @@ pnpm --filter @repo/riven-tui dev
 Configure the target instance with environment variables (see `.env.riven-tui.example`):
 
 - `RIVEN_TUI_SETTING__graphqlUrl` - the GraphQL endpoint of the Riven instance (defaults to `http://localhost:3000/`)
+- `RIVEN_TUI_SETTING__apiKey` - the Riven instance's API key (`RIVEN_SETTING__apiKey`), sent as a bearer token with every request
 
 ## Features
 

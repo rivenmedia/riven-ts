@@ -11,10 +11,11 @@ starting in a broken state.
 
 ## Variables
 
-| Variable                         | Description                                               | Default                         |
-| -------------------------------- | --------------------------------------------------------- | ------------------------------- |
-| `RIVEN_TUI_SETTING__graphqlUrl`  | The GraphQL endpoint of the Riven instance to connect to. | `http://localhost:3000/graphql` |
-| `RIVEN_TUI_SETTING__enableDebug` | Enables debug output.                                     | `false`                         |
+| Variable                         | Description                                                                                                | Default                         |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `RIVEN_TUI_SETTING__graphqlUrl`  | The GraphQL endpoint of the Riven instance to connect to.                                                  | `http://localhost:3000/graphql` |
+| `RIVEN_TUI_SETTING__apiKey`      | The Riven instance's API key, the value of its `RIVEN_SETTING__apiKey`. Riven rejects requests without it. | None                            |
+| `RIVEN_TUI_SETTING__enableDebug` | Enables debug output.                                                                                      | `false`                         |
 
 ## Setting variables
 
@@ -28,6 +29,7 @@ cp apps/riven-tui/.env.riven-tui.example apps/riven-tui/.env.riven-tui
 
 ```bash title=".env.riven-tui"
 RIVEN_TUI_SETTING__graphqlUrl="http://localhost:3000/graphql"
+RIVEN_TUI_SETTING__apiKey="<your RIVEN_SETTING__apiKey>"
 RIVEN_TUI_SETTING__enableDebug="false"
 ```
 
@@ -38,6 +40,7 @@ the container with the Riven process it's inspecting:
 
 ```bash
 docker exec -it -e RIVEN_TUI_SETTING__graphqlUrl="http://localhost:3000/graphql" \
+  -e RIVEN_TUI_SETTING__apiKey="<your RIVEN_SETTING__apiKey>" \
   <riven-container> node tui/dist/cli.js
 ```
 
