@@ -3,10 +3,14 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 export interface CreateGraphqlClientOptions {
   /** The GraphQL endpoint of the Riven instance to connect to. */
   uri: string;
+
+  /** The Riven instance's API key, sent as a bearer token with every request. */
+  apiKey?: string | undefined;
 }
 
 export function createGraphqlClient({
   uri,
+  apiKey,
 }: CreateGraphqlClientOptions): ApolloClient {
   return new ApolloClient({
     defaultOptions: {
@@ -26,6 +30,10 @@ export function createGraphqlClient({
         ShowLikeMediaItem: ["Show", "Season", "Episode"],
       },
     }),
-    link: new HttpLink({ uri }),
+    link: new HttpLink({
+      uri,
+      headers:
+        apiKey === undefined ? {} : { authorization: `Bearer ${apiKey}` },
+    }),
   });
 }
