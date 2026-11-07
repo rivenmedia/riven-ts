@@ -62,6 +62,31 @@ FROM base AS prepare
 
     RUN turbo prune @repo/riven --docker
 
+FROM base AS third-party-deps
+
+    LABEL builder="true"
+
+    ARG HOME
+    ARG PNPM_STORE
+
+    ARG CI
+    ENV CI=${CI}
+
+    WORKDIR ${HOME}
+
+    # Installs from the lockfile and package manifests only, so source changes
+    # (including to workspace packages) never invalidate this stage. Its output
+    # becomes the runtime image's `node_modules` layer, which can then be reused.
+    COPY --from=prepare ${HOME}/out/json/ ./
+    COPY --from=prepare ${HOME}/.pnpmfile.mjs ./
+
+    # Workspace packages are removed here and added from `production-deploy`
+    # instead, where they have been built.
+    # `.modules.yaml` is only read by pnpm and records a `prunedAt` timestamp.
+    RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} \
+        pnpm --filter @repo/riven --prod deploy pruned && \
+        rm -rf pruned/node_modules/.modules.yaml pruned/node_modules/.pnpm/@repo+*
+
 FROM base AS builder
 
     LABEL builder="true"
@@ -106,11 +131,12 @@ FROM builder AS production-deploy
     ARG CI
     ENV CI=${CI}
 
-    # `.modules.yaml` records a `prunedAt` timestamp, which would make the
-    # `node_modules` layer differ on every build even when the dependencies don't.
-    # It's only read by pnpm, so it's safe to drop from the runtime image.
+    # Only the built workspace packages are taken from this deploy; third-party
+    # dependencies come from `third-party-deps`. Both deploys use the same
+    # lockfile, so the `.pnpm` directory names match.
     RUN pnpm --filter @repo/riven --prod deploy pruned && \
-        rm -f pruned/node_modules/.modules.yaml
+        mkdir -p workspace-packages/.pnpm && \
+        mv pruned/node_modules/.pnpm/@repo+* workspace-packages/.pnpm/
 
 FROM node:${NODE_VERSION}-alpine AS runner
 
@@ -153,11 +179,19 @@ FROM node:${NODE_VERSION}-alpine AS runner
 
     USER ${PUID}:${PGID}
 
-    # Copy dependencies and app code as separate layers, so a change to the app
-    # alone produces a small `dist` layer and the `node_modules` layer is reused.
-    COPY --from=production-deploy ${HOME}/pruned/node_modules ./node_modules
+    # Layers are ordered from least to most frequently changed, so a code change
+    # only replaces the small layers at the end:
+    #   1. third-party dependencies (change with the lockfile)
+    #   2. workspace packages (change with `packages/*`)
+    #   3. the app itself
+    COPY --from=third-party-deps ${HOME}/pruned/node_modules ./node_modules
+    COPY --from=production-deploy ${HOME}/workspace-packages/ ./node_modules/
     COPY --from=production-deploy ${HOME}/pruned/package.json ./
     COPY --from=production-deploy ${HOME}/pruned/dist ./dist
+
+    # Fail the build if the two deploys disagreed on a package's location
+    RUN broken="$(find -L node_modules -type l)" && \
+        if [ -n "$broken" ]; then echo "Broken symlinks:"; echo "$broken"; exit 1; fi
 
     ENV NODE_ENV=production
 
