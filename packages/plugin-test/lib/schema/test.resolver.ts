@@ -1,10 +1,11 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { TestAPI } from "../datasource/test.datasource.ts";
 import { pluginConfig } from "../test-plugin.config.ts";
 
+@Authorized()
 @Resolver()
 export class TestResolver {
   @Query(() => Boolean)

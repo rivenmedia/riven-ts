@@ -2,12 +2,13 @@ import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-cont
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
-import { Args, Query, Resolver } from "type-graphql";
+import { Args, Authorized, Query, Resolver } from "type-graphql";
 
 import { ListrrAPI } from "../datasource/listrr.datasource.ts";
 import { pluginConfig } from "../listrr-plugin.config.ts";
 import { ListIdsArguments } from "./arguments/list-ids.arguments.ts";
 
+@Authorized()
 @Resolver()
 export class ListrrResolver {
   @Query(() => Boolean)

@@ -1,11 +1,20 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, FieldResolver, Int, Query, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  Authorized,
+  FieldResolver,
+  Int,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 
 @Resolver(() => Episode)
 export class EpisodeResolver {
+  @Authorized()
   @Query(() => Episode, {
     description:
       "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",

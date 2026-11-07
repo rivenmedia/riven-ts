@@ -1,8 +1,16 @@
 import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
-import { PluginDataSource } from "@repo/util-plugin-sdk";
+import { PluginDataSource, RequirePermissions } from "@repo/util-plugin-sdk";
 import { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 
-import { Arg, Args, Ctx, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  Args,
+  Authorized,
+  Ctx,
+  Mutation,
+  Query,
+  Resolver,
+} from "type-graphql";
 
 import { SeerrAPI } from "../datasource/seerr.datasource.ts";
 import { WebhookInput } from "../schemas/webhook-input.schema.ts";
@@ -12,6 +20,7 @@ import { SeerrHandleWebhookInput } from "./types/seerr-handle-webhook.input.ts";
 
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
+@Authorized()
 @Resolver()
 export class SeerrResolver {
   @Query(() => Boolean)
@@ -43,6 +52,7 @@ export class SeerrResolver {
     return shows;
   }
 
+  @RequirePermissions({ item: ["request"] })
   @Mutation(() => Boolean)
   public seerrHandleWebhook(
     @Arg("input", () => SeerrHandleWebhookInput) input: SeerrHandleWebhookInput,
