@@ -1,9 +1,10 @@
-import { createParameterDecorator } from "type-graphql";
+import { Authorized, createParameterDecorator } from "type-graphql";
 
 import { isBasePluginContext } from "../schemas/index.ts";
 
 import type { DataSourceConstructor } from "../schemas/index.ts";
 import type { GraphQLContext } from "../types/graphql-context.ts";
+import type { Permissions } from "@repo/util-auth/access-control";
 
 /**
  * Parameter decorator used to inject the plugin context for the current plugin.
@@ -39,4 +40,16 @@ export function PluginDataSource(
 
     return pluginContext.dataSources.get(dataSource);
   });
+}
+
+/**
+ * Restricts a resolver, query, mutation, subscription or field to callers
+ * whose role grants every action in `permissions`.
+ *
+ * @param permissions The actions required, keyed by resource
+ */
+export function RequirePermissions(
+  permissions: Permissions,
+): ReturnType<typeof Authorized> {
+  return Authorized<Permissions>([permissions]);
 }
