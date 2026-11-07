@@ -216,7 +216,7 @@ points:
   (e.g. `apps/riven` ignores `Migration*.ts` and `factories`/`seeders`
   directories from dead-code analysis, since those are invoked
   dynamically).
-- Run `pnpm knip` locally before relying on CI to catch unused
+- Run `pnpm knip` and `pnpm knip --strict` locally before relying on CI to catch unused
   exports/dependencies — `knip:prepare` regenerates API schemas first so
   generated-code consumers aren't false-flagged.
 

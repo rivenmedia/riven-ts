@@ -14,8 +14,8 @@ export async function clearDeduplicationJob(
   queueName: string,
   deduplicationId: string,
 ) {
-  const { flow } = await import("../flows/producer.ts");
-  const { logger } = await import("../../utilities/logger/logger.ts");
+  const { flow } = await import("#message-queue/flows/producer.ts");
+  const { logger } = await import("#utilities/logger/logger.ts");
 
   const queue = queueRegistry.get(queueName);
 

@@ -4,6 +4,7 @@ import { cn } from "cn";
 import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from "lucide-react";
 import { Select as SelectPrimitive } from "radix-ui";
 
+/** Dropdown for picking one value from a list of options. */
 function Select({
   ...props
 }: React.ComponentProps<typeof SelectPrimitive.Root>) {

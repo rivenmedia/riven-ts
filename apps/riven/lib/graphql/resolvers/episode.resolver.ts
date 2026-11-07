@@ -2,7 +2,7 @@ import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
 import { Arg, FieldResolver, Int, Query, Resolver, Root } from "type-graphql";
 
-import { CoreContext } from "../decorators/core-context.ts";
+import { CoreContext } from "#graphql/decorators/core-context.ts";
 
 @Resolver(() => Episode)
 export class EpisodeResolver {
@@ -26,6 +26,11 @@ export class EpisodeResolver {
   @FieldResolver(() => Season)
   public async season(@Root() episode: Episode) {
     return episode.season.loadOrFail();
+  }
+
+  @FieldResolver(() => Int)
+  public seasonNumber(@Root() episode: Episode) {
+    return episode.season.loadProperty("number");
   }
 
   @FieldResolver(() => [String])

@@ -2,7 +2,7 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { Arg, ID, Mutation, Resolver } from "type-graphql";
 
-import { CoreContext } from "../decorators/core-context.ts";
+import { CoreContext } from "#graphql/decorators/core-context.ts";
 
 import type { UUID } from "node:crypto";
 

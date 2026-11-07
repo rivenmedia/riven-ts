@@ -5,8 +5,9 @@ import { MediaItemScrapeErrorNoStreamsFound } from "@repo/util-plugin-sdk/schema
 import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
-import { settings } from "../../../../../utilities/settings.ts";
-import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
+
 import { scrapeItemProcessorSchema } from "./scrape-item.schema.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
@@ -32,7 +33,7 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
 
       if (item.state === "failed") {
         throw new UnrecoverableError(
-          `Scraping failed for ${item.fullTitle} after ${item.failedScrapeAttempts.toString()}/${settings.maximumFailedAttempts.toString()} attempts`,
+          `Scraping failed for ${item.fullTitle} after ${item.failedScrapeAttempts.toString()}/${getRuntimeSettings().general.scraping.maximumFailedAttempts.toString()} attempts`,
         );
       }
 
@@ -46,12 +47,14 @@ export const scrapeItemProcessor = scrapeItemProcessorSchema.implementAsync(
       });
     } catch (error) {
       if (
-        error instanceof MediaItemScrapeErrorIncorrectState ||
-        error instanceof MediaItemScrapeError
+        error instanceof MediaItemScrapeError ||
+        error instanceof MediaItemScrapeErrorIncorrectState
       ) {
         sendEvent(error.payload);
 
-        throw new UnrecoverableError(error.message);
+        throw new UnrecoverableError(
+          `Failed to scrape ${error.payload.item.fullTitle}: ${error.message}`,
+        );
       }
 
       if (error instanceof MediaItemScrapeErrorNoStreamsFound) {

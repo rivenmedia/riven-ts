@@ -1,7 +1,8 @@
 import { parse } from "@repo/util-rank-torrent-name/parser";
 
-import { logger } from "../../../../utilities/logger/logger.ts";
-import { createSandboxedJobProcessor } from "../../utilities/create-sandboxed-job.processor.ts";
+import { createSandboxedJobProcessor } from "#message-queue/sandboxed-jobs/utilities/create-sandboxed-job.processor.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import {
   ParseScrapeResultsSandboxedJob,
   parseScrapeResultsProcessorSchema,

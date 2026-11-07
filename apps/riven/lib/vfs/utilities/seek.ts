@@ -1,4 +1,5 @@
-import { logger } from "../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import {
   fdToCurrentStreamPositionMap,
   fdToResponsePromiseMap,

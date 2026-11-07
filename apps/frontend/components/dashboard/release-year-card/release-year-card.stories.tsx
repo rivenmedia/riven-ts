@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { ReleaseYearCard } from "./release-year-card";
+import { preview } from "#.storybook/preview.tsx";
+import { ReleaseYearCard } from "#components/dashboard/release-year-card/release-year-card.tsx";
 
 const meta = preview.meta({
   title: "Dashboard / ReleaseYearCard",

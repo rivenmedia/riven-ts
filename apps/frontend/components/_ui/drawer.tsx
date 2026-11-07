@@ -3,6 +3,10 @@
 import { cn } from "cn";
 import { Drawer as DrawerPrimitive } from "vaul";
 
+/**
+ * Panel that slides up from the screen edge with drag-to-dismiss and snap
+ * points (Vaul).
+ */
 function Drawer({
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root>) {

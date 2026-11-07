@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "frontend-storybook": {
+      "url": "http://localhost:6006/mcp",
+      "type": "http"
+    },
+    "wallaby": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "-c", "node ~/.wallaby/mcp/"]
+    }
+  }
+}

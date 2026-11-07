@@ -1,7 +1,7 @@
 import {
   RequestRange,
   transformRequestRangeToBounds,
-} from "../../schemas/request-range.schema.ts";
+} from "#vfs/schemas/request-range.schema.ts";
 
 interface CalculateChunkRangeInput {
   requestRange: [start: number, end: number];

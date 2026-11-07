@@ -2,7 +2,7 @@ import { Box, Text } from "ink";
 
 import { ActionResultMessage } from "./action-result-message.tsx";
 
-import type { ActionTarget, ItemAction } from "../../types/actions.ts";
+import type { ActionTarget, ItemAction } from "#types/actions.ts";
 import type { ApolloClient, CombinedGraphQLErrors } from "@apollo/client";
 
 export interface ActionResultProps {

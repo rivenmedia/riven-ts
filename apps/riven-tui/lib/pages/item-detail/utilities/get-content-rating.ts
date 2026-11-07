@@ -1,4 +1,4 @@
-import type { RivenTuiGetMediaItemOverviewQuery } from "../queries/get-media-item-overview.query.typegen.ts";
+import type { RivenTuiGetMediaItemOverviewQuery } from "#pages/item-detail/queries/get-media-item-overview.query.typegen.ts";
 
 /** Movies and shows/seasons/episodes use different content rating enums. */
 export function getContentRating(

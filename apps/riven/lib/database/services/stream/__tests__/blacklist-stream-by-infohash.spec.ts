@@ -1,7 +1,7 @@
 import { UniqueConstraintViolationException } from "@mikro-orm/core";
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 it("creates a BlacklistedStream for the given infohash/provider/plugin combination", async ({
   services: { streamService },

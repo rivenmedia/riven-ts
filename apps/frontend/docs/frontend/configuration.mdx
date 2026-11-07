@@ -1,0 +1,79 @@
+---
+title: Configuration
+description: Environment variables, sign-in methods and OAuth providers for the frontend
+---
+
+The frontend is configured in two places: a couple of variables on the
+frontend container itself, and the sign-in settings on Riven, which owns all
+accounts and sessions.
+
+## Frontend container
+
+| Variable      | Description                                                                             | Default                  |
+| ------------- | --------------------------------------------------------------------------------------- | ------------------------ |
+| `ORIGIN`      | The URL you open the frontend at. Must match `RIVEN_FRONTEND_SETTING__origin` on Riven. | `https://localhost:9000` |
+| `BACKEND_URL` | Where the frontend reaches Riven's API. In Docker Compose, use the service name.        | `http://localhost:3000`  |
+| `PORT`        | The port the frontend listens on inside the container.                                  | `9000`                   |
+
+Both URLs are validated when the frontend loads them, so a typo shows up as a
+validation error rather than failed requests.
+
+## Riven settings
+
+These are set on **Riven**, not the frontend, alongside your other
+`RIVEN_SETTING__` variables. Prefix each property with
+`RIVEN_FRONTEND_SETTING__` - for example, `RIVEN_FRONTEND_SETTING__origin`.
+
+<include>
+  ../../../riven/docs/\_\_generated\_\_/riven-frontend-settings.schema.mdx
+</include>
+
+<Callout type="info">
+  Browsers only allow passkeys on HTTPS or `localhost`, and `passkeyRpId` must
+  be a domain - not an IP address. If you open the frontend by IP over plain
+  HTTP, passkeys won't be available.
+</Callout>
+
+## Admin account
+
+Set `RIVEN_SETTING__adminUserCredentials` on Riven to create an admin on first
+boot:
+
+```bash title=".env"
+RIVEN_SETTING__adminUserCredentials="admin:CHANGEME"
+```
+
+The account is only created when no admin exists. Changing the value later has
+no effect on an existing admin.
+
+## OAuth / OpenID Connect providers
+
+Riven can add "Sign in with ..." buttons for any OAuth 2.0 or OpenID Connect
+provider, such as Authentik, Keycloak or Google. Each provider is configured
+with variables on Riven named `OAUTH_PROVIDER_<ID>_<KEY>`, where `<ID>` is a
+name you pick for the provider.
+
+```bash title=".env"
+OAUTH_PROVIDER_AUTHENTIK_CLIENT_ID="your-client-id"
+OAUTH_PROVIDER_AUTHENTIK_CLIENT_SECRET="your-client-secret"
+OAUTH_PROVIDER_AUTHENTIK_ISSUER="https://auth.example.com/application/o/riven"
+OAUTH_PROVIDER_AUTHENTIK_REDIRECT_URI="https://riven.example.com/api/auth/callback/authentik"
+OAUTH_PROVIDER_AUTHENTIK_NAME="Authentik"
+```
+
+| Key                                              | Description                                                                                 |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------- |
+| `CLIENT_ID`, `CLIENT_SECRET`                     | **Required.** Providers missing either are skipped.                                         |
+| `ISSUER`                                         | The issuer URL. Riven discovers endpoints from `<ISSUER>/.well-known/openid-configuration`. |
+| `DISCOVERY_URL`                                  | A full discovery URL, if it isn't under the issuer. Takes priority over `ISSUER`.           |
+| `AUTHORIZATION_URL`, `TOKEN_URL`, `USERINFO_URL` | Endpoints for providers that don't support discovery.                                       |
+| `REDIRECT_URI`                                   | The callback URL. Set it to `<ORIGIN>/api/auth/callback/<id>`, with `<id>` in lowercase.    |
+| `SCOPES`                                         | Comma-separated scopes, e.g. `openid,email,profile`.                                        |
+| `PKCE`                                           | Use PKCE. Defaults to `false`.                                                              |
+| `DISABLE_SIGNUP`                                 | Only let existing users sign in with this provider. Defaults to `false`.                    |
+| `NAME`                                           | Button label. Defaults to the provider ID.                                                  |
+| `ICON`                                           | URL of an icon to show on the button.                                                       |
+
+Register the same `REDIRECT_URI` with your provider. Without it, Riven builds
+the callback from its own internal address, which the browser usually can't
+reach.

@@ -3,19 +3,20 @@ import { Text, useInput } from "ink";
 import { Outlet, useNavigate, useParams } from "react-router";
 import { z } from "zod";
 
-import { useActionsMenuContext } from "../../ui/actions-menu/actions-menu-context.tsx";
-import { ActionsMenu } from "../../ui/actions-menu/actions-menu.tsx";
-import { MediaItemStateBadge } from "../../ui/media-item-state-badge.tsx";
-import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
-import { SuspenseBoundary } from "../../ui/suspense-boundary.tsx";
-import { createAction } from "../../utilities/create-action.ts";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
+import { ActionsMenu } from "#ui/actions-menu/actions-menu.tsx";
+import { MediaItemStateBadge } from "#ui/media-item-state-badge.tsx";
+import { PageWrapper } from "#ui/page-wrapper/page-wrapper.tsx";
+import { SuspenseBoundary } from "#ui/suspense-boundary.tsx";
+import { createAction } from "#utilities/create-action.ts";
+
 import { BLACKLIST_ACTIVE_STREAM } from "./queries/blacklist-active-stream.mutation.ts";
 import { GET_MEDIA_ITEM } from "./queries/get-media-item.query.ts";
 import { REMOVE_ITEM_REQUEST } from "./queries/remove-item-request.mutation.ts";
 import { RESET_MEDIA_ITEM } from "./queries/reset-media-item.mutation.ts";
 import { getActionsFor } from "./utilities/get-actions-for.ts";
 
-import type { ActionTarget, ItemAction } from "../../types/actions.ts";
+import type { ActionTarget, ItemAction } from "#types/actions.ts";
 
 export function ItemDetailPageLayout() {
   const params = useParams<"id">();

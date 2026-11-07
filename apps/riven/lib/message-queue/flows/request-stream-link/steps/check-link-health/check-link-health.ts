@@ -6,11 +6,11 @@ import {
 import { UnrecoverableError } from "bullmq";
 import assert from "node:assert";
 
-import { createJobParentConfig } from "../../../../utilities/create-job-parent-config.ts";
-import { maybeWaitForChildren } from "../../../../utilities/maybe-wait-for-children.ts";
-import { flow } from "../../../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 export async function checkLinkHealth({ job, token, mediaEntry }: StepContext) {
   assert.ok(

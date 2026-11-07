@@ -23,7 +23,7 @@ function findEnglishShowTitle(series: SeriesExtendedRecordSchema) {
 }
 
 /**
- * Collects the non-English aliases for a series, keyed by language.
+ * Collects the aliases for a series, keyed by language.
  */
 function getAliases(
   series: SeriesExtendedRecordSchema,
@@ -34,16 +34,17 @@ function getAliases(
 
   for (const { language, name } of series.translations?.nameTranslations ??
     []) {
-    // Ignore english translations, we already have the English show title.
-    // Also ignore translations that are identical to the main show title;
+    // Ignore translations that are identical to the main show title;
     // these add no value to the list.
-    if (!name || !language || language === "eng" || name === title) {
+    if (!name || !language || name.toLowerCase() === title.toLowerCase()) {
       continue;
     }
 
-    const languageAliases = aliases.get(language) ?? new Set<string>();
+    const normalisedLanguage = language.toLowerCase();
+    const languageAliases =
+      aliases.get(normalisedLanguage) ?? new Set<string>();
 
-    aliases.set(language, languageAliases.add(name));
+    aliases.set(normalisedLanguage, languageAliases.add(name.toLowerCase()));
   }
 
   return aliases;

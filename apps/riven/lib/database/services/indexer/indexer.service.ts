@@ -7,7 +7,8 @@ import {
 } from "@mikro-orm/decorators/legacy";
 import { DateTime } from "luxon";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+
 import { persistMovieIndexerData } from "./utilities/persist-movie-indexer-data.ts";
 import { persistShowIndexerData } from "./utilities/persist-show-indexer-data.ts";
 
@@ -65,7 +66,9 @@ export class IndexerService extends BaseService {
       | { isReleaseDateInPast: boolean; isReleaseDateKnown: true }
     )
   > {
-    const { settings } = await import("../../../utilities/settings.ts");
+    const { getRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
+    const { scheduling } = getRuntimeSettings().general;
     const baseDate =
       item instanceof Movie ? item.releaseDate : item.nextAirDate;
 
@@ -75,7 +78,7 @@ export class IndexerService extends BaseService {
         isReleaseDateKnown: false,
         reindexTime: DateTime.utc()
           .startOf("minute")
-          .plus({ days: settings.unknownAirDateOffsetDays }),
+          .plus({ days: scheduling.unknownAirDateOffsetDays }),
       };
     }
 
@@ -89,7 +92,7 @@ export class IndexerService extends BaseService {
       return {
         isReleaseDateKnown: true,
         isReleaseDateInPast: true,
-        reindexTime: now.plus({ minutes: settings.scheduleOffsetMinutes }),
+        reindexTime: now.plus({ minutes: scheduling.scheduleOffsetMinutes }),
       };
     }
 
@@ -99,7 +102,7 @@ export class IndexerService extends BaseService {
       isReleaseDateInPast: false,
       reindexTime: DateTime.fromJSDate(baseDate)
         .startOf("minute")
-        .plus({ minutes: settings.scheduleOffsetMinutes }),
+        .plus({ minutes: scheduling.scheduleOffsetMinutes }),
     };
   }
 }

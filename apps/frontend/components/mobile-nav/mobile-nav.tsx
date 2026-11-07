@@ -3,9 +3,9 @@ import { ChevronLeft, Menu, Search, X } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { fly } from "../_animations/fly";
-import { Button } from "../_ui/button";
-import { NotificationCenter } from "../notification-center/notification-center";
+import { fly } from "#components/_animations/fly.ts";
+import { Button } from "#components/_ui/button.tsx";
+import { NotificationCenter } from "#components/notification-center/notification-center.tsx";
 
 import type { AppRoutes } from "../../.next/types/routes";
 
@@ -20,6 +20,10 @@ const MAIN_PAGES = new Set<string>([
   // "/auth",
 ] satisfies AppRoutes[]);
 
+/**
+ * Mobile navigation with a back button on non-main pages and a slide-out
+ * sidebar.
+ */
 export function MobileNav() {
   const pathname = usePathname();
   const router = useRouter();

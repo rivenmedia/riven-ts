@@ -3,7 +3,8 @@ import * as fs from "node:fs/promises";
 import { expect, vi } from "vitest";
 import { toPromise } from "xstate";
 
-import { initialiseVfs } from "../actors/initialise-vfs.actor.ts";
+import { initialiseVfs } from "#state-machines/bootstrap/actors/initialise-vfs.actor.ts";
+
 import { it } from "./helpers/test-context.ts";
 
 import type { Stats } from "node:fs";

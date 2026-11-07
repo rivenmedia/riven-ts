@@ -2,14 +2,14 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text } from "ink";
 import { useNavigate } from "react-router";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { useActionsMenuContext } from "../../../ui/actions-menu/actions-menu-context.tsx";
-import { MediaItemStateBadge } from "../../../ui/media-item-state-badge.tsx";
-import { SelectList } from "../../../ui/select-list.tsx";
-import { SelectableRow } from "../../../ui/selectable-row.tsx";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_CHILDREN } from "../queries/get-media-item-children.query.ts";
-import { getChildren } from "../utilities/get-children.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_CHILDREN } from "#pages/item-detail/queries/get-media-item-children.query.ts";
+import { getChildren } from "#pages/item-detail/utilities/get-children.ts";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
+import { MediaItemStateBadge } from "#ui/media-item-state-badge.tsx";
+import { SelectList } from "#ui/select-list.tsx";
+import { SelectableRow } from "#ui/selectable-row.tsx";
 
 export function ItemDetailChildrenTab() {
   const id = useItemId();

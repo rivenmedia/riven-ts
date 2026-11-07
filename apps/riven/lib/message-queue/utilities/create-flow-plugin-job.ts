@@ -1,6 +1,7 @@
 import assert from "node:assert";
 
-import { serialiseEventData } from "../../utilities/serialisers/serialise-event-data.ts";
+import { serialiseEventData } from "#utilities/serialisers/serialise-event-data.ts";
+
 import { queueNameFor } from "./queue-name-for.ts";
 
 import type { ParamsFor } from "@repo/util-plugin-sdk";

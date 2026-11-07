@@ -1,5 +1,5 @@
-import { StreamFactory } from "../../factories/stream.factory.ts";
-import { BaseSeeder } from "../base.seeder.ts";
+import { StreamFactory } from "#database/factories/stream.factory.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { Stream } from "@repo/util-plugin-sdk/dto/entities";

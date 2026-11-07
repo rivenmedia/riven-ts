@@ -2,8 +2,9 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Text } from "ink";
 import { Outlet } from "react-router";
 
-import { PageWrapper } from "../../ui/page-wrapper/page-wrapper.tsx";
-import { SuspenseBoundary } from "../../ui/suspense-boundary.tsx";
+import { PageWrapper } from "#ui/page-wrapper/page-wrapper.tsx";
+import { SuspenseBoundary } from "#ui/suspense-boundary.tsx";
+
 import { GET_LIBRARY_ITEM_COUNTS } from "./queries/get-library-item-counts.query.ts";
 
 export function LibraryScreenLayout() {

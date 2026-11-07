@@ -3,6 +3,7 @@
 import { cn } from "cn";
 import { Switch as SwitchPrimitive } from "radix-ui";
 
+/** On/off toggle for a single setting. */
 function Switch({
   className,
   size = "default",

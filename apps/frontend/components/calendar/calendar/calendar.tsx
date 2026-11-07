@@ -1,22 +1,32 @@
-import { Button } from "@/components/_ui/button";
+"use client";
 
 import { ChevronLeft, ChevronRight, Film, Tv } from "lucide-react";
 import { DateTime } from "luxon";
 import { useMemo, useState } from "react";
 import { useMedia } from "react-use";
 
-import { CalendarDayCell } from "../calendar-day-cell/calendar-day-cell";
-import { CalendarMobileDayCard } from "../calendar-mobile-day-card/calendar-mobile-day-card";
-import { TypeFilterChips } from "../type-filter-chips/type-filter-chips";
-import { useCalendar } from "./use-calendar";
+import { Button } from "#components/_ui/button.tsx";
+import { CalendarDayCell } from "#components/calendar/calendar-day-cell/calendar-day-cell.tsx";
+import { CalendarMobileDayCard } from "#components/calendar/calendar-mobile-day-card/calendar-mobile-day-card.tsx";
+import { TypeFilterChips } from "#components/calendar/type-filter-chips/type-filter-chips.tsx";
 
-import type { EntertainmentItemData } from "../types";
+import { useCalendar } from "./use-calendar.ts";
+
+import type { MediaItemType } from "#app/_types/__generated__/graphql.ts";
+import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
+import type { CalendarMonth } from "./use-calendar.ts";
 
 export interface CalendarProps {
   items: EntertainmentItemData[];
+  /** The month to display initially. Defaults to the current month. */
+  initialMonth?: CalendarMonth;
 }
 
-export function Calendar({ items }: CalendarProps) {
+/**
+ * Monthly release calendar with type filters. Shows a grid on desktop and a
+ * list of day cards on mobile.
+ */
+export function Calendar({ items, initialMonth }: CalendarProps) {
   const {
     dayNames,
     selectedMonth,
@@ -25,9 +35,9 @@ export function Calendar({ items }: CalendarProps) {
     isToday,
     isCurrentMonth,
     resetToToday,
-  } = useCalendar();
+  } = useCalendar(initialMonth);
 
-  const shouldRenderMobileCalendar = useMedia("(max-width: 768px)");
+  const shouldRenderMobileCalendar = useMedia("(max-width: 768px)", false);
 
   const filterOptions = [
     { id: "movies", label: "Movies", type: "movie", icon: Film },
@@ -37,18 +47,21 @@ export function Calendar({ items }: CalendarProps) {
   ] as const;
 
   const [selectedFilters, setSelectedFilters] = useState(
-    Object.fromEntries(filterOptions.map(({ type }) => [type, true])),
+    Object.fromEntries(filterOptions.map(({ type }) => [type, true])) as Record<
+      MediaItemType,
+      boolean
+    >,
   );
 
   const filteredItems = useMemo(() => {
     const result: Record<string, EntertainmentItemData[]> = {};
 
     for (const item of items) {
-      if (selectedFilters[item.itemType] === false) {
+      if (!item.releaseDate || !selectedFilters[item.type]) {
         continue;
       }
 
-      const dateKey = DateTime.fromISO(item.airedAt).startOf("day").toISO();
+      const dateKey = DateTime.fromISO(item.releaseDate).startOf("day").toISO();
       const dayItems = (result[dateKey] ??= []);
 
       dayItems.push(item);

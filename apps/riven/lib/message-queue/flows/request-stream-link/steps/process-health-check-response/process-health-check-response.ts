@@ -4,13 +4,14 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { z } from "zod";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { filterChildrenFailure } from "../../../../utilities/filter-children-failure.ts";
-import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
-import { getHealthCheckNextStep } from "../../utilities/get-health-check-next-step.ts";
+import { getHealthCheckNextStep } from "#message-queue/flows/request-stream-link/utilities/get-health-check-next-step.ts";
+import { filterChildrenFailure } from "#message-queue/utilities/filter-children-failure.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { handleExpiredLink } from "./utilities/handle-expired-link.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 export async function processHealthCheckResponse(context: StepContext) {
   const { job, mediaEntry } = context;

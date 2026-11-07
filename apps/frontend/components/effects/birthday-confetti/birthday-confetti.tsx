@@ -29,6 +29,9 @@ export interface BirthdayConfettiProps {
   active: boolean;
 }
 
+/**
+ * Full-screen falling-confetti overlay, rendered only when `active` is true.
+ */
 export function BirthdayConfetti({ active }: BirthdayConfettiProps) {
   if (!active) {
     return null;

@@ -1,7 +1,7 @@
-import { preview } from "@/.storybook/preview";
-import { Slider } from "@/components/_ui/slider";
-
 import { fn } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
+import { Slider } from "#components/_ui/slider.tsx";
 
 /**
  * An input where the user selects a value from within a given range.

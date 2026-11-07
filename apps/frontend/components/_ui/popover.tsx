@@ -3,6 +3,7 @@
 import { cn } from "cn";
 import { Popover as PopoverPrimitive } from "radix-ui";
 
+/** Floating content panel anchored to a trigger. */
 function Popover({
   ...props
 }: React.ComponentProps<typeof PopoverPrimitive.Root>) {

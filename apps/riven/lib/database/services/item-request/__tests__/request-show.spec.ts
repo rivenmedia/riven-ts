@@ -4,7 +4,7 @@ import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/ite
 import { faker } from "@faker-js/faker";
 import { describe, expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 

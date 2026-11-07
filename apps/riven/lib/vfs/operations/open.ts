@@ -2,21 +2,21 @@ import Fuse from "@zkochan/fuse-native";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { services } from "../../database/database.ts";
-import { enqueueRequestStreamLink } from "../../message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
-import { runSingleJob } from "../../message-queue/utilities/run-single-job.ts";
-import { logger } from "../../utilities/logger/logger.ts";
-import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
+import { services } from "#database/database.ts";
+import { enqueueRequestStreamLink } from "#message-queue/flows/request-stream-link/enqueue-request-stream-link.ts";
+import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { FuseError, isFuseError } from "#vfs/errors/fuse-error.ts";
+import { calculateFileChunks } from "#vfs/utilities/chunks/calculate-file-chunks.ts";
 import {
   fdToFileHandleMeta,
   fileNameToFdCountMap,
   fileNameToFileChunkCalculationsMap,
-} from "../utilities/file-handle-map.ts";
-import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+} from "#vfs/utilities/file-handle-map.ts";
+import { withVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
-import type { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
+import type { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
 import type { Loaded } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 

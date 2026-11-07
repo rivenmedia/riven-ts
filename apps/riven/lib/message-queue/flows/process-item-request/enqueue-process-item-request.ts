@@ -1,6 +1,7 @@
 import { toMerged } from "es-toolkit";
 
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+
 import { createProcessItemRequestJob } from "./process-item-request.schema.ts";
 
 import type { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";

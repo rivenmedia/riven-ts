@@ -1,6 +1,3 @@
-import { source } from "@/lib/source";
-import { sharedMdxComponents } from "@/mdx-components";
-
 import {
   DocsBody,
   DocsDescription,
@@ -8,6 +5,9 @@ import {
   DocsTitle,
 } from "fumadocs-ui/page";
 import { notFound } from "next/navigation";
+
+import { source } from "#lib/source.ts";
+import { sharedMdxComponents } from "#mdx-components.tsx";
 
 export default async function Page(props: {
   params: Promise<{ slug?: string[] }>;

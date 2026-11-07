@@ -35,7 +35,7 @@ export async function saveSubtitles(
 
   const newEntities: SubtitleEntry[] = [];
 
-  const { logger } = await import("../../../../utilities/logger/logger.ts");
+  const { logger } = await import("#utilities/logger/logger.ts");
 
   for (const [language, subtitle] of subtitles) {
     if (existingLanguages.has(language)) {

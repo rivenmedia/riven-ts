@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useMemo } from "react";
+import { createContext, use, useMemo } from "react";
 
 import type { PropsWithChildren } from "react";
 
@@ -59,15 +59,11 @@ export function NotificationsProvider({ children }: PropsWithChildren) {
     [],
   );
 
-  return (
-    <NotificationsContext.Provider value={value}>
-      {children}
-    </NotificationsContext.Provider>
-  );
+  return <NotificationsContext value={value}>{children}</NotificationsContext>;
 }
 
 export function useNotificationsContext() {
-  const context = useContext(NotificationsContext);
+  const context = use(NotificationsContext);
 
   if (!context) {
     throw new Error(

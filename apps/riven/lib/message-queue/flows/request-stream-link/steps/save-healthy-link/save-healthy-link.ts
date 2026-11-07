@@ -3,9 +3,9 @@ import chalk from "chalk";
 import { DateTime, Duration } from "luxon";
 import assert from "node:assert";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 export async function saveHealthyLink({
   job,

@@ -108,12 +108,12 @@ docker compose up -d
 `http://<host>:3000` are refused. Anything that calls into Riven — the Seerr
 webhook, a reverse proxy — fails.
 
-**Fix**: `gqlHost` defaults to `localhost`, so the API binds to loopback
+**Fix**: `host` defaults to `localhost`, so the API binds to loopback
 _inside_ the container and publishing the port has no effect. Bind it to all
 interfaces:
 
 ```bash
-RIVEN_SETTING__gqlHost="0.0.0.0"
+RIVEN_SETTING__host="0.0.0.0"
 ```
 
 ## Plugin Issues

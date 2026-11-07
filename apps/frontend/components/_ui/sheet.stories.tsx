@@ -1,4 +1,6 @@
-import { preview } from "@/.storybook/preview";
+import { expect, userEvent, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 import {
   Sheet,
   SheetClose,
@@ -8,9 +10,7 @@ import {
   SheetHeader,
   SheetTitle,
   SheetTrigger,
-} from "@/components/_ui/sheet";
-
-import { expect, userEvent, within } from "storybook/test";
+} from "#components/_ui/sheet.tsx";
 
 /**
  * Extends the Dialog component to display content that complements the main

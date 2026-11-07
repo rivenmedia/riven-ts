@@ -1,8 +1,8 @@
 import z from "zod";
 
-import { chunkCache } from "../utilities/chunk-cache.ts";
-import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
-import { createChunkRangeLabel } from "../utilities/chunks/create-chunk-range-label.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+import { createChunkCacheKey } from "#vfs/utilities/chunks/create-chunk-cache-key.ts";
+import { createChunkRangeLabel } from "#vfs/utilities/chunks/create-chunk-range-label.ts";
 
 export const ChunkMetadata = z
   .object({

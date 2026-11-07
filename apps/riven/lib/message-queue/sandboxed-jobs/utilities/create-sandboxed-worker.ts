@@ -3,12 +3,12 @@ import { toMerged } from "es-toolkit";
 import assert from "node:assert";
 import { existsSync } from "node:fs";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { settings } from "../../../utilities/settings.ts";
-import { telemetry } from "../../../utilities/telemetry.ts";
-import { createQueue } from "../../utilities/create-queue.ts";
+import { createQueue } from "#message-queue/utilities/create-queue.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { settings } from "#utilities/settings.ts";
+import { telemetry } from "#utilities/telemetry.ts";
 
-import type { SandboxedJobDefinition } from "../index.ts";
+import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
 import type { QueueOptions, WorkerOptions } from "bullmq";
 import type { URL } from "node:url";
 import type { ZodLiteral, ZodObject, ZodType } from "zod";

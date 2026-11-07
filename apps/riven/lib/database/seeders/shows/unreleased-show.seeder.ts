@@ -2,7 +2,8 @@ import { Season } from "@repo/util-plugin-sdk/dto/entities";
 
 import assert from "node:assert";
 
-import { BaseSeeder } from "../base.seeder.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+
 import { IndexedShowSeeder } from "./indexed-show.seeder.ts";
 
 import type { ScrapedShowSeederContext } from "./scraped-show.seeder.ts";

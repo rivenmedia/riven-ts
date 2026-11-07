@@ -2,8 +2,8 @@ import { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/e
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../utilities/create-flow-job-builder.ts";
-import { createFlowSchema } from "../../utilities/create-flow-schema.ts";
+import { createFlowJobBuilder } from "#message-queue/utilities/create-flow-job-builder.ts";
+import { createFlowSchema } from "#message-queue/utilities/create-flow-schema.ts";
 
 export const RequestType = z.enum(["create", "update"]);
 

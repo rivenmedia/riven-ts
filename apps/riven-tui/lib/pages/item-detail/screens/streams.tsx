@@ -2,9 +2,9 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { UnorderedList } from "@inkjs/ui";
 import { Box, Text } from "ink";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_STREAMS } from "../queries/get-media-item-streams.query.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_STREAMS } from "#pages/item-detail/queries/get-media-item-streams.query.ts";
 
 export function ItemDetailStreamsScreen() {
   const itemId = useItemId();

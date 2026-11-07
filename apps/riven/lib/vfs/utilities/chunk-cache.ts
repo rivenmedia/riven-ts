@@ -1,6 +1,6 @@
 import { LRUCache } from "lru-cache";
 
-import { logger } from "../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
 import type { Buffer } from "node:buffer";
 

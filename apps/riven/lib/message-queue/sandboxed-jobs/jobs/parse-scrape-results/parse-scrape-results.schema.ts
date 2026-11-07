@@ -2,8 +2,8 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../../utilities/create-flow-job-builder.ts";
-import { createSandboxedJobSchema } from "../../utilities/create-sandboxed-job-schema.ts";
+import { createSandboxedJobSchema } from "#message-queue/sandboxed-jobs/utilities/create-sandboxed-job-schema.ts";
+import { createFlowJobBuilder } from "#message-queue/utilities/create-flow-job-builder.ts";
 
 import type { ParsedData } from "@repo/util-rank-torrent-name";
 

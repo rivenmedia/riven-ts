@@ -1,9 +1,9 @@
 import { ItemRequestCreateErrorConflict } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.conflict.event";
 import { ItemRequestCreateError } from "@repo/util-plugin-sdk/schemas/events/item-request.create.error.event";
 
-import type { ItemRequestService } from "../../../../database/services/item-request/item-request.service.ts";
-import type { MainRunnerMachineIntake } from "../../../../state-machines/main-runner/index.ts";
-import type { RequestedItem } from "../request-content-service.processor.ts";
+import type { ItemRequestService } from "#database/services/item-request/item-request.service.ts";
+import type { RequestedItem } from "#message-queue/flows/request-content-service/request-content-service.processor.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
 interface RequestItemsOptions {
   itemRequestService: ItemRequestService;

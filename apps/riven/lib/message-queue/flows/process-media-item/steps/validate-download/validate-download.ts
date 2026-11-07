@@ -2,9 +2,9 @@ import { DelayedError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { ProcessMediaItemJob } from "../../process-media-item.processor.ts";
+import type { ProcessMediaItemJob } from "#message-queue/flows/process-media-item/process-media-item.processor.ts";
 
 export async function validateDownload(
   job: ProcessMediaItemJob,

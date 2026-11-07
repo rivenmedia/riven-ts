@@ -4,9 +4,9 @@ import { MediaItemDownloadErrorIncorrectState } from "@repo/util-plugin-sdk/sche
 import { NotFoundError, ref } from "@mikro-orm/core";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
-import type { MatchedFile } from "../../../../message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import type { MatchedFile } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 
 it("throws an error if the media item has no streams", async ({
   indexedMovieContext: { indexedMovie },
@@ -265,4 +265,42 @@ it("throws a MediaItemDownloadError if a validation error occurs during persiste
       "@repo/plugin-test",
     ),
   ).rejects.toThrow(MediaItemDownloadError);
+});
+
+it("updates the state of a season to completed when downloading a season pack", async ({
+  em,
+  scrapedShowContext: {
+    seasons: [season],
+    streams: [stream],
+  },
+  services: { downloaderService },
+}) => {
+  expect.assert(season);
+  expect.assert(stream);
+
+  season.streams.add(stream);
+
+  await em.persist(season).flush();
+
+  const episodes = await season.episodes.loadItems();
+
+  const updatedItem = await downloaderService.downloadItem(
+    season.id,
+    {
+      torrentId: "1",
+      infoHash: stream.infoHash,
+      provider: null,
+      files: episodes.map<MatchedFile>((episode) => ({
+        size: 1024,
+        link: `http://example.com/${episode.title}.mp4`,
+        path: `/${episode.title}.mp4`,
+        name: `${episode.title}.mp4`,
+        matchedMediaItemId: episode.id,
+        isCachedFile: false,
+      })),
+    },
+    "@repo/plugin-test",
+  );
+
+  expect(updatedItem.state).toBe("completed");
 });

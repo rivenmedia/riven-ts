@@ -15,15 +15,7 @@
     "moduleResolution": "bundler",
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "plugins": [{ "name": "next" }],
-    "paths": {
-      "@/app/*": ["./app/*"],
-      "@/components/*": ["./components/*"],
-      "@/environment/*": ["./environment/*"],
-      "@/lib/*": ["./lib/*"],
-      "@/.storybook/*": ["./.storybook/*"],
-      "@/playwright/*": ["./playwright/*"]
-    }
+    "plugins": [{ "name": "next" }]
   },
   "files": [
     "components.json",

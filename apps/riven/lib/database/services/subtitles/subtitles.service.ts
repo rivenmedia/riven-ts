@@ -5,7 +5,8 @@ import {
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+
 import { saveSubtitles } from "./utilities/save-subtitles.ts";
 
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";

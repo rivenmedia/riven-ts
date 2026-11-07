@@ -1,13 +1,19 @@
-import { FormBase } from "../form-base/form-base";
-import { SingleAccountLink } from "./single-account-link";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
-import type { Account, Provider } from "./types";
+import { SingleAccountLink } from "./single-account-link.tsx";
+
+import type { SingleAccountLinkProps } from "./single-account-link.tsx";
+import type { Account } from "better-auth";
 
 export interface AccountLinksProps {
-  accounts: Account[];
-  providers: Record<string, Provider>;
+  accounts: Pick<Account, "providerId">[];
+  providers: Record<string, SingleAccountLinkProps["provider"]>;
 }
 
+/**
+ * Lists each configured auth provider and lets the user link or unlink their
+ * account for it.
+ */
 export function AccountLinks({ accounts, providers }: AccountLinksProps) {
   function renderContent() {
     const providerEntries = Object.entries(providers);
@@ -23,7 +29,9 @@ export function AccountLinks({ accounts, providers }: AccountLinksProps) {
     return providerEntries.map(([providerId, config]) => (
       <SingleAccountLink
         key={providerId}
-        account={accounts.find(({ providerId: id }) => id === providerId)}
+        hasLinkedAccount={accounts.some(
+          ({ providerId: id }) => id === providerId,
+        )}
         providerId={providerId}
         provider={config}
       />

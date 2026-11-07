@@ -2,15 +2,16 @@ import { DelayedError, UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import assert from "node:assert";
 
-import { getPluginEventSubscribers } from "../../../../../../../state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
-import { logger } from "../../../../../../../utilities/logger/logger.ts";
-import { createJobParentConfig } from "../../../../../../utilities/create-job-parent-config.ts";
-import { filterChildrenValues } from "../../../../../../utilities/filter-children-values.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
+import { getPluginEventSubscribers } from "#state-machines/main-runner/utilities/get-plugin-event-subscribers.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { findValidTorrentProcessorSchema } from "./find-valid-torrent.schema.ts";
 import { attemptInfoHashDownload } from "./utilities/attempt-infohash-download.ts";
 import { formatReattemptTime } from "./utilities/format-reattempt-time.ts";
 
-import type { StreamService } from "../../../../../../../database/services/stream/stream.service.ts";
+import type { StreamService } from "#database/services/stream/stream.service.ts";
 import type { FindValidTorrentFlow } from "./find-valid-torrent.schema.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";

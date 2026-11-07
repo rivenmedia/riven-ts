@@ -2,7 +2,8 @@ import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect, vi } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
+
 import { readDirSync } from "./readdir.ts";
 
 type ReadDirCallback = Parameters<typeof readDirSync>[1];
@@ -193,29 +194,113 @@ it('does not return entries for the "all movies" path when a movie does not have
   });
 });
 
-it("does not include periods in movie titles", async ({
-  em,
-  completedMovieContext: { completedMovie },
-}) => {
-  const callback = vi.fn<ReadDirCallback>();
+it.for([
+  {
+    label: "special characters",
+    unsanitisedTitle: "100% Awesome",
+    sanitisedTitle: "100 Awesome",
+  },
+  {
+    label: "underscores",
+    unsanitisedTitle: "The_Best_Movie",
+    sanitisedTitle: "TheBestMovie",
+  },
+  { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
+  {
+    label: "slashes",
+    unsanitisedTitle: "V/H/S: Viral",
+    sanitisedTitle: "VHS: Viral",
+  },
+  {
+    label: "periods",
+    unsanitisedTitle: "Mr. Robot",
+    sanitisedTitle: "Mr Robot",
+  },
+] as const)(
+  "does not include $label in movie titles ($unsanitisedTitle > $sanitisedTitle)",
+  async (
+    { unsanitisedTitle, sanitisedTitle },
+    { em, completedMovieContext: { completedMovie } },
+  ) => {
+    const callback = vi.fn<ReadDirCallback>();
 
-  em.assign(completedMovie, {
-    title: "Mr. Robot",
-    year: 2016,
-    tmdbId: "1234",
-  });
+    em.assign(completedMovie, {
+      title: unsanitisedTitle,
+      year: 2016,
+      tmdbId: "1234",
+    });
 
-  await em.flush();
+    await em.flush();
 
-  const mediaEntries = await completedMovie.getMediaEntries();
+    const mediaEntries = await completedMovie.getMediaEntries();
 
-  readDirSync(`/movies`, callback);
+    readDirSync(`/movies`, callback);
 
-  await vi.waitFor(() => {
-    expect.assert(mediaEntries[0]);
+    await vi.waitFor(() => {
+      expect.assert(mediaEntries[0]);
 
-    expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
-      "Mr Robot (2016) {tmdb-1234}",
-    ]);
-  });
-});
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        `${sanitisedTitle} (2016) {tmdb-1234}`,
+      ]);
+    });
+  },
+);
+
+it.for([
+  {
+    label: "special characters",
+    unsanitisedTitle: "100% Awesome",
+    sanitisedTitle: "100 Awesome",
+  },
+  {
+    label: "underscores",
+    unsanitisedTitle: "The_Best_Movie",
+    sanitisedTitle: "TheBestMovie",
+  },
+  { label: "slashes", unsanitisedTitle: "V/H/S", sanitisedTitle: "VHS" },
+  {
+    label: "slashes",
+    unsanitisedTitle: "V/H/S: Viral",
+    sanitisedTitle: "VHS: Viral",
+  },
+  {
+    label: "periods",
+    unsanitisedTitle: "Mr. Robot",
+    sanitisedTitle: "Mr Robot",
+  },
+] as const)(
+  "does not include $label in show titles ($unsanitisedTitle > $sanitisedTitle)",
+  async (
+    { unsanitisedTitle, sanitisedTitle },
+    { em, completedShowContext: { completedShow } },
+  ) => {
+    const callback = vi.fn<ReadDirCallback>();
+
+    em.assign(completedShow, {
+      title: unsanitisedTitle,
+      year: 2016,
+      tvdbId: "1234",
+    });
+
+    const mediaEntries = await completedShow.getMediaEntries();
+
+    for (const mediaEntry of mediaEntries) {
+      em.persist(mediaEntry);
+
+      // oxlint-disable-next-line no-underscore-dangle
+      await mediaEntry._setPath();
+    }
+
+    await em.flush();
+
+    readDirSync(`/shows`, callback);
+
+    await vi.waitFor(() => {
+      expect.assert(mediaEntries[0]);
+
+      expect(callback).toHaveBeenCalledWith<[number, string[]]>(0, [
+        `${sanitisedTitle} (2016) {tvdb-1234}`,
+      ]);
+    });
+  },
+);

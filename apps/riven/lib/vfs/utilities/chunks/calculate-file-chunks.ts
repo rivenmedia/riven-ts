@@ -1,9 +1,10 @@
-import { config } from "../../config.ts";
-import { chunkCache } from "../chunk-cache.ts";
+import { config } from "#vfs/config.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 import { createChunkRangeLabel } from "./create-chunk-range-label.ts";
 
-import type { FileChunkCalculations } from "../../schemas/file-chunk-calculations.schema.ts";
+import type { FileChunkCalculations } from "#vfs/schemas/file-chunk-calculations.schema.ts";
 
 function calculateFooterSize(fileSize: number) {
   const percentageSize = fileSize * config.targetFooterPercentage;

@@ -1,4 +1,4 @@
-import { MAX_HEALTH_CHECK_ATTEMPTS } from "../constants.ts";
+import { MAX_HEALTH_CHECK_ATTEMPTS } from "#message-queue/flows/request-stream-link/constants.ts";
 
 import type { MediaItemStreamLinkHealthCheckRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-health-check-requested.event";
 

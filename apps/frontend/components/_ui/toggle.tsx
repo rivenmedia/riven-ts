@@ -28,6 +28,10 @@ const toggleVariants = cva(
   },
 );
 
+/**
+ * Two-state button that can be pressed or unpressed, with default and outline
+ * variants.
+ */
 function Toggle({
   className,
   variant = "default",

@@ -1,0 +1,50 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "plexToken": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Plex Token for accessing the Plex API. See https://support.plex.tv/articles/204059436-finding-an-authentication-token-x-plex-token/",
+      "secret": true
+    },
+    "plexServerUrl": {
+      "type": "string",
+      "format": "uri",
+      "description": "The URL of your Plex server, e.g., http://localhost:32400/"
+    },
+    "plexLibraryPath": {
+      "default": "/mount",
+      "type": "string",
+      "minLength": 1,
+      "description": "The start of Plex library paths, e.g. \"/mount\" in \"/mount/movies\""
+    },
+    "watchlistEnabled": {
+      "default": false,
+      "type": "boolean"
+    },
+    "rssUrls": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "format": "uri"
+      }
+    },
+    "updateIntervalSeconds": {
+      "default": 60,
+      "description": "Interval in seconds to update content.",
+      "anyOf": [
+        {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 9007199254740991
+        },
+        {
+          "type": "null"
+        }
+      ]
+    }
+  },
+  "required": ["plexToken", "plexServerUrl"],
+  "title": "Plex"
+}

@@ -3,11 +3,11 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { vi } from "vitest";
 import { createActor, createEmptyActor } from "xstate";
 
-import { it as baseIt } from "../../../../__tests__/test-context.ts";
-import { mainRunnerMachine } from "../../../main-runner/index.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
+import { mainRunnerMachine } from "#state-machines/main-runner/index.ts";
 
-import type { ValidPlugin } from "../../../../types/plugins.ts";
-import type { MainRunnerMachineInput } from "../../../main-runner/index.ts";
+import type { MainRunnerMachineInput } from "#state-machines/main-runner/index.ts";
+import type { ValidPlugin } from "#types/plugins.ts";
 
 export const it = baseIt
   .extend(

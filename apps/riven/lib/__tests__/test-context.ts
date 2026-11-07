@@ -1,24 +1,64 @@
+import { plugin as testPluginConfig } from "@repo/plugin-test";
+import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { graphql, passthrough } from "msw";
+import { passthrough } from "msw";
+import { graphql } from "msw/graphql";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
+import { createRequire } from "node:module";
 import { test as testBase, vi } from "vitest";
 
-import { CoreKey } from "../graphql/context.ts";
-import { queueNameFor } from "../message-queue/utilities/queue-name-for.ts";
-import { logger } from "../utilities/logger/logger.ts";
+import { CoreKey } from "#graphql/context.ts";
+import { pubSub } from "#graphql/pubsub.ts";
+import { queueNameFor } from "#message-queue/utilities/queue-name-for.ts";
+import { SettingsManager } from "#settings/settings-manager.ts";
+import { buildSettingsSections } from "#settings/settings-sections.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { Services } from "../database/database.ts";
-import type { ApolloServerContext } from "../graphql/context.ts";
-import type { Flow } from "../message-queue/flows/index.ts";
-import type { SandboxedJobDefinition } from "../message-queue/sandboxed-jobs/index.ts";
-import type { MainRunnerMachineIntake } from "../state-machines/main-runner/index.ts";
-import type { ValidPlugin, ValidPluginMap } from "../types/plugins.ts";
+import type { Services } from "#database/database.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
+import type { Flow } from "#message-queue/flows/index.ts";
+import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
+import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
+import type { RuntimeSettings } from "#settings/core-settings-sections.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
+import type {
+  InstalledPlugin,
+  ValidPlugin,
+  ValidPluginMap,
+} from "#types/plugins.ts";
+import type { TypedDocumentNode } from "@apollo/client";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
+import type * as GraphQL from "graphql";
+import type { ExecutionResult } from "graphql";
+import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
+
+/**
+ * The test package.json mock makes `test` the only valid core plugin name,
+ * so TMDB is included as a fixture with a secret that has a default value.
+ */
+const fixtureInstalledPlugins: InstalledPlugin[] = [
+  {
+    sectionId: "repo-plugin-test",
+    packageName: "@repo/plugin-test",
+    name: "test" as CorePluginName,
+    plugin: testPluginConfig,
+    enabled: true,
+    alwaysEnabled: false,
+  },
+  {
+    sectionId: "repo-plugin-tmdb",
+    packageName: "@repo/plugin-tmdb",
+    name: "tmdb",
+    plugin: tmdbPlugin,
+    enabled: true,
+    alwaysEnabled: true,
+  },
+];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -28,10 +68,7 @@ export const it = testBase
     const { setupServer } = await import("msw/node");
 
     const server = setupServer(
-      graphql.query(
-        ({ request: { url } }) => url.includes("localhost"),
-        passthrough,
-      ),
+      graphql.link(/http:\/\/localhost:\d+\//iu).query(() => true, passthrough),
     );
 
     if (/^(\*|msw)/u.test(process.env["DEBUG"] ?? "")) {
@@ -47,9 +84,7 @@ export const it = testBase
     }
 
     // Start the worker before the test.
-    server.listen({
-      onUnhandledRequest: "error",
-    });
+    server.listen({ onUnhandledFrame: "error" });
 
     onCleanup(() => {
       // Stop the worker after the test.
@@ -79,33 +114,32 @@ export const it = testBase
     return mockAgent;
   })
   .extend("orm", { scope: "file" }, async () => {
-    const { database } = await import("../database/database.ts");
+    const { database } = await import("#database/database.ts");
 
     return database.orm;
   })
   .extend("services", { scope: "file" }, async () => {
-    const { services } = await import("../database/database.ts");
+    const { services } = await import("#database/database.ts");
 
     return services;
   })
   .extend("em", ({ orm }) => orm.em.fork())
   .extend("factories", async ({ em }) => {
     const { EpisodeFactory } =
-      await import("../database/factories/episode.factory.ts");
+      await import("#database/factories/episode.factory.ts");
     const { MediaEntryFactory } =
-      await import("../database/factories/media-entry.factory.ts");
+      await import("#database/factories/media-entry.factory.ts");
     const { MovieItemRequestFactory } =
-      await import("../database/factories/movie-item-request.factory.ts");
+      await import("#database/factories/movie-item-request.factory.ts");
     const { MovieFactory } =
-      await import("../database/factories/movie.factory.ts");
+      await import("#database/factories/movie.factory.ts");
     const { SeasonFactory } =
-      await import("../database/factories/season.factory.ts");
+      await import("#database/factories/season.factory.ts");
     const { ShowItemRequestFactory } =
-      await import("../database/factories/show-item-request.factory.ts");
-    const { ShowFactory } =
-      await import("../database/factories/show.factory.ts");
+      await import("#database/factories/show-item-request.factory.ts");
+    const { ShowFactory } = await import("#database/factories/show.factory.ts");
     const { StreamFactory } =
-      await import("../database/factories/stream.factory.ts");
+      await import("#database/factories/stream.factory.ts");
 
     return {
       movieItemRequestFactory: new MovieItemRequestFactory(em),
@@ -212,7 +246,7 @@ export const it = testBase
   )
   .extend("mockQueue", async ({ task }, { onCleanup }) => {
     const { createQueue } =
-      await import("../message-queue/utilities/create-queue.ts");
+      await import("#message-queue/utilities/create-queue.ts");
 
     const queue = createQueue(`mock-queue-${task.id}`);
 
@@ -263,29 +297,75 @@ export const it = testBase
 
     return new Sentry.Scope();
   })
+  .extend("overrideRuntimeSettings", async ({}, { onCleanup }) => {
+    const { toMerged } = await import("es-toolkit");
+    const { getRuntimeSettings, initialiseRuntimeSettings } =
+      await import("#utilities/runtime-settings.ts");
+
+    let originalSettings: RuntimeSettings | null = null;
+
+    onCleanup(() => {
+      if (originalSettings) {
+        initialiseRuntimeSettings(originalSettings);
+      }
+    });
+
+    // Replaces the current runtime settings with a copy that has the given overrides applied.
+    return (overrides: PartialDeep<RuntimeSettings>) => {
+      originalSettings ??= structuredClone(
+        getRuntimeSettings(),
+      ) as RuntimeSettings;
+
+      const current = structuredClone(getRuntimeSettings());
+
+      initialiseRuntimeSettings(toMerged(current, overrides));
+    };
+  })
   .extend("apolloServerInstance", { scope: "file" }, async () => {
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
-    const { resolvers } = await import("../graphql/resolvers/index.ts");
+    const { resolvers } = await import("#graphql/resolvers/index.ts");
 
-    return buildMockServer<ApolloServerContext>(resolvers);
+    return buildMockServer<ApolloServerContext>({
+      resolvers,
+      pubSub,
+    });
   })
-  .extend("createGqlContext", { scope: "file" }, ({ services, orm }) => () => ({
-    [CoreKey]: {
-      em: orm.em.fork(),
-      services,
-      sendEvent: vi.fn<MainRunnerMachineIntake>(),
-    },
-    logger,
-    sendEvent: vi.fn<MainRunnerMachineIntake>(),
-    plugins: new Map(),
-  }))
+  .extend(
+    "createGqlContext",
+    { scope: "file" },
+    ({ services, orm }) =>
+      (): ApolloServerContext => {
+        const settingsManager = new SettingsManager({
+          settingsService: services.settingsService,
+          sections: buildSettingsSections({
+            installedPlugins: fixtureInstalledPlugins,
+            pluginEnvironment: new Map(),
+            coreEnvironment: {},
+          }),
+          installedPlugins: fixtureInstalledPlugins,
+          coreEnvironment: {},
+        });
+
+        return {
+          [CoreKey]: {
+            em: orm.em.fork(),
+            services,
+            sendEvent: vi.fn<MainRunnerMachineIntake>(),
+            settingsManager,
+          },
+          logger,
+          sendEvent: vi.fn<MainRunnerMachineIntake>(),
+          plugins: new Map(),
+        };
+      },
+  )
   .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
   .extend(
     "gqlServer",
     { scope: "file" },
     async ({ apolloServerInstance, createGqlContext }, { onCleanup }) => {
-      const { initApolloClient } = await import("../graphql/apollo-client.ts");
+      const { initApolloClient } = await import("#graphql/apollo-client.ts");
       const { startStandaloneServer } =
         await import("@apollo/server/standalone");
 
@@ -306,14 +386,63 @@ export const it = testBase
       return apolloServerInstance;
     },
   )
+  .extend("gqlSchema", { scope: "file" }, async () => {
+    const { buildSchema } = await import("@repo/core-util-graphql-schema");
+    const { resolvers } = await import("#graphql/resolvers/index.ts");
+
+    return buildSchema({ resolvers, pubSub });
+  })
+  .extend(
+    "gqlSubscribe",
+    ({ gqlSchema, gqlContext }, { onCleanup }) =>
+      async <TResult, TVariables extends Record<string, unknown>>(
+        document: TypedDocumentNode<TResult, TVariables>,
+        variables: TVariables,
+      ) => {
+        // Vite resolves `graphql` to its ESM build, whereas type-graphql (loaded by Node)
+        // uses the CJS build, so the schema must be executed by the same CJS module.
+        const { subscribe } = createRequire(import.meta.url)(
+          "graphql",
+        ) as typeof GraphQL;
+
+        const result = await subscribe({
+          schema: gqlSchema,
+          document,
+          variableValues: variables,
+          contextValue: gqlContext,
+        });
+
+        if (!(Symbol.asyncIterator in result)) {
+          throw new Error(
+            `Subscription failed: ${JSON.stringify(result.errors)}`,
+          );
+        }
+
+        onCleanup(async () => {
+          await result.return();
+        });
+
+        return {
+          // Requesting the next event starts listening for published events,
+          // so this must be called before triggering the event.
+          nextEvent: result.next().then(({ done, value }) => {
+            assert.ok(!done, "Subscription ended without emitting an event");
+
+            // Results are built from null-prototype objects,
+            // which are cloned into plain objects for strict equality checks.
+            return structuredClone(value) as ExecutionResult<TResult>;
+          }),
+        };
+      },
+  )
   .extend(
     "apolloClient",
     { scope: "file" },
-    await import("../graphql/apollo-client.ts"),
+    await import("#graphql/apollo-client.ts"),
   )
   .extend("createFlowWorker", async ({}, { onCleanup }) => {
     const { createFlowWorker } =
-      await import("../message-queue/utilities/create-flow-worker.ts");
+      await import("#message-queue/utilities/create-flow-worker.ts");
 
     const workers = new Set<Worker>();
     const queues = new Set<Queue>();
@@ -344,7 +473,7 @@ export const it = testBase
   })
   .extend("createPluginWorker", async ({}, { onCleanup }) => {
     const { createPluginWorker } =
-      await import("../message-queue/utilities/create-plugin-worker.ts");
+      await import("#message-queue/utilities/create-plugin-worker.ts");
 
     const workers = new Set<Worker>();
     const queues = new Set<Queue>();

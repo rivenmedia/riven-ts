@@ -2,11 +2,12 @@ import { ContentServiceRequestedEvent } from "@repo/util-plugin-sdk/schemas/even
 
 import assert from "node:assert";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { createPluginFlowJob } from "../../utilities/create-flow-plugin-job.ts";
-import { createJobParentConfig } from "../../utilities/create-job-parent-config.ts";
-import { maybeWaitForChildren } from "../../utilities/maybe-wait-for-children.ts";
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
+import { createJobParentConfig } from "#message-queue/utilities/create-job-parent-config.ts";
+import { maybeWaitForChildren } from "#message-queue/utilities/maybe-wait-for-children.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { enqueueRequestContentService } from "./enqueue-request-content-service.ts";
 import { requestContentServiceProcessorSchema } from "./request-content-service.schema.ts";
 import { collectRequestedItems } from "./utilities/collect-requested-items.ts";

@@ -1,58 +1,72 @@
-import { fly } from "@/components/_animations/fly";
+import Link from "next/link";
+import React from "react";
+
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-} from "@/components/_ui/carousel";
-import { SectionHeading } from "@/components/media/section-heading/section-heading";
-import { PortraitCard } from "@/components/portrait-card/portrait-card";
+} from "#components/_ui/carousel.tsx";
+import { PortraitCard } from "#components/portrait-card/portrait-card.tsx";
 
-import { cn } from "cn";
-import Link from "next/link";
-import React from "react";
-
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
+import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
 
 interface MediaCarouselProps {
-  items: Pick<MediaItem, "id" | "title" | "posterPath" | "type" | "year">[];
-  title: string;
-  delay: number;
+  items: Pick<
+    IndexerData,
+    "id" | "title" | "type" | "posterUrl" | "year" | "isRequestable"
+  >[];
 }
 
-function formatSubtitle({ type, year }: Pick<MediaItem, "type" | "year">) {
+function formatSubtitle({
+  type,
+  year,
+  isRequestable,
+}: Pick<IndexerData, "type" | "year" | "isRequestable">) {
   const typeLabel = type === "movie" ? "Movie" : "TV";
 
-  return year ? `${typeLabel} • ${year.toString()}` : typeLabel;
+  return [typeLabel, year?.toString(), !isRequestable && "Not requestable"]
+    .filter(Boolean)
+    .join(" • ");
 }
 
-export function MediaCarousel({ items, title, delay }: MediaCarouselProps) {
+export function MediaCarousel({ items }: MediaCarouselProps) {
+  function renderCardContents(item: MediaCarouselProps["items"][number]) {
+    return (
+      <PortraitCard
+        title={item.title}
+        subtitle={formatSubtitle(item)}
+        image={item.posterUrl}
+        className="w-36 md:w-44 lg:w-48"
+      />
+    );
+  }
+
   return (
-    <section
-      className={cn("mt-8 md:mt-12 animation-duration-400", fly)}
-      style={{ animationDelay: `${delay.toString()}ms` }}
-    >
-      <SectionHeading title={title} />
-      <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
-        <CarouselContent className="-ml-3">
-          {items.map((item) => (
-            <React.Fragment key={`${item.type}-${item.id}`}>
-              <CarouselItem className="basis-auto pl-3">
+    <Carousel opts={{ dragFree: true, slidesToScroll: "auto" }}>
+      <CarouselContent className="-ml-3">
+        {items.map((item) => (
+          <React.Fragment key={`${item.type}-${item.id}`}>
+            <CarouselItem className="basis-auto pl-3">
+              {item.isRequestable ? (
                 <Link
                   href={`/details/media/${item.type}/${item.id}`}
                   className="group relative block opacity-80 transition-all duration-300 hover:opacity-100"
                 >
-                  <PortraitCard
-                    title={item.title}
-                    subtitle={formatSubtitle(item)}
-                    image={item.posterPath}
-                    className="w-36 md:w-44 lg:w-48"
-                  />
+                  {renderCardContents(item)}
                 </Link>
-              </CarouselItem>
-            </React.Fragment>
-          ))}
-        </CarouselContent>
-      </Carousel>
-    </section>
+              ) : (
+                // Items that can't be requested (e.g. shows without a TVDB ID) have no details page
+                <div
+                  aria-disabled="true"
+                  className="group relative block opacity-50"
+                >
+                  {renderCardContents(item)}
+                </div>
+              )}
+            </CarouselItem>
+          </React.Fragment>
+        ))}
+      </CarouselContent>
+    </Carousel>
   );
 }

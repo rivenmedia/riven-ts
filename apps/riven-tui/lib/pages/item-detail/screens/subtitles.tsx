@@ -2,9 +2,9 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { UnorderedList } from "@inkjs/ui";
 import { Text } from "ink";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_SUBTITLES } from "../queries/get-media-item-subtitles.query.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_SUBTITLES } from "#pages/item-detail/queries/get-media-item-subtitles.query.ts";
 
 export function ItemDetailSubtitlesScreen() {
   const { data, refetch } = useSuspenseQuery(GET_MEDIA_ITEM_SUBTITLES, {

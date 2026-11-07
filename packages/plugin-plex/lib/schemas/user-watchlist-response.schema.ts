@@ -6,7 +6,7 @@ export const UserWatchlistResponse = z.object({
   MediaContainer: z.object({
     size: z.int(),
     totalSize: z.int(),
-    Metadata: z.array(WatchlistItem),
+    Metadata: z.array(WatchlistItem).default([]),
   }),
 });
 

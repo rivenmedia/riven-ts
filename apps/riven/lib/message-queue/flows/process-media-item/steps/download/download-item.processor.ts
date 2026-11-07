@@ -5,7 +5,8 @@ import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 import { DateTime } from "luxon";
 
-import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
+
 import { downloadItemProcessorSchema } from "./download-item.schema.ts";
 
 export const downloadItemProcessor = downloadItemProcessorSchema.implementAsync(

@@ -3,10 +3,10 @@ import { Box, Text } from "ink";
 import SyntaxHighlight from "ink-syntax-highlight";
 import stringify from "json-stringify-pretty-compact";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { DetailRow } from "../components/detail-row.tsx";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_ACTIVE_STREAM } from "../queries/get-media-item-active-stream.query.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { DetailRow } from "#pages/item-detail/components/detail-row.tsx";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_ACTIVE_STREAM } from "#pages/item-detail/queries/get-media-item-active-stream.query.ts";
 
 export function ItemDetailActiveStreamScreen() {
   const itemId = useItemId();

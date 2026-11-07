@@ -2,6 +2,7 @@ export interface LoadingSpinnerProps {
   message: string;
 }
 
+/** Centred spinner with a loading message. */
 export function LoadingSpinner({ message }: LoadingSpinnerProps) {
   return (
     <div className="flex h-full flex-col items-center justify-center p-8">

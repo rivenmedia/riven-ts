@@ -2,9 +2,10 @@ import { ref } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { MediaEntryFactory } from "../../factories/media-entry.factory.ts";
-import { StreamFactory } from "../../factories/stream.factory.ts";
-import { BaseSeeder } from "../base.seeder.ts";
+import { MediaEntryFactory } from "#database/factories/media-entry.factory.ts";
+import { StreamFactory } from "#database/factories/stream.factory.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+
 import { ScrapedShowSeeder } from "./scraped-show.seeder.ts";
 
 import type { ScrapedShowSeederContext } from "./scraped-show.seeder.ts";

@@ -16,9 +16,20 @@ import { TextType, Type } from "@mikro-orm/core";
 // eslint-disable-next-line no-restricted-imports -- Core database config requires direct driver access
 import { GeneratedCacheAdapter, PostgreSqlDriver } from "@mikro-orm/postgresql";
 
-import { withLogContext } from "../utilities/logger/log-context.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
+
+import {
+  User,
+  Account,
+  Passkey,
+  Session,
+  Verification,
+  Setting,
+} from "./entities/index.ts";
+import { ItemRequestChangeSubscriber } from "./subscribers/item-request-change.subscriber.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
 import { MediaItemFullTitleSubscriber } from "./subscribers/media-item-full-title.subscriber.ts";
+import { MediaItemStateChangeSubscriber } from "./subscribers/media-item-state-change.subscriber.ts";
 import { MediaItemStateSubscriber } from "./subscribers/media-item-state.subscriber.ts";
 import { ShowLikeMediaItemReleaseDateSubscriber } from "./subscribers/show-like-media-item-release-date.subscriber.ts";
 import { ShowNextAirDateSubscriber } from "./subscribers/show-next-air-date.subscriber.ts";
@@ -39,6 +50,12 @@ const entities = [
   ItemRequest,
   Stream,
   BlacklistedStream,
+  User,
+  Account,
+  Passkey,
+  Session,
+  Verification,
+  Setting,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {
@@ -94,7 +111,9 @@ export async function createDatabaseConfig({
       new ShowLikeMediaItemReleaseDateSubscriber(),
       new ShowNextAirDateSubscriber(),
       new MediaItemStateSubscriber(),
+      new MediaItemStateChangeSubscriber(),
       new ItemRequestStateSubscriber(),
+      new ItemRequestChangeSubscriber(),
     ],
     ...metadataCacheConfig,
     ...options,

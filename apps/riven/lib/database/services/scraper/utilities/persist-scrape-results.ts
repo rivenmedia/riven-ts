@@ -3,7 +3,7 @@ import { MediaItemScrapeError } from "@repo/util-plugin-sdk/schemas/events/media
 
 import { validateOrReject } from "class-validator";
 
-import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";

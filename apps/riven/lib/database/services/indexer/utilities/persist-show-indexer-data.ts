@@ -12,7 +12,7 @@ import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas
 import { validateOrReject } from "class-validator";
 import assert from "node:assert";
 
-import { getValidationErrorMessage } from "../../core/utilities/get-validation-error-message.ts";
+import { getValidationErrorMessage } from "#database/services/core/utilities/get-validation-error-message.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { MediaItemIndexRequestedShowResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.index.requested.event";

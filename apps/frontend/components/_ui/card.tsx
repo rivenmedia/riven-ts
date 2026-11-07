@@ -1,5 +1,9 @@
 import { cn } from "cn";
 
+/**
+ * Bordered container with header, title, description, action, content and
+ * footer slots.
+ */
 function Card({
   className,
   size = "default",

@@ -3,109 +3,99 @@ import { gql } from "@apollo/client";
 import type {
   GetMediaItemQuery,
   GetMediaItemQueryVariables,
-} from "./get-media-item.query.typegen";
+} from "./get-media-item.query.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_MEDIA_ITEM: TypedDocumentNode<
   GetMediaItemQuery,
   GetMediaItemQueryVariables
 > = gql`
-  query GetMediaItem($id: ID!) {
-    mediaDetails(id: $id) {
-      totalFileCount
-      completedFileCount
-      details {
-        id
-        backdropPath
-        logo
-        trailer {
-          id
-          name
-          site
-          key
-          url
-        }
-        title
-        posterPath
-        overview
-        recommendations {
-          id
-          title
-          posterPath
-          type
-          year
-        }
-        similar {
-          id
-          title
-          posterPath
-          type
-          year
-        }
-        genres {
-          id
-          name
-        }
-        cast {
-          id
-          name
-          character
-          profilePath
-        }
-        year
-        formattedRuntime
-        originalLanguage
-        certification
-        status
-        seasons {
-          id
-          name
-          seasonNumber
-          episodeCount
-          completedCount
-          image
-        }
-      }
+  query GetMediaItem($id: ID!, $type: TopLevelMediaItemType!) {
+    tmdbItem(id: $id, type: $type) {
+      id
       type
-      state
-      filesystemEntries {
+      backdropUrl
+      logo(width: 750) {
+        aspectRatio
+        url
+        height
+        width
+      }
+      trailer {
         id
-        fileSize {
-          size
-          units
-        }
-        createdAt
-        type
-        originalFilename
-        plugin
+        name
+        site
+        key
+        url
       }
-      mediaMetadata {
-        subtitleTracks {
-          language
-        }
-        qualitySource
-        isRemux
-        isProper
-        isRepack
-        bitRate
-        duration
-        containerFormat
-        audioTracks {
-          channels
-          codec
-        }
-        fileName
-        video {
-          resolution {
-            width
-            height
-            codec
-            bitDepth
-            hdrType
-            frameRate
-          }
+      title
+      posterUrl
+      overview
+      genres {
+        id
+        name
+      }
+      year
+      runtime
+      language
+      certification
+      status
+      originCountry
+      productionCompanies {
+        id
+        name
+        logoPath
+        originCountry
+      }
+      revenue
+      budget
+      imdbId
+      isRequestable
+      mediaItem {
+        ... on MediaItem {
+          id
+          isRequested
+          state
         }
       }
+      # filesystemEntries {
+      #   id
+      #   fileSize {
+      #     size
+      #     units
+      #   }
+      #   createdAt
+      #   type
+      #   originalFilename
+      #   plugin
+      # }
+      # mediaMetadata {
+      #   subtitleTracks {
+      #     language
+      #   }
+      #   qualitySource
+      #   isRemux
+      #   isProper
+      #   isRepack
+      #   bitRate
+      #   duration
+      #   containerFormat
+      #   audioTracks {
+      #     channels
+      #     codec
+      #   }
+      #   fileName
+      #   video {
+      #     resolution {
+      #       width
+      #       height
+      #       codec
+      #       bitDepth
+      #       hdrType
+      #       frameRate
+      #     }
+      #   }
+      # }
     }
   }
 `;

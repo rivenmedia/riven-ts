@@ -4,6 +4,10 @@ import { cn } from "cn";
 import { CheckIcon, ChevronRightIcon } from "lucide-react";
 import { DropdownMenu as DropdownMenuPrimitive } from "radix-ui";
 
+/**
+ * Menu opened from a trigger, supporting shortcuts, submenus, checkbox items
+ * and radio items.
+ */
 function DropdownMenu({
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Root>) {

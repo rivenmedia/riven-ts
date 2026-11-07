@@ -31,7 +31,7 @@ const packageTypeFields: Partial<
       "@types/node": "catalog:",
       oxlint: "catalog:",
       typescript: "catalog:",
-      vitest: "catalog:",
+      vitest: "catalog:vitest",
     },
     scripts: {
       build: "tsc --project tsconfig.lib.json",

@@ -6,12 +6,11 @@ import { UnrecoverableError } from "bullmq";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
-import { it } from "../../../../../__tests__/test-context.ts";
-import * as settingsModule from "../../../../../utilities/settings.ts";
-import { settings } from "../../../../../utilities/settings.ts";
+import { it } from "#__tests__/test-context.ts";
+
 import { scrapeItemProcessor } from "./scrape-item.processor.ts";
 
-import type { MainRunnerMachineIntake } from "../../../../../state-machines/main-runner/index.ts";
+import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
 it("throws an UnrecoverableError if the item cannot be found", async ({
   createMockJob,
@@ -104,12 +103,12 @@ it("sends a 'riven.media-item.scrape.error.no-streams-found' event if no streams
 it("throws an UnrecoverableError if the item exceeds the maximum failed attempts", async ({
   createMockJob,
   mockSentryScope,
+  overrideRuntimeSettings,
   seeders: { seedIndexedMovie },
   services,
 }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
-    ...settings,
-    maximumFailedAttempts: 1,
+  overrideRuntimeSettings({
+    general: { scraping: { maximumFailedAttempts: 1 } },
   });
 
   const indexedMovie = await seedIndexedMovie();

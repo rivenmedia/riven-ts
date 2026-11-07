@@ -1,11 +1,11 @@
 import { DateTime } from "luxon";
 import assert from "node:assert";
 
-import { EpisodeFactory } from "../../factories/episode.factory.ts";
-import { SeasonFactory } from "../../factories/season.factory.ts";
-import { ShowItemRequestFactory } from "../../factories/show-item-request.factory.ts";
-import { ShowFactory } from "../../factories/show.factory.ts";
-import { BaseSeeder } from "../base.seeder.ts";
+import { EpisodeFactory } from "#database/factories/episode.factory.ts";
+import { SeasonFactory } from "#database/factories/season.factory.ts";
+import { ShowItemRequestFactory } from "#database/factories/show-item-request.factory.ts";
+import { ShowFactory } from "#database/factories/show.factory.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 import type { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";

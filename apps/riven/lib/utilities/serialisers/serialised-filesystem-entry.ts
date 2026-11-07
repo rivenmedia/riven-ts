@@ -7,7 +7,8 @@ import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import z from "zod";
 
-import { database } from "../../database/database.ts";
+import { database } from "#database/database.ts";
+
 import { createApolloInstanceSchema } from "./create-apollo-instance-schema.ts";
 
 /**

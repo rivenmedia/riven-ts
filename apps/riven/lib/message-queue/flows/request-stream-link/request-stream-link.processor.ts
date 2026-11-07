@@ -8,7 +8,7 @@ import { processStreamLinkResponse } from "./steps/process-stream-link-response/
 import { requestStreamLink } from "./steps/request-stream-link/request-stream-link.ts";
 import { saveHealthyLink } from "./steps/save-healthy-link/save-healthy-link.ts";
 
-import type { StreamService } from "../../../database/services/stream/stream.service.ts";
+import type { StreamService } from "#database/services/stream/stream.service.ts";
 import type { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 import type { Loaded } from "@mikro-orm/core";
 import type { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";

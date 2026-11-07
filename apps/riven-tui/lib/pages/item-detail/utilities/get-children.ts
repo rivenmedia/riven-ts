@@ -1,8 +1,8 @@
+import type { RivenTuiGetMediaItemChildrenQuery } from "#pages/item-detail/queries/get-media-item-children.query.typegen.ts";
 import type {
   MediaItemState,
   MediaItemType,
-} from "../../../types/__generated__/graphql.ts";
-import type { RivenTuiGetMediaItemChildrenQuery } from "../queries/get-media-item-children.query.typegen.ts";
+} from "#types/__generated__/graphql.ts";
 
 export interface ChildItem {
   id: string;

@@ -1,9 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
 import { expect, userEvent, waitFor, within } from "storybook/test";
 
-import { Header } from "./header";
+import { preview } from "#.storybook/preview.tsx";
+import { Header } from "#app/(protected)/_components/header.tsx";
 
 const meta = preview.meta({
   title: "Components / Header",
@@ -33,6 +32,36 @@ Default.test(
         { scroll: false },
       );
     });
+  },
+);
+
+Default.test(
+  "Pre-fills the search from the URL without navigating",
+  {
+    parameters: {
+      nextjs: {
+        navigation: {
+          pathname: "/explore",
+          query: { query: "the matrix" },
+        },
+      },
+    },
+  },
+  async ({ canvasElement }) => {
+    const router = getRouter();
+    const canvas = within(canvasElement);
+
+    await expect(canvas.getByRole("textbox", { name: /search/iu })).toHaveValue(
+      "the matrix",
+    );
+
+    // Outlast the 300ms search debounce
+    await new Promise((resolve) => {
+      setTimeout(resolve, 500);
+    });
+
+    await expect(router.push).not.toHaveBeenCalled();
+    await expect(router.replace).not.toHaveBeenCalled();
   },
 );
 

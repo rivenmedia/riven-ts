@@ -1,7 +1,7 @@
 import Fuse from "@zkochan/fuse-native";
 import z from "zod";
 
-import { getVfsOperationContext } from "../utilities/vfs-operation-context.ts";
+import { getVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
 export const FuseErrorCode = z.literal([
   Fuse.EPERM,

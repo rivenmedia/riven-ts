@@ -1,6 +1,7 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
+
 import { findCommonBlacklistItems } from "./find-common-blacklist-items.ts";
 
 it("returns an array of all media items that share the same active stream info hash, plugin, and provider", async ({

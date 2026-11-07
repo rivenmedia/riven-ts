@@ -1,10 +1,10 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import { XIcon } from "lucide-react";
 import { Dialog as SheetPrimitive } from "radix-ui";
+
+import { Button } from "#components/_ui/button.tsx";
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />;
@@ -44,6 +44,7 @@ function SheetOverlay({
   );
 }
 
+/** Side panel that slides in from a screen edge (the Sheet's content). */
 function SheetContent({
   className,
   children,

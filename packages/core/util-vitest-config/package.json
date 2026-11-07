@@ -25,12 +25,12 @@
     "@repo/core-util-typescript-config": "workspace:^",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
-    "@vitest/coverage-v8": "catalog:",
+    "@vitest/coverage-v8": "catalog:vitest",
     "glob": "catalog:",
     "nyc": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   },
   "peerDependencies": {
     "vitest": "^4.0.0"

@@ -1,0 +1,7 @@
+services:
+  riven-frontend:
+    container_name: riven-frontend
+    image: ghcr.io/rivenmedia/riven-ts-frontend:main
+    env_file: .env.riven-frontend
+    ports:
+      - 9000:9000

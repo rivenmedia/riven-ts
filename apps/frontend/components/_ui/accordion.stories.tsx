@@ -1,12 +1,12 @@
-import { preview } from "@/.storybook/preview";
+import { expect, userEvent, waitFor, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/_ui/accordion";
-
-import { expect, userEvent, waitFor, within } from "storybook/test";
+} from "#components/_ui/accordion.tsx";
 
 /**
  * A vertically stacked set of interactive headings that each reveal a section

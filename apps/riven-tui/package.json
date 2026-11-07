@@ -9,6 +9,16 @@
     "dist"
   ],
   "type": "module",
+  "imports": {
+    "#*.tsx": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.tsx"
+    },
+    "#*.ts": {
+      "production": "./dist/*.js",
+      "default": "./lib/*.ts"
+    }
+  },
   "exports": {
     "./wiki.config": "./wiki.config.ts"
   },
@@ -26,7 +36,6 @@
     "@apollo/client": "catalog:",
     "@inkjs/ui": "catalog:",
     "@mishieck/ink-titled-box": "catalog:",
-    "@repo/util-wiki-helpers": "workspace:^",
     "fullscreen-ink": "catalog:",
     "graphql": "catalog:",
     "ink": "catalog:",
@@ -50,6 +59,7 @@
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
+    "@repo/util-wiki-helpers": "workspace:^",
     "@swc-node/register": "catalog:",
     "@swc/core": "catalog:",
     "@types/luxon": "catalog:",
@@ -60,6 +70,6 @@
     "react-devtools-core": "catalog:",
     "typescript": "catalog:",
     "unplugin-swc": "catalog:",
-    "vitest": "catalog:"
+    "vitest": "catalog:vitest"
   }
 }

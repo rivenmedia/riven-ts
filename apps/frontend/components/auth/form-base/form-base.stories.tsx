@@ -1,9 +1,8 @@
-import { preview } from "@/.storybook/preview";
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import { Label } from "@/components/_ui/label";
-
-import { FormBase } from "./form-base";
+import { preview } from "#.storybook/preview.tsx";
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Label } from "#components/_ui/label.tsx";
+import { FormBase } from "#components/auth/form-base/form-base.tsx";
 
 const meta = preview.meta({
   title: "Auth / FormBase",

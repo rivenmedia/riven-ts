@@ -1,5 +1,5 @@
-import { preview } from "@/.storybook/preview";
-import { Label } from "@/components/_ui/label";
+import { preview } from "#.storybook/preview.tsx";
+import { Label } from "#components/_ui/label.tsx";
 
 /**
  * Renders an accessible label associated with controls.

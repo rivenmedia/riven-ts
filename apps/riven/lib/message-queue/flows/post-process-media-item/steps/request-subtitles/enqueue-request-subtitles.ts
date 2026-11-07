@@ -1,7 +1,8 @@
 import { MediaItemSubtitleRequestedEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
-import { createPluginFlowJob } from "../../../../utilities/create-flow-plugin-job.ts";
-import { flow } from "../../../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+import { createPluginFlowJob } from "#message-queue/utilities/create-flow-plugin-job.ts";
+
 import { createRequestSubtitlesJob } from "./request-subtitles.schema.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";

@@ -1,4 +1,4 @@
-import { source } from "@/lib/source";
+import { source } from "#lib/source.ts";
 
 import type { Folder, Node } from "fumadocs-core/page-tree";
 import type { ReactNode } from "react";

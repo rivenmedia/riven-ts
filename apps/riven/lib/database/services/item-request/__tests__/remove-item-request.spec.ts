@@ -8,7 +8,7 @@ import {
 import { NotFoundError, ref } from "@mikro-orm/core";
 import { describe, expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 describe(`when the media item is a movie`, () => {
   it("removes the item request", async ({

@@ -1,7 +1,8 @@
 import { toMerged } from "es-toolkit";
 
-import { services } from "../../../database/database.ts";
-import { flow } from "../producer.ts";
+import { services } from "#database/database.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+
 import { createPostProcessMediaItemJob } from "./post-process-media-item.schema.ts";
 
 import type { PostProcessMediaItemFlow } from "./post-process-media-item.schema.ts";

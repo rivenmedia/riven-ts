@@ -9,7 +9,7 @@ import type { TrendingMoviesQueryResponseSchema } from "../../__generated__/zod/
 import type { TmdbIndexerData } from "../types/tmdb-indexer-data.type.ts";
 
 const trendingMoviesQuery = `
-  query TmdbTrendingMovies($timeWindow: TMDBTrendingMoviesTimeWindow!) {
+  query TmdbTrendingMovies($timeWindow: TMDBTrendingTimeWindow!) {
     tmdbTrendingMovies(timeWindow: $timeWindow) {
       id
       title

@@ -4,8 +4,8 @@ import { atLeastOnePropertyRequired } from "@repo/util-plugin-sdk/validation";
 
 import z from "zod";
 
-import { createFlowJobBuilder } from "../../../../../../utilities/create-flow-job-builder.ts";
-import { createFlowSchema } from "../../../../../../utilities/create-flow-schema.ts";
+import { createFlowJobBuilder } from "#message-queue/utilities/create-flow-job-builder.ts";
+import { createFlowSchema } from "#message-queue/utilities/create-flow-schema.ts";
 
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 

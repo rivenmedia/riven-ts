@@ -1,7 +1,7 @@
 import { wrap } from "@mikro-orm/core";
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 

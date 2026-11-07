@@ -1,6 +1,5 @@
-import { preview } from "@/.storybook/preview";
-
-import { LogsPage } from "./page.client";
+import { preview } from "#.storybook/preview.tsx";
+import { LogsPage } from "#app/(protected)/view-logs/page.client.tsx";
 
 const meta = preview.meta({
   title: "Pages / Logs",

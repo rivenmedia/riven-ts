@@ -3,8 +3,9 @@ import fs from "node:fs";
 import path from "node:path";
 import { expect, vi } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
-import { PathInfo } from "../../database/services/vfs/schemas/path-info.schema.ts";
+import { it } from "#__tests__/test-context.ts";
+import { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
+
 import { getattrSync } from "./getattr.ts";
 
 // oxlint-disable-next-line no-bitwise

@@ -1,7 +1,5 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-
 import { cn } from "cn";
 import useEmblaCarousel from "embla-carousel-react";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
@@ -13,6 +11,8 @@ import {
   useMemo,
   useState,
 } from "react";
+
+import { Button } from "#components/_ui/button.tsx";
 
 import type { UseEmblaCarouselType } from "embla-carousel-react";
 import type { ComponentProps } from "react";
@@ -50,6 +50,10 @@ function useCarousel() {
   return context;
 }
 
+/**
+ * Horizontally or vertically scrolling slides with previous/next controls,
+ * built on Embla.
+ */
 function Carousel({
   opts,
   orientation = opts?.axis === "y" ? "vertical" : "horizontal",
@@ -220,6 +224,9 @@ function CarouselPrevious({
         className,
       )}
       disabled={!canScrollPrev}
+      // Stops Firefox persisting `disabled` across reloads, which causes a
+      // hydration mismatch. React's button types omit `autoComplete`.
+      {...{ autoComplete: "off" }}
       onClick={scrollPrev}
       {...props}
     >
@@ -250,6 +257,9 @@ function CarouselNext({
         className,
       )}
       disabled={!canScrollNext}
+      // Stops Firefox persisting `disabled` across reloads, which causes a
+      // hydration mismatch. React's button types omit `autoComplete`.
+      {...{ autoComplete: "off" }}
       onClick={scrollNext}
       {...props}
     >

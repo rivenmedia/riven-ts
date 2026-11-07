@@ -1,9 +1,9 @@
 import { fromPromise } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { keyvInstance } from "../../../utilities/redis-cache.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { keyvInstance } from "#utilities/redis-cache.ts";
 
-import type { mainRunnerMachine } from "../../main-runner/index.ts";
+import type { mainRunnerMachine } from "#state-machines/main-runner/index.ts";
 import type { Worker } from "bullmq";
 import type { ActorRefFrom } from "xstate";
 

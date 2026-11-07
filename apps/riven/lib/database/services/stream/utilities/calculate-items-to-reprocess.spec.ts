@@ -1,6 +1,6 @@
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 it("throws an error if no media items are provided", async ({
   services: { streamService },

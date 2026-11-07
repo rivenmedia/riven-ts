@@ -4,6 +4,7 @@ import { cn } from "cn";
 import { CheckIcon } from "lucide-react";
 import { Checkbox as CheckboxPrimitive } from "radix-ui";
 
+/** Accessible checkbox for boolean or multi-select choices. */
 function Checkbox({
   className,
   ...props

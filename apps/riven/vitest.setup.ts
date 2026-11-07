@@ -6,6 +6,7 @@ import { randomUUID } from "node:crypto";
 import path from "node:path";
 import { loadEnvFile } from "node:process";
 import { setEnvironmentData } from "node:worker_threads";
+import { Query } from "type-graphql";
 import {
   afterAll,
   aroundEach,
@@ -16,8 +17,8 @@ import {
 } from "vitest";
 import z from "zod";
 
-import { queueRegistry } from "./lib/message-queue/utilities/queue-registry.ts";
-import { withLogContext } from "./lib/utilities/logger/log-context.ts";
+import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
+import { withLogContext } from "#utilities/logger/log-context.ts";
 
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RedisClient } from "bullmq";
@@ -63,6 +64,7 @@ vi.mock(import("@repo/plugin-test"), () => {
   }
 
   class TestResolver {
+    @Query(() => Boolean)
     public testIsValid() {
       return true;
     }
@@ -87,9 +89,9 @@ vi.mock(import("@repo/plugin-test"), () => {
   };
 });
 
-vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
+vi.mock(import("#database/database.ts"), async (importOriginal) => {
   const { initORM } = await importOriginal();
-  const { createDatabaseConfig } = await import("./lib/database/config.ts");
+  const { createDatabaseConfig } = await import("#database/config.ts");
   const { SeedManager } = await import("@mikro-orm/seeder");
   const { SqliteDriver } = await import("@mikro-orm/sqlite");
   const databaseConfig = await createDatabaseConfig();
@@ -107,6 +109,11 @@ vi.mock(import("./lib/database/database.ts"), async (importOriginal) => {
       pathTs: "./seeders",
     },
   });
+
+  // Auth entities live in the `auth_db` schema, which SQLite models as an attached database.
+  await database.orm.em
+    .getConnection()
+    .execute("attach database ':memory:' as auth_db");
 
   await database.orm.schema.create();
 
@@ -141,7 +148,7 @@ let redisServer: RedisMemoryServer | null = null;
 let redisConnection: RedisConnection | null = null;
 let redisClient: RedisClient | null = null;
 
-vi.doMock(import("./lib/utilities/settings.ts"), async (importOriginal) => {
+vi.doMock(import("#utilities/settings.ts"), async (importOriginal) => {
   const { RedisMemoryServer } = await import("redis-memory-server");
   const { exec } = await import("node:child_process");
   const { promisify } = await import("node:util");
@@ -206,7 +213,27 @@ beforeAll(() => {
 });
 
 beforeEach(async () => {
-  const { database } = await import("./lib/database/database.ts");
+  const { resolveSettings } =
+    await import("#settings/utilities/resolve-settings.ts");
+  const { RuntimeSettings } =
+    await import("#settings/core-settings-sections.ts");
+  const { initialiseRuntimeSettings } =
+    await import("#utilities/runtime-settings.ts");
+  const { coreEnvironment } = await import("#utilities/settings.ts");
+
+  // Runtime settings are normally loaded from the database during bootstrap.
+  // Reset them to the env + default values before each test.
+  initialiseRuntimeSettings(
+    resolveSettings({
+      schema: RuntimeSettings,
+      stored: {},
+      env: coreEnvironment,
+    }).value,
+  );
+});
+
+beforeEach(async () => {
+  const { database } = await import("#database/database.ts");
 
   for (const queue of queueRegistry.values()) {
     await queue.disconnect();

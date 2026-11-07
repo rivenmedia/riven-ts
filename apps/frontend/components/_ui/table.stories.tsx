@@ -1,4 +1,4 @@
-import { preview } from "@/.storybook/preview";
+import { preview } from "#.storybook/preview.tsx";
 import {
   Table,
   TableBody,
@@ -7,7 +7,7 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/_ui/table";
+} from "#components/_ui/table.tsx";
 
 const invoices = [
   {
@@ -36,9 +36,6 @@ const invoices = [
   },
 ];
 
-/**
- * Powerful table and datagrids built using TanStack Table.
- */
 const meta = preview.meta({
   title: "ui/Table",
   component: Table,

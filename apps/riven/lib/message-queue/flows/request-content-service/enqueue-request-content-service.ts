@@ -1,4 +1,5 @@
-import { flow } from "../producer.ts";
+import { flow } from "#message-queue/flows/producer.ts";
+
 import { createRequestContentServiceJob } from "./request-content-service.schema.ts";
 
 export async function enqueueRequestContentService(

@@ -3,10 +3,10 @@ import { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/sche
 import { UnrecoverableError } from "bullmq";
 import { z } from "zod";
 
-import { filterChildrenFailure } from "../../../../utilities/filter-children-failure.ts";
-import { filterChildrenValues } from "../../../../utilities/filter-children-values.ts";
+import { filterChildrenFailure } from "#message-queue/utilities/filter-children-failure.ts";
+import { filterChildrenValues } from "#message-queue/utilities/filter-children-values.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 export async function processStreamLinkResponse({
   job,

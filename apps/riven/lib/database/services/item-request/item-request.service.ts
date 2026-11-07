@@ -2,15 +2,18 @@ import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   CreateRequestContext,
+  EnsureRequestContext,
   Transactional,
 } from "@mikro-orm/decorators/legacy";
 
-import { BaseService } from "../core/base-service.ts";
+import { BaseService } from "#database/services/core/base-service.ts";
+
 import { persistRequestedMovie } from "./utilities/persist-requested-movie.ts";
 import { persistRequestedShow } from "./utilities/persist-requested-show.ts";
 
 import type { Ref } from "@mikro-orm/core";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
+import type { ExternalIds } from "@repo/util-plugin-sdk/schemas/external-ids.type";
 import type { UUID } from "node:crypto";
 
 export class ItemRequestService extends BaseService {
@@ -19,7 +22,7 @@ export class ItemRequestService extends BaseService {
   public async requestMovie(
     item: ContentServiceRequestedResponse["movies"][number],
   ) {
-    const { logger } = await import("../../../utilities/logger/logger.ts");
+    const { logger } = await import("#utilities/logger/logger.ts");
 
     const externalIds = [
       item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -36,7 +39,7 @@ export class ItemRequestService extends BaseService {
   public async requestShow(
     item: ContentServiceRequestedResponse["shows"][number],
   ) {
-    const { logger } = await import("../../../utilities/logger/logger.ts");
+    const { logger } = await import("#utilities/logger/logger.ts");
 
     const externalIds = [
       item.imdbId ? `IMDB: ${item.imdbId}` : null,
@@ -48,9 +51,26 @@ export class ItemRequestService extends BaseService {
     return persistRequestedShow(this.em, item);
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   public async getItemRequestById(id: UUID) {
     return this.em.findOneOrFail(ItemRequest, id);
+  }
+
+  @EnsureRequestContext()
+  public async getItemRequestByExternalIds({
+    tmdbId,
+    imdbId,
+    tvdbId,
+  }: ExternalIds) {
+    if (!tmdbId && !imdbId && !tvdbId) {
+      throw new Error("At least one external ID must be provided");
+    }
+
+    return this.em.findOne(ItemRequest, {
+      ...(tmdbId && { tmdbId }),
+      ...(imdbId && { imdbId }),
+      ...(tvdbId && { tvdbId }),
+    });
   }
 
   @CreateRequestContext()
@@ -67,7 +87,7 @@ export class ItemRequestService extends BaseService {
     return itemRequest;
   }
 
-  @CreateRequestContext()
+  @EnsureRequestContext()
   @Transactional()
   public async removeItemRequest(target: ItemRequest | Ref<ItemRequest>) {
     this.em.remove(target);

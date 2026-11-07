@@ -4,9 +4,9 @@ import assert from "node:assert";
 import path from "node:path";
 import z from "zod";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { MapItemsToFilesSandboxedJob } from "../map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 
 const VALID_FILE_EXTENSIONS = z.enum([

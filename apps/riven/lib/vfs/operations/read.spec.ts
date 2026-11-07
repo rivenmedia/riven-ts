@@ -2,22 +2,22 @@ import { Buffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
 import { expect, vi } from "vitest";
 
-import { it } from "../../__tests__/test-context.ts";
-import { config } from "../config.ts";
-import { chunkCache } from "../utilities/chunk-cache.ts";
-import { calculateFileChunks } from "../utilities/chunks/calculate-file-chunks.ts";
-import { createChunkCacheKey } from "../utilities/chunks/create-chunk-cache-key.ts";
+import { it } from "#__tests__/test-context.ts";
+import { config } from "#vfs/config.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+import { calculateFileChunks } from "#vfs/utilities/chunks/calculate-file-chunks.ts";
+import { createChunkCacheKey } from "#vfs/utilities/chunks/create-chunk-cache-key.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponsePromiseMap,
   fileNameToFileChunkCalculationsMap,
-} from "../utilities/file-handle-map.ts";
-import { createStreamRequest } from "../utilities/requests/create-stream-request.ts";
-import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
+} from "#vfs/utilities/file-handle-map.ts";
+import { createStreamRequest } from "#vfs/utilities/requests/create-stream-request.ts";
+import { withVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
-import type { VfsOperationContext } from "../utilities/vfs-operation-context.ts";
+import type { VfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 import type { MockAgent } from "undici";
 
 const fileName = "movie.mkv";

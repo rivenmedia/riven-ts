@@ -2,7 +2,7 @@ import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
 import { expect } from "vitest";
 
-import { it } from "../../../../__tests__/test-context.ts";
+import { it } from "#__tests__/test-context.ts";
 
 it.for([
   [StatusCodes.INTERNAL_SERVER_ERROR, false],

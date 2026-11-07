@@ -1,14 +1,18 @@
 "use client";
 
-import { Button } from "@/components/_ui/button";
-import { Input } from "@/components/_ui/input";
-import { Textarea } from "@/components/_ui/textarea";
-
 import { cva } from "class-variance-authority";
 import { cn } from "cn";
 
+import { Button } from "#components/_ui/button.tsx";
+import { Input } from "#components/_ui/input.tsx";
+import { Textarea } from "#components/_ui/textarea.tsx";
+
 import type { VariantProps } from "class-variance-authority";
 
+/**
+ * Input or textarea with inline addons such as icons, text, buttons or
+ * spinners.
+ */
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
   return (
     <div

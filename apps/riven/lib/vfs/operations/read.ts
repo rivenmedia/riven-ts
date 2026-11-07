@@ -1,27 +1,27 @@
 import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
 
-import { logger } from "../../utilities/logger/logger.ts";
-import { config } from "../config.ts";
-import { FuseError, isFuseError } from "../errors/fuse-error.ts";
-import { SeekDetectedError } from "../errors/seek-detected.ts";
-import { calculateChunkRange } from "../utilities/chunks/calculate-chunk-range.ts";
-import { fetchDiscreteByteRange } from "../utilities/chunks/fetch-discrete-byte-range.ts";
-import { detectReadType } from "../utilities/detect-read-type.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { config } from "#vfs/config.ts";
+import { FuseError, isFuseError } from "#vfs/errors/fuse-error.ts";
+import { SeekDetectedError } from "#vfs/errors/seek-detected.ts";
+import { calculateChunkRange } from "#vfs/utilities/chunks/calculate-chunk-range.ts";
+import { fetchDiscreteByteRange } from "#vfs/utilities/chunks/fetch-discrete-byte-range.ts";
+import { detectReadType } from "#vfs/utilities/detect-read-type.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToFileHandleMeta,
   fdToPreviousReadPositionMap,
   fdToResponsePromiseMap,
   fileNameToFileChunkCalculationsMap,
-} from "../utilities/file-handle-map.ts";
-import { performBodyRead } from "../utilities/read-types/perform-body-read.ts";
-import { performCacheHit } from "../utilities/read-types/perform-cache-hit.ts";
+} from "#vfs/utilities/file-handle-map.ts";
+import { performBodyRead } from "#vfs/utilities/read-types/perform-body-read.ts";
+import { performCacheHit } from "#vfs/utilities/read-types/perform-cache-hit.ts";
 import {
   getVfsOperationContext,
   withVfsOperationContext,
-} from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+} from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 

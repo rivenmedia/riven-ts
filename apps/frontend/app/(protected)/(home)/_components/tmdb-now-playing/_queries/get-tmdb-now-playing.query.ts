@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 import type {
   GetTmdbNowPlayingQuery,
   GetTmdbNowPlayingQueryVariables,
-} from "./get-tmdb-now-playing.query.typegen";
+} from "./get-tmdb-now-playing.query.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
 export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
@@ -20,11 +20,17 @@ export const GET_TMDB_NOW_PLAYING: TypedDocumentNode<
         id
         name
       }
+      seasonLabel
       releaseDate
       language
       voteAverage
       certification(locale: $locale)
-      logoUrl
+      logo(width: 500) {
+        aspectRatio
+        height
+        width
+        url
+      }
       ratings {
         tmdb {
           logo

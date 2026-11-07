@@ -1,5 +1,6 @@
 import { cn } from "cn";
 
+/** Styled text input. */
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
   return (
     <input

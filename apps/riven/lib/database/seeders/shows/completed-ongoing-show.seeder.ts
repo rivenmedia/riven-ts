@@ -1,6 +1,7 @@
 import assert from "node:assert";
 
-import { BaseSeeder } from "../base.seeder.ts";
+import { BaseSeeder } from "#database/seeders/base.seeder.ts";
+
 import { CompletedShowSeeder } from "./completed-show.seeder.ts";
 
 import type { ScrapedShowSeederContext } from "./scraped-show.seeder.ts";

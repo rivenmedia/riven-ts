@@ -1,10 +1,10 @@
 import Fuse from "@zkochan/fuse-native";
 
-import { services } from "../../database/database.ts";
-import { logger } from "../../utilities/logger/logger.ts";
-import { isFuseError } from "../errors/fuse-error.ts";
-import { withVfsOperationContext } from "../utilities/vfs-operation-context.ts";
-import { withVfsScope } from "../utilities/with-vfs-scope.ts";
+import { services } from "#database/database.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { isFuseError } from "#vfs/errors/fuse-error.ts";
+import { withVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
+import { withVfsScope } from "#vfs/utilities/with-vfs-scope.ts";
 
 import type { OPERATIONS } from "@zkochan/fuse-native";
 

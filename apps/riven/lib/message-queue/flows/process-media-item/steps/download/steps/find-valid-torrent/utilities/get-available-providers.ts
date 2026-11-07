@@ -2,11 +2,12 @@ import { DelayedError } from "bullmq";
 import { isEmptyObject } from "es-toolkit";
 import { DateTime } from "luxon";
 
-import { logger } from "../../../../../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
+
 import { formatReattemptTime } from "./format-reattempt-time.ts";
 import { getPluginProviderList } from "./get-plugin-provider-list.ts";
 
-import type { FindValidTorrentContext } from "../find-valid-torrent.processor.ts";
+import type { FindValidTorrentContext } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.processor.ts";
 
 /**
  * Gets the providers that should be attempted for a plugin, tracking any rate limited providers.

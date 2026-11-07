@@ -1,5 +1,6 @@
 import { cn } from "cn";
 
+/** Styled multi-line text input. */
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (
     <textarea

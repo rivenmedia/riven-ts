@@ -4,12 +4,12 @@ import { gql } from "@apollo/client";
 import chalk from "chalk";
 import assert, { AssertionError } from "node:assert";
 
-import { client } from "../../../../../graphql/apollo-client.ts";
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { settings } from "../../../../../utilities/settings.ts";
-import { MatchedFile } from "../../../../flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { client } from "#graphql/apollo-client.ts";
+import { MatchedFile } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
-import type { MapItemsToFilesSandboxedJob } from "../../map-items-to-files/map-items-to-files.schema.ts";
+import type { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 import type {
   GetValidateTorrentFilesEpisodeQuery,
   GetValidateTorrentFilesEpisodeQueryVariables,
@@ -23,8 +23,14 @@ export class InvalidTorrentError extends Error {
   public override name = "InvalidTorrentError";
 }
 
+/**
+ * Calculates the average bitrate of a file in kbps.
+ *
+ * @param fileSize The file size in bytes
+ * @param runtime The runtime in minutes
+ */
 function calculateAverageBitrate(fileSize: number, runtime: number) {
-  return fileSize / runtime / (1024 * 1024);
+  return (fileSize * 8) / (runtime * 60) / 1000;
 }
 
 const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
@@ -48,7 +54,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
       }
 
       ... on Episode {
-        tvdbId
         runtime
         lookupKeys
         number
@@ -59,7 +64,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Season {
         number
-        tvdbId
         episodes {
           lookupKeys
         }
@@ -67,7 +71,6 @@ const GET_VALIDATE_TORRENT_FILES_ITEM_QUERY: TypedDocumentNode<
 
       ... on Show {
         status
-        tvdbId
         seasons {
           totalEpisodes
           episodes {
@@ -98,6 +101,7 @@ const GET_VALIDATE_TORRENT_FILES_EPISODE_QUERY: TypedDocumentNode<
       season {
         number
       }
+      runtime
     }
   }
 `;
@@ -127,6 +131,7 @@ function getValidMovieFiles(
   groupMap: Map<string, TorrentFile>,
   isCacheCheck: boolean,
 ): MatchedFile[] {
+  const { scraping } = getRuntimeSettings().general;
   const files = groupMap
     .values()
     .toArray()
@@ -138,15 +143,28 @@ function getValidMovieFiles(
 
       assert.ok(parseData.type === "movie", "File must be a movie");
 
-      if (item.runtime && settings.minimumAverageBitrateMovies) {
+      if (
+        item.runtime &&
+        (scraping.minimumAverageBitrateMovies ||
+          scraping.maximumAverageBitrateMovies)
+      ) {
         const bitrate = calculateAverageBitrate(file.size, item.runtime);
 
-        // TODO: If this assertion fails, we can probably skip checking all other files.
-        // Average bitrate is proportional to the file size, and the files are ordered by size.
-        assert.ok(
-          bitrate >= settings.minimumAverageBitrateMovies,
-          `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateMovies.toString()} for movies`,
-        );
+        if (scraping.minimumAverageBitrateMovies) {
+          // TODO: If this assertion fails, we can probably skip checking all other files.
+          // Average bitrate is proportional to the file size, and the files are ordered by size.
+          assert.ok(
+            bitrate >= scraping.minimumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${scraping.minimumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
+
+        if (scraping.maximumAverageBitrateMovies) {
+          assert.ok(
+            bitrate <= scraping.maximumAverageBitrateMovies,
+            `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${scraping.maximumAverageBitrateMovies.toString()} for movies`,
+          );
+        }
       }
 
       return [
@@ -189,6 +207,7 @@ async function getMatchedEpisodeId(
   item: ShowLikeValidateTorrentFilesItem,
   file: TorrentFile,
 ) {
+  const { scraping } = getRuntimeSettings().general;
   const parseData = parseFilePath(file.path);
 
   assert.ok(
@@ -230,13 +249,26 @@ async function getMatchedEpisodeId(
         episode.season.number === item.season.number,
       `Incorrect episode for ${item.fullTitle}`,
     );
+  }
 
-    if (item.runtime && settings.minimumAverageBitrateEpisodes) {
-      const bitrate = calculateAverageBitrate(file.size, item.runtime);
+  if (
+    episode.runtime &&
+    (scraping.minimumAverageBitrateEpisodes ||
+      scraping.maximumAverageBitrateEpisodes)
+  ) {
+    const bitrate = calculateAverageBitrate(file.size, episode.runtime);
 
+    if (scraping.minimumAverageBitrateEpisodes) {
       assert.ok(
-        bitrate >= settings.minimumAverageBitrateEpisodes,
-        `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${settings.minimumAverageBitrateEpisodes.toString()} for episodes`,
+        bitrate >= scraping.minimumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, under the configured minimum bitrate of ${scraping.minimumAverageBitrateEpisodes.toString()} for episodes`,
+      );
+    }
+
+    if (scraping.maximumAverageBitrateEpisodes) {
+      assert.ok(
+        bitrate <= scraping.maximumAverageBitrateEpisodes,
+        `File bitrate is ${bitrate.toString()}, over the configured maximum bitrate of ${scraping.maximumAverageBitrateEpisodes.toString()} for episodes`,
       );
     }
   }

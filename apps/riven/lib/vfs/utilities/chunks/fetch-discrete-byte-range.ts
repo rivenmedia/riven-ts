@@ -1,11 +1,12 @@
 import { Buffer } from "node:buffer";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { chunkCache } from "../chunk-cache.ts";
-import { createStreamRequest } from "../requests/create-stream-request.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+import { createStreamRequest } from "#vfs/utilities/requests/create-stream-request.ts";
+
 import { createChunkCacheKey } from "./create-chunk-cache-key.ts";
 
-import type { MediaFileHandleMetadata } from "../file-handle-map.ts";
+import type { MediaFileHandleMetadata } from "#vfs/utilities/file-handle-map.ts";
 
 export const fetchDiscreteByteRange = async (
   fileHandle: MediaFileHandleMetadata,

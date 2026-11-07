@@ -32,9 +32,7 @@ export const it = baseIt
       });
     }
 
-    server.listen({
-      onUnhandledRequest: "error",
-    });
+    server.listen({ onUnhandledFrame: "error" });
 
     onCleanup(() => {
       server.close();
@@ -52,10 +50,20 @@ export const it = baseIt
     createMockPluginSettings(plugin.settingsSchema, {}),
   )
   .extend("gqlServer", { scope: "file" }, async ({ plugin }, { onCleanup }) => {
+    const [firstResolver, ...otherResolvers] = plugin.resolvers;
+
+    if (!firstResolver) {
+      throw new Error(
+        `Plugin "${plugin.name.description ?? "unknown"}" does not register any resolvers, so there is no GraphQL schema to test against. Only use the \`gqlServer\` fixture in plugins that register at least one resolver.`,
+      );
+    }
+
     const { buildMockServer } =
       await import("@repo/core-util-mock-graphql-server");
 
-    const mockServer = await buildMockServer<GraphQLContext>(plugin.resolvers);
+    const mockServer = await buildMockServer<GraphQLContext>({
+      resolvers: [firstResolver, ...otherResolvers],
+    });
 
     await mockServer.start();
 

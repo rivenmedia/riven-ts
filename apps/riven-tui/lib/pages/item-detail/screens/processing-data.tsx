@@ -2,11 +2,11 @@ import { useSuspenseQuery } from "@apollo/client/react";
 import { Box, Text } from "ink";
 import { DateTime } from "luxon";
 
-import { useRefetch } from "../../../hooks/use-refetch.ts";
-import { DetailRow } from "../components/detail-row.tsx";
-import { useItemId } from "../hooks/use-item-id.ts";
-import { GET_MEDIA_ITEM_PROCESSING_DATA } from "../queries/get-media-item-processing-data.query.ts";
-import { formatDate } from "../utilities/format-date.ts";
+import { useRefetch } from "#hooks/use-refetch.ts";
+import { DetailRow } from "#pages/item-detail/components/detail-row.tsx";
+import { useItemId } from "#pages/item-detail/hooks/use-item-id.ts";
+import { GET_MEDIA_ITEM_PROCESSING_DATA } from "#pages/item-detail/queries/get-media-item-processing-data.query.ts";
+import { formatDate } from "#pages/item-detail/utilities/format-date.ts";
 
 export function ItemDetailProcessingDataScreen() {
   const itemId = useItemId();

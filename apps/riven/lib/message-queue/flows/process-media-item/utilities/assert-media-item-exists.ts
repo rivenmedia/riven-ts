@@ -1,7 +1,7 @@
 import { NotFoundError } from "@mikro-orm/core";
 import { UnrecoverableError } from "bullmq";
 
-import type { MediaItemService } from "../../../../database/services/media-item/media-item.service.ts";
+import type { MediaItemService } from "#database/services/media-item/media-item.service.ts";
 import type { UUID } from "node:crypto";
 
 export async function assertMediaItemExists(

@@ -122,11 +122,6 @@ export abstract class FileSystemEntry {
     const mediaItem = this.mediaItem.getEntity();
     const pathParts = await getMediaItemPathParts(mediaItem);
 
-    // Remove periods from path parts to avoid directories being parsed as files
-    const sanitisedPathParts = pathParts.map((part) =>
-      part.replaceAll(".", ""),
-    );
-
-    this.path = path.join(...sanitisedPathParts, await this.getVfsFileName());
+    this.path = path.join(...pathParts, await this.getVfsFileName());
   }
 }

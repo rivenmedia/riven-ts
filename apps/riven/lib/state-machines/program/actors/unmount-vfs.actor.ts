@@ -1,7 +1,7 @@
 import { getGlobalDispatcher } from "undici";
 import { fromPromise } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
 import type Fuse from "@zkochan/fuse-native";
 

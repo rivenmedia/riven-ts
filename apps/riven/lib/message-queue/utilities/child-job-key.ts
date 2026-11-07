@@ -1,7 +1,7 @@
 import { queueNameFor } from "./queue-name-for.ts";
 
-import type { Flow } from "../flows/index.ts";
-import type { SandboxedJobDefinition } from "../sandboxed-jobs/index.ts";
+import type { Flow } from "#message-queue/flows/index.ts";
+import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 
 /**

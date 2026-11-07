@@ -8,6 +8,7 @@ const supportedExtensions = new Set<`.${string}`>([
   ".wmv",
   ".flv",
   ".webm",
+  ".srt",
 ]);
 
 export const isSupportedExtension = (pathString: string) => {

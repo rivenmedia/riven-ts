@@ -1,10 +1,10 @@
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 
-import { logger } from "../../../../../utilities/logger/logger.ts";
-import { enqueueProcessMediaItem } from "../../../process-media-item/enqueue-process-media-item.ts";
+import { enqueueProcessMediaItem } from "#message-queue/flows/process-media-item/enqueue-process-media-item.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { StepContext } from "../../request-stream-link.processor.ts";
+import type { StepContext } from "#message-queue/flows/request-stream-link/request-stream-link.processor.ts";
 
 export async function blacklistStream({
   mediaEntry,

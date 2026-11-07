@@ -1,12 +1,12 @@
 import { request } from "undici";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { config } from "../../config.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { config } from "#vfs/config.ts";
 import {
   fdToCurrentStreamPositionMap,
   fdToResponsePromiseMap,
-} from "../file-handle-map.ts";
-import { getVfsOperationContext } from "../vfs-operation-context.ts";
+} from "#vfs/utilities/file-handle-map.ts";
+import { getVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
 export async function createStreamRequest(
   url: string,

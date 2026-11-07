@@ -1,9 +1,8 @@
-import { preview } from "@/.storybook/preview";
-
 import { INITIAL_VIEWPORTS } from "storybook/viewport";
 
-import { NotificationsProvider } from "../providers/notifications-provider";
-import { MobileNav } from "./mobile-nav";
+import { preview } from "#.storybook/preview.tsx";
+import { MobileNav } from "#components/mobile-nav/mobile-nav.tsx";
+import { NotificationsProvider } from "#components/providers/notifications-provider.tsx";
 
 const meta = preview.meta({
   title: "Components / MobileNav",

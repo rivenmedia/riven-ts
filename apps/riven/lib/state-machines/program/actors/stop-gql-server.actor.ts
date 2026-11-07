@@ -1,8 +1,8 @@
 import { fromPromise } from "xstate";
 
-import { logger } from "../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { ApolloServerContext } from "../../../graphql/context.ts";
+import type { ApolloServerContext } from "#graphql/context.ts";
 import type { ApolloServer } from "@apollo/server";
 
 export const stopGqlServer = fromPromise<

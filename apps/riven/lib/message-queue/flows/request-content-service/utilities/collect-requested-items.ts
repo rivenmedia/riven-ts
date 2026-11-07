@@ -1,6 +1,6 @@
-import { logger } from "../../../../utilities/logger/logger.ts";
+import { logger } from "#utilities/logger/logger.ts";
 
-import type { RequestedItem } from "../request-content-service.processor.ts";
+import type { RequestedItem } from "#message-queue/flows/request-content-service/request-content-service.processor.ts";
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
 function buildExternalIdKey(

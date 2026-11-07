@@ -39,11 +39,21 @@ export default {
     "@graphql-typed-document-node/*",
     "(?!-)vscode(?!-)", // Ignore VSCode packages - these tend to be used by editors and not the program
   ],
+  ignoreIssues: {
+    // `wiki.config.ts` is exposed through each package's `exports` for the wiki
+    // app, so `--strict` treats it as production code. It only runs when the
+    // docs are built, so `@repo/util-wiki-helpers` is deliberately a
+    // devDependency, keeping its Next.js/Vite tree out of production installs.
+    "**/wiki.config.ts": ["unlisted"],
+  },
   workspaces: {
     ".": {
       entry: [".husky/install.mjs", "turbo/generators/config.ts!"],
       project: ["turbo/**/*.ts"],
       ignoreBinaries: ["tail", "jq"],
+      ignoreDependencies: [
+        "@vitest/browser", // `@vitest/browser` is installed at the root so Wallaby can resolve and patch it - it's never imported.
+      ],
     },
     "apps/wiki": {
       entry: [

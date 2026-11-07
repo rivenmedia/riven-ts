@@ -7,7 +7,7 @@ import {
 
 import { getVfsSubtitleEntry } from "./get-vfs-subtitle-entry.ts";
 
-import type { PathInfo } from "../schemas/path-info.schema.ts";
+import type { PathInfo } from "#database/services/vfs/schemas/path-info.schema.ts";
 import type { EntityManager } from "@mikro-orm/core";
 
 export async function getEntry(em: EntityManager, pathInfo: PathInfo) {

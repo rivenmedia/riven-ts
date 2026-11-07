@@ -1,7 +1,7 @@
 import { UnrecoverableError } from "bullmq";
 import chalk from "chalk";
 
-import type { ProcessMediaItemJob } from "../../process-media-item.processor.ts";
+import type { ProcessMediaItemJob } from "#message-queue/flows/process-media-item/process-media-item.processor.ts";
 
 export async function assertScrapeSucceeded(job: ProcessMediaItemJob) {
   const { ignored = 0 } = await job.getDependenciesCount({

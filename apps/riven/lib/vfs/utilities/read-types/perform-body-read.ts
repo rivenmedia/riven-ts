@@ -4,15 +4,15 @@ import Fuse from "@zkochan/fuse-native";
 import assert from "node:assert";
 import { Buffer } from "node:buffer";
 
-import { logger } from "../../../utilities/logger/logger.ts";
-import { FuseError } from "../../errors/fuse-error.ts";
-import { chunkCache } from "../chunk-cache.ts";
-import { waitForChunk } from "../chunks/wait-for-chunk.ts";
-import { createStreamRequest } from "../requests/create-stream-request.ts";
-import { seek } from "../seek.ts";
-import { getVfsOperationContext } from "../vfs-operation-context.ts";
+import { logger } from "#utilities/logger/logger.ts";
+import { FuseError } from "#vfs/errors/fuse-error.ts";
+import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
+import { waitForChunk } from "#vfs/utilities/chunks/wait-for-chunk.ts";
+import { createStreamRequest } from "#vfs/utilities/requests/create-stream-request.ts";
+import { seek } from "#vfs/utilities/seek.ts";
+import { getVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
-import type { ChunkMetadata } from "../../schemas/chunk.schema.ts";
+import type { ChunkMetadata } from "#vfs/schemas/chunk.schema.ts";
 
 /**
  * Performs a body read for the given file descriptor and chunks.

@@ -1,11 +1,11 @@
-import { preview } from "@/.storybook/preview";
+import { expect, userEvent, within } from "storybook/test";
+
+import { preview } from "#.storybook/preview.tsx";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
-} from "@/components/_ui/popover";
-
-import { expect, userEvent, within } from "storybook/test";
+} from "#components/_ui/popover.tsx";
 
 /**
  * Displays rich content in a portal, triggered by a button.

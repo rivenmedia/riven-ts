@@ -3,51 +3,35 @@ import { Film, Tv } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
 
-import { getTypeStyle } from "../utilities/get-type-style";
+import { getTypeStyle } from "#components/calendar/utilities/get-type-style.ts";
 
-import type { EntertainmentItemData } from "../types";
+import type { EntertainmentItemData } from "#components/calendar/types.d.ts";
 
-function formatEpisodeLabel({ season, episode }: EntertainmentItemData) {
-  if (!season) {
-    return "";
-  }
-
-  const episodeLabel = episode ? `E${episode.toString()}` : "";
-
-  return ` S${season.toString()}${episodeLabel}`;
-}
-
-function itemUrl(item: EntertainmentItemData) {
-  switch (item.itemType) {
-    case "movie": {
-      // For movies, prefer TMDB ID
-      if (item.tmdbId) {
-        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
-      }
-
-      if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}?indexer=tvdb` as const;
-      }
-
-      break;
+function buildItemPath(item: EntertainmentItemData) {
+  switch (item.type) {
+    case "movie":
+    case "show": {
+      return `/details/media/${item.type}/${item.primaryExternalId}` as const;
     }
-    case "show":
-    case "season":
+    case "season": {
+      if (!item.number) {
+        throw new Error("Season number is required for season items");
+      }
+
+      return `/details/media/show/${item.primaryExternalId}/seasons/${item.number.toString()}` as const;
+    }
     case "episode": {
-      // For TV items, prefer TVDB ID to skip TMDB→TVDB resolution
-      if (item.tvdbId) {
-        return `/details/media/${item.itemType}/${item.tvdbId}/?indexer=tvdb` as const;
+      if (!item.seasonNumber) {
+        throw new Error("Season number is required for episode items");
       }
 
-      if (item.tmdbId) {
-        return `/details/media/${item.itemType}/${item.tmdbId}` as const;
+      if (!item.number) {
+        throw new Error("Episode number is required for episode items");
       }
 
-      break;
+      return `/details/media/show/${item.primaryExternalId}/seasons/${item.seasonNumber.toString()}/episodes/${item.number.toString()}` as const;
     }
   }
-
-  return undefined;
 }
 
 export interface EntertainmentItemProps {
@@ -55,15 +39,19 @@ export interface EntertainmentItemProps {
   compact?: boolean;
 }
 
+/**
+ * One calendar release (movie, show, season or episode), styled by type, with a
+ * compact variant.
+ */
 export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
-  const style = getTypeStyle(item.itemType);
+  const style = getTypeStyle(item.type);
 
   function renderIcon(size = 4) {
     z.int("EntertainmentItem size must be an integer").parse(size);
 
     const cls = `h-${size.toFixed(0)} w-${size.toFixed(0)} shrink-0 ${style.icon}`;
 
-    if (item.itemType === "movie") {
+    if (item.type === "movie") {
       return <Film className={cls} />;
     }
     return <Tv className={cls} />;
@@ -80,56 +68,36 @@ export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
               compact ? "truncate font-medium" : "font-semibold",
             )}
           >
-            {item.showTitle}{" "}
-            {item.season && compact && (
-              <>
-                S{item.season}
-                {item.episode && <>E{item.episode}</>}
-              </>
-            )}
+            {item.fullTitle}
           </div>
-          {item.season && item.episode && !compact && (
-            <div className="text-muted-foreground text-xs">
-              Season {item.season}
-              {item.episode && `, Episode ${item.episode.toString()}`}
-            </div>
-          )}
+          {item.type === "episode" &&
+            item.seasonNumber &&
+            item.number &&
+            !compact && (
+              <div className="text-muted-foreground text-xs">
+                Season {item.seasonNumber}
+                {item.number && `, Episode ${item.number.toString()}`}
+              </div>
+            )}
         </div>
       </>
     );
   }
 
-  const href = itemUrl(item);
-
   const classes = cn(
     "group/item flex items-center rounded-md border transition-colors",
     compact ? "gap-1.5 truncate px-2 py-1" : "gap-3 p-2.5",
     style.item,
-    item.lastState === "Completed" && "line-through opacity-60",
-    href && "no-underline",
+    item.state === "completed" && "line-through opacity-60",
+    "no-underline",
   );
 
-  const title = compact
-    ? `${item.showTitle} ${formatEpisodeLabel(item)}`
-    : undefined;
-
-  if (href) {
-    return (
-      <Link href={href} className={classes} title={title}>
-        {compact && (
-          <span className={cn("size-1.5 shrink-0 rounded-full", style.dot)} />
-        )}
-        {renderContent()}
-      </Link>
-    );
-  }
-
   return (
-    <div className={classes} title={title}>
+    <Link href={buildItemPath(item)} className={classes} title={item.fullTitle}>
       {compact && (
         <span className={cn("size-1.5 shrink-0 rounded-full", style.dot)} />
       )}
       {renderContent()}
-    </div>
+    </Link>
   );
 }

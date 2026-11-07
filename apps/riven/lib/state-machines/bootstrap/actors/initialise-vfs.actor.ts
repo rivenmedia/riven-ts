@@ -3,8 +3,8 @@ import dedent from "dedent";
 import { stat } from "node:fs/promises";
 import { fromPromise } from "xstate";
 
-import { settings } from "../../../utilities/settings.ts";
-import { fuseOperations } from "../../../vfs/index.ts";
+import { settings } from "#utilities/settings.ts";
+import { fuseOperations } from "#vfs/index.ts";
 
 export interface InitialiseVfsOutput {
   vfs: Fuse;

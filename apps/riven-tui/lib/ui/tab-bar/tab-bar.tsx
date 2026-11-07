@@ -2,7 +2,7 @@ import { Text } from "ink";
 import { Tab, Tabs } from "ink-tab";
 import { useLocation } from "react-router";
 
-import { useActionsMenuContext } from "../actions-menu/actions-menu-context.tsx";
+import { useActionsMenuContext } from "#ui/actions-menu/actions-menu-context.tsx";
 
 interface TabData {
   label: string;
