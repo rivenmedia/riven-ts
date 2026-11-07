@@ -1,3 +1,4 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import {
   Episode,
   ItemRequest,
@@ -21,6 +22,7 @@ import assert from "node:assert";
 import {
   Arg,
   Args,
+  Authorized,
   Ctx,
   FieldResolver,
   ID,
@@ -49,6 +51,7 @@ const MediaItemCursor = createCursorType<MediaItem>(
 
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
+  @Authorized()
   @Subscription(() => MediaItemUnion, {
     description:
       "Emits the media item for the given ID whenever its state changes.",
@@ -67,6 +70,7 @@ export class MediaItemResolver {
     return em.fork().findOneOrFail(MediaItem, mediaItemId);
   }
 
+  @Authorized()
   @Query(() => MediaItemUnion, {
     description:
       "Fetches a media item by its ID. The returned type will be one of the specific media item types (e.g., Movie, Episode) based on the underlying data.",
@@ -78,6 +82,7 @@ export class MediaItemResolver {
     return services.mediaItemService.getMediaItemById(id);
   }
 
+  @Authorized()
   @Query(() => MediaItemCursor)
   public async mediaItems(
     @Arg("search", () => String, { nullable: true })
@@ -108,6 +113,7 @@ export class MediaItemResolver {
     });
   }
 
+  @Authorized()
   @Query(() => Int)
   public async mediaItemsCount(
     @Arg("type", () => [MediaItemType.enum], {
@@ -121,11 +127,13 @@ export class MediaItemResolver {
     });
   }
 
+  @Authorized()
   @Query(() => [MediaItemUnion])
   public recentlyAdded() {
     return [];
   }
 
+  @RequirePermissions({ item: ["reset"] })
   @Mutation(() => [MediaItemUnion])
   public async resetMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -156,6 +164,7 @@ export class MediaItemResolver {
     return [...resetItems];
   }
 
+  @RequirePermissions({ item: ["retry"] })
   @Mutation(() => MediaItemUnion)
   public retryMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -166,6 +175,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions({ item: ["pause"] })
   @Mutation(() => MediaItemUnion)
   public pauseMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -176,6 +186,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions({ item: ["resume"] })
   @Mutation(() => MediaItemUnion)
   public resumeMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -186,6 +197,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions({ item: ["reset"] })
   @Mutation(() => Boolean)
   public async blacklistActiveStream(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,

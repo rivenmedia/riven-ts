@@ -1,3 +1,4 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { Arg, ID, Mutation, Resolver } from "type-graphql";
@@ -8,6 +9,7 @@ import type { UUID } from "node:crypto";
 
 @Resolver(() => MediaEntry)
 export class MediaEntryResolver {
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => MediaEntry)
   public async saveStreamUrl(
     @CoreContext() { em }: CoreContext,

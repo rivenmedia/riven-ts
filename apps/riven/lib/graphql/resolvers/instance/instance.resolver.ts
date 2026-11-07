@@ -1,9 +1,10 @@
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 
 import { InstanceStatus } from "./types/instance-status.type.ts";
 
+@Authorized()
 @Resolver()
 export class InstanceResolver {
   @Query(() => InstanceStatus)
