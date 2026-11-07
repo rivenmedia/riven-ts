@@ -28,7 +28,7 @@ Go to **Settings → Notifications → Webhook** and turn the agent on.
 
 ### Set the webhook URL
 
-Point it at Riven's GraphQL endpoint, e.g. `http://riven:3000`.
+Point it at Riven's GraphQL endpoint, e.g. `http://riven:3000/graphql`.
 
 Riven never sets this for you. Make sure the API is actually reachable from
 Seerr — if Riven runs in Docker, that requires
@@ -145,7 +145,7 @@ the Seerr container:
 
 ```bash
 docker compose exec seerr wget -qO- --post-data '{"query":"{ __typename }"}' \
-  --header 'content-type: application/json' http://riven:3000
+  --header 'content-type: application/json' http://riven:3000/graphql
 ```
 
 **`UNAUTHENTICATED`** in Seerr's webhook response. The **Authorization Header**
