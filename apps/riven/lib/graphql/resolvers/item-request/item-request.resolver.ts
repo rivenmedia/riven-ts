@@ -1,5 +1,6 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
+import path from "node:path";
 import {
   Arg,
   Args,
@@ -16,6 +17,7 @@ import { ExternalIdsArgs } from "#graphql/args/external-ids.args.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 import { getExternalIdTopics } from "#graphql/pubsub.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
+import { invalidateAttrCache } from "#vfs/utilities/invalidate-attr-cache.ts";
 
 import { RequestItemInput } from "./inputs/request-item.input.ts";
 

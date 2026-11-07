@@ -1,4 +1,5 @@
 import { gql } from "@apollo/client";
+import path from "node:path";
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
@@ -36,8 +37,8 @@ it("fires a riven.media-item.removed event with the movie's directory", async ({
   expect.assert(mediaEntry);
 
   const { body } = await gqlServer.executeOperation<
-    RemoveItemRequestMutation,
-    RemoveItemRequestMutationVariables
+    ItemRequestResolverSpecRemoveItemRequestMutation,
+    ItemRequestResolverSpecRemoveItemRequestMutationVariables
   >(
     {
       query: REMOVE_ITEM_REQUEST,
@@ -67,8 +68,8 @@ it("fires a riven.media-item.removed event with the show's directory", async ({
   expect.assert(mediaEntry);
 
   const { body } = await gqlServer.executeOperation<
-    RemoveItemRequestMutation,
-    RemoveItemRequestMutationVariables
+    ItemRequestResolverSpecRemoveItemRequestMutation,
+    ItemRequestResolverSpecRemoveItemRequestMutationVariables
   >(
     {
       query: REMOVE_ITEM_REQUEST,
@@ -102,8 +103,8 @@ it("clears the cached VFS attributes of the removed item", async ({
   attrCache.set(moviePath, { size: 1 });
 
   const { body } = await gqlServer.executeOperation<
-    RemoveItemRequestMutation,
-    RemoveItemRequestMutationVariables
+    ItemRequestResolverSpecRemoveItemRequestMutation,
+    ItemRequestResolverSpecRemoveItemRequestMutationVariables
   >(
     {
       query: REMOVE_ITEM_REQUEST,
@@ -125,8 +126,8 @@ it("does not fire a riven.media-item.removed event if the item has no media entr
   gqlServer,
 }) => {
   const { body } = await gqlServer.executeOperation<
-    RemoveItemRequestMutation,
-    RemoveItemRequestMutationVariables
+    ItemRequestResolverSpecRemoveItemRequestMutation,
+    ItemRequestResolverSpecRemoveItemRequestMutationVariables
   >(
     {
       query: REMOVE_ITEM_REQUEST,
