@@ -38,6 +38,18 @@ Seerr — if Riven runs in Docker, that requires
 </Step>
 <Step>
 
+### Set the authorization header
+
+Set **Authorization Header** to `Bearer <your RIVEN_SETTING__apiKey>`. Without
+it, Riven rejects the webhook.
+
+`RIVEN_SETTING__apiKey` must be set on Riven. If it is unset, Riven generates a
+new key on every start, and Seerr cannot know it. Riven never sets this header
+for you, and autofix keeps the value you enter.
+
+</Step>
+<Step>
+
 ### Enable autofix and restart Riven
 
 ```bash
@@ -66,7 +78,8 @@ RIVEN_PLUGIN_SETTING__REPO_PLUGIN_SEERR__updateIntervalSeconds=null
 ## Configuring it manually
 
 If you would rather not grant Riven write access to your Seerr settings, leave
-`autofixWebhookBody` off and configure the agent yourself.
+`autofixWebhookBody` off and configure the agent yourself. Set the webhook URL
+and the **Authorization Header** as in the steps above.
 
 Enable these two notification types, and **only** these two:
 
@@ -134,6 +147,9 @@ the Seerr container:
 docker compose exec seerr wget -qO- --post-data '{"query":"{ __typename }"}' \
   --header 'content-type: application/json' http://riven:3000
 ```
+
+**`UNAUTHENTICATED`** in Seerr's webhook response. The **Authorization Header**
+is missing, or its key does not match `RIVEN_SETTING__apiKey`.
 
 **`Received unsupported Seerr notification type`** — an extra notification type
 is enabled in Seerr. Harmless; turn it off to quiet the log.
