@@ -26,7 +26,6 @@
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "@vitest/coverage-v8": "catalog:vitest",
-    "glob": "catalog:",
     "nyc": "catalog:",
     "oxlint": "catalog:",
     "typescript": "catalog:",
