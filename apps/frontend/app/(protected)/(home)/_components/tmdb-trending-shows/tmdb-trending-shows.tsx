@@ -5,7 +5,7 @@ import { TrendingTimeWindowSection } from "#app/(protected)/(home)/_components/t
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
 import { ListCarousel } from "#components/list-carousel/list-carousel.tsx";
-import { query } from "#lib/graphql/client.ts";
+import { query } from "#lib/graphql/service-client.ts";
 
 import { GET_TMDB_TRENDING_SHOWS } from "./_queries/get-tmdb-trending-shows.ts";
 

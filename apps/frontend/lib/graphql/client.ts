@@ -6,31 +6,14 @@ import {
 } from "@apollo/client-integration-nextjs";
 import { SetContextLink } from "@apollo/client/link/context";
 import { getSessionCookie } from "better-auth/cookies";
-import { cacheTag } from "next/cache";
 import { cookies } from "next/headers";
 
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
 import { isUnavailableCookieStoreError } from "#lib/auth/plugins/next-cookies.ts";
 
-/**
- * Calling `cookies()` inside `"use cache"` stops Next.js storing the entry, even when the error is caught.
- * `cacheTag()` throws only outside such a scope, so it tells the two apart without touching the request.
- */
-function isInCacheScope() {
-  try {
-    cacheTag();
-
-    return true;
-  } catch {
-    return false;
-  }
-}
+import { cacheOptions } from "./cache-options.ts";
 
 async function readSessionToken() {
-  if (isInCacheScope()) {
-    return null;
-  }
-
   try {
     const cookieStore = await cookies();
 
@@ -63,17 +46,7 @@ const sessionTokenLink = new SetContextLink(
 export const { getClient, query, PreloadQuery } = registerApolloClient(
   () =>
     new ApolloClient({
-      cache: new InMemoryCache({
-        possibleTypes: {
-          MediaItem: ["Movie", "Show", "Season", "Episode"],
-          ShowLikeMediaItem: ["Show", "Season", "Episode"],
-        },
-        typePolicies: {
-          TmdbIndexerData: {
-            keyFields: ["type", "id"],
-          },
-        },
-      }),
+      cache: new InMemoryCache(cacheOptions),
       link: ApolloLink.from([
         sessionTokenLink,
         new HttpLink({

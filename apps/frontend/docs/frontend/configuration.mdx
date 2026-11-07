@@ -9,11 +9,12 @@ accounts and sessions.
 
 ## Frontend container
 
-| Variable      | Description                                                                             | Default                  |
-| ------------- | --------------------------------------------------------------------------------------- | ------------------------ |
-| `ORIGIN`      | The URL you open the frontend at. Must match `RIVEN_FRONTEND_SETTING__origin` on Riven. | `https://localhost:9000` |
-| `BACKEND_URL` | Where the frontend reaches Riven's API. In Docker Compose, use the service name.        | `http://localhost:3000`  |
-| `PORT`        | The port the frontend listens on inside the container.                                  | `9000`                   |
+| Variable          | Description                                                                                                                                                                        | Default                  |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `ORIGIN`          | The URL you open the frontend at. Must match `RIVEN_FRONTEND_SETTING__origin` on Riven.                                                                                            | `https://localhost:9000` |
+| `BACKEND_URL`     | Where the frontend reaches Riven's API. In Docker Compose, use the service name.                                                                                                   | `http://localhost:3000`  |
+| `BACKEND_API_KEY` | Riven's API key. Must equal `RIVEN_SETTING__apiKey` on Riven. The frontend sends it for data that every user shares, such as TMDB trending lists, and those pages fail without it. | None                     |
+| `PORT`            | The port the frontend listens on inside the container.                                                                                                                             | `9000`                   |
 
 Both URLs are validated when the frontend loads them, so a typo shows up as a
 validation error rather than failed requests.
