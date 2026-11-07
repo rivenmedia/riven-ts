@@ -55,6 +55,22 @@ allowBuilds:
   sharp: true
 blockExoticSubdeps: false
 overrides:
+  "@faker-js/faker@<=10.4.0": ^10.5.0
+  "@graphql-tools/utils@<=12.0.0": ^12.0.1
+  "@graphql-tools/utils@>=10.10.1 <=12.0.1": ^12.0.2
+  "@opentelemetry/core@<2.8.0": ^2.8.0
+  "@opentelemetry/instrumentation-knex@<0.65.0": ^0.65.0
+  "@opentelemetry/instrumentation-mongoose@<0.67.0": ^0.67.0
+  "@opentelemetry/instrumentation-mysql2@<0.67.0": ^0.67.0
+  "@opentelemetry/instrumentation-mysql@<0.67.0": ^0.67.0
+  "@opentelemetry/instrumentation-pg@<0.73.0": ^0.73.0
+  "@opentelemetry/instrumentation-tedious@<0.40.0": ^0.40.0
+  glob@>=9.0.0 <=14.0.1: ^14.0.2
+  "graphql-scalars": "catalog:"
+  minimatch@<3.1.4: ^3.1.4
+  minimatch@>=7.0.0 <11.0.1: ^11.0.1
+  uuid@<11.1.1: ^11.1.1
+  ws@>=8.0.0 <8.21.0: ^8.21.0
   zod: "catalog:"
 catalog:
   "@apollo/cache-control-types": ^1.0.3
@@ -74,7 +90,7 @@ catalog:
   "@commitlint/types": ^21.0.1
   "@elastic/ecs-winston-format": ^1.5.3
   "@eslint/json": ^0.14.0
-  "@faker-js/faker": 10.1.0
+  "@faker-js/faker": ^10.1.0
   "@graphql-codegen/cli": ^6.3.1
   "@graphql-codegen/near-operation-file-preset": ^4.0.0
   "@graphql-codegen/typescript": ^5.0.10
@@ -167,10 +183,9 @@ catalog:
   fumadocs-core: ^16.8.12
   fumadocs-mdx: ^14.3.2
   fumadocs-ui: ^16.8.12
-  glob: ^13.0.6
   globals: ^17.6.0
   graphql: 16.14.0
-  graphql-scalars: ^1.25.0
+  graphql-scalars: ^2.0.1
   graphql-ws: ^6.4.1
   http-status-codes: ^2.3.0
   husky: ^9.1.7
@@ -197,7 +212,7 @@ catalog:
   next: ^16.3.6
   next-safe-action: ^8.5.5
   nyc: ^18.0.0
-  oxfmt: ^0.59.0
+  oxfmt: ^0.75.0
   oxlint: ^1.74.0
   oxlint-tsgolint: ^0.25.0
   playwright: ^1.61.1
@@ -215,7 +230,7 @@ catalog:
   react-router: ^8.3.0
   react-use: ^17.6.1
   recharts: ^3.10.1
-  redis-memory-server: ^0.16.1
+  redis-memory-server: ^0.17.1
   reflect-metadata: 0.2.2
   rxjs: ^7.8.2
   schema-dts: ^1.1.5
@@ -244,3 +259,6 @@ catalog:
   zod: ^4.4.3
   zod-validation-error: ^5.0.0
   zod2md: ^0.2.5
+auditConfig:
+  ignoreGhsas:
+    - GHSA-gcqx-w48m-w2h4
