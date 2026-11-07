@@ -5,19 +5,25 @@ import { AuthenticationError } from "type-graphql";
 import { CoreKey } from "#graphql/context.ts";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
-import type { Principal } from "./principal.ts";
 import type { Permissions } from "@repo/util-auth/access-control";
 import type { AuthCheckerFn } from "type-graphql";
 
 /**
- * Whether `principal` may resolve a field that requires every statement in `required`.
+ * Whether the caller may resolve a field that requires every statement in `required`.
  *
  * An empty list only requires a signed-in caller.
  */
-function isAuthorized(principal: Principal, required: Permissions[]) {
+export const authChecker: AuthCheckerFn<ApolloServerContext, Permissions> = (
+  { context },
+  required,
+) => {
+  const { principal } = context[CoreKey];
+
   switch (principal.kind) {
     case "anonymous": {
-      return false;
+      // TypeGraphQL reports a denied field with permissions as UNAUTHORIZED,
+      // but an anonymous caller needs to sign in rather than ask for access.
+      throw new AuthenticationError();
     }
     case "service": {
       return true;
@@ -28,19 +34,4 @@ function isAuthorized(principal: Principal, required: Permissions[]) {
       );
     }
   }
-}
-
-export const authChecker: AuthCheckerFn<ApolloServerContext, Permissions> = (
-  { context },
-  required,
-) => {
-  const { principal } = context[CoreKey];
-
-  // TypeGraphQL reports a denied field with permissions as UNAUTHORIZED,
-  // but an anonymous caller needs to sign in rather than ask for access.
-  if (principal.kind === "anonymous") {
-    throw new AuthenticationError();
-  }
-
-  return isAuthorized(principal, required);
 };
