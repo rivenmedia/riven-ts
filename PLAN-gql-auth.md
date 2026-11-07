@@ -19,22 +19,69 @@ Feature playbook steps, copied verbatim:
   - **Independent workstreams.** Disjoint files, services, or layers parallelize. Shared writes serialize.
   - **Shared mutable state.** Default to splitting the target (the **separate-before-serializing-shared-state** principle skill). Serialize only for real invariants.
   - **Smallest safe decomposition.** If one worker is best, name why.
-- [ ] 4. Delegate code-writing to a subagent using your configured feature model (default `grok-4.7-xhigh-fast`) with a specific scope (file paths, named data shape and its organizing structure per **principle-model-the-domain**, a state machine over scattered booleans, a table/registry over branching, a typed model over repeated shape assumptions, chosen before the delegate writes logic, and success criteria). Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section. When the implementation admits multiple valid shapes (error handling, abstraction layer, test structure), delegate via the **arena** skill instead so the runners surface the alternatives and the cross-judge guards the pick. Mandatory: no skip-with-reason escape, and Laziness Protocol does not override it (the gain is review separation, not lines saved). A subagent forbidden to spawn satisfies this by owning the diff directly with the same review separation. No "standing by" reply that waits on a nested agent. Comments per **Comments**. Surgical edits, re-ground against the source for upstream-derived files. Port shared-primitive improvements to all consumers and verify each. Commit liberally.
-- [ ] 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass. Flag it.
-- [ ] 6. Rebase into small, ordered commits. Stack follow-ups.
-- [ ] 7. If the design is contested, `interrogate` before shipping.
+- [x] 4. Delegate code-writing to a subagent using your configured feature model (default `grok-4.7-xhigh-fast`) with a specific scope (file paths, named data shape and its organizing structure per **principle-model-the-domain**, a state machine over scattered booleans, a table/registry over branching, a typed model over repeated shape assumptions, chosen before the delegate writes logic, and success criteria). Pick each subagent's reasoning level and fast or standard speed for the job, per the Subagents section. When the implementation admits multiple valid shapes (error handling, abstraction layer, test structure), delegate via the **arena** skill instead so the runners surface the alternatives and the cross-judge guards the pick. Mandatory: no skip-with-reason escape, and Laziness Protocol does not override it (the gain is review separation, not lines saved). A subagent forbidden to spawn satisfies this by owning the diff directly with the same review separation. No "standing by" reply that waits on a nested agent. Comments per **Comments**. Surgical edits, re-ground against the source for upstream-derived files. Port shared-primitive improvements to all consumers and verify each. Commit liberally.
+- [x] 5. Verify on the matching surface. "Inconclusive" or wrong-surface is not a pass. Flag it.
+- [x] 6. Rebase into small, ordered commits. Stack follow-ups. Enforcement was moved after the frontend's shared-cache client, and the codegen fix was folded into the enforcement commit.
+- [x] 7. If the design is contested, `interrogate` before shipping. Skip: no review disputed the design. Decision 6 went to the user to override.
 
 Implementation units, in commit order. The "Implementation units" section has the details.
 
-- [ ] U1. Shared permission model in `@repo/util-auth`.
-- [ ] U2. `apiKey` setting for callers that have no user.
-- [ ] U3. Resolve the caller of each request. Nothing is enforced yet.
-- [ ] U4. The frontend and the TUI send credentials.
-- [ ] U5. Enforce the permission map, with coverage and scenario tests.
-- [ ] U6. Docs and docker examples.
-- [ ] Verification on the running app.
+- [x] U1. Shared permission model in `@repo/util-auth`. Commit `a4001a9f`.
+- [x] U2. `apiKey` setting for callers that have no user. Commit `85d68c80`.
+- [x] U3. Resolve the caller of each request. Nothing is enforced yet. Commit `8495c29d`.
+- [x] U4. The frontend and the TUI send credentials.
+  - [x] Frontend session token. Commit `c0a80d51`.
+  - [x] TUI. Commit `8faa07b9`.
+  - [x] Frontend shared caches send the API key (decision 6). Commit `a7dcb5c5`.
+- [x] U5. Enforce the permission map, with coverage and scenario tests. Commit `f8f77455`.
+- [x] U6. Docs and docker examples. Commit `c293b5f4`.
+- [x] Verification on the running app, on 2026-11-07. See "Notes from U4 to verification".
 
-Stop the run when weekly usage reaches 85%. Before each unit, run `python3 -I ~/.claude/scripts/check-usage.py 85`. The script exits with code 3 once weekly usage reaches the threshold. The script lives outside the repository.
+Stop the run when weekly usage reaches 15%, so that 85% of the weekly limit remains. The user clarified this on 2026-11-07. Before each unit and each commit, run `python3 -I ~/.claude/scripts/check-usage.py 15`. The script exits with code 3 once weekly usage reaches the threshold. The script lives outside the repository.
+
+## Notes from U1 to U3
+
+These are deviations from the design above, and facts about this machine that the remaining units need.
+
+Deviations, all reviewed:
+
+- `authChecker` throws `AuthenticationError` for an anonymous caller. Without that, TypeGraphQL reports `UNAUTHORIZED` for any field that lists permissions, even when nobody is signed in. The coverage test in U5 relies on `UNAUTHENTICATED`.
+- The `graphql-ws` context runs inside `RequestContext.create(orm.em, ...)`. better-auth's MikroORM adapter uses the global entity manager, which MikroORM refuses outside a request context.
+- `resolvePrincipal` calls `getSession` with `disableCookieCache: true`, so a ban or role change applies on the next request instead of up to a minute later.
+- A bearer token that is not the API key replaces the whole cookie header. A bad token with a valid cookie gives `anonymous`.
+- A user with no role gets `role: ""`, which grants nothing. better-auth's own `hasPermission` treats a missing role as `user`, so the backend is stricter in that case.
+- A generated API key never enters `coreEnvironment`. It lives in `settings.apiKey`, and worker threads read it from the `generatedApiKey` environment-data entry (`apps/riven/lib/utilities/api-key.ts`). The startup warning is logged in `apps/riven/lib/riven.ts`, because the logger imports `settings.ts`.
+- `RequirePermissions` is exported from `packages/util-plugin-sdk/lib/decorators/index.ts` with an explicit return type, which the SDK's declaration build needs.
+
+Facts about this machine:
+
+- `redis-server` is not installed, and every `@repo/riven` test needs it. A copy of Redis 8.2.11 is at `/tmp/riven-redis-bin/redis-server`. Put `/tmp/riven-redis-bin` first on `PATH` for backend test runs. `/tmp` may be cleared on reboot. To restore the binary, copy it out of the `redis:8-bookworm` image.
+- `pnpm` and `node` are on PATH only after `export PATH=/home/marc/.local/share/pnpm/bin:$PATH` in zsh. The husky hooks need them.
+- A stale `packages/util-plugin-sdk/dist` breaks `pnpm --filter @repo/riven lint`. Run `pnpm --filter @repo/util-plugin-sdk build` before linting riven.
+- Two `plugin-tmdb` tests (`search-tmdb.spec.ts`, `tmdb-trending-movies.spec.ts`) fail in the Europe/Berlin timezone on the base commit too. They pass with `TZ=UTC`.
+- `request-stream-link.processor.spec.ts` failed once in a full run and then passed five times in a row. It looks like a race in the test.
+- Playwright browsers are not installed, so `pnpm --filter @repo/frontend test:component` fails with `browserType.launch: Executable doesn't exist`. Install them with `pnpm --filter @repo/frontend exec playwright install chromium` before running Storybook tests.
+- The riven, frontend, SDK, and core packages have no `check-types` script. Their `lint` script runs `oxlint --type-check`, so lint is the type check.
+
+## Notes from U4 to verification
+
+Deviations, all reviewed:
+
+- The scenario tests use the nullable `itemRequestByExternalIds` and `vfsEntry` as denied siblings. `mediaItems` and `settingsSection` are non-null, so denying one would null all of `data`.
+- `start-gql-server.actor.ts` reads back the port it bound, so the scenario tests run the real server on port 0.
+- `RequirePermissions` lives in `packages/util-plugin-sdk/lib/decorators/require-permissions.ts`, which breaks an import cycle between the decorators and the SDK entities. The export path is unchanged.
+- Resolvers for object types (`MediaItem`, `ItemRequest`, `Episode`, `Season`, `MediaEntry`) take method-level requirements, so their nested fields stay unrestricted. Root-only resolver classes take a class-level requirement.
+- The wiki's V2 compose generator has no frontend service. It gained an API key field with a Generate button and writes `RIVEN_SETTING__apiKey` only when set.
+- `authorization.spec.ts` first reused the operation name `MediaItemStateChanged`, which broke `codegen:gql`. It is now `AuthorizationMediaItemStateChanged`.
+
+Verification results:
+
+- `pnpm turbo run lint test` passed everywhere after the codegen fix. Under full parallel load, three `util-plugin-sdk` tests hit the 5-second timeout and one `pagination.spec.ts` test failed. Each passed when run alone, and the riven suite passed alone with 620 tests. `pnpm format:check` fails only on `.claude/settings.local.json`, which this work did not touch. `pnpm knip` exits 0. The root `turbo.jsonc` defines no `check-types` task.
+- The running backend, frontend, and TUI were checked against throwaway Postgres and Redis, with only TMDB and torrentio enabled. Every scenario matched. A sandboxed parse-scrape-results job queried `mediaItemById` with the API key and saw no denial. Pages rendered for an admin, including all 40 TMDB trending titles, with no denials in the backend log. Without `BACKEND_API_KEY`, the trending sections were empty and the frontend logged the missing variable.
+- The Storybook story "Loads the correct items when the Trending Shows This week button is clicked" is flaky on both sides. Run as a whole file on an idle machine, it failed 3 of 10 on the branch and 5 of 10 on its parent. Run alone with `-t`, it fails every time on both. The other 97 Storybook failures are visual snapshot mismatches against the CI baselines.
+- `pnpm tui` runs `apps/riven-tui/dist/cli.js`. Rebuild it with `pnpm --filter @repo/riven-tui build` before a manual check.
+- Not checked on the running app: the nested `downloadUrl` denial, because no media entry exists without a downloader, and browser subscriptions. The scenario tests cover both.
+- `pnpm --filter @repo/riven dev` skips migrations. A fresh database needs `mikro-orm migration:up` first.
 
 ## How the API works today
 
@@ -244,8 +291,20 @@ The user reviewed these on 2026-11-07 and kept every default. The implementation
 3. **The TUI.** The issue's scope list leaves the TUI out, but enforcement breaks it. The default adds `RIVEN_TUI_SETTING__apiKey`. That is the "providing the API key to the requests" change that the scope allows for UI code.
 4. **Browser queries.** The default moves the browser `HttpLink` to the frontend's own origin. Without that change, browser queries cannot carry a credential. It is a one-line change in `apollo-provider.tsx`.
 5. **API key scope.** The API key grants full access, the same as an admin. A scoped key needs better-auth's API-key plugin and a migration, which belongs in a separate issue.
+6. **Cached frontend fetches. Decided by the agent on 2026-11-07, the user may override.** The nine `"use cache"` functions import `query` from a new `apps/frontend/lib/graphql/service-client.ts`. It sends `Authorization: Bearer <BACKEND_API_KEY>`, a new optional frontend variable that must equal `RIVEN_SETTING__apiKey`. The `cacheTag()` probe in `client.ts` is deleted, so the user client never guesses its scope. If the probe broke while the API key depended on it, every request would carry admin rights. With the probe gone, a user-client call inside `"use cache"` fails loudly. All nine functions query only `tmdbItem`, `tmdbNowPlaying`, `tmdbTrendingMovies`, and `tmdbTrendingShows`, and their cache entries are shared across users, so a credential with no user fits.
+
+   The original problem: `cacheComponents` is on, and nine `"use cache"` functions call the server client. Next.js forbids `cookies()` inside a cache scope, so these calls send no credential, and U5 would answer them with `UNAUTHENTICATED`. The files are `similar-items.tsx`, `item-recommendations.tsx`, `item-cast.tsx`, `fetch-item-seasons.ts`, `fetch-season.ts`, `episode-cast.tsx`, `tmdb-trending-shows.tsx`, `tmdb-trending-movies.tsx`, and `tmdb-now-playing.tsx`. The options considered:
+   - Give the frontend the backend API key and send it from cache scopes. This is the U4 agent's recommendation. It costs one environment variable and one branch in `apps/frontend/lib/graphql/client.ts`. A cached entry is shared across users, so it matches "a caller with no user".
+   - Read the token outside each cached function and pass it in. This changes nine call sites and makes the cache per session.
+   - Switch to `"use cache: private"`. This changes nine directives and loses the server-side cache.
+   - Make the `tmdb*` fields public. Anyone who can reach the instance could then use its TMDB key.
+
+   Commit `c0a80d51` had a cache-scope check in `client.ts` that called `cacheTag()` and treated an exception as "not in a cache scope". It depended on Next.js internals, and commit `a7dcb5c5` removed it.
 
 ## Known limits
+
+- A bearer token must be the signed session cookie value. The unsigned `token` in the sign-in response body is rejected. The frontend sends the cookie value, so it is unaffected.
+- A `user`-role visit to `/settings` still sends the page's settings query. The backend answers it with `UNAUTHORIZED`, and the layout shows the unauthorised page.
 
 - A WebSocket operation checks the session when it starts. A running subscription keeps streaming after the session expires or the user is banned, until the client reconnects.
 - A denied non-null field makes its nearest nullable parent null, as the GraphQL spec requires. The scenario tests select nullable fields or root fields, so the partial results stay visible.
