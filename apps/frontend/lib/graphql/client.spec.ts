@@ -3,7 +3,7 @@ import { graphql } from "msw/graphql";
 import { setupServer } from "msw/node";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
-import { it as baseIt, describe, expect, vi } from "vitest";
+import { it as baseIt, expect, vi } from "vitest";
 
 import { GET_INSTANCE_SETUP_REQUIRED } from "#app/_queries/get-instance-setup-required.query.ts";
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
@@ -84,33 +84,32 @@ async function sendQueryAndReadAuthorization(server: SetupServer) {
   return authorization.promise;
 }
 
-describe("with a session cookie", () => {
-  it.for(["riven.session_token", "__Secure-riven.session_token"])(
-    "sends the %s cookie as a bearer token",
-    async (cookieName, { server, setRequestCookies }) => {
-      setRequestCookies(
-        `theme=dark; ${cookieName}=${encodeURIComponent(sessionToken)}`,
-      );
+it.for(["riven.session_token", "__Secure-riven.session_token"])(
+  "with a session cookie, sends the %s cookie as a bearer token",
+  async (cookieName, { server, setRequestCookies }) => {
+    setRequestCookies(
+      `theme=dark; ${cookieName}=${encodeURIComponent(sessionToken)}`,
+    );
 
-      const authorization = await sendQueryAndReadAuthorization(server);
-      const [scheme, token] = authorization?.split(" ") ?? [];
+    const authorization = await sendQueryAndReadAuthorization(server);
+    const [scheme, token] = authorization?.split(" ") ?? [];
 
-      expect(scheme).toBe("Bearer");
-      expect(decodeURIComponent(token ?? "")).toBe(sessionToken);
-    },
-  );
+    expect(scheme).toBe("Bearer");
+    expect(decodeURIComponent(token ?? "")).toBe(sessionToken);
+  },
+);
+
+it("without a session cookie, sends no authorization header", async ({
+  server,
+  setRequestCookies,
+}) => {
+  setRequestCookies("theme=dark");
+
+  await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
 });
 
-describe("without a session cookie", () => {
-  it("sends no authorization header", async ({ server, setRequestCookies }) => {
-    setRequestCookies("theme=dark");
-
-    await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
-  });
-
-  it("sends no authorization header outside a request scope", async ({
-    server,
-  }) => {
-    await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
-  });
+it("without a session cookie, sends no authorization header outside a request scope", async ({
+  server,
+}) => {
+  await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
 });
