@@ -745,6 +745,8 @@ overrides:
 
 packageExtensionsChecksum: sha256-lmqPczCHsZjEudlMldfSNaZq7e+eaddMNumuy/0Y5Ys=
 
+pnpmfileChecksum: sha256-gCz1ufFZ5m92/Yjdqs3KiTGBqPFa5RjHWhDuPzqIjVc=
+
 patchedDependencies:
   '@zkochan/fuse-shared-library': b6a19defa99b08e4de2d398291f5111ace9e53104c781a595bbc5904c691019c
   '@zkochan/fuse-shared-library-darwin': b152e691160d442356dcb3d3cfe80504786d638dcd4520ee1066cfae5ff8a3d0
@@ -833,7 +835,7 @@ importers:
         version: 1.8.0(@date-fns/tz@1.5.0)(@types/react@19.3.0)(date-fns@4.4.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       '@better-auth/passkey':
         specifier: 'catalog:'
-        version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)
+        version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)
       '@bprogress/next':
         specifier: 'catalog:'
         version: 3.2.12(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
@@ -855,15 +857,12 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../../packages/util-docs-generation
       '@wrksz/themes':
         specifier: 'catalog:'
         version: 2.0.2(@typescript/typescript6@6.0.2)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       better-auth:
         specifier: 'catalog:'
-        version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)
+        version: 1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       class-variance-authority:
         specifier: 'catalog:'
         version: 0.7.1
@@ -982,6 +981,9 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../../packages/core/util-vitest-config
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       '@storybook/addon-a11y':
         specifier: 'catalog:'
         version: 10.6.3(storybook@10.6.3(@types/react@19.3.0)(react@19.3.0))
@@ -1089,7 +1091,7 @@ importers:
         version: 1.1.2(@apollo/server@5.5.1(graphql@16.14.0)(supports-color@10.2.2))(express@5.2.1(supports-color@10.2.2))
       '@better-auth/passkey':
         specifier: 'catalog:'
-        version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)
+        version: 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)
       '@elastic/ecs-winston-format':
         specifier: 'catalog:'
         version: 1.5.3
@@ -1168,9 +1170,6 @@ importers:
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../../packages/util-rank-torrent-name
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../../packages/util-docs-generation
       '@sentry/node':
         specifier: 'catalog:'
         version: 10.53.1(supports-color@10.2.2)
@@ -1182,10 +1181,10 @@ importers:
         version: 0.1.0(supports-color@10.2.2)
       better-auth:
         specifier: 'catalog:'
-        version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)
+        version: 1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       better-auth-mikro-orm:
         specifier: 'catalog:'
-        version: 1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12))
+        version: 1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))
       bullmq:
         specifier: 'catalog:'
         version: 5.76.10(supports-color@10.2.2)
@@ -1313,6 +1312,9 @@ importers:
       '@repo/plugin-test':
         specifier: workspace:^
         version: link:../../packages/plugin-test
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       '@swc-node/register':
         specifier: 'catalog:'
         version: 1.11.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(@swc/types@0.1.26)(@typescript/typescript6@6.0.2)(supports-color@10.2.2)
@@ -1370,9 +1372,6 @@ importers:
       '@mishieck/ink-titled-box':
         specifier: 'catalog:'
         version: 0.4.2(@typescript/typescript6@6.0.2)(ink@7.1.1(@types/react@19.3.0)(react-devtools-core@7.0.1)(react@19.3.0))(react@19.3.0)
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../../packages/util-docs-generation
       fullscreen-ink:
         specifier: 'catalog:'
         version: 0.1.0(@types/react@19.3.0)(react-devtools-core@7.0.1)
@@ -1437,6 +1436,9 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../../packages/core/util-vitest-config
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../../packages/util-docs-generation
       '@swc-node/register':
         specifier: 'catalog:'
         version: 1.11.1(@swc/core@1.15.40(@swc/helpers@0.5.23))(@swc/types@0.1.26)(@typescript/typescript6@6.0.2)(supports-color@10.2.2)
@@ -1855,9 +1857,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1877,6 +1876,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1904,9 +1906,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -1926,6 +1925,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -1956,9 +1958,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -1990,6 +1989,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2020,9 +2022,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -2054,6 +2053,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2081,9 +2083,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       luxon:
         specifier: 'catalog:'
         version: 3.7.2
@@ -2109,6 +2108,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/luxon':
         specifier: 'catalog:'
         version: 3.7.1
@@ -2142,9 +2144,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2173,6 +2172,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2203,9 +2205,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       class-validator:
         specifier: 'catalog:'
         version: 0.14.3
@@ -2240,6 +2239,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2270,9 +2272,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2292,6 +2291,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2322,9 +2324,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2344,6 +2343,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2417,9 +2419,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2448,6 +2447,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2475,9 +2477,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       type-graphql:
         specifier: 'catalog:'
         version: 2.0.0-rc.2(class-validator@0.14.3)(graphql-scalars@1.25.0(graphql@16.14.0))(graphql@16.14.0)
@@ -2497,6 +2496,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -2524,9 +2526,6 @@ importers:
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../util-plugin-sdk
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       countries-and-timezones:
         specifier: 'catalog:'
         version: 3.9.0
@@ -2561,6 +2560,9 @@ importers:
       '@repo/util-plugin-testing':
         specifier: workspace:^
         version: link:../util-plugin-testing
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/luxon':
         specifier: 'catalog:'
         version: 3.7.1
@@ -2587,7 +2589,7 @@ importers:
     dependencies:
       better-auth:
         specifier: 'catalog:'
-        version: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)
+        version: 1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       zod:
         specifier: ^4.4.3
         version: 4.6.7
@@ -2796,9 +2798,6 @@ importers:
 
   packages/util-rank-torrent-name:
     dependencies:
-      '@repo/util-wiki-helpers':
-        specifier: workspace:^
-        version: link:../util-docs-generation
       '@viren070/parse-torrent-title':
         specifier: 'catalog:'
         version: 0.7.6
@@ -2821,6 +2820,9 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../core/util-vitest-config
+      '@repo/util-wiki-helpers':
+        specifier: workspace:^
+        version: link:../util-docs-generation
       '@types/node':
         specifier: 'catalog:'
         version: 24.12.4
@@ -7998,6 +8000,7 @@ packages:
 
   '@viren070/parse-torrent-title@0.7.6':
     resolution: {integrity: sha512-5tHKCKg7QmrloP2irVyPrZSDTRVPr8ELacWzJoHzsJEWUnVQSxrsmlh+S9F04d3Y6ajvPn+vBwGZonJRhyAXHw==}
+    deprecated: Renamed to @aiostreams/release-parser
 
   '@vitejs/plugin-react@6.0.5':
     resolution: {integrity: sha512-BOVzne/NL162sMdResB25mUv+vWMF5NoAjNf09TeGlE7ZpszZWSD3winycicLJw72yeVsoCn/2kOhEuCvEShMA==}
@@ -8356,19 +8359,16 @@ packages:
       '@sveltejs/kit': ^2.0.0
       '@tanstack/react-start': ^1.0.0
       '@tanstack/solid-start': ^1.0.0
-      better-sqlite3: ^12.0.0
       drizzle-kit: '>=0.31.4 || >=1.0.0-beta.1'
       drizzle-orm: ^0.45.2 || >=1.0.0-rc.1 <2.0.0
       mongodb: ^6.0.0 || ^7.0.0
       mysql2: ^3.0.0
-      next: ^14.0.0 || ^15.0.0 || ^16.0.0
       pg: ^8.0.0
       prisma: ^5.0.0 || ^6.0.0 || ^7.0.0
       react: ^18.0.0 || ^19.0.0
       react-dom: ^18.0.0 || ^19.0.0
       solid-js: ^1.0.0
       svelte: ^4.0.0 || ^5.0.0
-      vitest: ^2.0.0 || ^3.0.0 || ^4.0.0
       vue: ^3.0.0
     peerDependenciesMeta:
       '@lynx-js/react':
@@ -8381,8 +8381,6 @@ packages:
         optional: true
       '@tanstack/solid-start':
         optional: true
-      better-sqlite3:
-        optional: true
       drizzle-kit:
         optional: true
       drizzle-orm:
@@ -8390,8 +8388,6 @@ packages:
       mongodb:
         optional: true
       mysql2:
-        optional: true
-      next:
         optional: true
       pg:
         optional: true
@@ -8404,8 +8400,6 @@ packages:
       solid-js:
         optional: true
       svelte:
-        optional: true
-      vitest:
         optional: true
       vue:
         optional: true
@@ -14364,14 +14358,14 @@ snapshots:
       '@better-auth/core': 1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1)
       '@better-auth/utils': 0.4.2
 
-  '@better-auth/passkey@1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)':
+  '@better-auth/passkey@1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(better-call@1.4.0(zod@4.6.7))(nanostores@1.5.1)':
     dependencies:
       '@better-auth/core': 1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1)
       '@better-auth/utils': 0.4.2
       '@better-fetch/fetch': 1.3.1
       '@simplewebauthn/browser': 13.3.0
       '@simplewebauthn/server': 13.3.2
-      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)
+      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       better-call: 1.4.0(zod@4.6.7)
       nanostores: 1.5.1
       zod: 4.6.7
@@ -19387,13 +19381,13 @@ snapshots:
 
   baseline-browser-mapping@2.11.13: {}
 
-  better-auth-mikro-orm@1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)):
+  better-auth-mikro-orm@1.0.0-next.2(@mikro-orm/core@7.1.0(dataloader@2.2.3))(better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)):
     dependencies:
       '@mikro-orm/core': 7.1.0(dataloader@2.2.3)
-      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12)
+      better-auth: 1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       dset: 3.1.4
 
-  better-auth@1.7.1(@opentelemetry/api@1.9.1)(better-sqlite3@12.10.0)(next@16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)(vitest@4.1.12):
+  better-auth@1.7.1(@opentelemetry/api@1.9.1)(pg@8.21.0)(react-dom@19.3.0(react@19.3.0))(react@19.3.0):
     dependencies:
       '@better-auth/core': 1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1)
       '@better-auth/drizzle-adapter': 1.7.1(@better-auth/core@1.7.1(@better-auth/utils@0.4.2)(@better-fetch/fetch@1.3.1)(@opentelemetry/api@1.9.1)(better-call@1.4.0(zod@4.6.7))(jose@6.2.9)(kysely@0.29.2)(nanostores@1.5.1))(@better-auth/utils@0.4.2)
@@ -19413,12 +19407,9 @@ snapshots:
       nanostores: 1.5.1
       zod: 4.6.7
     optionalDependencies:
-      better-sqlite3: 12.10.0
-      next: 16.4.3(@babel/core@7.29.7(supports-color@10.2.2))(@opentelemetry/api@1.9.1)(@playwright/test@1.62.1)(@types/node@24.12.4)(react-dom@19.3.0(react@19.3.0))(react@19.3.0)
       pg: 8.21.0
       react: 19.3.0
       react-dom: 19.3.0(react@19.3.0)
-      vitest: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
     transitivePeerDependencies:
       - '@cloudflare/workers-types'
       - '@opentelemetry/api'
