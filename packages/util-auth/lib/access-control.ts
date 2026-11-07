@@ -29,6 +29,10 @@ const statement = {
 
 export const ac = createAccessControl(statement);
 
+export type Permissions = {
+  readonly [Resource in keyof typeof statement]?: readonly (typeof statement)[Resource][number][];
+};
+
 export const admin = ac.newRole({
   item: ItemPermission.options,
   library: LibraryPermission.options,
@@ -55,3 +59,25 @@ export const manager = ac.newRole({
 export const UserRole = z.enum(["user", "manager", "admin"]);
 
 export type UserRole = z.infer<typeof UserRole>;
+
+export const roles = { admin, manager, user } satisfies Record<
+  UserRole,
+  unknown
+>;
+
+/**
+ * Whether any role in `role` grants every action in `permissions`.
+ *
+ * Like better-auth's admin plugin, `role` may list several comma-separated roles.
+ * An unknown or missing role grants nothing.
+ */
+export function roleHasPermissions(
+  role: string | null | undefined,
+  permissions: Permissions,
+) {
+  return (role ?? "").split(",").some((name) => {
+    const parsed = UserRole.safeParse(name);
+
+    return parsed.success && roles[parsed.data].authorize(permissions).success;
+  });
+}
