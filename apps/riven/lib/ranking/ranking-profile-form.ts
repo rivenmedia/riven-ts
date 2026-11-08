@@ -32,7 +32,7 @@ const CATEGORY_TITLES = {
 } as const satisfies Record<RankCategory, string>;
 
 const RankField = z
-  .object({ fetch: z.boolean(), rank: z.int().optional() })
+  .strictObject({ fetch: z.boolean(), rank: z.int().optional() })
   .refine(({ fetch, rank }) => !fetch || rank !== undefined, {
     path: ["rank"],
     message: "Enter a rank, or turn off fetching.",
@@ -57,22 +57,47 @@ const RANK_KEYS_BY_CATEGORY = Map.groupBy(
   )
   .toArray();
 
-const RankGroups = z.object(
+const RankGroups = z.strictObject(
   Object.fromEntries(
     RANK_KEYS_BY_CATEGORY.map(([category, keys]) => [
       category,
       z
-        .object(Object.fromEntries(keys.map((key) => [key, RankField])))
+        .strictObject(Object.fromEntries(keys.map((key) => [key, RankField])))
         .meta({ title: CATEGORY_TITLES[category] }),
     ]),
-  ) as Record<RankCategory, z.ZodObject<Record<string, typeof RankField>>>,
+  ) as Record<
+    RankCategory,
+    z.ZodObject<Record<string, typeof RankField>, z.core.$strict>
+  >,
 );
 
-const RankingProfileForm = z.object({
+type SettingsGroups = typeof RankingSettingsSection.shape;
+
+/**
+ * A strict copy of the global ranking settings section (which stays non-strict
+ * for the generic settings path), so unknown settings keys are reported.
+ */
+const StrictRankingSettings = z
+  .strictObject(
+    Object.fromEntries(
+      Object.entries(RankingSettingsSection.shape).map(([name, group]) => [
+        name,
+        z.strictObject(group.shape).meta(group.meta() ?? {}),
+      ]),
+    ) as {
+      [Name in keyof SettingsGroups]: z.ZodObject<
+        SettingsGroups[Name]["shape"],
+        z.core.$strict
+      >;
+    },
+  )
+  .meta(RankingSettingsSection.meta() ?? {});
+
+const RankingProfileForm = z.strictObject({
   name: z.string().trim().min(1),
   description: z.string().nullable(),
   ranks: RankGroups,
-  settings: RankingSettingsSection,
+  settings: StrictRankingSettings,
 });
 
 type RankingProfileFormInput = z.input<typeof RankingProfileForm>;
@@ -119,11 +144,19 @@ export function toProfileFormValues(
   };
 }
 
+const toDottedPath = (path: readonly PropertyKey[]) =>
+  path.map(String).join(".");
+
+/** Form issues at dotted paths, with one issue per unknown key at its own path. */
 function toIssues(error: z.ZodError): SettingsIssue[] {
-  return error.issues.map(({ path, message }) => ({
-    path: path.map(String).join("."),
-    message,
-  }));
+  return error.issues.flatMap((issue) =>
+    issue.code === "unrecognized_keys"
+      ? issue.keys.map((key) => ({
+          path: toDottedPath([...issue.path, key]),
+          message: `Unknown setting "${key}"`,
+        }))
+      : [{ path: toDottedPath(issue.path), message: issue.message }],
+  );
 }
 
 /** The form path of a stored-config issue (only rank paths differ). */
@@ -136,7 +169,7 @@ function toFormPath(configPath: readonly PropertyKey[]) {
 
   return group === "rankingModel" && category
     ? `ranks.${category}.${String(key)}.rank`
-    : configPath.map(String).join(".");
+    : toDottedPath(configPath);
 }
 
 /**

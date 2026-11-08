@@ -163,3 +163,70 @@ it("ignores the rank of a field that is not fetched", () => {
     config: {},
   });
 });
+
+it.each([
+  ["at the top level", { ...validValues, bogusTop: 1 }, "bogusTop"],
+  [
+    "under ranks",
+    { ...validValues, ranks: { ...validValues.ranks, extraGroup: {} } },
+    "ranks.extraGroup",
+  ],
+  [
+    "inside a rank category",
+    {
+      ...validValues,
+      ranks: {
+        ...validValues.ranks,
+        quality: { ...validValues.ranks.quality, av1x: { fetch: false } },
+      },
+    },
+    "ranks.quality.av1x",
+  ],
+  [
+    "inside a rank field",
+    {
+      ...validValues,
+      ranks: {
+        ...validValues.ranks,
+        quality: {
+          ...validValues.ranks.quality,
+          av1: { fetch: false, extra: true },
+        },
+      },
+    },
+    "ranks.quality.av1.extra",
+  ],
+  [
+    "under a settings group",
+    {
+      ...validValues,
+      settings: {
+        ...validValues.settings,
+        options: { ...validValues.settings.options, nope: true },
+      },
+    },
+    "settings.options.nope",
+  ],
+  [
+    "under settings",
+    { ...validValues, settings: { ...validValues.settings, extra: {} } },
+    "settings.extra",
+  ],
+])("reports an unknown key %s at its dotted path", (_, values, path) => {
+  expect(fromProfileFormValues(values).issues).toStrictEqual([
+    { path, message: expect.any(String) },
+  ]);
+});
+
+it("serves a JSON schema that disallows unknown keys", () => {
+  const schema = buildRankingProfileJsonSchema();
+
+  expect(schema.additionalProperties).toBe(false);
+  expect(child(schema, "ranks").additionalProperties).toBe(false);
+  expect(child(schema, "ranks", "quality").additionalProperties).toBe(false);
+  expect(child(schema, "ranks", "quality", "av1").additionalProperties).toBe(
+    false,
+  );
+  expect(child(schema, "settings").additionalProperties).toBe(false);
+  expect(child(schema, "settings", "options").additionalProperties).toBe(false);
+});
