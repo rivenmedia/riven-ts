@@ -25,6 +25,7 @@ import {
   Session,
   Verification,
   Setting,
+  RankingProfile,
 } from "./entities/index.ts";
 import { ItemRequestChangeSubscriber } from "./subscribers/item-request-change.subscriber.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
@@ -56,6 +57,7 @@ const entities = [
   Session,
   Verification,
   Setting,
+  RankingProfile,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {
