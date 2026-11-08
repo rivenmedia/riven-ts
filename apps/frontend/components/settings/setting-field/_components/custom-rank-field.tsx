@@ -46,6 +46,9 @@ export function SettingsCustomRankField({
             }}
           />
         </Label>
+        <Label htmlFor={id} className="sr-only">
+          {label} rank
+        </Label>
         <Input {...rankField} id={id} type="number" className="h-8 w-24 " />
       </div>
     </div>

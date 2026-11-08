@@ -460,7 +460,7 @@ CustomRank.test(
   "Toggling fetch disables and enables the rank input",
   async ({ canvas, step }) => {
     const fetchSwitch = canvas.getByRole("switch", { name: /fetch/iu });
-    const rankInput = canvas.getByRole("spinbutton");
+    const rankInput = canvas.getByRole("spinbutton", { name: "1080p rank" });
 
     await step("Enabled by default", async () => {
       await expect(fetchSwitch).toBeChecked();
