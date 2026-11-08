@@ -342,6 +342,8 @@ export const it = testBase
             installedPlugins: fixtureInstalledPlugins,
             pluginEnvironment: new Map(),
             coreEnvironment: {},
+            rankingProfileService: services.rankingProfileService,
+            settingsService: services.settingsService,
           }),
           installedPlugins: fixtureInstalledPlugins,
           coreEnvironment: {},

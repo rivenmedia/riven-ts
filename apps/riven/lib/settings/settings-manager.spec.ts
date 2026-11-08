@@ -14,6 +14,8 @@ import { createLogger } from "winston";
 import z from "zod";
 
 import { it } from "#__tests__/test-context.ts";
+import { rankingPresets } from "#ranking/presets/index.ts";
+import { RANKING_NAMESPACE } from "#ranking/ranking-settings-section.schema.ts";
 
 import { SettingsManager } from "./settings-manager.ts";
 import { buildSettingsSections } from "./settings-sections.ts";
@@ -87,6 +89,7 @@ function createManager(
     fakeEnvironment?: Record<string, string>;
     clearEnvironment?: Record<string, string>;
     coreEnvironment?: Record<string, string>;
+    onHotSectionChange?: (sectionId: string) => void;
   } = {},
 ) {
   const coreEnvironment = options.coreEnvironment ?? {};
@@ -94,6 +97,8 @@ function createManager(
     installedPlugins,
     pluginEnvironment: new Map(),
     coreEnvironment,
+    rankingProfileService: services.rankingProfileService,
+    settingsService: services.settingsService,
   });
 
   sections.set("fake", {
@@ -117,7 +122,28 @@ function createManager(
     sections,
     installedPlugins,
     coreEnvironment,
+    ...(options.onHotSectionChange && {
+      onHotSectionChange: options.onHotSectionChange,
+    }),
   });
+}
+
+/** Seeds the presets and selects a profile that enables 2160p (RTN default: off). */
+async function selectRankingProfile(services: Services) {
+  await services.rankingProfileService.syncPresets(rankingPresets);
+
+  const profile = await services.rankingProfileService.create({
+    name: "4K",
+    description: null,
+    config: { settings: { resolutions: { r2160p: true } } },
+  });
+
+  await services.settingsService.writeValues(RANKING_NAMESPACE, {
+    upsert: { activeProfileId: profile.id },
+    delete: [],
+  });
+
+  return profile;
 }
 
 describe("getSection", () => {
@@ -890,6 +916,8 @@ describe("plugin env settings", () => {
         installedPlugins: [notificationsInstall],
         pluginEnvironment,
         coreEnvironment: {},
+        rankingProfileService: services.rankingProfileService,
+        settingsService: services.settingsService,
       }),
       installedPlugins: [notificationsInstall],
       coreEnvironment: {},
@@ -900,5 +928,157 @@ describe("plugin env settings", () => {
     expect(view.lockedFields).toStrictEqual(["urls"]);
     expect(view.values).toStrictEqual({ urls: ["discord://id/token"] });
     expect(view.issues).toStrictEqual([]);
+  });
+});
+
+describe("ranking section", () => {
+  it("shows the active profile's value as the ranking default", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const manager = createManager(services);
+
+    const section = await manager.getSection("ranking");
+
+    expect(section.values).toMatchObject({
+      resolutions: { r2160p: true, r1080p: true },
+    });
+    expect(section.appliesImmediately).toBe(true);
+    expect(section.lockedFields).toStrictEqual([]);
+    expect(section.issues).toStrictEqual([]);
+  });
+
+  it("serves the active profile's values as the JSON schema defaults", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const manager = createManager(services);
+
+    const { jsonSchema } = await manager.getSection("ranking");
+
+    expect(jsonSchema).toMatchObject({
+      properties: {
+        resolutions: {
+          properties: {
+            r2160p: { default: true },
+            r1080p: { default: true },
+          },
+        },
+      },
+    });
+  });
+
+  it("shows a stored override over the active profile's value", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+    await services.settingsService.writeValues(RANKING_NAMESPACE, {
+      upsert: { r2160p: false },
+      delete: [],
+    });
+
+    const manager = createManager(services);
+
+    const section = await manager.getSection("ranking");
+
+    expect(section.values).toMatchObject({ resolutions: { r2160p: false } });
+  });
+
+  it("removes an override equal to the profile value", async ({ services }) => {
+    const profile = await selectRankingProfile(services);
+    const manager = createManager(services);
+
+    await manager.updateSection("ranking", { resolutions: { r2160p: false } });
+
+    await expect(
+      services.settingsService.getStoredValues(RANKING_NAMESPACE),
+    ).resolves.toStrictEqual({ activeProfileId: profile.id, r2160p: false });
+
+    await manager.updateSection("ranking", { resolutions: { r2160p: true } });
+
+    await expect(
+      services.settingsService.getStoredValues(RANKING_NAMESPACE),
+    ).resolves.toStrictEqual({ activeProfileId: profile.id });
+  });
+
+  it("stores an override equal to the schema default but not the profile value", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const manager = createManager(services);
+
+    await manager.updateSection("ranking", { resolutions: { r2160p: false } });
+
+    await expect(
+      services.settingsService.getStoredValues(RANKING_NAMESPACE),
+    ).resolves.toMatchObject({ r2160p: false });
+  });
+
+  it("keeps env-locked leaves regardless of the active profile", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const manager = createManager(services, {
+      coreEnvironment: { r2160p: "false" },
+    });
+
+    const section = await manager.getSection("ranking");
+
+    expect(section.values).toMatchObject({ resolutions: { r2160p: false } });
+    expect(section.lockedFields).toContain("resolutions.r2160p");
+  });
+
+  it("does not require a restart for hot sections and notifies instead", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const onHotSectionChange = vi.fn<(sectionId: string) => void>();
+    const manager = createManager(services, { onHotSectionChange });
+
+    await manager.updateSection("ranking", {
+      options: { removeAllTrash: false },
+    });
+
+    expect(manager.restartRequired).toBe(false);
+    expect(onHotSectionChange).toHaveBeenCalledExactlyOnceWith("ranking");
+
+    await manager.resetFields("ranking", ["options.removeAllTrash"]);
+
+    expect(manager.restartRequired).toBe(false);
+    expect(onHotSectionChange).toHaveBeenCalledTimes(2);
+  });
+
+  it("does not notify when a hot section write changes nothing", async ({
+    services,
+  }) => {
+    await selectRankingProfile(services);
+
+    const onHotSectionChange = vi.fn<(sectionId: string) => void>();
+    const manager = createManager(services, { onHotSectionChange });
+
+    await manager.updateSection("ranking", { resolutions: { r2160p: true } });
+
+    expect(onHotSectionChange).not.toHaveBeenCalled();
+  });
+
+  it("still requires a restart for general", async ({ services }) => {
+    const onHotSectionChange = vi.fn<(sectionId: string) => void>();
+    const manager = createManager(services, { onHotSectionChange });
+
+    const section = await manager.getSection("general");
+
+    expect(section.appliesImmediately).toBe(false);
+
+    await manager.updateSection("general", {
+      scraping: { maximumFailedAttempts: 3 },
+    });
+
+    expect(manager.restartRequired).toBe(true);
+    expect(onHotSectionChange).not.toHaveBeenCalled();
   });
 });

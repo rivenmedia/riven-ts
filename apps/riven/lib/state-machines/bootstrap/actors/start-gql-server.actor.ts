@@ -21,6 +21,7 @@ import { initApolloClient } from "#graphql/apollo-client.ts";
 import { buildContextFunction } from "#graphql/build-context-function.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { resolvers } from "#graphql/resolvers/index.ts";
+import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
@@ -111,9 +112,14 @@ export const startGqlServer = fromPromise<
         installedPlugins,
         pluginEnvironment,
         coreEnvironment,
+        rankingProfileService: services.rankingProfileService,
+        settingsService: services.settingsService,
       }),
       installedPlugins,
       coreEnvironment,
+      onHotSectionChange: () => {
+        invalidateRankingEngine();
+      },
     });
 
     const context = buildContextFunction(

@@ -96,4 +96,19 @@ describe(buildSectionJsonSchema, () => {
 
     expect(jsonSchema.required).toStrictEqual(["nested"]);
   });
+
+  it("replaces non-secret defaults with the given default overrides", () => {
+    const jsonSchema = buildSectionJsonSchema(
+      FakeSettings,
+      new Map([["token", "default"]]),
+      // oxlint-disable-next-line id-length
+      { n: 7, token: "override-secret" },
+    ) as JsonSchemaNode;
+
+    expect(jsonSchema.properties["nested"]?.properties["n"]).toHaveProperty(
+      "default",
+      7,
+    );
+    expect(JSON.stringify(jsonSchema)).not.toContain("override-secret");
+  });
 });

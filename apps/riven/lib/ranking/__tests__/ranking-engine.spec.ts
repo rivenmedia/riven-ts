@@ -71,6 +71,29 @@ it("applies global ranking settings over the profile", async ({ deps }) => {
   ).toThrow();
 });
 
+it("uses the active profile's settings when no global overrides are stored", async ({
+  deps,
+}) => {
+  const profile = await deps.rankingProfileService.create({
+    name: "4K only",
+    description: null,
+    config: { settings: { resolutions: { r2160p: true } } },
+  });
+
+  await deps.settingsService.writeValues("riven-ranking", {
+    upsert: { activeProfileId: profile.id },
+    delete: [],
+  });
+  invalidateRankingEngine();
+
+  const rtn = await getRankingEngine(deps);
+
+  // The schema default (`r2160p: false`) must not leak in as a global override.
+  expect(() =>
+    rtn.rankTorrent("Some Movie 2020 2160p", "c".repeat(40), "Some Movie", {}),
+  ).not.toThrow();
+});
+
 it("returns the cached instance until invalidated", async ({ deps }) => {
   const a = await getRankingEngine(deps);
 
