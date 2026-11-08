@@ -19,8 +19,6 @@ import type { UserRole } from "@repo/util-auth/access-control";
 import type { AnyActorRef } from "xstate";
 
 vi.hoisted(() => {
-  // The server binds any free port. Settings are parsed on first import,
-  // so this runs before the imports.
   process.env["RIVEN_SETTING__port"] = "0";
 });
 
@@ -167,7 +165,7 @@ const it = testContext
       },
   );
 
-const LIBRARY_AND_SETTINGS = /* GraphQL */ `
+const LIBRARY_AND_SETTINGS = `
   query LibraryAndSettings($id: ID!) {
     mediaItems {
       items {
@@ -221,7 +219,7 @@ it("scenario 2, an invalid credential, returns public fields and denies every au
 }) => {
   await expect(
     request(
-      /* GraphQL */ `
+      `
         query PublicAndAuthenticated {
           authProviders {
             key
@@ -256,7 +254,7 @@ it("scenario 3, a partly authorised caller, returns the sibling fields the calle
 }) => {
   await expect(
     request(
-      /* GraphQL */ `
+      `
         query LibraryAndVfs {
           mediaItems {
             items {
@@ -286,7 +284,7 @@ it("scenario 3, a partly authorised caller, denies a nested field that its reada
 }) => {
   await expect(
     request(
-      /* GraphQL */ `
+      `
         query MediaEntries($id: ID!) {
           mediaItemById(id: $id) {
             ... on Movie {
@@ -325,7 +323,7 @@ it("scenario 3, a partly authorised caller, runs the mutations the caller's role
 }) => {
   await expect(
     request(
-      /* GraphQL */ `
+      `
         mutation RequestItem($input: RequestItemInput!) {
           requestItem(input: $input)
         }
@@ -345,7 +343,7 @@ it("scenario 3, a partly authorised caller, runs the mutations the caller's role
 
   await expect(
     request(
-      /* GraphQL */ `
+      `
         mutation ResetMediaItem($id: ID!) {
           resetMediaItem(mediaItemId: $id) {
             __typename
@@ -366,7 +364,7 @@ it("scenario 3, a partly authorised caller, runs the mutations the caller's role
 
 it("scenario 4, no credential, returns public fields", async ({ request }) => {
   await expect(
-    request(/* GraphQL */ `
+    request(`
       query AuthProviders {
         authProviders {
           key
@@ -379,7 +377,7 @@ it("scenario 4, no credential, returns public fields", async ({ request }) => {
   });
 });
 
-const MEDIA_ITEM_STATE_CHANGED = /* GraphQL */ `
+const MEDIA_ITEM_STATE_CHANGED = `
   subscription AuthorizationMediaItemStateChanged($id: ID!) {
     mediaItemStateChanged(id: $id) {
       ... on Movie {
@@ -412,7 +410,6 @@ it("streams events to a WebSocket subscription with a session cookie", async ({
     { cookie: user.cookie },
   );
 
-  // The server starts the subscription asynchronously, so publish until an event arrives.
   const publishing = setInterval(() => {
     pubSub.publish("MEDIA_ITEM_STATE_CHANGED", movie.id, movie.id);
   }, 50);

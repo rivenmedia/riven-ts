@@ -8,11 +8,6 @@ import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Permissions } from "@repo/util-auth/access-control";
 import type { AuthCheckerFn } from "type-graphql";
 
-/**
- * Whether the caller may resolve a field that requires every statement in `required`.
- *
- * An empty list only requires a signed-in caller.
- */
 export const authChecker: AuthCheckerFn<ApolloServerContext, Permissions> = (
   { context },
   required,

@@ -34,13 +34,11 @@ const it = testContext
         }),
     );
 
-    // The browser's `Cookie` header, from the cookies that sign-up set.
     const cookie = headers
       .getSetCookie()
       .map((setCookie) => setCookie.split(";", 1)[0])
       .join("; ");
 
-    // The frontend reads the token from that header the same way.
     const sessionToken = getSessionCookie(new Headers({ cookie }), {
       cookiePrefix: "riven",
     });

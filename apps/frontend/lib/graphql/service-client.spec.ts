@@ -40,7 +40,6 @@ const it = baseIt
       vi.unstubAllEnvs();
     });
 
-    // The environment is parsed when the module loads
     return async (apiKey: string | undefined) => {
       vi.stubEnv("BACKEND_API_KEY", apiKey);
       vi.resetModules();

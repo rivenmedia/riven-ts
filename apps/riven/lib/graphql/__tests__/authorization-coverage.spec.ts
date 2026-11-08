@@ -14,11 +14,6 @@ import type { GraphQLField, GraphQLResolveInfo } from "graphql";
 
 const publicRootFields = new Set(["authProviders"]);
 
-/**
- * The resolvers of every plugin package that riven depends on.
- *
- * The test setup mocks `package.json` and `@repo/plugin-test`, so both are read unmocked.
- */
 async function importPluginResolvers() {
   const { dependencies, devDependencies } = JSON.parse(
     readFileSync(new URL("../../../package.json", import.meta.url), "utf8"),
@@ -43,7 +38,6 @@ async function runAnonymously(
   context: unknown,
 ) {
   try {
-    // The auth check runs before arguments are read, so empty arguments are enough.
     await (subscribe ?? resolve)?.(
       undefined,
       {},
@@ -88,7 +82,6 @@ it("denies every root field except the public ones to an anonymous caller", asyn
     ),
   );
 
-  // A plugin field shows that the plugin resolvers are part of the schema.
   expect(Object.keys(outcomes)).toContain("seerrHandleWebhook");
   expect(outcomes).toStrictEqual(
     Object.fromEntries(

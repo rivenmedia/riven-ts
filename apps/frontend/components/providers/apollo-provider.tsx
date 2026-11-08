@@ -19,8 +19,6 @@ function makeLink() {
     return new HttpLink({ uri: `${privateEnvironment.BACKEND_URL}/graphql` });
   }
 
-  // `BACKEND_URL` is server-only, so the browser connects to its own origin and `proxy.ts` forwards
-  // requests and upgrades to the backend, with the session cookie
   const graphqlUrl = new URL("/graphql", globalThis.location.href);
   const wsUrl = new URL(graphqlUrl);
 

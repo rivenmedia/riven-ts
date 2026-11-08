@@ -219,7 +219,6 @@ export const startGqlServer = fromPromise<
 
     const address = httpServer.address();
 
-    // Port 0 binds any free port, so read back the one that was bound.
     if (address !== null && typeof address === "object") {
       url.port = address.port.toString();
     }

@@ -4,7 +4,6 @@ export interface CreateGraphqlClientOptions {
   /** The GraphQL endpoint of the Riven instance to connect to. */
   uri: string;
 
-  /** The Riven instance's API key, sent as a bearer token with every request. */
   apiKey?: string | undefined;
 }
 

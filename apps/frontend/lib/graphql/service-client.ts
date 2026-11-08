@@ -27,9 +27,6 @@ const apiKeyLink = new SetContextLink(
   },
 );
 
-/**
- * A client for `"use cache"` scopes, whose results are shared across users, so it sends Riven's API key instead of a session.
- */
 export const { query } = registerApolloClient(
   () =>
     new ApolloClient({

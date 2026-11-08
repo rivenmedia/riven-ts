@@ -30,13 +30,6 @@ function decodeToken(token: string) {
   }
 }
 
-/**
- * Identifies the caller from the request's `Authorization` header or session cookie.
- *
- * A bearer token other than the API key is checked as a better-auth session token,
- * so the frontend can forward its session cookie as an authorisation header.
- * A missing or invalid credential identifies the caller as anonymous.
- */
 export async function resolvePrincipal(headers: Headers): Promise<Principal> {
   const token = bearerTokenPattern.exec(
     headers.get("authorization")?.trim() ?? "",
@@ -51,8 +44,6 @@ export async function resolvePrincipal(headers: Headers): Promise<Principal> {
   if (token !== undefined) {
     const { authCookies } = await auth.$context;
 
-    // Decoding first accepts the cookie value raw or URL-encoded,
-    // and encoding stops a `;` in the token from adding cookies.
     sessionHeaders.set(
       "cookie",
       `${authCookies.sessionToken.name}=${encodeURIComponent(decodeToken(token))}`,
@@ -61,8 +52,6 @@ export async function resolvePrincipal(headers: Headers): Promise<Principal> {
 
   const session = await auth.api.getSession({
     headers: sessionHeaders,
-    // The cached session in the `session_data` cookie can be up to a minute old,
-    // which would delay a ban or role change.
     query: { disableCookieCache: true },
   });
 

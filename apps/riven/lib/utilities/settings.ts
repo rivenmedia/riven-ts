@@ -66,10 +66,6 @@ function parseBootstrapSettings() {
   return parsedSettings;
 }
 
-/**
- * The env-only bootstrap settings, available as soon as this module loads.
- *
- * `apiKey` is generated when the environment does not set one.
- */
+/** The env-only bootstrap settings, available as soon as this module loads. */
 export const settings: ReadonlyDeep<RivenSettings & { apiKey: string }> =
   parseBootstrapSettings();
