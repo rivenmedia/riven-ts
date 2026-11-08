@@ -3,8 +3,9 @@ import { tmpdir } from "node:os";
 import path from "node:path";
 import { it as baseIt, describe, expect } from "vitest";
 
+import { defaultPreset } from "#ranking/presets/default-preset.ts";
+
 import { loadRankingConfig } from "./load-ranking-config.ts";
-import { defaultPreset } from "./presets/default-preset.ts";
 
 import type { RankingConfigFileContents } from "./ranking-config.schema.ts";
 import type { PartialDeep } from "type-fest";

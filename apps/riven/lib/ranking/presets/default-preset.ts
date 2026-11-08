@@ -1,5 +1,4 @@
-import type { RawRankingConfig } from "#ranking-config/ranking-config.schema.ts";
-import type { PartialDeep } from "type-fest";
+import type { RankingProfileConfig } from "../ranking-profile-config.schema.ts";
 
 export const defaultPreset =
   //#region default-preset
@@ -57,4 +56,4 @@ export const defaultPreset =
       },
     },
     //#endregion
-  } satisfies PartialDeep<RawRankingConfig>;
+  } satisfies RankingProfileConfig;

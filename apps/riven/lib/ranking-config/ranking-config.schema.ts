@@ -12,13 +12,13 @@ import { presets } from "./presets/index.ts";
 const RankingModelPreset = z.enum(["default"]);
 const RankingModel = z.union([RankingModelSchema, RankingModelPreset]);
 
-export const RawRankingConfig = z.strictObject({
+const RawRankingConfig = z.strictObject({
   $schema: z.string().optional(),
   settings: Settings.optional(),
   rankingModel: RankingModel.default("default"),
 });
 
-export type RawRankingConfig = z.infer<typeof RawRankingConfig>;
+type RawRankingConfig = z.infer<typeof RawRankingConfig>;
 
 export const RankingConfig = RawRankingConfig.transform((data) => {
   if (typeof data.rankingModel === "string") {
