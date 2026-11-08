@@ -1,17 +1,11 @@
 "use client";
 
-import { RankingModelSchemaMetadata } from "@repo/util-rank-torrent-name";
-
-import { FormProvider, useForm } from "react-hook-form";
+import { ChevronRight } from "lucide-react";
+import Link from "next/link";
 
 import { Button } from "#components/_ui/button.tsx";
-import { RankingModelSchema } from "#components/settings/ranking-tab/ranking-tab.form-schema.ts";
-import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
 
 import { RankingProfileCard } from "./ranking-profile-card.tsx";
-
-import type { RankingModel } from "#components/settings/ranking-tab/ranking-tab.form-schema.ts";
-import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export interface RankingProfilesTabProps {
   selectedProfile: string;
@@ -20,28 +14,6 @@ export interface RankingProfilesTabProps {
 export function RankingProfilesTab({
   selectedProfile,
 }: RankingProfilesTabProps) {
-  const defaultValues: Partial<RankingModel> = {};
-  const settingCategories: Record<string, SettingFieldProps[]> = {};
-
-  for (const [key, field] of Object.entries(RankingModelSchema.shape)) {
-    const meta = RankingModelSchemaMetadata.parse(field.meta());
-
-    settingCategories[meta.category] ??= [];
-    settingCategories[meta.category]?.push({
-      type: "custom_rank",
-      config: {
-        label: key,
-        name: key,
-      },
-    });
-
-    defaultValues[key as keyof RankingModel] = null;
-  }
-
-  const form = useForm({ defaultValues });
-
-  const { isDirty } = form.formState;
-
   return (
     <div className="space-y-4">
       <div>
@@ -53,6 +25,11 @@ export function RankingProfilesTab({
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <RankingProfileCard
+          title="Performant"
+          description="Optimised for streaming performance."
+          isSelected={selectedProfile === "performant"}
+        />
+        <RankingProfileCard
           title="Balanced"
           description="A good mix of quality and size."
           isSelected={selectedProfile === "balanced"}
@@ -62,31 +39,18 @@ export function RankingProfilesTab({
           description="Highest resolution and bitrate."
           isSelected={selectedProfile === "best-quality"}
         />
-        <RankingProfileCard
-          title="Custom"
-          description="Customise your ranking settings."
-          isSelected={selectedProfile === "custom"}
-        />
       </div>
-      <FormProvider {...form}>
-        {selectedProfile === "custom" && (
-          <>
-            {Object.entries(settingCategories).map(([category, fields]) => (
-              <SettingField
-                key={category}
-                type="group"
-                config={{
-                  name: category,
-                  schema: fields,
-                }}
-              />
-            ))}
-            <Button disabled={!isDirty} type="submit">
-              Save ranking settings
-            </Button>
-          </>
-        )}
-      </FormProvider>
+      <div className="flex justify-between items-center">
+        <h2 className="text-lg font-semibold">Custom Profiles</h2>
+        <Button asChild>
+          <Link href="/settings/ranking/profile/create">
+            Create Custom Profile <ChevronRight />
+          </Link>
+        </Button>
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        Custom profiles list
+      </div>
     </div>
   );
 }
