@@ -48,6 +48,21 @@ async function readConfigFile(resolvedPath: string) {
   }
 }
 
+async function findFreeImportedName(
+  rankingProfileService: RankingProfileService,
+) {
+  for (let attempt = 1; ; attempt++) {
+    const candidate =
+      attempt === 1
+        ? IMPORTED_PROFILE_NAME
+        : `${IMPORTED_PROFILE_NAME} ${String(attempt)}`;
+
+    if (!(await rankingProfileService.nameExists(candidate))) {
+      return candidate;
+    }
+  }
+}
+
 function toLeafValues(settings: SettingsInput) {
   return flattenSettings(
     RankingSettingsSection,
@@ -125,8 +140,10 @@ export async function importLegacyRankingConfig({
     return "imported";
   }
 
+  // Created before the marker is written, so a crash in between only leaves an
+  // unused profile; the next boot imports again under a free name.
   const profile = await rankingProfileService.create({
-    name: IMPORTED_PROFILE_NAME,
+    name: await findFreeImportedName(rankingProfileService),
     description: `Imported from "${resolvedPath}".`,
     config: sparsifyProfileConfig({ rankingModel, settings }),
   });

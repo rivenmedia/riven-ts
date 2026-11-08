@@ -133,6 +133,28 @@ describe("when the file names a preset", () => {
       r720p: false,
     });
   });
+
+  it("drops the preset's whole resolutions group when the file sets one resolution", async ({
+    deps,
+    defaultProfileId,
+    services: { settingsService },
+  }) => {
+    await writeConfigFile(deps.filePath, {
+      rankingModel: "default",
+      settings: { resolutions: { r1080p: false } },
+    });
+
+    await importLegacyRankingConfig(deps);
+
+    await expect(
+      settingsService.getStoredValues(RANKING_NAMESPACE),
+    ).resolves.toStrictEqual({
+      activeProfileId: defaultProfileId,
+      legacyConfigImported: true,
+      r1080p: false,
+      r2160p: false,
+    });
+  });
 });
 
 describe("when the file holds a custom ranking model", () => {
@@ -183,6 +205,38 @@ describe("when the file holds a custom ranking model", () => {
 
     expect(profile?.rankingModel).toStrictEqual({ av1: 1 });
     expect(profile?.settings).toStrictEqual({ resolutions: { r720p: false } });
+  });
+});
+
+describe("when a custom profile is already named Imported", () => {
+  it("creates the imported profile under the next free name", async ({
+    deps,
+    defaultProfileId: _defaultProfileId,
+    services: { rankingProfileService, settingsService },
+  }) => {
+    const existing = await rankingProfileService.create({
+      name: "Imported",
+      description: null,
+      config: {},
+    });
+
+    await writeConfigFile(deps.filePath, { rankingModel: { av1: 1 } });
+
+    await expect(importLegacyRankingConfig(deps)).resolves.toBe("imported");
+
+    const profiles = await rankingProfileService.list();
+    const imported = profiles.find(({ name }) => name === "Imported 2");
+
+    expect(imported).toMatchObject({ rankingModel: { av1: 1 } });
+    await expect(
+      rankingProfileService.findById(existing.id),
+    ).resolves.toMatchObject({ name: "Imported", rankingModel: {} });
+    await expect(
+      settingsService.getStoredValues(RANKING_NAMESPACE),
+    ).resolves.toStrictEqual({
+      activeProfileId: imported?.id,
+      legacyConfigImported: true,
+    });
   });
 });
 
