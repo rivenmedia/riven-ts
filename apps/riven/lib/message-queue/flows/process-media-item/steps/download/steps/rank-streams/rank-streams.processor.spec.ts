@@ -7,7 +7,8 @@ import {
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
-import * as rankingConfigModule from "#ranking-config/ranking-config.ts";
+import * as rankingEngineModule from "#ranking/ranking-engine.ts";
+import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
 
 import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
@@ -18,7 +19,8 @@ const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
 );
 
 it.beforeEach(() => {
-  vi.spyOn(rankingConfigModule, "rtnInstance", "get").mockReturnValue(
+  invalidateRankingEngine();
+  vi.spyOn(rankingEngineModule, "getRankingEngine").mockResolvedValue(
     new RTN(
       createRankingModel({
         bluray: 0,
@@ -256,6 +258,54 @@ it("handles foreign language shows with aliases correctly", async ({
       }),
     }),
   ]);
+});
+
+it("uses one engine snapshot for the whole job", async ({
+  createMockJob,
+  indexedMovieContext: { indexedMovie },
+  mockSentryScope,
+  streams,
+  services,
+}) => {
+  expect.assert(streams[0]);
+  expect.assert(streams[1]);
+  expect.assert(streams[2]);
+
+  const engine = await rankingEngineModule.getRankingEngine({
+    ...services,
+    environment: {},
+  });
+  const rankTorrent = vi
+    .spyOn(engine, "rankTorrent")
+    .mockImplementation((...args) => {
+      invalidateRankingEngine();
+
+      return RTN.prototype.rankTorrent.apply(engine, args);
+    });
+
+  vi.mocked(rankingEngineModule.getRankingEngine).mockClear();
+  vi.mocked(rankingEngineModule.getRankingEngine).mockResolvedValue(engine);
+
+  const job = await createMockJob({
+    id: indexedMovie.id,
+    streams: {
+      [streams[0].infoHash]: `${indexedMovie.title} 720p`,
+      [streams[1].infoHash]: `${indexedMovie.title} 1080p`,
+      [streams[2].infoHash]: indexedMovie.title,
+    },
+  });
+
+  await rankStreamsProcessor(
+    { job, scope: mockSentryScope },
+    {
+      sendEvent: vi.fn<MainRunnerMachineIntake>(),
+      services,
+      plugins: new Map(),
+    },
+  );
+
+  expect(rankingEngineModule.getRankingEngine).toHaveBeenCalledOnce();
+  expect(rankTorrent).toHaveBeenCalledTimes(3);
 });
 
 it.todo(
