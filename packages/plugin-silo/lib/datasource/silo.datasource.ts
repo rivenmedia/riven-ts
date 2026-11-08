@@ -1,9 +1,24 @@
-import { BaseDataSource } from "@repo/util-plugin-sdk";
+import { BaseDataSource, DataSourceHTTPError } from "@repo/util-plugin-sdk";
+
+import path from "node:path";
 
 import { ScanCapabilitiesResponse } from "../schemas/scan-capabilities-response.schema.ts";
+import { ScanStartResponse } from "../schemas/scan-start-response.schema.ts";
 
 import type { SiloSettings } from "../silo-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
+
+class SiloAPIError extends Error {
+  public override name = "SiloAPIError";
+}
+
+const scanErrorReasons: Partial<Record<number, string>> = {
+  400: "the path is not inside a Silo library, does not exist, cannot be read by Silo, or matches more than one library",
+  401: "the API key is missing, invalid or expired",
+  403: "the API key does not belong to an administrator",
+  409: "the library is disabled, or the path's state conflicts with the scan",
+  503: "the Silo scanner is not available",
+};
 
 export class SiloAPI extends BaseDataSource<SiloSettings> {
   public override baseURL = this.settings.siloServerUrl;
@@ -15,6 +30,31 @@ export class SiloAPI extends BaseDataSource<SiloSettings> {
   ): void {
     requestOpts.headers["authorization"] = `Bearer ${this.settings.siloApiKey}`;
     requestOpts.headers["accept"] = "application/json";
+  }
+
+  public async scanPath(subPath: string) {
+    const scanPath = path.join(this.settings.siloLibraryPath, subPath);
+
+    try {
+      const response = await this.post<unknown>("api/v2/scan", {
+        body: { path: scanPath },
+      });
+
+      const { mode, library_id: libraryId } = ScanStartResponse.parse(response);
+
+      this.logger.debug(
+        `Silo accepted ${mode} scan of ${scanPath} in library ${libraryId}`,
+      );
+    } catch (error) {
+      const reason =
+        error instanceof DataSourceHTTPError
+          ? (scanErrorReasons[error.response.status] ?? error.message)
+          : (error as Error).message;
+
+      throw new SiloAPIError(`Failed to scan ${scanPath}: ${reason}`, {
+        cause: error,
+      });
+    }
   }
 
   public override async validate() {
