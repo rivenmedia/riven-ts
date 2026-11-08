@@ -290,12 +290,79 @@ export const bootstrapMachine = setup({
               environment: coreEnvironment,
             };
           },
+          onDone: [
+            {
+              target: "Applying mock scenario",
+              guard: "hasMockScenario",
+              actions: {
+                type: "log",
+                params: ({ context: { mockScenario } }) => {
+                  assert.ok(mockScenario);
+
+                  return {
+                    message: `Runtime settings loaded. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
+                  };
+                },
+              },
+            },
+            {
+              target: "Syncing ranking profiles",
+              actions: {
+                type: "log",
+                params: {
+                  message: "Runtime settings loaded.",
+                },
+              },
+            },
+          ],
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to load runtime settings during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Applying mock scenario": {
+        entry: {
+          type: "log",
+          params: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return {
+              message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
+            };
+          },
+        },
+        invoke: {
+          id: "applyMockScenario",
+          src: "applyMockScenario",
+          input: ({ context: { mockScenario } }) => {
+            assert.ok(mockScenario);
+
+            return { mockScenario };
+          },
           onDone: {
             target: "Syncing ranking profiles",
             actions: {
               type: "log",
-              params: {
-                message: "Runtime settings loaded.",
+              params: ({ context: { mockScenario } }) => {
+                assert.ok(mockScenario);
+
+                return {
+                  message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
+                };
               },
             },
           },
@@ -305,7 +372,7 @@ export const bootstrapMachine = setup({
               {
                 type: "log",
                 params: ({ event: { error } }) => ({
-                  message: "Failed to load runtime settings during bootstrap.",
+                  message: "Failed to apply mock scenario during bootstrap.",
                   level: "error",
                   error,
                 }),
@@ -340,31 +407,15 @@ export const bootstrapMachine = setup({
               legacyConfigPath: settings.rankingConfigPath,
             };
           },
-          onDone: [
-            {
-              target: "Applying mock scenario",
-              guard: "hasMockScenario",
-              actions: {
-                type: "log",
-                params: ({ context: { mockScenario } }) => {
-                  assert.ok(mockScenario);
-
-                  return {
-                    message: `Ranking profiles synced. Mock scenario "${mockScenario.scenarioName}" will be applied.`,
-                  };
-                },
+          onDone: {
+            target: "Bootstrapping plugins",
+            actions: {
+              type: "log",
+              params: {
+                message: "Ranking profiles synced.",
               },
             },
-            {
-              target: "Bootstrapping plugins",
-              actions: {
-                type: "log",
-                params: {
-                  message: "Ranking profiles synced.",
-                },
-              },
-            },
-          ],
+          },
           onError: {
             target: "Errored",
             actions: [
@@ -372,57 +423,6 @@ export const bootstrapMachine = setup({
                 type: "log",
                 params: ({ event: { error } }) => ({
                   message: "Failed to sync ranking profiles during bootstrap.",
-                  level: "error",
-                  error,
-                }),
-              },
-              {
-                type: "raiseError",
-                params: ({ event }) => event.error as Error,
-              },
-            ],
-          },
-        },
-      },
-      "Applying mock scenario": {
-        entry: {
-          type: "log",
-          params: ({ context: { mockScenario } }) => {
-            assert.ok(mockScenario);
-
-            return {
-              message: `Applying mock scenario "${mockScenario.scenarioName}"...`,
-            };
-          },
-        },
-        invoke: {
-          id: "applyMockScenario",
-          src: "applyMockScenario",
-          input: ({ context: { mockScenario } }) => {
-            assert.ok(mockScenario);
-
-            return { mockScenario };
-          },
-          onDone: {
-            target: "Bootstrapping plugins",
-            actions: {
-              type: "log",
-              params: ({ context: { mockScenario } }) => {
-                assert.ok(mockScenario);
-
-                return {
-                  message: `Mock scenario "${mockScenario.scenarioName}" applied successfully.`,
-                };
-              },
-            },
-          },
-          onError: {
-            target: "Errored",
-            actions: [
-              {
-                type: "log",
-                params: ({ event: { error } }) => ({
-                  message: "Failed to apply mock scenario during bootstrap.",
                   level: "error",
                   error,
                 }),

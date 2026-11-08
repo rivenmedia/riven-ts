@@ -69,7 +69,10 @@ it("falls back to default when the active preset was removed", async ({
 
   await expect(
     settingsService.getStoredValues(RANKING_NAMESPACE),
-  ).resolves.toStrictEqual({ excludedPatterns: ["cam"] });
+  ).resolves.toStrictEqual({
+    excludedPatterns: ["cam"],
+    legacyConfigImported: true,
+  });
   expect(warnSpy).toHaveBeenCalledWith(
     'Ranking profile "retired" no longer exists; using the default profile.',
   );
@@ -98,7 +101,10 @@ it("keeps the active profile when it still exists", async ({
 
   await expect(
     settingsService.getStoredValues(RANKING_NAMESPACE),
-  ).resolves.toStrictEqual({ activeProfileId: custom.id });
+  ).resolves.toStrictEqual({
+    activeProfileId: custom.id,
+    legacyConfigImported: true,
+  });
   expect(warnSpy).not.toHaveBeenCalled();
 });
 

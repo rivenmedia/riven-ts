@@ -1,6 +1,12 @@
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import path from "node:path";
 import { describe, expect, vi } from "vitest";
-import { fromPromise, toPromise } from "xstate";
+import { createActor, createEmptyActor, fromPromise, toPromise } from "xstate";
 
+import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenario.ts";
+import { DEFAULT_PRESET_SLUG } from "#ranking/presets/index.ts";
+import { syncRankingProfiles as realSyncRankingProfiles } from "#state-machines/bootstrap/actors/sync-ranking-profiles.actor.ts";
 import { settings } from "#utilities/settings.ts";
 
 import { it } from "./helpers/test-context.ts";
@@ -71,5 +77,62 @@ describe("when syncing ranking profiles fails", () => {
     await expect(toPromise(actor.start())).rejects.toThrow(
       "Invalid ranking config file",
     );
+  });
+});
+
+describe("when a mock scenario is applied", () => {
+  it.override({
+    input: {
+      rootRef: createEmptyActor(),
+      mainRunnerRef: createEmptyActor(),
+      mockScenario: deadStreamLinkScenario,
+    },
+    // The real sync, pointed at a legacy config path that does not exist.
+    syncRankingProfilesActorLogic: fromPromise<
+      undefined,
+      SyncRankingProfilesInput
+    >(async ({ input }) => {
+      const dir = await mkdtemp(path.join(tmpdir(), "riven-bootstrap-sync-"));
+
+      try {
+        await toPromise(
+          createActor(realSyncRankingProfiles, {
+            input: {
+              ...input,
+              legacyConfigPath: path.join(dir, "missing.json"),
+            },
+          }).start(),
+        );
+      } finally {
+        await rm(dir, { recursive: true });
+      }
+    }),
+  });
+
+  it("syncs ranking profiles after the scenario resets the database", async ({
+    actor,
+    services,
+  }) => {
+    const visitedStates: unknown[] = [];
+
+    actor.subscribe(({ value }) => {
+      if (visitedStates.at(-1) !== value) {
+        visitedStates.push(value);
+      }
+    });
+
+    await toPromise(actor.start());
+
+    const syncIndex = visitedStates.indexOf("Syncing ranking profiles");
+
+    expect(syncIndex).toBeGreaterThan(
+      visitedStates.indexOf("Applying mock scenario"),
+    );
+    expect(syncIndex).toBeLessThan(
+      visitedStates.indexOf("Bootstrapping plugins"),
+    );
+    await expect(
+      services.rankingProfileService.findBySlug(DEFAULT_PRESET_SLUG),
+    ).resolves.toMatchObject({ builtIn: true });
   });
 });

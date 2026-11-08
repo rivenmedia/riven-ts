@@ -241,7 +241,7 @@ describe("when a custom profile is already named Imported", () => {
 });
 
 describe("when the import does not apply", () => {
-  it("skips when the file is missing", async ({
+  it("skips when the file is missing and marks the import as done", async ({
     deps,
     services: { settingsService },
   }) => {
@@ -251,7 +251,27 @@ describe("when the import does not apply", () => {
 
     await expect(
       settingsService.getStoredValues(RANKING_NAMESPACE),
-    ).resolves.toStrictEqual({});
+    ).resolves.toStrictEqual({ legacyConfigImported: true });
+  });
+
+  it("never imports a file that appears after a boot without one", async ({
+    deps,
+    defaultProfileId: _defaultProfileId,
+    services: { rankingProfileService },
+  }) => {
+    await expect(importLegacyRankingConfig(deps)).resolves.toBe(
+      "skipped-no-file",
+    );
+
+    await writeConfigFile(deps.filePath, { rankingModel: { av1: 1 } });
+
+    await expect(importLegacyRankingConfig(deps)).resolves.toBe(
+      "skipped-already-imported",
+    );
+
+    const profiles = await rankingProfileService.list();
+
+    expect(profiles.some(({ name }) => name === "Imported")).toBe(false);
   });
 
   it("never imports twice", async ({

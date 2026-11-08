@@ -108,6 +108,13 @@ export async function importLegacyRankingConfig({
   const raw = await readConfigFile(resolvedPath);
 
   if (raw === null) {
+    // Marked as done so a file that appears later never overrides profiles
+    // configured in the UI.
+    await settingsService.writeValues(RANKING_NAMESPACE, {
+      upsert: { legacyConfigImported: true },
+      delete: [],
+    });
+
     return "skipped-no-file";
   }
 
