@@ -89,6 +89,15 @@ mkdir -p packages/plugin-seerr/docker-data/seerr
 sudo chown -R $UID:$GID packages/plugin-seerr/docker-data
 ```
 
+`silo` reads its media and data paths from `SILO_MEDIA_ROOT`, `SILO_MEDIA_CONTAINER_ROOT`, and `SILO_DATA_ROOT` in the root `.env`, as in `.env.example`. Without `SILO_MEDIA_ROOT`, every `docker compose` command fails. Silo's other settings come from `packages/plugin-silo/.env.silo`, and Silo refuses to start without a `SECRET_KEY` there:
+
+```bash
+cp packages/plugin-silo/.env.silo.example packages/plugin-silo/.env.silo
+printf '\nSECRET_KEY=%s\n' "$(openssl rand -base64 48)" >> packages/plugin-silo/.env.silo
+```
+
+`packages/plugin-silo/docker-compose.yaml` and `.env.silo.example` are copies of Silo's `docker-compose.yml` and `.env.example`, so they are easy to update. Lines marked `Riven:` show where they differ.
+
 ```bash
 turbo codegen:api-schemas
 ```
@@ -108,6 +117,7 @@ This will run the services & analytics:
 - `stremthru`
 - `seerr` - for requesting media - <http://localhost:5055>
 - `plex` - media server - <http://localhost:32400>
+- `silo` - media server - <http://localhost:8090>
 
 Then, you can start the riven app in dev mode,
 
