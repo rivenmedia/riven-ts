@@ -68,7 +68,7 @@ it("applies global ranking settings over the profile", async ({ deps }) => {
 
   expect(() =>
     rtn.rankTorrent("Some Movie 2020 1080p", "b".repeat(40), "Some Movie", {}),
-  ).toThrow();
+  ).toThrow(/Garbage torrent detected/u);
 });
 
 it("uses the active profile's settings when no global overrides are stored", async ({

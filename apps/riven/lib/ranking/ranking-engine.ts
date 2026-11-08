@@ -17,13 +17,12 @@ import {
 import { resolveEffectiveRankingConfig } from "./resolve-effective-ranking-config.ts";
 
 import type { ActiveRankingProfileDeps } from "./get-active-ranking-profile.ts";
-import type { RankingSettingsSectionInput } from "./ranking-settings-section.schema.ts";
 
 export interface RankingEngineDeps extends ActiveRankingProfileDeps {
   environment: Readonly<Record<string, string>>;
 }
 
-let cached: Promise<RTN> | undefined;
+let cached: Promise<RTN> | null = null;
 
 async function buildRankingEngine({
   rankingProfileService,
@@ -92,7 +91,7 @@ export function getRankingEngine(deps: RankingEngineDeps): Promise<RTN> {
     // A failed build must not poison the cache.
     build.catch(() => {
       if (cached === build) {
-        cached = undefined;
+        cached = null;
       }
     });
   }
@@ -101,5 +100,5 @@ export function getRankingEngine(deps: RankingEngineDeps): Promise<RTN> {
 }
 
 export function invalidateRankingEngine(): void {
-  cached = undefined;
+  cached = null;
 }
