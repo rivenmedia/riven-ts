@@ -1,3 +1,5 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
+
 import { createReadStream } from "node:fs";
 import { createInterface } from "node:readline";
 import { Mutation, Resolver } from "type-graphql";
@@ -11,6 +13,7 @@ const ELASTICSEARCH_URL = "https://elastic.dev.riven.tv";
 const ELASTICSEARCH_AUTH = `Basic ${Buffer.from("riven_log_uploader:riven-shared-logs-upload-only").toString("base64")}`;
 const INDEX_NAME = "riven-shared-logs";
 
+@RequirePermissions({ instance: ["manage-settings"] })
 @Resolver()
 export class ShareLogsResolver {
   @Mutation(() => String, {

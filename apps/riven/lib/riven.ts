@@ -64,7 +64,8 @@ export async function riven() {
     const { createRivenMachine } =
       await import("./state-machines/program/index.ts");
     const { logger } = await import("./utilities/logger/logger.ts");
-    const { settings } = await import("./utilities/settings.ts");
+    const { coreEnvironment, settings } =
+      await import("./utilities/settings.ts");
 
     const shutdownTimeoutMs = Duration.fromObject({
       seconds: settings.shutdownTimeoutSeconds,
@@ -73,6 +74,12 @@ export async function riven() {
     if (mockScenario) {
       logger.warn(
         `Mocks are enabled with the "${mockScenario.scenarioName}" scenario.`,
+      );
+    }
+
+    if (coreEnvironment["apiKey"] === undefined) {
+      logger.warn(
+        "RIVEN_SETTING__apiKey is not set, so Riven generated an API key for this run. External callers such as Seerr and the TUI cannot authenticate until a key is set.",
       );
     }
 

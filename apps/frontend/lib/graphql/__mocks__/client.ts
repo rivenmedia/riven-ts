@@ -2,20 +2,11 @@ import { HttpLink } from "@apollo/client";
 import { ApolloClient, InMemoryCache } from "@apollo/client-integration-nextjs";
 
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
+import { cacheOptions } from "#lib/graphql/cache-options.ts";
 
 const createClient = () =>
   new ApolloClient({
-    cache: new InMemoryCache({
-      possibleTypes: {
-        MediaItem: ["Movie", "Show", "Season", "Episode"],
-        ShowLikeMediaItem: ["Show", "Season", "Episode"],
-      },
-      typePolicies: {
-        TmdbIndexerData: {
-          keyFields: ["type", "id"],
-        },
-      },
-    }),
+    cache: new InMemoryCache(cacheOptions),
     link: new HttpLink({
       uri: new URL("/graphql", privateEnvironment.BACKEND_URL).toString(),
     }),

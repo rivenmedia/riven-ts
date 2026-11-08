@@ -1,3 +1,5 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
+
 import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
@@ -13,6 +15,7 @@ const toResult = (issues: SettingsIssue[]): SettingsMutationResult => ({
   issues,
 });
 
+@RequirePermissions({ instance: ["manage-settings"] })
 @Resolver()
 export class SettingsResolver {
   @Query(() => SettingsSection)

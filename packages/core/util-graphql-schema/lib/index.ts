@@ -5,7 +5,10 @@ import { registerEnums } from "./register-enums.ts";
 
 import type { BuildSchemaOptions } from "type-graphql";
 
-export const buildSchema = async (options: BuildSchemaOptions) => {
+export const buildSchema = async (
+  options: BuildSchemaOptions &
+    Required<Pick<BuildSchemaOptions, "authChecker">>,
+) => {
   registerEnums();
 
   return baseBuildSchema({

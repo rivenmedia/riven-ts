@@ -2,6 +2,7 @@ import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   Arg,
+  Authorized,
   FieldResolver,
   ID,
   Int,
@@ -17,6 +18,7 @@ import type { SubscribeResolverData } from "type-graphql";
 
 @Resolver(() => Season)
 export class SeasonResolver {
+  @Authorized()
   @Subscription(() => Season, {
     description:
       "Emits the season for the given ID whenever its state, or the state of any of its episodes, changes.",

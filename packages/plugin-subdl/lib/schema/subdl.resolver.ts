@@ -1,10 +1,11 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { SubdlAPI } from "../datasource/subdl.datasource.ts";
 import { pluginConfig } from "../subdl-plugin.config.ts";
 
+@Authorized()
 @Resolver()
 export class SubdlResolver {
   @Query((_returns) => Boolean)

@@ -9,5 +9,5 @@ export const buildMockServer = async <Context extends BaseContext>(
   options: Pick<Parameters<typeof buildSchema>[0], "resolvers" | "pubSub">,
 ) =>
   new ApolloServer<Context>({
-    schema: await buildSchema(options),
+    schema: await buildSchema({ ...options, authChecker: () => true }),
   });

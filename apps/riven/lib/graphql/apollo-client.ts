@@ -1,5 +1,7 @@
 import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 
+import { settings } from "#utilities/settings.ts";
+
 import type { StoreObject } from "@apollo/client";
 import type { URL } from "node:url";
 
@@ -49,6 +51,9 @@ export function initApolloClient(uri: URL, signal?: AbortSignal) {
     assumeImmutableResults: true,
     link: new HttpLink({
       uri: uri.toString(),
+      headers: {
+        authorization: `Bearer ${settings.apiKey}`,
+      },
       fetchOptions: {
         signal: signal ?? null,
       },

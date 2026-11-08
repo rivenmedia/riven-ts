@@ -97,6 +97,7 @@
   },
   "dependencies": {
     "@mikro-orm/decorators": "catalog:",
+    "@repo/util-auth": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",

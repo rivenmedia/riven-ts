@@ -1,7 +1,7 @@
 import { cacheLife } from "next/cache";
 
 import { CastSection } from "#app/(protected)/details/media/_components/cast-section.tsx";
-import { query } from "#lib/graphql/client.ts";
+import { query } from "#lib/graphql/service-client.ts";
 
 import { GET_ITEM_CAST } from "./_queries/get-item-cast.query";
 

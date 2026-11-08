@@ -17,6 +17,7 @@ import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import type { Services } from "#database/database.ts";
+import type { Principal } from "#graphql/auth/principal.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
@@ -59,6 +60,8 @@ const fixtureInstalledPlugins: InstalledPlugin[] = [
     alwaysEnabled: true,
   },
 ];
+
+const servicePrincipal: Principal = { kind: "service" };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -335,7 +338,7 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (): ApolloServerContext => {
+      (principal: Principal = servicePrincipal): ApolloServerContext => {
         const settingsManager = new SettingsManager({
           settingsService: services.settingsService,
           sections: buildSettingsSections({
@@ -350,6 +353,7 @@ export const it = testBase
         return {
           [CoreKey]: {
             em: orm.em.fork(),
+            principal,
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,
@@ -388,9 +392,10 @@ export const it = testBase
   )
   .extend("gqlSchema", { scope: "file" }, async () => {
     const { buildSchema } = await import("@repo/core-util-graphql-schema");
+    const { authChecker } = await import("#graphql/auth/auth-checker.ts");
     const { resolvers } = await import("#graphql/resolvers/index.ts");
 
-    return buildSchema({ resolvers, pubSub });
+    return buildSchema({ resolvers, pubSub, authChecker });
   })
   .extend(
     "gqlSubscribe",

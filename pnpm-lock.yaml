@@ -2658,6 +2658,9 @@ importers:
       '@mikro-orm/decorators':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))(reflect-metadata@0.2.2)
+      '@repo/util-auth':
+        specifier: workspace:^
+        version: link:../util-auth
       '@repo/util-rank-torrent-name':
         specifier: workspace:^
         version: link:../util-rank-torrent-name

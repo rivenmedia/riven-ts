@@ -1,8 +1,10 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   Arg,
   Args,
+  Authorized,
   Ctx,
   ID,
   Mutation,
@@ -26,6 +28,7 @@ import type { SubscribeResolverData } from "type-graphql";
 
 @Resolver(() => ItemRequest)
 export class ItemRequestResolver {
+  @Authorized()
   @Subscription(() => ID, {
     description:
       "Emits the ID of the item request with the given external ID whenever it is created, updated, indexed or removed. Only the first provided external ID is used, in the order TMDB, TVDB, IMDB.",
@@ -47,6 +50,7 @@ export class ItemRequestResolver {
     return itemRequestId;
   }
 
+  @Authorized()
   @Query(() => ItemRequest, { nullable: true })
   public async itemRequestByExternalIds(
     @CoreContext() { services: { itemRequestService } }: CoreContext,
@@ -55,6 +59,7 @@ export class ItemRequestResolver {
     return itemRequestService.getItemRequestByExternalIds(externalIds);
   }
 
+  @RequirePermissions({ item: ["request"] })
   @Mutation(() => Boolean)
   public requestItem(
     @Arg("input", () => RequestItemInput)
@@ -77,6 +82,7 @@ export class ItemRequestResolver {
     return true;
   }
 
+  @RequirePermissions({ item: ["delete"] })
   @Mutation(() => Boolean)
   public async removeItemRequest(
     @Arg("itemRequestId", () => ID) itemRequestId: UUID,

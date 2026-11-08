@@ -2,7 +2,7 @@
 
 import { cacheLife } from "next/cache";
 
-import { query } from "#lib/graphql/client.ts";
+import { query } from "#lib/graphql/service-client.ts";
 
 import { GET_SEASON } from "../_queries/get-season.query.ts";
 
