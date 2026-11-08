@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import { RivenSettings } from "#riven-settings.schema.ts";
 import { RuntimeSettings } from "#settings/core-settings-sections.ts";
+import { buildSectionJsonSchema } from "#settings/utilities/build-section-json-schema.ts";
 import {
   getLeafDefault,
   getLeafPaths,
@@ -48,6 +49,38 @@ describe("ranking settings section adapter", () => {
     expect(getLeafDefault(RankingSettingsSection, "titleSimilarity")).toBe(
       0.85,
     );
+  });
+
+  it("serves a title for each group", () => {
+    const { properties = {} } = buildSectionJsonSchema(
+      RankingSettingsSection,
+      new Map(),
+    );
+
+    expect(
+      Object.fromEntries(
+        Object.entries(properties).map(([group, node]) => [
+          group,
+          typeof node === "object"
+            ? { title: node.title, description: node.description }
+            : undefined,
+        ]),
+      ),
+    ).toStrictEqual({
+      patterns: { title: "Patterns", description: undefined },
+      resolutions: {
+        title: "Resolutions",
+        description: "Enable / disable specific resolutions",
+      },
+      options: {
+        title: "Options",
+        description: "Configure various options for torrent ranking",
+      },
+      languages: {
+        title: "Languages",
+        description: "Configure language preferences for torrents",
+      },
+    });
   });
 
   it("is titled for the settings UI", () => {

@@ -33,10 +33,12 @@ const meta = preview.meta({
                   options: {
                     type: "object",
                     title: "Options",
+                    description:
+                      "Configure various options for torrent ranking",
                     properties: {
                       removeAllTrash: {
                         type: "boolean",
-                        title: "Remove All Trash",
+                        title: "Remove all trash",
                         default: true,
                       },
                     },
@@ -69,6 +71,6 @@ Default.test("Switches to the ranking settings", async ({ canvas }) => {
   await userEvent.click(canvas.getByRole("tab", { name: "Ranking Settings" }));
 
   await expect(
-    await canvas.findByRole("switch", { name: "Remove All Trash" }),
+    await canvas.findByRole("switch", { name: "Remove all trash" }),
   ).toBeChecked();
 });

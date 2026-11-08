@@ -14,28 +14,39 @@ const rankCategory = (title: string, keys: string[]) =>
     .strictObject(Object.fromEntries(keys.map((key) => [key, RankField])))
     .meta({ title });
 
-/** A trimmed copy of the served profile form schema, with a rank or two per category. */
+/**
+ * A trimmed copy of the served profile form schema: the same titles and
+ * structure, with a rank or two per category and one settings group.
+ */
 export const rankingProfileJsonSchema = z.toJSONSchema(
   z.strictObject({
     name: z.string().trim().min(1).meta({ title: "Name" }),
     description: z.string().nullable().meta({ title: "Description" }),
-    ranks: z.strictObject({
-      quality: rankCategory("Quality", ["av1", "remux"]),
-      rips: rankCategory("Rips", ["bdrip"]),
-      hdr: rankCategory("HDR", ["dolbyVision"]),
-      audio: rankCategory("Audio", ["atmos"]),
-      extras: rankCategory("Extras", ["threeD"]),
-      trash: rankCategory("Trash", ["cam"]),
-    }),
+    ranks: z
+      .strictObject({
+        quality: rankCategory("Quality", ["av1", "remux"]),
+        rips: rankCategory("Rips", ["bdrip"]),
+        hdr: rankCategory("HDR", ["dolbyVision"]),
+        audio: rankCategory("Audio", ["atmos"]),
+        extras: rankCategory("Extras", ["threeD"]),
+        trash: rankCategory("Trash", ["cam"]),
+      })
+      .meta({ title: "Ranks" }),
     settings: z
       .strictObject({
         options: z
           .strictObject({
-            removeAllTrash: z.boolean().meta({ title: "Remove All Trash" }),
+            removeAllTrash: z
+              .boolean()
+              .default(true)
+              .meta({ title: "Remove all trash" }),
           })
-          .meta({ title: "Options" }),
+          .meta({
+            title: "Options",
+            description: "Configure various options for torrent ranking",
+          }),
       })
-      .meta({ title: "Ranking Settings" }),
+      .meta({ title: "Settings" }),
   }),
   { io: "input", unrepresentable: "any" },
 ) as Record<string, unknown>;

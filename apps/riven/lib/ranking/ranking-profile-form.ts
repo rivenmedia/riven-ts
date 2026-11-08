@@ -57,19 +57,21 @@ const RANK_KEYS_BY_CATEGORY = Map.groupBy(
   )
   .toArray();
 
-const RankGroups = z.strictObject(
-  Object.fromEntries(
-    RANK_KEYS_BY_CATEGORY.map(([category, keys]) => [
-      category,
-      z
-        .strictObject(Object.fromEntries(keys.map((key) => [key, RankField])))
-        .meta({ title: CATEGORY_TITLES[category] }),
-    ]),
-  ) as Record<
-    RankCategory,
-    z.ZodObject<Record<string, typeof RankField>, z.core.$strict>
-  >,
-);
+const RankGroups = z
+  .strictObject(
+    Object.fromEntries(
+      RANK_KEYS_BY_CATEGORY.map(([category, keys]) => [
+        category,
+        z
+          .strictObject(Object.fromEntries(keys.map((key) => [key, RankField])))
+          .meta({ title: CATEGORY_TITLES[category] }),
+      ]),
+    ) as Record<
+      RankCategory,
+      z.ZodObject<Record<string, typeof RankField>, z.core.$strict>
+    >,
+  )
+  .meta({ title: "Ranks" });
 
 type SettingsGroups = typeof RankingSettingsSection.shape;
 
@@ -91,11 +93,12 @@ const StrictRankingSettings = z
       >;
     },
   )
-  .meta(RankingSettingsSection.meta() ?? {});
+  // Within a profile, "Settings" sits alongside "Ranks"; the groups keep their titles
+  .meta({ title: "Settings" });
 
 const RankingProfileForm = z.strictObject({
-  name: z.string().trim().min(1),
-  description: z.string().nullable(),
+  name: z.string().trim().min(1).meta({ title: "Name" }),
+  description: z.string().nullable().meta({ title: "Description" }),
   ranks: RankGroups,
   settings: StrictRankingSettings,
 });

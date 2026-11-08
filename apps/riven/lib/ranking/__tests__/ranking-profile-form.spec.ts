@@ -51,6 +51,19 @@ it("groups ranks by category with custom_rank widgets", () => {
   expect(child(ranks, "quality", "av1")["widget"]).toBe("custom_rank");
 });
 
+it("serves a title for each field and group outside the ranks", () => {
+  const schema = buildRankingProfileJsonSchema();
+
+  expect(child(schema, "name").title).toBe("Name");
+  expect(child(schema, "description").title).toBe("Description");
+  expect(child(schema, "ranks").title).toBe("Ranks");
+  expect(child(schema, "settings").title).toBe("Settings");
+  expect(child(schema, "settings", "patterns").title).toBe("Patterns");
+  expect(child(schema, "settings", "resolutions").title).toBe("Resolutions");
+  expect(child(schema, "settings", "options").title).toBe("Options");
+  expect(child(schema, "settings", "languages").title).toBe("Languages");
+});
+
 it("lists rank keys in RTN field order within each category", () => {
   const quality = child(buildRankingProfileJsonSchema(), "ranks", "quality");
 

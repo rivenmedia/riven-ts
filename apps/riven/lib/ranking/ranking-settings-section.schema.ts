@@ -6,9 +6,13 @@ import type { SettingsInput } from "@repo/util-rank-torrent-name";
 
 export const RANKING_NAMESPACE = "riven-ranking";
 
-const resolutions = SettingsSchema.shape.resolutions.unwrap().shape;
-const options = SettingsSchema.shape.options.unwrap().shape;
-const languages = SettingsSchema.shape.languages.unwrap().shape;
+const resolutionsGroup = SettingsSchema.shape.resolutions.unwrap();
+const optionsGroup = SettingsSchema.shape.options.unwrap();
+const languagesGroup = SettingsSchema.shape.languages.unwrap();
+
+const resolutions = resolutionsGroup.shape;
+const options = optionsGroup.shape;
+const languages = languagesGroup.shape;
 
 /**
  * Adapter between RTN's settings shape and the settings framework, which only treats
@@ -18,33 +22,42 @@ const languages = SettingsSchema.shape.languages.unwrap().shape;
  */
 export const RankingSettingsSection = z
   .object({
-    patterns: z.object({
-      requiredPatterns: SettingsSchema.shape.require,
-      excludedPatterns: SettingsSchema.shape.exclude,
-      preferredPatterns: SettingsSchema.shape.preferred,
-    }),
-    resolutions: z.object({
-      r2160p: resolutions.r2160p,
-      r1080p: resolutions.r1080p,
-      r720p: resolutions.r720p,
-      r480p: resolutions.r480p,
-      r360p: resolutions.r360p,
-      unknownResolution: resolutions.unknown,
-    }),
-    options: z.object({
-      removeAllTrash: options.removeAllTrash,
-      removeRanksUnder: options.removeRanksUnder,
-      removeUnknownLanguages: options.removeUnknownLanguages,
-      allowEnglishInLanguages: options.allowEnglishInLanguages,
-      removeAdultContent: options.removeAdultContent,
-      titleSimilarity: options.titleSimilarity,
-    }),
-    languages: z.object({
-      requiredLanguages: languages.required,
-      allowedLanguages: languages.allowed,
-      excludedLanguages: languages.exclude,
-      preferredLanguages: languages.preferred,
-    }),
+    patterns: z
+      .object({
+        requiredPatterns: SettingsSchema.shape.require,
+        excludedPatterns: SettingsSchema.shape.exclude,
+        preferredPatterns: SettingsSchema.shape.preferred,
+      })
+      // RTN's patterns are top-level fields, so the group has no RTN meta
+      .meta({ title: "Patterns" }),
+    resolutions: z
+      .object({
+        r2160p: resolutions.r2160p,
+        r1080p: resolutions.r1080p,
+        r720p: resolutions.r720p,
+        r480p: resolutions.r480p,
+        r360p: resolutions.r360p,
+        unknownResolution: resolutions.unknown,
+      })
+      .meta(resolutionsGroup.meta() ?? {}),
+    options: z
+      .object({
+        removeAllTrash: options.removeAllTrash,
+        removeRanksUnder: options.removeRanksUnder,
+        removeUnknownLanguages: options.removeUnknownLanguages,
+        allowEnglishInLanguages: options.allowEnglishInLanguages,
+        removeAdultContent: options.removeAdultContent,
+        titleSimilarity: options.titleSimilarity,
+      })
+      .meta(optionsGroup.meta() ?? {}),
+    languages: z
+      .object({
+        requiredLanguages: languages.required,
+        allowedLanguages: languages.allowed,
+        excludedLanguages: languages.exclude,
+        preferredLanguages: languages.preferred,
+      })
+      .meta(languagesGroup.meta() ?? {}),
   })
   .meta({ title: "Ranking Settings" });
 

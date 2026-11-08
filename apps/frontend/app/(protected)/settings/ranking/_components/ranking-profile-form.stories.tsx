@@ -71,18 +71,20 @@ const meta = preview.meta({
 /** Creating a profile, starting from the default profile's values. */
 export const Create = meta.story();
 
-Create.test("Renders the profile's groups", async ({ canvas }) => {
-  for (const category of [
+Create.test("Renders the profile's titled groups", async ({ canvas }) => {
+  for (const title of [
     "Quality",
     "Rips",
     "HDR",
     "Audio",
     "Extras",
     "Trash",
-    "Ranking Settings",
+    "Ranks",
+    "Settings",
+    "Options",
   ]) {
     await expect(
-      canvas.getByRole("heading", { name: category }),
+      canvas.getByRole("heading", { name: title }),
     ).toBeInTheDocument();
   }
 
