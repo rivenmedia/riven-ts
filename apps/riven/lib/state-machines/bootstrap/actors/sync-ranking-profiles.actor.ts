@@ -112,9 +112,17 @@ export const syncRankingProfiles = fromPromise<
     settingsService,
   });
 
+  const resolvedPath = path.resolve(legacyConfigPath);
+
   if (result === "imported") {
     logger.warn(
-      `Imported ranking config from "${path.resolve(legacyConfigPath)}". The file is no longer read and can be deleted.`,
+      `Imported ranking config from "${resolvedPath}". The file is no longer read and can be deleted.`,
+    );
+  } else if (result === "skipped-no-file") {
+    // The import is marked as done either way, so say where the file was
+    // looked for in case it was meant to be imported
+    logger.info(
+      `No legacy ranking config found at "${resolvedPath}"; using ranking profiles from the database.`,
     );
   }
 });

@@ -176,6 +176,36 @@ it("imports the legacy config file and logs where it came from", async ({
   );
 });
 
+it("logs where it looked when there is no legacy config file", async ({
+  services,
+  legacyConfigPath,
+}) => {
+  const infoSpy = vi.spyOn(logger, "info");
+
+  await runSync(services, legacyConfigPath);
+
+  expect(infoSpy).toHaveBeenCalledWith(
+    `No legacy ranking config found at "${legacyConfigPath}"; using ranking profiles from the database.`,
+  );
+});
+
+it("logs nothing about the legacy config once it has been imported", async ({
+  services,
+  legacyConfigPath,
+}) => {
+  await runSync(services, legacyConfigPath);
+
+  const infoSpy = vi.spyOn(logger, "info");
+  const warnSpy = vi.spyOn(logger, "warn");
+
+  await runSync(services, legacyConfigPath);
+
+  expect(infoSpy).not.toHaveBeenCalledWith(
+    expect.stringContaining("legacy ranking config"),
+  );
+  expect(warnSpy).not.toHaveBeenCalled();
+});
+
 it("rejects when the legacy config file is invalid", async ({
   services,
   legacyConfigPath,
