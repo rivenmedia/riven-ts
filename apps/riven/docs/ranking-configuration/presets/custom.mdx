@@ -26,7 +26,16 @@ The **Ranking Settings** tab holds global overrides that are applied on top of t
 2. The active profile
 3. Global Ranking Settings
 
-Objects are merged key by key; lists are replaced entirely. Changes apply immediately without a restart. Individual values can also be locked with `RIVEN_SETTING__<key>` environment variables.
+Objects are merged key by key; lists are replaced entirely. Changes apply immediately without a restart.
+
+Individual Ranking Settings can also be locked with `RIVEN_SETTING__<key>` environment variables, which override every layer above. Use these keys, not RTN's setting names (for example `RIVEN_SETTING__removeAllTrash=false`). Values other than text are written as JSON, such as `RIVEN_SETTING__excludedLanguages=["de","fr"]`.
+
+| Group       | Keys                                                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Patterns    | `requiredPatterns`, `excludedPatterns`, `preferredPatterns`                                                                        |
+| Resolutions | `r2160p`, `r1080p`, `r720p`, `r480p`, `r360p`, `unknownResolution`                                                                 |
+| Options     | `removeAllTrash`, `removeRanksUnder`, `removeUnknownLanguages`, `allowEnglishInLanguages`, `removeAdultContent`, `titleSimilarity` |
+| Languages   | `requiredLanguages`, `allowedLanguages`, `excludedLanguages`, `preferredLanguages`                                                 |
 
 ## Upgrading from `riven-ranking-config.json`
 
