@@ -169,3 +169,54 @@ Edit.test("Saves the profile's changes", async ({ canvas }) => {
     expect(redirect).toHaveBeenCalledWith("/settings/ranking"),
   );
 });
+
+Edit.test(
+  "Shows an emptied rank's issue on its field instead of saving",
+  async ({ canvas }) => {
+    const rankInput = canvas.getByRole("spinbutton", { name: "Av1 rank" });
+
+    await userEvent.clear(rankInput);
+    await userEvent.click(canvas.getByRole("button", { name: "Save profile" }));
+
+    const alert = await canvas.findByRole("alert");
+
+    await expect(alert).toHaveTextContent(/expected number/iu);
+    await expect(alert.parentElement).toContainElement(rankInput);
+    await expect(rankInput).toHaveFocus();
+    await expect(updateRankingProfileRequest).not.toHaveBeenCalled();
+  },
+);
+
+Edit.test(
+  "Shows the refused rank's issue on its field",
+  async ({ canvas, msw }) => {
+    msw.use(
+      api.mutation(UPDATE_RANKING_PROFILE, () =>
+        HttpResponse.json({
+          data: {
+            updateRankingProfile: toMutationResult([
+              {
+                path: "ranks.quality.av1.rank",
+                message: "Enter a rank, or turn off fetching.",
+              },
+            ]),
+          } satisfies UpdateRankingProfileMutation,
+        }),
+      ),
+    );
+
+    await userEvent.type(canvas.getByRole("textbox", { name: "Name" }), "2");
+    await userEvent.click(canvas.getByRole("button", { name: "Save profile" }));
+
+    const alert = await canvas.findByRole("alert");
+
+    // On the field, rather than for the form at the issue's path
+    await expect(alert).toHaveTextContent(
+      /^Enter a rank, or turn off fetching\.$/u,
+    );
+    await expect(alert.parentElement).toContainElement(
+      canvas.getByRole("spinbutton", { name: "Av1 rank" }),
+    );
+    await expect(redirect).not.toHaveBeenCalled();
+  },
+);

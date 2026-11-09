@@ -7,6 +7,8 @@ import { Input } from "#components/_ui/input.tsx";
 import { Label } from "#components/_ui/label.tsx";
 import { Switch } from "#components/_ui/switch.tsx";
 
+import { SettingFieldError } from "./setting-field-error.tsx";
+
 import type { CommonSettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 export function SettingsCustomRankField({
@@ -27,30 +29,35 @@ export function SettingsCustomRankField({
     valueAsNumber: true,
   });
 
+  // The field's value is an object, so its issues are on its fetch and rank
   return (
-    <div className="bg-muted/30 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm">
-      <div>
-        <span className="min-w-0 truncate">{label}</span>
-        {description && (
-          <p className="text-muted-foreground text-sm">{description}</p>
-        )}
+    <div className="space-y-2">
+      <div className="bg-muted/30 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm">
+        <div>
+          <span className="min-w-0 truncate">{label}</span>
+          {description && (
+            <p className="text-muted-foreground text-sm">{description}</p>
+          )}
+        </div>
+        <div className="flex items-center gap-3">
+          <Label className="flex items-center gap-2">
+            Fetch
+            <Switch
+              {...fetchField}
+              defaultChecked={fetchEnabled}
+              onCheckedChange={(checked) => {
+                setValue(`${name}.fetch`, checked);
+              }}
+            />
+          </Label>
+          <Label htmlFor={id} className="sr-only">
+            {label} rank
+          </Label>
+          <Input {...rankField} id={id} type="number" className="h-8 w-24 " />
+        </div>
       </div>
-      <div className="flex items-center gap-3">
-        <Label className="flex items-center gap-2">
-          Fetch
-          <Switch
-            {...fetchField}
-            defaultChecked={fetchEnabled}
-            onCheckedChange={(checked) => {
-              setValue(`${name}.fetch`, checked);
-            }}
-          />
-        </Label>
-        <Label htmlFor={id} className="sr-only">
-          {label} rank
-        </Label>
-        <Input {...rankField} id={id} type="number" className="h-8 w-24 " />
-      </div>
+      <SettingFieldError name={`${name}.fetch`} />
+      <SettingFieldError name={`${name}.rank`} />
     </div>
   );
 }
