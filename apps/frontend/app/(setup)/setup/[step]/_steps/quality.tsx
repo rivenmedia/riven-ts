@@ -1,7 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useAction } from "next-safe-action/hooks";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
+import { selectRankingProfile } from "#app/(protected)/settings/ranking/_actions/select-ranking-profile.action.ts";
 import {
   Accordion,
   AccordionContent,
@@ -60,8 +62,10 @@ export function SetupQualityStep({
     },
   });
 
-  const handleSubmit = form.handleSubmit(() => {
-    /* empty */
+  const { execute } = useAction(selectRankingProfile);
+
+  const handleSubmit = form.handleSubmit(({ selectedProfile }) => {
+    execute({ id: selectedProfile });
   });
 
   return (
