@@ -1,6 +1,7 @@
 import path from "node:path";
 import { fromPromise } from "xstate";
 
+import { findFreeName } from "#ranking/find-free-name.ts";
 import { importLegacyRankingConfig } from "#ranking/legacy/import-legacy-ranking-config.ts";
 import { rankingPresets } from "#ranking/presets/index.ts";
 import { RANKING_NAMESPACE } from "#ranking/ranking-settings-section.schema.ts";
@@ -13,26 +14,6 @@ export interface SyncRankingProfilesInput {
   rankingProfileService: RankingProfileService;
   settingsService: SettingsService;
   legacyConfigPath: string;
-}
-
-async function findFreeCustomName(
-  rankingProfileService: RankingProfileService,
-  name: string,
-  reservedNames: ReadonlySet<string>,
-) {
-  for (let attempt = 1; ; attempt++) {
-    const candidate =
-      attempt === 1
-        ? `${name} (custom)`
-        : `${name} (custom ${String(attempt)})`;
-
-    if (
-      !reservedNames.has(candidate) &&
-      !(await rankingProfileService.nameExists(candidate))
-    ) {
-      return candidate;
-    }
-  }
 }
 
 /**
@@ -50,10 +31,12 @@ async function renameCustomProfilesUsingPresetNames(
       continue;
     }
 
-    const newName = await findFreeCustomName(
-      rankingProfileService,
+    const newName = await findFreeName(
       profile.name,
-      presetNames,
+      "custom",
+      (candidate) =>
+        presetNames.has(candidate) ||
+        rankingProfileService.nameExists(candidate),
     );
 
     await rankingProfileService.update(profile.id, {

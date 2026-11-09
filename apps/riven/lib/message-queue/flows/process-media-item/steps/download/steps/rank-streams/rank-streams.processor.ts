@@ -27,7 +27,9 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       },
     },
   ) => {
-    // One engine snapshot for the whole job, even if the ranking config changes mid-run.
+    // Store a snapshot of the ranking engine for
+    // the whole job to allow for consistent ranking
+    // even if the ranking config changes mid-invocation.
     const rtn = await getRankingEngine({
       rankingProfileService,
       settingsService,

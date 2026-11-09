@@ -1,5 +1,6 @@
 import { GraphQLError } from "graphql";
 
+import { findFreeName } from "./find-free-name.ts";
 import { getActiveRankingProfile } from "./get-active-ranking-profile.ts";
 import { invalidateRankingEngine } from "./ranking-engine.ts";
 import {
@@ -195,13 +196,8 @@ export class RankingManager {
 
   /** `"<name> (copy)"`, then `"<name> (copy 2)"`, `"<name> (copy 3)"`… */
   async #copyName(name: string) {
-    for (let copy = 1; ; copy++) {
-      const candidate =
-        copy === 1 ? `${name} (copy)` : `${name} (copy ${String(copy)})`;
-
-      if (!(await this.#deps.rankingProfileService.nameExists(candidate))) {
-        return candidate;
-      }
-    }
+    return findFreeName(name, "copy", (candidate) =>
+      this.#deps.rankingProfileService.nameExists(candidate),
+    );
   }
 }

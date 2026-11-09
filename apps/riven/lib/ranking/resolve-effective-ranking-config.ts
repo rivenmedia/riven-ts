@@ -6,11 +6,7 @@ import {
 import { mergeWith } from "es-toolkit";
 
 import type { RankingProfileConfig } from "./ranking-profile-config.schema.ts";
-import type {
-  RankingModel,
-  Settings,
-  SettingsInput,
-} from "@repo/util-rank-torrent-name";
+import type { SettingsInput } from "@repo/util-rank-torrent-name";
 
 interface ResolveEffectiveRankingConfigInput {
   profile: RankingProfileConfig;
@@ -20,10 +16,7 @@ interface ResolveEffectiveRankingConfigInput {
 export function resolveEffectiveRankingConfig({
   profile,
   globalSettings,
-}: ResolveEffectiveRankingConfigInput): {
-  rankingModel: RankingModel;
-  settings: Settings;
-} {
+}: ResolveEffectiveRankingConfigInput) {
   const mergedSettings = mergeWith(
     structuredClone(profile.settings ?? {}),
     globalSettings,

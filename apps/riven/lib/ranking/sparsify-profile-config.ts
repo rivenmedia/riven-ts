@@ -1,6 +1,6 @@
 import {
-  SettingsSchema,
   createRankingModel,
+  createSettings,
 } from "@repo/util-rank-torrent-name";
 
 import { isEqual, isPlainObject } from "es-toolkit";
@@ -33,18 +33,11 @@ function sparsify(value: unknown, defaults: unknown): unknown {
 export function sparsifyProfileConfig(
   config: RankingProfileConfig,
 ): RankingProfileConfig {
-  const result: RankingProfileConfig = {};
-
   const rankingModel = sparsify(config.rankingModel, createRankingModel());
-  const settings = sparsify(config.settings, SettingsSchema.parse({}));
+  const settings = sparsify(config.settings, createSettings());
 
-  if (rankingModel) {
-    result.rankingModel = rankingModel;
-  }
-
-  if (settings) {
-    result.settings = settings;
-  }
-
-  return result;
+  return {
+    ...(rankingModel ? { rankingModel } : {}),
+    ...(settings ? { settings } : {}),
+  };
 }

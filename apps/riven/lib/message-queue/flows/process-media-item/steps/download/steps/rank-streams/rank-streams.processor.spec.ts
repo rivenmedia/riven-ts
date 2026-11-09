@@ -20,6 +20,7 @@ const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
 
 it.beforeEach(() => {
   invalidateRankingEngine();
+
   vi.spyOn(rankingEngineModule, "getRankingEngine").mockResolvedValue(
     new RTN(
       createRankingModel({
