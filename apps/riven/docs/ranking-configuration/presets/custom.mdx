@@ -2,17 +2,38 @@
 title: Custom
 ---
 
-See [Settings](../settings) for all available settings.
+Custom ranking profiles are created and managed in the Riven UI under **Settings → Ranking**. See [Settings](../settings) for all available settings.
 
-```json
-{
-  "preset": "custom",
-  "settings": {
-    // Add your custom ranking configuration settings here
-  },
-  "rankingModel": {
-    // Define your custom ranking model here
-    //
-  }
-}
-```
+## Managing profiles
+
+Settings → Ranking lists the built-in profiles (currently only _Default_) and your custom profiles.
+
+- Built-in profiles can be **Selected** or **Duplicated**.
+- Custom profiles can be **Selected**, **Edited**, **Duplicated** or **Deleted**. A profile cannot be deleted while it is the active one.
+
+To create a profile from scratch, go to `/settings/ranking/profile/create`, or duplicate an existing profile and edit the copy.
+
+In a profile's ranks, each attribute has a **Fetch** toggle and a number:
+
+- With **Fetch** off, torrents with that attribute are rejected.
+- With **Fetch** on, the number is the rank (score) added to torrents with that attribute.
+
+## Ranking Settings
+
+The **Ranking Settings** tab holds global overrides that are applied on top of the active profile. Values are resolved in this order, with later layers winning:
+
+1. RTN defaults
+2. The active profile
+3. Global Ranking Settings
+
+Objects are merged key by key; lists are replaced entirely. Changes apply immediately without a restart. Individual values can also be locked with `RIVEN_SETTING__<key>` environment variables.
+
+## Upgrading from `riven-ranking-config.json`
+
+Earlier versions read ranking configuration from `riven-ranking-config.json` (at `rankingConfigPath`). On the first boot after upgrading, an existing file is imported once:
+
+- A preset name selects that preset, and any `settings` become your global Ranking Settings.
+- A custom `rankingModel` becomes a custom profile named _Imported_, which is selected automatically.
+- An invalid file stops boot with an error, so fix or remove it and start again.
+
+After the import the file is never read again and can be deleted. You no longer need to mount it into the container.
