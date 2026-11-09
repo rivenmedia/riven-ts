@@ -19,9 +19,6 @@ services:
       retries: 3
     volumes:
       - ./docker-data/riven/logs:/app/logs
-      # Only needed for the one-time import of the legacy ranking config on the
-      # first boot after upgrading. Remove it once the import has run.
-      - ./docker-data/riven/riven-ranking-config.json:/app/riven-ranking-config.json
       - ${HOST_VFS_MOUNT_PATH}:/mount:rshared
     ports:
       - 3000:3000

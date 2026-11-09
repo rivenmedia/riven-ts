@@ -68,10 +68,12 @@ export class RankingProfileService extends BaseService {
   ) {
     const profile = await this.em.findOneOrFail(RankingProfile, { id });
 
-    profile.name = name;
-    profile.description = description;
-    profile.rankingModel = config.rankingModel ?? {};
-    profile.settings = config.settings ?? {};
+    this.em.assign(profile, {
+      name,
+      description,
+      rankingModel: config.rankingModel ?? {},
+      settings: config.settings ?? {},
+    });
 
     await this.em.flush();
 
@@ -95,7 +97,8 @@ export class RankingProfileService extends BaseService {
         builtIn: true,
         rankingModel: config.rankingModel ?? {},
         settings: config.settings ?? {},
-      };
+      } as const satisfies Partial<RankingProfile>;
+
       const existing = await this.em.findOne(RankingProfile, {
         slug: preset.slug,
       });

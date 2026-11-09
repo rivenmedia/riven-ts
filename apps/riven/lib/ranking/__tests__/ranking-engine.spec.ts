@@ -38,6 +38,7 @@ it("ranks with the active profile", async ({ deps }) => {
     upsert: { activeProfileId: custom.id },
     delete: [],
   });
+
   invalidateRankingEngine();
 
   expect(rankOf(await getRankingEngine(deps))).toBe(defaultRank + 9499);

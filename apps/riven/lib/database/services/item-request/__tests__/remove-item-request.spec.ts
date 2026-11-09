@@ -10,7 +10,7 @@ import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
-describe(`when the media item is a movie`, () => {
+describe("when the media item is a movie", () => {
   it("removes the item request", async ({
     services,
     completedMovieContext: { completedMovie },
@@ -113,7 +113,7 @@ describe(`when the media item is a movie`, () => {
   });
 });
 
-describe(`when the media item is a show`, () => {
+describe("when the media item is a show", () => {
   it("removes the item request", async ({
     services,
     completedShowContext: { completedShow },

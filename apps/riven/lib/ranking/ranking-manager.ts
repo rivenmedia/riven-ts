@@ -14,9 +14,7 @@ import type { RankingProfile } from "#database/entities/ranking-profile.entity.t
 import type { SettingsIssue } from "#graphql/resolvers/settings/types/settings-issue.type.ts";
 import type { ActiveRankingProfileDeps } from "./get-active-ranking-profile.ts";
 
-export type RankingManagerDeps = ActiveRankingProfileDeps;
-
-export interface RankingProfileView {
+interface RankingProfileView {
   id: string;
   slug: string | null;
   name: string;
@@ -54,17 +52,17 @@ function notFound(message: string) {
  * sparsely. Changes that affect ranking invalidate the ranking engine.
  */
 export class RankingManager {
-  readonly #deps: RankingManagerDeps;
+  readonly #deps: ActiveRankingProfileDeps;
 
-  public constructor(deps: RankingManagerDeps) {
+  public constructor(deps: ActiveRankingProfileDeps) {
     this.#deps = deps;
   }
 
-  public async list(): Promise<RankingProfileView[]> {
+  public async list() {
     const profiles = await this.#deps.rankingProfileService.list();
     const activeId = await this.#activeProfileId();
 
-    return profiles.map((profile) => ({
+    return profiles.map<RankingProfileView>((profile) => ({
       id: profile.id,
       slug: profile.slug,
       name: profile.name,
@@ -81,9 +79,7 @@ export class RankingManager {
     return buildRankingProfileJsonSchema();
   }
 
-  public async create(
-    values: Record<string, unknown>,
-  ): Promise<SettingsIssue[]> {
+  public async create(values: Record<string, unknown>) {
     const result = fromProfileFormValues(values);
 
     if (!("config" in result)) {
@@ -105,10 +101,7 @@ export class RankingManager {
     return [];
   }
 
-  public async update(
-    id: string,
-    values: Record<string, unknown>,
-  ): Promise<SettingsIssue[]> {
+  public async update(id: string, values: Record<string, unknown>) {
     const profile = await this.#findProfile(id);
 
     if (profile.builtIn) {
@@ -140,7 +133,7 @@ export class RankingManager {
     return [];
   }
 
-  public async delete(id: string): Promise<SettingsIssue[]> {
+  public async delete(id: string) {
     const profile = await this.#findProfile(id);
 
     if (profile.builtIn) {
@@ -156,7 +149,7 @@ export class RankingManager {
     return [];
   }
 
-  public async duplicate(id: string): Promise<SettingsIssue[]> {
+  public async duplicate(id: string) {
     const profile = await this.#findProfile(id);
 
     await this.#deps.rankingProfileService.create({
@@ -171,7 +164,7 @@ export class RankingManager {
     return [];
   }
 
-  public async select(id: string): Promise<SettingsIssue[]> {
+  public async select(id: string) {
     await this.#findProfile(id);
 
     await this.#deps.settingsService.writeValues(RANKING_NAMESPACE, {

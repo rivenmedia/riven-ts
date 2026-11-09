@@ -142,6 +142,8 @@ export const it = testBase
     const { ShowFactory } = await import("#database/factories/show.factory.ts");
     const { StreamFactory } =
       await import("#database/factories/stream.factory.ts");
+    const { RankingProfileFactory } =
+      await import("#database/factories/ranking-profile.factory.ts");
 
     return {
       movieItemRequestFactory: new MovieItemRequestFactory(em),
@@ -152,6 +154,7 @@ export const it = testBase
       episodeFactory: new EpisodeFactory(em),
       streamFactory: new StreamFactory(em),
       mediaEntryFactory: new MediaEntryFactory(em),
+      rankingProfileFactory: new RankingProfileFactory(em),
     };
   })
   .extend("stream", async ({ factories }) =>

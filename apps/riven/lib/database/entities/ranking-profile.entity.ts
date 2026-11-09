@@ -1,5 +1,11 @@
 import { OptionalProps } from "@mikro-orm/core";
-import { Entity, Property, Unique } from "@mikro-orm/decorators/legacy";
+import {
+  Entity,
+  PrimaryKey,
+  Property,
+  Unique,
+} from "@mikro-orm/decorators/legacy";
+import { randomUUID } from "node:crypto";
 
 import type { RankingProfileConfig } from "#ranking/ranking-profile-config.schema.ts";
 
@@ -15,11 +21,11 @@ export class RankingProfile {
     | "createdAt"
     | "updatedAt";
 
-  @Property({ type: "uuid", primary: true })
-  public id: string = crypto.randomUUID();
+  @PrimaryKey({ type: "uuid" })
+  public id: string = randomUUID();
 
   // Set only for built-in presets
-  @Property({ type: "text", nullable: true })
+  @Property()
   @Unique()
   public slug: string | null = null;
 
@@ -27,10 +33,10 @@ export class RankingProfile {
   @Unique()
   public name!: string;
 
-  @Property({ type: "text", nullable: true })
+  @Property()
   public description: string | null = null;
 
-  @Property({ type: "boolean", default: false })
+  @Property({ default: false })
   public builtIn = false;
 
   @Property({ type: "jsonb", nullable: false, default: "{}" })
@@ -39,7 +45,7 @@ export class RankingProfile {
   @Property({ type: "jsonb", nullable: false, default: "{}" })
   public settings: NonNullable<RankingProfileConfig["settings"]> = {};
 
-  @Property({ type: "datetime", onCreate: () => new Date() })
+  @Property({ onCreate: () => new Date() })
   public createdAt: Date = new Date();
 
   @Property({
