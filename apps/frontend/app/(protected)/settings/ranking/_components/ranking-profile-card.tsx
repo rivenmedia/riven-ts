@@ -5,6 +5,17 @@ import { useAction } from "next-safe-action/hooks";
 import Link from "next/link";
 import { toast } from "sonner";
 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 import {
   Card,
@@ -67,6 +78,7 @@ export function RankingProfileCard({ profile }: RankingProfileCardProps) {
       "Failed to select the ranking profile",
     ),
   );
+
   const duplicate = useAction(
     duplicateRankingProfile,
     toastActionResult(
@@ -74,6 +86,7 @@ export function RankingProfileCard({ profile }: RankingProfileCardProps) {
       "Failed to duplicate the ranking profile",
     ),
   );
+
   const remove = useAction(
     deleteRankingProfile,
     toastActionResult(
@@ -122,16 +135,37 @@ export function RankingProfileCard({ profile }: RankingProfileCardProps) {
           Duplicate
         </Button>
         {!builtIn && (
-          <Button
-            disabled={isActive || isPending}
-            type="button"
-            variant="destructive"
-            onClick={() => {
-              remove.execute({ id });
-            }}
-          >
-            Delete
-          </Button>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button
+                disabled={isActive || isPending}
+                type="button"
+                variant="destructive"
+              >
+                Delete
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Delete ranking profile?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  &ldquo;{name}&rdquo; will be permanently deleted. This cannot
+                  be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  variant="destructive"
+                  onClick={() => {
+                    remove.execute({ id });
+                  }}
+                >
+                  Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         )}
       </CardFooter>
     </Card>
