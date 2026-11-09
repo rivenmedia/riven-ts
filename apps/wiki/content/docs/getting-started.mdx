@@ -145,6 +145,12 @@ volumes:
 
 ### Create your .env file
 
+<Callout>
+  Upgrading from a version that used `riven-ranking-config.json`? Keep that file
+  mounted for the first boot so it can be imported. See [Upgrading from
+  `riven-ranking-config.json`](/docs/ranking-configuration/presets/custom#upgrading-from-riven-ranking-configjson).
+</Callout>
+
 ```bash title=".env"
 # Core
 RIVEN_SETTING__databaseUrl="postgres+psycopg2://riven:CHANGEME@postgres:5432/riven"

@@ -11,7 +11,7 @@ Settings → Ranking lists the built-in profiles (currently only _Default_) and 
 - Built-in profiles can be **Selected** or **Duplicated**.
 - Custom profiles can be **Selected**, **Edited**, **Duplicated** or **Deleted**. A profile cannot be deleted while it is the active one.
 
-To create a profile from scratch, go to `/settings/ranking/profile/create`, or duplicate an existing profile and edit the copy.
+To create a profile from scratch, use the **Create Custom Profile** button under **Settings → Ranking**, or duplicate an existing profile and edit the copy.
 
 In a profile's ranks, each attribute has a **Fetch** toggle and a number:
 
@@ -36,4 +36,4 @@ Earlier versions read ranking configuration from `riven-ranking-config.json` (at
 - A custom `rankingModel` becomes a custom profile named _Imported_, which is selected automatically.
 - An invalid file stops boot with an error, so fix or remove it and start again.
 
-After the import the file is never read again and can be deleted. You no longer need to mount it into the container.
+The file must be readable at `rankingConfigPath` on the first boot after upgrading. If you run Docker, keep your existing mount and `RIVEN_SETTING__rankingConfigPath` (if you set it) in place for that first boot. Check the log for the message `Imported ranking config from …`. Once you see it, remove the mount and the environment variable, and delete the file.
