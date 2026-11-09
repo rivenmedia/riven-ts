@@ -37,7 +37,6 @@ const RankField = z
     path: ["rank"],
     message: "Enter a rank, or turn off fetching.",
   })
-  // After `refine`, which returns a copy without the meta.
   .meta({ widget: "custom_rank" });
 
 /** Rank keys per category, in RTN's declared order. */

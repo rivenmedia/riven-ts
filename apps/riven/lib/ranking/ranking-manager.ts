@@ -15,33 +15,34 @@ import type { RankingProfile } from "#database/entities/ranking-profile.entity.t
 import type { SettingsIssue } from "#graphql/resolvers/settings/types/settings-issue.type.ts";
 import type { ActiveRankingProfileDeps } from "./get-active-ranking-profile.ts";
 
-interface RankingProfileView {
+interface RankingProfileView extends Pick<
+  RankingProfile,
+  "rankingModel" | "settings"
+> {
   id: string;
   slug: string | null;
   name: string;
   description: string | null;
   builtIn: boolean;
   isActive: boolean;
-  rankingModel: RankingProfile["rankingModel"];
-  settings: RankingProfile["settings"];
-  /** The profile's form values, with RTN defaults filled in. */
+  /** The profile's form values, with `RTN` defaults filled in. */
   values: Record<string, unknown>;
 }
 
-const BUILT_IN_ISSUE: SettingsIssue = {
+const BUILT_IN_ISSUE = {
   path: "",
   message: "Built-in profiles can't be changed. Duplicate it to customise.",
-};
+} as const satisfies SettingsIssue;
 
-const ACTIVE_DELETE_ISSUE: SettingsIssue = {
+const ACTIVE_DELETE_ISSUE = {
   path: "",
   message: "The active profile can't be deleted. Select another profile first.",
-};
+} as const satisfies SettingsIssue;
 
-const NAME_TAKEN_ISSUE: SettingsIssue = {
+const NAME_TAKEN_ISSUE = {
   path: "name",
   message: "A profile with this name already exists.",
-};
+} as const satisfies SettingsIssue;
 
 function notFound(message: string) {
   return new GraphQLError(message, { extensions: { code: "NOT_FOUND" } });

@@ -10,8 +10,7 @@ const FakeSettings = z.object({
   token: z.string().default("d").meta({ secret: true }),
   nested: z.object({
     password: z.string().min(1).nullable().optional().meta({ secret: true }),
-    // oxlint-disable-next-line id-length
-    n: z.int().default(1),
+    nestedValue: z.int().default(1),
   }),
 });
 
@@ -36,10 +35,9 @@ describe(buildSectionJsonSchema, () => {
     });
 
     expect(jsonSchema.properties["token"]).not.toHaveProperty("default");
-    expect(jsonSchema.properties["nested"]?.properties["n"]).toHaveProperty(
-      "default",
-      1,
-    );
+    expect(
+      jsonSchema.properties["nested"]?.properties["nestedValue"],
+    ).toHaveProperty("default", 1);
   });
 
   it("keeps an unset secret required with its minLength", () => {
@@ -101,14 +99,12 @@ describe(buildSectionJsonSchema, () => {
     const jsonSchema = buildSectionJsonSchema(
       FakeSettings,
       new Map([["token", "default"]]),
-      // oxlint-disable-next-line id-length
-      { n: 7, token: "override-secret" },
+      { nestedValue: 7, token: "override-secret" },
     ) as JsonSchemaNode;
 
-    expect(jsonSchema.properties["nested"]?.properties["n"]).toHaveProperty(
-      "default",
-      7,
-    );
+    expect(
+      jsonSchema.properties["nested"]?.properties["nestedValue"],
+    ).toHaveProperty("default", 7);
     expect(JSON.stringify(jsonSchema)).not.toContain("override-secret");
   });
 });

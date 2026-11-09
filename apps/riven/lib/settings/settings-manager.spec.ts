@@ -1,5 +1,3 @@
-// The `n` leaf name comes from the settings backend plan fixture.
-// oxlint-disable id-length
 import { plugin as cometPlugin } from "@repo/plugin-comet";
 import { plugin as notificationsPlugin } from "@repo/plugin-notifications";
 import { plugin as plexPlugin } from "@repo/plugin-plex";
@@ -32,7 +30,7 @@ const FakeSettings = z
   .object({
     apiKey: z.string().min(1).meta({ secret: true }),
     token: z.string().default("d").meta({ secret: true }),
-    nested: z.object({ n: z.int().default(1) }),
+    nested: z.object({ nestedValue: z.int().default(1) }),
   })
   .meta({ title: "Fake" });
 
@@ -196,7 +194,7 @@ describe("getSection", () => {
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
-      upsert: { apiKey: "stored-secret-value", n: 3 },
+      upsert: { apiKey: "stored-secret-value", nestedValue: 3 },
       delete: [],
     });
 
@@ -204,7 +202,7 @@ describe("getSection", () => {
 
     const view = await manager.getSection("fake");
 
-    expect(view.values).toStrictEqual({ nested: { n: 3 } });
+    expect(view.values).toStrictEqual({ nested: { nestedValue: 3 } });
     expect(JSON.stringify(view)).not.toContain("stored-secret-value");
   });
 
@@ -273,13 +271,13 @@ describe("getSection", () => {
     services,
   }) => {
     const manager = createManager(services, {
-      fakeEnvironment: { apiKey: "env-secret-value", n: "5" },
+      fakeEnvironment: { apiKey: "env-secret-value", nestedValue: "5" },
     });
 
     const view = await manager.getSection("fake");
 
-    expect(view.values).toStrictEqual({ nested: { n: 5 } });
-    expect(view.lockedFields).toStrictEqual(["apiKey", "nested.n"]);
+    expect(view.values).toStrictEqual({ nested: { nestedValue: 5 } });
+    expect(view.lockedFields).toStrictEqual(["apiKey", "nested.nestedValue"]);
     expect(view.secretStates).toContainEqual({ path: "apiKey", state: "env" });
     expect(JSON.stringify(view)).not.toContain("env-secret-value");
   });
@@ -301,7 +299,7 @@ describe("getSection", () => {
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
-      upsert: { n: "not-a-number" },
+      upsert: { nestedValue: "not-a-number" },
       delete: [],
     });
 
@@ -310,7 +308,11 @@ describe("getSection", () => {
     const view = await manager.getSection("fake");
 
     expect(view.issues).toStrictEqual([
-      { leaf: "n", path: "nested.n", message: expect.any(String) },
+      {
+        leaf: "nestedValue",
+        path: "nested.nestedValue",
+        message: expect.any(String),
+      },
     ]);
   });
 });
@@ -320,14 +322,14 @@ describe("updateSection", () => {
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
-      upsert: { apiKey: "secret", n: 3 },
+      upsert: { apiKey: "secret", nestedValue: 3 },
       delete: [],
     });
 
     const manager = createManager(services);
 
     await expect(
-      manager.updateSection("fake", { nested: { n: 1 } }),
+      manager.updateSection("fake", { nested: { nestedValue: 1 } }),
     ).resolves.toStrictEqual([]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
@@ -343,11 +345,11 @@ describe("updateSection", () => {
     const manager = createManager(services);
 
     await expect(
-      manager.updateSection("fake", { nested: { n: 2 } }),
+      manager.updateSection("fake", { nested: { nestedValue: 2 } }),
     ).resolves.toStrictEqual([]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
-    ).resolves.toStrictEqual({ apiKey: "secret", n: 2 });
+    ).resolves.toStrictEqual({ apiKey: "secret", nestedValue: 2 });
   });
 
   it("leaves a stored secret unchanged when submitted empty", async ({
@@ -361,11 +363,11 @@ describe("updateSection", () => {
     const manager = createManager(services);
 
     await expect(
-      manager.updateSection("fake", { apiKey: "", nested: { n: 2 } }),
+      manager.updateSection("fake", { apiKey: "", nested: { nestedValue: 2 } }),
     ).resolves.toStrictEqual([]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
-    ).resolves.toStrictEqual({ apiKey: "secret", n: 2 });
+    ).resolves.toStrictEqual({ apiKey: "secret", nestedValue: 2 });
   });
 
   it("stores a submitted secret", async ({ services }) => {
@@ -381,11 +383,11 @@ describe("updateSection", () => {
 
   it("ignores env-locked fields in the payload", async ({ services }) => {
     const manager = createManager(services, {
-      fakeEnvironment: { apiKey: "env-secret", n: "5" },
+      fakeEnvironment: { apiKey: "env-secret", nestedValue: "5" },
     });
 
     await expect(
-      manager.updateSection("fake", { nested: { n: 2 } }),
+      manager.updateSection("fake", { nested: { nestedValue: 2 } }),
     ).resolves.toStrictEqual([]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
@@ -403,9 +405,9 @@ describe("updateSection", () => {
     const manager = createManager(services);
 
     await expect(
-      manager.updateSection("fake", { nested: { n: "nope" } }),
+      manager.updateSection("fake", { nested: { nestedValue: "nope" } }),
     ).resolves.toStrictEqual([
-      { path: "nested.n", message: expect.any(String) },
+      { path: "nested.nestedValue", message: expect.any(String) },
     ]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
@@ -535,20 +537,22 @@ describe("updateSection with reset", () => {
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
-      upsert: { apiKey: "secret", n: 3 },
+      upsert: { apiKey: "secret", nestedValue: 3 },
       delete: [],
     });
 
     const manager = createManager(services);
 
     await expect(
-      manager.updateSection("fake", { nested: { n: 4 } }, ["nested.n"]),
+      manager.updateSection("fake", { nested: { nestedValue: 4 } }, [
+        "nested.nestedValue",
+      ]),
     ).resolves.toStrictEqual([
-      { path: "nested.n", message: expect.any(String) },
+      { path: "nested.nestedValue", message: expect.any(String) },
     ]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
-    ).resolves.toStrictEqual({ apiKey: "secret", n: 3 });
+    ).resolves.toStrictEqual({ apiKey: "secret", nestedValue: 3 });
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -621,14 +625,14 @@ describe("resetFields", () => {
 
   it("resets a field by its nested path", async ({ services }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
-      upsert: { apiKey: "secret", n: 3 },
+      upsert: { apiKey: "secret", nestedValue: 3 },
       delete: [],
     });
 
     const manager = createManager(services);
 
     await expect(
-      manager.resetFields("fake", ["nested.n"]),
+      manager.resetFields("fake", ["nested.nestedValue"]),
     ).resolves.toStrictEqual([]);
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),

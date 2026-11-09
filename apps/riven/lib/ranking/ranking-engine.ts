@@ -78,6 +78,10 @@ async function buildRankingEngine({
   return new RTN(rankingModel, settings);
 }
 
+export function invalidateRankingEngine(): void {
+  cached = null;
+}
+
 /**
  * Returns the ranking engine for the active profile + global ranking settings.
  * Cached until {@link invalidateRankingEngine}; concurrent callers share one build.
@@ -91,14 +95,10 @@ export function getRankingEngine(deps: RankingEngineDeps): Promise<RTN> {
     // A failed build must not poison the cache.
     build.catch(() => {
       if (cached === build) {
-        cached = null;
+        invalidateRankingEngine();
       }
     });
   }
 
   return cached;
-}
-
-export function invalidateRankingEngine(): void {
-  cached = null;
 }
