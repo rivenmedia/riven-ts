@@ -6,15 +6,13 @@ import { RANKING_PROFILES } from "#app/(protected)/settings/ranking/_queries/ran
 import { api } from "#mocks/graphql.ts";
 
 import type { RankingProfileFixture } from "#app/(protected)/settings/ranking/_components/ranking-profiles.fixtures.ts";
-import type { RankingProfileSchemaQuery } from "#app/(protected)/settings/ranking/_queries/ranking-profile-schema.query.typegen.ts";
-import type { RankingProfilesQuery } from "#app/(protected)/settings/ranking/_queries/ranking-profiles.query.typegen.ts";
 
 export const createRankingProfilesHandler = (
   profiles: RankingProfileFixture[],
 ) =>
   api.query(RANKING_PROFILES, () =>
     HttpResponse.json({
-      data: { rankingProfiles: profiles } satisfies RankingProfilesQuery,
+      data: { rankingProfiles: profiles },
     }),
   );
 
@@ -24,6 +22,6 @@ export const rankingProfileSchemaHandler = api.query(
     HttpResponse.json({
       data: {
         rankingProfileSchema: rankingProfileJsonSchema,
-      } satisfies RankingProfileSchemaQuery,
+      },
     }),
 );

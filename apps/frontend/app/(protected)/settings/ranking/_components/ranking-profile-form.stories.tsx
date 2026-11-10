@@ -16,14 +16,8 @@ import {
   toMutationResult,
 } from "./ranking-profiles.fixtures";
 
-import type {
-  CreateRankingProfileMutation,
-  CreateRankingProfileMutationVariables,
-} from "../_mutations/create-ranking-profile.mutation.typegen";
-import type {
-  UpdateRankingProfileMutation,
-  UpdateRankingProfileMutationVariables,
-} from "../_mutations/update-ranking-profile.mutation.typegen";
+import type { CreateRankingProfileMutationVariables } from "../_mutations/create-ranking-profile.mutation.typegen";
+import type { UpdateRankingProfileMutationVariables } from "../_mutations/update-ranking-profile.mutation.typegen";
 
 const createRankingProfileRequest =
   fn<(variables: CreateRankingProfileMutationVariables) => void>();
@@ -52,7 +46,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             createRankingProfile: toMutationResult(),
-          } satisfies CreateRankingProfileMutation,
+          },
         });
       }),
       api.mutation(UPDATE_RANKING_PROFILE, ({ variables }) => {
@@ -61,7 +55,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             updateRankingProfile: toMutationResult(),
-          } satisfies UpdateRankingProfileMutation,
+          },
         });
       }),
     );
@@ -124,7 +118,7 @@ Create.test("Shows the issue of a refused name", async ({ canvas, msw }) => {
               message: "A profile with this name already exists.",
             },
           ]),
-        } satisfies CreateRankingProfileMutation,
+        },
       }),
     ),
   );
@@ -200,7 +194,7 @@ Edit.test(
                 message: "Enter a rank, or turn off fetching.",
               },
             ]),
-          } satisfies UpdateRankingProfileMutation,
+          },
         }),
       ),
     );

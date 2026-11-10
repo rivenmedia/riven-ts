@@ -29,7 +29,6 @@ export function SettingsCustomRankField({
     valueAsNumber: true,
   });
 
-  // The field's value is an object, so its issues are on its fetch and rank
   return (
     <div className="space-y-2">
       <div className="bg-muted/30 flex items-center justify-between gap-3 rounded-lg px-3 py-2 text-sm">

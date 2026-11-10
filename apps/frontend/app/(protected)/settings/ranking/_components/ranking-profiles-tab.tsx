@@ -20,16 +20,15 @@ function RankingProfileGrid({
 }) {
   return (
     <div className={gridClassName}>
-      {profiles.map((profile) => (
+      {profiles.map(({ builtIn, id, name, description, isActive }) => (
         <RankingProfileCard
-          key={profile.id}
-          // Only what the card shows, so the profiles' values aren't sent to the client
+          key={id}
           profile={{
-            id: profile.id,
-            name: profile.name,
-            description: profile.description,
-            builtIn: profile.builtIn,
-            isActive: profile.isActive,
+            id,
+            name,
+            description,
+            builtIn,
+            isActive,
           }}
         />
       ))}

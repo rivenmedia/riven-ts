@@ -14,8 +14,6 @@ import { createRankingProfilesHandler } from "#mocks/handlers/ranking-profiles.h
 
 import { SetupQualityStepContainer } from "./quality-step-container.tsx";
 
-import type { SelectRankingProfileMutation } from "#app/(protected)/settings/ranking/_mutations/select-ranking-profile.mutation.typegen.ts";
-
 /** Matches a radio's accessible name, which also holds the profile description. */
 const startsWith = (prefix: string) => (name: string) =>
   name.startsWith(prefix);
@@ -40,7 +38,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             selectRankingProfile: toMutationResult(),
-          } satisfies SelectRankingProfileMutation,
+          },
         });
       }),
     );

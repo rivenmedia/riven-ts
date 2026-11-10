@@ -66,7 +66,7 @@ const defaultProfileValues = {
     trash: { cam: { fetch: false } },
   },
   settings: { options: { removeAllTrash: true } },
-};
+} as const satisfies Record<string, unknown>;
 
 export const defaultProfile = {
   __typename: "RankingProfile",
@@ -77,7 +77,7 @@ export const defaultProfile = {
   builtIn: true,
   isActive: true,
   values: defaultProfileValues,
-} satisfies RankingProfileFixture;
+} as const satisfies RankingProfileFixture;
 
 export const customProfile = {
   __typename: "RankingProfile",
@@ -92,7 +92,7 @@ export const customProfile = {
     name: "Mine",
     description: "My own tweaks.",
   },
-} satisfies RankingProfileFixture;
+} as const satisfies RankingProfileFixture;
 
 /** A ranking mutation's result: a success, or a refusal with the given issues. */
 export const toMutationResult = (

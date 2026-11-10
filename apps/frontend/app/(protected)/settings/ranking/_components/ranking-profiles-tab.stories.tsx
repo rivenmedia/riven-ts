@@ -16,10 +16,6 @@ import {
   toMutationResult,
 } from "./ranking-profiles.fixtures";
 
-import type { DeleteRankingProfileMutation } from "../_mutations/delete-ranking-profile.mutation.typegen";
-import type { DuplicateRankingProfileMutation } from "../_mutations/duplicate-ranking-profile.mutation.typegen";
-import type { SelectRankingProfileMutation } from "../_mutations/select-ranking-profile.mutation.typegen";
-
 const selectRankingProfileRequest = fn<(id: string) => void>();
 const duplicateRankingProfileRequest = fn<(id: string) => void>();
 const deleteRankingProfileRequest = fn<(id: string) => void>();
@@ -51,7 +47,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             selectRankingProfile: toMutationResult(),
-          } satisfies SelectRankingProfileMutation,
+          },
         });
       }),
       api.mutation(DUPLICATE_RANKING_PROFILE, ({ variables }) => {
@@ -60,7 +56,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             duplicateRankingProfile: toMutationResult(),
-          } satisfies DuplicateRankingProfileMutation,
+          },
         });
       }),
       api.mutation(DELETE_RANKING_PROFILE, ({ variables }) => {
@@ -69,7 +65,7 @@ const meta = preview.meta({
         return HttpResponse.json({
           data: {
             deleteRankingProfile: toMutationResult(),
-          } satisfies DeleteRankingProfileMutation,
+          },
         });
       }),
     );
@@ -172,7 +168,7 @@ Default.test(
             selectRankingProfile: toMutationResult([
               { path: "", message: "Ranking profile not found." },
             ]),
-          } satisfies SelectRankingProfileMutation,
+          },
         }),
       ),
     );

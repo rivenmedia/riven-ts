@@ -11,11 +11,7 @@ import { RESET_SETTINGS_FIELDS } from "./_mutations/reset-settings-fields.mutati
 import { UPDATE_SETTINGS_SECTION } from "./_mutations/update-settings-section.mutation";
 import { SettingsSectionForm } from "./settings-section-form";
 
-import type { ResetSettingsFieldsMutation } from "./_mutations/reset-settings-fields.mutation.typegen";
-import type {
-  UpdateSettingsSectionMutation,
-  UpdateSettingsSectionMutationVariables,
-} from "./_mutations/update-settings-section.mutation.typegen";
+import type { UpdateSettingsSectionMutationVariables } from "./_mutations/update-settings-section.mutation.typegen";
 import type { SettingsSectionFormProps } from "./settings-section-form";
 
 /** Serves a Zod schema the way the backend does. */
@@ -91,7 +87,7 @@ const meta = preview.meta({
               success: true,
               issues: [],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         });
       }),
       api.mutation(RESET_SETTINGS_FIELDS, ({ variables }) => {
@@ -104,7 +100,7 @@ const meta = preview.meta({
               success: true,
               issues: [],
             },
-          } satisfies ResetSettingsFieldsMutation,
+          },
         });
       }),
     );
@@ -211,7 +207,7 @@ Default.test(
                 },
               ],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         }),
       ),
     );
@@ -251,7 +247,7 @@ Default.test(
                 },
               ],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         }),
       ),
     );
@@ -391,7 +387,7 @@ WithCustomSecret.test(
                 },
               ],
             },
-          } satisfies ResetSettingsFieldsMutation,
+          },
         }),
       ),
     );
@@ -783,7 +779,7 @@ WithClearedFieldRevalidation.test(
               success: true,
               issues: [],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         });
       }),
     );
