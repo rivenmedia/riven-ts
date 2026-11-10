@@ -90,7 +90,7 @@ function getGlobalOverrides(
 
 /**
  * Imports the retired `riven-ranking-config.json` once: a preset name selects
- * that built-in profile (with `settings` going to the global layer), while a
+ * that built-in profile (with `settings` going to the global layer), whilst a
  * custom ranking model becomes a new "Imported" profile holding both.
  */
 export async function importLegacyRankingConfig({
