@@ -6,28 +6,12 @@ import { invalidateRankingEngine } from "./ranking-engine.ts";
 import {
   buildRankingProfileJsonSchema,
   fromProfileFormValues,
-  toProfileFormValues,
 } from "./ranking-profile-form.ts";
 import { RANKING_NAMESPACE } from "./ranking-settings-section.schema.ts";
 import { sparsifyProfileConfig } from "./sparsify-profile-config.ts";
 
-import type { RankingProfile } from "#database/entities/ranking-profile.entity.ts";
 import type { SettingsIssue } from "#graphql/resolvers/settings/types/settings-issue.type.ts";
 import type { ActiveRankingProfileDeps } from "./get-active-ranking-profile.ts";
-
-interface RankingProfileView extends Pick<
-  RankingProfile,
-  "rankingModel" | "settings"
-> {
-  id: string;
-  slug: string | null;
-  name: string;
-  description: string | null;
-  builtIn: boolean;
-  isActive: boolean;
-  /** The profile's form values, with `RTN` defaults filled in. */
-  values: Record<string, unknown>;
-}
 
 const BUILT_IN_ISSUE = {
   path: "",
@@ -60,21 +44,8 @@ export class RankingManager {
     this.#deps = deps;
   }
 
-  public async list() {
-    const profiles = await this.#deps.rankingProfileService.list();
-    const activeId = await this.#activeProfileId();
-
-    return profiles.map<RankingProfileView>((profile) => ({
-      id: profile.id,
-      slug: profile.slug,
-      name: profile.name,
-      description: profile.description,
-      builtIn: profile.builtIn,
-      isActive: profile.id === activeId,
-      rankingModel: profile.rankingModel,
-      settings: profile.settings,
-      values: toProfileFormValues(profile),
-    }));
+  public list() {
+    return this.#deps.rankingProfileService.list();
   }
 
   public getSchema() {
@@ -128,7 +99,7 @@ export class RankingManager {
       config,
     });
 
-    if (id === (await this.#activeProfileId())) {
+    if (id === (await this.getActiveProfileId())) {
       invalidateRankingEngine();
     }
 
@@ -142,7 +113,7 @@ export class RankingManager {
       return [BUILT_IN_ISSUE];
     }
 
-    if (id === (await this.#activeProfileId())) {
+    if (id === (await this.getActiveProfileId())) {
       return [ACTIVE_DELETE_ISSUE];
     }
 
@@ -189,7 +160,7 @@ export class RankingManager {
     return profile;
   }
 
-  async #activeProfileId() {
+  public async getActiveProfileId() {
     const active = await getActiveRankingProfile(this.#deps);
 
     return active.id;

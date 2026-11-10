@@ -1,9 +1,18 @@
-import { Arg, ID, Mutation, Query, Resolver } from "type-graphql";
+import {
+  Arg,
+  FieldResolver,
+  ID,
+  Mutation,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 
+import { RankingProfile } from "#database/entities/ranking-profile.entity.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
+import { toProfileFormValues } from "#ranking/ranking-profile-form.ts";
 
 import { SettingsMutationResult } from "../settings/types/settings-mutation-result.type.ts";
-import { RankingProfile } from "./types/ranking-profile.type.ts";
 
 import type { SettingsIssue } from "../settings/types/settings-issue.type.ts";
 
@@ -12,11 +21,28 @@ const toResult = (issues: SettingsIssue[]): SettingsMutationResult => ({
   issues,
 });
 
-@Resolver()
+@Resolver(() => RankingProfile)
 export class RankingProfileResolver {
   @Query(() => [RankingProfile])
   public async rankingProfiles(@CoreContext() { rankingManager }: CoreContext) {
     return rankingManager.list();
+  }
+
+  @FieldResolver(() => Boolean)
+  public async isActive(
+    @Root() profile: RankingProfile,
+    @CoreContext() { rankingManager }: CoreContext,
+  ) {
+    const activeProfileId = await rankingManager.getActiveProfileId();
+
+    return profile.id === activeProfileId;
+  }
+
+  @FieldResolver(() => Object, {
+    description: "The profile's form values, with defaults filled in.",
+  })
+  public values(@Root() profile: RankingProfile) {
+    return toProfileFormValues(profile);
   }
 
   @Query(() => Object, {

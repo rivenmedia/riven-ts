@@ -33,12 +33,13 @@ const formValues = (name: string, rankingModel = {}) =>
 
 async function listProfiles(manager: RankingManager) {
   const profiles = await manager.list();
+  const activeId = await manager.getActiveProfileId();
 
   return {
     profiles,
     names: profiles.map(({ name }) => name),
     activeNames: profiles
-      .filter(({ isActive }) => isActive)
+      .filter(({ id }) => id === activeId)
       .map(({ name }) => name),
   };
 }
@@ -74,9 +75,10 @@ it("lists presets first and marks the active profile", async ({
   await manager.create(formValues("Aaa", { av1: 1 }));
 
   const profiles = await manager.list();
+  const activeId = await manager.getActiveProfileId();
 
   expect(
-    profiles.map(({ name, isActive }) => ({ name, isActive })),
+    profiles.map(({ id, name }) => ({ name, isActive: id === activeId })),
   ).toStrictEqual([
     { name: "Default", isActive: true },
     { name: "Aaa", isActive: false },
@@ -96,10 +98,6 @@ it("lists presets first and marks the active profile", async ({
     description: null,
     rankingModel: { av1: 1 },
     settings: {},
-    values: {
-      name: "Aaa",
-      ranks: { quality: { av1: { fetch: true, rank: 1 } } },
-    },
   });
 });
 
