@@ -79,9 +79,14 @@ async function getMetadataCacheConfig(): Promise<Options> {
   }
 
   const { TsMorphMetadataProvider } = await import("@mikro-orm/reflection");
+  const { EntityMetadataFileCacheAdapter } =
+    await import("./entity-metadata-file-cache-adapter.ts");
 
   return {
     metadataProvider: TsMorphMetadataProvider,
+    metadataCache: {
+      adapter: EntityMetadataFileCacheAdapter,
+    },
   };
 }
 
