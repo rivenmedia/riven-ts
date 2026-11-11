@@ -1,4 +1,5 @@
 import { expect, http, test } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { UserRole } from "@repo/util-auth/access-control";
 
@@ -35,7 +36,11 @@ test.describe("when signed in", () => {
     network.use(http.post("**/api/auth/sign-out", auth.signOut()));
 
     await page.goto(pageWithoutData);
-    await page.getByRole("button", { name: "Logout" }).click();
+
+    const logoutButton = page.getByRole("button", { name: "Logout" });
+
+    await waitForHydration(logoutButton);
+    await logoutButton.click();
 
     await expect(page).toHaveURL("/login");
 
