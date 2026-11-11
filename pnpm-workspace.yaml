@@ -30,6 +30,7 @@ packageExtensions:
     dependencies:
       tslib: ^2.0.0
 patchedDependencies:
+  "@msw/playwright@0.7.0": patches/@msw__playwright@0.7.0.patch
   "@zkochan/fuse-shared-library": patches/@zkochan__fuse-shared-library.patch
   "@zkochan/fuse-shared-library-darwin": patches/@zkochan__fuse-shared-library-darwin.patch
 publicHoistPattern:

@@ -751,6 +751,7 @@ packageExtensionsChecksum: sha256-lmqPczCHsZjEudlMldfSNaZq7e+eaddMNumuy/0Y5Ys=
 pnpmfileChecksum: sha256-gCz1ufFZ5m92/Yjdqs3KiTGBqPFa5RjHWhDuPzqIjVc=
 
 patchedDependencies:
+  '@msw/playwright@0.7.0': 580c15bdad92f4f5aa5f960b822f602ffbfb2f0fb079ec805bfdce419aaab165
   '@zkochan/fuse-shared-library': b6a19defa99b08e4de2d398291f5111ace9e53104c781a595bbc5904c691019c
   '@zkochan/fuse-shared-library-darwin': b152e691160d442356dcb3d3cfe80504786d638dcd4520ee1066cfae5ff8a3d0
 
@@ -971,7 +972,7 @@ importers:
         version: 5.1.0(graphql@16.14.0)
       '@msw/playwright':
         specifier: 'catalog:'
-        version: 0.7.0(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)
+        version: 0.7.0(patch_hash=580c15bdad92f4f5aa5f960b822f602ffbfb2f0fb079ec805bfdce419aaab165)(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
@@ -16245,7 +16246,7 @@ snapshots:
   '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.3':
     optional: true
 
-  '@msw/playwright@0.7.0(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)':
+  '@msw/playwright@0.7.0(patch_hash=580c15bdad92f4f5aa5f960b822f602ffbfb2f0fb079ec805bfdce419aaab165)(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)':
     dependencies:
       '@mswjs/interceptors': 0.45.9(supports-color@10.2.2)
       msw: 3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
