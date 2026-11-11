@@ -47,6 +47,8 @@ test.describe("when signed in", () => {
     await logoutButton.click();
 
     await expect(page).toHaveURL("/login");
+    // Let the redirect finish rendering, as navigating during it is cancelled in some browsers
+    await expect(page.getByRole("tab", { name: "Login" })).toBeVisible();
 
     await page.goto("/library");
 

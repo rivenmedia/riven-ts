@@ -1,4 +1,5 @@
 import { expect, http, test } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 test("navigates to the dashboard after registration", async ({
   auth,
@@ -9,7 +10,10 @@ test("navigates to the dashboard after registration", async ({
 
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /register/iu }).click();
+  const registerTab = page.getByRole("tab", { name: /register/iu });
+
+  await waitForHydration(registerTab);
+  await registerTab.click();
 
   await page.getByRole("textbox", { name: /username/iu }).fill("username");
   await page

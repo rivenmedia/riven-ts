@@ -68,7 +68,8 @@ export default defineConfig({
     command: isDevServer
       ? `pnpm exec next dev --port ${String(devServerPort)}`
       : productionServerCommand,
-    url: baseURL,
+    // Wait for the port rather than requesting a page, which outside of a test would reach for the real backend
+    port: isDevServer ? devServerPort : productionServerPort,
     env: {
       ENABLE_TEST_PROXY: "true",
       // The tests mock the network themselves, and the development mocks would intercept Next.js' requests to the test proxy

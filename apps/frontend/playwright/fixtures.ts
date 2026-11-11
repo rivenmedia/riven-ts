@@ -177,12 +177,27 @@ export const test = nextTest.extend<Options & Fixtures>({
       createTmdbTrendingShowsHandler(),
       createRecentlyAddedHandler(),
       ...remoteAssetHandlers,
+      // Subscriptions no test mocks connect, but never receive anything, like an idle backend
+      api.subscription(/.*/u, () => {
+        // Nothing changes
+      }),
     ]);
   },
 
   network: [
     // `next` registers its own routes, so it must be set up first for the network's routes to take precedence
-    async ({ next, context, handlers, baselineHandlers }, use) => {
+    async (
+      { next, _nextWorker, context, handlers, baselineHandlers },
+      use,
+      testInfo,
+    ) => {
+      // Next.js' fixture only adds the test's headers in a route, which a redirected request doesn't go through.
+      // Without them, the server can't attribute that request's fetches to the test, so they'd reach the real backend.
+      await context.setExtraHTTPHeaders({
+        "Next-Test-Proxy-Port": String(_nextWorker.proxyPort),
+        "Next-Test-Data": testInfo.testId,
+      });
+
       const nextFetchSource = new NextFetchSource(next);
 
       const network = defineNetwork({

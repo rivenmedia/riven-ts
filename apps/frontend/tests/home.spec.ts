@@ -1,4 +1,5 @@
 import { expect, test } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 test.use({ signedInAs: "user" });
 
@@ -30,10 +31,12 @@ test("shows what's playing, recently added and trending", async ({ page }) => {
 test("switches the trending movies to this week", async ({ page }) => {
   await page.goto("/");
 
-  await page
+  const thisWeek = page
     .getByRole("region", { name: "Trending Movies actions" })
-    .getByRole("button", { name: "This Week" })
-    .click();
+    .getByRole("button", { name: "This Week" });
+
+  await waitForHydration(thisWeek);
+  await thisWeek.click();
 
   await expect(
     page.getByRole("heading", { name: "The Odyssey" }),

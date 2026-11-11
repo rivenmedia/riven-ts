@@ -106,9 +106,10 @@ test.describe("the general settings", () => {
 
     await page.goto("/settings/general");
 
-    await page
-      .getByRole("textbox", { name: "Log Directory" })
-      .fill("/var/log/riven");
+    const logDirectory = page.getByRole("textbox", { name: "Log Directory" });
+
+    await waitForHydration(logDirectory);
+    await logDirectory.fill("/var/log/riven");
     await page.getByRole("button", { name: "Save" }).click();
 
     await expect(
@@ -150,9 +151,10 @@ test.describe("the general settings", () => {
 
     await page.goto("/settings/general");
 
-    await page
-      .getByRole("textbox", { name: "Log Directory" })
-      .fill("/root/logs");
+    const logDirectory = page.getByRole("textbox", { name: "Log Directory" });
+
+    await waitForHydration(logDirectory);
+    await logDirectory.fill("/root/logs");
     await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page.getByText("Directory is not writable")).toBeVisible();
@@ -220,7 +222,10 @@ test.describe("the ranking profiles", () => {
 
     await page.getByRole("link", { name: "Create Custom Profile" }).click();
 
-    await page.getByRole("textbox", { name: "Name" }).fill("Anime");
+    const name = page.getByRole("textbox", { name: "Name" });
+
+    await waitForHydration(name);
+    await name.fill("Anime");
     await page
       .getByRole("textbox", { name: "Description" })
       .fill("Prefers dual audio releases.");
@@ -244,9 +249,10 @@ test.describe("the ranking profiles", () => {
       `/settings/ranking/profile/${customProfile.id}`,
     );
 
-    await page
-      .getByRole("textbox", { name: "Description" })
-      .fill("Tuned for 4K releases.");
+    const description = page.getByRole("textbox", { name: "Description" });
+
+    await waitForHydration(description);
+    await description.fill("Tuned for 4K releases.");
     await page.getByRole("button", { name: "Save profile" }).click();
 
     await expect(page.getByText("Ranking profile saved.")).toBeVisible();
