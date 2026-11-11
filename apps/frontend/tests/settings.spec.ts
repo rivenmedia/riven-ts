@@ -1,5 +1,4 @@
 import { UPDATE_SETTINGS_SECTION } from "#app/(protected)/settings/_components/settings-section/_mutations/update-settings-section.mutation.ts";
-import { SETTINGS_SECTION } from "#app/(protected)/settings/_components/settings-section/_queries/settings-section.query.ts";
 import { SETTINGS_PLUGINS } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.ts";
 import {
   customProfile,
@@ -11,6 +10,7 @@ import {
   rankingProfileSchemaHandler,
 } from "#mocks/handlers/ranking-profiles.handler.ts";
 import { createSettingsPluginsStore } from "#mocks/handlers/settings-plugins.handler.ts";
+import { logDirectorySettingsSectionHandler } from "#mocks/handlers/settings-section.handler.ts";
 import {
   HttpResponse,
   expect,
@@ -19,39 +19,13 @@ import {
 } from "#playwright/fixtures.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
-import type { SettingsSectionQuery } from "#app/(protected)/settings/_components/settings-section/_queries/settings-section.query.typegen.ts";
 import type { SettingsPluginsQuery } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.typegen.ts";
 import type { Page } from "@playwright/test";
 
 test.use({
   signedInAs: "admin",
   handlers: withHandlers(
-    api.query(SETTINGS_SECTION, ({ variables }) =>
-      HttpResponse.json({
-        data: {
-          settingsSection: {
-            __typename: "SettingsSection",
-            id: variables.id,
-            title: "General",
-            appliesImmediately: false,
-            jsonSchema: {
-              type: "object",
-              properties: {
-                logDirectory: {
-                  type: "string",
-                  title: "Log Directory",
-                  default: "./logs",
-                },
-              },
-            },
-            values: { logDirectory: "./logs" },
-            lockedFields: [],
-            secretStates: [],
-            issues: [],
-          },
-        } satisfies SettingsSectionQuery,
-      }),
-    ),
+    logDirectorySettingsSectionHandler,
     api.query(SETTINGS_PLUGINS, () =>
       HttpResponse.json({
         data: {

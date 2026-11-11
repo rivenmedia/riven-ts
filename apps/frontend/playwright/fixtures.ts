@@ -183,10 +183,12 @@ export const test = nextTest.extend<Options & Fixtures>({
   network: [
     // `next` registers its own routes, so it must be set up first for the network's routes to take precedence
     async ({ next, context, handlers, baselineHandlers }, use) => {
+      const nextFetchSource = new NextFetchSource(next);
+
       const network = defineNetwork({
         sources: [
           new PlaywrightNetworkSource({ context, skipAssetRequests: true }),
-          new NextFetchSource(next),
+          nextFetchSource,
         ],
         handlers: [...handlers, ...baselineHandlers],
         context: { quiet: true },
@@ -200,6 +202,10 @@ export const test = nextTest.extend<Options & Fixtures>({
 
       await network.enable();
       await use(network);
+
+      // Close the pages, then let the server finish their requests, so they aren't cut off (and logged as errors)
+      await Promise.all(context.pages().map((page) => page.close()));
+      await nextFetchSource.waitForIdle();
       await network.disable();
     },
     { auto: true },
