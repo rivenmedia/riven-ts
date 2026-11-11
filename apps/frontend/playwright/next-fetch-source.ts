@@ -68,6 +68,10 @@ export const isNextFetchFrame = (frame: unknown) =>
 export class NextFetchSource extends NetworkSource<NextFetchFrame> {
   #enabled = false;
 
+  #inFlight = 0;
+
+  #lastActivity = 0;
+
   public constructor(next: NextFixture) {
     super();
 
@@ -76,7 +80,15 @@ export class NextFetchSource extends NetworkSource<NextFetchFrame> {
         return undefined;
       }
 
+      this.#inFlight += 1;
+      this.#lastActivity = performance.now();
+
       const { promise, resolve } = Promise.withResolvers<FetchHandlerResult>();
+
+      void promise.finally(() => {
+        this.#inFlight -= 1;
+        this.#lastActivity = performance.now();
+      });
       const frame = new NextFetchFrame(request, resolve);
 
       await this.queue(frame);
@@ -86,6 +98,27 @@ export class NextFetchSource extends NetworkSource<NextFetchFrame> {
 
       return promise;
     });
+  }
+
+  /**
+   * Waits for the Next.js server to stop fetching, e.g. after a test's pages close, as it can keep rendering for them
+   * (e.g. prefetched routes). Fetches that arrive once the test has ended are aborted, which Next.js logs as errors.
+   */
+  public async waitForIdle({ idleMs = 250, timeoutMs = 2000 } = {}) {
+    const deadline = performance.now() + timeoutMs;
+
+    while (performance.now() < deadline) {
+      if (
+        this.#inFlight === 0 &&
+        performance.now() - this.#lastActivity >= idleMs
+      ) {
+        return;
+      }
+
+      await new Promise((resolve) => {
+        setTimeout(resolve, 50);
+      });
+    }
   }
 
   public enable() {

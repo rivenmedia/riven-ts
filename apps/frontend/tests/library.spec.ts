@@ -2,6 +2,7 @@ import { unrequestedMovie } from "#app/(protected)/details/media/[type]/[id]/med
 import { createLibraryItemsHandler } from "#mocks/handlers/library.handler.ts";
 import { unrequestedMovieHandlers } from "#mocks/handlers/media-details.handler.ts";
 import { expect, test, withHandlers } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 const libraryMovie = {
   __typename: "Movie",
@@ -51,10 +52,13 @@ test("lists the library's items", async ({ page }) => {
 test("searching narrows down the items", async ({ page }) => {
   await page.goto("/library");
 
-  await page
+  const search = page
     .getByRole("main")
-    .getByRole("textbox", { name: "Search..." })
-    .fill("arcane");
+    .getByRole("textbox", { name: "Search..." });
+
+  // The search only filters once hydrated
+  await waitForHydration(search);
+  await search.fill("arcane");
 
   await expect(
     page.getByRole("main").getByText("Arcane", { exact: true }),
