@@ -150,6 +150,14 @@ Default.test("Deletes a custom profile", async ({ canvas, canvasElement }) => {
 
   await userEvent.click(mineCard.getByRole("button", { name: "Delete" }));
 
+  const dialog = within(
+    await within(canvasElement.ownerDocument.body).findByRole("alertdialog", {
+      name: "Delete ranking profile?",
+    }),
+  );
+
+  await userEvent.click(dialog.getByRole("button", { name: "Delete" }));
+
   await waitFor(() =>
     expect(deleteRankingProfileRequest).toHaveBeenCalledWith(customProfile.id),
   );
