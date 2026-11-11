@@ -61,3 +61,17 @@ test("navigates to the setup page after admin user login if setup is required", 
   await expect(page.getByText("Initial Setup")).toBeVisible();
   await expect(page).toHaveURL(/\/setup\//u);
 });
+
+test("stays on the login page when passkey autofill isn't available", async ({
+  page,
+}) => {
+  const passkeyOptions = page.waitForResponse(
+    "**/api/auth/passkey/generate-authenticate-options",
+  );
+
+  await page.goto("/login");
+  await passkeyOptions;
+
+  await expect(page.getByRole("tab", { name: "Login" })).toBeVisible();
+  await expect(page).toHaveURL("/login");
+});

@@ -11,6 +11,12 @@ import { test as nextTest } from "next/experimental/testmode/playwright.js";
 import { api } from "#mocks/graphql.ts";
 import { createAuthProvidersHandler } from "#mocks/handlers/auth-providers.handler.ts";
 import {
+  createRecentlyAddedHandler,
+  createTmdbNowPlayingHandler,
+  createTmdbTrendingMoviesHandler,
+  createTmdbTrendingShowsHandler,
+} from "#mocks/handlers/home.handler.ts";
+import {
   createInstanceRestartStatusHandler,
   createInstanceSetupRequiredHandler,
 } from "#mocks/handlers/instance-status.handler.ts";
@@ -20,8 +26,10 @@ import {
   USER_ROLE_COOKIE,
   createGetSessionHandler,
   hasPermissionHandler,
+  passkeysUnavailableHandler,
 } from "./auth-handlers.ts";
 import { NextFetchSource, isNextFetchFrame } from "./next-fetch-source.ts";
+import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { serialiseCookie } from "./serialise-cookie.ts";
 
 import type { TypedDocumentNode } from "@apollo/client";
@@ -67,7 +75,7 @@ interface Fixtures {
   user: UserWithRole;
   session: Session;
 
-  /** Handlers describing a healthy instance that has already been set up */
+  /** Handlers describing a healthy instance that has already been set up, with some media to show */
   baselineHandlers: AnyHandler[];
 
   /**
@@ -160,9 +168,15 @@ export const test = nextTest.extend<Options & Fixtures>({
     await use([
       createGetSessionHandler(session, user),
       hasPermissionHandler,
+      passkeysUnavailableHandler,
       createInstanceSetupRequiredHandler(false),
       createInstanceRestartStatusHandler(false),
       createAuthProvidersHandler(),
+      createTmdbNowPlayingHandler(),
+      createTmdbTrendingMoviesHandler(),
+      createTmdbTrendingShowsHandler(),
+      createRecentlyAddedHandler(),
+      ...remoteAssetHandlers,
     ]);
   },
 
