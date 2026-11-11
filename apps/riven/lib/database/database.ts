@@ -6,6 +6,7 @@ import { ItemRequestService } from "./services/item-request/item-request.service
 import { MediaEntryService } from "./services/media-entry/media-entry.service.ts";
 import { MediaItemService } from "./services/media-item/media-item.service.ts";
 import { PostProcessingService } from "./services/post-processing/post-processing.service.ts";
+import { RankingProfileService } from "./services/ranking-profile/ranking-profile.service.ts";
 import { RetryLibraryService } from "./services/retry-library/retry-library.service.ts";
 import { ScraperService } from "./services/scraper/scraper.service.ts";
 import { SettingsService } from "./services/settings/settings.service.ts";
@@ -29,6 +30,7 @@ export interface Services {
   mediaEntryService: MediaEntryService;
   mediaItemService: MediaItemService;
   postProcessingService: PostProcessingService;
+  rankingProfileService: RankingProfileService;
   retryLibraryService: RetryLibraryService;
   scraperService: ScraperService;
   settingsService: SettingsService;
@@ -71,6 +73,7 @@ export async function initORM(options: Partial<Options>) {
     mediaEntryService: new MediaEntryService(orm),
     mediaItemService: new MediaItemService(orm),
     postProcessingService: new PostProcessingService(orm),
+    rankingProfileService: new RankingProfileService(orm),
     retryLibraryService: new RetryLibraryService(orm),
     scraperService: new ScraperService(orm),
     settingsService: new SettingsService(orm),

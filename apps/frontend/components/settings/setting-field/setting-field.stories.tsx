@@ -460,7 +460,7 @@ CustomRank.test(
   "Toggling fetch disables and enables the rank input",
   async ({ canvas, step }) => {
     const fetchSwitch = canvas.getByRole("switch", { name: /fetch/iu });
-    const rankInput = canvas.getByRole("spinbutton");
+    const rankInput = canvas.getByRole("spinbutton", { name: "1080p rank" });
 
     await step("Enabled by default", async () => {
       await expect(fetchSwitch).toBeChecked();
@@ -478,6 +478,36 @@ CustomRank.test(
       await expect(fetchSwitch).toBeChecked();
       await expect(rankInput).toBeEnabled();
     });
+  },
+);
+
+export const CustomRankWithError = meta.story({
+  args: {
+    type: "custom_rank",
+    config: { label: "1080p", name: "custom-rank" },
+  },
+  decorators: [
+    createFormDecorator<{ "custom-rank": { fetch: boolean; rank?: number } }>({
+      progressive: true,
+      defaultValues: { "custom-rank": { fetch: true } },
+      errors: {
+        "custom-rank": {
+          rank: {
+            type: "validate",
+            message: "Enter a rank, or turn off fetching.",
+          },
+        },
+      },
+    }),
+  ],
+});
+
+CustomRankWithError.test(
+  "Shows the rank's validation error",
+  async ({ canvas }) => {
+    await expect(canvas.getByRole("alert")).toHaveTextContent(
+      "Enter a rank, or turn off fetching.",
+    );
   },
 );
 

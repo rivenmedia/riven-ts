@@ -1,5 +1,5 @@
-import { RankingTab } from "#components/settings/ranking-tab/ranking-tab.tsx";
+import { RankingTab } from "./_components/ranking-tab";
 
 export default function RankingSettingsPage() {
-  return <RankingTab selectedProfile="balanced" />;
+  return <RankingTab />;
 }

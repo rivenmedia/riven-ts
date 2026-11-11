@@ -7,7 +7,6 @@
   ],
   "files": [
     "scripts/generate-gql-schema.ts",
-    "scripts/generate-ranking-config-json-schema.ts",
     "scripts/generate-zod-docs.ts",
     "oxlint.config.ts",
     "graphql.config.ts",

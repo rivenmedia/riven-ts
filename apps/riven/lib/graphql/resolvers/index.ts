@@ -11,6 +11,7 @@ import { ItemRequestResolver } from "./item-request/item-request.resolver.ts";
 import { MediaEntryResolver } from "./media-entry.resolver.ts";
 import { MediaItemResolver } from "./media-item/media-item.resolver.ts";
 import { MovieResolver } from "./movie.resolver.ts";
+import { RankingProfileResolver } from "./ranking-profile/ranking-profile.resolver.ts";
 import { SeasonResolver } from "./season.resolver.ts";
 import { SettingsResolver } from "./settings/settings.resolver.ts";
 import { ShareLogsResolver } from "./share-logs.resolver.ts";
@@ -38,4 +39,5 @@ export const resolvers = [
   InstanceResolver,
   CalendarResolver,
   SettingsResolver,
+  RankingProfileResolver,
 ] as const satisfies Constructor<object>[];
