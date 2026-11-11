@@ -1,60 +1,11 @@
-import assert from "node:assert";
-
-import { GET_AUTH_PROVIDERS } from "#app/(public)/login/_queries/get-auth-providers.query.ts";
-import { api } from "#mocks/graphql.ts";
-import { HttpResponse, expect, http, test } from "#playwright/fixtures.ts";
-
-import type { UserWithRole } from "better-auth/client/plugins";
+import { expect, http, test } from "#playwright/fixtures.ts";
 
 test("navigates to the dashboard after registration", async ({
+  auth,
+  network,
   page,
-  msw,
-  standardUser,
-  authHelpers,
-  context,
 }) => {
-  msw.use(
-    api.query(GET_AUTH_PROVIDERS, () =>
-      HttpResponse.json({
-        data: {
-          authProviders: [
-            {
-              __typename: "AuthProvider",
-              disableSignup: false,
-              enabled: true,
-              key: "credential",
-              name: "Email and Password",
-            },
-          ],
-        },
-      }),
-    ),
-    http.post("**/api/auth/sign-up/email", async () => {
-      const [cookie] = await authHelpers.getCookies({
-        userId: standardUser.id,
-      });
-
-      assert.ok(cookie);
-
-      await context.addCookies([
-        {
-          name: "user_role",
-          path: "/",
-          value: standardUser.role,
-          domain: "localhost",
-        },
-      ]);
-
-      return HttpResponse.json<{ user: UserWithRole }>(
-        { user: standardUser },
-        {
-          headers: {
-            "set-cookie": `${cookie.name}=${cookie.value}; Path=${cookie.path}; HttpOnly; Secure; SameSite=${cookie.sameSite ?? "Lax"};`,
-          },
-        },
-      );
-    }),
-  );
+  network.use(http.post("**/api/auth/sign-up/email", auth.signIn("user")));
 
   await page.goto("/login");
 

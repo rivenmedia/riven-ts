@@ -70,9 +70,23 @@ Run these from `apps/frontend`:
 | --------------------- | ------------------------------------------------------- |
 | `pnpm test`           | Unit tests                                              |
 | `pnpm test:component` | Storybook stories as component tests, in a real browser |
-| `pnpm e2e:headless`   | Playwright end-to-end tests                             |
+| `pnpm e2e:headless`   | Playwright end-to-end tests, against a production build |
 | `pnpm e2e`            | Playwright end-to-end tests, in Playwright's UI         |
 | `pnpm lint`           | oxlint, with type checking                              |
+
+### End-to-end tests
+
+The end-to-end tests run the real frontend against a mocked backend, so they don't need the backend, a database or Redis. `pnpm e2e:headless` builds the app (through Turborepo, so unchanged builds come from the cache) and tests it with `next start` on port 9100, in every browser. CI does the same, in Chromium only.
+
+`pnpm e2e` opens Playwright's UI against `next dev` on port 9101 instead, for faster iteration. Both run over plain HTTP: `next dev --experimental-https` intermittently drops WebSocket connections, including the HMR socket Next.js uses to send React's debug info for server renders, which leaves pages stuck mid-render.
+
+Import `test` from `#playwright/fixtures.ts`. Its fixtures mock the network with [MSW](https://mswjs.io) handlers, the same as the stories. The handlers answer both the Next.js server's requests, through Next.js' test mode, and the browser's, including GraphQL subscriptions over WebSockets.
+
+- Every test starts from a healthy instance that has already been set up. To change that, override the handlers.
+- `test.use({ signedInAs: "admin" })` signs the test in with a role (`"admin"`, `"manager"` or `"user"`). Tests are signed out by default.
+- `test.use({ handlers: withHandlers(...) })` adds handlers for every test in a file. `network.use(...)` adds handlers inside a single test. Handlers you add take precedence over the defaults.
+- `auth.signIn(role)` is a resolver for the sign-in and sign-up endpoints, for tests that go through the login form.
+- `recordOperation(QUERY)` returns the variables of each request for that GraphQL operation, so tests can check what was sent.
 
 ## Building the Docker image
 

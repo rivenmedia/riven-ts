@@ -1,45 +1,116 @@
+import { faker } from "@faker-js/faker";
+import { PlaywrightNetworkSource } from "@msw/playwright";
 import { betterAuth } from "better-auth";
-import { getSessionCookie } from "better-auth/cookies";
 import { testUtils } from "better-auth/plugins";
+import { OperationTypeNode, getOperationAST } from "graphql";
 import { DateTime } from "luxon";
-import {
-  HttpResponse,
-  test as baseTest,
-  http,
-} from "next/experimental/testmode/playwright/msw";
+import { HttpResponse } from "msw";
+import { defineNetwork } from "msw/experimental";
+import { test as nextTest } from "next/experimental/testmode/playwright.js";
 
+import { api } from "#mocks/graphql.ts";
+import { createAuthProvidersHandler } from "#mocks/handlers/auth-providers.handler.ts";
+import {
+  createInstanceRestartStatusHandler,
+  createInstanceSetupRequiredHandler,
+} from "#mocks/handlers/instance-status.handler.ts";
+
+import {
+  AUTH_COOKIE_PREFIX,
+  USER_ROLE_COOKIE,
+  createGetSessionHandler,
+  hasPermissionHandler,
+} from "./auth-handlers.ts";
+import { NextFetchSource, isNextFetchFrame } from "./next-fetch-source.ts";
+import { serialiseCookie } from "./serialise-cookie.ts";
+
+import type { TypedDocumentNode } from "@apollo/client";
+import type { UserRole } from "@repo/util-auth/access-control";
 import type { Session } from "better-auth";
 import type { UserWithRole } from "better-auth/client/plugins";
-import type { TestHelpers } from "better-auth/plugins";
-import type {
-  DefaultBodyType,
-  PathParams,
-} from "next/experimental/testmode/playwright/msw";
+import type { TestCookie, TestHelpers } from "better-auth/plugins";
+import type { AnyHandler, HttpResponseResolver } from "msw";
+import type { NetworkApi } from "msw/experimental";
 import type { SetReturnType } from "type-fest";
 
-export * from "next/experimental/testmode/playwright/msw";
+export { expect } from "@playwright/test";
+export { HttpResponse, http } from "msw";
 
-interface Fixtures {
-  session: Session;
-  adminUser: UserWithRole & { role: "admin" };
-  standardUser: UserWithRole & { role: "user" };
-  authHelpers: TestHelpers;
+/**
+ * Wraps handlers for `test.use({ handlers })`.
+ *
+ * Playwright reads an array as a `[value, options]` fixture tuple, so passing the handlers directly would drop all but the first.
+ */
+export const withHandlers = (
+  ...handlers: AnyHandler[]
+): [AnyHandler[], { scope: "test" }] => [handlers, { scope: "test" }];
+
+interface Options {
+  /**
+   * The role of the user who is signed in when the test starts, or `null` when signed out.
+   *
+   * @default null
+   */
+  signedInAs: UserRole | null;
+
+  /**
+   * Handlers that take precedence over the baseline handlers for every test using them.
+   * Use `network.use()` to add handlers inside a single test.
+   *
+   * @default []
+   */
+  handlers: AnyHandler[];
 }
 
-export const test = baseTest.extend<Fixtures>({
-  session: async ({}, use) => {
-    const session: Session = {
-      createdAt: DateTime.now().toJSDate(),
-      expiresAt: DateTime.now().plus({ days: 7 }).toJSDate(),
-      id: "session-id",
-      token: "token",
-      updatedAt: DateTime.now().toJSDate(),
-      userId: "user-id",
-    };
+interface Fixtures {
+  authHelpers: TestHelpers;
+  user: UserWithRole;
+  session: Session;
 
-    await use(session);
-  },
-  authHelpers: async ({}, use) => {
+  /** Handlers describing a healthy instance that has already been set up */
+  baselineHandlers: AnyHandler[];
+
+  /**
+   * The mocked network, shared by the browser (HTTP and WebSocket) and the Next.js server.
+   *
+   * @see https://mswjs.io/docs/api/setup-server/use
+   */
+  network: NetworkApi<[PlaywrightNetworkSource, NextFetchSource]>;
+
+  auth: {
+    /** Creates the cookies for a session signed in with the given role */
+    getCookies: (role: UserRole) => Promise<TestCookie[]>;
+
+    /** A resolver for a sign-in or sign-up endpoint that signs the user in with the given role */
+    signIn: (role: UserRole) => HttpResponseResolver;
+  };
+
+  /**
+   * Records the variables of every request for the given GraphQL operation,
+   * without changing how it's handled.
+   */
+  recordOperation: <TVariables extends Record<string, unknown>>(
+    document: TypedDocumentNode<unknown, TVariables>,
+  ) => TVariables[];
+
+  _seedFaker: undefined;
+  _signIn: undefined;
+}
+
+export const test = nextTest.extend<Options & Fixtures>({
+  signedInAs: [null, { option: true }],
+  handlers: [[], { option: true }],
+
+  _seedFaker: [
+    async ({}, use) => {
+      faker.seed(1);
+
+      await use(undefined);
+    },
+    { auto: true },
+  ],
+
+  authHelpers: async ({ baseURL }, use) => {
     const testUtilsPlugin = testUtils();
 
     type TestUtilsInitReturn = Awaited<ReturnType<typeof testUtilsPlugin.init>>;
@@ -55,58 +126,129 @@ export const test = baseTest.extend<Fixtures>({
     };
 
     const instance = betterAuth({
-      baseURL: "https://localhost:9000",
+      baseURL,
       plugins: [fixedTestUtilsPlugin],
-      advanced: {
-        cookiePrefix: "riven",
-      },
+      advanced: { cookiePrefix: AUTH_COOKIE_PREFIX },
     });
 
     const { test: testHelpers } = await instance.$context;
 
     await use(testHelpers);
   },
-  standardUser: async ({ authHelpers }, use) => {
-    const user = {
-      ...authHelpers.createUser(),
-      banned: false,
-      role: "user",
-    } as const;
 
-    await use(user);
+  user: async ({ authHelpers }, use) => {
+    await use({ ...authHelpers.createUser(), banned: false, role: "user" });
   },
-  adminUser: async ({ standardUser }, use) => {
+
+  session: async ({ user }, use) => {
+    const now = DateTime.now();
+
     await use({
-      ...standardUser,
-      role: "admin",
+      createdAt: now.toJSDate(),
+      expiresAt: now.plus({ days: 7 }).toJSDate(),
+      id: "session-id",
+      token: "token",
+      updatedAt: now.toJSDate(),
+      userId: user.id,
     });
   },
-});
 
-test.use({
-  mswHandlers: async ({ standardUser, session }, use) =>
-    use([
-      http.get<
-        PathParams,
-        DefaultBodyType,
-        { session: Session; user: UserWithRole } | null
-      >("**/api/auth/get-session", ({ request, cookies }) => {
-        const sessionCookie = getSessionCookie(request, {
-          cookiePrefix: "riven",
-        });
-        const userRole = cookies["user_role"];
+  baselineHandlers: async ({ session, user }, use) => {
+    await use([
+      createGetSessionHandler(session, user),
+      hasPermissionHandler,
+      createInstanceSetupRequiredHandler(false),
+      createInstanceRestartStatusHandler(false),
+      createAuthProvidersHandler(),
+    ]);
+  },
 
-        if (!sessionCookie || !userRole) {
-          return HttpResponse.json(null);
+  network: [
+    // `next` registers its own routes, so it must be set up first for the network's routes to take precedence
+    async ({ next, context, handlers, baselineHandlers }, use) => {
+      const network = defineNetwork({
+        sources: [
+          new PlaywrightNetworkSource({ context, skipAssetRequests: true }),
+          new NextFetchSource(next),
+        ],
+        handlers: [...handlers, ...baselineHandlers],
+        context: { quiet: true },
+        onUnhandledFrame: ({ frame, defaults }) => {
+          // The page's own requests (navigations, RSC payloads, etc.) are expected to reach the Next.js server
+          if (isNextFetchFrame(frame)) {
+            defaults.warn();
+          }
+        },
+      });
+
+      await network.enable();
+      await use(network);
+      await network.disable();
+    },
+    { auto: true },
+  ],
+
+  auth: async ({ authHelpers, baseURL, session, user }, use) => {
+    const { hostname } = new URL(baseURL ?? "");
+
+    const getCookies = async (role: UserRole): Promise<TestCookie[]> => [
+      ...(await authHelpers.getCookies({ userId: user.id, domain: hostname })),
+      { name: USER_ROLE_COOKIE, value: role, domain: hostname, path: "/" },
+    ];
+
+    await use({
+      getCookies,
+      // The backend sets the session cookies on the Next.js server's response, rather than in the browser
+      signIn: (role) => async () => {
+        const headers = new Headers();
+
+        for (const cookie of await getCookies(role)) {
+          headers.append("set-cookie", serialiseCookie(cookie));
         }
 
-        return HttpResponse.json({
-          session,
-          user: {
-            ...standardUser,
-            role: userRole,
-          },
-        });
-      }),
-    ]),
+        return HttpResponse.json(
+          { redirect: false, token: session.token, user: { ...user, role } },
+          { headers },
+        );
+      },
+    });
+  },
+
+  _signIn: [
+    async ({ auth, context, signedInAs }, use) => {
+      if (signedInAs) {
+        const cookies = await auth.getCookies(signedInAs);
+
+        await context.addCookies(
+          cookies.map(({ expires, ...cookie }) => cookie),
+        );
+      }
+
+      await use(undefined);
+    },
+    { auto: true },
+  ],
+
+  recordOperation: async ({ network }, use) => {
+    await use(
+      <TVariables extends Record<string, unknown>>(
+        document: TypedDocumentNode<unknown, TVariables>,
+      ) => {
+        const recorded: TVariables[] = [];
+        const createHandler =
+          getOperationAST(document)?.operation === OperationTypeNode.MUTATION
+            ? api.mutation
+            : api.query;
+
+        // Returning nothing falls through to the handler that actually answers the request
+        network.use(
+          createHandler(document, ({ variables }) => {
+            recorded.push(variables);
+          }),
+        );
+
+        return recorded;
+      },
+    );
+  },
 });

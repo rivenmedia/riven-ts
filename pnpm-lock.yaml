@@ -296,6 +296,9 @@ catalogs:
     '@mishieck/ink-titled-box':
       specifier: ^0.4.2
       version: 0.4.2
+    '@msw/playwright':
+      specifier: ^0.7.0
+      version: 0.7.0
     '@next-safe-action/adapter-react-hook-form':
       specifier: ^2.0.6
       version: 2.1.0
@@ -966,6 +969,9 @@ importers:
       '@graphql-codegen/typescript-operations':
         specifier: 'catalog:'
         version: 5.1.0(graphql@16.14.0)
+      '@msw/playwright':
+        specifier: 'catalog:'
+        version: 0.7.0(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)
       '@playwright/test':
         specifier: 'catalog:'
         version: 1.62.1
@@ -4964,6 +4970,12 @@ packages:
     resolution: {integrity: sha512-x0fWaQtYp4E6sktbsdAqnehxDgEc/VwM7uLsRCYWaiGu0ykYdZPiS8zCWdnjHwyiumousxfBm4SO31eXqwEZhQ==}
     cpu: [x64]
     os: [win32]
+
+  '@msw/playwright@0.7.0':
+    resolution: {integrity: sha512-HovTLoUTrs3oaMBmztaCtYv3roaWXCkoE89Gzwri2Qc0kFPTZ2hYvEU4fUzXuAR3S7t+TnY1QVLIVKY/p+lJzw==}
+    engines: {node: '>=22.0.0'}
+    peerDependencies:
+      msw: '>=3'
 
   '@msw/url@0.1.2':
     resolution: {integrity: sha512-DdeBLQxQ+ZrtmwEmaj7GQ7lbzPCgbbbyAqOz/I4ulo68hwBpfdNvQJ5bmihJUkAAKOeCmqCIG3OFZGosqFN4mA==}
@@ -16232,6 +16244,14 @@ snapshots:
 
   '@msgpackr-extract/msgpackr-extract-win32-x64@3.0.3':
     optional: true
+
+  '@msw/playwright@0.7.0(msw@3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1)))(supports-color@10.2.2)':
+    dependencies:
+      '@mswjs/interceptors': 0.45.9(supports-color@10.2.2)
+      msw: 3.0.3(@types/node@24.12.4)(@typescript/typescript6@6.0.2)(graphql@16.14.0)(supports-color@10.2.2)(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+      outvariant: 1.4.3
+    transitivePeerDependencies:
+      - supports-color
 
   '@msw/url@0.1.2': {}
 
