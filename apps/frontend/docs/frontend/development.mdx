@@ -86,6 +86,7 @@ Import `test` from `#playwright/fixtures.ts`. Its fixtures mock the network with
 - `test.use({ signedInAs: "admin" })` signs the test in with a role (`"admin"`, `"manager"` or `"user"`). Tests are signed out by default.
 - `test.use({ handlers: withHandlers(...) })` adds handlers for every test in a file. `network.use(...)` adds handlers inside a single test. Handlers you add take precedence over the defaults.
 - `auth.signIn(role)` is a resolver for the sign-in and sign-up endpoints, for tests that go through the login form.
+- `auth.signOut()` is a resolver for the sign-out endpoint, which expires the session cookies.
 - `recordOperation(QUERY)` returns the variables of each request for that GraphQL operation, so tests can check what was sent.
 
 ## Building the Docker image
