@@ -14,8 +14,6 @@ const paths = {
   instanceSetup: "/setup",
 } as const satisfies Record<string, AppRoutes | RedirectRoutes>;
 
-const client = getClient();
-
 export async function proxy(request: NextRequest) {
   if (
     request.nextUrl.pathname === "/graphql" ||
@@ -36,7 +34,9 @@ export async function proxy(request: NextRequest) {
   } else if (session && request.nextUrl.pathname === paths.login) {
     return NextResponse.redirect(new URL(paths.home, request.url));
   } else if (session?.user.role === "admin") {
-    const { data } = await client.query({ query: GET_INSTANCE_SETUP_REQUIRED });
+    const { data } = await getClient().query({
+      query: GET_INSTANCE_SETUP_REQUIRED,
+    });
 
     if (
       !request.nextUrl.pathname.startsWith(paths.instanceSetup) &&

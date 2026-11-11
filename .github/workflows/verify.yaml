@@ -79,6 +79,9 @@ jobs:
           - name: Build
             command: build
 
+          - name: E2E tests
+            command: e2e:headless
+
           - name: Validate generators
             command: //#validate-generators
             runner-requirements:
