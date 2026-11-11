@@ -8,10 +8,7 @@ import { createHasPermissionHandler } from "#mocks/handlers/has-permission.handl
 import { SET_PLUGIN_ENABLED } from "../_mutations/set-plugin-enabled.mutation";
 import { PluginNav } from "./plugin-nav";
 
-import type {
-  SetPluginEnabledMutation,
-  SetPluginEnabledMutationVariables,
-} from "../_mutations/set-plugin-enabled.mutation.typegen";
+import type { SetPluginEnabledMutationVariables } from "../_mutations/set-plugin-enabled.mutation.typegen";
 
 const navigation = {
   pathname: "/settings/plugins/repo-plugin-comet",
@@ -67,7 +64,7 @@ const meta = preview.meta({
               success: true,
               issues: [],
             },
-          } satisfies SetPluginEnabledMutation,
+          },
         });
       }),
     );
@@ -181,7 +178,7 @@ export const RejectedChange = meta.story({
                 },
               ],
             },
-          } satisfies SetPluginEnabledMutation,
+          },
         });
       }),
     );

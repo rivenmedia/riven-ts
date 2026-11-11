@@ -47,6 +47,7 @@ test.use({
               __typename: "SettingsSection",
               id: variables.id,
               title: "General",
+              appliesImmediately: false,
               jsonSchema: {
                 type: "object",
                 properties: {

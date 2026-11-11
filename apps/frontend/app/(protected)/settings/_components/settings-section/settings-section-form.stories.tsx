@@ -11,11 +11,7 @@ import { RESET_SETTINGS_FIELDS } from "./_mutations/reset-settings-fields.mutati
 import { UPDATE_SETTINGS_SECTION } from "./_mutations/update-settings-section.mutation";
 import { SettingsSectionForm } from "./settings-section-form";
 
-import type { ResetSettingsFieldsMutation } from "./_mutations/reset-settings-fields.mutation.typegen";
-import type {
-  UpdateSettingsSectionMutation,
-  UpdateSettingsSectionMutationVariables,
-} from "./_mutations/update-settings-section.mutation.typegen";
+import type { UpdateSettingsSectionMutationVariables } from "./_mutations/update-settings-section.mutation.typegen";
 import type { SettingsSectionFormProps } from "./settings-section-form";
 
 /** Serves a Zod schema the way the backend does. */
@@ -68,6 +64,7 @@ const meta = preview.meta({
   args: {
     id: "general",
     title: "General",
+    appliesImmediately: false,
     jsonSchema: generalJsonSchema,
     values: generalValues,
     lockedFields: [],
@@ -90,7 +87,7 @@ const meta = preview.meta({
               success: true,
               issues: [],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         });
       }),
       api.mutation(RESET_SETTINGS_FIELDS, ({ variables }) => {
@@ -103,7 +100,7 @@ const meta = preview.meta({
               success: true,
               issues: [],
             },
-          } satisfies ResetSettingsFieldsMutation,
+          },
         });
       }),
     );
@@ -210,7 +207,7 @@ Default.test(
                 },
               ],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         }),
       ),
     );
@@ -250,7 +247,7 @@ Default.test(
                 },
               ],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         }),
       ),
     );
@@ -390,7 +387,7 @@ WithCustomSecret.test(
                 },
               ],
             },
-          } satisfies ResetSettingsFieldsMutation,
+          },
         }),
       ),
     );
@@ -782,7 +779,7 @@ WithClearedFieldRevalidation.test(
               success: true,
               issues: [],
             },
-          } satisfies UpdateSettingsSectionMutation,
+          },
         });
       }),
     );
@@ -815,5 +812,62 @@ WithClearedFieldRevalidation.test(
 
     await waitFor(() => expect(retries).toHaveValue(3));
     await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
+  },
+);
+
+export const RankingSection = meta.story({
+  args: {
+    id: "ranking",
+    title: "Ranking",
+    // Ranking settings are read on each ranking, so they apply without a restart
+    appliesImmediately: true,
+    jsonSchema: toServedJsonSchema(
+      z.object({
+        quality: z
+          .strictObject({
+            av1: z
+              .strictObject({ fetch: z.boolean(), rank: z.int().optional() })
+              .meta({ widget: "custom_rank", title: "AV1" }),
+          })
+          .meta({ title: "Quality" }),
+      }),
+    ),
+    values: { quality: { av1: { fetch: true, rank: 500 } } },
+  },
+});
+
+RankingSection.test(
+  "Saves a rank and says it applies straight away",
+  async ({ canvas, step }) => {
+    await step("Renders the rank as a custom rank input", async () => {
+      await expect(canvas.getByText("AV1")).toBeInTheDocument();
+      await expect(canvas.getByRole("switch", { name: "Fetch" })).toBeChecked();
+      await expect(canvas.getByRole("spinbutton")).toHaveValue(500);
+    });
+
+    await step("Submits the rank as a fetch and rank pair", async () => {
+      const rank = canvas.getByRole("spinbutton");
+
+      await userEvent.clear(rank);
+      await userEvent.type(rank, "600");
+      await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+      await waitFor(() =>
+        expect(updateSettingsSectionRequest).toHaveBeenCalledWith({
+          id: "ranking",
+          values: { quality: { av1: { fetch: true, rank: 600 } } },
+          reset: [],
+        }),
+      );
+    });
+
+    await step("Doesn't tell the user to restart Riven", async () => {
+      await expect(
+        await canvas.findByText("Settings saved."),
+      ).toBeInTheDocument();
+      await expect(
+        canvas.queryByText("Settings saved. Restart Riven to apply them."),
+      ).not.toBeInTheDocument();
+    });
   },
 );

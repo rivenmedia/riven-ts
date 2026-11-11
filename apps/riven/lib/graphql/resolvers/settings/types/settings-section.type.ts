@@ -14,6 +14,12 @@ export class SettingsSection {
   @Field()
   public title!: string;
 
+  @Field({
+    description:
+      "Whether saved changes take effect immediately, without a restart.",
+  })
+  public appliesImmediately!: boolean;
+
   @Field(() => Object)
   public jsonSchema!: ZodStandardJSONSchemaPayload<z.ZodObject>;
 

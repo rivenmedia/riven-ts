@@ -14,6 +14,7 @@ export const SETTINGS_SECTION: TypedDocumentNode<
     settingsSection(id: $id) {
       id
       title
+      appliesImmediately
       jsonSchema
       values
       lockedFields
