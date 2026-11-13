@@ -45,7 +45,6 @@
     "@react-spring/web": "catalog:",
     "@repo/util-auth": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
-    "@repo/util-rank-torrent-name": "workspace:^",
     "@wrksz/themes": "catalog:",
     "better-auth": "catalog:",
     "class-variance-authority": "catalog:",

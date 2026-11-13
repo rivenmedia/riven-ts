@@ -36,7 +36,6 @@
     "codegen:config-docs": "pnpm node scripts/generate-zod-docs.ts",
     "codegen:gql": "graphql-codegen --config graphql.config.ts",
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
-    "codegen:ranking-config-json-schema": "pnpm node scripts/generate-ranking-config-json-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
     "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven --env-file-if-exists=.env.riven-frontend --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
     "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",

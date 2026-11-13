@@ -25,6 +25,7 @@ import {
   Session,
   Verification,
   Setting,
+  RankingProfile,
 } from "./entities/index.ts";
 import { ItemRequestChangeSubscriber } from "./subscribers/item-request-change.subscriber.ts";
 import { ItemRequestStateSubscriber } from "./subscribers/item-request-state.subscriber.ts";
@@ -56,6 +57,7 @@ const entities = [
   Session,
   Verification,
   Setting,
+  RankingProfile,
 ];
 
 async function getMetadataCacheConfig(): Promise<Options> {
@@ -77,9 +79,14 @@ async function getMetadataCacheConfig(): Promise<Options> {
   }
 
   const { TsMorphMetadataProvider } = await import("@mikro-orm/reflection");
+  const { EntityMetadataFileCacheAdapter } =
+    await import("./entity-metadata-file-cache-adapter.ts");
 
   return {
     metadataProvider: TsMorphMetadataProvider,
+    metadataCache: {
+      adapter: EntityMetadataFileCacheAdapter,
+    },
   };
 }
 
