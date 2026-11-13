@@ -84,8 +84,9 @@ services:
     volumes:
       # Silo's state, the PostgreSQL cluster, and the Redis and Meilisearch data.
       - ${SILO_DATA_ROOT:-/opt/silo}/config:/config
-      # Riven: SILO_MEDIA_ROOT and SILO_MEDIA_CONTAINER_ROOT, set in the root .env.
-      - ${SILO_MEDIA_ROOT:?Set SILO_MEDIA_ROOT in the root .env to the host media path}:${SILO_MEDIA_CONTAINER_ROOT:-/mnt/media}:ro
+      # Riven: SILO_MEDIA_ROOT and SILO_MEDIA_CONTAINER_ROOT come from the root
+      # .env, and rslave shows Silo the VFS that Riven mounts after Silo starts.
+      - ${SILO_MEDIA_ROOT:?Set SILO_MEDIA_ROOT in the root .env to the host media path}:${SILO_MEDIA_CONTAINER_ROOT:-/mnt/media}:ro,rslave
       # Transcode segments, kept out of /config so a backup of it stays small.
       - ${SILO_DATA_ROOT:-/opt/silo}/transcode:/tmp/silo-transcode
       # Prepared downloads. While "Prepared file directory" (download.artifact_dir)
