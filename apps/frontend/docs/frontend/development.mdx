@@ -89,6 +89,13 @@ Import `test` from `#playwright/fixtures.ts`. Its fixtures mock the network with
 - `auth.signOut()` is a resolver for the sign-out endpoint, which expires the session cookies.
 - `recordOperation(QUERY)` returns the variables of each request for that GraphQL operation, so tests can check what was sent.
 
+Some things to know when writing tests:
+
+- **Shared mock data:** handler factories in `mocks/handlers` (e.g. `home.handler.ts`, `media-details.handler.ts`, `library.handler.ts`) are shared with the stories, so prefer them over new inline mocks.
+- **Subscriptions:** a subscription handler only attaches to a WebSocket when the page connects. Add it before the page loads, with `test.use({ handlers })` or `network.use()` in `beforeEach`, rather than in response to something the test does.
+- **Cached data:** data fetched in `"use cache"` functions (e.g. the home page's carousels) is cached by the production server across tests. Overriding it in one test won't reliably change what that test sees.
+- **Hidden duplicates:** the production build keeps hidden copies of streamed content outside `main`. Scope text queries to `page.getByRole("main")` so they don't match both.
+
 ## Building the Docker image
 
 The image is built from the monorepo root:

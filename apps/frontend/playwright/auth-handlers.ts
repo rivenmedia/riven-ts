@@ -64,3 +64,9 @@ export const hasPermissionHandler = http.post(
     });
   },
 );
+
+/** No passkeys are registered, so the login page's passkey autofill has nothing to offer */
+export const passkeysUnavailableHandler = http.get(
+  "**/api/auth/passkey/generate-authenticate-options",
+  () => HttpResponse.json(null, { status: 404 }),
+);

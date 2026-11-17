@@ -1,0 +1,33 @@
+diff --git a/build/index.mjs b/build/index.mjs
+index 3891da9f3e2d1dfc8c89d8befa3a3b2d477cc8ae..4f89b94222d6723a4fefcd7040c260031defd35e 100644
+--- a/build/index.mjs
++++ b/build/index.mjs
+@@ -166,11 +166,7 @@ var PlaywrightWebSocketNetworkFrame = class extends WebSocketNetworkFrame {
+ 		super({ connection: {
+ 			client: new PlaywrightWebSocketClientConnection(options.route),
+ 			server: new PlaywrightWebSocketServerConnection(options.route),
+-			info: { 
+-			/**
+-			* @note Playwright does not expose the protocols requested by the client.
+-			*/
+-protocols: [] }
++			info: { protocols: options.route.protocols() }
+ 		} });
+ 		this.#route = options.route;
+ 		this.#baseUrl = options.baseUrl;
+diff --git a/src/fixture.ts b/src/fixture.ts
+index 7a9234820fe885b0b9dd52a4b65592c41fa0a39a..e81ae20f54e42d857e5e5584aa92553898fd5eee 100644
+--- a/src/fixture.ts
++++ b/src/fixture.ts
+@@ -303,10 +303,7 @@ class PlaywrightWebSocketNetworkFrame extends WebSocketNetworkFrame {
+         client: new PlaywrightWebSocketClientConnection(options.route),
+         server: new PlaywrightWebSocketServerConnection(options.route),
+         info: {
+-          /**
+-           * @note Playwright does not expose the protocols requested by the client.
+-           */
+-          protocols: [],
++          protocols: options.route.protocols(),
+         },
+       },
+     })
