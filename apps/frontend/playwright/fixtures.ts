@@ -120,7 +120,6 @@ export const test = nextTest.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
-
   authHelpers: async ({ baseURL }, use) => {
     const testUtilsPlugin = testUtils();
 
@@ -146,11 +145,9 @@ export const test = nextTest.extend<Options & Fixtures>({
 
     await use(testHelpers);
   },
-
   user: async ({ authHelpers }, use) => {
     await use({ ...authHelpers.createUser(), banned: false, role: "user" });
   },
-
   session: async ({ user }, use) => {
     const now = DateTime.now();
 
@@ -163,7 +160,6 @@ export const test = nextTest.extend<Options & Fixtures>({
       userId: user.id,
     });
   },
-
   baselineHandlers: async ({ session, user }, use) => {
     await use([
       createGetSessionHandler(session, user),
@@ -183,7 +179,6 @@ export const test = nextTest.extend<Options & Fixtures>({
       }),
     ]);
   },
-
   network: [
     // `next` registers its own routes, so it must be set up first for the network's routes to take precedence
     async (
@@ -225,7 +220,6 @@ export const test = nextTest.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
-
   auth: async ({ authHelpers, baseURL, session, user }, use) => {
     const { hostname } = new URL(baseURL ?? "");
 
@@ -260,7 +254,6 @@ export const test = nextTest.extend<Options & Fixtures>({
       },
     });
   },
-
   _signIn: [
     async ({ auth, context, signedInAs }, use) => {
       if (signedInAs) {
@@ -275,7 +268,6 @@ export const test = nextTest.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
-
   recordOperation: async ({ network }, use) => {
     await use(
       <TVariables extends Record<string, unknown>>(

@@ -3,8 +3,6 @@ import { HttpResponse } from "msw";
 import { SETTINGS_SECTION } from "#app/(protected)/settings/_components/settings-section/_queries/settings-section.query.ts";
 import { api } from "#mocks/graphql.ts";
 
-import type { SettingsSectionQuery } from "#app/(protected)/settings/_components/settings-section/_queries/settings-section.query.typegen.ts";
-
 /** Mocks every settings section as a section with a single "Log Directory" setting */
 export const logDirectorySettingsSectionHandler = api.query(
   SETTINGS_SECTION,
@@ -31,6 +29,6 @@ export const logDirectorySettingsSectionHandler = api.query(
           secretStates: [],
           issues: [],
         },
-      } satisfies SettingsSectionQuery,
+      },
     }),
 );

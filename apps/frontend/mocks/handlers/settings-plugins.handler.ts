@@ -25,7 +25,7 @@ export const createSettingsPluginsStore = (initialPlugins: PluginSummary[]) => {
               enabledPluginsLocked: false,
               plugins,
             },
-          } satisfies SettingsPluginsQuery,
+          },
         }),
       ),
       api.mutation(SET_PLUGIN_ENABLED, ({ variables: { id, enabled } }) => {

@@ -19,7 +19,6 @@ import {
 } from "#playwright/fixtures.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
-import type { SettingsPluginsQuery } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.typegen.ts";
 import type { Page } from "@playwright/test";
 
 test.use({
@@ -42,7 +41,7 @@ test.use({
               },
             ],
           },
-        } satisfies SettingsPluginsQuery,
+        },
       }),
     ),
   ),
