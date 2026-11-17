@@ -10,8 +10,6 @@ import { SETTINGS_SECTION } from "../../_components/settings-section/_queries/se
 import { customProfile, defaultProfile } from "./ranking-profiles.fixtures";
 import { RankingTab } from "./ranking-tab";
 
-import type { SettingsSectionQuery } from "../../_components/settings-section/_queries/settings-section.query.typegen";
-
 const meta = preview.meta({
   title: "Settings / RankingTab",
   component: RankingTab,
@@ -50,7 +48,7 @@ const meta = preview.meta({
               secretStates: [],
               issues: [],
             },
-          } satisfies SettingsSectionQuery,
+          },
         }),
       ),
     );

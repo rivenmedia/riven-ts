@@ -94,6 +94,8 @@ Some things to know when writing tests:
 - **Shared mock data:** handler factories in `mocks/handlers` (e.g. `home.handler.ts`, `media-details.handler.ts`, `library.handler.ts`) are shared with the stories, so prefer them over new inline mocks.
 - **Subscriptions:** a subscription handler only attaches to a WebSocket when the page connects. Add it before the page loads, with `test.use({ handlers })` or `network.use()` in `beforeEach`, rather than in response to something the test does.
 - **Cached data:** data fetched in `"use cache"` functions (e.g. the home page's carousels) is cached by the production server across tests. Overriding it in one test won't reliably change what that test sees.
+- **Hydration:** server-rendered elements are clickable before React hydrates them, and a click before then is lost. This happens most under `next dev`. Call `waitForHydration(locator)` from `#playwright/wait-for-hydration.ts` before clicking an element that only works once hydrated, such as a switch or a button with an `onClick`.
+- **Stateful mocks:** to test that a change persists, use a store such as `createRankingProfilesStore()` or `createSettingsPluginsStore()`. These keep what the app saves, so a reload shows it.
 - **Hidden duplicates:** the production build keeps hidden copies of streamed content outside `main`. Scope text queries to `page.getByRole("main")` so they don't match both.
 
 ## Building the Docker image

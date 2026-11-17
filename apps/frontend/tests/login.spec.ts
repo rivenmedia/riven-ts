@@ -1,12 +1,16 @@
 import { createInstanceSetupRequiredHandler } from "#mocks/handlers/instance-status.handler.ts";
 import { expect, http, test } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { Page } from "@playwright/test";
 
 const logIn = async (page: Page) => {
   await page.goto("/login");
 
-  await page.getByRole("tab", { name: /login/iu }).click();
+  const loginTab = page.getByRole("tab", { name: /login/iu });
+
+  await waitForHydration(loginTab);
+  await loginTab.click();
 
   await page.getByRole("textbox", { name: /username/iu }).fill("username");
   await page.getByRole("textbox", { name: /^password$/iu }).fill("password");

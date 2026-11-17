@@ -26,6 +26,7 @@ import {
   test,
   withHandlers,
 } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { AnyHandler } from "msw";
 
@@ -106,7 +107,10 @@ test.describe("an unrequested movie", () => {
 
     await page.goto(`/details/media/movie/${unrequestedMovie.id}`);
 
-    await page.getByRole("button", { name: "Request" }).click();
+    const requestButton = page.getByRole("button", { name: "Request" });
+
+    await waitForHydration(requestButton);
+    await requestButton.click();
     await page
       .getByRole("alertdialog")
       .getByRole("button", { name: "Request" })

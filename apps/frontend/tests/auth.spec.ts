@@ -1,9 +1,14 @@
-import { expect, http, test } from "#playwright/fixtures.ts";
+import { logDirectorySettingsSectionHandler } from "#mocks/handlers/settings-section.handler.ts";
+import { expect, http, test, withHandlers } from "#playwright/fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { UserRole } from "@repo/util-auth/access-control";
 
 // A protected page that renders without mocking its data, as unmocked requests elsewhere open Next.js' error overlay
 const pageWithoutData = "/explore";
+
+// The settings page loads its section even when the user isn't allowed to see it
+test.use({ handlers: withHandlers(logDirectorySettingsSectionHandler) });
 
 test.describe("when signed out", () => {
   for (const path of ["/", "/library", "/settings"] as const) {
@@ -35,9 +40,15 @@ test.describe("when signed in", () => {
     network.use(http.post("**/api/auth/sign-out", auth.signOut()));
 
     await page.goto(pageWithoutData);
-    await page.getByRole("button", { name: "Logout" }).click();
+
+    const logoutButton = page.getByRole("button", { name: "Logout" });
+
+    await waitForHydration(logoutButton);
+    await logoutButton.click();
 
     await expect(page).toHaveURL("/login");
+    // Let the redirect finish rendering, as navigating during it is cancelled in some browsers
+    await expect(page.getByRole("tab", { name: "Login" })).toBeVisible();
 
     await page.goto("/library");
 

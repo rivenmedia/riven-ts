@@ -120,7 +120,6 @@ export const test = nextTest.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
-
   authHelpers: async ({ baseURL }, use) => {
     const testUtilsPlugin = testUtils();
 
@@ -146,11 +145,9 @@ export const test = nextTest.extend<Options & Fixtures>({
 
     await use(testHelpers);
   },
-
   user: async ({ authHelpers }, use) => {
     await use({ ...authHelpers.createUser(), banned: false, role: "user" });
   },
-
   session: async ({ user }, use) => {
     const now = DateTime.now();
 
@@ -163,7 +160,6 @@ export const test = nextTest.extend<Options & Fixtures>({
       userId: user.id,
     });
   },
-
   baselineHandlers: async ({ session, user }, use) => {
     await use([
       createGetSessionHandler(session, user),
@@ -177,16 +173,32 @@ export const test = nextTest.extend<Options & Fixtures>({
       createTmdbTrendingShowsHandler(),
       createRecentlyAddedHandler(),
       ...remoteAssetHandlers,
+      // Subscriptions no test mocks connect, but never receive anything, like an idle backend
+      api.subscription(/.*/u, () => {
+        // Nothing changes
+      }),
     ]);
   },
-
   network: [
     // `next` registers its own routes, so it must be set up first for the network's routes to take precedence
-    async ({ next, context, handlers, baselineHandlers }, use) => {
+    async (
+      { next, _nextWorker, context, handlers, baselineHandlers },
+      use,
+      testInfo,
+    ) => {
+      // Next.js' fixture only adds the test's headers in a route, which a redirected request doesn't go through.
+      // Without them, the server can't attribute that request's fetches to the test, so they'd reach the real backend.
+      await context.setExtraHTTPHeaders({
+        "Next-Test-Proxy-Port": String(_nextWorker.proxyPort),
+        "Next-Test-Data": testInfo.testId,
+      });
+
+      const nextFetchSource = new NextFetchSource(next);
+
       const network = defineNetwork({
         sources: [
           new PlaywrightNetworkSource({ context, skipAssetRequests: true }),
-          new NextFetchSource(next),
+          nextFetchSource,
         ],
         handlers: [...handlers, ...baselineHandlers],
         context: { quiet: true },
@@ -200,11 +212,14 @@ export const test = nextTest.extend<Options & Fixtures>({
 
       await network.enable();
       await use(network);
+
+      // Close the pages, then let the server finish their requests, so they aren't cut off (and logged as errors)
+      await Promise.all(context.pages().map((page) => page.close()));
+      await nextFetchSource.waitForIdle();
       await network.disable();
     },
     { auto: true },
   ],
-
   auth: async ({ authHelpers, baseURL, session, user }, use) => {
     const { hostname } = new URL(baseURL ?? "");
 
@@ -239,7 +254,6 @@ export const test = nextTest.extend<Options & Fixtures>({
       },
     });
   },
-
   _signIn: [
     async ({ auth, context, signedInAs }, use) => {
       if (signedInAs) {
@@ -254,7 +268,6 @@ export const test = nextTest.extend<Options & Fixtures>({
     },
     { auto: true },
   ],
-
   recordOperation: async ({ network }, use) => {
     await use(
       <TVariables extends Record<string, unknown>>(
