@@ -246,3 +246,6 @@ catalog:
   zod: ^4.4.3
   zod-validation-error: ^5.0.0
   zod2md: ^0.2.5
+permissions:
+  "@apollo/client":
+    skills: true
