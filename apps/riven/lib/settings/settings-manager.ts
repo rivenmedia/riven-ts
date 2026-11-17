@@ -37,6 +37,18 @@ export interface SettingsSectionDefinition {
   schema: Schema;
   /** Raw env values keyed by leaf. Never exposed outside the settings manager. */
   environment: Readonly<Record<string, string>>;
+  /**
+   * Whether changes apply without a restart. Writes notify `onHotSectionChange`
+   * instead of setting `restartRequired`.
+   */
+  hot?: boolean;
+  /**
+   * Resolves the current defaults (flat `leaf -> value`), replacing the schema
+   * defaults for the displayed values, the JSON Schema `default` keywords and
+   * the "equal to the default removes the override" rule. Leaves it omits keep
+   * their schema default.
+   */
+  resolveDefaults?: () => Promise<Record<string, unknown>>;
 }
 
 export interface SettingsManagerDeps {
@@ -44,6 +56,8 @@ export interface SettingsManagerDeps {
   sections: ReadonlyMap<string, SettingsSectionDefinition>;
   installedPlugins: InstalledPlugin[];
   coreEnvironment: Readonly<Record<string, string>>;
+  /** Called after a write to a `hot` section changes its stored values. */
+  onHotSectionChange?: (sectionId: string) => void;
 }
 
 interface SectionState {
@@ -78,6 +92,22 @@ function decodeEnvironment(
       leaf,
       decodeEnvValue(raw, getLeafSchema(schema, leaf)),
     ]),
+  );
+}
+
+/** The default of every leaf: the resolved default if any, else the schema default. */
+function getLeafDefaults(
+  schema: z.ZodObject,
+  leaves: LeafPathMap,
+  resolved: Readonly<Record<string, unknown>>,
+): Record<string, unknown> {
+  return Object.fromEntries(
+    leaves
+      .keys()
+      .map((leaf) => [
+        leaf,
+        leaf in resolved ? resolved[leaf] : getLeafDefault(schema, leaf),
+      ]),
   );
 }
 
@@ -134,6 +164,7 @@ export class SettingsManager {
   readonly #sections: ReadonlyMap<string, SettingsSectionDefinition>;
   readonly #installedPlugins: InstalledPlugin[];
   readonly #coreEnvironment: Readonly<Record<string, string>>;
+  readonly #onHotSectionChange: ((sectionId: string) => void) | undefined;
   #restartRequired = false;
 
   public constructor(deps: SettingsManagerDeps) {
@@ -141,9 +172,10 @@ export class SettingsManager {
     this.#sections = deps.sections;
     this.#installedPlugins = deps.installedPlugins;
     this.#coreEnvironment = deps.coreEnvironment;
+    this.#onHotSectionChange = deps.onHotSectionChange;
   }
 
-  /** Whether any settings have changed since boot. */
+  /** Whether any settings that need a restart (non-`hot` sections) have changed since boot. */
   public get restartRequired() {
     return this.#restartRequired;
   }
@@ -151,6 +183,8 @@ export class SettingsManager {
   public async getSection(id: string): Promise<SettingsSection> {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;
+    const resolvedDefaults = (await definition.resolveDefaults?.()) ?? {};
+    const defaults = getLeafDefaults(schema, leaves, resolvedDefaults);
 
     const issues = findIgnoredStored({
       schema,
@@ -166,7 +200,7 @@ export class SettingsManager {
     const secretStates = new Map<string, SecretState>();
 
     for (const leaf of leaves.keys()) {
-      const defaultValue = getLeafDefault(schema, leaf);
+      const defaultValue = defaults[leaf];
 
       if (isSecretLeaf(schema, leaf)) {
         secretStates.set(
@@ -185,7 +219,12 @@ export class SettingsManager {
     return {
       id: definition.id,
       title: definition.title,
-      jsonSchema: buildSectionJsonSchema(schema, secretStates),
+      appliesImmediately: definition.hot === true,
+      jsonSchema: buildSectionJsonSchema(
+        schema,
+        secretStates,
+        resolvedDefaults,
+      ),
       values: unflattenSettings(schema, flatValues),
       lockedFields: Object.keys(env).map((leaf) => toDottedPath(leaves, leaf)),
       secretStates: secretStates
@@ -256,11 +295,16 @@ export class SettingsManager {
       return issues;
     }
 
+    const defaults = getLeafDefaults(
+      schema,
+      leaves,
+      (await definition.resolveDefaults?.()) ?? {},
+    );
     const upsert: Record<string, unknown> = {};
     const toDelete = [...clearedLeaves].filter((leaf) => leaf in stored);
 
     for (const [leaf, value] of Object.entries(submitted)) {
-      if (isEqual(value, getLeafDefault(schema, leaf))) {
+      if (isEqual(value, defaults[leaf])) {
         if (leaf in stored) {
           toDelete.push(leaf);
         }
@@ -269,7 +313,7 @@ export class SettingsManager {
       }
     }
 
-    await this.#write(definition.namespace, upsert, toDelete);
+    await this.#writeSection(definition, upsert, toDelete);
 
     return [];
   }
@@ -302,8 +346,8 @@ export class SettingsManager {
       return issues;
     }
 
-    await this.#write(
-      definition.namespace,
+    await this.#writeSection(
+      definition,
       {},
       [...resetLeaves].filter((leaf) => leaf in stored),
     );
@@ -375,11 +419,12 @@ export class SettingsManager {
       return [];
     }
 
-    await this.#write(
-      CORE_NAMESPACE,
-      isDefault ? {} : { enabledPlugins: next },
-      isDefault ? ["enabledPlugins"] : [],
-    );
+    await this.#settingsService.writeValues(CORE_NAMESPACE, {
+      upsert: isDefault ? {} : { enabledPlugins: next },
+      delete: isDefault ? ["enabledPlugins"] : [],
+    });
+
+    this.#restartRequired = true;
 
     return [];
   }
@@ -444,8 +489,12 @@ export class SettingsManager {
     };
   }
 
-  async #write(
-    namespace: string,
+  /**
+   * Writes a section's changes, then notifies a hot section's change or marks
+   * a restart as required. Does nothing if there are no changes.
+   */
+  async #writeSection(
+    definition: SettingsSectionDefinition,
     upsert: Record<string, unknown>,
     toDelete: string[],
   ) {
@@ -453,11 +502,15 @@ export class SettingsManager {
       return;
     }
 
-    await this.#settingsService.writeValues(namespace, {
+    await this.#settingsService.writeValues(definition.namespace, {
       upsert,
       delete: toDelete,
     });
 
-    this.#restartRequired = true;
+    if (definition.hot) {
+      this.#onHotSectionChange?.(definition.id);
+    } else {
+      this.#restartRequired = true;
+    }
   }
 }

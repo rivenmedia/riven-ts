@@ -14,7 +14,7 @@ import {
 import { Separator } from "#components/_ui/separator.tsx";
 
 import { useSteps } from "./_hooks/use-steps.tsx";
-import { SetupQualityStep } from "./_steps/quality.tsx";
+import { SetupQualityStepContainer } from "./_steps/quality-step-container.tsx";
 import { SetupReviewStep } from "./_steps/review.tsx";
 import { SetupWelcomeStep } from "./_steps/welcome.tsx";
 
@@ -30,7 +30,7 @@ const steps = [
   },
   {
     id: "quality",
-    component: () => <SetupQualityStep generalSections={[]} profiles={[]} />,
+    component: SetupQualityStepContainer,
     label: "Quality",
     description: "Choose profiles and instance defaults.",
   },

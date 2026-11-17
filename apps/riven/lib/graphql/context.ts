@@ -1,4 +1,5 @@
 import type { services } from "#database/database.ts";
+import type { RankingManager } from "#ranking/ranking-manager.ts";
 import type { SettingsManager } from "#settings/settings-manager.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "#types/plugins.ts";
@@ -14,5 +15,6 @@ export interface ApolloServerContext extends GraphQLContext {
     services: typeof services;
     sendEvent: MainRunnerMachineIntake;
     settingsManager: SettingsManager;
+    rankingManager: RankingManager;
   };
 }

@@ -64,11 +64,13 @@ function removeRequired(parent: JSONSchemaRoot, key: string) {
  *
  * Secret defaults are removed so they never leave the backend, and secrets that
  * already have a value (`default`, `custom` or `env`) are made optional so an
- * empty submission means "unchanged".
+ * empty submission means "unchanged". Non-secret leaves in `defaultOverrides`
+ * have their schema default replaced by the given value.
  */
 export function buildSectionJsonSchema(
   schema: z.ZodObject,
   secretStates: Map<string, SecretState>,
+  defaultOverrides: Readonly<Record<string, unknown>> = {},
 ) {
   const jsonSchema = z.toJSONSchema(schema, {
     io: "input",
@@ -76,13 +78,21 @@ export function buildSectionJsonSchema(
   });
 
   for (const [leaf, path] of getLeafPaths(schema)) {
-    if (!isSecretLeaf(schema, leaf)) {
+    const isSecret = isSecretLeaf(schema, leaf);
+
+    if (!isSecret && !(leaf in defaultOverrides)) {
       continue;
     }
 
     const { parent, key, node } = findLeafNode(jsonSchema, path);
 
     if (typeof node !== "object") {
+      continue;
+    }
+
+    if (!isSecret) {
+      node.default = defaultOverrides[leaf];
+
       continue;
     }
 
