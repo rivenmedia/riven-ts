@@ -101,6 +101,7 @@ catalog:
   "@mikro-orm/seeder": ^7.1.0
   "@mikro-orm/sqlite": ^7.1.0
   "@mishieck/ink-titled-box": ^0.4.2
+  "@msw/playwright": ^0.7.0
   "@next-safe-action/adapter-react-hook-form": ^2.0.6
   "@parcel/watcher": ^2.5.6
   "@playwright/test": ^1.61.1

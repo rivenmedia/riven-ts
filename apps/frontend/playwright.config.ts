@@ -1,8 +1,52 @@
 import { defineConfig, devices } from "@playwright/test";
 import z from "zod";
 
-const isCI = z.stringbool().default(false).parse(process.env["CI"]);
-const baseURL = "https://localhost:9000";
+import type { Project } from "@playwright/test";
+
+const environment = z
+  .object({
+    CI: z.stringbool().default(false),
+    /**
+     * Run the tests against `next dev`, rather than a production build.
+     */
+    E2E_DEV_SERVER: z.stringbool().default(false),
+  })
+  .parse(process.env);
+
+const isCI = environment.CI;
+const isDevServer = environment.E2E_DEV_SERVER && !isCI;
+
+// Both servers use plain HTTP. `next start` doesn't support HTTPS, and `next dev --experimental-https` intermittently
+// drops WebSocket connections. That includes the HMR socket Next.js sends React's debug info for server renders over,
+// so pages get stuck mid-render. Each server has its own port, so it doesn't clash with a regular dev server.
+const devServerPort = 9101;
+const productionServerPort = 9100;
+
+const baseURL = `http://localhost:${String(isDevServer ? devServerPort : productionServerPort)}`;
+
+const productionServerCommand = isCI
+  ? // CI builds the app beforehand, via the `e2e:headless` task's dependencies
+    `pnpm start --port ${String(productionServerPort)}`
+  : `pnpm turbo run build --filter=@repo/frontend --output-logs=errors-only && pnpm start --port ${String(productionServerPort)}`;
+
+const chromium: Project = {
+  name: "chromium",
+  use: {
+    ...devices["Desktop Chrome"],
+    // Use the full browser in new headless mode, rather than the separate headless shell
+    channel: "chromium",
+  },
+};
+
+const firefox: Project = {
+  name: "firefox",
+  use: devices["Desktop Firefox"],
+};
+
+const webkit: Project = {
+  name: "webkit",
+  use: devices["Desktop Safari"],
+};
 
 /**
  * See https://playwright.dev/docs/test-configuration.
@@ -13,33 +57,26 @@ export default defineConfig({
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
   ...(isCI && { workers: 1 }),
-  reporter: "html",
+  reporter: isCI ? [["github"], ["html", { open: "never" }]] : "html",
   use: {
     baseURL,
     trace: "on-first-retry",
   },
-  projects: [
-    {
-      name: "chromium",
-      use: {
-        ...devices["Desktop Chrome"],
-        launchOptions: {
-          args: ["--ignore-certificate-errors"],
-        },
-      },
-    },
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
-    },
-  ],
+  // CI only installs Chromium. Run every browser locally with `pnpm e2e:headless`.
+  projects: isCI ? [chromium] : [chromium, firefox, webkit],
   webServer: {
-    command: "pnpm dev",
+    command: isDevServer
+      ? `pnpm exec next dev --port ${String(devServerPort)}`
+      : productionServerCommand,
     url: baseURL,
+    env: {
+      ENABLE_TEST_PROXY: "true",
+      // The tests mock the network themselves, and the development mocks would intercept Next.js' requests to the test proxy
+      ENABLE_MOCKS: "false",
+      ORIGIN: baseURL,
+    },
+    // Allow time to build the app locally
+    timeout: isDevServer || isCI ? 60_000 : 300_000,
     gracefulShutdown: {
       signal: "SIGTERM",
       timeout: 5000,
@@ -47,8 +84,9 @@ export default defineConfig({
     reuseExistingServer: !isCI,
     stdout: "pipe",
     stderr: "pipe",
+    // Requesting a page would hang on the session check, as there's no backend outside of tests
     wait: {
-      stdout: new RegExp(`Local:[ \\t]+${baseURL}`, "iu"),
+      stdout: /Ready in/u,
     },
   },
 });
