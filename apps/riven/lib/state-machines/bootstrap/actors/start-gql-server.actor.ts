@@ -22,6 +22,8 @@ import { authChecker } from "#graphql/auth/auth-checker.ts";
 import { buildContextFunction } from "#graphql/build-context-function.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { resolvers } from "#graphql/resolvers/index.ts";
+import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
+import { RankingManager } from "#ranking/ranking-manager.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
@@ -115,9 +117,19 @@ export const startGqlServer = fromPromise<
         installedPlugins,
         pluginEnvironment,
         coreEnvironment,
+        rankingProfileService: services.rankingProfileService,
+        settingsService: services.settingsService,
       }),
       installedPlugins,
       coreEnvironment,
+      onHotSectionChange: () => {
+        invalidateRankingEngine();
+      },
+    });
+
+    const rankingManager = new RankingManager({
+      rankingProfileService: services.rankingProfileService,
+      settingsService: services.settingsService,
     });
 
     const context = buildContextFunction(
@@ -125,6 +137,7 @@ export const startGqlServer = fromPromise<
       sendExternalEvent,
       validPlugins,
       settingsManager,
+      rankingManager,
     );
 
     const serverCleanup = useServer(

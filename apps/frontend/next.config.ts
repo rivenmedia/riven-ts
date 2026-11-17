@@ -5,6 +5,11 @@ import type { NextConfig } from "next";
 
 const monorepoRoot = path.join(import.meta.dirname, "../..");
 
+const isTestProxyEnabled = z
+  .stringbool()
+  .default(false)
+  .parse(process.env["ENABLE_TEST_PROXY"]);
+
 export default {
   output: "standalone",
   // Next.js won't infer the monorepo root when it's also the home directory (e.g. `/app` in Docker)
@@ -12,12 +17,11 @@ export default {
   outputFileTracingRoot: monorepoRoot,
   experimental: {
     authInterrupts: true,
-    testProxy: z
-      .stringbool()
-      .default(false)
-      .parse(process.env["ENABLE_TEST_PROXY"]),
+    testProxy: isTestProxyEnabled,
     typedEnv: true,
   },
+  // The dev tools indicator covers the sidebar's logout button, intercepting clicks in the e2e tests
+  ...(isTestProxyEnabled && { devIndicators: false }),
   cacheComponents: true,
   typedRoutes: true,
   images: {

@@ -156,14 +156,11 @@ export const it = baseIt
       return dataSourceMap;
     },
   )
-  .extend(
-    "gqlContext",
-    ({ plugin, dataSourceMap }): GraphQLContext => ({
-      logger: {} as never,
-      plugins: new Map([[plugin.name, { dataSources: dataSourceMap }]]),
-      sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
-    }),
-  );
+  .extend("gqlContext", ({ plugin, dataSourceMap }): GraphQLContext => ({
+    logger: {} as never,
+    plugins: new Map([[plugin.name, { dataSources: dataSourceMap }]]),
+    sendEvent: vi.fn<GraphQLContext["sendEvent"]>(),
+  }));
 
 it.beforeEach(async ({ httpCache, redisClient }) => {
   httpCache.clear();

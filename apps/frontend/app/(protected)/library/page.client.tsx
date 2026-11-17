@@ -50,7 +50,7 @@ const defaultFormValues = {
   search: "",
   type: "all",
   state: "all",
-} satisfies LibrarySearchFormValues;
+} as const satisfies LibrarySearchFormValues;
 
 /**
  * Library route listing the user's media items, with search, type and state

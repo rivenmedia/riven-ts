@@ -37,8 +37,9 @@ The same object also accepts the optional `initResult` (seed the initial `result
 ```tsx
 "use client";
 
-import { useOptimisticAction } from "next-safe-action/hooks";
 import { toggleLike } from "@/app/actions";
+
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 interface Props {
   postId: string;

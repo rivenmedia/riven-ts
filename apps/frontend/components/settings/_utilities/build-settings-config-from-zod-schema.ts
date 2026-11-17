@@ -434,6 +434,16 @@ export function buildSettingsConfigFromZodSchema(
     case "object": {
       assertSchemaType(schema, ZodObject);
 
+      // A served `{ fetch, rank }` rank renders as one custom rank input
+      if (meta["widget"] === "custom_rank") {
+        const commonConfig = buildCommonConfig(meta, key, context);
+
+        return settings.set(commonConfig.name, {
+          type: "custom_rank",
+          config: commonConfig,
+        });
+      }
+
       const { shape } = schema as ZodObject<Record<string, ZodType>>;
 
       const nestedSettings = new Map<string, SettingFieldProps>(

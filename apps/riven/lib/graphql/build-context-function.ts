@@ -6,6 +6,7 @@ import { logger } from "#utilities/logger/logger.ts";
 import { resolvePrincipal } from "./auth/principal.ts";
 import { CoreKey } from "./context.ts";
 
+import type { RankingManager } from "#ranking/ranking-manager.ts";
 import type { SettingsManager } from "#settings/settings-manager.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "#types/plugins.ts";
@@ -17,8 +18,15 @@ export const buildContextFunction: (
   sendExternalEvent: GraphQLContext["sendEvent"],
   validPlugins: ValidPluginMap,
   settingsManager: SettingsManager,
+  rankingManager: RankingManager,
 ) => (headers: Headers) => Promise<ApolloServerContext> =
-  (sendEvent, sendExternalEvent, validPlugins, settingsManager) =>
+  (
+    sendEvent,
+    sendExternalEvent,
+    validPlugins,
+    settingsManager,
+    rankingManager,
+  ) =>
   async (headers) => ({
     [CoreKey]: {
       em: RequestContext.getEntityManager() ?? database.em.fork(),
@@ -26,6 +34,7 @@ export const buildContextFunction: (
       services,
       sendEvent,
       settingsManager,
+      rankingManager,
     },
     logger,
     sendEvent: sendExternalEvent,

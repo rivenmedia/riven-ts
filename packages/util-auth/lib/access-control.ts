@@ -30,7 +30,9 @@ const statement = {
 export const ac = createAccessControl(statement);
 
 export type Permissions = {
-  readonly [Resource in keyof typeof statement]?: readonly (typeof statement)[Resource][number][];
+  readonly [
+    Resource in keyof typeof statement
+  ]?: readonly (typeof statement)[Resource][number][];
 };
 
 export const admin = ac.newRole({

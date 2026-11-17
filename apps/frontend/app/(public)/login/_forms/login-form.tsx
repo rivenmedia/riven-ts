@@ -52,10 +52,16 @@ export function LoginForm({
 
         if (supportsPasskeyAutofill) {
           try {
-            await authClient.signIn.passkey({
+            // Failures (e.g. no passkey options, or the user dismissing the prompt) are returned, rather than thrown
+            const { error } = await authClient.signIn.passkey({
               autoFill: true,
-              fetchOptions: { throw: true },
             });
+
+            if (error) {
+              logger.debug("Passkey autofill encountered an error:", error);
+
+              return;
+            }
 
             handleSuccessfulSignin();
           } catch (error) {

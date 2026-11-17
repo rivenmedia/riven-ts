@@ -14,17 +14,15 @@ import type {
   StartGQLServerInput,
   StartGQLServerOutput,
 } from "#state-machines/bootstrap/actors/start-gql-server.actor.ts";
+import type { SyncRankingProfilesInput } from "#state-machines/bootstrap/actors/sync-ranking-profiles.actor.ts";
 import type { BootstrapMachineInput } from "#state-machines/bootstrap/index.ts";
 
 export const it = baseIt
-  .extend(
-    "input",
-    (): BootstrapMachineInput => ({
-      rootRef: createEmptyActor(),
-      mainRunnerRef: createEmptyActor(),
-      mockScenario: undefined,
-    }),
-  )
+  .extend("input", (): BootstrapMachineInput => ({
+    rootRef: createEmptyActor(),
+    mainRunnerRef: createEmptyActor(),
+    mockScenario: undefined,
+  }))
   .extend("initialiseDatabaseConnectionActorLogic", ({ orm, services }) =>
     fromPromise<InitialiseDatabaseConnectionOutput>(async () => ({
       orm,
@@ -44,18 +42,25 @@ export const it = baseIt
       vfs: new Fuse("/mnt/fake-path", {}),
     })),
   )
+  // Stubbed so tests never import a ranking config file from the working directory.
+  .extend(
+    "syncRankingProfilesActorLogic",
+    fromPromise<undefined, SyncRankingProfilesInput>(async () => undefined),
+  )
   .extend(
     "machine",
     ({
       initialiseDatabaseConnectionActorLogic,
       startGqlServerActorLogic,
       initialiseVfsActorLogic,
+      syncRankingProfilesActorLogic,
     }) =>
       bootstrapMachine.provide({
         actors: {
           initialiseDatabaseConnection: initialiseDatabaseConnectionActorLogic,
           startGqlServer: startGqlServerActorLogic,
           initialiseVfs: initialiseVfsActorLogic,
+          syncRankingProfiles: syncRankingProfilesActorLogic,
         },
       }),
   )

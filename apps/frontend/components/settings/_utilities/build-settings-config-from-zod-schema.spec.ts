@@ -985,6 +985,91 @@ describe(buildSettingsConfigFromZodSchema, () => {
     });
   });
 
+  describe("custom rank schemas", () => {
+    it("maps custom_rank widget objects to custom_rank fields", () => {
+      const schema = z.fromJSONSchema({
+        type: "object",
+        properties: {
+          av1: {
+            type: "object",
+            widget: "custom_rank",
+            properties: {
+              fetch: { type: "boolean" },
+              rank: { type: "integer" },
+            },
+            required: ["fetch"],
+          },
+        },
+      });
+
+      expect(buildSettingsConfigFromZodSchema(schema).get("av1")).toMatchObject(
+        { type: "custom_rank", config: { name: "av1" } },
+      );
+    });
+
+    it("builds a served rank as a custom_rank field within its category group", () => {
+      const schema = z.fromJSONSchema({
+        type: "object",
+        properties: {
+          quality: {
+            type: "object",
+            title: "Quality",
+            additionalProperties: false,
+            properties: {
+              av1: {
+                type: "object",
+                widget: "custom_rank",
+                title: "AV1",
+                description: "AV1 encoded releases.",
+                additionalProperties: false,
+                properties: {
+                  fetch: { type: "boolean" },
+                  rank: { type: "integer" },
+                },
+                required: ["fetch"],
+              },
+            },
+          },
+        },
+      });
+
+      expect(
+        buildSettingsConfigFromZodSchema(
+          schema,
+          undefined,
+          true,
+          {},
+          {
+            lockedFields: new Set(["quality.av1"]),
+          },
+        ),
+      ).toStrictEqual<Map<string, SettingFieldProps>>(
+        new Map([
+          [
+            "quality",
+            {
+              type: "group",
+              config: {
+                name: "Quality",
+                schema: [
+                  {
+                    type: "custom_rank",
+                    config: {
+                      label: "AV1",
+                      name: "quality.av1",
+                      description: "AV1 encoded releases.",
+                      locked: true,
+                    },
+                  },
+                ],
+              },
+            },
+          ],
+        ]),
+      );
+    });
+  });
+
   describe("nested object schemas", () => {
     it("converts a nested object field into a group field", () => {
       const schema = z.object({

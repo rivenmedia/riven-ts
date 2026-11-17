@@ -62,6 +62,7 @@ const meta = preview.meta({
               __typename: "SettingsSection",
               id: variables.id,
               title: sectionTitles[variables.id] ?? variables.id,
+              appliesImmediately: false,
               jsonSchema: {
                 type: "object",
                 properties: {

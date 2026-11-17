@@ -12,6 +12,8 @@ import { test as testBase, vi } from "vitest";
 import { CoreKey } from "#graphql/context.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { queueNameFor } from "#message-queue/utilities/queue-name-for.ts";
+import { rankingPresets } from "#ranking/presets/index.ts";
+import { RankingManager } from "#ranking/ranking-manager.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
@@ -143,6 +145,8 @@ export const it = testBase
     const { ShowFactory } = await import("#database/factories/show.factory.ts");
     const { StreamFactory } =
       await import("#database/factories/stream.factory.ts");
+    const { RankingProfileFactory } =
+      await import("#database/factories/ranking-profile.factory.ts");
 
     return {
       movieItemRequestFactory: new MovieItemRequestFactory(em),
@@ -153,6 +157,7 @@ export const it = testBase
       episodeFactory: new EpisodeFactory(em),
       streamFactory: new StreamFactory(em),
       mediaEntryFactory: new MediaEntryFactory(em),
+      rankingProfileFactory: new RankingProfileFactory(em),
     };
   })
   .extend("stream", async ({ factories }) =>
@@ -345,6 +350,8 @@ export const it = testBase
             installedPlugins: fixtureInstalledPlugins,
             pluginEnvironment: new Map(),
             coreEnvironment: {},
+            rankingProfileService: services.rankingProfileService,
+            settingsService: services.settingsService,
           }),
           installedPlugins: fixtureInstalledPlugins,
           coreEnvironment: {},
@@ -357,6 +364,10 @@ export const it = testBase
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,
+            rankingManager: new RankingManager({
+              rankingProfileService: services.rankingProfileService,
+              settingsService: services.settingsService,
+            }),
           },
           logger,
           sendEvent: vi.fn<MainRunnerMachineIntake>(),
@@ -364,7 +375,11 @@ export const it = testBase
         };
       },
   )
-  .extend("gqlContext", ({ createGqlContext }) => createGqlContext())
+  .extend("gqlContext", async ({ createGqlContext, services }) => {
+    await services.rankingProfileService.syncPresets(rankingPresets);
+
+    return createGqlContext();
+  })
   .extend(
     "gqlServer",
     { scope: "file" },
