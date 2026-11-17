@@ -56,10 +56,10 @@ allowBuilds:
   sharp: true
 blockExoticSubdeps: false
 overrides:
-  "@faker-js/faker@<=10.4.0": ^10.5.0
   "@graphql-tools/utils@<=12.0.0": ^12.0.1
   "@graphql-tools/utils@>=10.10.1 <=12.0.1": ^12.0.2
   "@opentelemetry/core@<2.8.0": ^2.8.0
+  "@opentelemetry/instrumentation-http@>=0.204.0 <0.222.0": ^0.222.0
   "@opentelemetry/instrumentation-knex@<0.65.0": ^0.65.0
   "@opentelemetry/instrumentation-mongoose@<0.67.0": ^0.67.0
   "@opentelemetry/instrumentation-mysql2@<0.67.0": ^0.67.0
