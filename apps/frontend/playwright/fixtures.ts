@@ -83,6 +83,9 @@ interface Fixtures {
 
     /** A resolver for a sign-in or sign-up endpoint that signs the user in with the given role */
     signIn: (role: UserRole) => HttpResponseResolver;
+
+    /** A resolver for the sign-out endpoint that expires the session cookies */
+    signOut: () => HttpResponseResolver;
   };
 
   /**
@@ -210,6 +213,15 @@ export const test = nextTest.extend<Options & Fixtures>({
           { redirect: false, token: session.token, user: { ...user, role } },
           { headers },
         );
+      },
+      signOut: () => async () => {
+        const headers = new Headers();
+
+        for (const { name, path } of await getCookies("user")) {
+          headers.append("set-cookie", `${name}=; Path=${path}; Max-Age=0`);
+        }
+
+        return HttpResponse.json({ success: true }, { headers });
       },
     });
   },
