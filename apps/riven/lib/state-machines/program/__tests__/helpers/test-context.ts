@@ -13,13 +13,10 @@ import type { RivenMachineInput } from "#state-machines/program/index.ts";
 import type { ValidPlugin } from "#types/plugins.ts";
 
 export const it = baseIt
-  .extend(
-    "input",
-    (): RivenMachineInput => ({
-      sessionId: SessionID.parse(crypto.randomUUID()),
-      mockScenario: undefined,
-    }),
-  )
+  .extend("input", (): RivenMachineInput => ({
+    sessionId: SessionID.parse(crypto.randomUUID()),
+    mockScenario: undefined,
+  }))
   .extend("machine", () => rivenMachine)
   .extend(
     "bootstrapMachineOutput",

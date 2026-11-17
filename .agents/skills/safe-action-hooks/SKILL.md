@@ -15,7 +15,6 @@ import {
   useStateAction,
   useOptimisticStateAction,
 } from "next-safe-action/hooks";
-
 // Backward-compatible re-export (same useStateAction hook)
 import { useStateAction } from "next-safe-action/stateful-hooks";
 ```
@@ -36,8 +35,9 @@ Pick by action kind first: `.action()` pairs with `useAction` / `useOptimisticAc
 ```tsx
 "use client";
 
-import { useAction } from "next-safe-action/hooks";
 import { createUser } from "@/app/actions";
+
+import { useAction } from "next-safe-action/hooks";
 
 export function CreateUserForm() {
   const { execute, result, status, isExecuting, isPending } = useAction(
@@ -76,8 +76,9 @@ export function CreateUserForm() {
 ```tsx
 "use client";
 
-import { useOptimisticAction } from "next-safe-action/hooks";
 import { toggleTodo } from "@/app/actions";
+
+import { useOptimisticAction } from "next-safe-action/hooks";
 
 export function TodoItem({ todo }: { todo: Todo }) {
   const { execute, optimisticState } = useOptimisticAction(toggleTodo, {
@@ -108,9 +109,10 @@ For overlapping writes that must **accumulate** (reorder an item, then reorder i
 ```tsx
 "use client";
 
-import { useOptimisticStateAction } from "next-safe-action/hooks";
 import { moveItem } from "@/app/actions";
 import { reorder } from "@/lib/reorder"; // the same reducer the server runs
+
+import { useOptimisticStateAction } from "next-safe-action/hooks";
 
 export function ReorderList({ items }: { items: Item[] }) {
   const { execute, optimisticState, isPending } = useOptimisticStateAction(
@@ -158,8 +160,9 @@ See [useOptimisticStateAction in depth](./use-optimistic-state-action.md) for th
 ```tsx
 "use client";
 
-import { useStateAction } from "next-safe-action/hooks";
 import { submitFeedback } from "@/app/actions";
+
+import { useStateAction } from "next-safe-action/hooks";
 
 export function FeedbackForm() {
   const { formAction, result, isPending, hasSucceeded } = useStateAction(
@@ -195,9 +198,10 @@ The server-side action must use `.stateAction()` (not `.action()`). `<form actio
 ```ts
 "use server";
 
+import { actionClient } from "@/lib/safe-action";
+
 import { z } from "zod";
 import { zfd } from "zod-form-data";
-import { actionClient } from "@/lib/safe-action";
 
 export const submitFeedback = actionClient
   .inputSchema(
