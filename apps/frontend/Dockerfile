@@ -63,6 +63,9 @@ FROM base AS prepare
 
     RUN turbo prune @repo/frontend --docker
 
+    # `permissions.*.skills` makes pnpm fetch full registry metadata, which is unavailable offline; skills aren't needed in the image
+    RUN sed -i '/^permissions:/,/^[^ ]/{/^permissions:/d;/^ /d}' out/pnpm-workspace.yaml
+
 FROM base AS builder
 
     LABEL builder="true"
