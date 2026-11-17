@@ -1,7 +1,7 @@
 ARG HOME=/app
 ARG NODE_VERSION=24.22.1
 ARG TURBO_VERSION=2.11.4
-ARG PNPM_VERSION=12.15.0
+ARG PNPM_VERSION=12.22.0
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
 ARG PNPM_STORE=${PNPM_HOME}/store
 ARG APP_DIR=apps/frontend
@@ -64,7 +64,7 @@ FROM base AS prepare
     RUN turbo prune @repo/frontend --docker
 
     # `permissions.*.skills` makes pnpm fetch full registry metadata, which is unavailable offline; skills aren't needed in the image
-    RUN sed -i '/^permissions:/,/^[^ ]/{/^permissions:/d;/^ /d}' out/pnpm-workspace.yaml
+    RUN sed -i '/^permissions:/,/^[^ ]/{/^permissions:/d;/^ /d}' out/pnpm-workspace.yaml out/full/pnpm-workspace.yaml
 
 FROM base AS builder
 
