@@ -2,17 +2,60 @@
 title: Custom
 ---
 
-See [Settings](../settings) for all available settings.
+Custom ranking profiles are created and managed in the Riven UI under **Settings → Ranking**. See [Settings](../settings) for all available settings.
 
-```json
-{
-  "preset": "custom",
-  "settings": {
-    // Add your custom ranking configuration settings here
-  },
-  "rankingModel": {
-    // Define your custom ranking model here
-    //
-  }
-}
-```
+## Managing profiles
+
+Settings → Ranking lists the built-in profiles (currently only _Default_) and your custom profiles.
+
+- Built-in profiles can be **Selected** or **Duplicated**.
+- Custom profiles can be **Selected**, **Edited**, **Duplicated** or **Deleted**. A profile cannot be deleted whilst it is the active one.
+
+To create a profile from scratch, use the **Create Custom Profile** button under **Settings → Ranking**, or duplicate an existing profile and edit the copy.
+
+In a profile's ranks, each attribute has a **Fetch** toggle and a number:
+
+- With **Fetch** off, torrents with that attribute are rejected.
+- With **Fetch** on, the number is the rank (score) added to torrents with that attribute.
+
+## Ranking Settings
+
+The **Ranking Settings** tab holds global overrides that are applied on top of the active profile. Values are resolved in this order, with later layers winning:
+
+1. RTN defaults
+2. The active profile
+3. Global Ranking Settings
+
+Objects are merged key by key; lists are replaced entirely. Changes apply immediately without a restart.
+
+Individual Ranking Settings can also be locked with `RIVEN_SETTING__<key>` environment variables, which override every layer above. Use these keys, not RTN's setting names (for example `RIVEN_SETTING__removeAllTrash=false`). Values other than text are written as JSON, such as `RIVEN_SETTING__excludedLanguages=["de","fr"]`.
+
+| Group       | Keys                                                                                                                               |
+| ----------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Patterns    | `requiredPatterns`, `excludedPatterns`, `preferredPatterns`                                                                        |
+| Resolutions | `r2160p`, `r1080p`, `r720p`, `r480p`, `r360p`, `unknownResolution`                                                                 |
+| Options     | `removeAllTrash`, `removeRanksUnder`, `removeUnknownLanguages`, `allowEnglishInLanguages`, `removeAdultContent`, `titleSimilarity` |
+| Languages   | `requiredLanguages`, `allowedLanguages`, `excludedLanguages`, `preferredLanguages`                                                 |
+
+## Upgrading from `riven-ranking-config.json`
+
+Earlier versions read ranking configuration from `riven-ranking-config.json` (at `rankingConfigPath`). On the first boot after upgrading, an existing file is imported once:
+
+- A preset name selects that preset, and any `settings` become your global Ranking Settings.
+- A custom `rankingModel` becomes a custom profile named _Imported_, which is selected automatically.
+- An invalid file stops boot with an error, so fix or remove it and start again.
+
+The file must be readable at `rankingConfigPath` on the first boot after upgrading. If you run Docker, keep your existing mount and `RIVEN_SETTING__rankingConfigPath` (if you set it) in place for that first boot. Check the log for the message `Imported ranking config from …`. Once you see it, remove the mount and the environment variable, and delete the file.
+
+### If the import was skipped
+
+If the file wasn't readable at `rankingConfigPath` on that first boot, Riven logs `No legacy ranking config found at "…"; using ranking profiles from the database.` and marks the import as done, so it isn't tried again. To import the file afterwards:
+
+1. Put the file back at `rankingConfigPath` (with Docker, restore the mount).
+2. Delete the setting with namespace `riven-ranking` and key `legacyConfigImported` from the database:
+
+   ```sql
+   DELETE FROM setting WHERE namespace = 'riven-ranking' AND key = 'legacyConfigImported';
+   ```
+
+3. Restart Riven, and check the log for `Imported ranking config from …`.

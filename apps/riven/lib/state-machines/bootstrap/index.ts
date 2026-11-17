@@ -13,6 +13,7 @@ import { initialiseDatabaseConnection } from "./actors/initialise-database-conne
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
 import { loadRuntimeSettings } from "./actors/load-runtime-settings.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
+import { syncRankingProfiles } from "./actors/sync-ranking-profiles.actor.ts";
 
 import type { Services } from "#database/database.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
@@ -77,6 +78,7 @@ export const bootstrapMachine = setup({
       startGqlServer: "startGqlServer";
       initialiseDatabaseConnection: "initialiseDatabaseConnection";
       loadRuntimeSettings: "loadRuntimeSettings";
+      syncRankingProfiles: "syncRankingProfiles";
       pluginRegistrarMachine: "pluginRegistrarMachine";
       initialiseVfs: "initialiseVfs";
     },
@@ -127,6 +129,7 @@ export const bootstrapMachine = setup({
     loadRuntimeSettings,
     pluginRegistrarMachine,
     startGqlServer,
+    syncRankingProfiles,
   },
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
@@ -303,7 +306,7 @@ export const bootstrapMachine = setup({
               },
             },
             {
-              target: "Bootstrapping plugins",
+              target: "Syncing ranking profiles",
               actions: {
                 type: "log",
                 params: {
@@ -351,7 +354,7 @@ export const bootstrapMachine = setup({
             return { mockScenario };
           },
           onDone: {
-            target: "Bootstrapping plugins",
+            target: "Syncing ranking profiles",
             actions: {
               type: "log",
               params: ({ context: { mockScenario } }) => {
@@ -370,6 +373,56 @@ export const bootstrapMachine = setup({
                 type: "log",
                 params: ({ event: { error } }) => ({
                   message: "Failed to apply mock scenario during bootstrap.",
+                  level: "error",
+                  error,
+                }),
+              },
+              {
+                type: "raiseError",
+                params: ({ event }) => event.error as Error,
+              },
+            ],
+          },
+        },
+      },
+      "Syncing ranking profiles": {
+        entry: {
+          type: "log",
+          params: {
+            message: "Syncing ranking profiles...",
+          },
+        },
+        invoke: {
+          id: "syncRankingProfiles",
+          src: "syncRankingProfiles",
+          input: ({ context: { services } }) => {
+            assert.ok(
+              services,
+              "Services not available when syncing ranking profiles. Ensure the database connection has been initialised first.",
+            );
+
+            return {
+              rankingProfileService: services.rankingProfileService,
+              settingsService: services.settingsService,
+              legacyConfigPath: settings.rankingConfigPath,
+            };
+          },
+          onDone: {
+            target: "Bootstrapping plugins",
+            actions: {
+              type: "log",
+              params: {
+                message: "Ranking profiles synced.",
+              },
+            },
+          },
+          onError: {
+            target: "Errored",
+            actions: [
+              {
+                type: "log",
+                params: ({ event: { error } }) => ({
+                  message: "Failed to sync ranking profiles during bootstrap.",
                   level: "error",
                   error,
                 }),

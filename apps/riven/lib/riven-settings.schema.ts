@@ -94,9 +94,12 @@ export const RivenSettings = z.object({
     .string()
     .default("./riven-ranking-config.json")
     .describe(
-      "Path to the JSON file containing the torrent ranking configuration. Auto-generated with defaults on first startup.",
+      "Deprecated. Path to the legacy JSON torrent ranking configuration file. It is read once at startup to import it into the database, then ignored.",
     )
-    .meta({ "wiki.section": "ranking" }),
+    .meta({
+      deprecated: true,
+      "wiki.section": "ranking",
+    }),
   printConfigurationOnStartup: z
     .stringbool()
     .default(false)

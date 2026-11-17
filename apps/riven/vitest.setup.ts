@@ -37,9 +37,6 @@ try {
   /* empty */
 }
 
-process.env["RIVEN_SETTING__rankingConfigPath"] =
-  `${import.meta.dirname}/riven-ranking-config.json`;
-
 vi.mock<{ default: Record<string, unknown> }>(
   import("./package.json"),
   () =>

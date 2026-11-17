@@ -5,9 +5,10 @@ import { NotFoundError } from "@mikro-orm/core";
 import chalk from "chalk";
 
 import { SkippedTorrentError } from "#message-queue/sandboxed-jobs/jobs/parse-scrape-results/utilities/validate-torrent.ts";
-import { rtnInstance } from "#ranking-config/ranking-config.ts";
+import { getRankingEngine } from "#ranking/ranking-engine.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
+import { coreEnvironment } from "#utilities/settings.ts";
 
 import { rankStreamsProcessorSchema } from "./rank-streams.schema.ts";
 import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution.ts";
@@ -15,7 +16,26 @@ import { sortByRankAndResolution } from "./utilities/sort-by-rank-and-resolution
 import type { RankedResult } from "@repo/util-rank-torrent-name";
 
 export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
-  async ({ job }, { services: { mediaItemService, downloaderService } }) => {
+  async (
+    { job },
+    {
+      services: {
+        mediaItemService,
+        downloaderService,
+        rankingProfileService,
+        settingsService,
+      },
+    },
+  ) => {
+    // Store a snapshot of the ranking engine for
+    // the whole job to allow for consistent ranking
+    // even if the ranking config changes mid-invocation.
+    const rtn = await getRankingEngine({
+      rankingProfileService,
+      settingsService,
+      environment: coreEnvironment,
+    });
+
     const streams = await downloaderService.findMatchingStreams(
       Object.keys(job.data.streams),
     );
@@ -58,7 +78,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
         }
 
         rankedResults.push(
-          rtnInstance.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
+          rtn.rankTorrent(rawTitle, hash, itemTitle, aliases ?? {}),
         );
       } catch (error) {
         if (
@@ -75,7 +95,7 @@ export const rankStreamsProcessor = rankStreamsProcessorSchema.implementAsync(
       }
     }
 
-    const bucketedTorrents = rtnInstance.sortTorrents(rankedResults);
+    const bucketedTorrents = rtn.sortTorrents(rankedResults);
     const sortedTorrentsByResolution = bucketedTorrents.toSorted(
       sortByRankAndResolution,
     );

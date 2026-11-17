@@ -6,39 +6,15 @@ import preview from "#.storybook/preview.tsx";
 import { GET_LIBRARY_ITEMS } from "#app/(protected)/library/_queries/get-library-items.query.ts";
 import { LibraryPage } from "#app/(protected)/library/page.client.tsx";
 import { api } from "#mocks/graphql.ts";
+import {
+  createLibraryItemsHandler,
+  libraryItems,
+} from "#mocks/handlers/library.handler.ts";
 
 import type { GetLibraryItemsQuery } from "#app/(protected)/library/_queries/get-library-items.query.typegen.ts";
-import type { MediaItemState } from "@repo/util-plugin-sdk/dto/enums/media-item-state.enum";
 import type { StoryContext } from "@storybook/nextjs-vite";
 
 //#region Helpers
-const libraryItems = [
-  {
-    __typename: "Movie",
-    id: "1",
-    type: "movie",
-    title: "John Wick: Chapter 4",
-    releaseDate: "2023-03-24",
-    year: 2023,
-    posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
-    state: "completed",
-    primaryExternalId: "tmdb-12345",
-  },
-  {
-    __typename: "Show",
-    id: "2",
-    type: "show",
-    title: "Arcane",
-    releaseDate: "2024-01-01",
-    year: 2024,
-    posterUrl: faker.image.urlPicsumPhotos({ width: 200, height: 300 }),
-    state: "indexed",
-    primaryExternalId: "tvdb-12345",
-  },
-] as const satisfies (GetLibraryItemsQuery["mediaItems"]["items"][number] & {
-  state: MediaItemState;
-})[];
-
 const { length: libraryItemsCount } = libraryItems;
 
 const libraryPageSize = 25;
@@ -62,12 +38,6 @@ const createLibraryPage = (page: number) =>
       primaryExternalId: `external-${position}`,
     } as const satisfies GetLibraryItemsQuery["mediaItems"]["items"][number];
   });
-
-/**
- * Checks whether a value passes a GraphQL list filter, where an omitted filter matches everything.
- */
-const matchesFilter = <T,>(filter: T | T[] | null | undefined, value: T) =>
-  filter == null || [filter].flat().includes(value);
 
 /**
  * Asserts that exactly the given library items are displayed.
@@ -106,31 +76,7 @@ const meta = preview.meta({
   title: "Pages / Library",
   component: LibraryPage,
   beforeEach({ msw }) {
-    msw.use(
-      api.query(GET_LIBRARY_ITEMS, ({ variables }) => {
-        const search = variables.search?.toLowerCase();
-
-        const items = libraryItems.filter(
-          (item) =>
-            (!search || item.title.toLowerCase().includes(search)) &&
-            matchesFilter(variables.type, item.type) &&
-            matchesFilter(variables.state, item.state),
-        );
-
-        return HttpResponse.json({
-          data: {
-            mediaItems: {
-              __typename: "MediaItemCursor",
-              hasNextPage: false,
-              hasPrevPage: false,
-              totalCount: items.length,
-              endCursor: null,
-              items,
-            },
-          },
-        });
-      }),
-    );
+    msw.use(createLibraryItemsHandler());
   },
 });
 
