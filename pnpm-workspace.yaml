@@ -196,7 +196,7 @@ catalog:
   luxon: ^3.7.2
   msw: ^3.0.3
   msw-storybook-addon: ^3.0.3
-  next: ^16.3.6
+  next: ^16.4.6
   next-safe-action: ^8.5.5
   nyc: ^18.0.0
   oxfmt: ^0.59.0
