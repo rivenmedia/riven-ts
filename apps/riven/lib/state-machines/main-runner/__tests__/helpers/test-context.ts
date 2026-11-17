@@ -10,12 +10,9 @@ import type { MainRunnerMachineInput } from "#state-machines/main-runner/index.t
 import type { ValidPlugin } from "#types/plugins.ts";
 
 export const it = baseIt
-  .extend(
-    "input",
-    (): MainRunnerMachineInput => ({
-      parentRef: createEmptyActor(),
-    }),
-  )
+  .extend("input", (): MainRunnerMachineInput => ({
+    parentRef: createEmptyActor(),
+  }))
   .extend("machine", mainRunnerMachine)
   .extend("actor", async ({ input, machine }, { onCleanup }) => {
     const { plugin: testPlugin } = await import("@repo/plugin-test");

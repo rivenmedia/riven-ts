@@ -1,8 +1,7 @@
 /**
  * See https://github.com/vercel/turborepo/blob/main/examples/with-vitest/packages/vitest-config/src/scripts/collect-json-outputs.ts
  */
-import { glob } from "glob";
-import fs from "node:fs/promises";
+import fs, { glob } from "node:fs/promises";
 import path from "node:path";
 
 // Create clean patterns for display (without any "../" prefixes)
@@ -35,12 +34,12 @@ try {
   // Process each pattern
   for (const pattern of patterns) {
     // Find all paths matching the pattern
-    const matches = await glob(pattern, {
+    const matches = glob(pattern, {
       cwd: process.cwd(),
     });
 
     // Filter to only include directories
-    for (const match of matches) {
+    for await (const match of matches) {
       const stats = await fs.stat(match);
 
       if (stats.isDirectory()) {

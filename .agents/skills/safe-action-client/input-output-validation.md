@@ -11,8 +11,9 @@ next-safe-action works with any validation library that implements the [Standard
 ```ts
 "use server";
 
-import { z } from "zod";
 import { actionClient } from "@/lib/safe-action";
+
+import { z } from "zod";
 
 export const createUser = actionClient
   .inputSchema(
