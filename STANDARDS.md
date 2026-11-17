@@ -107,7 +107,7 @@ only), plus `@eslint/json` and `eslint-plugin-turbo`.
 - **No unassigned/side-effect imports**, except `reflect-metadata`, `*.css`,
   and `*.d.ts`.
 - **No import cycles** deeper than 3 modules (`import/no-cycle`, `maxDepth:
-3`).
+  3`).
 - Namespace imports (`import * as foo`) are disallowed generally, but
   allowed in test files where mocking often needs them.
 

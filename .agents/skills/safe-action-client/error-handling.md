@@ -130,8 +130,9 @@ export class PermissionError extends AppError {
 
 ```ts
 // src/lib/safe-action.ts
-import { createSafeActionClient } from "next-safe-action";
 import { AppError } from "@/lib/errors";
+
+import { createSafeActionClient } from "next-safe-action";
 
 export const actionClient = createSafeActionClient({
   handleServerError: (error) => {
@@ -150,6 +151,7 @@ export const actionClient = createSafeActionClient({
 
 import { NotFoundError } from "@/lib/errors";
 import { authActionClient } from "@/lib/safe-action";
+
 import { z } from "zod";
 
 export const getPost = authActionClient

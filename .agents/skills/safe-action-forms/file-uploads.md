@@ -16,9 +16,10 @@ npm install zod-form-data
 // src/app/actions.ts
 "use server";
 
-import { zfd } from "zod-form-data";
-import { z } from "zod";
 import { actionClient } from "@/lib/safe-action";
+
+import { z } from "zod";
+import { zfd } from "zod-form-data";
 
 export const uploadAvatar = actionClient
   .inputSchema(
@@ -47,8 +48,9 @@ export const uploadAvatar = actionClient
 ```tsx
 "use client";
 
-import { useAction } from "next-safe-action/hooks";
 import { uploadAvatar } from "@/app/actions";
+
+import { useAction } from "next-safe-action/hooks";
 
 export function AvatarUpload() {
   const { execute, result, isPending } = useAction(uploadAvatar);

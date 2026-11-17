@@ -11,8 +11,9 @@ Server actions are async functions — call them directly in tests:
 
 ```ts
 // src/__tests__/actions.test.ts
-import { describe, it, expect, vi } from "vitest";
 import { createUser } from "@/app/actions";
+
+import { describe, it, expect, vi } from "vitest";
 
 describe("createUser", () => {
   it("returns user data on valid input", async () => {
@@ -96,8 +97,8 @@ describe("updatePost", () => {
 Test middleware behavior by creating actions with specific middleware chains:
 
 ```ts
-import { describe, it, expect, vi } from "vitest";
 import { createSafeActionClient } from "next-safe-action";
+import { describe, it, expect, vi } from "vitest";
 import { z } from "zod";
 
 // Mock auth
@@ -141,9 +142,9 @@ describe("auth middleware", () => {
 Use React Testing Library's `renderHook`:
 
 ```tsx
-import { describe, it, expect, vi } from "vitest";
 import { renderHook, act, waitFor } from "@testing-library/react";
 import { useAction } from "next-safe-action/hooks";
+import { describe, it, expect, vi } from "vitest";
 
 // Mock the action
 const mockAction = vi.fn();

@@ -37,9 +37,10 @@ Throws a `ActionServerValidationError` that the framework catches and returns as
 ```ts
 "use server";
 
-import { z } from "zod";
-import { returnValidationErrors } from "next-safe-action";
 import { actionClient } from "@/lib/safe-action";
+
+import { returnValidationErrors } from "next-safe-action";
+import { z } from "zod";
 
 const registerSchema = z.object({
   email: z.string().email(),

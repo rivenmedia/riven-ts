@@ -14,8 +14,9 @@ The `authorize` callback lets you customize the authorization flow. The session 
 
 ```ts
 // src/lib/safe-action.ts
-import { unauthorized } from "next/navigation";
 import { betterAuth } from "@next-safe-action/adapter-better-auth";
+import { unauthorized } from "next/navigation";
+
 import { auth } from "./auth";
 
 export const adminClient = actionClient.use(
@@ -50,8 +51,9 @@ export const deleteUser = adminClient
 Use `redirect()` instead of `unauthorized()` when you want to send unauthenticated users to a login page:
 
 ```ts
-import { redirect } from "next/navigation";
 import { betterAuth } from "@next-safe-action/adapter-better-auth";
+import { redirect } from "next/navigation";
+
 import { auth } from "./auth";
 
 export const authClient = actionClient.use(
@@ -73,8 +75,9 @@ This does not require `authInterrupts: true` in `next.config.ts` since `redirect
 When using Better Auth's `organization` plugin, session types automatically include `activeOrganizationId`:
 
 ```ts
-import { unauthorized } from "next/navigation";
 import { betterAuth } from "@next-safe-action/adapter-better-auth";
+import { unauthorized } from "next/navigation";
+
 import { auth } from "./auth"; // auth configured with organization plugin
 
 export const orgClient = actionClient.use(
@@ -134,6 +137,7 @@ For actions where authentication is optional (e.g., showing different content fo
 
 ```ts
 import { betterAuth } from "@next-safe-action/adapter-better-auth";
+
 import { auth } from "./auth";
 
 // Does NOT call unauthorized() — allows null authData through
