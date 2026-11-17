@@ -18,14 +18,11 @@ import type { SyncRankingProfilesInput } from "#state-machines/bootstrap/actors/
 import type { BootstrapMachineInput } from "#state-machines/bootstrap/index.ts";
 
 export const it = baseIt
-  .extend(
-    "input",
-    (): BootstrapMachineInput => ({
-      rootRef: createEmptyActor(),
-      mainRunnerRef: createEmptyActor(),
-      mockScenario: undefined,
-    }),
-  )
+  .extend("input", (): BootstrapMachineInput => ({
+    rootRef: createEmptyActor(),
+    mainRunnerRef: createEmptyActor(),
+    mockScenario: undefined,
+  }))
   .extend("initialiseDatabaseConnectionActorLogic", ({ orm, services }) =>
     fromPromise<InitialiseDatabaseConnectionOutput>(async () => ({
       orm,

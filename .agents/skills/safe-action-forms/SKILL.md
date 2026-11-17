@@ -20,8 +20,9 @@ description: Use when integrating next-safe-action with forms -- react-hook-form
 ```tsx
 "use client";
 
-import { useStateAction } from "next-safe-action/hooks";
 import { submitContact } from "@/app/actions";
+
+import { useStateAction } from "next-safe-action/hooks";
 
 export function ContactForm() {
   const { formAction, result, isPending, hasSucceeded } = useStateAction(
@@ -58,8 +59,9 @@ Note: `useStateAction` requires the server action to be defined with `.stateActi
 ```tsx
 "use client";
 
-import { useAction } from "next-safe-action/hooks";
 import { submitContact } from "@/app/actions";
+
+import { useAction } from "next-safe-action/hooks";
 
 export function ContactForm() {
   const { execute, result, isPending } = useAction(submitContact);
@@ -99,10 +101,11 @@ export function ContactForm() {
 ```tsx
 "use client";
 
-import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { submitContact } from "@/app/actions";
+
+import { zodResolver } from "@hookform/resolvers/zod";
+import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { z } from "zod";
 
 const schema = z.object({
   name: z.string().min(1, "Name is required"),
