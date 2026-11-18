@@ -2,11 +2,11 @@ import { expect, it } from "vitest";
 
 import { RivenSettings } from "./riven-settings.schema.ts";
 
-const requiredSettings = {
+const requiredSettings = Object.freeze({
   databaseUrl: "postgresql://riven@localhost/riven",
   redisUrl: "redis://localhost:6379",
   vfsMountPath: "/mnt/riven",
-};
+});
 
 it("apiKey setting rejects a key shorter than 32 characters", () => {
   const { error } = RivenSettings.safeParse({
@@ -23,4 +23,11 @@ it("apiKey setting accepts a key of 32 characters", () => {
   expect(
     RivenSettings.parse({ ...requiredSettings, apiKey: "k".repeat(32) }),
   ).toHaveProperty("apiKey", "k".repeat(32));
+});
+
+it("apiKey setting resolves to a generated key when unset", () => {
+  const { apiKey } = RivenSettings.parse(requiredSettings);
+
+  expect(apiKey.length).toBeGreaterThanOrEqual(32);
+  expect(RivenSettings.parse(requiredSettings).apiKey).toBe(apiKey);
 });

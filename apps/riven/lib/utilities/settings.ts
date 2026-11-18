@@ -6,7 +6,6 @@ import {
 
 import { RivenSettings } from "#riven-settings.schema.ts";
 
-import { resolveApiKey } from "./api-key.ts";
 import { deepFreeze } from "./deep-freeze.ts";
 
 import type { ReadonlyDeep } from "type-fest";
@@ -50,11 +49,7 @@ export const coreEnvironment: Readonly<Record<string, string>> = Object.freeze(
 );
 
 function parseBootstrapSettings() {
-  const configuredSettings = RivenSettings.parse(coreEnvironment);
-  const parsedSettings = deepFreeze({
-    ...configuredSettings,
-    apiKey: resolveApiKey(configuredSettings.apiKey, isMainThread),
-  });
+  const parsedSettings = deepFreeze(RivenSettings.parse(coreEnvironment));
 
   if (isMainThread && parsedSettings.printConfigurationOnStartup) {
     console.debug("#################");
@@ -67,5 +62,4 @@ function parseBootstrapSettings() {
 }
 
 /** The env-only bootstrap settings, available as soon as this module loads. */
-export const settings: ReadonlyDeep<RivenSettings & { apiKey: string }> =
-  parseBootstrapSettings();
+export const settings: ReadonlyDeep<RivenSettings> = parseBootstrapSettings();
