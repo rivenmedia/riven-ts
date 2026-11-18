@@ -1,6 +1,6 @@
 import { UserRole } from "@repo/util-auth/access-control";
 
-import { createHash, timingSafeEqual } from "node:crypto";
+import { pbkdf2Sync, randomBytes, timingSafeEqual } from "node:crypto";
 
 import { auth } from "#auth/auth.ts";
 import { settings } from "#utilities/settings.ts";
@@ -10,18 +10,19 @@ export type Principal =
   | { kind: "service" }
   | { kind: "user"; userId: string; role: UserRole };
 
-const bearerTokenPattern = /^Bearer +(?<token>\S+)$/iu;
+const salt = randomBytes(16);
 
-function sha256(value: string) {
-  return createHash("sha256").update(value).digest();
+function createDigest(token: string) {
+  // oxlint-disable-next-line node/no-sync
+  return pbkdf2Sync(token, salt, 100_000, 32, "sha256");
 }
 
-const apiKeyDigest = sha256(settings.apiKey);
+const apiKeyDigest = createDigest(settings.apiKey);
 
 // Comparing digests gives `timingSafeEqual` inputs of equal length,
 // so a wrong key's length cannot short-circuit the comparison.
 function isApiKey(token: string) {
-  return timingSafeEqual(sha256(token), apiKeyDigest);
+  return timingSafeEqual(createDigest(token), apiKeyDigest);
 }
 
 function decodeToken(token: string) {
@@ -33,6 +34,7 @@ function decodeToken(token: string) {
 }
 
 export async function resolvePrincipal(headers: Headers): Promise<Principal> {
+  const bearerTokenPattern = /^Bearer +(?<token>\S+)$/iu;
   const token = bearerTokenPattern.exec(
     headers.get("authorization")?.trim() ?? "",
   )?.groups?.["token"];
