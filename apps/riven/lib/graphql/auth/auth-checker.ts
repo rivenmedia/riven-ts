@@ -1,7 +1,6 @@
-import { roleHasPermissions } from "@repo/util-auth/access-control";
-
 import { AuthenticationError } from "type-graphql";
 
+import { principalHasPermissions } from "#graphql/auth/principal-has-permissions.ts";
 import { CoreKey } from "#graphql/context.ts";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
@@ -14,19 +13,13 @@ export const authChecker: AuthCheckerFn<ApolloServerContext, Permissions> = (
 ) => {
   const { principal } = context[CoreKey];
 
-  switch (principal.kind) {
-    case "anonymous": {
-      // TypeGraphQL reports a denied field with permissions as UNAUTHORIZED,
-      // but an anonymous caller needs to sign in rather than ask for access.
-      throw new AuthenticationError();
-    }
-    case "service": {
-      return true;
-    }
-    case "user": {
-      return required.every((permissions) =>
-        roleHasPermissions(principal.role, permissions),
-      );
-    }
+  if (principal.kind === "anonymous") {
+    // TypeGraphQL reports a denied field with permissions as UNAUTHORIZED,
+    // but an anonymous caller needs to sign in rather than ask for access.
+    throw new AuthenticationError();
   }
+
+  return required.every((permissions) =>
+    principalHasPermissions(principal, permissions),
+  );
 };

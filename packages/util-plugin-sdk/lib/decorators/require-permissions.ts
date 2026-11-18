@@ -10,6 +10,7 @@ import type { Permissions } from "@repo/util-auth/access-control";
  */
 export function RequirePermissions(
   permissions: Permissions,
+  // The inferred type references a type-graphql type that declarations can't name
 ): ReturnType<typeof Authorized> {
   return Authorized<Permissions>([permissions]);
 }

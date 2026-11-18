@@ -1,3 +1,5 @@
+import { UserRole } from "@repo/util-auth/access-control";
+
 import { createHash, timingSafeEqual } from "node:crypto";
 
 import { auth } from "#auth/auth.ts";
@@ -6,7 +8,7 @@ import { settings } from "#utilities/settings.ts";
 export type Principal =
   | { kind: "anonymous" }
   | { kind: "service" }
-  | { kind: "user"; userId: string; role: string };
+  | { kind: "user"; userId: string; role: UserRole };
 
 const bearerTokenPattern = /^Bearer +(?<token>\S+)$/iu;
 
@@ -62,6 +64,6 @@ export async function resolvePrincipal(headers: Headers): Promise<Principal> {
   return {
     kind: "user",
     userId: session.user.id,
-    role: session.user.role ?? "",
+    role: UserRole.parse(session.user.role),
   };
 }

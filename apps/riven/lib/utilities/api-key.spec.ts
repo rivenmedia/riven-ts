@@ -1,6 +1,6 @@
 import { expect, it } from "vitest";
 
-import { resolveApiKey } from "./api-key.ts";
+import { isGeneratedApiKey, resolveApiKey } from "./api-key.ts";
 
 it("resolveApiKey uses the configured key in every thread", () => {
   const configuredKey = "k".repeat(32);
@@ -17,4 +17,9 @@ it("resolveApiKey gives worker threads the key that the main thread generated", 
 
 it("resolveApiKey generates a key as long as a configured key must be", () => {
   expect(resolveApiKey(undefined, true).length).toBeGreaterThanOrEqual(32);
+});
+
+it("isGeneratedApiKey is true only for the key the main thread generated", () => {
+  expect(isGeneratedApiKey(resolveApiKey(undefined, true))).toBe(true);
+  expect(isGeneratedApiKey(resolveApiKey("k".repeat(32), true))).toBe(false);
 });

@@ -16,9 +16,9 @@ import { CoreContext } from "#graphql/decorators/core-context.ts";
 import type { UUID } from "node:crypto";
 import type { SubscribeResolverData } from "type-graphql";
 
+@Authorized()
 @Resolver(() => Season)
 export class SeasonResolver {
-  @Authorized()
   @Subscription(() => Season, {
     description:
       "Emits the season for the given ID whenever its state, or the state of any of its episodes, changes.",

@@ -11,13 +11,13 @@ import { authChecker } from "./auth-checker.ts";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Principal } from "./principal.ts";
-import type { Permissions } from "@repo/util-auth/access-control";
+import type { Permissions, UserRole } from "@repo/util-auth/access-control";
 import type { GraphQLResolveInfo } from "graphql";
 
 const anonymous: Principal = { kind: "anonymous" };
 const service: Principal = { kind: "service" };
 
-function signedIn(role: string): Principal {
+function signedIn(role: UserRole): Principal {
   return { kind: "user", userId: "user-id", role };
 }
 
@@ -57,8 +57,8 @@ it.for<[Principal, Permissions[], boolean]>([
   [signedIn("user"), [], true],
   [signedIn("user"), [{ item: ["request"] }], true],
   [signedIn("user"), [{ item: ["reset"] }], false],
-  [signedIn(""), [], true],
-  [signedIn(""), [{ item: ["request"] }], false],
+  [signedIn("" as UserRole), [], true],
+  [signedIn("" as UserRole), [{ item: ["request"] }], false],
 ])(
   "authChecker authorizes %j requiring %j: %s",
   ([principal, required, expected], { createGqlContext }) => {

@@ -3,7 +3,7 @@ import { ApolloClient, HttpLink, InMemoryCache } from "@apollo/client";
 export interface CreateGraphqlClientOptions {
   /** The GraphQL endpoint of the Riven instance to connect to. */
   uri: string;
-
+  /** The API key to use for authenticating with the Riven instance. */
   apiKey?: string | undefined;
 }
 

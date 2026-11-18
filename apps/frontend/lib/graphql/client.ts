@@ -1,17 +1,10 @@
-import { ApolloLink, HttpLink } from "@apollo/client";
-import {
-  registerApolloClient,
-  ApolloClient,
-  InMemoryCache,
-} from "@apollo/client-integration-nextjs";
-import { SetContextLink } from "@apollo/client/link/context";
+import { registerApolloClient } from "@apollo/client-integration-nextjs";
 import { getSessionCookie } from "better-auth/cookies";
 import { cookies } from "next/headers";
 
-import { privateEnvironment } from "#environment/private-environment.schema.ts";
-import { isUnavailableCookieStoreError } from "#lib/auth/plugins/next-cookies.ts";
+import { isUnavailableCookieStoreError } from "#lib/utils/is-unavailable-cookie-store-error.ts";
 
-import { cacheOptions } from "./cache-options.ts";
+import { createClient } from "./create-client.ts";
 
 async function readSessionToken() {
   try {
@@ -29,29 +22,6 @@ async function readSessionToken() {
   }
 }
 
-const sessionTokenLink = new SetContextLink(
-  async ({ headers }: HttpLink.ContextOptions) => {
-    const sessionToken = await readSessionToken();
-
-    if (!sessionToken) {
-      return {};
-    }
-
-    return {
-      headers: { ...headers, authorization: `Bearer ${sessionToken}` },
-    };
-  },
-);
-
-export const { getClient, query, PreloadQuery } = registerApolloClient(
-  () =>
-    new ApolloClient({
-      cache: new InMemoryCache(cacheOptions),
-      link: ApolloLink.from([
-        sessionTokenLink,
-        new HttpLink({
-          uri: `${privateEnvironment.BACKEND_URL}/graphql`,
-        }),
-      ]),
-    }),
+export const { getClient, query, PreloadQuery } = registerApolloClient(() =>
+  createClient(readSessionToken),
 );

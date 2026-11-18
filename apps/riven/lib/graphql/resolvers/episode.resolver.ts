@@ -12,9 +12,9 @@ import {
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 
+@Authorized()
 @Resolver(() => Episode)
 export class EpisodeResolver {
-  @Authorized()
   @Query(() => Episode, {
     description:
       "Fetches an episode by its TVDB ID, season number, and episode number. If season number is not provided, it will lookup using absolute episode numbering.",

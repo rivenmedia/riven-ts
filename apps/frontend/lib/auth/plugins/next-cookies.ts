@@ -1,20 +1,8 @@
 import { parseSetCookieHeader, toCookieOptions } from "better-auth/cookies";
 
-import type { BetterAuthClientPlugin } from "better-auth";
+import { isUnavailableCookieStoreError } from "#lib/utils/is-unavailable-cookie-store-error.ts";
 
-/**
- * Whether the error was caused by the Next.js cookie store being unavailable,
- * e.g. when called outside of a request scope.
- */
-export function isUnavailableCookieStoreError(error: unknown) {
-  return (
-    error instanceof Error &&
-    (error.message.startsWith(
-      "`cookies` was called outside a request scope.",
-    ) ||
-      error.message.includes("Cannot find module"))
-  );
-}
+import type { BetterAuthClientPlugin } from "better-auth";
 
 async function setResponseCookies(
   parsedCookies: ReturnType<typeof parseSetCookieHeader>,

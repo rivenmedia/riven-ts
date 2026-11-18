@@ -8,6 +8,7 @@ import {
   Resolver,
   Root,
   getMetadataStorage,
+  Authorized,
 } from "type-graphql";
 
 import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
@@ -15,6 +16,7 @@ import { pluginConfig } from "../tvdb-plugin.config.ts";
 
 import type { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
+@Authorized()
 @Resolver(() => {
   const tmdbIndexerData = getMetadataStorage().objectTypes.find(
     (type) => type.name === "TmdbIndexerData",

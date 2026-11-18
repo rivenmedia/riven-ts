@@ -1,41 +1,22 @@
-import { ApolloLink, HttpLink } from "@apollo/client";
-import {
-  registerApolloClient,
-  ApolloClient,
-  InMemoryCache,
-} from "@apollo/client-integration-nextjs";
-import { SetContextLink } from "@apollo/client/link/context";
+import { registerApolloClient } from "@apollo/client-integration-nextjs";
 
 import { privateEnvironment } from "#environment/private-environment.schema.ts";
 
-import { cacheOptions } from "./cache-options.ts";
+import { createClient } from "./create-client.ts";
 
-const apiKeyLink = new SetContextLink(
-  ({ headers }: HttpLink.ContextOptions) => {
-    if (!privateEnvironment.BACKEND_API_KEY) {
-      throw new Error(
-        "BACKEND_API_KEY is not set. Set it to the value of Riven's RIVEN_SETTING__apiKey.",
-      );
-    }
+function readApiKey() {
+  if (!privateEnvironment.BACKEND_API_KEY) {
+    throw new Error(
+      "BACKEND_API_KEY is not set. Set it to the value of Riven's RIVEN_SETTING__apiKey.",
+    );
+  }
 
-    return {
-      headers: {
-        ...headers,
-        authorization: `Bearer ${privateEnvironment.BACKEND_API_KEY}`,
-      },
-    };
-  },
-);
+  return privateEnvironment.BACKEND_API_KEY;
+}
 
-export const { query } = registerApolloClient(
-  () =>
-    new ApolloClient({
-      cache: new InMemoryCache(cacheOptions),
-      link: ApolloLink.from([
-        apiKeyLink,
-        new HttpLink({
-          uri: `${privateEnvironment.BACKEND_URL}/graphql`,
-        }),
-      ]),
-    }),
-);
+/**
+ * Queries Riven with the API key rather than the viewer's session, so `"use cache"` scopes can share the result.
+ *
+ * The API key bypasses role checks, so only use this for data that every signed-in user may read.
+ */
+export const { query } = registerApolloClient(() => createClient(readApiKey));
