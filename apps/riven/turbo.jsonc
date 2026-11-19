@@ -31,11 +31,6 @@
       "outputs": ["schema.graphql"]
     },
     "codegen:gql": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "codegen:gql-schema",
-        "transit:source-files"
-      ],
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
