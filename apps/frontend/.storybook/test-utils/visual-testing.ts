@@ -127,6 +127,46 @@ export const trackPendingRequests = (worker: SetupWorker) => {
 };
 
 /**
+ * How long Chromium's native validation bubble takes to appear, rounded up from its `transform 1166.67ms` transition.
+ *
+ * The bubble is drawn outside the page, so its transition can't be seen, paused or finished from the page.
+ * https://chromium.googlesource.com/chromium/src/+/refs/heads/main/third_party/blink/renderer/core/html/forms/resources/validation_bubble.css
+ */
+const NATIVE_VALIDATION_BUBBLE_TRANSITION_MS = 1200;
+
+/** When a form control last failed native validation, which may have shown Chromium's validation bubble */
+const nativeValidation = { lastInvalidAt: Number.NEGATIVE_INFINITY };
+
+/**
+ * Records when form controls fail native validation (e.g. `required` or `min` when a form is submitted).
+ *
+ * `invalid` doesn't bubble, so it's listened for as it's captured on the window.
+ */
+export const trackNativeValidation = () => {
+  globalThis.addEventListener(
+    "invalid",
+    () => {
+      nativeValidation.lastInvalidAt = performance.now();
+    },
+    { capture: true },
+  );
+};
+
+/** Waits for Chromium's native validation bubble to finish appearing, so it isn't captured mid-transition */
+const waitForNativeValidationBubble = async () => {
+  const remainingMs =
+    nativeValidation.lastInvalidAt +
+    NATIVE_VALIDATION_BUBBLE_TRANSITION_MS -
+    performance.now();
+
+  if (remainingMs > 0) {
+    await new Promise((resolve) => {
+      setTimeout(resolve, remainingMs);
+    });
+  }
+};
+
+/**
  * Waits until the DOM hasn't changed for `quietMs`, so states that settle shortly after the story renders
  * (e.g. data loading in, or a tooltip opening once focus moves) are captured consistently.
  *
@@ -428,6 +468,7 @@ export const prepareAutoSnapshot: Extract<
   }
 
   await waitForNextFrame();
+  await waitForNativeValidationBubble();
 
   if (holdMs) {
     // Restarts whenever the page changes, so e.g. a carousel advancing during the hold period is captured once it settles
@@ -459,6 +500,7 @@ export const resetAutoSnapshot = () => {
 
   // Requests from the previous story may never finish, e.g. if it unmounted mid-request
   pendingRequestIds.clear();
+  nativeValidation.lastInvalidAt = Number.NEGATIVE_INFINITY;
 
   // Otherwise elements that unmount once their exit animation ends (e.g. a closing accordion item) would never unmount
   document.head.querySelector(`#${PAUSE_STYLE_ID}`)?.remove();

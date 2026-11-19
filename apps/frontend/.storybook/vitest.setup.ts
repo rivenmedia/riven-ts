@@ -1,6 +1,9 @@
 import { beforeEach, vi } from "vitest";
 
-import { stopStorybookFinishingAnimations } from "./test-utils/visual-testing.ts";
+import {
+  stopStorybookFinishingAnimations,
+  trackNativeValidation,
+} from "./test-utils/visual-testing.ts";
 
 export class MemoryStorage implements Storage {
   readonly #items = new Map<string, string>();
@@ -43,3 +46,6 @@ beforeEach(() => {
 
 // Animations are paused on their last frame for each snapshot, rather than finished by Storybook
 stopStorybookFinishingAnimations();
+
+// Snapshots wait for Chromium's native validation bubble to finish appearing
+trackNativeValidation();
