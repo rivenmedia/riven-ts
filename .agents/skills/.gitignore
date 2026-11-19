@@ -1,3 +1,6 @@
 # pnpm
 /apollo-client
 # pnpm end
+
+# The MSW skill erroneously includes a .github directory that should be ignored
+msw/.github

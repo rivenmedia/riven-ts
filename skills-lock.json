@@ -14,55 +14,64 @@
       "source": "anivar/msw-skill",
       "sourceType": "github",
       "skillPath": "SKILL.md",
-      "computedHash": ""
+      "computedHash": "64d37a78468a85e627978c623de68559a9ef69c40ef30c406b195afbe47a1147",
+      "commit": "b512d34a916d43e0a315640a22feb09a316e912f"
     },
     "safe-action-advanced": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-advanced/SKILL.md",
-      "computedHash": ""
+      "computedHash": "61b922b4c81aa28524e128a23dbf015afd06e76d8d0b69eb3efc21b0cc03f924",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-better-auth": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-better-auth/SKILL.md",
-      "computedHash": ""
+      "computedHash": "6a02543147f4242e1a6cd5d98ce0473476fe279d6a50aa0bf58f72fa8227a7c7",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-client": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-client/SKILL.md",
-      "computedHash": ""
+      "computedHash": "16cc1e9803c6a4268452642a0103e3962da4394f378324ce2cbf190e63b1d0e4",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-forms": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-forms/SKILL.md",
-      "computedHash": ""
+      "computedHash": "7a507ce555f3f48868cd1b0dea12f4f2341c7fbe473b29ef5a4709568561f457",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-hooks": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-hooks/SKILL.md",
-      "computedHash": ""
+      "computedHash": "338a8a55bcbbc26afefcd90de4402068d440f28cc60a2744a5a1098a1c1187eb",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-middleware": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-middleware/SKILL.md",
-      "computedHash": ""
+      "computedHash": "cf46db85ad345343c0daa166af4a08360ae34065f0d4cb354f40049b54ebb1d8",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-testing": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-testing/SKILL.md",
-      "computedHash": ""
+      "computedHash": "11495a5f06fe15d8bbe2dbadd98090d778c5d1d611afb25440d64a0b09cd85f8",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "safe-action-validation-errors": {
       "source": "next-safe-action/skills",
       "sourceType": "github",
       "skillPath": "skills/safe-action-validation-errors/SKILL.md",
-      "computedHash": ""
+      "computedHash": "50dcd4eb9f59278df96f0b49f0ddf6ae1f114955fcbc1347b6923cec7dedd5cb",
+      "commit": "a2605bd2e84321245cba8f5718c144a6e4a5fa47"
     },
     "storybook-init": {
       "source": "storybookjs/skills",

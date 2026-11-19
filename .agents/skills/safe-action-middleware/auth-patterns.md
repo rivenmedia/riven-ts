@@ -7,9 +7,8 @@
 ## Session Lookup
 
 ```ts
-import { getSession } from "@/lib/auth";
-
 import { createSafeActionClient } from "next-safe-action";
+import { getSession } from "@/lib/auth";
 
 const actionClient = createSafeActionClient();
 

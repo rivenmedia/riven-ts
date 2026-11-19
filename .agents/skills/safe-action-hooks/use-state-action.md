@@ -5,6 +5,7 @@
 ```ts
 // Primary import (recommended)
 import { useStateAction } from "next-safe-action/hooks";
+
 // Backward-compatible re-export (same hook)
 import { useStateAction } from "next-safe-action/stateful-hooks";
 ```
@@ -16,10 +17,9 @@ import { useStateAction } from "next-safe-action/stateful-hooks";
 ```ts
 "use server";
 
-import { actionClient } from "@/lib/safe-action";
-
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { actionClient } from "@/lib/safe-action";
 
 export const submitFeedback = actionClient
   .inputSchema(
@@ -52,9 +52,8 @@ Forms are the most common use, but not the defining one. `useStateAction` is bui
 ```tsx
 "use client";
 
-import { submitFeedback } from "@/app/actions";
-
 import { useStateAction } from "next-safe-action/hooks";
+import { submitFeedback } from "@/app/actions";
 
 export function FeedbackForm() {
   const { formAction, result, isPending, hasSucceeded, reset } = useStateAction(
