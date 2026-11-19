@@ -88,7 +88,7 @@ const locales = [
   { value: "fa-IR", title: "فارسی" },
 ] as const;
 
-type Locale = (typeof locales)[number]["value"];
+export type Locale = (typeof locales)[number]["value"];
 
 declare module "storybook/internal/csf" {
   interface StoryContext {
