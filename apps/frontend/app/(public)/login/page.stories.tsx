@@ -86,7 +86,7 @@ CredentialsEnabled.test(
       await canvas.findByText(/login successful/iu),
     ).toBeInTheDocument();
 
-    await expect(redirect).toBeCalledWith("/");
+    await expect(redirect).toHaveBeenCalledWith("/");
   },
 );
 
@@ -123,7 +123,7 @@ CredentialsEnabled.test(
       await canvas.findByText(/an error occurred during login/iu),
     ).toBeInTheDocument();
 
-    await expect(redirect).not.toBeCalled();
+    await expect(redirect).not.toHaveBeenCalled();
   },
 );
 
@@ -170,7 +170,7 @@ CredentialsEnabled.test(
       await canvas.findByText(/registration successful/iu),
     ).toBeInTheDocument();
 
-    await expect(redirect).toBeCalledWith("/");
+    await expect(redirect).toHaveBeenCalledWith("/");
   },
 );
 
@@ -215,7 +215,7 @@ CredentialsEnabled.test(
       await canvas.findByText(/an error occurred during registration/iu),
     ).toBeInTheDocument();
 
-    await expect(redirect).not.toBeCalled();
+    await expect(redirect).not.toHaveBeenCalled();
   },
 );
 

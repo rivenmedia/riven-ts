@@ -4,8 +4,6 @@ import { preview } from "#.storybook/preview.tsx";
 import { NowPlayingSkeleton } from "#components/now-playing/now-playing-skeleton.tsx";
 import { NowPlaying } from "#components/now-playing/now-playing.tsx";
 
-import type { IndexerData } from "#app/_types/__generated__/graphql.ts";
-
 const meta = preview.meta({
   title: "Components / NowPlaying",
   component: NowPlaying,
@@ -21,7 +19,6 @@ const meta = preview.meta({
         title: "John Wick: Chapter 4",
         backdropUrl:
           "https://image.tmdb.org/t/p/original/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg",
-        releaseDate: "2023-03-24",
         voteAverage: 7.8,
         language: "en",
         overview:
@@ -44,8 +41,6 @@ const meta = preview.meta({
           },
         },
         logo: null,
-        status: "released",
-        isRequestable: true,
       },
       {
         id: "94605",
@@ -53,7 +48,6 @@ const meta = preview.meta({
         title: "Arcane",
         backdropUrl:
           "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-        releaseDate: "2024-11-09",
         voteAverage: 9.1,
         language: "en",
         overview:
@@ -65,8 +59,6 @@ const meta = preview.meta({
         certification: "12A",
         ratings: {},
         logo: null,
-        status: "released",
-        isRequestable: true,
       },
       {
         id: "1291595",
@@ -74,7 +66,6 @@ const meta = preview.meta({
         title: "Insidious: Out of the Further",
         backdropUrl:
           "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
-        releaseDate: "2026-08-21",
         voteAverage: 6.5,
         language: "en",
         overview:
@@ -83,10 +74,8 @@ const meta = preview.meta({
         certification: "18",
         ratings: {},
         logo: null,
-        status: "released",
-        isRequestable: true,
       },
-    ] satisfies IndexerData[],
+    ],
   },
 });
 
@@ -189,7 +178,7 @@ Default.test(
       await userEvent.hover(carousel);
     });
 
-    const waitDuration = Number(args.autoplayDelay) + 1000;
+    const waitDuration = args.autoplayDelay + 1000;
 
     await step(
       `Wait for ${(waitDuration / 1000).toString()} seconds`,
@@ -233,7 +222,7 @@ Default.test(
 
     await step("Wait for the next slide to appear", async () => {
       await waitFor(async () => expect(firstSlideTitle).not.toBeVisible(), {
-        timeout: Number(args.autoplayDelay) + 1000,
+        timeout: args.autoplayDelay + 1000,
       });
     });
 
@@ -266,7 +255,7 @@ Default.test(
 
     await step("Wait for a partial slide duration", async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, Number(args.autoplayDelay) / 2);
+        setTimeout(resolve, args.autoplayDelay / 2);
       });
     });
 
@@ -290,7 +279,7 @@ Default.test(
 
     await step("Wait for a partial slide duration", async () => {
       await new Promise((resolve) => {
-        setTimeout(resolve, Number(args.autoplayDelay) / 2);
+        setTimeout(resolve, args.autoplayDelay / 2);
       });
     });
 
