@@ -5,6 +5,8 @@ import { isBasePluginContext } from "../schemas/index.ts";
 import type { DataSourceConstructor } from "../schemas/index.ts";
 import type { GraphQLContext } from "../types/graphql-context.ts";
 
+export { RequirePermissions } from "./require-permissions.ts";
+
 /**
  * Parameter decorator used to inject the plugin context for the current plugin.
  *

@@ -3,6 +3,7 @@ import { RequestContext } from "@mikro-orm/core";
 import { database, services } from "#database/database.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
+import { resolvePrincipal } from "./auth/principal.ts";
 import { CoreKey } from "./context.ts";
 
 import type { RankingManager } from "#ranking/ranking-manager.ts";
@@ -10,8 +11,6 @@ import type { SettingsManager } from "#settings/settings-manager.ts";
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 import type { ValidPluginMap } from "#types/plugins.ts";
 import type { ApolloServerContext } from "./context.ts";
-import type { ContextFunction } from "@apollo/server";
-import type { ExpressContextFunctionArgument } from "@as-integrations/express5";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
 export const buildContextFunction: (
@@ -20,7 +19,7 @@ export const buildContextFunction: (
   validPlugins: ValidPluginMap,
   settingsManager: SettingsManager,
   rankingManager: RankingManager,
-) => ContextFunction<[ExpressContextFunctionArgument], ApolloServerContext> =
+) => (headers: Headers) => Promise<ApolloServerContext> =
   (
     sendEvent,
     sendExternalEvent,
@@ -28,16 +27,16 @@ export const buildContextFunction: (
     settingsManager,
     rankingManager,
   ) =>
-  async () =>
-    Promise.resolve({
-      [CoreKey]: {
-        em: RequestContext.getEntityManager() ?? database.em.fork(),
-        services,
-        sendEvent,
-        settingsManager,
-        rankingManager,
-      },
-      logger,
-      sendEvent: sendExternalEvent,
-      plugins: validPlugins,
-    });
+  async (headers) => ({
+    [CoreKey]: {
+      em: RequestContext.getEntityManager() ?? database.em.fork(),
+      principal: await resolvePrincipal(headers),
+      services,
+      sendEvent,
+      settingsManager,
+      rankingManager,
+    },
+    logger,
+    sendEvent: sendExternalEvent,
+    plugins: validPlugins,
+  });

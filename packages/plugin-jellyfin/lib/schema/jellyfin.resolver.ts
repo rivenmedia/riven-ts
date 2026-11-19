@@ -1,10 +1,11 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { JellyfinAPI } from "../datasource/jellyfin.datasource.ts";
 import { pluginConfig } from "../jellyfin-plugin.config.ts";
 
+@Authorized()
 @Resolver()
 export class JellyfinResolver {
   @Query(() => Boolean)

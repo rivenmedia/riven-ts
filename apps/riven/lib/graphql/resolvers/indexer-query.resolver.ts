@@ -3,6 +3,7 @@ import { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
 import {
   Arg,
+  Authorized,
   Ctx,
   Field,
   Int,
@@ -91,6 +92,7 @@ const interleave = <T>(lists: T[][]) => {
   ).flat();
 };
 
+@Authorized()
 @Resolver()
 export class IndexerQueryResolver {
   @Query(() => SearchResponse, {

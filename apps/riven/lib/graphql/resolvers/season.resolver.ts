@@ -2,6 +2,7 @@ import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   Arg,
+  Authorized,
   FieldResolver,
   ID,
   Int,
@@ -15,6 +16,7 @@ import { CoreContext } from "#graphql/decorators/core-context.ts";
 import type { UUID } from "node:crypto";
 import type { SubscribeResolverData } from "type-graphql";
 
+@Authorized()
 @Resolver(() => Season)
 export class SeasonResolver {
   @Subscription(() => Season, {

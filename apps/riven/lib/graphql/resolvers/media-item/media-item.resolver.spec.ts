@@ -4,6 +4,7 @@ import { gql } from "@apollo/client";
 import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
+import { mediaItemActionPermissions } from "#graphql/auth/media-item-action-permissions.ts";
 import { createQueue } from "#message-queue/utilities/create-queue.ts";
 
 import type {
@@ -13,6 +14,8 @@ import type {
   GetMediaItemsQueryVariables,
   MediaItemStateChangedSubscription,
   MediaItemStateChangedSubscriptionVariables,
+  ResetMediaItemResolverSpecMutation,
+  ResetMediaItemResolverSpecMutationVariables,
 } from "./media-item.resolver.spec.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
 
@@ -211,6 +214,38 @@ describe("mediaItemStateChanged", () => {
         id: indexedMovie.id,
         state: "scraped",
       },
+    });
+  });
+});
+
+describe("resetMediaItem", () => {
+  const RESET_MEDIA_ITEM: TypedDocumentNode<
+    ResetMediaItemResolverSpecMutation,
+    ResetMediaItemResolverSpecMutationVariables
+  > = gql`
+    mutation ResetMediaItemResolverSpec($mediaItemId: ID!) {
+      resetMediaItem(mediaItemId: $mediaItemId) {
+        __typename
+      }
+    }
+  `;
+
+  it("denies a caller without the reset action's permissions", async ({
+    completedMovieContext: { completedMovie },
+    gqlExecuteAs,
+    userWithout,
+  }) => {
+    await expect(
+      gqlExecuteAs(
+        userWithout(mediaItemActionPermissions.reset),
+        RESET_MEDIA_ITEM,
+        {
+          mediaItemId: completedMovie.id,
+        },
+      ),
+    ).resolves.toStrictEqual({
+      data: null,
+      errors: [{ path: "resetMediaItem", code: "UNAUTHORIZED" }],
     });
   });
 });

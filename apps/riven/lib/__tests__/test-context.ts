@@ -1,5 +1,6 @@
 import { plugin as testPluginConfig } from "@repo/plugin-test";
 import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
+import { roleHasPermissions, UserRole } from "@repo/util-auth/access-control";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { passthrough } from "msw";
@@ -19,6 +20,7 @@ import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import type { Services } from "#database/database.ts";
+import type { Principal } from "#graphql/auth/principal.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
@@ -31,6 +33,7 @@ import type {
   ValidPluginMap,
 } from "#types/plugins.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { Permissions } from "@repo/util-auth/access-control";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type * as GraphQL from "graphql";
@@ -61,6 +64,8 @@ const fixtureInstalledPlugins: InstalledPlugin[] = [
     alwaysEnabled: true,
   },
 ];
+
+const servicePrincipal: Principal = { kind: "service" };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -340,7 +345,7 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (): ApolloServerContext => {
+      (principal: Principal = servicePrincipal): ApolloServerContext => {
         const settingsManager = new SettingsManager({
           settingsService: services.settingsService,
           sections: buildSettingsSections({
@@ -357,6 +362,7 @@ export const it = testBase
         return {
           [CoreKey]: {
             em: orm.em.fork(),
+            principal,
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,
@@ -403,10 +409,61 @@ export const it = testBase
   )
   .extend("gqlSchema", { scope: "file" }, async () => {
     const { buildSchema } = await import("@repo/core-util-graphql-schema");
+    const { authChecker } = await import("#graphql/auth/auth-checker.ts");
     const { resolvers } = await import("#graphql/resolvers/index.ts");
 
-    return buildSchema({ resolvers, pubSub });
+    return buildSchema({ resolvers, pubSub, authChecker });
   })
+  .extend("userWith", () => (permissions: Permissions): Principal => {
+    const role = UserRole.options.find((name) =>
+      roleHasPermissions(name, permissions),
+    );
+
+    assert.ok(role, `No role grants ${JSON.stringify(permissions)}`);
+
+    return { kind: "user", userId: "user-id", role };
+  })
+  .extend("userWithout", () => (permissions: Permissions): Principal => {
+    const role = UserRole.options.find(
+      (name) => !roleHasPermissions(name, permissions),
+    );
+
+    assert.ok(role, `Every role grants ${JSON.stringify(permissions)}`);
+
+    return { kind: "user", userId: "user-id", role };
+  })
+  .extend(
+    "gqlExecuteAs",
+    ({ gqlSchema, createGqlContext }) =>
+      async <TResult, TVariables extends Record<string, unknown>>(
+        principal: Principal,
+        document: TypedDocumentNode<TResult, TVariables>,
+        variables: TVariables,
+      ) => {
+        // Unlike `gqlServer`, this enforces the real auth checker.
+        // See `gqlSubscribe` for why the CJS build of `graphql` is required.
+        const { execute } = createRequire(import.meta.url)(
+          "graphql",
+        ) as typeof GraphQL;
+
+        const { data = null, errors = [] } = await execute({
+          schema: gqlSchema,
+          document,
+          variableValues: variables,
+          contextValue: createGqlContext(principal),
+        });
+
+        return {
+          // Results are built from null-prototype objects,
+          // which are cloned into plain objects for strict equality checks.
+          data: structuredClone(data) as TResult | null,
+          errors: errors.map(({ path = [], extensions }) => ({
+            path: path.join("."),
+            code: extensions["code"],
+          })),
+        };
+      },
+  )
   .extend(
     "gqlSubscribe",
     ({ gqlSchema, gqlContext }, { onCleanup }) =>

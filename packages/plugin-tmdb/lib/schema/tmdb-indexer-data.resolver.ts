@@ -4,7 +4,15 @@ import { Genre } from "@repo/util-plugin-sdk/dto/types/genre.type";
 import { ItemImage } from "@repo/util-plugin-sdk/dto/types/item-image.type";
 import { Trailer } from "@repo/util-plugin-sdk/dto/types/trailer.type";
 
-import { Arg, FieldResolver, Float, Int, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  FieldResolver,
+  Float,
+  Int,
+  Resolver,
+  Root,
+  Authorized,
+} from "type-graphql";
 
 import { movieAdapter } from "../adapters/movie.adapter.ts";
 import { showAdapter } from "../adapters/show.adapter.ts";
@@ -23,6 +31,7 @@ const adapters = {
   show: showAdapter,
 } satisfies Record<TmdbIndexerData["type"], TmdbMediaAdapter>;
 
+@Authorized()
 @Resolver((_of) => TmdbIndexerData)
 export class TmdbIndexerDataResolver implements ResolverInterface<TmdbIndexerData> {
   #getAdapter(tmdbIndexerData: TmdbIndexerData) {

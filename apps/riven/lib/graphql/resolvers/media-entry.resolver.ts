@@ -1,19 +1,6 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, ID, Mutation, Resolver } from "type-graphql";
-
-import { CoreContext } from "#graphql/decorators/core-context.ts";
-
-import type { UUID } from "node:crypto";
+import { Resolver } from "type-graphql";
 
 @Resolver(() => MediaEntry)
-export class MediaEntryResolver {
-  @Mutation(() => MediaEntry)
-  public async saveStreamUrl(
-    @CoreContext() { em }: CoreContext,
-    @Arg("id", () => ID) id: UUID,
-    @Arg("url", () => String) url: string,
-  ): Promise<MediaEntry> {
-    return em.getRepository(MediaEntry).saveStreamPermalink(id, url);
-  }
-}
+export class MediaEntryResolver {}

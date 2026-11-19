@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { NowPlayingSkeleton } from "#components/now-playing/now-playing-skeleton.tsx";
 import { NowPlaying } from "#components/now-playing/now-playing.tsx";
-import { query } from "#lib/graphql/client.ts";
+import { query } from "#lib/graphql/service-client.ts";
 import { resolveLocale } from "#lib/utils/resolve-locale.ts";
 
 import { GET_TMDB_NOW_PLAYING } from "./_queries/get-tmdb-now-playing.query.ts";
