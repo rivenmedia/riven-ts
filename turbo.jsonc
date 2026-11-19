@@ -86,6 +86,14 @@
         "!*.md"
       ]
     },
+    "codegen:gql": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema", "transit:source-files"]
+    },
+    "codegen:gql:watch": {
+      "dependsOn": ["@repo/riven#codegen:gql-schema"],
+      "cache": false,
+      "persistent": true
+    },
     "lint": {
       "dependsOn": [
         "^build",
