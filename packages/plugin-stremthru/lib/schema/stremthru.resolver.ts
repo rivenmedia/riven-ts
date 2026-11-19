@@ -1,10 +1,11 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { StremThruTorznabAPI } from "../datasource/stremthru-torznab.datasource.ts";
 import { pluginConfig } from "../stremthru-plugin.config.ts";
 
+@Authorized()
 @Resolver()
 export class StremThruResolver {
   @Query(() => Boolean)

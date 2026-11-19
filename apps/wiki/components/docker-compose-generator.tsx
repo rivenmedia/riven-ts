@@ -13,6 +13,7 @@ interface TSConfig {
   dbUser: string;
   dbPassword: string;
   dbName: string;
+  apiKey: string;
   mediaServer: MediaServer;
   // Plugin settings
   tmdbApiKey: string;
@@ -359,6 +360,14 @@ function buildTSCompose(cfg: TSConfig): {
       .join(",")}]`,
     "",
   ];
+
+  if (cfg.apiKey) {
+    envLines.push(
+      "# API key for the frontend, the Seerr webhook and the TUI",
+      `RIVEN_SETTING__apiKey="${cfg.apiKey}"`,
+      "",
+    );
+  }
 
   if (cfg.tmdbApiKey) {
     envLines.push(
@@ -730,6 +739,26 @@ function TSConfigForm({
         type="button"
       >
         Generate DB Password
+      </button>
+
+      <InputField
+        label="API Key"
+        value={config.apiKey}
+        onChange={(value) => {
+          update("apiKey", value);
+        }}
+        hint="Callers without a user account, such as the Seerr webhook, send this key"
+        mono
+      />
+
+      <button
+        onClick={() => {
+          update("apiKey", generateSecret(64));
+        }}
+        className="rounded-md bg-fd-muted px-3 py-1.5 text-xs font-medium transition-colors hover:bg-fd-muted/80"
+        type="button"
+      >
+        Generate API Key
       </button>
 
       <SelectField
@@ -1162,6 +1191,7 @@ export default function DockerComposeGenerator() {
     dbUser: "riven",
     dbPassword: "",
     dbName: "riven",
+    apiKey: "",
     mediaServer: "none",
     tmdbApiKey: "",
     debridProvider: "realdebrid",

@@ -2,8 +2,12 @@
 
 import { json } from "@repo/util-plugin-sdk/validation";
 
+import dedent from "dedent";
 import { readFileSync } from "node:fs";
+import { isMainThread } from "node:worker_threads";
 import z from "zod";
+
+import { resolveApiKey } from "#utilities/api-key.ts";
 
 export const RivenSettings = z.object({
   databaseUrl: z
@@ -86,6 +90,19 @@ export const RivenSettings = z.object({
     .int()
     .default(3000)
     .describe("The API server port.")
+    .meta({ "wiki.section": "server" }),
+  apiKey: z
+    .string()
+    .min(32)
+    .optional()
+    .describe(
+      dedent`
+        The API key for callers without a user account, such as the Seerr webhook and the TUI. They send it as \`Authorization: Bearer <key>\`. Must be at least 32 characters. Generate one with \`openssl rand -hex 32\`.
+
+        **Note**: If not set, a random key is generated on every start. Riven's own workers use it, but external callers cannot authenticate until a key is set.
+      `,
+    )
+    .transform((val) => resolveApiKey(val, isMainThread))
     .meta({ "wiki.section": "server" }),
   shutdownTimeoutSeconds: json(z.int().positive())
     .default(30)

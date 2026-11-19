@@ -1,8 +1,10 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 
 import {
   Arg,
   Args,
+  Authorized,
   Ctx,
   ID,
   Mutation,
@@ -13,6 +15,7 @@ import {
 } from "type-graphql";
 
 import { ExternalIdsArgs } from "#graphql/args/external-ids.args.ts";
+import { mediaItemActionPermissions } from "#graphql/auth/media-item-action-permissions.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 import { getExternalIdTopics } from "#graphql/pubsub.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
@@ -24,6 +27,7 @@ import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context
 import type { UUID } from "node:crypto";
 import type { SubscribeResolverData } from "type-graphql";
 
+@Authorized()
 @Resolver(() => ItemRequest)
 export class ItemRequestResolver {
   @Subscription(() => ID, {
@@ -55,6 +59,7 @@ export class ItemRequestResolver {
     return itemRequestService.getItemRequestByExternalIds(externalIds);
   }
 
+  @RequirePermissions(mediaItemActionPermissions.requestSingle)
   @Mutation(() => Boolean)
   public requestItem(
     @Arg("input", () => RequestItemInput)
@@ -77,6 +82,7 @@ export class ItemRequestResolver {
     return true;
   }
 
+  @RequirePermissions(mediaItemActionPermissions.delete)
   @Mutation(() => Boolean)
   public async removeItemRequest(
     @Arg("itemRequestId", () => ID) itemRequestId: UUID,

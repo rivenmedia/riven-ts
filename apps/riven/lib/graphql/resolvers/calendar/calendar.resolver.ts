@@ -1,9 +1,10 @@
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/index";
 
-import { Arg, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, Query, Resolver } from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 
+@Authorized()
 @Resolver()
 export class CalendarResolver {
   @Query(() => [MediaItemUnion])

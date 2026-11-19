@@ -4,6 +4,7 @@ import { IsOptional, IsUrl } from "class-validator";
 import path from "node:path";
 import { Field, ObjectType } from "type-graphql";
 
+import { RequirePermissions } from "../../../decorators/require-permissions.ts";
 import { MediaEntryRepository } from "../../repositories/media-entry.repository.ts";
 import { MediaMetadata } from "../../types/media-metadata.type.ts";
 import { FileSystemEntry } from "./filesystem-entry.entity.ts";
@@ -30,12 +31,14 @@ export class MediaEntry extends FileSystemEntry {
   // TODO: separate entity?
   // ------------------------
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Field(() => String, { nullable: true })
   @Property()
   @IsUrl()
   @IsOptional()
   public downloadUrl?: string;
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Field(() => String, { nullable: true })
   @Property()
   @IsUrl()

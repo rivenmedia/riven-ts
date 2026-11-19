@@ -1,3 +1,4 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import { FileSystemEntryUnion } from "@repo/util-plugin-sdk/dto/unions/filesystem-entry.union";
 
 import { Arg, Query, Resolver } from "type-graphql";
@@ -6,6 +7,7 @@ import { CoreContext } from "#graphql/decorators/core-context.ts";
 
 import { VfsEntryStat } from "./types/vfs-entry-stat.type.ts";
 
+@RequirePermissions({ instance: ["manage-settings"] })
 @Resolver()
 export class VfsResolver {
   @Query(() => VfsEntryStat)

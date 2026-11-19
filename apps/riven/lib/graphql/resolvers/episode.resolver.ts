@@ -1,9 +1,18 @@
 import { Episode, Season } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, FieldResolver, Int, Query, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  Authorized,
+  FieldResolver,
+  Int,
+  Query,
+  Resolver,
+  Root,
+} from "type-graphql";
 
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 
+@Authorized()
 @Resolver(() => Episode)
 export class EpisodeResolver {
   @Query(() => Episode, {

@@ -1,5 +1,8 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
+
 import {
   Arg,
+  Authorized,
   FieldResolver,
   ID,
   Mutation,
@@ -21,6 +24,7 @@ const toResult = (issues: SettingsIssue[]): SettingsMutationResult => ({
   issues,
 });
 
+@Authorized()
 @Resolver(() => RankingProfile)
 export class RankingProfileResolver {
   @Query(() => [RankingProfile])
@@ -52,6 +56,7 @@ export class RankingProfileResolver {
     return rankingManager.getSchema();
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => SettingsMutationResult)
   public async createRankingProfile(
     @CoreContext() { rankingManager }: CoreContext,
@@ -60,6 +65,7 @@ export class RankingProfileResolver {
     return toResult(await rankingManager.create(values));
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => SettingsMutationResult)
   public async updateRankingProfile(
     @CoreContext() { rankingManager }: CoreContext,
@@ -69,6 +75,7 @@ export class RankingProfileResolver {
     return toResult(await rankingManager.update(id, values));
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => SettingsMutationResult)
   public async deleteRankingProfile(
     @CoreContext() { rankingManager }: CoreContext,
@@ -77,6 +84,7 @@ export class RankingProfileResolver {
     return toResult(await rankingManager.delete(id));
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => SettingsMutationResult)
   public async duplicateRankingProfile(
     @CoreContext() { rankingManager }: CoreContext,
@@ -85,6 +93,7 @@ export class RankingProfileResolver {
     return toResult(await rankingManager.duplicate(id));
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @Mutation(() => SettingsMutationResult)
   public async selectRankingProfile(
     @CoreContext() { rankingManager }: CoreContext,
