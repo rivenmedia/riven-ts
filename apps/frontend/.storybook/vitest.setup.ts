@@ -1,6 +1,6 @@
 import { beforeEach, vi } from "vitest";
 
-import { holdAnimationPause } from "./test-utils/visual-testing.ts";
+import { stopStorybookFinishingAnimations } from "./test-utils/visual-testing.ts";
 
 export class MemoryStorage implements Storage {
   readonly #items = new Map<string, string>();
@@ -41,5 +41,5 @@ beforeEach(() => {
   sessionStorage.clear();
 });
 
-// Animations play out before each snapshot, rather than being paused wherever the story finished
-holdAnimationPause();
+// Animations are paused on their last frame for each snapshot, rather than finished by Storybook
+stopStorybookFinishingAnimations();

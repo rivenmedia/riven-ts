@@ -242,53 +242,48 @@ const waitForNextFrame = () =>
     });
   });
 
-/** The declaration Storybook uses to pause animations on their last frame once a story finishes */
-const PAUSE_DECLARATION = "animation-play-state: paused !important";
+/**
+ * Pauses animations on their last frame, and stops transitions so layout changes (e.g. resizing the viewport) apply at once.
+ *
+ * Reversed and paused at their start, animations show their last keyframe, even those without `animation-fill-mode`.
+ */
+const PAUSE_STYLE = `*, *::before, *::after {
+  animation-delay: 0s !important;
+  animation-direction: reverse !important;
+  animation-play-state: paused !important;
+  transition: none !important;
+}`;
 
-/** The declaration Storybook briefly applies first, so the paused animations restart from their first frame */
-const RESTART_DECLARATION = "animation: none !important";
+/** Identifies the style {@link releaseAnimationPause} applies until the next story starts */
+const PAUSE_STYLE_ID = "auto-snapshot-animation-pause";
 
-/** Storybook's pause styles, held back until {@link releaseAnimationPause} */
-const heldPauseStyles = new Set<HTMLStyleElement>();
-
-const findAnimationPauseStyles = () =>
-  [...document.head.querySelectorAll("style:not([id])")].filter((style) =>
-    style.textContent.includes(PAUSE_DECLARATION),
-  );
+const snapshotState = {
+  /** Whether an automatic snapshot is being prepared, from {@link prepareAutoSnapshot} until the next story starts */
+  isPreparing: false,
+};
 
 /**
- * Holds back the styles Storybook adds to pause animations once a story finishes, so they can play out before the snapshot.
+ * Stops Storybook from finishing animations and transitions that start whilst a snapshot is prepared.
  *
- * Storybook pauses them on their last frame as the story's play function ends, which doesn't render the same as finishing:
- * - An exit animation never ends, so its element stays mounted, e.g. a closed dialog never returns focus to its trigger
- * - Transitions are cut short, so e.g. an element that was moving can be rasterised at a different subpixel offset
+ * Once a story's play function ends, Storybook finishes its running animations, then listens for `animationstart` and
+ * `transitionrun` on the window to finish any that start later. Finishing isn't the same as reaching the last frame:
+ * - An animation without `animation-fill-mode` reverts to its unanimated style, e.g. a progress bar empties
+ * - The animations {@link releaseAnimationPause} pauses on their last frame would be finished as they restart
  *
- * As the play function can end at any point in an animation, snapshots would vary between runs.
- * Storybook adds the styles synchronously and immediately applies them, so they must be disabled as they're added.
+ * The events are stopped as they're captured on the window, before reaching Storybook's listener on the window.
  */
-export const holdAnimationPause = () => {
-  const { head } = document;
-  const appendChild = head.appendChild.bind(head);
-
-  head.appendChild = <T extends Node>(node: T) => {
-    const appended = appendChild(node);
-
-    if (
-      node instanceof HTMLStyleElement &&
-      node.sheet &&
-      [PAUSE_DECLARATION, RESTART_DECLARATION].some((declaration) =>
-        node.textContent.includes(declaration),
-      )
-    ) {
-      node.sheet.disabled = true;
-
-      if (node.textContent.includes(PAUSE_DECLARATION)) {
-        heldPauseStyles.add(node);
-      }
-    }
-
-    return appended;
-  };
+export const stopStorybookFinishingAnimations = () => {
+  for (const type of ["animationstart", "transitionrun"]) {
+    globalThis.addEventListener(
+      type,
+      (event) => {
+        if (snapshotState.isPreparing) {
+          event.stopPropagation();
+        }
+      },
+      { capture: true },
+    );
+  }
 };
 
 /**
@@ -340,26 +335,25 @@ const finishRunningAnimations = async ({
 };
 
 /**
- * Applies Storybook's held back pause styles, so animations that are infinite (e.g. spinners) or too long to wait for
- * are captured on their last frame, as Storybook would have.
+ * Pauses animations that are infinite (e.g. spinners) or too long to wait for on their last frame, and stops transitions.
  */
 const releaseAnimationPause = () => {
   const restartStyle = document.createElement("style");
 
-  restartStyle.textContent = `*, *::before, *::after { ${RESTART_DECLARATION}; }`;
+  restartStyle.textContent =
+    "*, *::before, *::after { animation: none !important; }";
 
-  // Restarts the animations, so they're paused on the same frame whatever point they had reached
+  // Restarts the animations, so they're paused on the same frame whatever point they had reached,
+  // including those that already finished (e.g. the ones Storybook finished as the play function ended)
   document.head.append(restartStyle);
   document.body.getBoundingClientRect();
   restartStyle.remove();
 
-  for (const style of heldPauseStyles) {
-    if (style.sheet) {
-      style.sheet.disabled = false;
-    }
-  }
+  const pauseStyle = document.createElement("style");
 
-  heldPauseStyles.clear();
+  pauseStyle.id = PAUSE_STYLE_ID;
+  pauseStyle.textContent = PAUSE_STYLE;
+  document.head.append(pauseStyle);
 };
 
 /**
@@ -407,6 +401,8 @@ export const prepareAutoSnapshot: Extract<
   if (enabled === false) {
     return false;
   }
+
+  snapshotState.isPreparing = true;
 
   if (fullPage === false) {
     clipBodyToViewport();
@@ -456,20 +452,6 @@ export const prepareAutoSnapshot: Extract<
   return true;
 };
 
-/**
- * Removes the style Storybook adds to pause animations whilst `afterEach` hooks run.
- *
- * Storybook only removes it once the hooks succeed, so a failed snapshot leaves animations paused for the test's retries.
- * Elements that unmount once their exit animation ends (e.g. a closing accordion item) then never unmount.
- */
-const removeLeakedAnimationPause = () => {
-  for (const style of findAnimationPauseStyles()) {
-    style.remove();
-  }
-
-  heldPauseStyles.clear();
-};
-
 /** Undoes any page changes made by {@link prepareAutoSnapshot}, as stories in the same file share a document */
 export const resetAutoSnapshot = () => {
   document.body.style.removeProperty("height");
@@ -478,5 +460,7 @@ export const resetAutoSnapshot = () => {
   // Requests from the previous story may never finish, e.g. if it unmounted mid-request
   pendingRequestIds.clear();
 
-  removeLeakedAnimationPause();
+  // Otherwise elements that unmount once their exit animation ends (e.g. a closing accordion item) would never unmount
+  document.head.querySelector(`#${PAUSE_STYLE_ID}`)?.remove();
+  snapshotState.isPreparing = false;
 };
