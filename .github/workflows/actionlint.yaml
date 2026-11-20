@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   actionlint:
+    name: Actionlint
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
