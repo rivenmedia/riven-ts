@@ -1,8 +1,6 @@
 name: Verify
 
-description: |
-  This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
-
+# This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
 run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 
