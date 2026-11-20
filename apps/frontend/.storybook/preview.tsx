@@ -91,13 +91,8 @@ const locales = [
 export type Locale = (typeof locales)[number]["value"];
 
 declare module "storybook/internal/csf" {
-  interface StoryContext {
-    parameters: {
-      i18n: typeof i18n;
-    };
-    globals: {
-      locale: Locale;
-    };
+  interface Parameters {
+    i18n?: typeof i18n;
   }
 
   interface Globals {
