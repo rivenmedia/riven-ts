@@ -44,10 +44,9 @@ After `await next()`, the result contains the action outcome. Inspect it for log
 ## Structured Logging
 
 ```ts
-import { logger } from "@/lib/logger"; // pino, winston, etc.
-
 import { createSafeActionClient } from "next-safe-action";
 import { z } from "zod";
+import { logger } from "@/lib/logger"; // pino, winston, etc.
 
 export const actionClient = createSafeActionClient({
   defineMetadataSchema: () =>

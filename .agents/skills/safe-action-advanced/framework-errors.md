@@ -13,12 +13,11 @@ Next.js uses thrown errors for navigation: `redirect()`, `notFound()`, `forbidde
 ```ts
 "use server";
 
-import { authActionClient } from "@/lib/safe-action";
-
 import { redirect } from "next/navigation";
 import { notFound } from "next/navigation";
 import { forbidden, unauthorized } from "next/navigation";
 import { z } from "zod";
+import { authActionClient } from "@/lib/safe-action";
 
 // Redirect after creation
 export const createPost = authActionClient

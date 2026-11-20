@@ -28,7 +28,8 @@
     "codegen:gql": {
       "outputs": [
         "./app/_types/__generated__/graphql.ts",
-        "./app/**/*.typegen.ts"
+        "./app/**/*.typegen.ts",
+        "./components/**/*.typegen.ts"
       ]
     },
     "msw:init": {

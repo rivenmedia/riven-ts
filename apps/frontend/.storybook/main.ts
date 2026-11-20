@@ -19,9 +19,9 @@ export default defineMain({
   staticDirs: ["../public"],
   features: {
     componentsManifest: true,
-    experimentalReview: true,
     experimentalCodeExamples: true,
     experimentalTestSyntax: true,
     experimentalReactComponentMeta: true,
   },
+  storySorts: [{ method: "alphabetical" }],
 });
