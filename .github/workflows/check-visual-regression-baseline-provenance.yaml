@@ -1,9 +1,7 @@
 name: Check visual regression baseline provenance
 
-description: |
-  Asserts that all visual regression baselines changed in a pull request
-  were modified by the update-visual-regression-baselines deployment
-
+# Asserts that all visual regression baselines changed in a pull request
+# were modified by the update-visual-regression-baselines deployment
 on:
   # `pull_request_target` runs from the base branch,
   # so a malicious pull request cannot bypass the checks
@@ -59,7 +57,7 @@ jobs:
           git init -q
           git fetch -q --filter=blob:none --no-tags "https://github.com/$GITHUB_REPOSITORY" "$BASE_SHA" "$HEAD_SHA"
 
-          echo "MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")" >> $GITHUB_ENV
+          echo "MERGE_BASE=$(git merge-base "$BASE_SHA" "$HEAD_SHA")" >> "$GITHUB_ENV"
 
       - name: Check baselines were changed by the deployment
         id: provenance
@@ -133,7 +131,7 @@ jobs:
           echo "Baselines changed outside of the deployment (${#UNATTESTED[@]}):"
           printf '  %s\n' "${UNATTESTED[@]}"
 
-          echo "unattested-baselines=$(printf '%s\n' "${UNATTESTED[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> $GITHUB_OUTPUT
+          echo "unattested-baselines=$(printf '%s\n' "${UNATTESTED[@]}" | jq -Rnc '[inputs | select(length > 0)]')" >> "$GITHUB_OUTPUT"
 
           if (( ${#UNATTESTED[@]} > 0 )) && [[ "$REPORT_ONLY" != "true" ]]; then
             echo "::error::${#UNATTESTED[@]} baselines were changed outside of the update-visual-regression-baselines deployment. Revert them, and the deployment will commit the baselines once a maintainer approves it."
