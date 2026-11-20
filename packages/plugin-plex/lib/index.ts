@@ -29,6 +29,70 @@ function getExternalIds(item: Pick<WatchlistItem, "Guid" | "type">) {
   return request;
 }
 
+async function updateSections(
+  plexAPI: PlexAPI,
+  sectionPaths: string[],
+  title: string,
+) {
+  const results = await Promise.allSettled(
+    sectionPaths.map(async (sectionPath) => plexAPI.updateSection(sectionPath)),
+  );
+
+  const errors = results
+    .filter(
+      (result): result is PromiseRejectedResult => result.status === "rejected",
+    )
+    .map((result) =>
+      result.reason instanceof Error
+        ? result.reason
+        : new Error(String(result.reason)),
+    );
+
+  if (errors.length > 0) {
+    throw new Error(
+      `Failed to update library sections for ${title}. ${errors.map((error) => error.message).join(", ")}`,
+      { cause: errors },
+    );
+  }
+}
+
+/**
+ * Deletes the Plex items with the given title that are stored entirely within the removed path.
+ *
+ * @returns The number of deleted items
+ */
+async function deleteItemsInPath(
+  plexAPI: PlexAPI,
+  removedPath: string,
+  fullRemovedPath: string,
+  title: string,
+) {
+  const sectionKey = await plexAPI.getLibrarySectionKey(removedPath);
+  const ratingKeys = await plexAPI.getItemKeysByTitle(sectionKey, title);
+
+  let deletedItemCount = 0;
+
+  for (const ratingKey of ratingKeys) {
+    const locations = await plexAPI.getItemLocations(ratingKey);
+
+    const isStoredInRemovedPath =
+      locations.length > 0 &&
+      locations.every(
+        (location) =>
+          location === fullRemovedPath ||
+          location.startsWith(`${fullRemovedPath}/`),
+      );
+
+    if (isStoredInRemovedPath) {
+      await plexAPI.deleteItem(ratingKey);
+
+      deletedItemCount += 1;
+    }
+  }
+
+  return deletedItemCount;
+}
+
 export const plugin: RivenPlugin = {
   name: pluginConfig.name,
   version: packageJson.version,
@@ -59,32 +123,48 @@ export const plugin: RivenPlugin = {
 
       const sectionPaths = [...sectionPathsSet];
 
-      const results = await Promise.allSettled(
-        sectionPaths.map(async (sectionPath) =>
-          plexAPI.updateSection(sectionPath),
-        ),
-      );
-
-      const errors = results
-        .filter(
-          (result): result is PromiseRejectedResult =>
-            result.status === "rejected",
-        )
-        .map((result) =>
-          result.reason instanceof Error
-            ? result.reason
-            : new Error(String(result.reason)),
-        );
-
-      if (errors.length > 0) {
-        throw new Error(
-          `Failed to update library sections for ${event.item.fullTitle}. ${errors.map((error) => error.message).join(", ")}`,
-          { cause: errors },
-        );
-      }
+      await updateSections(plexAPI, sectionPaths, event.item.fullTitle);
 
       logger.info(
-        `Updated ${results.length.toString()} paths for ${event.item.fullTitle}`,
+        `Updated ${sectionPaths.length.toString()} paths for ${event.item.fullTitle}`,
+      );
+    },
+    "riven.media-item.removed": async ({
+      dataSources,
+      event,
+      logger,
+      settings,
+    }) => {
+      const plexAPI = dataSources.get(PlexAPI);
+      const { plexLibraryPath } = settings.get(PlexSettings);
+      const unmatchedPaths: string[] = [];
+
+      for (const removedPath of event.paths) {
+        try {
+          const deletedItemCount = await deleteItemsInPath(
+            plexAPI,
+            removedPath,
+            path.join(plexLibraryPath, removedPath),
+            event.title,
+          );
+
+          if (deletedItemCount === 0) {
+            unmatchedPaths.push(removedPath);
+          }
+        } catch (error) {
+          logger.warn(
+            `Unable to delete ${event.title} from Plex, refreshing ${removedPath} instead`,
+            { err: error },
+          );
+
+          unmatchedPaths.push(removedPath);
+        }
+      }
+
+      await updateSections(plexAPI, unmatchedPaths, event.title);
+
+      logger.info(
+        `Removed ${event.paths.length.toString()} paths for ${event.title}`,
       );
     },
     "riven.content-service.requested": async ({

@@ -2,6 +2,8 @@ import { BaseDataSource } from "@repo/util-plugin-sdk";
 
 import path from "node:path";
 
+import { ItemsResponse } from "../schemas/items-response.schema.ts";
+
 import type { JellyfinSettings } from "../jellyfin-settings.schema.ts";
 import type { AugmentedRequest } from "@apollo/datasource-rest";
 
@@ -34,6 +36,30 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
     } catch (error) {
       throw new JellyfinAPIError(
         `Failed to refresh library section for paths: ${paths.join(", ")}. Error: ${(error as Error).message}`,
+      );
+    }
+  }
+
+  public async getItems() {
+    const response = await this.get<unknown>("Items", {
+      params: {
+        Recursive: "true",
+        IncludeItemTypes: "Movie,Series",
+        Fields: "Path",
+        EnableImages: "false",
+        EnableUserData: "false",
+      },
+    });
+
+    return ItemsResponse.parse(response).Items;
+  }
+
+  public async deleteItem(itemId: string) {
+    try {
+      await this.delete(`Items/${itemId}`);
+    } catch (error) {
+      throw new JellyfinAPIError(
+        `Failed to delete item ${itemId}. Error: ${(error as Error).message}`,
       );
     }
   }
