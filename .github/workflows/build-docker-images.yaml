@@ -1,7 +1,6 @@
 name: Build Docker Images
 
-description: Build Docker images for the Riven backend and frontend apps and optionally push them to the registry.
-
+# Build Docker images for the Riven backend and frontend apps and optionally push them to the registry.
 on:
   push:
     branches:
@@ -55,7 +54,7 @@ jobs:
         id: platform
         env:
           PLATFORM: ${{ matrix.target.platform }}
-        run: echo "suffix=${PLATFORM//\//-}" >> $GITHUB_OUTPUT
+        run: echo "suffix=${PLATFORM//\//-}" >> "$GITHUB_OUTPUT"
 
       - name: Checkout code
         uses: actions/checkout@v6
@@ -172,9 +171,16 @@ jobs:
         env:
           IMAGE: ${{ matrix.app.image }}
         run: |
+          mapfile -t TAGS < <(jq -r '.tags[] | "-t", .' <<<"$DOCKER_METADATA_OUTPUT_JSON")
+
+          SOURCES=()
+          for DIGEST in *; do
+            SOURCES+=("${IMAGE}@sha256:${DIGEST}")
+          done
+
           docker buildx imagetools create \
-            $(jq -cr '.tags | map("-t " + .) | join(" ")' <<<"$DOCKER_METADATA_OUTPUT_JSON") \
-            $(printf "${IMAGE}@sha256:%s " *)
+            "${TAGS[@]}" \
+            "${SOURCES[@]}"
 
       - name: Inspect image
         env:
