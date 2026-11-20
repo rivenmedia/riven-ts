@@ -3,18 +3,18 @@
   "extends": ["//"],
   "tags": ["group:core", "type:util"],
   "tasks": {
+    // These tasks read files written by the tasks they depend on. Turborepo hashes
+    // inputs before any task runs, so caching them would restore a stale report.
     "collect-json-reports": {
       "cache": false
     },
     "merge-json-reports": {
       "dependsOn": ["collect-json-reports"],
-      "inputs": ["coverage/raw/**"],
-      "outputs": ["coverage/merged/**"]
+      "cache": false
     },
     "report": {
       "dependsOn": ["merge-json-reports"],
-      "inputs": ["coverage/merged/**"],
-      "outputs": ["coverage/report/**", "coverage/summary/**"]
+      "cache": false
     }
   }
 }

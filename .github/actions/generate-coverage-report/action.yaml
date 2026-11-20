@@ -5,15 +5,40 @@ description: Generates a coverage report from a test run
 runs:
   using: composite
   steps:
+    # The PR checkout is a merge commit whose first parent is the base commit the tests ran against.
+    # `github.event.pull_request.base.sha` can lag behind it, so it isn't used here.
+    - name: Get baseline commit
+      id: get-baseline-commit
+      shell: bash
+      run: |
+        BASELINE_SHA=$(git cat-file -p HEAD | awk '/^parent / { print $2; exit }')
+
+        if [ -z "$BASELINE_SHA" ]; then
+          echo "::error::Unable to determine the baseline commit"
+          exit 1
+        fi
+
+        echo "sha=$BASELINE_SHA" >> "$GITHUB_OUTPUT"
+
+    # No fallback keys: comparing against any other commit's baseline reports changes the PR didn't make
     - name: Get coverage baseline
       id: get-coverage-baseline
       uses: actions/cache/restore@v5
       with:
-        key: coverage-baseline-${{ github.event.pull_request.base.sha }}
-        restore-keys: |
-          coverage-baseline-${{ github.event.pull_request.base.sha }}-
-          coverage-baseline-
+        key: coverage-baseline-${{ steps.get-baseline-commit.outputs.sha }}
         path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
+
+    - name: Warn about missing coverage baseline
+      if: steps.get-coverage-baseline.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        echo "::warning::No coverage baseline found for ${{ steps.get-baseline-commit.outputs.sha }}; the coverage report won't include a comparison."
+
+    # Only affected packages were tested in this job. Restore every package's coverage from the
+    # Turborepo cache so the report covers the same packages as the baseline.
+    - name: Restore coverage for all packages
+      shell: bash
+      run: pnpm turbo test --continue --concurrency "100%" --output-logs=errors-only
 
     - name: Merge reports
       shell: bash

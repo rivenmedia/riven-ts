@@ -25,7 +25,8 @@ try {
   // Define the destination directory (you can change this as needed)
   const destinationDir = path.join(process.cwd(), "coverage/raw");
 
-  // Create the destination directory if it doesn't exist
+  // Start from an empty destination so reports from previous runs aren't merged in
+  await fs.rm(destinationDir, { recursive: true, force: true });
   await fs.mkdir(destinationDir, { recursive: true });
 
   // Arrays to collect all directories and directories with coverage.json
