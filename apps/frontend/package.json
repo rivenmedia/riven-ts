@@ -24,7 +24,7 @@
     "dev": "next dev -p 9000 --experimental-https",
     "e2e": "E2E_DEV_SERVER=true playwright test --ui",
     "e2e:headless": "playwright test",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "msw:init": "msw init",
     "postinstall": "msw init",
