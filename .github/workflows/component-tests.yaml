@@ -1,8 +1,6 @@
 name: Component Tests
 
-description: |
-  This workflow runs component tests on pull requests.
-
+# This workflow runs component tests on pull requests.
 run-name: "Component Tests: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 

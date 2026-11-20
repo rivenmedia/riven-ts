@@ -1,8 +1,6 @@
 name: Inspect Visual Regression report from fork
 
-description: |
-  Handles visual regression checks for PRs from forked repos
-
+# Handles visual regression checks for PRs from forked repos
 on:
   workflow_run:
     workflows:
@@ -36,10 +34,10 @@ jobs:
           ARTIFACTS=$(gh api "repos/$GITHUB_REPOSITORY/actions/runs/$RUN_ID/artifacts" --paginate --jq '.artifacts[].name')
 
           if grep -qx 'pr-number.txt' <<< "$ARTIFACTS"; then
-            echo "has-pr-number=true" >> $GITHUB_OUTPUT
+            echo "has-pr-number=true" >> "$GITHUB_OUTPUT"
           else
             echo "::notice::No PR number was uploaded by run $RUN_ID"
-            echo "has-pr-number=false" >> $GITHUB_OUTPUT
+            echo "has-pr-number=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Download PR number
@@ -59,7 +57,7 @@ jobs:
 
           [[ "$PR_NUMBER" =~ ^[0-9]+$ ]] || { echo "Invalid PR number: $PR_NUMBER"; exit 1; }
 
-          echo "pr-number=$PR_NUMBER" >> $GITHUB_OUTPUT
+          echo "pr-number=$PR_NUMBER" >> "$GITHUB_OUTPUT"
 
       # The PR number is uploaded by the PR's own workflow run, so it is only trusted if that PR's head is the tested commit
       - name: Check PR state
@@ -76,12 +74,12 @@ jobs:
 
           if [[ "$PR_STATE" != "OPEN" ]]; then
             echo "::notice::PR #$PR_NUMBER is not open"
-            echo "should-inspect=false" >> $GITHUB_OUTPUT
+            echo "should-inspect=false" >> "$GITHUB_OUTPUT"
           elif [[ "$PR_HEAD_SHA" != "$HEAD_SHA" ]]; then
             echo "::notice::PR #$PR_NUMBER head ($PR_HEAD_SHA) does not match the tested commit ($HEAD_SHA)"
-            echo "should-inspect=false" >> $GITHUB_OUTPUT
+            echo "should-inspect=false" >> "$GITHUB_OUTPUT"
           else
-            echo "should-inspect=true" >> $GITHUB_OUTPUT
+            echo "should-inspect=true" >> "$GITHUB_OUTPUT"
           fi
 
   check-for-visual-regressions:
