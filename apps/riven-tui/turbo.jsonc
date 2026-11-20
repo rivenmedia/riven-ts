@@ -7,8 +7,8 @@
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
-        "graphql.config.ts",
-        "$TURBO_ROOT$/apps/riven/schema.graphql"
+        "!lib/**/*.typegen.ts",
+        "graphql.config.ts"
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]
     },
