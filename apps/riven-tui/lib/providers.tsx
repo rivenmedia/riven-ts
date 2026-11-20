@@ -11,7 +11,11 @@ import type { PropsWithChildren } from "react";
 
 export function Providers({ children }: PropsWithChildren) {
   const client = useMemo(
-    () => createGraphqlClient({ uri: settings.RIVEN_TUI_SETTING__graphqlUrl }),
+    () =>
+      createGraphqlClient({
+        uri: settings.RIVEN_TUI_SETTING__graphqlUrl,
+        apiKey: settings.RIVEN_TUI_SETTING__apiKey,
+      }),
     [],
   );
 

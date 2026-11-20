@@ -1,7 +1,15 @@
 import { Season, Show } from "@repo/util-plugin-sdk/dto/entities";
 
-import { Arg, FieldResolver, Int, Resolver, Root } from "type-graphql";
+import {
+  Arg,
+  FieldResolver,
+  Int,
+  Resolver,
+  Root,
+  Authorized,
+} from "type-graphql";
 
+@Authorized()
 @Resolver(() => Show)
 export class ShowResolver {
   @FieldResolver(() => [Season])

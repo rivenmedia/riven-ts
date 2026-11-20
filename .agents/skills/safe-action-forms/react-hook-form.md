@@ -11,8 +11,8 @@ npm install @next-safe-action/adapter-react-hook-form react-hook-form @hookform/
 Composes `useAction` + `useForm` with automatic server validation error mapping.
 
 ```tsx
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
 ```
 
 ### Signature
@@ -64,11 +64,10 @@ const { form, action, handleSubmitWithAction, resetFormAndAction } = useHookForm
 ```tsx
 "use client";
 
-import { createUser } from "@/app/actions";
-
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useHookFormAction } from "@next-safe-action/adapter-react-hook-form/hooks";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { createUser } from "@/app/actions";
 
 const schema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -130,7 +129,7 @@ export function CreateUserForm() {
 
 When the action returns `validationErrors`, the adapter maps them to react-hook-form's `FieldErrors` format:
 
-```text
+```
 Server: { email: { _errors: ["Email taken", "Try another"] } }
    ↓ mapToHookFormErrors({ joinBy: " " })
 RHF:    { email: { type: "validate", message: "Email taken Try another" } }

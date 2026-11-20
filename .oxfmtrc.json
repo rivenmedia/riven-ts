@@ -21,6 +21,14 @@
       "options": {
         "trailingComma": "none"
       }
+    },
+    {
+      // The .agents directory contains markdown files not necessarily written by us,
+      // so we disable import sorting to avoid potentially changing their behaviour.
+      "files": [".agents/**/*.md"],
+      "options": {
+        "sortImports": false
+      }
     }
   ],
   "printWidth": 80,

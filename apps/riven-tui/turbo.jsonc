@@ -4,11 +4,6 @@
   "tags": ["type:app"],
   "tasks": {
     "codegen:gql": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "@repo/riven#codegen:gql-schema",
-        "transit:source-files"
-      ],
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
@@ -28,11 +23,17 @@
     },
     "dev": {
       "dependsOn": ["$TURBO_EXTENDS$", "codegen:gql"],
-      "passThroughEnv": ["RIVEN_TUI_SETTING__graphqlUrl"]
+      "passThroughEnv": [
+        "RIVEN_TUI_SETTING__graphqlUrl",
+        "RIVEN_TUI_SETTING__apiKey"
+      ]
     },
     "start": {
       "dependsOn": ["$TURBO_EXTENDS$", "build"],
-      "passThroughEnv": ["RIVEN_TUI_SETTING__graphqlUrl"]
+      "passThroughEnv": [
+        "RIVEN_TUI_SETTING__graphqlUrl",
+        "RIVEN_TUI_SETTING__apiKey"
+      ]
     }
   }
 }

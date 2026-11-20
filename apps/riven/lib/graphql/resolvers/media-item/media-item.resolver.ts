@@ -1,3 +1,4 @@
+import { RequirePermissions } from "@repo/util-plugin-sdk";
 import {
   Episode,
   ItemRequest,
@@ -16,11 +17,13 @@ import { MediaItemType } from "@repo/util-plugin-sdk/dto/enums/media-item-type.e
 import { MediaItemUnion } from "@repo/util-plugin-sdk/dto/unions/media-item.union";
 
 import chalk from "chalk";
+import { camelCase } from "es-toolkit";
 import { DateTime } from "luxon";
 import assert from "node:assert";
 import {
   Arg,
   Args,
+  Authorized,
   Ctx,
   FieldResolver,
   ID,
@@ -33,6 +36,8 @@ import {
 } from "type-graphql";
 
 import { PaginationArgs } from "#graphql/args/pagination.args.ts";
+import { mediaItemActionPermissions } from "#graphql/auth/media-item-action-permissions.ts";
+import { principalHasPermissions } from "#graphql/auth/principal-has-permissions.ts";
 import { CoreContext } from "#graphql/decorators/core-context.ts";
 import { createCursorType } from "#graphql/types/create-cursor-type.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
@@ -40,6 +45,7 @@ import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { UUID } from "node:crypto";
+import type { CamelCase } from "type-fest";
 import type { SubscribeResolverData } from "type-graphql";
 
 const MediaItemCursor = createCursorType<MediaItem>(
@@ -47,6 +53,7 @@ const MediaItemCursor = createCursorType<MediaItem>(
   MediaItemUnion,
 );
 
+@Authorized()
 @Resolver(() => MediaItem)
 export class MediaItemResolver {
   @Subscription(() => MediaItemUnion, {
@@ -126,6 +133,7 @@ export class MediaItemResolver {
     return [];
   }
 
+  @RequirePermissions(mediaItemActionPermissions.reset)
   @Mutation(() => [MediaItemUnion])
   public async resetMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -156,6 +164,7 @@ export class MediaItemResolver {
     return [...resetItems];
   }
 
+  @RequirePermissions(mediaItemActionPermissions.retry)
   @Mutation(() => MediaItemUnion)
   public retryMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -166,6 +175,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions(mediaItemActionPermissions.pause)
   @Mutation(() => MediaItemUnion)
   public pauseMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -176,6 +186,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions(mediaItemActionPermissions.resume)
   @Mutation(() => MediaItemUnion)
   public resumeMediaItem(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -186,6 +197,7 @@ export class MediaItemResolver {
     return null;
   }
 
+  @RequirePermissions(mediaItemActionPermissions.blacklistActiveStream)
   @Mutation(() => Boolean)
   public async blacklistActiveStream(
     @Arg("mediaItemId", () => ID) mediaItemId: UUID,
@@ -260,6 +272,7 @@ export class MediaItemResolver {
     );
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => Stream)
   public async streams(@Root() mediaItem: MediaItem) {
     return mediaItem.streams.loadItems();
@@ -270,11 +283,13 @@ export class MediaItemResolver {
     return mediaItem.streams.loadCount();
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => Stream)
   public async blacklistedStreams(@Root() mediaItem: MediaItem) {
     return mediaItem.blacklistedStreams.loadItems();
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => Stream)
   public async filesystemEntries(@Root() mediaItem: MediaItem) {
     return mediaItem.filesystemEntries.loadItems();
@@ -312,11 +327,13 @@ export class MediaItemResolver {
     return mediaItem.subtitles.loadItems();
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => ItemRequest)
   public async itemRequest(@Root() mediaItem: MediaItem) {
     return mediaItem.itemRequest.loadOrFail();
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => Stream)
   public async activeStream(@Root() mediaItem: MediaItem) {
     return mediaItem.activeStream?.loadOrFail();
@@ -348,6 +365,7 @@ export class MediaItemResolver {
     return 0;
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => ID, { nullable: true })
   public async processorJobId(@Root() mediaItem: MediaItem) {
     const queue = queueRegistry.get("process-media-item");
@@ -363,6 +381,7 @@ export class MediaItemResolver {
     return jobId ?? null;
   }
 
+  @RequirePermissions({ instance: ["manage-settings"] })
   @FieldResolver(() => Date, { nullable: true })
   public async nextScrapeAttemptAt(@Root() mediaItem: MediaItem) {
     const { flow } = await import("#message-queue/flows/producer.ts");
@@ -392,8 +411,14 @@ export class MediaItemResolver {
     return baseTimestamp.plus({ milliseconds: scrapeJob.job.delay }).toJSDate();
   }
 
-  @FieldResolver(() => [MediaItemAction.enum])
-  public async availableActions(@Root() item: MediaItem) {
+  @FieldResolver(() => [MediaItemAction.enum], {
+    description:
+      "The actions that apply to the media item in its current state and that the caller may perform.",
+  })
+  public async availableActions(
+    @Root() item: MediaItem,
+    @CoreContext() { principal }: CoreContext,
+  ) {
     if (!item.isRequested) {
       return [];
     }
@@ -434,6 +459,13 @@ export class MediaItemResolver {
       actions.add("delete");
     }
 
-    return [...actions];
+    return [...actions].filter((action) =>
+      principalHasPermissions(
+        principal,
+        mediaItemActionPermissions[
+          camelCase(action) as CamelCase<MediaItemAction>
+        ],
+      ),
+    );
   }
 }

@@ -1,28 +1,27 @@
-import { HttpLink } from "@apollo/client";
-import {
-  registerApolloClient,
-  ApolloClient,
-  InMemoryCache,
-} from "@apollo/client-integration-nextjs";
+import { registerApolloClient } from "@apollo/client-integration-nextjs";
+import { getSessionCookie } from "better-auth/cookies";
+import { cookies } from "next/headers";
 
-import { privateEnvironment } from "#environment/private-environment.schema.ts";
+import { isUnavailableCookieStoreError } from "#lib/utils/is-unavailable-cookie-store-error.ts";
 
-export const { getClient, query, PreloadQuery } = registerApolloClient(
-  () =>
-    new ApolloClient({
-      cache: new InMemoryCache({
-        possibleTypes: {
-          MediaItem: ["Movie", "Show", "Season", "Episode"],
-          ShowLikeMediaItem: ["Show", "Season", "Episode"],
-        },
-        typePolicies: {
-          TmdbIndexerData: {
-            keyFields: ["type", "id"],
-          },
-        },
-      }),
-      link: new HttpLink({
-        uri: `${privateEnvironment.BACKEND_URL}/graphql`,
-      }),
-    }),
+import { createClient } from "./create-client.ts";
+
+async function readSessionToken() {
+  try {
+    const cookieStore = await cookies();
+
+    return getSessionCookie(new Headers({ cookie: cookieStore.toString() }), {
+      cookiePrefix: "riven",
+    });
+  } catch (error) {
+    if (isUnavailableCookieStoreError(error)) {
+      return null;
+    }
+
+    throw error;
+  }
+}
+
+export const { getClient, query, PreloadQuery } = registerApolloClient(() =>
+  createClient(readSessionToken),
 );

@@ -35,6 +35,7 @@ import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 // Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("../lib/graphql/service-client.ts"));
 sb.mock(import("../lib/enabled-features.ts"));
 
 sb.mock(import("next/cache"));
@@ -80,14 +81,27 @@ Object.assign(expect, {
   },
 });
 
+const locales = [
+  { value: "en-GB", title: "English (GB)" },
+  { value: "en-US", title: "English (US)" },
+  { value: "fr-FR", title: "Français" },
+  { value: "fa-IR", title: "فارسی" },
+] as const;
+
+export type Locale = (typeof locales)[number]["value"];
+
 declare module "storybook/internal/csf" {
   interface StoryContext {
     parameters: {
       i18n: typeof i18n;
     };
     globals: {
-      locale: string;
+      locale: Locale;
     };
+  }
+
+  interface Globals {
+    locale: Locale;
   }
 }
 
@@ -136,27 +150,19 @@ export const preview = definePreview({
     backgrounds: {
       disable: true,
     },
-    options: {
-      storySort: {
-        method: "alphabetical",
-      },
-    },
   },
   globalTypes: {
     locale: {
       name: "Locale",
       description: "Internationalization locale",
-      defaultValue: "en-GB",
       toolbar: {
         icon: "globe",
-        items: [
-          { value: "en-GB", title: "English (GB)" },
-          { value: "en-US", title: "English (US)" },
-          { value: "fr-FR", title: "Français" },
-          { value: "fa-IR", title: "فارسی" },
-        ],
+        items: [...locales],
       },
     },
+  },
+  initialGlobals: {
+    locale: "en-GB",
   },
   decorators: [
     WithReducedMotionCheck,

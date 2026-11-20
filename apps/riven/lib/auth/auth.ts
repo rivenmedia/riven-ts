@@ -1,7 +1,7 @@
 // Provides types needed to squash portability errors from @better-auth/passkey
 // oxlint-disable-next-line import/no-unassigned-import
 import "@simplewebauthn/server";
-import { ac, admin, manager, user } from "@repo/util-auth/access-control";
+import { ac, roles } from "@repo/util-auth/access-control";
 
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
@@ -77,11 +77,7 @@ export const authConfig = {
     username(),
     adminPlugin({
       ac,
-      roles: {
-        admin,
-        user,
-        manager,
-      },
+      roles,
       defaultRole: "user",
       adminRoles: ["admin"],
     }),

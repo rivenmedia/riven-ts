@@ -5,9 +5,8 @@
 ```tsx
 "use client";
 
-import { updateProfile } from "@/app/actions";
-
 import { useAction } from "next-safe-action/hooks";
+import { updateProfile } from "@/app/actions";
 
 export function ProfileForm({ user }: { user: User }) {
   const { execute, result, isPending, hasSucceeded } = useAction(
@@ -70,9 +69,8 @@ Use `.bindArgsSchemas()` to pass arguments that aren't in the form:
 // src/app/actions.ts
 "use server";
 
-import { authActionClient } from "@/lib/safe-action";
-
 import { z } from "zod";
+import { authActionClient } from "@/lib/safe-action";
 
 export const updatePost = authActionClient
   .bindArgsSchemas([z.string().uuid()]) // postId
@@ -87,9 +85,8 @@ export const updatePost = authActionClient
 // src/components/edit-post-form.tsx
 "use client";
 
-import { updatePost } from "@/app/actions";
-
 import { useAction } from "next-safe-action/hooks";
+import { updatePost } from "@/app/actions";
 
 export function EditPostForm({ post }: { post: Post }) {
   // Bind the postId argument
@@ -151,10 +148,9 @@ const handleSubmit = async () => {
 // src/app/actions.ts
 "use server";
 
-import { actionClient } from "@/lib/safe-action";
-
 import { z } from "zod";
 import { zfd } from "zod-form-data";
+import { actionClient } from "@/lib/safe-action";
 
 export const updateProfile = actionClient
   .inputSchema(
@@ -173,9 +169,8 @@ export const updateProfile = actionClient
 // src/components/profile-form.tsx
 "use client";
 
-import { updateProfile } from "@/app/actions";
-
 import { useStateAction } from "next-safe-action/hooks";
+import { updateProfile } from "@/app/actions";
 
 export function ProfileForm({ user }: { user: User }) {
   const { formAction, result, isPending, hasSucceeded, reset } = useStateAction(

@@ -75,6 +75,8 @@ export default defineConfig({
       // The tests mock the network themselves, and the development mocks would intercept Next.js' requests to the test proxy
       ENABLE_MOCKS: "false",
       ORIGIN: baseURL,
+      // Shared `"use cache"` queries authenticate with the API key, and fail without one
+      BACKEND_API_KEY: "e2e-backend-api-key-0123456789abcdef",
     },
     // Allow time to build the app locally
     timeout: isDevServer || isCI ? 60_000 : 300_000,

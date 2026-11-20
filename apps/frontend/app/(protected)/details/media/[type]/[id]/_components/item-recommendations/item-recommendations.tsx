@@ -6,7 +6,7 @@ import { fly } from "#components/_animations/fly.ts";
 import { ErrorFallback } from "#components/error-fallback/error-fallback.tsx";
 import { ListCarouselSkeleton } from "#components/list-carousel/list-carousel-skeleton.tsx";
 import { SectionHeading } from "#components/media/section-heading/section-heading.tsx";
-import { query } from "#lib/graphql/client.ts";
+import { query } from "#lib/graphql/service-client.ts";
 
 import { MediaCarousel } from "../media-carousel";
 import { GET_ITEM_RECOMMENDATIONS } from "./_queries/get-item-recommendations.query";
