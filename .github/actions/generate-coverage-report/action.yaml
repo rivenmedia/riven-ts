@@ -20,11 +20,11 @@ runs:
 
         echo "sha=$BASELINE_SHA" >> "$GITHUB_OUTPUT"
 
-    # No fallback keys: comparing against any other commit's baseline reports changes the PR didn't make
     - name: Get coverage baseline
       id: get-coverage-baseline
       uses: actions/cache/restore@v5
       with:
+        # No fallback keys: comparing against any other commit's baseline reports changes the PR didn't make
         key: coverage-baseline-${{ steps.get-baseline-commit.outputs.sha }}
         path: packages/core/util-vitest-config/coverage/compare/coverage-summary.json
 
