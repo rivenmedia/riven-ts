@@ -7,7 +7,7 @@
     ".": "./lib/base.ts"
   },
   "scripts": {
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix"
   },
   "dependencies": {

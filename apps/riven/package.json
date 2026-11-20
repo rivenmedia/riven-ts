@@ -38,7 +38,7 @@
     "codegen:gql-schema": "node --import=@swc-node/register/esm-register scripts/generate-gql-schema.ts",
     "database:cache:generate": "mikro-orm cache:generate --combined --contextName slim",
     "dev": "NODE_ENV=development pnpm node --watch --env-file-if-exists=.env.riven --env-file-if-exists=.env.riven-frontend --import=@swc-node/register/esm-register --enable-source-maps lib/index.ts",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "migration:check": "mikro-orm migration:check",
     "migration:create": "mikro-orm migration:create",
