@@ -1,7 +1,9 @@
+import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import {
   RTN,
   createRankingModel,
   createSettings,
+  parse,
 } from "@repo/util-rank-torrent-name";
 
 import { expect, vi } from "vitest";
@@ -309,14 +311,75 @@ it("uses one engine snapshot for the whole job", async ({
   expect(rankTorrent).toHaveBeenCalledTimes(3);
 });
 
-it.todo(
-  'includes non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is disabled',
-);
+it.for([
+  {
+    isAnime: true,
+    dubbedAnimeOnly: false,
+    expected: ["dubbed", "non-dubbed"],
+  },
+  { isAnime: true, dubbedAnimeOnly: true, expected: ["dubbed"] },
+  {
+    isAnime: false,
+    dubbedAnimeOnly: true,
+    expected: ["dubbed", "non-dubbed"],
+  },
+])(
+  "ranks $expected torrents (anime: $isAnime, dubbed anime only: $dubbedAnimeOnly)",
+  async (
+    { isAnime, dubbedAnimeOnly, expected },
+    {
+      em,
+      createMockJob,
+      indexedMovieContext: { indexedMovie },
+      mockSentryScope,
+      overrideRuntimeSettings,
+      services,
+      factories: { streamFactory },
+    },
+  ) => {
+    overrideRuntimeSettings({ general: { scraping: { dubbedAnimeOnly } } });
 
-it.todo(
-  'does not include non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
-);
+    await em.nativeUpdate(
+      MediaItem,
+      { id: indexedMovie.id },
+      isAnime
+        ? { language: "ja", genres: ["Animation", "Anime"] }
+        : { language: "en", genres: ["Action"] },
+    );
 
-it.todo(
-  'includes dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
+    const dubbedStream = await streamFactory.createOne({
+      parsedData: parse("Example.Item.2024.1080p.DUBBED.BluRay.x264-GROUP"),
+    });
+    const nonDubbedStream = await streamFactory.createOne({
+      parsedData: parse("Example.Item.2024.1080p.BluRay.x264-GROUP"),
+    });
+
+    const job = await createMockJob({
+      id: indexedMovie.id,
+      streams: {
+        [dubbedStream.infoHash]: `${indexedMovie.title} 1080p`,
+        [nonDubbedStream.infoHash]: `${indexedMovie.title} 720p`,
+      },
+    });
+
+    const result = await rankStreamsProcessor(
+      { job, scope: mockSentryScope },
+      {
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
+        services,
+        plugins: new Map(),
+      },
+    );
+
+    const labels = new Map([
+      [dubbedStream.infoHash, "dubbed"],
+      [nonDubbedStream.infoHash, "non-dubbed"],
+    ]);
+
+    expect(
+      result
+        .map(({ hash }) => labels.get(hash) ?? hash)
+        .toSorted((a, b) => a.localeCompare(b)),
+    ).toStrictEqual(expected);
+  },
 );

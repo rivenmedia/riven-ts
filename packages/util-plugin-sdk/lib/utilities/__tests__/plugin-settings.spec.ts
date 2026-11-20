@@ -122,4 +122,64 @@ describe(PluginSettings, () => {
       "The plugin environment is no longer available after the settings have been locked.",
     );
   });
+  it("deeply freezes nested settings after lock()", () => {
+    const nestedSchema = z.object({
+      servers: z.array(z.object({ url: z.url() })),
+    });
+    const pluginSettings = createPluginSettings();
+
+    pluginSettings.set(
+      PREFIX,
+      nestedSchema,
+      { servers: [{ url: "https://example.com" }] },
+      [],
+    );
+    pluginSettings.lock();
+
+    const { servers } = pluginSettings.get(nestedSchema);
+
+    expect(Object.isFrozen(servers)).toBe(true);
+    expect(Object.isFrozen(servers[0])).toBe(true);
+  });
+
+  it("keeps the locked settings when lock() is called again", () => {
+    const warn = vi.spyOn(logger, "warn");
+    const pluginSettings = createPluginSettings();
+
+    pluginSettings.set(
+      PREFIX,
+      schema,
+      { enabled: true, url: "https://example.com" },
+      [],
+    );
+    pluginSettings.lock();
+    pluginSettings.lock();
+
+    expect(warn).toHaveBeenCalledExactlyOnceWith(
+      "PluginSettings.lock() called multiple times. This is a no-op.",
+    );
+    expect(pluginSettings.get(schema)).toStrictEqual({
+      enabled: true,
+      url: "https://example.com",
+    });
+  });
+
+  it("throws when getting the settings of an unknown schema", () => {
+    const pluginSettings = createPluginSettings();
+
+    expect(() => pluginSettings.get(schema)).toThrow(
+      "Schema not found in settings map.",
+    );
+  });
+
+  it("prints the effective configuration when enabled", () => {
+    const debug = vi.spyOn(console, "debug").mockImplementation(vi.fn());
+    const pluginSettings = new PluginSettings({}, [PREFIX], logger, true);
+    const value = { enabled: true, url: "https://example.com" };
+
+    pluginSettings.set(PREFIX, schema, value, []);
+
+    expect(debug).toHaveBeenCalledWith(`Effective ${PREFIX} configuration:`);
+    expect(debug).toHaveBeenCalledWith(value);
+  });
 });

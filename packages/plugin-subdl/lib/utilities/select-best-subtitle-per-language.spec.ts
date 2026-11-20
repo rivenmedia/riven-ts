@@ -78,3 +78,58 @@ it.each([
 
   expect([...selected.keys()]).toStrictEqual([expectedLanguage]);
 });
+
+const episodeSubtitle = (
+  name: string,
+  season: number | null,
+  episode: number | null,
+): SubtitleResponse => ({
+  release_name: name,
+  name,
+  lang: "English",
+  url: `/${name}.zip`,
+  season,
+  episode,
+});
+
+it("selects a subtitle for the requested episode when searching for an episode", () => {
+  const results = [
+    episodeSubtitle("other-episode", 3, 4),
+    episodeSubtitle("other-season", 2, 5),
+    episodeSubtitle("whole-season", 3, null),
+    episodeSubtitle("requested-episode", 3, 5),
+  ];
+
+  const selected = selectBestSubtitlePerLanguage(results, {
+    type: "tv",
+    tmdbId: undefined,
+    imdbId: "tt0944947",
+    seasonNumber: 3,
+    episodeNumber: 5,
+  });
+
+  expect([...selected]).toStrictEqual([["english", results[3]]]);
+});
+
+it("selects nothing when no subtitle is for the requested episode", () => {
+  const selected = selectBestSubtitlePerLanguage(
+    [episodeSubtitle("other-episode", 3, 4)],
+    {
+      type: "tv",
+      tmdbId: undefined,
+      imdbId: "tt0944947",
+      seasonNumber: 3,
+      episodeNumber: 5,
+    },
+  );
+
+  expect(selected.size).toBe(0);
+});
+
+it("ignores the season and episode of subtitles for a movie", () => {
+  const results = [episodeSubtitle("movie", 1, 1)];
+
+  const selected = selectBestSubtitlePerLanguage(results, metadata);
+
+  expect([...selected]).toStrictEqual([["english", results[0]]]);
+});

@@ -88,42 +88,77 @@ it("clears previously valid stores when revalidating", async ({
   server,
   dataSourceMap,
 }) => {
+  let subscriptionStatus: StoreUserResponse["data"]["subscription_status"] =
+    "premium";
+
   server.use(
-    http.get(
-      "**/v0/store/user",
-      () =>
-        HttpResponse.json<StoreUserResponse>({
-          data: {
-            email: "mock@email.com",
-            id: "mock-id",
-            subscription_status: "premium",
-            has_usenet: false,
-          },
-        }),
-      { once: true },
-    ),
-    http.get(
-      "**/v0/store/user",
-      () =>
-        HttpResponse.json<StoreUserResponse>({
-          data: {
-            email: "mock@email.com",
-            id: "mock-id",
-            subscription_status: "expired",
-            has_usenet: false,
-          },
-        }),
-      { once: true },
+    http.get("**/v0/store/user", () =>
+      HttpResponse.json<StoreUserResponse>({
+        data: {
+          email: "mock@email.com",
+          id: "mock-id",
+          subscription_status: subscriptionStatus,
+          has_usenet: false,
+        },
+      }),
     ),
   );
 
   const api = dataSourceMap.get(StremThruTorzAPI);
 
-  await api.validate();
+  await expect(api.validate()).resolves.toBe(true);
+  expect(api.validStores).toStrictEqual(new Set(["premiumize", "realdebrid"]));
 
-  expect(api.validStores.size).toBe(1);
+  subscriptionStatus = "expired";
 
-  await api.validate();
+  await expect(api.validate()).resolves.toBe(false);
+  expect(api.validStores).toStrictEqual(new Set());
+});
 
-  expect(api.validStores.size).toBe(0);
+it("accepts stores with a trial subscription", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(
+    http.get("**/v0/store/user", () =>
+      HttpResponse.json<StoreUserResponse>({
+        data: {
+          email: "mock@email.com",
+          id: "mock-id",
+          subscription_status: "trial",
+          has_usenet: false,
+        },
+      }),
+    ),
+  );
+
+  const api = dataSourceMap.get(StremThruTorzAPI);
+
+  await expect(api.validate()).resolves.toBe(true);
+  expect(api.validStores).toStrictEqual(new Set(["premiumize", "realdebrid"]));
+});
+
+it("rejects stores that return an unexpected response", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(
+    http.get("**/v0/store/user", ({ request }) =>
+      request.headers.get("x-stremthru-store-name") === "realdebrid"
+        ? HttpResponse.json({ data: { error: "unexpected" } })
+        : HttpResponse.json<StoreUserResponse>({
+            data: {
+              email: "mock@email.com",
+              id: "mock-id",
+              subscription_status: "premium",
+              has_usenet: false,
+            },
+          }),
+    ),
+  );
+
+  const api = dataSourceMap.get(StremThruTorzAPI);
+
+  await expect(api.validate()).resolves.toBe(true);
+  expect(api.validStores).toStrictEqual(new Set(["premiumize"]));
 });
