@@ -13,8 +13,11 @@ inputs:
 runs:
   using: composite
   steps:
+    # The baseline is generated on linux-x64, so only that platform's coverage is comparable.
+    # Coverage from other platforms differs (e.g. macOS file paths), and duplicate artifacts make
+    # the report pick one at random.
     - name: Merge coverage reports
-      if: ${{ inputs.task == 'test' && inputs.success == 'true' }}
+      if: ${{ inputs.task == 'test' && inputs.success == 'true' && github.event_name == 'pull_request' && runner.os == 'Linux' && runner.arch == 'X64' }}
       uses: ./.github/actions/generate-coverage-report
 
     - name: Upload Knip report
