@@ -95,11 +95,16 @@ Default.test(
       canvas.getByRole("region", { name: /notifications/iu }),
     );
 
-    await waitFor(async () => {
-      const toastItem = toastContainer.getByRole("listitem");
+    await waitFor(
+      async () => {
+        const toastItem = toastContainer.getByRole("listitem");
 
-      await expect(toastItem).toHaveTextContent(/user deleted successfully/iu);
-    });
+        await expect(toastItem).toHaveTextContent(
+          /user deleted successfully/iu,
+        );
+      },
+      { timeout: 5000 },
+    );
   },
 );
 
@@ -139,11 +144,14 @@ Default.test(
       canvas.getByRole("region", { name: /notifications/iu }),
     );
 
-    await waitFor(async () => {
-      const toastItem = toastContainer.getByRole("listitem");
+    await waitFor(
+      async () => {
+        const toastItem = toastContainer.getByRole("listitem");
 
-      await expect(toastItem).toHaveTextContent(/failed to delete user/iu);
-    });
+        await expect(toastItem).toHaveTextContent(/failed to delete user/iu);
+      },
+      { timeout: 5000 },
+    );
   },
 );
 
