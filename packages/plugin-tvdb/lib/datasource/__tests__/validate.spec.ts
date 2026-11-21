@@ -1,4 +1,4 @@
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 
 import {
   postLoginHandler,
@@ -28,20 +28,17 @@ it("returns true if the request succeeds", async ({
   expect(isValid).toBe(true);
 });
 
-it.for([
-  { label: "succeeds", loginSucceeds: true },
-  { label: "fails", loginSucceeds: false },
-])(
-  "validates the plugin by logging in to TVDB, which $label",
-  async ({ loginSucceeds }, { dataSourceMap, plugin, server, settings }) => {
-    server.use(
-      loginSucceeds
-        ? postLoginHandler({ data: { token: "mock-token" } })
-        : postLoginHandler(postLoginHandlerResponse401),
-    );
+it("validates the plugin with the TVDB data source", async ({
+  dataSourceMap,
+  plugin,
+  settings,
+}) => {
+  const validateSpy = vi
+    .spyOn(dataSourceMap.get(TvdbAPI), "validate")
+    .mockResolvedValue(false);
 
-    await expect(
-      plugin.validator({ dataSources: dataSourceMap, settings }),
-    ).resolves.toBe(loginSucceeds);
-  },
-);
+  await expect(
+    plugin.validator({ dataSources: dataSourceMap, settings }),
+  ).resolves.toBe(false);
+  expect(validateSpy).toHaveBeenCalledExactlyOnceWith();
+});

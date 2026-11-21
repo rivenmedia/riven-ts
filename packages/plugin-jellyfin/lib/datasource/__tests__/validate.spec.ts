@@ -1,5 +1,5 @@
 import { HttpResponse, http } from "msw";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 
 import { it } from "../../__tests__/jellyfin.test-context.ts";
 import { JellyfinAPI } from "../jellyfin.datasource.ts";
@@ -29,20 +29,17 @@ it("returns true if the request succeeds", async ({
   expect(isValid).toBe(true);
 });
 
-it.for([
-  { status: 200, expected: true },
-  { status: 401, expected: false },
-])(
-  "validates the plugin by connecting to Jellyfin (HTTP $status)",
-  async ({ status, expected }, { dataSourceMap, plugin, server, settings }) => {
-    server.use(
-      http.get("**/System/Configuration", () =>
-        HttpResponse.json({}, { status }),
-      ),
-    );
+it("validates the plugin with the Jellyfin data source", async ({
+  dataSourceMap,
+  plugin,
+  settings,
+}) => {
+  const validateSpy = vi
+    .spyOn(dataSourceMap.get(JellyfinAPI), "validate")
+    .mockResolvedValue(false);
 
-    await expect(
-      plugin.validator({ dataSources: dataSourceMap, settings }),
-    ).resolves.toBe(expected);
-  },
-);
+  await expect(
+    plugin.validator({ dataSources: dataSourceMap, settings }),
+  ).resolves.toBe(false);
+  expect(validateSpy).toHaveBeenCalledExactlyOnceWith();
+});

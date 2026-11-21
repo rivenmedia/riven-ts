@@ -99,5 +99,8 @@ it("processes an item request when it is updated", async ({
 
   actor.send({ type: "riven.item-request.update.success", item: itemRequest });
 
-  expect(actor.getSnapshot().children.processItemRequest).toBeDefined();
+  const child = actor.getSnapshot().children.processItemRequest;
+
+  expect.assert(child);
+  expect(child.getSnapshot().input).toStrictEqual({ item: itemRequest });
 });

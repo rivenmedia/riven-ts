@@ -52,29 +52,36 @@ const it = baseIt
 it("keeps all state when nothing is wiped", async ({
   em,
   redis,
-  seededState,
+  seededState: { completedMovie },
 }) => {
   await runClear({});
 
   await expect(redis.get("riven:test-key")).resolves.toBe("value");
-  await expect(em.fork().count(Movie)).resolves.toBe(1);
+  await expect(em.fork().count(Movie, { id: completedMovie.id })).resolves.toBe(
+    1,
+  );
   await expect(em.fork().count(User)).resolves.toBe(1);
-  expect(seededState.completedMovie).toBeDefined();
 });
 
-it("wipes Redis", async ({ em, redis, seededState }) => {
+it("wipes Redis", async ({ em, redis, seededState: { completedMovie } }) => {
   await runClear({ wipeRedis: true });
 
   await expect(redis.get("riven:test-key")).resolves.toBeNull();
-  await expect(em.fork().count(Movie)).resolves.toBe(1);
-  expect(seededState.completedMovie).toBeDefined();
+  await expect(em.fork().count(Movie, { id: completedMovie.id })).resolves.toBe(
+    1,
+  );
 });
 
-it("wipes users without wiping media", async ({ em, redis, seededState }) => {
+it("wipes users without wiping media", async ({
+  em,
+  redis,
+  seededState: { completedMovie },
+}) => {
   await runClear({ wipeUsers: true });
 
   await expect(em.fork().count(User)).resolves.toBe(0);
-  await expect(em.fork().count(Movie)).resolves.toBe(1);
+  await expect(em.fork().count(Movie, { id: completedMovie.id })).resolves.toBe(
+    1,
+  );
   await expect(redis.get("riven:test-key")).resolves.toBe("value");
-  expect(seededState.completedMovie).toBeDefined();
 });

@@ -1,3 +1,4 @@
+import { DEFAULT_SERVER_ERROR_MESSAGE } from "next-safe-action";
 import { expect, it, vi } from "vitest";
 
 import {
@@ -23,6 +24,7 @@ const session = { user: { id: "user-1" }, session: { id: "session-1" } };
 it.beforeEach(() => {
   auth.getSession.mockReset();
   auth.hasPermission.mockReset();
+  vi.restoreAllMocks();
 });
 
 it("runs a logged-in action with the session in its context", async () => {
@@ -40,10 +42,16 @@ it("runs a logged-in action with the session in its context", async () => {
 it("rejects a logged-in action without a session", async () => {
   auth.getSession.mockResolvedValue({ data: null });
 
+  // The default server error handler hides the cause from the client and only logs it
+  const consoleErrorSpy = vi.spyOn(console, "error").mockReturnValue(undefined);
   const handler = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
   const result = await loggedInActionClient.action(handler)();
 
-  expect(result.serverError).toBeDefined();
+  expect(result.serverError).toBe(DEFAULT_SERVER_ERROR_MESSAGE);
+  expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(
+    "Action error:",
+    "User is not authenticated",
+  );
   expect(result.data).toBeUndefined();
   expect(handler).not.toHaveBeenCalled();
 });
@@ -72,12 +80,19 @@ it.for([
     auth.hasPermission.mockResolvedValue({ data });
     auth.getSession.mockResolvedValue({ data: session });
 
+    const consoleErrorSpy = vi
+      .spyOn(console, "error")
+      .mockReturnValue(undefined);
     const handler = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
     const result = await permissionActionClient
       .metadata({ permissions: { item: ["delete"] } })
       .action(handler)();
 
-    expect(result.serverError).toBeDefined();
+    expect(result.serverError).toBe(DEFAULT_SERVER_ERROR_MESSAGE);
+    expect(consoleErrorSpy).toHaveBeenCalledExactlyOnceWith(
+      "Action error:",
+      "User does not have the required permissions",
+    );
     expect(handler).not.toHaveBeenCalled();
   },
 );
