@@ -1,0 +1,128 @@
+# Riven: copied from Silo's docker-compose.yml at
+# https://github.com/Silo-Server/silo-server/blob/a52941174808fd21fd55b009e1fe3a47f460f508/docker-compose.yml
+# Lines marked "Riven:" differ from upstream. Keep them when you update this file.
+#
+# Silo in one container. Silo's Docker image runs Silo with a bundled
+# PostgreSQL and Redis, and starts the bundled Meilisearch when
+# ENABLE_MEILISEARCH is set. Settings come from .env; see .env.example.
+# docs/architecture/omnibus-image.md describes the image.
+#
+# Optional settings are commented out in the silo service: hardware
+# transcoding (VA-API or NVIDIA), and the ports proxy or transcode nodes on
+# other hosts use to reach this server. A node's own host runs this same file
+# with MODE, DATABASE_URL, REDIS_URL, and NODE_URL in its .env; see the node
+# section of .env.example.
+#
+# This file is an example of a new install. An existing install keeps its own
+# Compose file; docker-compose.advanced.yml runs PostgreSQL and Redis in
+# containers of their own, the layout this file used before.
+# This file does not look for an earlier install: started on one's
+# SILO_DATA_ROOT, Silo comes up on a new, empty database with first-run setup
+# open on the published ports. Moving an earlier install into this layout is a
+# separate step; see "Moving from the multi-container stack" in
+# docs/architecture/omnibus-image.md.
+
+services:
+  silo:
+    image: ${SILO_OMNIBUS_IMAGE:-ghcr.io/silo-server/silo-server:latest}
+    restart: unless-stopped
+    # On stop Silo fails readiness, keeps serving for SILO_SHUTDOWN_DELAY
+    # (default 5s), then finishes in-flight requests, and PostgreSQL shuts
+    # down after it. Docker kills a container 10s after asking it to stop,
+    # which would cut that short. A transcode node first drains its sessions
+    # for up to SILO_NODE_DRAIN_TIMEOUT (default 10m), so a node's host sets
+    # SILO_STOP_GRACE_PERIOD=11m.
+    stop_grace_period: ${SILO_STOP_GRACE_PERIOD:-2m}
+    # NET_ADMIN lets Silo use kernel BBR congestion control on its client
+    # connections even where the host does not allow bbr. It also lets Silo
+    # force a larger TCP send buffer when the kernel's limit would cap remote
+    # clients on long, fast links (near 160 Mbit/s at 1 Gbit/s, 100 ms and 1%
+    # loss). A proxy node uses it the same way. A transcode node drops it at
+    # startup and uses none of it.
+    #
+    # Before its own code runs, Silo starts a small helper that holds
+    # NET_ADMIN until the listeners are configured and then exits. Silo,
+    # ffmpeg, ffprobe and plugins never keep it, and the start log says if
+    # dropping it fails. The container's root processes (the s6 supervisor,
+    # placeholders for disabled services, docker exec shells) keep it while
+    # the container runs. Whatever holds NET_ADMIN can change this container's
+    # interfaces, routes and firewall rules and reach more kernel code
+    # (nf_tables), or the host's own with network_mode: host.
+    #
+    # To undo, remove this line; Silo then logs the TCP limits it cannot change
+    # and how to raise them. In .env, SILO_NET_TCP_CONGESTION=off turns BBR off
+    # and SILO_NET_TCP_SEND_BUFFER=off keeps send-buffer autotuning.
+    cap_add: [NET_ADMIN]
+    environment:
+      # The container always listens on these ports. PORT, JF_PORT and ABS_PORT
+      # in .env change only the ports published on the host.
+      PORT: "8080"
+      JF_PORT: "8096"
+      ABS_PORT: "13378"
+      # The account that runs Silo, owns /config/silo, and reads the media.
+      PUID: ${PUID:-1000}
+      PGID: ${PGID:-1000}
+      TZ: ${TZ:-Etc/UTC}
+      # Riven: SECRET_KEY comes from .env.silo, so a missing key stops only Silo.
+      # On unless .env sets ENABLE_REDIS=false or its own REDIS_URL. Watch
+      # Party rooms need Redis, and the multi-container stack always ran it.
+      # The image's own default is off: nodes ignore the setting and warn when
+      # it is on.
+      ENABLE_REDIS: ${ENABLE_REDIS:-true}
+      # Off by default. Set to "true" to start the bundled Meilisearch.
+      ENABLE_MEILISEARCH: ${ENABLE_MEILISEARCH:-false}
+    ports:
+      - "${PORT:-8090}:8080"
+      - "${JF_PORT:-8096}:8096"
+      - "${ABS_PORT:-13378}:13378"
+      # Proxy or transcode nodes on other hosts: set ENABLE_NODE_ACCESS=true,
+      # POSTGRES_PASSWORD, REDIS_PASSWORD, and NODE_ACCESS_HOST in .env, then
+      # uncomment these two. Nodes sign in as silo with those passwords. Neither
+      # connection is encrypted, so use an address on a network you trust.
+      # - "${NODE_ACCESS_HOST:?Set NODE_ACCESS_HOST in .env}:${POSTGRES_PORT:-5432}:5432"
+      # - "${NODE_ACCESS_HOST:?Set NODE_ACCESS_HOST in .env}:${REDIS_PORT:-6379}:6379"
+    volumes:
+      # Silo's state, the PostgreSQL cluster, and the Redis and Meilisearch data.
+      - ${SILO_DATA_ROOT:-/opt/silo}/config:/config
+      # Riven: SILO_MEDIA_ROOT and SILO_MEDIA_CONTAINER_ROOT come from the root
+      # .env, and rslave shows Silo the VFS that Riven mounts after Silo starts.
+      - ${SILO_MEDIA_ROOT:?Set SILO_MEDIA_ROOT in the root .env to the host media path}:${SILO_MEDIA_CONTAINER_ROOT:-/mnt/media}:ro,rslave
+      # Transcode segments, kept out of /config so a backup of it stays small.
+      - ${SILO_DATA_ROOT:-/opt/silo}/transcode:/tmp/silo-transcode
+      # Prepared downloads. While "Prepared file directory" (download.artifact_dir)
+      # is blank, Silo keeps them beside the transcode directory rather than in
+      # it, so they need their own mount to survive image updates. This path
+      # assumes the default playback.transcode_dir; with another one, mount the
+      # silo-download-artifacts directory beside that instead. No storage budget
+      # applies until you set one ("Default storage budget per location",
+      # download.artifact_max_bytes, in Settings > Downloads).
+      - ${SILO_DATA_ROOT:-/opt/silo}/download-artifacts:/tmp/silo-download-artifacts
+      - ${SILO_DATA_ROOT:-/opt/silo}/catalog-seeds:/catalog-seeds:ro
+      # These three matter only when the Docker host is itself an LXC container.
+      # There the files describe the physical machine, and the LXC's own limit
+      # sits on a cgroup this container cannot see. lxcfs rewrites them to the
+      # LXC's limits, so mounting them makes CPU, load, and memory report this
+      # container's share instead of the whole machine's. On bare metal or a VM
+      # they are the same files Silo reads anyway, so they do no harm. Silo uses
+      # each one separately; removing one only reverts that reading. See
+      # docs/architecture/observability.md#node-resource-sampling.
+      - /proc/meminfo:/host/proc/meminfo:ro
+      - /proc/stat:/host/proc/stat:ro
+      - /proc/loadavg:/host/proc/loadavg:ro
+    env_file:
+      # Riven: .env.silo, like the .env.<name> files of the other plugins.
+      - path: .env.silo
+        required: false
+    # Intel or AMD hardware transcoding (VA-API, Quick Sync): uncomment.
+    # devices:
+    #   - /dev/dri:/dev/dri
+    # NVIDIA, with the NVIDIA Container Toolkit installed: uncomment. "video"
+    # mounts the NVENC/NVDEC libraries; without it FFmpeg sees the GPU but
+    # encodes in software.
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: ${NVIDIA_GPU_COUNT:-1}
+    #           capabilities: [gpu, compute, utility, video]
