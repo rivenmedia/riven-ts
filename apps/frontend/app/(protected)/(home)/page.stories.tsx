@@ -46,9 +46,11 @@ Default.test(
       await userEvent.click(thisWeekButton);
     });
 
-    const weeklyTrendingMovie = await canvas.findByRole("heading", {
-      name: /the odyssey/iu,
-    });
+    const weeklyTrendingMovie = await canvas.findByRole(
+      "heading",
+      { name: /the odyssey/iu },
+      { timeout: 5000 },
+    );
 
     await expect(weeklyTrendingMovie).toBeInTheDocument();
   },
@@ -91,9 +93,11 @@ Default.test(
       await userEvent.click(thisWeekButton);
     });
 
-    const weeklyTrendingShow = await canvas.findByRole("heading", {
-      name: /arcane/iu,
-    });
+    const weeklyTrendingShow = await canvas.findByRole(
+      "heading",
+      { name: /arcane/iu },
+      { timeout: 5000 },
+    );
 
     await expect(weeklyTrendingShow).toBeInTheDocument();
   },

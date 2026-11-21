@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { http, HttpResponse } from "msw";
+import { delay, http, HttpResponse } from "msw";
 import { expect, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
@@ -10,9 +10,12 @@ const meta = preview.meta({
   component: UserManagement,
   beforeEach({ msw }) {
     msw.use(
-      http.post("**/api/auth/admin/remove-user", () =>
-        HttpResponse.json({ success: true }),
-      ),
+      http.post("**/api/auth/admin/remove-user", async () => {
+        // Resolve after the dialog's close animation, as a real request would
+        await delay(500);
+
+        return HttpResponse.json({ success: true });
+      }),
     );
   },
 });
@@ -113,9 +116,11 @@ Default.test(
   {
     beforeEach({ msw }) {
       msw.use(
-        http.post("**/api/auth/admin/remove-user", () =>
-          HttpResponse.json({ success: false }),
-        ),
+        http.post("**/api/auth/admin/remove-user", async () => {
+          await delay(500);
+
+          return HttpResponse.json({ success: false });
+        }),
       );
     },
   },
