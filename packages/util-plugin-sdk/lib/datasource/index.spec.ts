@@ -1,5 +1,5 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import { QueueEvents } from "bullmq";
+import { QueueEvents, Scripts } from "bullmq";
 import { HttpResponse, http } from "msw";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
@@ -570,8 +570,14 @@ it("resolves a request that finishes before the queue events start reading", asy
   server,
   dataSourceConfig,
 }) => {
+  const finishChecked = Promise.withResolvers<undefined>();
+
   server.use(
-    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+    http.get("**/endpoint", async () => {
+      await finishChecked.promise;
+
+      return HttpResponse.json({ success: true });
+    }),
   );
 
   const jobCompleted = Promise.withResolvers<undefined>();
@@ -580,6 +586,25 @@ it("resolves a request that finishes before the queue events start reading", asy
 
   // BullMQ internals: `QueueEvents` reads the event stream with `xread` on a connection it gets from `connection.duplicate()`.
   // Holding its first read until the job has completed guarantees the job finishes before the queue events start reading.
+  // `Job.waitUntilFinished` also checks whether the job has already finished, with `Scripts.prototype.isFinished`.
+  // Holding the response until that check has run guarantees it finds the job unfinished, so only the queue events can resolve the request.
+  // The check runs for real: calling the spy again from inside its one-off implementation reaches the original.
+  const isFinishedSpy = vi
+    .spyOn(Scripts.prototype, "isFinished")
+    .mockImplementationOnce(async function checkThenRelease(
+      this: Scripts,
+      ...isFinishedArgs: Parameters<Scripts["isFinished"]>
+    ) {
+      const result = await Scripts.prototype.isFinished.apply(
+        this,
+        isFinishedArgs,
+      );
+
+      finishChecked.resolve(undefined);
+
+      return result;
+    });
+
   vi.spyOn(connection, "duplicate").mockImplementation((() => {
     const client = duplicate();
     const xread = client.xread.bind(client) as (
@@ -606,6 +631,7 @@ it("resolves a request that finishes before the queue events start reading", asy
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
+  expect(isFinishedSpy).toHaveBeenCalledWith(expect.any(String), true);
 });
 
 it("recovers after the queue events fail to start", async ({
