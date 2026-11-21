@@ -70,10 +70,7 @@ export function SettingsStringArrayField({
         items={items}
         value={value}
         onValueChange={(newValue) => {
-          setValue(name, newValue, {
-            shouldDirty: true,
-            shouldTouch: true,
-          });
+          setValue(name, newValue, { shouldDirty: true });
         }}
         onInputValueChange={setInputValue}
       >

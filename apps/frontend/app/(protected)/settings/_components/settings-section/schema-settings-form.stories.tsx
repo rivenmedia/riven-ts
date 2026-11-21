@@ -1,4 +1,4 @@
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 import { z } from "zod";
 
 import { preview } from "#.storybook/preview.tsx";
@@ -99,3 +99,104 @@ Pending.test("Can't submit whilst pending", async ({ canvas }) => {
     canvas.getByRole("button", { name: "Save profile" }),
   ).toBeDisabled();
 });
+
+export const StringArray = meta.story({
+  args: {
+    title: "Filters",
+    jsonSchema: z.toJSONSchema(
+      z.object({
+        excludedWords: z.array(z.string()).meta({ title: "Excluded Words" }),
+      }),
+      { io: "input" },
+    ),
+    values: { excludedWords: ["CAM", "TS"] },
+    submitLabel: "Save filters",
+  },
+});
+
+StringArray.test(
+  "Editing the chips enables saving",
+  async ({ canvas, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save filters" });
+
+    await step("Can't save until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Adding a chip enables saving", async () => {
+      const input = canvas.getByRole("combobox");
+
+      await userEvent.click(input);
+      await userEvent.type(input, "HDR{enter}");
+
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+);
+
+export const BooleanSwitch = meta.story({
+  args: {
+    title: "Library",
+    jsonSchema: z.toJSONSchema(
+      z.object({ autoScan: z.boolean().meta({ title: "Auto Scan" }) }),
+      { io: "input" },
+    ),
+    values: { autoScan: false },
+    submitLabel: "Save library",
+  },
+});
+
+BooleanSwitch.test(
+  "Toggling the switch enables saving",
+  async ({ canvas, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save library" });
+
+    await step("Can't save until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Toggling the switch enables saving", async () => {
+      await userEvent.click(canvas.getByRole("switch", { name: "Auto Scan" }));
+
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+);
+
+export const Select = meta.story({
+  args: {
+    title: "Playback",
+    jsonSchema: z.toJSONSchema(
+      z.object({
+        resolution: z.enum(["480p", "720p", "1080p"]).meta({
+          title: "Resolution",
+        }),
+      }),
+      { io: "input" },
+    ),
+    values: { resolution: "1080p" },
+    submitLabel: "Save playback",
+  },
+});
+
+Select.test(
+  "Choosing an option enables saving",
+  async ({ canvas, canvasElement, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save playback" });
+
+    await step("Can't save until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Choosing an option enables saving", async () => {
+      await userEvent.click(canvas.getByRole("combobox"));
+      await userEvent.click(
+        await within(canvasElement.ownerDocument.body).findByRole("option", {
+          name: "720p",
+        }),
+      );
+
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+);

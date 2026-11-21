@@ -13,3 +13,9 @@ For every change to how the UI looks (you create, change, or delete a component,
 4. `ui-review`: publish a review that shows the user what changed, as your last step. Also when the user asks to see components or stories.
 
 <!-- END:storybook-skills -->
+
+> **Note:** the block between `BEGIN:storybook-skills` and `END:storybook-skills` is managed by Storybook and overwritten on upgrade. Put project-specific Storybook rules outside it, like the section below.
+
+## Storybook reviews
+
+When publishing a Storybook review (`ui-review`), include the relevant test story IDs (`<story-id>:<test-name>`, from `stories changed`) in the review's collections, alongside the base story IDs.
