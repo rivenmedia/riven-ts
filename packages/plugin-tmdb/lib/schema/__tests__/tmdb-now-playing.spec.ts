@@ -70,7 +70,8 @@ it.for([
   { releaseDate: "2023-08-21", expected: "Summer 2023" },
   { releaseDate: "2023-09-01", expected: "Fall 2023" },
   { releaseDate: "2023-11-09", expected: "Fall 2023" },
-  { releaseDate: "2023-12-01", expected: "Winter 2023" },
+  { releaseDate: "2023-12-15", expected: "Winter 2024" },
+  { releaseDate: "2024-02-15", expected: "Winter 2024" },
   { releaseDate: "", expected: null },
 ])(
   "labels a movie released on $releaseDate as $expected",

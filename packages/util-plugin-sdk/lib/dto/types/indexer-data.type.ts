@@ -125,7 +125,10 @@ export abstract class IndexerData extends IndexerBaseItem {
       return null;
     }
 
-    return `${seasonLabel} ${year.toString()}`;
+    // December belongs to the next year's winter, so Dec 2023 to Feb 2024 are all "Winter 2024"
+    const seasonYear = month === 11 ? year + 1 : year;
+
+    return `${seasonLabel} ${seasonYear.toString()}`;
   }
 
   @Field(() => Trailer, { nullable: true })
