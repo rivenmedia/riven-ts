@@ -1,4 +1,4 @@
-import { expect, fn, userEvent, within } from "storybook/test";
+import { expect, fn, mocked, userEvent, within } from "storybook/test";
 
 import { createFormDecorator } from "#.storybook/decorators/create-form-decorator.tsx";
 import { preview } from "#.storybook/preview.tsx";
@@ -79,8 +79,6 @@ Password.test(
   },
 );
 
-const onSecretReset = fn();
-
 export const SecretDefault = meta.story({
   args: {
     type: "secret",
@@ -115,19 +113,20 @@ export const SecretCustom = meta.story({
       name: "api-key",
       secretState: "custom",
       registerOptions: { required: false },
-      onReset: onSecretReset,
+      onReset: fn(),
     },
   },
   decorators: [createFormDecorator({ progressive: true })],
-  beforeEach: () => {
-    onSecretReset.mockClear();
-  },
 });
 
 SecretCustom.test(
   "Confirming the reset dialog calls onReset once",
-  async ({ canvas, canvasElement, step }) => {
+  async ({ args, canvas, canvasElement, step }) => {
     const body = within(canvasElement.ownerDocument.body);
+
+    expect.assert("onReset" in args.config);
+
+    const onReset = mocked(args.config.onReset);
 
     await step("Shows the custom-value placeholder", async () => {
       await expect(canvas.getByLabelText(/api key/iu)).toHaveAttribute(
@@ -141,7 +140,7 @@ SecretCustom.test(
       await expect(
         await body.findByText("Reset to default?"),
       ).toBeInTheDocument();
-      await expect(onSecretReset).not.toHaveBeenCalled();
+      await expect(onReset).not.toHaveBeenCalled();
     });
 
     await step("Confirms the reset", async () => {
@@ -150,7 +149,7 @@ SecretCustom.test(
       await userEvent.click(
         within(dialog).getByRole("button", { name: /^reset$/iu }),
       );
-      await expect(onSecretReset).toHaveBeenCalledOnce();
+      await expect(onReset).toHaveBeenCalledOnce();
     });
   },
 );
@@ -284,10 +283,13 @@ export const BooleanField = meta.story({
     },
   },
   decorators: [
-    createFormDecorator({
-      progressive: true,
-      defaultValues: { "enable-notifications": true },
-    }),
+    createFormDecorator(
+      {
+        progressive: true,
+        defaultValues: { "enable-notifications": true },
+      },
+      fn(),
+    ),
   ],
 });
 
@@ -310,6 +312,25 @@ BooleanField.test(
     await step("Toggle on", async () => {
       await userEvent.click(toggle);
       await expect(toggle).toBeChecked();
+    });
+  },
+);
+
+BooleanField.test(
+  "Toggling the switch marks the form dirty",
+  async ({ canvas, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save" });
+
+    await step("Clean until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Toggling the switch enables saving", async () => {
+      await userEvent.click(
+        canvas.getByRole("switch", { name: /enable notifications/iu }),
+      );
+
+      await expect(saveButton).toBeEnabled();
     });
   },
 );
@@ -377,10 +398,13 @@ export const Select = meta.story({
     },
   },
   decorators: [
-    createFormDecorator({
-      progressive: true,
-      defaultValues: { "preferred-resolution": "1080p" },
-    }),
+    createFormDecorator(
+      {
+        progressive: true,
+        defaultValues: { "preferred-resolution": "1080p" },
+      },
+      fn(),
+    ),
   ],
 });
 
@@ -399,6 +423,28 @@ Select.test(
   },
 );
 
+Select.test(
+  "Choosing an option marks the form dirty",
+  async ({ canvas, canvasElement, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save" });
+
+    await step("Clean until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Choosing an option enables saving", async () => {
+      await userEvent.click(canvas.getByRole("combobox"));
+      await userEvent.click(
+        await within(canvasElement.ownerDocument.body).findByRole("option", {
+          name: /720p/iu,
+        }),
+      );
+
+      await expect(saveButton).toBeEnabled();
+    });
+  },
+);
+
 export const StringArray = meta.story({
   args: {
     type: "string_array",
@@ -408,10 +454,13 @@ export const StringArray = meta.story({
     },
   },
   decorators: [
-    createFormDecorator({
-      progressive: true,
-      defaultValues: { "excluded-words": ["CAM", "TS", "WORKPRINT"] },
-    }),
+    createFormDecorator(
+      {
+        progressive: true,
+        defaultValues: { "excluded-words": ["CAM", "TS", "WORKPRINT"] },
+      },
+      fn(),
+    ),
   ],
 });
 
@@ -429,13 +478,33 @@ StringArray.test(
   async ({ canvas }) => {
     const chip = canvas.getByText("CAM").closest('[data-slot="combobox-chip"]');
 
-    await expect(chip).not.toBeNull();
+    expect.assert(chip instanceof HTMLElement);
 
-    const removeButton = within(chip as HTMLElement).getByRole("button");
+    const removeButton = within(chip).getByRole("button");
 
     await userEvent.click(removeButton);
 
     await expect(canvas.queryByText("CAM")).not.toBeInTheDocument();
+  },
+);
+
+StringArray.test(
+  "Adding a chip marks the form dirty",
+  async ({ canvas, step }) => {
+    const saveButton = canvas.getByRole("button", { name: "Save" });
+
+    await step("Clean until something changes", async () => {
+      await expect(saveButton).toBeDisabled();
+    });
+
+    await step("Adding a chip enables saving", async () => {
+      const input = canvas.getByRole("combobox");
+
+      await userEvent.click(input);
+      await userEvent.type(input, "HDR{enter}");
+
+      await expect(saveButton).toBeEnabled();
+    });
   },
 );
 
