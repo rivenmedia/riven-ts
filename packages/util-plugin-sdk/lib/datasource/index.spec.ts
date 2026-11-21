@@ -1,8 +1,7 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { QueueEvents } from "bullmq";
-import { HttpResponse, delay, http } from "msw";
+import { HttpResponse, http } from "msw";
 import { randomUUID } from "node:crypto";
-import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
@@ -572,17 +571,15 @@ it("resolves a request that finishes before the queue events start reading", asy
   dataSourceConfig,
 }) => {
   server.use(
-    http.get("**/endpoint", async () => {
-      await delay(100);
-
-      return HttpResponse.json({ success: true });
-    }),
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
   );
 
+  const jobCompleted = Promise.withResolvers<undefined>();
   const { connection } = dataSourceConfig;
   const duplicate = connection.duplicate.bind(connection);
 
-  // The queue events read the event stream on their own connection; delay their first read until after the request has finished
+  // BullMQ internals: `QueueEvents` reads the event stream with `xread` on a connection it gets from `connection.duplicate()`.
+  // Holding its first read until the job has completed guarantees the job finishes before the queue events start reading.
   vi.spyOn(connection, "duplicate").mockImplementation((() => {
     const client = duplicate();
     const xread = client.xread.bind(client) as (
@@ -592,7 +589,7 @@ it("resolves a request that finishes before the queue events start reading", asy
     vi.spyOn(client, "xread").mockImplementationOnce((async (
       ...xreadArgs: unknown[]
     ) => {
-      await setTimeout(500);
+      await jobCompleted.promise;
 
       return xread(...xreadArgs);
     }) as never);
@@ -601,6 +598,10 @@ it("resolves a request that finishes before the queue events start reading", asy
   }) as never);
 
   const dataSource = new TestDataSource(dataSourceConfig);
+
+  dataSource.worker.once("completed", () => {
+    jobCompleted.resolve(undefined);
+  });
 
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
