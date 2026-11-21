@@ -1,8 +1,8 @@
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/tmdb.test-context.ts";
-import { searchTmdb } from "../search-tmdb.ts";
+import { it } from "../__tests__/tmdb.test-context.ts";
+import { searchTmdb } from "./search-tmdb.ts";
 
 const createMovie = (id: number, title: string) => ({
   media_type: "movie",

@@ -5,11 +5,11 @@ import { HttpResponse, http } from "msw";
 import { randomUUID } from "node:crypto";
 import { expect } from "vitest";
 
-import { findByIdHandler } from "../../__generated__/handlers/findByIdHandler.ts";
-import { movieAlternativeTitlesHandler } from "../../__generated__/handlers/movieAlternativeTitlesHandler.ts";
-import { movieDetailsHandler } from "../../__generated__/handlers/movieDetailsHandler.ts";
-import { it as baseIt } from "../../__tests__/tmdb.test-context.ts";
-import { indexTMDBMediaItem } from "../index-tmdb-media-item.ts";
+import { findByIdHandler } from "../__generated__/handlers/findByIdHandler.ts";
+import { movieAlternativeTitlesHandler } from "../__generated__/handlers/movieAlternativeTitlesHandler.ts";
+import { movieDetailsHandler } from "../__generated__/handlers/movieDetailsHandler.ts";
+import { it as baseIt } from "../__tests__/tmdb.test-context.ts";
+import { indexTMDBMediaItem } from "./index-tmdb-media-item.ts";
 
 const it = baseIt.extend("item", ({}) => {
   const item = new ItemRequest();

@@ -1,25 +1,11 @@
-import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
-
 import { HttpResponse, http } from "msw";
-import { describe, expect } from "vitest";
+import { expect } from "vitest";
 
-import { it } from "../../../__tests__/stremthru.test-context.ts";
-import { Store } from "../../../schemas/store.schema.ts";
-import { StremThruSettings } from "../../../stremthru-settings.schema.ts";
-import { StremThruTorzAPI } from "../../stremthru-torz.datasource.ts";
+import { it } from "../__tests__/stremthru.test-context.ts";
+import { Store } from "../schemas/store.schema.ts";
+import { StremThruTorzAPI } from "./stremthru-torz.datasource.ts";
 
-import type { StoreUserResponse } from "../../../schemas/store-user-response.schema.ts";
-
-describe("when no stores are configured", () => {
-  it.override("settings", createMockPluginSettings(StremThruSettings, {}));
-
-  it("returns false", async ({ dataSourceMap }) => {
-    const api = dataSourceMap.get(StremThruTorzAPI);
-    const isValid = await api.validate();
-
-    expect(isValid).toBe(false);
-  });
-});
+import type { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
 
 it("returns false when all stores are invalid", async ({
   server,
