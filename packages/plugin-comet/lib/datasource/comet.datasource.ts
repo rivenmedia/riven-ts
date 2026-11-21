@@ -85,7 +85,10 @@ export class CometAPI extends BaseDataSource<CometSettings> {
         const title =
           stream.behaviorHints.filename ??
           // Comet prefixes description lines with emoji (e.g., "<emoji> Title"), strip it
-          stream.description.split("\n")[0]?.slice(1).trim();
+          stream.description
+            .split("\n")[0]
+            ?.replace(/^\p{Extended_Pictographic}\uFE0F?/u, "")
+            .trim();
 
         if (!title) {
           continue;

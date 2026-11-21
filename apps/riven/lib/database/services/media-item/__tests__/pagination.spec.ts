@@ -190,3 +190,64 @@ it("does not return unrequested items when includeUnrequestedItems is false", as
     show.seasons.filter((season) => season.isRequested).length,
   );
 });
+
+it("rejects requests for both the previous and next page", async ({
+  services: { mediaItemService },
+}) => {
+  await expect(
+    mediaItemService.getPaginatedMediaItems({ before: "a", after: "b" }),
+  ).rejects.toThrow(
+    "Cannot specify both 'before' and 'after' cursors for pagination.",
+  );
+});
+
+it("returns the previous page before a cursor", async ({
+  services: { mediaItemService },
+  factories: { movieFactory },
+}) => {
+  for (const title of ["A Movie", "B Movie", "C Movie", "D Movie"]) {
+    await movieFactory.createOne({ title });
+  }
+
+  const { endCursor } = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+  });
+  const secondPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+    after: endCursor,
+  });
+
+  expect(secondPage.items.map(({ title }) => title)).toStrictEqual([
+    "C Movie",
+    "D Movie",
+  ]);
+
+  const firstPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+    before: secondPage.startCursor,
+  });
+
+  expect(firstPage.items.map(({ title }) => title)).toStrictEqual([
+    "A Movie",
+    "B Movie",
+  ]);
+});
+
+it("does not skip items sharing a title and state across a page boundary", async ({
+  services: { mediaItemService },
+  factories: { movieFactory },
+}) => {
+  const movies = await movieFactory.create(3, { title: "Duplicate Movie" });
+
+  const firstPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+  });
+  const secondPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+    after: firstPage.endCursor,
+  });
+
+  expect(
+    [...firstPage.items, ...secondPage.items].map(({ id }) => id).toSorted(),
+  ).toStrictEqual(movies.map(({ id }) => id).toSorted());
+});

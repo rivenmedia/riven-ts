@@ -17,7 +17,9 @@ export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
     _path: string,
     requestOpts: AugmentedRequest,
   ): void {
-    requestOpts.headers["Authorization"] =
+    // Header names must be lowercase: requests are augmented twice, and a differently-cased
+    // name from the second pass would be sent as a duplicate header
+    requestOpts.headers["authorization"] =
       `MediaBrowser Client=Riven, Token=${this.settings.jellyfinToken}`;
   }
 

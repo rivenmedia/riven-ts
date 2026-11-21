@@ -27,3 +27,21 @@ it("returns true if the request succeeds", async ({
 
   expect(isValid).toBe(true);
 });
+
+it.for([
+  { label: "succeeds", loginSucceeds: true },
+  { label: "fails", loginSucceeds: false },
+])(
+  "validates the plugin by logging in to TVDB, which $label",
+  async ({ loginSucceeds }, { dataSourceMap, plugin, server, settings }) => {
+    server.use(
+      loginSucceeds
+        ? postLoginHandler({ data: { token: "mock-token" } })
+        : postLoginHandler(postLoginHandlerResponse401),
+    );
+
+    await expect(
+      plugin.validator({ dataSources: dataSourceMap, settings }),
+    ).resolves.toBe(loginSucceeds);
+  },
+);

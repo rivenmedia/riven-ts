@@ -126,7 +126,7 @@ export abstract class BaseDataSource<
   readonly #requestBackoffDelay: number;
 
   readonly #queueId: string;
-  readonly #queueEvents: QueueEvents;
+  readonly #queueEvents: Promise<QueueEvents>;
   public queue: Queue<FetchJobInput, FetchResponse>;
   public worker: Worker<FetchJobInput, FetchResponse>;
 
@@ -166,7 +166,12 @@ export abstract class BaseDataSource<
       telemetry,
     });
 
-    this.#queueEvents = new QueueEvents(this.#queueId, { connection });
+    this.#queueEvents = this.#createQueueEvents(connection);
+
+    // Requests await the queue events and receive this error themselves; this stops it being unhandled before then
+    this.#queueEvents.catch((error: unknown) => {
+      this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
+    });
 
     this.worker = new Worker(
       this.#queueId,
@@ -262,16 +267,63 @@ export abstract class BaseDataSource<
 
     this.logger = apolloDataSourceOptions.logger;
 
-    for (const resource of [this.queue, this.#queueEvents, this.worker]) {
-      (resource as EventEmitter).on("error", (error: unknown) => {
-        this.logger.error(
-          `${this.#queueId} ${resource.constructor.name} error`,
-          { err: error },
-        );
-      });
+    for (const resource of [this.queue, this.worker]) {
+      this.#logErrors(resource);
     }
 
     this.settings = settings;
+  }
+
+  /**
+   * Closes the request queue, its worker and the queue events, so none of them keep using the Redis connection.
+   */
+  public async close() {
+    await this.worker.close();
+    await this.queue.close();
+
+    try {
+      const queueEvents = await this.#queueEvents;
+
+      await queueEvents.close();
+    } catch {
+      // The queue events were never created, so there is nothing to close
+    }
+  }
+
+  #logErrors(resource: Queue | QueueEvents | Worker) {
+    (resource as EventEmitter).on("error", (error: unknown) => {
+      this.logger.error(`${this.#queueId} ${resource.constructor.name} error`, {
+        err: error,
+      });
+    });
+  }
+
+  /**
+   * Creates the queue events that report when each request job finishes.
+   *
+   * By default, queue events only receive events added after their first read of the event stream,
+   * which happens some time after they connect. A request job that finishes in between would never be reported,
+   * leaving its request waiting forever. Instead, the queue events start reading from the latest event that exists
+   * before any request job is added.
+   */
+  async #createQueueEvents(connection: ConnectionOptions) {
+    const client = await this.queue.client;
+    const [latestEvent] = await client.xrevrange(
+      this.queue.toKey("events"),
+      "+",
+      "-",
+      "COUNT",
+      1,
+    );
+
+    const queueEvents = new QueueEvents(this.#queueId, {
+      connection,
+      lastEventId: latestEvent?.[0] ?? "0-0",
+    });
+
+    this.#logErrors(queueEvents);
+
+    return queueEvents;
   }
 
   #decodeRequestBody(job: Job<FetchJobInput, FetchResponse>) {
@@ -482,6 +534,9 @@ export abstract class BaseDataSource<
         } satisfies ParentOptions)
       : undefined;
 
+    // The queue events must know where to start reading before the job is added, so they cannot miss it finishing
+    const queueEvents = await this.#queueEvents;
+
     const job = await this.#createRequestJob(
       path,
       augmentedRequest,
@@ -489,7 +544,7 @@ export abstract class BaseDataSource<
       jobParentOptions,
     );
 
-    const result = await job.waitUntilFinished(this.#queueEvents);
+    const result = await job.waitUntilFinished(queueEvents);
 
     const clonedResponse = new Response(null, result.response);
 

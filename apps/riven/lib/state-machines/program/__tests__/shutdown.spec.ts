@@ -66,4 +66,58 @@ it("unmounts the VFS when shutting down", async ({ machine, input }) => {
   expect(unmountVfsMock).toHaveBeenCalledOnce();
 });
 
-it.todo("stops the main runner when shutting down");
+it("stops the main runner when shutting down", async ({ machine, input }) => {
+  const shutdownMock = vi
+    .fn<() => Promise<undefined>>()
+    .mockResolvedValue(undefined);
+
+  const actor = createActor(
+    machine.provide({
+      actors: {
+        shutdown: fromPromise(shutdownMock),
+      },
+    }),
+    { input },
+  );
+
+  actor.start().send({ type: "riven.core.shutdown" });
+
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toBe("Exited");
+  });
+
+  expect(shutdownMock).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({
+      input: { mainRunnerRef: actor.getSnapshot().context.mainRunnerRef },
+    }),
+  );
+});
+
+it("continues shutting down when the main runner fails to stop", async ({
+  machine,
+  input,
+}) => {
+  const unmountVfsMock = vi
+    .fn<() => Promise<undefined>>()
+    .mockResolvedValue(undefined);
+
+  const actor = createActor(
+    machine.provide({
+      actors: {
+        shutdown: fromPromise(async () =>
+          Promise.reject(new Error("Main runner failed to stop")),
+        ),
+        unmountVfs: fromPromise(unmountVfsMock),
+      },
+    }),
+    { input },
+  );
+
+  actor.start().send({ type: "riven.core.shutdown" });
+
+  await vi.waitFor(() => {
+    expect(actor.getSnapshot().value).toBe("Exited");
+  });
+
+  expect(unmountVfsMock).toHaveBeenCalledOnce();
+});

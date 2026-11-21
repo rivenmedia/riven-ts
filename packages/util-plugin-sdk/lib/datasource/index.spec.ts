@@ -1,6 +1,7 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import { HttpResponse, http } from "msw";
+import { HttpResponse, delay, http } from "msw";
 import { randomUUID } from "node:crypto";
+import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
@@ -311,4 +312,296 @@ it("performs a single cache lookup for concurrent GET requests to a cached URL",
   for (const response of responses) {
     expect(response.parsedBody).toStrictEqual({ value: "cached-value" });
   }
+});
+
+it("sends URL search params bodies as a form", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  const requests: { body: string; contentType: string | null }[] = [];
+
+  server.use(
+    http.post("**/endpoint", async ({ request }) => {
+      requests.push({
+        body: await request.text(),
+        contentType: request.headers.get("content-type"),
+      });
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await dataSource.fetch("endpoint", {
+    method: "POST",
+    body: new URLSearchParams({ name: "value", other: "a&b" }),
+  });
+
+  expect(requests).toStrictEqual([
+    {
+      body: "name=value&other=a%26b",
+      contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+    },
+  ]);
+});
+
+it.for([
+  { type: "object", body: { name: "value" } },
+  { type: "JSON string", body: JSON.stringify({ name: "value" }) },
+])(
+  "sends $type bodies as JSON",
+  async ({ body }, { server, dataSourceConfig }) => {
+    const requests: unknown[] = [];
+
+    server.use(
+      http.post("**/endpoint", async ({ request }) => {
+        requests.push(await request.json());
+
+        return HttpResponse.json({ success: true });
+      }),
+    );
+
+    const dataSource = new TestDataSource(dataSourceConfig);
+
+    await dataSource.fetch("endpoint", { method: "POST", body });
+
+    expect(requests).toStrictEqual([{ name: "value" }]);
+  },
+);
+
+it("rejects string bodies that are not JSON without sending them", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.post("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(
+    dataSource.fetch("endpoint", { method: "POST", body: "name=value" }),
+  ).rejects.toThrow(
+    "Unable to determine the request body type: invalid JSON string.",
+  );
+  expect(requestCount).toBe(0);
+});
+
+it("rejects with the response of a request that fails with a fatal status", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.get("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json(null, { status: 404, statusText: "Not Found" });
+    }),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestBackoffDelay: 0,
+  });
+
+  const error = await dataSource
+    .fetch("endpoint")
+    .catch((fetchError: unknown) => fetchError);
+
+  expect(error).toBeInstanceOf(DataSourceHTTPError);
+  expect((error as DataSourceHTTPError).response.status).toBe(404);
+  expect(requestCount).toBe(1);
+});
+
+it("retries a request that fails with a non-fatal status", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json(null, { status: 503 }), {
+      once: true,
+    }),
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestBackoffDelay: 0,
+  });
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+});
+
+it("rejects a request that fails with a non-fatal status on every attempt", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.get("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json(null, { status: 503 });
+    }),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestAttempts: 2,
+    requestBackoffDelay: 0,
+  });
+
+  await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+    DataSourceHTTPError,
+  );
+  expect(requestCount).toBe(2);
+});
+
+class RateLimitRecordingDataSource extends TestDataSource {
+  public readonly waits: number[] = [];
+
+  protected override didEncounterRateLimit(
+    _request: unknown,
+    _response: unknown,
+    waitMs: number,
+  ) {
+    this.waits.push(waitMs);
+  }
+}
+
+it.for([
+  { retryAfter: "2", waitMs: 2000 },
+  { retryAfter: "0", waitMs: 10_000 },
+  { retryAfter: "soon", waitMs: 10_000 },
+  { retryAfter: null, waitMs: 10_000 },
+])(
+  'waits $waitMs ms after a 429 response with a Retry-After of "$retryAfter"',
+  async ({ retryAfter, waitMs }, { server, dataSourceConfig }) => {
+    server.use(
+      http.get("**/endpoint", () =>
+        HttpResponse.json(null, {
+          status: 429,
+          headers: retryAfter === null ? {} : { "Retry-After": retryAfter },
+        }),
+      ),
+    );
+
+    const dataSource = new RateLimitRecordingDataSource({
+      ...dataSourceConfig,
+      requestAttempts: 1,
+    });
+
+    await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+      DataSourceHTTPError,
+    );
+    expect(dataSource.waits).toStrictEqual([waitMs]);
+  },
+);
+
+it("waits until the date given by a Retry-After header", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  const retryAt = new Date(Date.now() + 60_000);
+
+  server.use(
+    http.get("**/endpoint", () =>
+      HttpResponse.json(null, {
+        status: 429,
+        headers: { "Retry-After": retryAt.toUTCString() },
+      }),
+    ),
+  );
+
+  const dataSource = new RateLimitRecordingDataSource({
+    ...dataSourceConfig,
+    requestAttempts: 1,
+  });
+
+  await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+    DataSourceHTTPError,
+  );
+
+  const [waitMs] = dataSource.waits;
+
+  expect(waitMs).toBeGreaterThan(55_000);
+  expect(waitMs).toBeLessThanOrEqual(60_000);
+});
+
+it("rate limits the queue and retries after a 429 response", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get(
+      "**/endpoint",
+      () =>
+        HttpResponse.json(null, {
+          status: 429,
+          headers: { "Retry-After": "1" },
+        }),
+      { once: true },
+    ),
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+  const rateLimitSpy = vi.spyOn(dataSource.queue, "rateLimit");
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+  expect(rateLimitSpy).toHaveBeenCalledExactlyOnceWith(1000);
+});
+
+it("resolves a request that finishes before the queue events start reading", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", async () => {
+      await delay(100);
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const { connection } = dataSourceConfig;
+  const duplicate = connection.duplicate.bind(connection);
+
+  // The queue events read the event stream on their own connection; delay their first read until after the request has finished
+  vi.spyOn(connection, "duplicate").mockImplementation((() => {
+    const client = duplicate();
+    const xread = client.xread.bind(client) as (
+      ...xreadArgs: unknown[]
+    ) => Promise<unknown>;
+
+    vi.spyOn(client, "xread").mockImplementationOnce((async (
+      ...xreadArgs: unknown[]
+    ) => {
+      await setTimeout(500);
+
+      return xread(...xreadArgs);
+    }) as never);
+
+    return client;
+  }) as never);
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
 });

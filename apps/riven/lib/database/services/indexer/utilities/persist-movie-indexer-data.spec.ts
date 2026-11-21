@@ -1,4 +1,5 @@
-import { Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { ItemRequest, Movie } from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
@@ -6,6 +7,8 @@ import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
+
+import type { MovieIndexData } from "./persist-movie-indexer-data.ts";
 
 it("returns the movie if processed successfully", async ({
   factories: { movieItemRequestFactory },
@@ -148,4 +151,121 @@ it("updates the movie with the latest data if it already exists", async ({
       scrapedAt: initialMovie.scrapedAt,
     }),
   );
+});
+
+const indexedMovie = (
+  id: ItemRequest["id"],
+  overrides: Partial<Pick<MovieIndexData, "imdbId" | "releaseDate">> = {},
+): MovieIndexData => ({
+  id,
+  title: "Test Movie",
+  contentRating: "g",
+  genres: [],
+  type: "movie",
+  runtime: 40,
+  imdbId: null,
+  releaseDate: null,
+  ...overrides,
+});
+
+it("rejects a movie request without a TMDB ID", async ({
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await movieItemRequestFactory.createOne({
+    imdbId: "tt1234567",
+    tmdbId: null,
+    state: "requested",
+  });
+
+  await expect(
+    indexerService.indexItem(indexedMovie(itemRequest.id)),
+  ).rejects.toThrow(
+    "Item request is missing tmdbId, cannot persist movie indexer data",
+  );
+});
+
+it("marks a movie without a release date as unreleased", async ({
+  em,
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await movieItemRequestFactory.createOne({
+    state: "requested",
+  });
+
+  const { item } = await indexerService.indexItem(indexedMovie(itemRequest.id));
+
+  expect(item).toMatchObject({
+    releaseDate: null,
+    year: null,
+    isReleased: false,
+  });
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ state: "unreleased" });
+});
+
+it("fills in the item request's missing IMDB ID from the indexed movie", async ({
+  em,
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await movieItemRequestFactory.createOne({
+    imdbId: null,
+    state: "requested",
+  });
+
+  const { item } = await indexerService.indexItem(
+    indexedMovie(itemRequest.id, {
+      imdbId: "tt7654321",
+      releaseDate: DateTime.utc(2020, 1, 1).toISO(),
+    }),
+  );
+
+  expect(item).toMatchObject({ imdbId: "tt7654321", year: 2020 });
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({
+    imdbId: "tt7654321",
+    tmdbId: itemRequest.tmdbId,
+    state: "completed",
+  });
+});
+
+it("uses the item request's IMDB ID when the indexer does not provide one", async ({
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await movieItemRequestFactory.createOne({
+    imdbId: "tt1234567",
+    state: "requested",
+  });
+
+  const { item } = await indexerService.indexItem(indexedMovie(itemRequest.id));
+
+  expect(item.imdbId).toBe("tt1234567");
+});
+
+it("rejects indexed movie data that fails validation", async ({
+  em,
+  factories: { movieItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await movieItemRequestFactory.createOne({
+    imdbId: null,
+    state: "requested",
+  });
+
+  await expect(
+    indexerService.indexItem(
+      indexedMovie(itemRequest.id, { imdbId: "not-an-imdb-id" }),
+    ),
+  ).rejects.toThrow(MediaItemIndexError);
+
+  await expect(
+    em.fork().count(Movie, { tmdbId: itemRequest.tmdbId ?? "" }),
+  ).resolves.toBe(0);
 });

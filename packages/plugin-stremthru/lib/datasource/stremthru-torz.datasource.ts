@@ -298,7 +298,7 @@ export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
     const infoHashSet = new Set(infoHashes);
     const requests: Promise<Record<string, DebridFile[]>>[] = [];
 
-    for (let i = 0; i < infoHashes.length; i += chunkSize) {
+    for (let i = 0; i < infoHashSet.size; i += chunkSize) {
       const chunk = infoHashSet.values().drop(i).take(chunkSize).toArray();
 
       requests.push(this.#processCacheCheckChunk(chunk, store));

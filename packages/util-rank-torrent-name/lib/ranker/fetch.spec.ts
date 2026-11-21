@@ -256,3 +256,84 @@ describe("fetch codec", () => {
     expect(result.failedChecks).toContain("av1");
   });
 });
+
+describe("language groups and exceptions", () => {
+  it("expands language groups in the excluded languages", ({
+    rankingModel,
+  }) => {
+    const settings = createSettings({ languages: { exclude: ["anime"] } });
+    const data = parse("Movie.2024.JAPANESE.1080p.BluRay.x264-GROUP");
+
+    expect(data.languages).toStrictEqual(["ja"]);
+
+    const result = checkFetch(data, settings, rankingModel);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("lang_ja");
+  });
+
+  it("accepts a release in a required language", ({ rankingModel }) => {
+    const settings = createSettings({ languages: { required: ["fr"] } });
+    const data = parse("Movie.2024.FRENCH.1080p.BluRay.x264-GROUP");
+
+    expect(checkFetch(data, settings, rankingModel).fetch).toBe(true);
+  });
+
+  it("rejects a release whose languages are all outside the required languages", ({
+    rankingModel,
+  }) => {
+    const settings = createSettings({ languages: { required: ["de"] } });
+    const data = parse("Movie.2024.FRENCH.1080p.BluRay.x264-GROUP");
+    const result = checkFetch(data, settings, rankingModel);
+
+    expect(result.fetch).toBe(false);
+    expect(result.failedChecks).toContain("missing_required_language");
+  });
+
+  it.for([
+    { allowEnglishInLanguages: true, fetch: true },
+    { allowEnglishInLanguages: false, fetch: false },
+  ])(
+    "keeps excluded languages alongside English when allowEnglishInLanguages is $allowEnglishInLanguages",
+    ({ allowEnglishInLanguages, fetch }, { rankingModel }) => {
+      const settings = createSettings({
+        languages: { exclude: ["fr"] },
+        options: { allowEnglishInLanguages },
+      });
+      const data = parse("Movie.2024.FRENCH.ENGLISH.1080p.BluRay.x264-GROUP");
+
+      expect(data.languages).toStrictEqual(
+        expect.arrayContaining(["en", "fr"]),
+      );
+      expect(checkFetch(data, settings, rankingModel).fetch).toBe(fetch);
+    },
+  );
+});
+
+describe("trash", () => {
+  it("rejects releases the parser flags as trash", ({
+    settings,
+    rankingModel,
+  }) => {
+    const data = parse("Movie.2024.1080p.WEB-DL.HQ.Clean.Audio.x264-GROUP");
+
+    expect(data.trash).toBe(true);
+
+    const result = checkFetch(data, settings, rankingModel);
+
+    expect(result.fetch).toBe(false);
+    expect([...result.failedChecks]).toStrictEqual(["trash_flag"]);
+  });
+
+  it("accepts releases flagged as trash when removeAllTrash is false", ({
+    rankingModel,
+  }) => {
+    const settings = createSettings({ options: { removeAllTrash: false } });
+    const data = parse("Movie.2024.1080p.WEB-DL.HQ.Clean.Audio.x264-GROUP");
+
+    const result = checkFetch(data, settings, rankingModel);
+
+    expect(result.fetch).toBe(true);
+    expect([...result.failedChecks]).toStrictEqual([]);
+  });
+});

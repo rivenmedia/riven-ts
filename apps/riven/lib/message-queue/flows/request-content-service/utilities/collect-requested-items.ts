@@ -21,7 +21,9 @@ function buildExternalIdKey(
 }
 
 /**
- * Collects the items returned by the content service into a map of unique items, keyed by external ID.
+ * Collects the items returned by the content service into a map of unique items, keyed by media type and external ID.
+ *
+ * Movies and shows are keyed separately, as TMDB and TVDB IDs can collide.
  */
 export function collectRequestedItems(
   childrenData: ContentServiceRequestedResponse[],
@@ -44,7 +46,7 @@ export function collectRequestedItems(
         continue;
       }
 
-      items.set(key, { item: movie, type: "movie" });
+      items.set(`movie:${key}`, { item: movie, type: "movie" });
     }
 
     for (const show of childData.shows) {
@@ -58,7 +60,7 @@ export function collectRequestedItems(
         continue;
       }
 
-      items.set(key, { item: show, type: "show" });
+      items.set(`show:${key}`, { item: show, type: "show" });
     }
   }
 

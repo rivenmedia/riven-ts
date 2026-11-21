@@ -1,5 +1,5 @@
 import { HttpResponse, http } from "msw";
-import { expect } from "vitest";
+import { expect, vi } from "vitest";
 
 import { findByIdHandler } from "../../__generated__/handlers/findByIdHandler.ts";
 import { tvEpisodeCreditsHandler } from "../../__generated__/handlers/tvEpisodeCreditsHandler.ts";
@@ -143,5 +143,63 @@ it.describe(getEpisodeCast, () => {
     );
 
     expect(cast).toBeNull();
+  });
+
+  it("returns null if TMDB has neither the episode nor its show", async ({
+    server,
+    dataSourceMap,
+  }) => {
+    const credits = vi.fn<() => Response>(() =>
+      HttpResponse.json({ id: 1, cast: [], guest_stars: [] }),
+    );
+
+    server.use(
+      findByIdHandler({ tv_results: [], tv_episode_results: [] }),
+      tvEpisodeCreditsHandler(credits),
+    );
+
+    await expect(
+      getEpisodeCast(dataSourceMap.get(TmdbAPI), createEpisode(), "en-US"),
+    ).resolves.toBeNull();
+
+    expect(credits).not.toHaveBeenCalled();
+  });
+
+  it("returns null if TMDB has no credits for the episode", async ({
+    server,
+    dataSourceMap,
+  }) => {
+    server.use(
+      findByIdHandler({
+        tv_results: [],
+        tv_episode_results: [
+          { show_id: 1396, season_number: 1, episode_number: 1 },
+        ],
+      }),
+      tvEpisodeCreditsHandler(() => HttpResponse.json(null, { status: 404 })),
+    );
+
+    await expect(
+      getEpisodeCast(dataSourceMap.get(TmdbAPI), createEpisode(), "en-US"),
+    ).resolves.toBeNull();
+  });
+
+  it("rethrows other errors when fetching the episode's credits", async ({
+    server,
+    dataSourceMap,
+  }) => {
+    server.use(
+      findByIdHandler({
+        tv_results: [],
+        tv_episode_results: [
+          { show_id: 1396, season_number: 1, episode_number: 1 },
+        ],
+      }),
+      tvEpisodeCreditsHandler(() => HttpResponse.json(null, { status: 403 })),
+    );
+
+    await expect(
+      getEpisodeCast(dataSourceMap.get(TmdbAPI), createEpisode(), "en-US"),
+    ).rejects.toMatchObject({ response: { status: 403 } });
   });
 });

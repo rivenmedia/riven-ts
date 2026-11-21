@@ -85,7 +85,8 @@ it("maps movies and shows in TMDB's relevance order, skipping people", async ({
       type: "movie",
       title: "Test Movie",
       isRequestable: true,
-      releaseDate: new Date("2024-01-01T00:00:00.000Z"),
+      // TMDB dates are parsed as midnight in the server's time zone
+      releaseDate: new Date(2024, 0, 1),
     },
   ]);
 });

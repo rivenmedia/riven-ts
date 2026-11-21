@@ -132,7 +132,10 @@ export const RivenSettings = z.object({
         return null;
       }
 
-      const [username, password] = val.split(":");
+      // Only the first colon separates the username, as passwords may contain colons
+      const separatorIndex = val.indexOf(":");
+      const username = val.slice(0, separatorIndex);
+      const password = val.slice(separatorIndex + 1);
 
       if (!username || !password) {
         throw new Error(
