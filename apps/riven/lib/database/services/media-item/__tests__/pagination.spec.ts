@@ -232,3 +232,22 @@ it("returns the previous page before a cursor", async ({
     "B Movie",
   ]);
 });
+
+it("does not skip items sharing a title and state across a page boundary", async ({
+  services: { mediaItemService },
+  factories: { movieFactory },
+}) => {
+  const movies = await movieFactory.create(3, { title: "Duplicate Movie" });
+
+  const firstPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+  });
+  const secondPage = await mediaItemService.getPaginatedMediaItems({
+    itemsPerPage: 2,
+    after: firstPage.endCursor,
+  });
+
+  expect(
+    [...firstPage.items, ...secondPage.items].map(({ id }) => id).toSorted(),
+  ).toStrictEqual(movies.map(({ id }) => id).toSorted());
+});

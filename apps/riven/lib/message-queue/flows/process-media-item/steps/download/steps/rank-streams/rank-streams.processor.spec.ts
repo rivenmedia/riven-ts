@@ -339,12 +339,15 @@ it.for([
   ) => {
     overrideRuntimeSettings({ general: { scraping: { dubbedAnimeOnly } } });
 
+    // A fixed title, as some generated titles (e.g. "The Old Man and the Sea") are rejected by the ranking engine
+    const title = "Example Item";
+
     await em.nativeUpdate(
       MediaItem,
       { id: indexedMovie.id },
       isAnime
-        ? { language: "ja", genres: ["Animation", "Anime"] }
-        : { language: "en", genres: ["Action"] },
+        ? { title, language: "ja", genres: ["Animation", "Anime"] }
+        : { title, language: "en", genres: ["Action"] },
     );
 
     const dubbedStream = await streamFactory.createOne({
@@ -357,8 +360,8 @@ it.for([
     const job = await createMockJob({
       id: indexedMovie.id,
       streams: {
-        [dubbedStream.infoHash]: `${indexedMovie.title} 1080p`,
-        [nonDubbedStream.infoHash]: `${indexedMovie.title} 720p`,
+        [dubbedStream.infoHash]: `${title} 1080p`,
+        [nonDubbedStream.infoHash]: `${title} 720p`,
       },
     });
 
