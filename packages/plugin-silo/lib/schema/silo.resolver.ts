@@ -1,10 +1,11 @@
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Query, Resolver } from "type-graphql";
+import { Authorized, Query, Resolver } from "type-graphql";
 
 import { SiloAPI } from "../datasource/silo.datasource.ts";
 import { pluginConfig } from "../silo-plugin.config.ts";
 
+@Authorized()
 @Resolver()
 export class SiloResolver {
   @Query(() => Boolean)

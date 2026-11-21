@@ -106,3 +106,62 @@ it("accepts a scan in a mode that Silo added later", async ({
     siloApi.scanPath("movies/Oppenheimer (2023)"),
   ).resolves.toBeUndefined();
 });
+
+it.for([
+  [401, "the API key is missing, invalid or expired"],
+  [409, "the library is disabled, or the path's state conflicts with the scan"],
+  [503, "the Silo scanner is not available"],
+] as const)(
+  "explains a %i response from Silo",
+  async ([status, reason], { server, dataSourceMap }) => {
+    server.use(
+      http.post("**/api/v2/scan", () => HttpResponse.json({}, { status })),
+    );
+
+    await expect(
+      dataSourceMap.get(SiloAPI).scanPath("movies/Unknown"),
+    ).rejects.toThrow(`Failed to scan /mount/movies/Unknown: ${reason}`);
+  },
+);
+
+it("falls back to the HTTP error message for statuses without a known reason", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(
+    http.post("**/api/v2/scan", () => HttpResponse.json({}, { status: 418 })),
+  );
+
+  const failure = await dataSourceMap
+    .get(SiloAPI)
+    .scanPath("movies/Unknown")
+    .catch((error: unknown) => error as Error);
+
+  expect.assert(failure instanceof Error);
+
+  expect(failure.name).toBe("SiloAPIError");
+  expect(failure.message).toMatch(
+    /^Failed to scan \/mount\/movies\/Unknown: .+/u,
+  );
+  expect(failure.message).not.toContain("the API key");
+  expect(failure.cause).toBeInstanceOf(Error);
+});
+
+it("reports network failures and keeps the original error as the cause", async ({
+  server,
+  dataSourceMap,
+}) => {
+  server.use(http.post("**/api/v2/scan", () => HttpResponse.error()));
+
+  const failure = await dataSourceMap
+    .get(SiloAPI)
+    .scanPath("movies/Unknown")
+    .catch((error: unknown) => error as Error);
+
+  expect.assert(failure instanceof Error);
+
+  expect(failure.message).toMatch(
+    /^Failed to scan \/mount\/movies\/Unknown: .+/u,
+  );
+  expect(failure.cause).toBeDefined();
+});

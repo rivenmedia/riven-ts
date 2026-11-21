@@ -1,6 +1,7 @@
 import { HttpResponse, http } from "msw";
 import { expect, vi } from "vitest";
 
+import { SiloAPI } from "../datasource/silo.datasource.ts";
 import { it } from "./silo.test-context.ts";
 
 import type { MediaItemDownloadSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.success.event";
@@ -122,4 +123,139 @@ it("throws an aggregated error if any scan fails", async ({
   ).rejects.toThrow(
     "Failed to scan Silo library paths for Test Show - Season 1. Failed to scan /mount/shows/Test Show/Season 02",
   );
+});
+
+it("requests a scan for each distinct directory", async ({
+  dataSourceMap,
+  logger,
+  plugin,
+  server,
+  settings,
+}) => {
+  const downloadSuccessHook = plugin.hooks["riven.media-item.download.success"];
+
+  expect.assert(downloadSuccessHook);
+
+  const scannedPaths: string[] = [];
+
+  server.use(
+    http.post("**/api/v2/scan", async ({ request }) => {
+      scannedPaths.push(((await request.json()) as { path: string }).path);
+
+      return HttpResponse.json(
+        { status: "accepted", mode: "subtree", library_id: "1" },
+        { status: 202 },
+      );
+    }),
+  );
+
+  await downloadSuccessHook({
+    dataSources: dataSourceMap,
+    settings,
+    logger,
+    event: createEvent([
+      { baseDirectory: "shows", path: "Test Show/Season 01/S01E01.mkv" },
+      { baseDirectory: "shows", path: "Test Show/Season 02/S02E01.mkv" },
+      { baseDirectory: "anime", path: "Test Show/Season 01/S01E01.mkv" },
+    ]),
+  });
+
+  expect(scannedPaths.toSorted()).toStrictEqual([
+    "/mount/anime/Test Show/Season 01",
+    "/mount/shows/Test Show/Season 01",
+    "/mount/shows/Test Show/Season 02",
+  ]);
+});
+
+it("reports every failed scan and does not log success", async ({
+  dataSourceMap,
+  logger,
+  plugin,
+  server,
+  settings,
+}) => {
+  const downloadSuccessHook = plugin.hooks["riven.media-item.download.success"];
+
+  expect.assert(downloadSuccessHook);
+
+  const infoLog = vi.spyOn(logger, "info");
+
+  server.use(
+    http.post("**/api/v2/scan", () => HttpResponse.json({}, { status: 403 })),
+  );
+
+  const failure = await downloadSuccessHook({
+    dataSources: dataSourceMap,
+    settings,
+    logger,
+    event: createEvent([
+      { baseDirectory: "shows", path: "Test Show/Season 01/S01E01.mkv" },
+      { baseDirectory: "shows", path: "Test Show/Season 02/S02E01.mkv" },
+    ]),
+  }).catch((error: unknown) => error as Error);
+
+  expect.assert(failure instanceof Error);
+  expect.assert(Array.isArray(failure.cause));
+
+  expect(failure.cause).toHaveLength(2);
+  expect(failure.message).toContain("/mount/shows/Test Show/Season 01");
+  expect(failure.message).toContain("/mount/shows/Test Show/Season 02");
+  expect(infoLog).not.toHaveBeenCalled();
+});
+
+it("wraps non-Error rejections from a scan", async ({
+  dataSourceMap,
+  logger,
+  plugin,
+  settings,
+}) => {
+  const downloadSuccessHook = plugin.hooks["riven.media-item.download.success"];
+
+  expect.assert(downloadSuccessHook);
+
+  vi.spyOn(dataSourceMap.get(SiloAPI), "scanPath").mockRejectedValueOnce(
+    "boom",
+  );
+
+  await expect(
+    downloadSuccessHook({
+      dataSources: dataSourceMap,
+      settings,
+      logger,
+      event: createEvent([
+        { baseDirectory: "shows", path: "Test Show/Season 01/S01E01.mkv" },
+      ]),
+    }),
+  ).rejects.toThrow(
+    "Failed to scan Silo library paths for Test Show - Season 1. boom",
+  );
+});
+
+it("validates by checking the Silo scan capabilities", async ({
+  dataSourceMap,
+  plugin,
+  settings,
+  server,
+}) => {
+  expect.assert(plugin.validator);
+
+  server.use(
+    http.get("**/api/v2/scan/capabilities", () =>
+      HttpResponse.json({ state: "available", allowed: true }),
+    ),
+  );
+
+  await expect(
+    plugin.validator({ dataSources: dataSourceMap, settings }),
+  ).resolves.toBe(true);
+
+  server.use(
+    http.get("**/api/v2/scan/capabilities", () =>
+      HttpResponse.json({ state: "available", allowed: false }),
+    ),
+  );
+
+  await expect(
+    plugin.validator({ dataSources: dataSourceMap, settings }),
+  ).resolves.toBe(false);
 });
