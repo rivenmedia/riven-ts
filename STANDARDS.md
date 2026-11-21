@@ -39,7 +39,7 @@ wrong, change the config, not the code.
 
 ## Code
 
-- Prefer **inferred return types**. The explicit return type rules are
+- Use **inferred return types**. The explicit return type rules are
   intentionally disabled — don't add annotations just for the sake of it.
 - The size and complexity rules (`complexity`, `max-lines`,
   `max-lines-per-function`, `max-params`, `max-statements`, etc.) are
@@ -65,17 +65,16 @@ wrong, change the config, not the code.
 
 ## Tests
 
-- Flat test files (no top-level `describe`) are preferred; split into
+- Write flat test files (no top-level `describe`); when specs span multiple logical domains, split into
   separate files (e.g. `rank-torrent.removing-trash.spec.ts`, `rank-torrent.keeping-trash.spec.ts`) instead of nesting `describe` blocks for organisation.
 
-### Prefer type narrowing
+### Type narrowing
 
-When writing tests, prefer to use type narrowing by using `expect.assert()`
-rather than type assertions.
+When writing tests, use type narrowing by using `expect.assert()` over type assertions.
 
-### Prefer colocation
+### Spec colocation
 
-Prefer to write spec files alongside the source file under test when the spec
+Write spec files alongside the source file under test when the spec
 file only includes tests relating to that file.
 
 When a test spans multiple logical boundaries (e.g. in an integration test),
@@ -117,7 +116,7 @@ name that clearly explains the subject matter of the tests.
 
 #### Story reuse
 
-When writing Storybook tests, prefer to re-use existing stories instead of
+When writing Storybook tests, re-use existing stories instead of
 creating new ones, unless none satisfy the needs of the initial test's state.
 
 **BAD - duplicate stories are created with identical inputs:**
@@ -170,9 +169,9 @@ DisabledInput.test("is not editable", () => {
 });
 ```
 
-#### Prefer args targeting
+#### Args targeting
 
-When writing Storybook stories, prefer to assert against args provided to the
+When writing Storybook stories, assert against args provided to the
 story under test instead of a variable in a parent scope.
 
 **BAD - test asserts a function outside the story scope:**
