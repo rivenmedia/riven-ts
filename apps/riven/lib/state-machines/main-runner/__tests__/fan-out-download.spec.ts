@@ -7,17 +7,20 @@ import { waitFor } from "xstate";
 
 import { flow } from "#message-queue/flows/producer.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
 
 const eventType = getEventTypeFromSchema(MediaItemDownloadErrorEvent);
 
+const it = baseIt.extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
+
 it(`enqueues a scrape for each incomplete season when a "${eventType}" event is received for a show`, async ({
+  spyOnAddBulk,
   actor,
   scrapedShowContext: { scrapedShow },
 }) => {
   const seasons = await scrapedShow.seasons.load();
 
-  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+  const flowAddBulkSpy = spyOnAddBulk();
 
   actor.start();
 
@@ -49,6 +52,7 @@ it(`enqueues a scrape for each incomplete season when a "${eventType}" event is 
 });
 
 it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is received for a season`, async ({
+  spyOnAddBulk,
   actor,
   scrapedShowContext: { scrapedShow },
 }) => {
@@ -56,7 +60,7 @@ it(`enqueues a scrape for each incomplete episode when a "${eventType}" event is
 
   assert.ok(failedSeason);
 
-  const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+  const flowAddBulkSpy = spyOnAddBulk();
 
   actor.start();
 

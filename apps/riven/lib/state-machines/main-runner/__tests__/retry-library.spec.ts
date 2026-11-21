@@ -6,7 +6,9 @@ import { waitFor } from "xstate";
 import { flow } from "#message-queue/flows/producer.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
+
+const it = baseIt.extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
 
 it("enqueues an item processor job for each incomplete item request in the database", async ({
   actor,
@@ -82,10 +84,11 @@ it("enqueues an item processor job for each incomplete item request in the datab
 });
 
 it('enqueues a media item processor job in the "scrape" step for each incomplete indexed media item', async ({
+  spyOnAddBulk,
   actor,
   seeders: { seedIndexedMovie },
 }) => {
-  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = spyOnAddBulk().mockResolvedValue([]);
 
   const indexedMovies = await seedIndexedMovie(3);
 
@@ -113,10 +116,11 @@ it('enqueues a media item processor job in the "scrape" step for each incomplete
 });
 
 it('enqueues a media item processor job in the "scrape" step for each partially completed media item', async ({
+  spyOnAddBulk,
   actor,
   seeders: { seedPartiallyCompletedShow },
 }) => {
-  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = spyOnAddBulk().mockResolvedValue([]);
 
   const partiallyCompletedShows = await seedPartiallyCompletedShow(3);
 
@@ -149,10 +153,11 @@ it('enqueues a media item processor job in the "scrape" step for each partially 
 });
 
 it('enqueues a media item processor job in the "download" step for each incomplete scraped media item', async ({
+  spyOnAddBulk,
   actor,
   seeders: { seedScrapedMovie },
 }) => {
-  const flowAddBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const flowAddBulkSpy = spyOnAddBulk().mockResolvedValue([]);
 
   const scrapedMovies = await seedScrapedMovie(3);
 

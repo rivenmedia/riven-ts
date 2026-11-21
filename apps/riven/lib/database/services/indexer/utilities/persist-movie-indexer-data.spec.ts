@@ -6,9 +6,28 @@ import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import type { MovieIndexData } from "./persist-movie-indexer-data.ts";
+
+const it = baseIt.extend(
+  "indexedMovie",
+  () =>
+    (
+      id: ItemRequest["id"],
+      overrides: Partial<Pick<MovieIndexData, "imdbId" | "releaseDate">> = {},
+    ): MovieIndexData => ({
+      id,
+      title: "Test Movie",
+      contentRating: "g",
+      genres: [],
+      type: "movie",
+      runtime: 40,
+      imdbId: null,
+      releaseDate: null,
+      ...overrides,
+    }),
+);
 
 it("returns the movie if processed successfully", async ({
   factories: { movieItemRequestFactory },
@@ -153,22 +172,8 @@ it("updates the movie with the latest data if it already exists", async ({
   );
 });
 
-const indexedMovie = (
-  id: ItemRequest["id"],
-  overrides: Partial<Pick<MovieIndexData, "imdbId" | "releaseDate">> = {},
-): MovieIndexData => ({
-  id,
-  title: "Test Movie",
-  contentRating: "g",
-  genres: [],
-  type: "movie",
-  runtime: 40,
-  imdbId: null,
-  releaseDate: null,
-  ...overrides,
-});
-
 it("rejects a movie request without a TMDB ID", async ({
+  indexedMovie,
   factories: { movieItemRequestFactory },
   services: { indexerService },
 }) => {
@@ -186,6 +191,7 @@ it("rejects a movie request without a TMDB ID", async ({
 });
 
 it("marks a movie without a release date as unreleased", async ({
+  indexedMovie,
   em,
   factories: { movieItemRequestFactory },
   services: { indexerService },
@@ -208,6 +214,7 @@ it("marks a movie without a release date as unreleased", async ({
 });
 
 it("fills in the item request's missing IMDB ID from the indexed movie", async ({
+  indexedMovie,
   em,
   factories: { movieItemRequestFactory },
   services: { indexerService },
@@ -236,6 +243,7 @@ it("fills in the item request's missing IMDB ID from the indexed movie", async (
 });
 
 it("uses the item request's IMDB ID when the indexer does not provide one", async ({
+  indexedMovie,
   factories: { movieItemRequestFactory },
   services: { indexerService },
 }) => {
@@ -250,6 +258,7 @@ it("uses the item request's IMDB ID when the indexer does not provide one", asyn
 });
 
 it("rejects indexed movie data that fails validation", async ({
+  indexedMovie,
   em,
   factories: { movieItemRequestFactory },
   services: { indexerService },

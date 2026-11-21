@@ -2,53 +2,64 @@ import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getRequestHandler } from "../__generated__/handlers/getRequestHandler.ts";
-import { it } from "../__tests__/seerr.test-context.ts";
+import { it as baseIt } from "../__tests__/seerr.test-context.ts";
 import { SeerrAPI } from "./seerr.datasource.ts";
 
 import type { ExtendedMediaRequest } from "../schemas/extended-media-request.schema.ts";
 import type { RequestResponse } from "../schemas/request-response.schema.ts";
 
-const requester = (email: string) => ({
-  id: 1,
-  email,
-  createdAt: "2026-01-01T00:00:00.000Z",
-  updatedAt: "2026-01-01T00:00:00.000Z",
-});
-
-const respondWith = (body: RequestResponse) =>
-  getRequestHandler(() => HttpResponse.json<RequestResponse>(body));
-
-const movieRequest = (
-  id: number,
-  media: { tmdbId?: number },
-  email?: string,
-): ExtendedMediaRequest => ({
-  id,
-  status: 2,
-  type: "movie",
-  media,
-  ...(email && { requestedBy: requester(email) }),
-});
-
-const showRequest = (
-  id: number,
-  media: { id?: number; tmdbId?: number; tvdbId?: number },
-  seasonNumbers: number[],
-  email?: string,
-): ExtendedMediaRequest => ({
-  id,
-  status: 2,
-  type: "tv",
-  media,
-  seasons: seasonNumbers.map((seasonNumber) => ({
-    id: seasonNumber,
-    status: 2,
-    seasonNumber,
-  })),
-  ...(email && { requestedBy: requester(email) }),
-});
+const it = baseIt
+  .extend("requester", () => (email: string) => ({
+    id: 1,
+    email,
+    createdAt: "2026-01-01T00:00:00.000Z",
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  }))
+  .extend(
+    "respondWith",
+    () => (body: RequestResponse) =>
+      getRequestHandler(() => HttpResponse.json<RequestResponse>(body)),
+  )
+  .extend(
+    "movieRequest",
+    ({ requester }) =>
+      (
+        id: number,
+        media: { tmdbId?: number },
+        email?: string,
+      ): ExtendedMediaRequest => ({
+        id,
+        status: 2,
+        type: "movie",
+        media,
+        ...(email && { requestedBy: requester(email) }),
+      }),
+  )
+  .extend(
+    "showRequest",
+    ({ requester }) =>
+      (
+        id: number,
+        media: { id?: number; tmdbId?: number; tvdbId?: number },
+        seasonNumbers: number[],
+        email?: string,
+      ): ExtendedMediaRequest => ({
+        id,
+        status: 2,
+        type: "tv",
+        media,
+        seasons: seasonNumbers.map((seasonNumber) => ({
+          id: seasonNumber,
+          status: 2,
+          seasonNumber,
+        })),
+        ...(email && { requestedBy: requester(email) }),
+      }),
+  );
 
 it("maps movie requests to their TMDB ID, request ID and requester", async ({
+  respondWith,
+  movieRequest,
   server,
   dataSourceMap,
 }) => {
@@ -74,6 +85,8 @@ it("maps movie requests to their TMDB ID, request ID and requester", async ({
 });
 
 it("maps show requests to their IDs, media ID and requested seasons", async ({
+  respondWith,
+  showRequest,
   server,
   dataSourceMap,
 }) => {
@@ -108,6 +121,8 @@ it("maps show requests to their IDs, media ID and requested seasons", async ({
 });
 
 it("uses the request ID for shows without a media ID", async ({
+  respondWith,
+  showRequest,
   server,
   dataSourceMap,
 }) => {
@@ -132,6 +147,8 @@ it("uses the request ID for shows without a media ID", async ({
 });
 
 it("combines the seasons of multiple requests for the same show", async ({
+  respondWith,
+  showRequest,
   server,
   dataSourceMap,
 }) => {
@@ -155,6 +172,9 @@ it("combines the seasons of multiple requests for the same show", async ({
 });
 
 it("skips requests without the ID needed to identify the item", async ({
+  respondWith,
+  movieRequest,
+  showRequest,
   server,
   dataSourceMap,
 }) => {
@@ -181,6 +201,7 @@ it("skips requests without the ID needed to identify the item", async ({
 });
 
 it("requests every page with the given filter", async ({
+  movieRequest,
   server,
   dataSourceMap,
 }) => {

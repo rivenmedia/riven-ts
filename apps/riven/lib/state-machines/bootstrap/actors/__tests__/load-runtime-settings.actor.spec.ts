@@ -2,7 +2,7 @@ import { expect, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 import { ZodError } from "zod";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { CORE_NAMESPACE } from "#settings/core-settings-sections.ts";
 import { configureLogger, logger } from "#utilities/logger/logger.ts";
 import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
@@ -22,7 +22,13 @@ async function runLoader(
   );
 }
 
+const it = baseIt.extend(
+  "spyOnLoggerWarn",
+  () => () => vi.spyOn(logger, "warn"),
+);
+
 it("drops an invalid stored value, logs a warning and continues", async ({
+  spyOnLoggerWarn,
   services,
 }) => {
   await services.settingsService.writeValues(CORE_NAMESPACE, {
@@ -30,7 +36,7 @@ it("drops an invalid stored value, logs a warning and continues", async ({
     delete: [],
   });
 
-  const warnSpy = vi.spyOn(logger, "warn");
+  const warnSpy = spyOnLoggerWarn();
 
   await expect(runLoader(services)).resolves.toBeUndefined();
 

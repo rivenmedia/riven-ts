@@ -1,7 +1,7 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/mdblist.test-context.ts";
+import { it as baseIt } from "../__tests__/mdblist.test-context.ts";
 import { MdblistAPI } from "./mdblist.datasource.ts";
 
 import type { GetListItemsByName200Schema as ListItemsResponse } from "../__generated__/zod/getListItemsByNameSchema.ts";
@@ -9,71 +9,80 @@ import type { GetListItemsByName200Schema as ListItemsResponse } from "../__gene
 type Movie = NonNullable<ListItemsResponse["movies"]>[number];
 type Show = NonNullable<ListItemsResponse["shows"]>[number];
 
-const movie = (id: number, ids: Movie["ids"] = {}): Movie => ({
-  id,
-  rank: null,
-  adult: 0,
-  title: `Movie ${id.toString()}`,
-  imdb_id: null,
-  tvdb_id: null,
-  ids,
-  language: null,
-  mediatype: "movie",
-  release_year: null,
-  spoken_language: null,
-  country: null,
-});
-
-const show = (
-  id: number,
-  {
-    imdbId = null,
-    tvdbId = null,
-  }: { imdbId?: string | null; tvdbId?: number | null } = {},
-): Show => ({
-  id,
-  rank: null,
-  adult: 0,
-  title: `Show ${id.toString()}`,
-  imdb_id: imdbId,
-  tvdb_id: tvdbId,
-  language: null,
-  mediatype: "show",
-  release_year: null,
-  spoken_language: null,
-  country: null,
-});
-
 const LIST_ITEMS_URL =
   "https://api.mdblist.com/lists/:username/:listname/items";
 
 const isAuthorized = (request: Request) =>
   new URL(request.url).searchParams.get("apikey") === "mock-api-key";
 
-const listItemsHandler = (
-  lists: Record<string, ListItemsResponse>,
-  requestedLists: string[] = [],
-) =>
-  http.get(LIST_ITEMS_URL, ({ params, request }) => {
-    const list = `${String(params["username"])}/${String(params["listname"])}`;
+const it = baseIt
+  .extend("movie", () => (id: number, ids: Movie["ids"] = {}): Movie => ({
+    id,
+    rank: null,
+    adult: 0,
+    title: `Movie ${id.toString()}`,
+    imdb_id: null,
+    tvdb_id: null,
+    ids,
+    language: null,
+    mediatype: "movie",
+    release_year: null,
+    spoken_language: null,
+    country: null,
+  }))
+  .extend(
+    "show",
+    () =>
+      (
+        id: number,
+        {
+          imdbId = null,
+          tvdbId = null,
+        }: { imdbId?: string | null; tvdbId?: number | null } = {},
+      ): Show => ({
+        id,
+        rank: null,
+        adult: 0,
+        title: `Show ${id.toString()}`,
+        imdb_id: imdbId,
+        tvdb_id: tvdbId,
+        language: null,
+        mediatype: "show",
+        release_year: null,
+        spoken_language: null,
+        country: null,
+      }),
+  )
+  .extend(
+    "listItemsHandler",
+    () =>
+      (
+        lists: Record<string, ListItemsResponse>,
+        requestedLists: string[] = [],
+      ) =>
+        http.get(LIST_ITEMS_URL, ({ params, request }) => {
+          const list = `${String(params["username"])}/${String(params["listname"])}`;
 
-    requestedLists.push(list);
+          requestedLists.push(list);
 
-    if (!isAuthorized(request)) {
-      return HttpResponse.json(null, { status: 401 });
-    }
+          if (!isAuthorized(request)) {
+            return HttpResponse.json(null, { status: 401 });
+          }
 
-    const items =
-      new URL(request.url).searchParams.get("offset") === "0"
-        ? lists[list]
-        : undefined;
+          const items =
+            new URL(request.url).searchParams.get("offset") === "0"
+              ? lists[list]
+              : undefined;
 
-    if (!items) {
-      return HttpResponse.json(null, { status: 404 });
-    }
+          if (!items) {
+            return HttpResponse.json(null, { status: 404 });
+          }
 
-    return HttpResponse.json(items, { headers: { "X-Has-More": "false" } });
-  });
+          return HttpResponse.json(items, {
+            headers: { "X-Has-More": "false" },
+          });
+        }),
+  );
 
 it("returns no items without requesting anything when no lists are given", async ({
   dataSourceMap,
@@ -85,7 +94,7 @@ it("returns no items without requesting anything when no lists are given", async
 
 it.for(["no-slash", "too/many/slashes", "/missing-user", "missing-list/"])(
   'rejects the invalid list name "%s" before requesting any list',
-  async (listName, { server, dataSourceMap }) => {
+  async (listName, { listItemsHandler, server, dataSourceMap }) => {
     const requestedLists: string[] = [];
 
     server.use(listItemsHandler({}, requestedLists));
@@ -102,6 +111,9 @@ it.for(["no-slash", "too/many/slashes", "/missing-user", "missing-list/"])(
 );
 
 it("maps the external IDs of movies and shows", async ({
+  movie,
+  show,
+  listItemsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -149,6 +161,9 @@ it("maps the external IDs of movies and shows", async ({
 });
 
 it("combines the items of every list without duplicates", async ({
+  movie,
+  show,
+  listItemsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -174,6 +189,9 @@ it("combines the items of every list without duplicates", async ({
 });
 
 it("only returns items that were not returned by an earlier request", async ({
+  movie,
+  show,
+  listItemsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -203,6 +221,8 @@ it("only returns items that were not returned by an earlier request", async ({
 });
 
 it("requests the following pages from the offset of the items received so far", async ({
+  movie,
+  show,
   server,
   dataSourceMap,
 }) => {
@@ -238,7 +258,13 @@ it("requests the following pages from the offset of the items received so far", 
   expect(shows.map(({ tvdbId }) => tvdbId)).toStrictEqual(["10", "11"]);
 });
 
-it("ignores items without an MDBList ID", async ({ server, dataSourceMap }) => {
+it("ignores items without an MDBList ID", async ({
+  movie,
+  show,
+  listItemsHandler,
+  server,
+  dataSourceMap,
+}) => {
   server.use(
     listItemsHandler({
       "user/list": {
@@ -257,6 +283,7 @@ it("ignores items without an MDBList ID", async ({ server, dataSourceMap }) => {
 });
 
 it("rejects when a list cannot be fetched", async ({
+  listItemsHandler,
   server,
   dataSourceMap,
 }) => {

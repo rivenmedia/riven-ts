@@ -2,7 +2,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import type { ValidPluginMap } from "#types/plugins.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
@@ -14,23 +14,28 @@ type SubtitleHook = NonNullable<
   RivenPlugin["hooks"]["riven.media-item.subtitle.requested"]
 >;
 
-const createPlugins = (...hooks: RivenPlugin["hooks"][]): ValidPluginMap =>
-  new Map(
-    hooks.map((pluginHooks, index) => {
-      const name = Symbol.for(`@repo/plugin-${index.toString()}`);
+const it = baseIt.extend(
+  "createPlugins",
+  () =>
+    (...hooks: RivenPlugin["hooks"][]): ValidPluginMap =>
+      new Map(
+        hooks.map((pluginHooks, index) => {
+          const name = Symbol.for(`@repo/plugin-${index.toString()}`);
 
-      return [
-        name,
-        {
-          config: { name, hooks: pluginHooks } as RivenPlugin,
-          dataSources: new DataSourceMap(),
-          status: "valid",
-        },
-      ];
-    }),
-  );
+          return [
+            name,
+            {
+              config: { name, hooks: pluginHooks } as RivenPlugin,
+              dataSources: new DataSourceMap(),
+              status: "valid",
+            },
+          ];
+        }),
+      ),
+);
 
 it("requires post-processing when a plugin subscribes to subtitle requests", ({
+  createPlugins,
   completedMovieContext: { completedMovie },
   services: { postProcessingService },
 }) => {
@@ -49,6 +54,7 @@ it("requires post-processing when a plugin subscribes to subtitle requests", ({
 });
 
 it("does not require post-processing when no plugin subscribes to post-processing events", ({
+  createPlugins,
   completedMovieContext: { completedMovie },
   services: { postProcessingService },
 }) => {

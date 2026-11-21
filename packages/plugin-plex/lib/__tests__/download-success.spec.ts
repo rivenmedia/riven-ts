@@ -3,23 +3,28 @@ import { createMockMediaItem } from "@repo/util-plugin-testing/create-mock-media
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "./plex.test-context.ts";
+import { it as baseIt } from "./plex.test-context.ts";
 
 import type { LibrarySectionsResponse } from "../schemas/library-sections-response.schema.ts";
 
-const sections = (...locations: [key: string, path: string][]) =>
-  http.get("http://localhost:32400/library/sections", () =>
-    HttpResponse.json<LibrarySectionsResponse>({
-      MediaContainer: {
-        Directory: locations.map(([key, locationPath]) => ({
-          key,
-          Location: [{ id: Number(key), path: locationPath }],
-        })),
-      },
-    }),
-  );
+const it = baseIt.extend(
+  "sections",
+  () =>
+    (...locations: [key: string, path: string][]) =>
+      http.get("http://localhost:32400/library/sections", () =>
+        HttpResponse.json<LibrarySectionsResponse>({
+          MediaContainer: {
+            Directory: locations.map(([key, locationPath]) => ({
+              key,
+              Location: [{ id: Number(key), path: locationPath }],
+            })),
+          },
+        }),
+      ),
+);
 
 it("refreshes the library section containing each downloaded folder", async ({
+  sections,
   dataSourceMap,
   plugin,
   server,
@@ -83,6 +88,7 @@ it("refreshes the library section containing each downloaded folder", async ({
 });
 
 it("does not refresh a section whose location only shares a prefix with the folder", async ({
+  sections,
   dataSourceMap,
   plugin,
   server,
@@ -122,6 +128,7 @@ it("does not refresh a section whose location only shares a prefix with the fold
 });
 
 it("refreshes a section for a folder whose name starts with two dots", async ({
+  sections,
   dataSourceMap,
   plugin,
   server,
@@ -161,6 +168,7 @@ it("refreshes a section for a folder whose name starts with two dots", async ({
 });
 
 it("rejects when a folder is not in any library section", async ({
+  sections,
   dataSourceMap,
   plugin,
   server,

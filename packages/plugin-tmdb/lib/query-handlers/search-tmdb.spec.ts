@@ -1,49 +1,54 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/tmdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tmdb.test-context.ts";
 import { searchTmdb } from "./search-tmdb.ts";
 
-const createMovie = (id: number, title: string) => ({
-  media_type: "movie",
-  id,
-  title,
-  overview: `${title} overview`,
-  backdrop_path: "/backdrop.jpg",
-  poster_path: "/poster.jpg",
-  original_language: "en",
-  genre_ids: [28],
-  release_date: "2024-01-01",
-});
-
-const createShow = (id: number, name: string) => ({
-  media_type: "tv",
-  id,
-  name,
-  overview: `${name} overview`,
-  backdrop_path: "/backdrop.jpg",
-  poster_path: "/poster.jpg",
-  original_language: "en",
-  genre_ids: [18],
-  first_air_date: "2024-01-01",
-  origin_country: ["US"],
-});
-
-const createPerson = (id: number) => ({
-  media_type: "person",
-  id,
-  name: "Some Person",
-});
-
-const searchResponse = (results: unknown[]) =>
-  HttpResponse.json({
-    page: 1,
-    total_pages: 1,
-    total_results: results.length,
-    results,
-  });
+const it = baseIt
+  .extend("createMovie", () => (id: number, title: string) => ({
+    media_type: "movie",
+    id,
+    title,
+    overview: `${title} overview`,
+    backdrop_path: "/backdrop.jpg",
+    poster_path: "/poster.jpg",
+    original_language: "en",
+    genre_ids: [28],
+    release_date: "2024-01-01",
+  }))
+  .extend("createShow", () => (id: number, name: string) => ({
+    media_type: "tv",
+    id,
+    name,
+    overview: `${name} overview`,
+    backdrop_path: "/backdrop.jpg",
+    poster_path: "/poster.jpg",
+    original_language: "en",
+    genre_ids: [18],
+    first_air_date: "2024-01-01",
+    origin_country: ["US"],
+  }))
+  .extend("createPerson", () => (id: number) => ({
+    media_type: "person",
+    id,
+    name: "Some Person",
+  }))
+  .extend(
+    "searchResponse",
+    () => (results: unknown[]) =>
+      HttpResponse.json({
+        page: 1,
+        total_pages: 1,
+        total_results: results.length,
+        results,
+      }),
+  );
 
 it("maps movies and shows in TMDB's relevance order, skipping people", async ({
+  createMovie,
+  createShow,
+  createPerson,
+  searchResponse,
   server,
   dataSourceMap,
   logger,
@@ -92,6 +97,8 @@ it("maps movies and shows in TMDB's relevance order, skipping people", async ({
 });
 
 it("surfaces shows without a TVDB ID as unrequestable", async ({
+  createShow,
+  searchResponse,
   server,
   dataSourceMap,
   logger,
@@ -117,6 +124,8 @@ it("surfaces shows without a TVDB ID as unrequestable", async ({
 });
 
 it("passes the query and page to TMDB", async ({
+  createMovie,
+  searchResponse,
   server,
   dataSourceMap,
   logger,

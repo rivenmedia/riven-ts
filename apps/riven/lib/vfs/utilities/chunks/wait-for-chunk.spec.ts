@@ -1,7 +1,7 @@
 import Fuse from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 import { Readable } from "node:stream";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 
 import { withReadContext } from "#vfs/__tests__/with-read-context.ts";
 import { ChunkMetadata } from "#vfs/schemas/chunk.schema.ts";
@@ -19,12 +19,20 @@ const chunk = ChunkMetadata.parse({
   end: 7,
 });
 
-const createReader = () =>
-  new Readable({
-    read() {
-      /* data is pushed by each test */
-    },
-  }) as unknown as BodyReadable.default & Readable;
+const it = baseIt
+  .extend(
+    "spyOnAbortSignalTimeout",
+    () => () => vi.spyOn(AbortSignal, "timeout"),
+  )
+  .extend(
+    "createReader",
+    () => () =>
+      new Readable({
+        read() {
+          /* data is pushed by each test */
+        },
+      }) as unknown as BodyReadable.default & Readable,
+  );
 
 it.beforeEach(() => {
   chunkCache.clear();
@@ -32,7 +40,9 @@ it.beforeEach(() => {
   fdToCurrentStreamPositionMap.set(1, 100);
 });
 
-it("reads the chunk once enough data arrives and advances the stream position", async () => {
+it("reads the chunk once enough data arrives and advances the stream position", async ({
+  createReader,
+}) => {
   const reader = createReader();
   const data = Buffer.from("abcdefghij");
 
@@ -50,7 +60,9 @@ it("reads the chunk once enough data arrives and advances the stream position", 
   expect(fdToCurrentStreamPositionMap.get(1)).toBe(100 + chunk.size);
 });
 
-it("returns the chunk cached by another read whilst waiting without advancing the stream position", async () => {
+it("returns the chunk cached by another read whilst waiting without advancing the stream position", async ({
+  createReader,
+}) => {
   const reader = createReader();
   const cached = Buffer.from("cached!!");
 
@@ -66,7 +78,9 @@ it("returns the chunk cached by another read whilst waiting without advancing th
   expect(fdToCurrentStreamPositionMap.get(1)).toBe(100);
 });
 
-it("aborts waiting for the chunk when a seek is detected", async () => {
+it("aborts waiting for the chunk when a seek is detected", async ({
+  createReader,
+}) => {
   const reader = createReader();
   const seekController = new AbortController();
 
@@ -82,7 +96,9 @@ it("aborts waiting for the chunk when a seek is detected", async () => {
   });
 });
 
-it("leaves the stream data unread once a seek has been detected", async () => {
+it("leaves the stream data unread once a seek has been detected", async ({
+  createReader,
+}) => {
   const reader = createReader();
   const seekController = new AbortController();
 
@@ -100,7 +116,9 @@ it("leaves the stream data unread once a seek has been detected", async () => {
   expect(fdToCurrentStreamPositionMap.get(1)).toBe(100);
 });
 
-it("discards a chunk cached by another read when a seek is detected whilst waiting", async () => {
+it("discards a chunk cached by another read when a seek is detected whilst waiting", async ({
+  createReader,
+}) => {
   const reader = createReader();
   const seekController = new AbortController();
 
@@ -114,7 +132,9 @@ it("discards a chunk cached by another read when a seek is detected whilst waiti
   await expect(result).rejects.toMatchObject({ name: "SeekDetectedError" });
 });
 
-it("fails with EIO when the stream is aborted before the chunk arrives", async () => {
+it("fails with EIO when the stream is aborted before the chunk arrives", async ({
+  createReader,
+}) => {
   const reader = createReader();
 
   reader.destroy();
@@ -130,8 +150,11 @@ it("fails with EIO when the stream is aborted before the chunk arrives", async (
   });
 });
 
-it("fails with ETIMEDOUT when the chunk does not arrive in time", async () => {
-  vi.spyOn(AbortSignal, "timeout").mockReturnValue(AbortSignal.abort());
+it("fails with ETIMEDOUT when the chunk does not arrive in time", async ({
+  spyOnAbortSignalTimeout,
+  createReader,
+}) => {
+  spyOnAbortSignalTimeout().mockReturnValue(AbortSignal.abort());
 
   const reader = createReader();
 

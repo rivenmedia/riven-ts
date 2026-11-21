@@ -1,4 +1,4 @@
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 import { createLogger } from "winston";
 import z from "zod";
 
@@ -13,11 +13,20 @@ const schema = z.object({
   url: z.url().default("https://example.com"),
 });
 
-function createPluginSettings(environment: NodeJS.ProcessEnv = {}) {
-  return new PluginSettings(environment, [PREFIX], logger, false);
-}
+const it = baseIt
+  .extend("spyOnLoggerWarn", () => () => vi.spyOn(logger, "warn"))
+  .extend("spyOnConsoleDebug", () => () => vi.spyOn(console, "debug"))
+  .extend(
+    "createPluginSettings",
+    () =>
+      function createPluginSettings(environment: NodeJS.ProcessEnv = {}) {
+        return new PluginSettings(environment, [PREFIX], logger, false);
+      },
+  );
 
-it("removes the plugin settings from the environment", () => {
+it("removes the plugin settings from the environment", ({
+  createPluginSettings,
+}) => {
   const environment = {
     [`RIVEN_PLUGIN_SETTING__${PREFIX}__enabled`]: "true",
     OTHER: "value",
@@ -28,7 +37,7 @@ it("removes the plugin settings from the environment", () => {
   expect(environment).toStrictEqual({ OTHER: "value" });
 });
 
-it("returns the frozen settings after lock()", () => {
+it("returns the frozen settings after lock()", ({ createPluginSettings }) => {
   const pluginSettings = createPluginSettings();
 
   pluginSettings.set(
@@ -45,8 +54,12 @@ it("returns the frozen settings after lock()", () => {
   expect(Object.isFrozen(value)).toBe(true);
 });
 
-it("warns about environment settings that were not consumed on lock()", () => {
-  const warn = vi.spyOn(logger, "warn");
+it("warns about environment settings that were not consumed on lock()", ({
+  spyOnLoggerWarn,
+  createPluginSettings,
+}) => {
+  const warn = spyOnLoggerWarn();
+
   const pluginSettings = createPluginSettings({
     [`RIVEN_PLUGIN_SETTING__${PREFIX}__enabled`]: "true",
     [`RIVEN_PLUGIN_SETTING__${PREFIX}__unknown`]: "value",
@@ -65,7 +78,9 @@ it("warns about environment settings that were not consumed on lock()", () => {
   );
 });
 
-it("throws when setting an unknown config prefix", () => {
+it("throws when setting an unknown config prefix", ({
+  createPluginSettings,
+}) => {
   const pluginSettings = createPluginSettings();
 
   expect(() => {
@@ -80,7 +95,7 @@ it("throws when setting an unknown config prefix", () => {
   );
 });
 
-it("throws when setting after lock()", () => {
+it("throws when setting after lock()", ({ createPluginSettings }) => {
   const pluginSettings = createPluginSettings();
 
   pluginSettings.lock();
@@ -95,7 +110,9 @@ it("throws when setting after lock()", () => {
   }).toThrow("Settings are locked and cannot be modified.");
 });
 
-it("returns a snapshot of the raw environment groups before lock()", () => {
+it("returns a snapshot of the raw environment groups before lock()", ({
+  createPluginSettings,
+}) => {
   const pluginSettings = createPluginSettings({
     [`RIVEN_PLUGIN_SETTING__${PREFIX}__enabled`]: "true",
   });
@@ -112,7 +129,9 @@ it("returns a snapshot of the raw environment groups before lock()", () => {
   expect(snapshot).toStrictEqual(new Map([[PREFIX, { enabled: "true" }]]));
 });
 
-it("throws when the environment snapshot is requested after lock()", () => {
+it("throws when the environment snapshot is requested after lock()", ({
+  createPluginSettings,
+}) => {
   const pluginSettings = createPluginSettings();
 
   pluginSettings.lock();
@@ -121,7 +140,9 @@ it("throws when the environment snapshot is requested after lock()", () => {
     "The plugin environment is no longer available after the settings have been locked.",
   );
 });
-it("deeply freezes nested settings after lock()", () => {
+it("deeply freezes nested settings after lock()", ({
+  createPluginSettings,
+}) => {
   const nestedSchema = z.object({
     servers: z.array(z.object({ url: z.url() })),
   });
@@ -141,8 +162,12 @@ it("deeply freezes nested settings after lock()", () => {
   expect(Object.isFrozen(servers[0])).toBe(true);
 });
 
-it("keeps the locked settings when lock() is called again", () => {
-  const warn = vi.spyOn(logger, "warn");
+it("keeps the locked settings when lock() is called again", ({
+  spyOnLoggerWarn,
+  createPluginSettings,
+}) => {
+  const warn = spyOnLoggerWarn();
+
   const pluginSettings = createPluginSettings();
 
   pluginSettings.set(
@@ -163,7 +188,9 @@ it("keeps the locked settings when lock() is called again", () => {
   });
 });
 
-it("throws when getting the settings of an unknown schema", () => {
+it("throws when getting the settings of an unknown schema", ({
+  createPluginSettings,
+}) => {
   const pluginSettings = createPluginSettings();
 
   expect(() => pluginSettings.get(schema)).toThrow(
@@ -171,8 +198,10 @@ it("throws when getting the settings of an unknown schema", () => {
   );
 });
 
-it("prints the effective configuration when enabled", () => {
-  const debug = vi.spyOn(console, "debug").mockImplementation(vi.fn());
+it("prints the effective configuration when enabled", ({
+  spyOnConsoleDebug,
+}) => {
+  const debug = spyOnConsoleDebug().mockImplementation(vi.fn());
   const pluginSettings = new PluginSettings({}, [PREFIX], logger, true);
   const value = { enabled: true, url: "https://example.com" };
 

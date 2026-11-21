@@ -1,6 +1,6 @@
 import Fuse from "@zkochan/fuse-native";
 import Undici from "undici";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 
 import { calculateFileChunks } from "#vfs/utilities/chunks/calculate-file-chunks.ts";
 import {
@@ -51,8 +51,11 @@ const openMediaFd = (fd: number) => {
   );
 };
 
-const createResponse = (dump: () => Promise<void>) =>
-  Promise.resolve({ body: { dump } } as unknown as Dispatcher.ResponseData);
+const it = baseIt.extend(
+  "createResponse",
+  () => (dump: () => Promise<void>) =>
+    Promise.resolve({ body: { dump } } as unknown as Dispatcher.ResponseData),
+);
 
 const expectFdReleased = (fd: number) => {
   for (const map of [
@@ -137,7 +140,9 @@ it("succeeds when releasing an unknown file descriptor", async () => {
   expect(fileNameToFdCountMap.get(fileName)).toBe(1);
 });
 
-it("drains the in-flight response before releasing", async () => {
+it("drains the in-flight response before releasing", async ({
+  createResponse,
+}) => {
   const dump = vi.fn<() => Promise<void>>().mockResolvedValue();
 
   openMediaFd(1);
@@ -149,7 +154,9 @@ it("drains the in-flight response before releasing", async () => {
   expectFdReleased(1);
 });
 
-it("ignores aborted requests when draining the in-flight response", async () => {
+it("ignores aborted requests when draining the in-flight response", async ({
+  createResponse,
+}) => {
   openMediaFd(1);
   fdToResponsePromiseMap.set(
     1,
@@ -163,7 +170,9 @@ it("ignores aborted requests when draining the in-flight response", async () => 
   expectFdReleased(1);
 });
 
-it("fails with EIO when draining the in-flight response fails", async () => {
+it("fails with EIO when draining the in-flight response fails", async ({
+  createResponse,
+}) => {
   openMediaFd(1);
   fdToResponsePromiseMap.set(
     1,

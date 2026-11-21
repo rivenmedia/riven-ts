@@ -4,32 +4,26 @@ import { waitFor } from "xstate";
 
 import { flow } from "#message-queue/flows/producer.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-import type { MockInstance } from "vitest";
 
-const expectProcessMediaItem = (
-  addBulkSpy: MockInstance<typeof flow.addBulk>,
-  item: MediaItem,
-) =>
-  vi.waitFor(() => {
-    expect(addBulkSpy).toHaveBeenCalledWith([
-      expect.objectContaining({
-        queueName: "process-media-item",
-        data: expect.objectContaining({
-          mediaItem: expect.objectContaining({ id: item.id }),
-        }),
+const it = baseIt
+  .extend("spyOnAdd", () => () => vi.spyOn(flow, "add"))
+  .extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"))
+  // The jobs `flow.addBulk` is called with to process the item
+  .extend("processMediaItemJobs", () => (item: MediaItem) => [
+    expect.objectContaining({
+      queueName: "process-media-item",
+      data: expect.objectContaining({
+        mediaItem: expect.objectContaining({ id: item.id }),
       }),
-    ]);
-  });
-
-const expectReindex = (
-  addSpy: MockInstance<typeof flow.add>,
-  item: MediaItem,
-) =>
-  vi.waitFor(() => {
-    expect(addSpy).toHaveBeenCalledWith(
+    }),
+  ])
+  // The job `flow.add` is called with to reindex the item
+  .extend(
+    "reindexJob",
+    () => (item: MediaItem) =>
       expect.objectContaining({
         queueName: "process-item-request",
         data: expect.objectContaining({
@@ -41,10 +35,11 @@ const expectReindex = (
           }),
         }),
       }),
-    );
-  });
+  );
 
 it("processes a released movie without scheduling a reindex", async ({
+  processMediaItemJobs,
+  spyOnAddBulk,
   em,
   actor,
   services,
@@ -52,13 +47,14 @@ it("processes a released movie without scheduling a reindex", async ({
 }) => {
   indexedMovie.releaseDate = DateTime.utc().minus({ days: 1 }).toJSDate();
 
+  const addBulkSpy = spyOnAddBulk();
+
   await em.flush();
 
   const calculateReindexTimeSpy = vi.spyOn(
     services.indexerService,
     "calculateReindexTime",
   );
-  const addBulkSpy = vi.spyOn(flow, "addBulk");
 
   actor.start();
 
@@ -70,13 +66,19 @@ it("processes a released movie without scheduling a reindex", async ({
     meta: { type: "movie", isReindex: false },
   });
 
-  await expectProcessMediaItem(addBulkSpy, indexedMovie);
+  await vi.waitFor(() => {
+    expect(addBulkSpy).toHaveBeenCalledWith(processMediaItemJobs(indexedMovie));
+  });
 
   // Scheduling a reindex calculates the reindex time before any job is added
   expect(calculateReindexTimeSpy).not.toHaveBeenCalled();
 });
 
 it("processes a movie without a release date and schedules a reindex", async ({
+  processMediaItemJobs,
+  reindexJob,
+  spyOnAdd,
+  spyOnAddBulk,
   em,
   actor,
   indexedMovieContext: { indexedMovie },
@@ -85,8 +87,8 @@ it("processes a movie without a release date and schedules a reindex", async ({
 
   await em.flush();
 
-  const addSpy = vi.spyOn(flow, "add");
-  const addBulkSpy = vi.spyOn(flow, "addBulk");
+  const addSpy = spyOnAdd();
+  const addBulkSpy = spyOnAddBulk();
 
   actor.start();
 
@@ -98,11 +100,17 @@ it("processes a movie without a release date and schedules a reindex", async ({
     meta: { type: "movie", isReindex: false },
   });
 
-  await expectProcessMediaItem(addBulkSpy, indexedMovie);
-  await expectReindex(addSpy, indexedMovie);
+  await vi.waitFor(() => {
+    expect(addBulkSpy).toHaveBeenCalledWith(processMediaItemJobs(indexedMovie));
+  });
+  await vi.waitFor(() => {
+    expect(addSpy).toHaveBeenCalledWith(reindexJob(indexedMovie));
+  });
 });
 
 it("schedules a reindex for an unreleased movie without processing it", async ({
+  reindexJob,
+  spyOnAdd,
   actor,
   services,
   seeders: { seedUnreleasedMovie },
@@ -111,7 +119,8 @@ it("schedules a reindex for an unreleased movie without processing it", async ({
 
   expect(movie.state).toBe("unreleased");
 
-  const addSpy = vi.spyOn(flow, "add");
+  const addSpy = spyOnAdd();
+
   const getItemsToProcessSpy = vi.spyOn(
     services.mediaItemService,
     "getItemsToProcess",
@@ -127,13 +136,16 @@ it("schedules a reindex for an unreleased movie without processing it", async ({
     meta: { type: "movie", isReindex: false },
   });
 
-  await expectReindex(addSpy, movie);
+  await vi.waitFor(() => {
+    expect(addSpy).toHaveBeenCalledWith(reindexJob(movie));
+  });
 
   // Processing an item looks up the items to process before any job is added
   expect(getItemsToProcessSpy).not.toHaveBeenCalledWith(movie.id);
 });
 
 it("processes an ended show without scheduling a reindex", async ({
+  spyOnAddBulk,
   actor,
   services,
   indexedShowContext: { indexedShow },
@@ -144,7 +156,8 @@ it("processes an ended show without scheduling a reindex", async ({
     services.indexerService,
     "calculateReindexTime",
   );
-  const addBulkSpy = vi.spyOn(flow, "addBulk");
+
+  const addBulkSpy = spyOnAddBulk();
 
   actor.start();
 

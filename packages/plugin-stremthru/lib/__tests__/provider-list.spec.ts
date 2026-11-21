@@ -5,9 +5,14 @@ import { expect, vi } from "vitest";
 
 import { StremThruTorzAPI } from "../datasource/stremthru-torz.datasource.ts";
 import { StremThruSettings } from "../stremthru-settings.schema.ts";
-import { it } from "./stremthru.test-context.ts";
+import { it as baseIt } from "./stremthru.test-context.ts";
 
 import type { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
+
+const it = baseIt.extend(
+  "spyOnPerformanceNow",
+  () => () => vi.spyOn(performance, "now"),
+);
 
 it.override(
   "settings",
@@ -169,6 +174,7 @@ it("returns rate-limited providers in the rateLimitedProviders list", async ({
 });
 
 it("moves rate-limited providers back to the providers list after the rate limit has passed", async ({
+  spyOnPerformanceNow,
   server,
   plugin,
   settings,
@@ -187,7 +193,7 @@ it("moves rate-limited providers back to the providers list after the rate limit
 
   // TTLCache holds a reference to the real `performance` object from import time,
   // so faking the global doesn't reach it. Drive its clock from the faked `Date` instead.
-  vi.spyOn(performance, "now").mockImplementation(Date.now);
+  spyOnPerformanceNow().mockImplementation(Date.now);
 
   const providerListRequestedHook =
     plugin.hooks["riven.media-item.download.provider-list-requested"];

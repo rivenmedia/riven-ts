@@ -5,14 +5,10 @@ import path from "node:path";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
+import { getEcsSymlinkPath } from "#utilities/logger/logger.ts";
 import { getSessionId } from "#utilities/logger/session-id.ts";
 
-const logFile = vi.hoisted(() => ({ path: "" }));
-
-vi.mock(import("#utilities/logger/logger.ts"), async (importOriginal) => ({
-  ...(await importOriginal()),
-  getEcsSymlinkPath: () => logFile.path,
-}));
+vi.mock(import("#utilities/logger/logger.ts"), { spy: true });
 
 const SHARE_LOGS = "mutation { shareLogs }";
 const BULK_URL = "https://elastic.dev.riven.tv/_bulk";
@@ -25,13 +21,16 @@ const it = baseIt.extend(
     const directory = await mkdtemp(path.join(tmpdir(), "riven-logs-"));
 
     onCleanup(async () => {
+      vi.mocked(getEcsSymlinkPath).mockReset();
       await rm(directory, { recursive: true });
     });
 
     return async (contents: string) => {
-      logFile.path = path.join(directory, "ecs.log");
+      const logFilePath = path.join(directory, "ecs.log");
 
-      await writeFile(logFile.path, contents);
+      vi.mocked(getEcsSymlinkPath).mockReturnValue(logFilePath);
+
+      await writeFile(logFilePath, contents);
     };
   },
 );

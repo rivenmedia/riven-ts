@@ -5,7 +5,7 @@ import { NotFoundError } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { ProcessMediaItemFlow } from "#message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { flow } from "#message-queue/flows/producer.ts";
 import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
@@ -16,6 +16,8 @@ import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 
 import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { Processor } from "bullmq";
+
+const it = baseIt.extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
 
 it.beforeEach(({ createFlowWorker }) => {
   createFlowWorker(RequestStreamLinkFlow, requestStreamLinkProcessor);
@@ -631,6 +633,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
 });
 
 it("adds a job to reprocess the lowest common denominator in the item's hierarchy if the item is show-like and its torrent is dead", async ({
+  spyOnAddBulk,
   completedShowContext: { completedShow },
   createPluginWorker,
   createFlowWorker,
@@ -640,8 +643,8 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
   expect.assert(mediaEntry);
 
   const mockProcessMediaItemProcessor = vi.fn<Processor>();
-  const flowAddSpy = vi.spyOn(flow, "addBulk");
 
+  const flowAddSpy = spyOnAddBulk();
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
 
   createPluginWorker(

@@ -1,45 +1,47 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/tvdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { TvdbAPI } from "./tvdb.datasource.ts";
 
 const SERIES_URL = "https://api4.thetvdb.com/v4/series/:id/translations/eng";
 
 const API_KEY = "6be85335-5c4f-4d8d-b945-d3ed0eb8cdce";
 
-/**
- * Issues a new token for each login, and only answers series requests that
- * use the first one.
- */
-const authenticatedHandlers = (logins: { count: number }) => [
-  http.post("https://api4.thetvdb.com/v4/login", async ({ request }) => {
-    const body = (await request.json()) as { apikey?: unknown } | null;
+const it = baseIt
+  /**
+   * Issues a new token for each login, and only answers series requests that
+   * use the first one.
+   */
+  .extend("authenticatedHandlers", () => (logins: { count: number }) => [
+    http.post("https://api4.thetvdb.com/v4/login", async ({ request }) => {
+      const body = (await request.json()) as { apikey?: unknown } | null;
 
-    if (body?.apikey !== API_KEY) {
-      return HttpResponse.json(null, { status: 401 });
-    }
+      if (body?.apikey !== API_KEY) {
+        return HttpResponse.json(null, { status: 401 });
+      }
 
-    logins.count += 1;
+      logins.count += 1;
 
-    return HttpResponse.json({
-      status: "success",
-      data: { token: `token-${logins.count.toString()}` },
-    });
-  }),
-  http.get(SERIES_URL, ({ request, params }) => {
-    if (request.headers.get("authorization") !== "Bearer token-1") {
-      return HttpResponse.json(null, { status: 401 });
-    }
+      return HttpResponse.json({
+        status: "success",
+        data: { token: `token-${logins.count.toString()}` },
+      });
+    }),
+    http.get(SERIES_URL, ({ request, params }) => {
+      if (request.headers.get("authorization") !== "Bearer token-1") {
+        return HttpResponse.json(null, { status: 401 });
+      }
 
-    return HttpResponse.json({
-      status: "success",
-      data: { language: "eng", name: `Series ${String(params["id"])}` },
-    });
-  }),
-];
+      return HttpResponse.json({
+        status: "success",
+        data: { language: "eng", name: `Series ${String(params["id"])}` },
+      });
+    }),
+  ]);
 
 it("logs in once and reuses the token for later requests", async ({
+  authenticatedHandlers,
   server,
   dataSourceMap,
 }) => {
@@ -81,6 +83,7 @@ it("rejects requests when the login response has no token", async ({
 });
 
 it("rejects a series translation response without data", async ({
+  authenticatedHandlers,
   server,
   dataSourceMap,
 }) => {

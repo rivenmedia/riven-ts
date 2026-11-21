@@ -1,22 +1,23 @@
-import { expect, it } from "vitest";
+import { expect, it as baseIt } from "vitest";
 
 import { selectLogo } from "./select-logo.ts";
 
 import type { MediaImage } from "../schemas/media-image.schema.ts";
 
-const logo = (
-  name: string,
-  overrides: Partial<MediaImage> = {},
-): MediaImage => ({
-  aspect_ratio: 2,
-  height: 250,
-  width: 500,
-  iso_639_1: "en",
-  file_path: `/${name}.png`,
-  vote_average: 5,
-  vote_count: 10,
-  ...overrides,
-});
+const it = baseIt.extend(
+  "logo",
+  () =>
+    (name: string, overrides: Partial<MediaImage> = {}): MediaImage => ({
+      aspect_ratio: 2,
+      height: 250,
+      width: 500,
+      iso_639_1: "en",
+      file_path: `/${name}.png`,
+      vote_average: 5,
+      vote_count: 10,
+      ...overrides,
+    }),
+);
 
 const select = (
   logos: MediaImage[],
@@ -32,7 +33,9 @@ const select = (
 const urlFor = (name: string) =>
   `https://image.tmdb.org/t/p/original/${name}.png`;
 
-it("returns the highest-rated logo when no dimensions are requested", () => {
+it("returns the highest-rated logo when no dimensions are requested", ({
+  logo,
+}) => {
   expect(
     select([
       logo("low", { vote_average: 4 }),
@@ -42,7 +45,7 @@ it("returns the highest-rated logo when no dimensions are requested", () => {
   ).toBe(urlFor("best"));
 });
 
-it("returns the logo's details", () => {
+it("returns the logo's details", ({ logo }) => {
   expect(
     selectLogo([logo("only", { width: 640, height: 320 })], {
       width: null,
@@ -57,7 +60,9 @@ it("returns the logo's details", () => {
   });
 });
 
-it("only considers logos in the requested language or without a language", () => {
+it("only considers logos in the requested language or without a language", ({
+  logo,
+}) => {
   const logos = [
     logo("english", { vote_average: 9 }),
     logo("neutral", { iso_639_1: null, vote_average: 3 }),
@@ -68,13 +73,13 @@ it("only considers logos in the requested language or without a language", () =>
   expect(select(logos, { language: "de-DE" })).toBe(urlFor("neutral"));
 });
 
-it("returns no logo when none are usable", () => {
+it("returns no logo when none are usable", ({ logo }) => {
   expect(select([logo("german", { iso_639_1: "de" })])).toBeUndefined();
   expect(select([logo("no-file", { file_path: "" })])).toBeUndefined();
   expect(select([])).toBeUndefined();
 });
 
-it("returns the logo closest to the requested aspect ratio", () => {
+it("returns the logo closest to the requested aspect ratio", ({ logo }) => {
   expect(
     select(
       [
@@ -87,7 +92,7 @@ it("returns the logo closest to the requested aspect ratio", () => {
   ).toBe(urlFor("close"));
 });
 
-it("prefers the closest logo that does not need upscaling", () => {
+it("prefers the closest logo that does not need upscaling", ({ logo }) => {
   expect(
     select(
       [
@@ -100,7 +105,9 @@ it("prefers the closest logo that does not need upscaling", () => {
   ).toBe(urlFor("closest-large-enough"));
 });
 
-it("falls back to the closest smaller logo when none are wide enough", () => {
+it("falls back to the closest smaller logo when none are wide enough", ({
+  logo,
+}) => {
   expect(
     select([logo("tiny", { width: 100 }), logo("closest", { width: 400 })], {
       width: 500,
@@ -108,7 +115,7 @@ it("falls back to the closest smaller logo when none are wide enough", () => {
   ).toBe(urlFor("closest"));
 });
 
-it("breaks aspect ratio ties by width and then by rating", () => {
+it("breaks aspect ratio ties by width and then by rating", ({ logo }) => {
   const logos = [
     logo("far-width", { aspect_ratio: 2, width: 1000, vote_average: 10 }),
     logo("near-width-low", { aspect_ratio: 2, width: 600, vote_average: 4 }),

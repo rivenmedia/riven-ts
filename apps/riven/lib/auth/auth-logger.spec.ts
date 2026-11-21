@@ -1,9 +1,14 @@
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { authConfig } from "#auth/auth.ts";
 import { getLogContext } from "#utilities/logger/log-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
+
+const it = baseIt.extend(
+  "spyOnLoggerWarn",
+  () => () => vi.spyOn(logger, "warn"),
+);
 
 it.for([
   { logLevel: "silly", expected: "debug" },
@@ -34,10 +39,12 @@ it("disables auth logging when logging is disabled", ({
   expect(authConfig.logger.disabled).toBe(false);
 });
 
-it("writes auth messages to the logger with the auth log source", () => {
+it("writes auth messages to the logger with the auth log source", ({
+  spyOnLoggerWarn,
+}) => {
   const sources: unknown[] = [];
 
-  vi.spyOn(logger, "warn").mockImplementation(() => {
+  spyOnLoggerWarn().mockImplementation(() => {
     sources.push(getLogContext()["riven.log.source"]);
 
     return logger;

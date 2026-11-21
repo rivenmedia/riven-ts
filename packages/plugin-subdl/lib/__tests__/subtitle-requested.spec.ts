@@ -5,7 +5,7 @@ import { createHash } from "node:crypto";
 import { expect } from "vitest";
 
 import { createZip } from "./helpers/create-zip.ts";
-import { it } from "./subdl.test-context.ts";
+import { it as baseIt } from "./subdl.test-context.ts";
 
 import type { SubtitleSearchResponse } from "../schemas/subtitle-search.response.schema.ts";
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
@@ -14,28 +14,30 @@ const SEARCH_URL = "https://api.subdl.com/api/v1/subtitles";
 const ENGLISH = "1\n00:00:01,000 --> 00:00:02,000\nHello\n";
 const SPANISH = "1\n00:00:01,000 --> 00:00:02,000\nHola, señor\n";
 
-const createMovie = () => {
-  const movie = new Movie();
+const it = baseIt
+  .extend("createMovie", () => () => {
+    const movie = new Movie();
 
-  movie.fullTitle = "The Matrix (1999)";
-  movie.tmdbId = "603";
-  movie.imdbId = "tt0133093";
+    movie.fullTitle = "The Matrix (1999)";
+    movie.tmdbId = "603";
+    movie.imdbId = "tt0133093";
 
-  return movie;
-};
-
-const subtitle = (lang: string, url: string) => ({
-  release_name: "The.Matrix.1999.1080p",
-  name: "The Matrix",
-  lang,
-  url,
-});
+    return movie;
+  })
+  .extend("subtitle", () => (lang: string, url: string) => ({
+    release_name: "The.Matrix.1999.1080p",
+    name: "The Matrix",
+    lang,
+    url,
+  }));
 
 const md5 = (content: string) =>
   // oxlint-disable-next-line sonarjs/hashing -- matches the checksum the plugin reports
   createHash("md5").update(content).digest("hex");
 
 it("downloads the first subtitle of each language", async ({
+  createMovie,
+  subtitle,
   server,
   plugin,
   settings,
@@ -112,6 +114,8 @@ it("downloads the first subtitle of each language", async ({
 });
 
 it("skips languages whose subtitle cannot be downloaded or extracted", async ({
+  createMovie,
+  subtitle,
   server,
   plugin,
   settings,
@@ -226,6 +230,7 @@ it.for([
 );
 
 it("returns no subtitles when none are found", async ({
+  createMovie,
   server,
   plugin,
   settings,

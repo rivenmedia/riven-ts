@@ -1,37 +1,47 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "./stremthru.test-context.ts";
+import { it as baseIt } from "./stremthru.test-context.ts";
 
 import type { CacheCheckResponse } from "../schemas/cache-check-response.schema.ts";
 import type { ItemStatus } from "../schemas/item-status.schema.ts";
 
 const hash = (index: number) => index.toString(16).padStart(40, "0");
 
-const file = (name: string) => ({ name, path: `/${name}`, size: 100 });
+const it = baseIt
+  .extend("file", () => (name: string) => ({
+    name,
+    path: `/${name}`,
+    size: 100,
+  }))
+  .extend(
+    "cacheCheckHandler",
+    ({ file }) =>
+      (
+        statuses: Record<string, ItemStatus>,
+        requestedHashes: string[][] = [],
+      ) =>
+        http.get("**/v0/store/torz/check", ({ request }) => {
+          const hashes =
+            new URL(request.url).searchParams.get("hash")?.split(",") ?? [];
 
-const cacheCheckHandler = (
-  statuses: Record<string, ItemStatus>,
-  requestedHashes: string[][] = [],
-) =>
-  http.get("**/v0/store/torz/check", ({ request }) => {
-    const hashes =
-      new URL(request.url).searchParams.get("hash")?.split(",") ?? [];
+          requestedHashes.push(hashes);
 
-    requestedHashes.push(hashes);
-
-    return HttpResponse.json<CacheCheckResponse>({
-      data: {
-        items: hashes.map((infoHash) => ({
-          hash: infoHash,
-          status: statuses[infoHash] ?? "unknown",
-          files: [file(`${infoHash}.mkv`)],
-        })),
-      },
-    });
-  });
+          return HttpResponse.json<CacheCheckResponse>({
+            data: {
+              items: hashes.map((infoHash) => ({
+                hash: infoHash,
+                status: statuses[infoHash] ?? "unknown",
+                files: [file(`${infoHash}.mkv`)],
+              })),
+            },
+          });
+        }),
+  );
 
 it("returns the files of torrents that are cached, downloaded or of unknown status", async ({
+  file,
+  cacheCheckHandler,
   server,
   plugin,
   settings,
@@ -69,6 +79,7 @@ it("returns the files of torrents that are cached, downloaded or of unknown stat
 });
 
 it("checks at most 500 unique torrents per request", async ({
+  cacheCheckHandler,
   server,
   plugin,
   settings,
@@ -103,6 +114,7 @@ it("checks at most 500 unique torrents per request", async ({
 });
 
 it("does not send an empty request when duplicates fill a chunk", async ({
+  cacheCheckHandler,
   server,
   plugin,
   settings,

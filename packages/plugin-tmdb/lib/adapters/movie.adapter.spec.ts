@@ -1,7 +1,7 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/tmdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tmdb.test-context.ts";
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { createTmdbMovie } from "../utilities/create-tmdb-indexer-data.ts";
 import { movieAdapter } from "./movie.adapter.ts";
@@ -13,20 +13,26 @@ const TMDB_URL = "https://api.themoviedb.org/3";
 const THEATRICAL = 3;
 const PREMIERE = 1;
 
-const createMovie = (imdbId?: string | null) =>
-  createTmdbMovie({
-    id: "603",
-    ...(imdbId === undefined ? {} : { imdbId }),
-    title: "The Matrix",
-    overview: "",
-    genres: [],
-    rawRuntime: null,
-    status: "unknown",
-  });
-
-const releaseDatesHandler = (results: MovieReleaseDates200Schema["results"]) =>
-  http.get(`${TMDB_URL}/movie/603/release_dates`, () =>
-    HttpResponse.json<MovieReleaseDates200Schema>({ id: 603, results }),
+const it = baseIt
+  .extend(
+    "createMovie",
+    () => (imdbId?: string | null) =>
+      createTmdbMovie({
+        id: "603",
+        ...(imdbId === undefined ? {} : { imdbId }),
+        title: "The Matrix",
+        overview: "",
+        genres: [],
+        rawRuntime: null,
+        status: "unknown",
+      }),
+  )
+  .extend(
+    "releaseDatesHandler",
+    () => (results: MovieReleaseDates200Schema["results"]) =>
+      http.get(`${TMDB_URL}/movie/603/release_dates`, () =>
+        HttpResponse.json<MovieReleaseDates200Schema>({ id: 603, results }),
+      ),
   );
 
 it.for([
@@ -36,7 +42,10 @@ it.for([
   { locale: "de", expected: "R" },
 ])(
   "returns the $locale certification, falling back to the US certification",
-  async ({ locale, expected }, { server, dataSourceMap }) => {
+  async (
+    { locale, expected },
+    { createMovie, releaseDatesHandler, server, dataSourceMap },
+  ) => {
     server.use(
       releaseDatesHandler([
         {
@@ -65,6 +74,8 @@ it.for([
 );
 
 it("returns no certification when there is no certified theatrical, digital or physical release", async ({
+  createMovie,
+  releaseDatesHandler,
   server,
   dataSourceMap,
 }) => {
@@ -90,6 +101,8 @@ it("returns no certification when there is no certified theatrical, digital or p
 });
 
 it("fails when the movie has no release dates", async ({
+  createMovie,
+  releaseDatesHandler,
   server,
   dataSourceMap,
 }) => {
@@ -115,7 +128,10 @@ it.for([
   },
 ])(
   "fails when $scenario has release dates",
-  async ({ results }, { server, dataSourceMap }) => {
+  async (
+    { results },
+    { createMovie, releaseDatesHandler, server, dataSourceMap },
+  ) => {
     server.use(releaseDatesHandler(results));
 
     await expect(
@@ -131,6 +147,7 @@ it.for([
 );
 
 it("returns the known IMDB ID without looking it up", async ({
+  createMovie,
   server,
   dataSourceMap,
 }) => {
@@ -163,7 +180,10 @@ it.for([
   { imdbId: undefined, response: {}, expected: null },
 ])(
   "looks up the IMDB ID when it is $imdbId (found: $expected)",
-  async ({ imdbId, response, expected }, { server, dataSourceMap }) => {
+  async (
+    { imdbId, response, expected },
+    { createMovie, server, dataSourceMap },
+  ) => {
     server.use(
       http.get(`${TMDB_URL}/movie/603/external_ids`, () =>
         HttpResponse.json(response),

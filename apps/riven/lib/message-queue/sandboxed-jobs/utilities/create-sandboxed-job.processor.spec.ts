@@ -8,11 +8,6 @@ import { createSandboxedJobProcessor } from "./create-sandboxed-job.processor.ts
 
 import type { SandboxedJob } from "bullmq";
 
-const it = baseIt.extend(
-  "job",
-  () => ({ id: "job-1", name: "map-items-to-files" }) as SandboxedJob,
-);
-
 const sentry = vi.hoisted(() => ({
   captureException: vi.fn<(error: unknown) => string>(),
 }));
@@ -27,6 +22,13 @@ type Processor = (input: { job: SandboxedJob }) => Promise<unknown>;
 const createProcessor = (processor: Processor) =>
   createSandboxedJobProcessor(MapItemsToFilesSandboxedJob, processor as never);
 
+const it = baseIt
+  .extend("spyOnProcessExit", () => () => vi.spyOn(process, "exit"))
+  .extend(
+    "job",
+    () => ({ id: "job-1", name: "map-items-to-files" }) as SandboxedJob,
+  );
+
 it.beforeEach(() => {
   vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
 
@@ -36,9 +38,10 @@ it.beforeEach(() => {
 });
 
 it("resolves with the processor result and exits the sandbox once idle", async ({
+  spyOnProcessExit,
   job,
 }) => {
-  const exit = vi.spyOn(process, "exit").mockReturnValue(undefined as never);
+  const exit = spyOnProcessExit().mockReturnValue(undefined as never);
   const result = { movies: {}, episodes: {} };
   const processor = vi.fn<Processor>().mockResolvedValue(result);
 
@@ -57,8 +60,11 @@ it("resolves with the processor result and exits the sandbox once idle", async (
   expect(exit).toHaveBeenCalledExactlyOnceWith(0);
 });
 
-it("stays alive whilst jobs keep arriving", async ({ job }) => {
-  const exit = vi.spyOn(process, "exit").mockReturnValue(undefined as never);
+it("stays alive whilst jobs keep arriving", async ({
+  spyOnProcessExit,
+  job,
+}) => {
+  const exit = spyOnProcessExit().mockReturnValue(undefined as never);
   const processJob = createProcessor(
     vi.fn<Processor>().mockResolvedValue({ movies: {}, episodes: {} }),
   );

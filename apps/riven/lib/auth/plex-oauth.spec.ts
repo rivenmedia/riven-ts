@@ -2,7 +2,7 @@ import { HttpResponse, http } from "msw/http";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import { plexOAuth } from "./plex-oauth.ts";
@@ -13,8 +13,6 @@ const USER_URL = "https://plex.tv/api/v2/user";
 const tokenRequest = Object.freeze({
   redirectURI: "https://riven.test/api/plex/callback",
 } as const);
-
-const UNAUTHORIZED = () => new HttpResponse(null, { status: 401 });
 
 const hasHeaders = (request: Request, expected: Record<string, string>) =>
   Object.entries(expected).every(
@@ -36,6 +34,10 @@ const getUserInfo = (options: Parameters<typeof plexOAuth>[0]) => {
 
   return fetchUserInfo;
 };
+
+const it = baseIt
+  .extend("spyOnLoggerError", () => () => vi.spyOn(logger, "error"))
+  .extend("UNAUTHORIZED", () => () => new HttpResponse(null, { status: 401 }));
 
 it("requires a client ID", () => {
   expect(() => plexOAuth({ clientId: "" })).toThrow(
@@ -89,6 +91,7 @@ it.for(["1234:", ":abcd"])(
 );
 
 it("exchanges an authorised PIN for its auth token using the default Plex headers", async ({
+  UNAUTHORIZED,
   server,
 }) => {
   const pin = { id: 1234, code: "abcd", authToken: "plex-auth-token" };
@@ -128,7 +131,10 @@ it("exchanges an authorised PIN for its auth token using the default Plex header
   });
 });
 
-it("sends the configured product details to Plex", async ({ server }) => {
+it("sends the configured product details to Plex", async ({
+  UNAUTHORIZED,
+  server,
+}) => {
   server.use(
     http.get(PIN_URL, ({ request }) => {
       if (
@@ -198,6 +204,7 @@ it("returns no user info without an access token", async ({ server }) => {
 });
 
 it("maps the Plex profile to user info using the auth token", async ({
+  UNAUTHORIZED,
   server,
 }) => {
   server.use(
@@ -254,9 +261,10 @@ it("falls back to the Plex username when the profile has no title", async ({
 });
 
 it("logs and returns no user info when Plex fails to return the profile", async ({
+  spyOnLoggerError,
   server,
 }) => {
-  const errorSpy = vi.spyOn(logger, "error").mockReturnValue(logger);
+  const errorSpy = spyOnLoggerError().mockReturnValue(logger);
 
   server.use(http.get(USER_URL, () => new HttpResponse(null, { status: 401 })));
 

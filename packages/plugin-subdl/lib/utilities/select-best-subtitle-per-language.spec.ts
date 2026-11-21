@@ -5,13 +5,30 @@ import { selectBestSubtitlePerLanguage } from "./select-best-subtitle-per-langua
 import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import type { ItemMetadata } from "./get-item-metadata.ts";
 
-const it = baseIt.extend("metadata", (): ItemMetadata => ({
-  type: "movie",
-  tmdbId: "671",
-  imdbId: "tt0241527",
-  seasonNumber: undefined,
-  episodeNumber: undefined,
-}));
+const it = baseIt
+  .extend(
+    "episodeSubtitle",
+    () =>
+      (
+        name: string,
+        season: number | null,
+        episode: number | null,
+      ): SubtitleResponse => ({
+        release_name: name,
+        name,
+        lang: "English",
+        url: `/${name}.zip`,
+        season,
+        episode,
+      }),
+  )
+  .extend("metadata", (): ItemMetadata => ({
+    type: "movie",
+    tmdbId: "671",
+    imdbId: "tt0241527",
+    seasonNumber: undefined,
+    episodeNumber: undefined,
+  }));
 
 it("normalizes Brazilian Portuguese variants to one pt-BR subtitle", ({
   metadata,
@@ -86,20 +103,9 @@ it.for([
   },
 );
 
-const episodeSubtitle = (
-  name: string,
-  season: number | null,
-  episode: number | null,
-): SubtitleResponse => ({
-  release_name: name,
-  name,
-  lang: "English",
-  url: `/${name}.zip`,
-  season,
-  episode,
-});
-
-it("selects a subtitle for the requested episode when searching for an episode", () => {
+it("selects a subtitle for the requested episode when searching for an episode", ({
+  episodeSubtitle,
+}) => {
   const results = [
     episodeSubtitle("other-episode", 3, 4),
     episodeSubtitle("other-season", 2, 5),
@@ -118,7 +124,9 @@ it("selects a subtitle for the requested episode when searching for an episode",
   expect([...selected]).toStrictEqual([["english", results[3]]]);
 });
 
-it("selects nothing when no subtitle is for the requested episode", () => {
+it("selects nothing when no subtitle is for the requested episode", ({
+  episodeSubtitle,
+}) => {
   const selected = selectBestSubtitlePerLanguage(
     [episodeSubtitle("other-episode", 3, 4)],
     {
@@ -134,6 +142,7 @@ it("selects nothing when no subtitle is for the requested episode", () => {
 });
 
 it("ignores the season and episode of subtitles for a movie", ({
+  episodeSubtitle,
   metadata,
 }) => {
   const results = [episodeSubtitle("movie", 1, 1)];

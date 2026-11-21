@@ -1,24 +1,30 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "./stremthru.test-context.ts";
+import { it as baseIt } from "./stremthru.test-context.ts";
 
 import type { StoreUserResponse } from "../schemas/store-user-response.schema.ts";
 
-const storeUser = (subscriptionStatus: "premium" | "expired") =>
-  http.get("**/v0/store/user", () =>
-    HttpResponse.json<StoreUserResponse>({
-      data: {
-        id: "test-user-id",
-        email: "email@email.com",
-        has_usenet: false,
-        subscription_status: subscriptionStatus,
-      },
-    }),
+const it = baseIt
+  .extend(
+    "storeUser",
+    () => (subscriptionStatus: "premium" | "expired") =>
+      http.get("**/v0/store/user", () =>
+        HttpResponse.json<StoreUserResponse>({
+          data: {
+            id: "test-user-id",
+            email: "email@email.com",
+            has_usenet: false,
+            subscription_status: subscriptionStatus,
+          },
+        }),
+      ),
+  )
+  .extend(
+    "torznab",
+    () => (status: number) =>
+      http.get("**/v0/torznab/api", () => HttpResponse.json({}, { status })),
   );
-
-const torznab = (status: number) =>
-  http.get("**/v0/torznab/api", () => HttpResponse.json({}, { status }));
 
 it.for([
   {
@@ -43,7 +49,7 @@ it.for([
   "is valid only when both APIs are valid: $label",
   async (
     { subscription, torznabStatus, expected },
-    { dataSourceMap, plugin, server, settings },
+    { storeUser, torznab, dataSourceMap, plugin, server, settings },
   ) => {
     server.use(storeUser(subscription), torznab(torznabStatus));
 

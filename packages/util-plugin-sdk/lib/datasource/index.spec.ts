@@ -20,6 +20,10 @@ class TestDataSource extends BaseDataSource<Record<string, unknown>> {
 }
 
 const it = baseIt
+  .extend(
+    "spyOnQueueEventsClose",
+    () => () => vi.spyOn(QueueEvents.prototype, "close"),
+  )
   .extend("keyvCache", async ({ redisClient: { url } }, { onCleanup }) => {
     const { default: KeyvRedis, Keyv } = await import("@keyv/redis");
 
@@ -672,6 +676,7 @@ it("force-closes the worker when closing with force", async ({
 });
 
 it("logs a failure to close the queue events", async ({
+  spyOnQueueEventsClose,
   server,
   dataSourceConfig,
 }) => {
@@ -682,13 +687,13 @@ it("logs a failure to close the queue events", async ({
   const closeError = new Error("Close failed");
 
   // Close for real, so the queue events don't keep the connection open, then report a failure
-  vi.spyOn(QueueEvents.prototype, "close").mockImplementationOnce(
-    async function closeThenFail(this: QueueEvents) {
-      await QueueEvents.prototype.close.call(this);
+  spyOnQueueEventsClose().mockImplementationOnce(async function closeThenFail(
+    this: QueueEvents,
+  ) {
+    await QueueEvents.prototype.close.call(this);
 
-      throw closeError;
-    },
-  );
+    throw closeError;
+  });
 
   const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
   const dataSource = new TestDataSource(dataSourceConfig);

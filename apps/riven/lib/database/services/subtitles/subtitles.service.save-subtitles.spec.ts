@@ -2,23 +2,28 @@ import { SubtitleEntry } from "@repo/util-plugin-sdk/dto/entities";
 
 import { expect } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
-const createSubtitle = (
-  language: string,
-  overrides: Partial<SubtitleData> = {},
-): SubtitleData => ({
-  language,
-  content: `1\n00:00:01,000 --> 00:00:02,000\n${language} subtitle\n`,
-  fileHash: `${language}-hash`,
-  fileSize: 42,
-  sourceProvider: "test-provider",
-  ...overrides,
-});
+const it = baseIt.extend(
+  "createSubtitle",
+  () =>
+    (
+      language: string,
+      overrides: Partial<SubtitleData> = {},
+    ): SubtitleData => ({
+      language,
+      content: `1\n00:00:01,000 --> 00:00:02,000\n${language} subtitle\n`,
+      fileHash: `${language}-hash`,
+      fileSize: 42,
+      sourceProvider: "test-provider",
+      ...overrides,
+    }),
+);
 
 it("saves a subtitle entry for each new language of a movie", async ({
+  createSubtitle,
   completedMovieContext: { completedMovie },
   em,
   services: { subtitlesService },
@@ -66,6 +71,7 @@ it("saves a subtitle entry for each new language of a movie", async ({
 });
 
 it("skips languages that already have a subtitle entry", async ({
+  createSubtitle,
   completedMovieContext: { completedMovie },
   em,
   services: { subtitlesService },
@@ -100,6 +106,7 @@ it("skips languages that already have a subtitle entry", async ({
 });
 
 it("saves nothing when every language already has a subtitle entry", async ({
+  createSubtitle,
   completedMovieContext: { completedMovie },
   em,
   services: { subtitlesService },
@@ -122,6 +129,7 @@ it("saves nothing when every language already has a subtitle entry", async ({
 });
 
 it("saves subtitle entries for an episode under its show and season directories", async ({
+  createSubtitle,
   completedShowContext: { episodes },
   em,
   services: { subtitlesService },
@@ -145,6 +153,7 @@ it("saves subtitle entries for an episode under its show and season directories"
 });
 
 it("rejects saving subtitles for a show", async ({
+  createSubtitle,
   completedShowContext: { completedShow },
   em,
   services: { subtitlesService },

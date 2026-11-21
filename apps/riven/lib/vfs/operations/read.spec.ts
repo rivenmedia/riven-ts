@@ -4,7 +4,7 @@ import { randomBytes } from "node:crypto";
 import Undici from "undici";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { config } from "#vfs/config.ts";
 import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
 import { calculateFileChunks } from "#vfs/utilities/chunks/calculate-file-chunks.ts";
@@ -24,38 +24,42 @@ import type { MockAgent } from "undici";
 
 const fileName = "movie.mkv";
 
-function setupRangeInterceptor(
-  agent: MockAgent,
-  range: readonly [number, number | undefined],
-) {
-  const mockPool = agent.get("http://example.com");
+const it = baseIt.extend(
+  "setupRangeInterceptor",
+  () =>
+    function setupRangeInterceptor(
+      agent: MockAgent,
+      range: readonly [number, number | undefined],
+    ) {
+      const mockPool = agent.get("http://example.com");
 
-  const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
-  const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
+      const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
+      const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
 
-  responseBuffer.set(randomBytes(responseBuffer.byteLength));
+      responseBuffer.set(randomBytes(responseBuffer.byteLength));
 
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = new Undici.Headers(headers).get("range");
+      mockPool
+        .intercept({ path: `/files/${fileName}` })
+        .reply(({ headers }) => {
+          const rangeHeader = new Undici.Headers(headers).get("range");
 
-      if (rangeHeader === `bytes=${range.join("-")}`) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
+          if (rangeHeader === `bytes=${range.join("-")}`) {
+            return {
+              statusCode: 206,
+              data: responseBuffer,
+            };
+          }
 
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
+          return {
+            statusCode: 416,
+            data: "",
+          };
+        })
+        .times(2);
 
-  return responseBuffer;
-}
+      return responseBuffer;
+    },
+);
 
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
@@ -84,6 +88,7 @@ it.beforeEach(() => {
 });
 
 it("fetches the header chunk if the requested range is entirely within the header chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -114,6 +119,7 @@ it("fetches the header chunk if the requested range is entirely within the heade
 });
 
 it("fetches the footer chunk if the requested range is entirely within the footer chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -152,6 +158,7 @@ it("fetches the footer chunk if the requested range is entirely within the foote
 });
 
 it("correctly calculates offsets when copying chunk data into the buffer", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -191,6 +198,7 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
 });
 
 it("offsets the first chunk by the size of the header chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -227,6 +235,7 @@ it("offsets the first chunk by the size of the header chunk", async ({
 });
 
 it("reads data across multiple chunks, utilising the chunk cache where possible", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -276,6 +285,7 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
 });
 
 it("performs a one-off scan when receiving a read outside the scan tolerance limit during playback", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");

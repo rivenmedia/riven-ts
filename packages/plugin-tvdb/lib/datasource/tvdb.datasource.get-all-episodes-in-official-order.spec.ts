@@ -2,18 +2,19 @@ import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { postLoginHandler } from "../__generated__/handlers/postLoginHandler.ts";
-import { it } from "../__tests__/tvdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { TvdbAPI } from "./tvdb.datasource.ts";
 
-const episode = (id: number) => ({
+const it = baseIt.extend("episode", () => (id: number) => ({
   id,
   seriesId: 81_189,
   seasonNumber: 1,
   number: id,
   name: `Episode ${id.toString()}`,
-});
+}));
 
 it("collects the episodes from every page", async ({
+  episode,
   server,
   dataSourceMap,
 }) => {

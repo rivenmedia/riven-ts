@@ -6,10 +6,12 @@ import { MediaEntryFactory } from "#database/factories/media-entry.factory.ts";
 import { ProcessMediaItemFlow } from "#message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { flow } from "#message-queue/flows/producer.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
 
 import type { MainRunnerMachineEvent } from "#state-machines/main-runner/index.ts";
 import type { Show } from "@repo/util-plugin-sdk/dto/entities";
+
+const it = baseIt.extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
 
 it.for<{ type: string; createEvent: (item: Show) => MainRunnerMachineEvent }>([
   {
@@ -32,7 +34,7 @@ it.for<{ type: string; createEvent: (item: Show) => MainRunnerMachineEvent }>([
   'enqueues each incomplete season of a show after a "$type" event',
   async (
     { createEvent },
-    { actor, em, scrapedShowContext: { scrapedShow, streams } },
+    { spyOnAddBulk, actor, em, scrapedShowContext: { scrapedShow, streams } },
   ) => {
     const [completedSeason, ...incompleteSeasons] =
       await scrapedShow.seasons.load();
@@ -62,7 +64,7 @@ it.for<{ type: string; createEvent: (item: Show) => MainRunnerMachineEvent }>([
 
     expect(completedSeason.state).toBe("completed");
 
-    const flowAddBulkSpy = vi.spyOn(flow, "addBulk");
+    const flowAddBulkSpy = spyOnAddBulk();
 
     actor.start();
 

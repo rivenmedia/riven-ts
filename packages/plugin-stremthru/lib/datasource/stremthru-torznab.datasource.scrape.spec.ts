@@ -9,7 +9,7 @@ import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/stremthru.test-context.ts";
+import { it as baseIt } from "../__tests__/stremthru.test-context.ts";
 import { StremThruTorznabAPI } from "./stremthru-torznab.datasource.ts";
 
 import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
@@ -24,44 +24,49 @@ const withDetails = <T extends MediaItem>(item: T, imdbId: string | null) => {
   return item;
 };
 
-const createSeason = () => {
-  const season = withDetails(new Season(), "tt0944947");
+const it = baseIt
+  .extend("createSeason", () => () => {
+    const season = withDetails(new Season(), "tt0944947");
 
-  season.number = 2;
+    season.number = 2;
 
-  return season;
-};
+    return season;
+  })
+  .extend("createEpisode", () => () => {
+    const episode = withDetails(new Episode(), "tt0944947");
 
-const createEpisode = () => {
-  const episode = withDetails(new Episode(), "tt0944947");
+    episode.number = 5;
+    episode.season = createMockSeasonReference(3);
 
-  episode.number = 5;
-  episode.season = createMockSeasonReference(3);
+    return episode;
+  })
+  .extend(
+    "torznabItem",
+    () => (title: string, attributes: Record<string, string>) => ({
+      title,
+      attr: Object.entries(attributes).map(([name, value]) => ({
+        "@attributes": { name, value },
+      })),
+    }),
+  )
+  .extend(
+    "torznabHandler",
+    () =>
+      (
+        body: Record<string, unknown>,
+        requestedParams: [string, string][][] = [],
+      ) =>
+        http.get(TORZNAB_URL, ({ request }) => {
+          requestedParams.push([...new URL(request.url).searchParams]);
 
-  return episode;
-};
-
-const torznabItem = (title: string, attributes: Record<string, string>) => ({
-  title,
-  attr: Object.entries(attributes).map(([name, value]) => ({
-    "@attributes": { name, value },
-  })),
-});
-
-const torznabHandler = (
-  body: Record<string, unknown>,
-  requestedParams: [string, string][][] = [],
-) =>
-  http.get(TORZNAB_URL, ({ request }) => {
-    requestedParams.push([...new URL(request.url).searchParams]);
-
-    return HttpResponse.json(body);
-  });
+          return HttpResponse.json(body);
+        }),
+  );
 
 it.for([
   {
     type: "movie",
-    createItem: () => withDetails(new Movie(), "tt0133093"),
+    item: "movie",
     params: [
       ["o", "json"],
       ["imdbid", "tt0133093"],
@@ -71,7 +76,7 @@ it.for([
   },
   {
     type: "show",
-    createItem: () => withDetails(new Show(), "tt0944947"),
+    item: "show",
     params: [
       ["o", "json"],
       ["imdbid", "tt0944947"],
@@ -81,7 +86,7 @@ it.for([
   },
   {
     type: "season",
-    createItem: createSeason,
+    item: "season",
     params: [
       ["o", "json"],
       ["imdbid", "tt0944947"],
@@ -93,7 +98,7 @@ it.for([
   },
   {
     type: "episode",
-    createItem: createEpisode,
+    item: "episode",
     params: [
       ["o", "json"],
       ["imdbid", "tt0944947"],
@@ -105,7 +110,7 @@ it.for([
   },
   {
     type: "movie without an IMDB ID",
-    createItem: () => withDetails(new Movie(), null),
+    item: "movieWithoutImdbId",
     params: [
       ["o", "json"],
       ["q", "Game of Thrones"],
@@ -113,9 +118,19 @@ it.for([
       ["cat", "2000"],
     ],
   },
-])(
+] as const)(
   "searches for a $type",
-  async ({ createItem, params }, { server, dataSourceMap }) => {
+  async (
+    { item, params },
+    { createEpisode, createSeason, torznabHandler, server, dataSourceMap },
+  ) => {
+    const createItem = {
+      movie: () => withDetails(new Movie(), "tt0133093"),
+      show: () => withDetails(new Show(), "tt0944947"),
+      season: createSeason,
+      episode: createEpisode,
+      movieWithoutImdbId: () => withDetails(new Movie(), null),
+    }[item];
     const requestedParams: [string, string][][] = [];
 
     server.use(torznabHandler({ channel: {} }, requestedParams));
@@ -127,6 +142,9 @@ it.for([
 );
 
 it("returns the title of each result keyed by its info hash", async ({
+  createSeason,
+  torznabItem,
+  torznabHandler,
   server,
   dataSourceMap,
 }) => {
@@ -160,6 +178,8 @@ it("returns the title of each result keyed by its info hash", async ({
 });
 
 it("returns no torrents when the response is malformed", async ({
+  createSeason,
+  torznabHandler,
   server,
   dataSourceMap,
 }) => {
@@ -173,6 +193,7 @@ it("returns no torrents when the response is malformed", async ({
 });
 
 it("returns no torrents when the request fails", async ({
+  createSeason,
   server,
   dataSourceMap,
 }) => {
@@ -188,6 +209,9 @@ it("returns no torrents when the request fails", async ({
 });
 
 it("returns the scraped torrents from the scrape requested hook", async ({
+  createSeason,
+  torznabItem,
+  torznabHandler,
   server,
   dataSourceMap,
   plugin,

@@ -3,32 +3,40 @@ import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/torrentio.test-context.ts";
+import { it as baseIt } from "../__tests__/torrentio.test-context.ts";
 import { TorrentioAPI } from "./torrentio.datasource.ts";
 
 const HASH_A = "a".repeat(40);
 const HASH_B = "b".repeat(40);
 
-const createMovie = (imdbId: string | null = "tt0133093") => {
-  const movie = new Movie();
+const it = baseIt
+  .extend("createMovie", () => (imdbId: string | null = "tt0133093") => {
+    const movie = new Movie();
 
-  movie.imdbId = imdbId;
-  movie.fullTitle = "The Matrix";
+    movie.imdbId = imdbId;
+    movie.fullTitle = "The Matrix";
 
-  return movie;
-};
+    return movie;
+  })
+  .extend(
+    "streamsHandler",
+    () =>
+      (
+        streams: { title: string; infoHash: string }[],
+        requestedPaths: string[] = [],
+      ) =>
+        http.get("https://torrentio.strem.fun/*", ({ request }) => {
+          requestedPaths.push(
+            decodeURIComponent(new URL(request.url).pathname),
+          );
 
-const streamsHandler = (
-  streams: { title: string; infoHash: string }[],
-  requestedPaths: string[] = [],
-) =>
-  http.get("https://torrentio.strem.fun/*", ({ request }) => {
-    requestedPaths.push(decodeURIComponent(new URL(request.url).pathname));
-
-    return HttpResponse.json({ streams });
-  });
+          return HttpResponse.json({ streams });
+        }),
+  );
 
 it("returns the first line of each stream title keyed by its info hash", async ({
+  createMovie,
+  streamsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -55,7 +63,12 @@ it("returns the first line of each stream title keyed by its info hash", async (
   });
 });
 
-it("skips streams without a title", async ({ server, dataSourceMap }) => {
+it("skips streams without a title", async ({
+  createMovie,
+  streamsHandler,
+  server,
+  dataSourceMap,
+}) => {
   server.use(
     streamsHandler([
       { title: "\n👤 25 💾 2 GB", infoHash: HASH_A },
@@ -71,6 +84,8 @@ it("skips streams without a title", async ({ server, dataSourceMap }) => {
 });
 
 it("returns no torrents without requesting streams when the item has no IMDB ID", async ({
+  createMovie,
+  streamsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -87,6 +102,7 @@ it("returns no torrents without requesting streams when the item has no IMDB ID"
 });
 
 it("returns no torrents when the request fails", async ({
+  createMovie,
   server,
   dataSourceMap,
 }) => {
@@ -104,6 +120,8 @@ it("returns no torrents when the request fails", async ({
 });
 
 it("returns the scraped torrents from the scrape requested hook", async ({
+  createMovie,
+  streamsHandler,
   server,
   dataSourceMap,
   plugin,

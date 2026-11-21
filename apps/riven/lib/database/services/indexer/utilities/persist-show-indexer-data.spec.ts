@@ -11,7 +11,7 @@ import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import type { ShowIndexData } from "./persist-show-indexer-data.ts";
 import type { EntityManager } from "@mikro-orm/core";
@@ -63,6 +63,45 @@ async function assertChildItemCounts(
     }),
   ).resolves.toBe(episodeCount);
 }
+
+const it = baseIt
+  .extend("indexedSeason", () => (number: number) => ({
+    number,
+    title: null,
+    episodes: [
+      {
+        absoluteNumber: number,
+        contentRating: "tv-14" as const,
+        number: 1,
+        airedAt: DateTime.utc(2020, 1, number + 1).toISO(),
+        title: `Episode 1 of season ${number.toString()}`,
+        runtime: 30,
+      },
+    ],
+  }))
+  .extend(
+    "indexedShow",
+    ({ indexedSeason }) =>
+      (
+        id: UUID,
+        overrides: Partial<Pick<ShowIndexData, "imdbId" | "seasons">> = {},
+      ): ShowIndexData => ({
+        id,
+        title: "Test Show",
+        imdbId: null,
+        contentRating: "tv-14",
+        genres: [],
+        type: "show",
+        network: "Test Network",
+        status: "ended",
+        seasons: {
+          0: indexedSeason(0),
+          1: indexedSeason(1),
+          2: indexedSeason(2),
+        },
+        ...overrides,
+      }),
+  );
 
 it("returns the show if processed successfully", async ({
   em,
@@ -622,41 +661,6 @@ it("updates the show and its children with the latest data if it has already bee
   });
 });
 
-const indexedSeason = (number: number) => ({
-  number,
-  title: null,
-  episodes: [
-    {
-      absoluteNumber: number,
-      contentRating: "tv-14" as const,
-      number: 1,
-      airedAt: DateTime.utc(2020, 1, number + 1).toISO(),
-      title: `Episode 1 of season ${number.toString()}`,
-      runtime: 30,
-    },
-  ],
-});
-
-const indexedShow = (
-  id: UUID,
-  overrides: Partial<Pick<ShowIndexData, "imdbId" | "seasons">> = {},
-): ShowIndexData => ({
-  id,
-  title: "Test Show",
-  imdbId: null,
-  contentRating: "tv-14",
-  genres: [],
-  type: "show",
-  network: "Test Network",
-  status: "ended",
-  seasons: {
-    0: indexedSeason(0),
-    1: indexedSeason(1),
-    2: indexedSeason(2),
-  },
-  ...overrides,
-});
-
 const getRequestedSeasons = async (em: EntityManager, showId: UUID) => {
   const seasons = await em
     .fork()
@@ -668,6 +672,7 @@ const getRequestedSeasons = async (em: EntityManager, showId: UUID) => {
 };
 
 it("requests every season except specials when no seasons were requested", async ({
+  indexedShow,
   em,
   factories: { showItemRequestFactory },
   services: { indexerService },
@@ -690,6 +695,7 @@ it("requests every season except specials when no seasons were requested", async
 });
 
 it("only requests the requested seasons of a partial request", async ({
+  indexedShow,
   em,
   factories: { showItemRequestFactory },
   services: { indexerService },
@@ -726,6 +732,7 @@ it("only requests the requested seasons of a partial request", async ({
 });
 
 it("treats a request for every regular season as a full request", async ({
+  indexedShow,
   em,
   factories: { showItemRequestFactory },
   services: { indexerService },
@@ -743,6 +750,7 @@ it("treats a request for every regular season as a full request", async ({
 });
 
 it("rejects a show request without a TVDB ID", async ({
+  indexedShow,
   factories: { showItemRequestFactory },
   services: { indexerService },
 }) => {
@@ -758,6 +766,7 @@ it("rejects a show request without a TVDB ID", async ({
 });
 
 it("fills in the item request's missing IMDB ID and passes it to the show's children", async ({
+  indexedShow,
   em,
   factories: { showItemRequestFactory },
   services: { indexerService },
@@ -787,6 +796,7 @@ it("fills in the item request's missing IMDB ID and passes it to the show's chil
 });
 
 it("rejects indexed show data that fails validation", async ({
+  indexedShow,
   em,
   factories: { showItemRequestFactory },
   services: { indexerService },

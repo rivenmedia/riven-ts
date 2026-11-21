@@ -1,4 +1,4 @@
-import { expect, it } from "vitest";
+import { expect, it as baseIt } from "vitest";
 
 import {
   Episode,
@@ -11,26 +11,26 @@ import { getStremioScrapeConfig } from "./get-stremio-scrape-config.ts";
 
 const IMDB_ID = "tt0944947";
 
-const createSeason = () => {
-  const season = new Season();
+const it = baseIt
+  .extend("createSeason", () => () => {
+    const season = new Season();
 
-  season.imdbId = IMDB_ID;
-  season.number = 2;
+    season.imdbId = IMDB_ID;
+    season.number = 2;
 
-  return season;
-};
+    return season;
+  })
+  .extend("createEpisode", () => () => {
+    const episode = new Episode();
 
-const createEpisode = () => {
-  const episode = new Episode();
+    episode.imdbId = IMDB_ID;
+    episode.number = 5;
+    episode.season = {
+      loadProperty: async () => Promise.resolve(3),
+    } as unknown as Episode["season"];
 
-  episode.imdbId = IMDB_ID;
-  episode.number = 5;
-  episode.season = {
-    loadProperty: async () => Promise.resolve(3),
-  } as unknown as Episode["season"];
-
-  return episode;
-};
+    return episode;
+  });
 
 it("scrapes a movie by its IMDB ID alone", async () => {
   const movie = new Movie();
@@ -56,7 +56,7 @@ it("scrapes a show by its first episode", async () => {
   });
 });
 
-it("scrapes a season by its first episode", async () => {
+it("scrapes a season by its first episode", async ({ createSeason }) => {
   await expect(getStremioScrapeConfig(createSeason())).resolves.toStrictEqual({
     identifier: ":2:1",
     imdbId: IMDB_ID,
@@ -64,7 +64,9 @@ it("scrapes a season by its first episode", async () => {
   });
 });
 
-it("scrapes an episode by its season and episode number", async () => {
+it("scrapes an episode by its season and episode number", async ({
+  createEpisode,
+}) => {
   await expect(getStremioScrapeConfig(createEpisode())).resolves.toStrictEqual({
     identifier: ":3:5",
     imdbId: IMDB_ID,

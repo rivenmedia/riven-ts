@@ -4,20 +4,45 @@ import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
+const it = baseIt
+  .extend("spyOnSettingsNow", () => () => vi.spyOn(Settings, "now"))
+  .extend(
+    "createFindValidTorrentResult",
+    () => (infoHash: string, matchedMediaItemId: string) => ({
+      result: {
+        torrentId: "1234",
+        infoHash,
+        provider: null,
+        files: [
+          {
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
+            matchedMediaItemId,
+            isCachedFile: false,
+          },
+        ],
+      },
+      plugin: "@repo/plugin-test",
+    }),
+  );
+
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
+  spyOnSettingsNow,
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
   mockSentryScope,
   services,
   createMockJobChildKey,
 }) => {
-  vi.spyOn(Settings, "now").mockReturnValue(10_000);
+  spyOnSettingsNow().mockReturnValue(10_000);
 
   const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
 
@@ -168,29 +193,8 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
   });
 });
 
-const createFindValidTorrentResult = (
-  infoHash: string,
-  matchedMediaItemId: string,
-) => ({
-  result: {
-    torrentId: "1234",
-    infoHash,
-    provider: null,
-    files: [
-      {
-        name: "Test Movie 2024 1080p.mkv",
-        path: "/Test Movie 2024 1080p.mkv",
-        size: 1024,
-        link: "http://example.com/download",
-        matchedMediaItemId,
-        isCachedFile: false,
-      },
-    ],
-  },
-  plugin: "@repo/plugin-test",
-});
-
 it("sends the download error event and fails permanently when the results cannot be persisted", async ({
+  createFindValidTorrentResult,
   completedMovieContext: {
     completedMovie,
     streams: [stream],
@@ -231,6 +235,7 @@ it("sends the download error event and fails permanently when the results cannot
 });
 
 it("rethrows unexpected errors whilst persisting the results", async ({
+  createFindValidTorrentResult,
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
   createMockJobChildKey,

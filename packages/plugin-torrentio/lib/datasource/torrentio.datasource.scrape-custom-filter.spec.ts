@@ -4,16 +4,19 @@ import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/torrentio.test-context.ts";
+import { it as baseIt } from "../__tests__/torrentio.test-context.ts";
 import { TorrentioSettings } from "../torrentio-settings.schema.ts";
 import { TorrentioAPI } from "./torrentio.datasource.ts";
 
-const streamsHandler = (requestedPaths: string[]) =>
-  http.get("https://torrentio.strem.fun/*", ({ request }) => {
-    requestedPaths.push(decodeURIComponent(new URL(request.url).pathname));
+const it = baseIt.extend(
+  "streamsHandler",
+  () => (requestedPaths: string[]) =>
+    http.get("https://torrentio.strem.fun/*", ({ request }) => {
+      requestedPaths.push(decodeURIComponent(new URL(request.url).pathname));
 
-    return HttpResponse.json({ streams: [] });
-  });
+      return HttpResponse.json({ streams: [] });
+    }),
+);
 
 it.override(
   "settings",
@@ -21,6 +24,7 @@ it.override(
 );
 
 it("requests the streams of a season through the configured filter", async ({
+  streamsHandler,
   server,
   dataSourceMap,
 }) => {

@@ -3,7 +3,7 @@ import { DataSourceMap } from "@repo/util-plugin-sdk";
 import { expect, vi } from "vitest";
 import { createActor } from "xstate";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { flow } from "#message-queue/flows/producer.ts";
 
 import { jobEnqueuer } from "./job-enqueuer.actor.ts";
@@ -13,27 +13,39 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { Queue } from "bullmq";
 
-const createPlugin = (name: string): [symbol, ValidPlugin] => {
-  const symbol = Symbol(name);
+const it = baseIt
+  .extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"))
+  .extend("createPlugin", () => (name: string): [symbol, ValidPlugin] => {
+    const symbol = Symbol(name);
 
-  return [
-    symbol,
-    {
-      config: { name: symbol } as RivenPlugin,
-      dataSources: new DataSourceMap(),
-      status: "valid",
-    },
-  ];
-};
+    return [
+      symbol,
+      {
+        config: { name: symbol } as RivenPlugin,
+        dataSources: new DataSourceMap(),
+        status: "valid",
+      },
+    ];
+  })
+  .extend(
+    "eventQueues",
+    () =>
+      (...entries: [RivenEvent["type"], Queue][]) =>
+        new Map(entries),
+  )
+  .extend(
+    "queueFor",
+    () => (pluginName: string, event: string) =>
+      ({ name: `plugin[${pluginName}]-${event}` }) as Queue,
+  );
 
-const eventQueues = (...entries: [RivenEvent["type"], Queue][]) =>
-  new Map(entries);
-
-const queueFor = (pluginName: string, event: string) =>
-  ({ name: `plugin[${pluginName}]-${event}` }) as Queue;
-
-it("enqueues the event for each plugin that has a queue for it", async () => {
-  const addBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+it("enqueues the event for each plugin that has a queue for it", async ({
+  spyOnAddBulk,
+  createPlugin,
+  eventQueues,
+  queueFor,
+}) => {
+  const addBulkSpy = spyOnAddBulk().mockResolvedValue([]);
   const [subscribedSymbol, subscribedPlugin] = createPlugin("subscribed");
   const [otherSymbol, otherPlugin] = createPlugin("other");
   const [unsubscribedSymbol, unsubscribedPlugin] = createPlugin("unsubscribed");
@@ -87,8 +99,13 @@ it("enqueues the event for each plugin that has a queue for it", async () => {
   actor.stop();
 });
 
-it("does not enqueue an event that no plugin has a queue for", () => {
-  const addBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+it("does not enqueue an event that no plugin has a queue for", ({
+  spyOnAddBulk,
+  createPlugin,
+  eventQueues,
+  queueFor,
+}) => {
+  const addBulkSpy = spyOnAddBulk().mockResolvedValue([]);
   const [symbol, plugin] = createPlugin("plugin");
 
   const actor = createActor(jobEnqueuer, {
@@ -109,9 +126,13 @@ it("does not enqueue an event that no plugin has a queue for", () => {
   expect(addBulkSpy).not.toHaveBeenCalled();
 });
 
-it("keeps receiving events after failing to enqueue one", async () => {
-  const addBulkSpy = vi
-    .spyOn(flow, "addBulk")
+it("keeps receiving events after failing to enqueue one", async ({
+  spyOnAddBulk,
+  createPlugin,
+  eventQueues,
+  queueFor,
+}) => {
+  const addBulkSpy = spyOnAddBulk()
     .mockRejectedValueOnce(new Error("Redis is unavailable"))
     .mockResolvedValue([]);
   const [symbol, plugin] = createPlugin("plugin");

@@ -6,11 +6,6 @@ import {
   permissionActionClient,
 } from "./action-client.ts";
 
-const it = baseIt.extend("session", () => ({
-  user: { id: "user-1" },
-  session: { id: "session-1" },
-}));
-
 const auth = vi.hoisted(() => ({
   getSession: vi.fn<() => Promise<{ data: unknown }>>(),
   hasPermission:
@@ -23,6 +18,13 @@ vi.mock(import("#lib/auth/client.ts"), () => ({
     admin: { hasPermission: auth.hasPermission },
   } as never,
 }));
+
+const it = baseIt
+  .extend("spyOnConsoleError", () => () => vi.spyOn(console, "error"))
+  .extend("session", () => ({
+    user: { id: "user-1" },
+    session: { id: "session-1" },
+  }));
 
 it.beforeEach(() => {
   auth.getSession.mockReset();
@@ -44,11 +46,13 @@ it("runs a logged-in action with the session in its context", async ({
   });
 });
 
-it("rejects a logged-in action without a session", async () => {
+it("rejects a logged-in action without a session", async ({
+  spyOnConsoleError,
+}) => {
   auth.getSession.mockResolvedValue({ data: null });
 
   // The default server error handler hides the cause from the client and only logs it
-  const consoleErrorSpy = vi.spyOn(console, "error").mockReturnValue(undefined);
+  const consoleErrorSpy = spyOnConsoleError().mockReturnValue(undefined);
   const handler = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
   const result = await loggedInActionClient.action(handler)();
 
@@ -83,13 +87,11 @@ it.for([
   { label: "cannot be checked", data: null },
 ])(
   "rejects a permission-checked action when the permission $label",
-  async ({ data }, { session }) => {
+  async ({ data }, { spyOnConsoleError, session }) => {
     auth.hasPermission.mockResolvedValue({ data });
     auth.getSession.mockResolvedValue({ data: session });
 
-    const consoleErrorSpy = vi
-      .spyOn(console, "error")
-      .mockReturnValue(undefined);
+    const consoleErrorSpy = spyOnConsoleError().mockReturnValue(undefined);
     const handler = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
     const result = await permissionActionClient
       .metadata({ permissions: { item: ["delete"] } })

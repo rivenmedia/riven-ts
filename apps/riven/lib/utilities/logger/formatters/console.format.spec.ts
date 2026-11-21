@@ -2,7 +2,7 @@ import { UnrecoverableError } from "bullmq";
 import { DateTime } from "luxon";
 import { stripVTControlCharacters } from "node:util";
 import { SPLAT } from "triple-beam";
-import { expect, it } from "vitest";
+import { expect, it as baseIt } from "vitest";
 import z from "zod";
 
 import { createConsoleFormat } from "./console.format.ts";
@@ -26,6 +26,18 @@ function render(info: Partial<TransformableInfo>, showStackTraces = true) {
 
   return message;
 }
+
+const it = baseIt.extend(
+  "createValidationError",
+  () =>
+    function createValidationError() {
+      const { error } = z.object({ title: z.string() }).safeParse({ title: 1 });
+
+      expect.assert(error);
+
+      return error;
+    },
+);
 
 it("omits the stack trace for expected errors", () => {
   const error = new UnrecoverableError(
@@ -123,15 +135,9 @@ it("renders only the message when no error is logged", () => {
   expect(output).toMatch(/ - info: All good$/u);
 });
 
-function createValidationError() {
-  const { error } = z.object({ title: z.string() }).safeParse({ title: 1 });
-
-  expect.assert(error);
-
-  return error;
-}
-
-it("prettifies validation errors when stack traces are disabled", () => {
+it("prettifies validation errors when stack traces are disabled", ({
+  createValidationError,
+}) => {
   const validationError = createValidationError();
 
   const output = stripVTControlCharacters(
@@ -149,7 +155,9 @@ it("prettifies validation errors when stack traces are disabled", () => {
   );
 });
 
-it("shows the stack trace of validation errors when stack traces are enabled", () => {
+it("shows the stack trace of validation errors when stack traces are enabled", ({
+  createValidationError,
+}) => {
   const validationError = createValidationError();
 
   const output = render({
@@ -162,7 +170,9 @@ it("shows the stack trace of validation errors when stack traces are enabled", (
   expect(output).toContain(validationError.stack);
 });
 
-it("uses the validation error message when the log message is not a string", () => {
+it("uses the validation error message when the log message is not a string", ({
+  createValidationError,
+}) => {
   const validationError = createValidationError();
 
   const output = stripVTControlCharacters(

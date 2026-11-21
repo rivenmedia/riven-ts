@@ -3,13 +3,16 @@ import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "./stremthru.test-context.ts";
+import { it as baseIt } from "./stremthru.test-context.ts";
 
-const createEntry = (entry: Partial<MediaEntry>) =>
-  Object.assign(new MediaEntry(), {
-    id: "00000000-0000-4000-8000-000000000001",
-    ...entry,
-  });
+const it = baseIt.extend(
+  "createEntry",
+  () => (entry: Partial<MediaEntry>) =>
+    Object.assign(new MediaEntry(), {
+      id: "00000000-0000-4000-8000-000000000001",
+      ...entry,
+    }),
+);
 
 it.for([
   {
@@ -52,7 +55,7 @@ it.for([
   "rejects when $scenario",
   async (
     { entry, files, error },
-    { server, plugin, settings, logger, dataSourceMap },
+    { createEntry, server, plugin, settings, logger, dataSourceMap },
   ) => {
     const requestStreamLinkHook =
       plugin.hooks["riven.media-item.stream-link.requested"];
@@ -77,6 +80,7 @@ it.for([
 );
 
 it("rejects when the torrent cannot be found on the store", async ({
+  createEntry,
   server,
   plugin,
   settings,
@@ -111,6 +115,7 @@ it("rejects when the torrent cannot be found on the store", async ({
 });
 
 it("rejects entries from an unknown provider", async ({
+  createEntry,
   plugin,
   settings,
   logger,

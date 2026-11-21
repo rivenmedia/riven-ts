@@ -1,5 +1,5 @@
 import { Writable } from "node:stream";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 import { transports } from "winston";
 
 import type * as SentryModule from "@sentry/node";
@@ -31,23 +31,26 @@ type Transaction = Parameters<
   NonNullable<NodeOptions["beforeSendTransaction"]>
 >[0];
 
-const importSentry = async (env: Record<string, string>) => {
-  vi.resetModules();
+const it = baseIt.extend(
+  "importSentry",
+  () => async (env: Record<string, string>) => {
+    vi.resetModules();
 
-  for (const [key, value] of Object.entries(env)) {
-    vi.stubEnv(key, value);
-  }
+    for (const [key, value] of Object.entries(env)) {
+      vi.stubEnv(key, value);
+    }
 
-  const fetchSpy = vi
-    .spyOn(globalThis, "fetch")
-    .mockResolvedValue(new Response(null));
+    const fetchSpy = vi
+      .spyOn(globalThis, "fetch")
+      .mockResolvedValue(new Response(null));
 
-  await import("./sentry.ts");
+    await import("./sentry.ts");
 
-  const { logger } = await import("./utilities/logger/logger.ts");
+    const { logger } = await import("./utilities/logger/logger.ts");
 
-  return { fetchSpy, logger };
-};
+    return { fetchSpy, logger };
+  },
+);
 
 const getBeforeSendTransaction = () => {
   const [options] = sentry.init.mock.calls[0] ?? [];
@@ -65,14 +68,18 @@ const getBeforeSendTransaction = () => {
   };
 };
 
-it("does not initialise Sentry unless Spotlight is enabled", async () => {
+it("does not initialise Sentry unless Spotlight is enabled", async ({
+  importSentry,
+}) => {
   const { fetchSpy } = await importSentry({ SENTRY_SPOTLIGHT: "0" });
 
   expect(sentry.init).not.toHaveBeenCalled();
   expect(fetchSpy).not.toHaveBeenCalled();
 });
 
-it("initialises Sentry against the local Spotlight server", async () => {
+it("initialises Sentry against the local Spotlight server", async ({
+  importSentry,
+}) => {
   const { fetchSpy } = await importSentry({
     SENTRY_SPOTLIGHT: "1",
     SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP: "0",
@@ -89,7 +96,9 @@ it("initialises Sentry against the local Spotlight server", async () => {
   expect(fetchSpy).not.toHaveBeenCalled();
 });
 
-it("clears the Spotlight server on startup when configured", async () => {
+it("clears the Spotlight server on startup when configured", async ({
+  importSentry,
+}) => {
   const { fetchSpy } = await importSentry({
     SENTRY_SPOTLIGHT: "1",
     SENTRY_SPOTLIGHT_CLEAR_ON_STARTUP: "1",
@@ -103,7 +112,7 @@ it("clears the Spotlight server on startup when configured", async () => {
 
 it.for(["extendLocks", "moveStalledJobsToWait"])(
   "drops BullMQ %s housekeeping transactions",
-  async (operation) => {
+  async (operation, { importSentry }) => {
     await importSentry({ SENTRY_SPOTLIGHT: "1" });
 
     const beforeSendTransaction = getBeforeSendTransaction();
@@ -123,7 +132,9 @@ it.for(["extendLocks", "moveStalledJobsToWait"])(
   },
 );
 
-it("marks a transaction as failed when one of its BullMQ spans failed", async () => {
+it("marks a transaction as failed when one of its BullMQ spans failed", async ({
+  importSentry,
+}) => {
   await importSentry({ SENTRY_SPOTLIGHT: "1" });
 
   const beforeSendTransaction = getBeforeSendTransaction();
@@ -160,7 +171,7 @@ it("marks a transaction as failed when one of its BullMQ spans failed", async ()
   ]);
 });
 
-it("keeps successful transactions unchanged", async () => {
+it("keeps successful transactions unchanged", async ({ importSentry }) => {
   await importSentry({ SENTRY_SPOTLIGHT: "1" });
 
   const beforeSendTransaction = getBeforeSendTransaction();
@@ -184,7 +195,9 @@ it("keeps successful transactions unchanged", async () => {
   expect(event?.spans?.[0]?.status).toBeUndefined();
 });
 
-it("forwards log entries to the Sentry logger at the matching level", async () => {
+it("forwards log entries to the Sentry logger at the matching level", async ({
+  importSentry,
+}) => {
   expect.hasAssertions();
 
   const { logger } = await importSentry({ SENTRY_SPOTLIGHT: "1" });

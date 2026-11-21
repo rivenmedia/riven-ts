@@ -13,7 +13,11 @@ import { processMediaItemProcessor } from "./process-media-item.processor.ts";
 import type { ProcessMediaItemFlow } from "./process-media-item.schema.ts";
 import type { FlowJob } from "bullmq";
 
+const enqueuedQueues = (spy: { mock: { calls: [FlowJob, ...unknown[]][] } }) =>
+  spy.mock.calls.map(([node]) => node.queueName);
+
 const it = baseIt
+  .extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"))
   .extend(
     "processJob",
     ({ mockFlowProcessorContext, mockSentryScope }) =>
@@ -58,9 +62,6 @@ const it = baseIt
         return job;
       },
   );
-
-const enqueuedQueues = (spy: { mock: { calls: [FlowJob, ...unknown[]][] } }) =>
-  spy.mock.calls.map(([node]) => node.queueName);
 
 it("enqueues the item for scraping and waits for the scrape to finish", async ({
   createProcessorJob,
@@ -203,13 +204,14 @@ it.for([
   async (
     { requiresPostProcessing, enqueued },
     {
+      spyOnAddBulk,
       createProcessorJob,
       processJob,
       services,
       completedMovieContext: { completedMovie },
     },
   ) => {
-    const addBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+    const addBulkSpy = spyOnAddBulk().mockResolvedValue([]);
 
     vi.spyOn(
       services.postProcessingService,

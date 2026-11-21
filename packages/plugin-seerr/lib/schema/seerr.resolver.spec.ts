@@ -9,37 +9,71 @@ import { it as baseIt } from "../__tests__/seerr.test-context.ts";
 import type { RequestResponse } from "../schemas/request-response.schema.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
-const it = baseIt.extend("requests", (): RequestResponse => ({
-  pageInfo: { results: 2 },
-  results: [
-    { id: 1, status: 2, type: "movie", media: { tmdbId: 550 } },
-    {
-      id: 2,
-      status: 2,
-      type: "tv",
-      media: { id: 20, tmdbId: 1399, tvdbId: 121_361 },
-      seasons: [{ id: 3, status: 2, seasonNumber: 1 }],
-    },
-  ],
-}));
-
-const requestsWithFilter = (requests: RequestResponse, filter: string) =>
-  getRequestHandler(({ request }) => {
-    if (new URL(request.url).searchParams.get("filter") !== filter) {
-      return HttpResponse.json(null, { status: 400 });
-    }
-
-    return HttpResponse.json<RequestResponse>(requests);
-  });
-
 const CASES = [
   { field: "seerrMovies", expected: [{ tmdbId: "550", tvdbId: null }] },
   { field: "seerrShows", expected: [{ tmdbId: "1399", tvdbId: "121361" }] },
 ] as const;
 
+const it = baseIt
+  .extend(
+    "requestsWithFilter",
+    () => (requests: RequestResponse, filter: string) =>
+      getRequestHandler(({ request }) => {
+        if (new URL(request.url).searchParams.get("filter") !== filter) {
+          return HttpResponse.json(null, { status: 400 });
+        }
+
+        return HttpResponse.json<RequestResponse>(requests);
+      }),
+  )
+  .extend("createContext", () => (gqlContext: GraphQLContext) => {
+    const logger = {
+      info: vi.fn<(message: string) => void>(),
+      warn: vi.fn<(message: string) => void>(),
+    };
+
+    return {
+      logger,
+      contextValue: {
+        ...gqlContext,
+        logger: logger as unknown as GraphQLContext["logger"],
+      },
+    };
+  })
+  .extend(
+    "mediaPayload",
+    () =>
+      (
+        notificationType: string,
+        media: Record<string, string>,
+        extra: { name: string; value: string }[] = [],
+      ) => ({
+        notification_type: notificationType,
+        media: { imdbId: "", tmdbId: "", tvdbId: "", ...media },
+        request: { request_id: "42", requestedBy_email: "user@example.com" },
+        extra,
+      }),
+  )
+  .extend("requests", (): RequestResponse => ({
+    pageInfo: { results: 2 },
+    results: [
+      { id: 1, status: 2, type: "movie", media: { tmdbId: 550 } },
+      {
+        id: 2,
+        status: 2,
+        type: "tv",
+        media: { id: 20, tmdbId: 1399, tvdbId: 121_361 },
+        seasons: [{ id: 3, status: 2, seasonNumber: 1 }],
+      },
+    ],
+  }));
+
 it.for(CASES)(
   "$field returns the requested items for the given filter",
-  async ({ field, expected }, { gqlContext, gqlServer, requests, server }) => {
+  async (
+    { field, expected },
+    { requestsWithFilter, gqlContext, gqlServer, requests, server },
+  ) => {
     server.use(requestsWithFilter(requests, "pending"));
 
     const { body } = await gqlServer.executeOperation(
@@ -61,7 +95,10 @@ it.for(CASES)(
 
 it.for(CASES)(
   "$field filters by approved requests by default",
-  async ({ field, expected }, { gqlContext, gqlServer, requests, server }) => {
+  async (
+    { field, expected },
+    { requestsWithFilter, gqlContext, gqlServer, requests, server },
+  ) => {
     server.use(requestsWithFilter(requests, "approved"));
 
     const { body } = await gqlServer.executeOperation(
@@ -102,33 +139,8 @@ const mutation = `
     }
   `;
 
-const createContext = (gqlContext: GraphQLContext) => {
-  const logger = {
-    info: vi.fn<(message: string) => void>(),
-    warn: vi.fn<(message: string) => void>(),
-  };
-
-  return {
-    logger,
-    contextValue: {
-      ...gqlContext,
-      logger: logger as unknown as GraphQLContext["logger"],
-    },
-  };
-};
-
-const mediaPayload = (
-  notificationType: string,
-  media: Record<string, string>,
-  extra: { name: string; value: string }[] = [],
-) => ({
-  notification_type: notificationType,
-  media: { imdbId: "", tmdbId: "", tvdbId: "", ...media },
-  request: { request_id: "42", requestedBy_email: "user@example.com" },
-  extra,
-});
-
 it("seerrHandleWebhook acknowledges test notifications without requesting anything", async ({
+  createContext,
   gqlContext,
   gqlServer,
 }) => {
@@ -156,7 +168,10 @@ it("seerrHandleWebhook acknowledges test notifications without requesting anythi
 
 it.for(["MEDIA_PENDING", "MEDIA_AVAILABLE", "MEDIA_DECLINED"])(
   "seerrHandleWebhook ignores %s notifications",
-  async (notificationType, { gqlContext, gqlServer }) => {
+  async (
+    notificationType,
+    { createContext, mediaPayload, gqlContext, gqlServer },
+  ) => {
     const { contextValue, logger } = createContext(gqlContext);
 
     const { body } = await gqlServer.executeOperation(
@@ -187,7 +202,10 @@ it.for(["MEDIA_PENDING", "MEDIA_AVAILABLE", "MEDIA_DECLINED"])(
 
 it.for(["MEDIA_APPROVED", "MEDIA_AUTO_APPROVED"])(
   "seerrHandleWebhook requests the movie from a %s notification",
-  async (notificationType, { gqlContext, gqlServer }) => {
+  async (
+    notificationType,
+    { createContext, mediaPayload, gqlContext, gqlServer },
+  ) => {
     const { contextValue } = createContext(gqlContext);
 
     const { body } = await gqlServer.executeOperation(
@@ -224,6 +242,8 @@ it.for(["MEDIA_APPROVED", "MEDIA_AUTO_APPROVED"])(
 );
 
 it("seerrHandleWebhook requests the show and its requested seasons", async ({
+  createContext,
+  mediaPayload,
   gqlContext,
   gqlServer,
 }) => {
@@ -265,6 +285,8 @@ it("seerrHandleWebhook requests the show and its requested seasons", async ({
 });
 
 it("seerrHandleWebhook requests every season of a show when none are listed", async ({
+  createContext,
+  mediaPayload,
   gqlContext,
   gqlServer,
 }) => {
@@ -296,6 +318,7 @@ it("seerrHandleWebhook requests every season of a show when none are listed", as
 });
 
 it("seerrHandleWebhook rejects payloads without the request details", async ({
+  createContext,
   gqlContext,
   gqlServer,
 }) => {

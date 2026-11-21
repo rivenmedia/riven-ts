@@ -3,28 +3,37 @@ import { expect, vi } from "vitest";
 
 import { findByIdHandler } from "../__generated__/handlers/findByIdHandler.ts";
 import { tvEpisodeCreditsHandler } from "../__generated__/handlers/tvEpisodeCreditsHandler.ts";
-import { it } from "../__tests__/tmdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tmdb.test-context.ts";
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { getEpisodeCast } from "./get-indexer-cast.ts";
 
-const castMember = (id: number, name: string, character: string) => ({
-  id,
-  name,
-  character,
-  profile_path: `/${name.toLowerCase().replaceAll(" ", "-")}.jpg`,
-  order: id,
-});
-
-function createEpisode() {
-  return {
-    id: "349232",
-    rootId: "81189",
-    seasonNumber: 1,
-    number: 1,
-  };
-}
+const it = baseIt
+  .extend(
+    "castMember",
+    () => (id: number, name: string, character: string) => ({
+      id,
+      name,
+      character,
+      profile_path: `/${name.toLowerCase().replaceAll(" ", "-")}.jpg`,
+      order: id,
+    }),
+  )
+  .extend(
+    "createEpisode",
+    () =>
+      function createEpisode() {
+        return {
+          id: "349232",
+          rootId: "81189",
+          seasonNumber: 1,
+          number: 1,
+        };
+      },
+  );
 
 it("returns the episode's cast followed by its guest stars, using TMDB's numbering", async ({
+  castMember,
+  createEpisode,
   server,
   dataSourceMap,
 }) => {
@@ -73,6 +82,8 @@ it("returns the episode's cast followed by its guest stars, using TMDB's numberi
 });
 
 it("falls back to the show and episode numbers if TMDB doesn't have the episode's TVDB ID", async ({
+  castMember,
+  createEpisode,
   server,
   dataSourceMap,
 }) => {
@@ -120,6 +131,7 @@ it("falls back to the show and episode numbers if TMDB doesn't have the episode'
 });
 
 it("returns null if the episode has no cast", async ({
+  createEpisode,
   server,
   dataSourceMap,
 }) => {
@@ -145,6 +157,7 @@ it("returns null if the episode has no cast", async ({
 });
 
 it("returns null if TMDB has neither the episode nor its show", async ({
+  createEpisode,
   server,
   dataSourceMap,
 }) => {
@@ -165,6 +178,7 @@ it("returns null if TMDB has neither the episode nor its show", async ({
 });
 
 it("returns null if TMDB has no credits for the episode", async ({
+  createEpisode,
   server,
   dataSourceMap,
 }) => {
@@ -184,6 +198,7 @@ it("returns null if TMDB has no credits for the episode", async ({
 });
 
 it("rethrows other errors when fetching the episode's credits", async ({
+  createEpisode,
   server,
   dataSourceMap,
 }) => {

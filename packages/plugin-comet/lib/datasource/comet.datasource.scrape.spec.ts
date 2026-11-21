@@ -9,7 +9,7 @@ import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/comet.test-context.ts";
+import { it as baseIt } from "../__tests__/comet.test-context.ts";
 import { CometAPI } from "./comet.datasource.ts";
 
 import type { CometScrapeResponse } from "../schemas/scrape-response.schema.ts";
@@ -27,62 +27,79 @@ const withIds = <T extends MediaItem>(item: T, imdbId: string | null) => {
   return item;
 };
 
-const createMovie = (imdbId: string | null = "tt0133093") =>
-  withIds(new Movie(), imdbId);
+const it = baseIt
+  .extend(
+    "createMovie",
+    () =>
+      (imdbId: string | null = "tt0133093") =>
+        withIds(new Movie(), imdbId),
+  )
+  .extend("createShow", () => () => withIds(new Show(), "tt0944947"))
+  .extend("createSeason", () => () => {
+    const season = withIds(new Season(), "tt0944947");
 
-const createShow = () => withIds(new Show(), "tt0944947");
+    season.number = 2;
 
-const createSeason = () => {
-  const season = withIds(new Season(), "tt0944947");
+    return season;
+  })
+  .extend("createEpisode", () => () => {
+    const episode = withIds(new Episode(), "tt0944947");
 
-  season.number = 2;
+    episode.number = 5;
+    episode.season = createMockSeasonReference(3);
 
-  return season;
-};
+    return episode;
+  })
+  .extend(
+    "streamsHandler",
+    () =>
+      (
+        streams: CometScrapeResponse["streams"],
+        requestedPaths: string[] = [],
+      ) =>
+        http.get("https://comet.feels.legal/stream/*", ({ request }) => {
+          requestedPaths.push(new URL(request.url).pathname);
 
-const createEpisode = () => {
-  const episode = withIds(new Episode(), "tt0944947");
-
-  episode.number = 5;
-  episode.season = createMockSeasonReference(3);
-
-  return episode;
-};
-
-const streamsHandler = (
-  streams: CometScrapeResponse["streams"],
-  requestedPaths: string[] = [],
-) =>
-  http.get("https://comet.feels.legal/stream/*", ({ request }) => {
-    requestedPaths.push(new URL(request.url).pathname);
-
-    return HttpResponse.json<CometScrapeResponse>({ streams });
-  });
+          return HttpResponse.json<CometScrapeResponse>({ streams });
+        }),
+  );
 
 it.for([
   {
     type: "movie",
-    createItem: createMovie,
     path: "/stream/movie/tt0133093.json",
   },
   {
     type: "show",
-    createItem: createShow,
     path: "/stream/series/tt0944947.json",
   },
   {
     type: "season",
-    createItem: createSeason,
     path: "/stream/series/tt0944947:2.json",
   },
   {
     type: "episode",
-    createItem: createEpisode,
     path: "/stream/series/tt0944947:3:5.json",
   },
-])(
+] as const)(
   "requests the streams of a $type",
-  async ({ createItem, path }, { server, dataSourceMap }) => {
+  async (
+    { type, path },
+    {
+      createEpisode,
+      createMovie,
+      createSeason,
+      createShow,
+      server,
+      dataSourceMap,
+    },
+  ) => {
+    const createItem = {
+      movie: createMovie,
+      show: createShow,
+      season: createSeason,
+      episode: createEpisode,
+    }[type];
     server.use(
       http.get(`https://comet.feels.legal${path}`, () =>
         HttpResponse.json<CometScrapeResponse>({
@@ -105,6 +122,8 @@ it.for([
 );
 
 it("returns the title of each torrent keyed by its info hash", async ({
+  createMovie,
+  streamsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -136,7 +155,12 @@ it("returns the title of each torrent keyed by its info hash", async ({
   });
 });
 
-it("skips streams without a title", async ({ server, dataSourceMap }) => {
+it("skips streams without a title", async ({
+  createMovie,
+  streamsHandler,
+  server,
+  dataSourceMap,
+}) => {
   server.use(
     streamsHandler([
       {
@@ -162,6 +186,8 @@ it("skips streams without a title", async ({ server, dataSourceMap }) => {
 });
 
 it("returns no torrents without requesting streams when the item has no IMDB ID", async ({
+  createMovie,
+  streamsHandler,
   server,
   dataSourceMap,
 }) => {
@@ -178,6 +204,7 @@ it("returns no torrents without requesting streams when the item has no IMDB ID"
 });
 
 it("returns no torrents when the request fails", async ({
+  createMovie,
   server,
   dataSourceMap,
 }) => {
@@ -195,6 +222,7 @@ it("returns no torrents when the request fails", async ({
 });
 
 it("returns no torrents when the response is malformed", async ({
+  createMovie,
   server,
   dataSourceMap,
 }) => {

@@ -1,6 +1,6 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 
 import { keyvInstance } from "#utilities/redis-cache.ts";
@@ -11,68 +11,85 @@ import type { ShutdownInput } from "./shutdown.actor.ts";
 
 type CloseFn = (force?: boolean) => Promise<void>;
 
-const createWorker = (
-  name: string,
-  close: CloseFn = async () => Promise.resolve(),
-) => ({
-  name,
-  close: vi.fn<CloseFn>(close),
-});
-
-const createDataSource = (close: CloseFn = async () => Promise.resolve()) => ({
-  close: vi.fn<CloseFn>(close),
-});
-
-const createMainRunnerRef = ({
-  flowWorkers = [],
-  sandboxedWorkers = [],
-  pluginDataSources = [],
-}: {
-  flowWorkers?: ReturnType<typeof createWorker>[];
-  sandboxedWorkers?: ReturnType<typeof createWorker>[];
-  pluginDataSources?: ReturnType<typeof createDataSource>[];
-}) => {
-  const dataSources = new DataSourceMap();
-
-  for (const [index, dataSource] of pluginDataSources.entries()) {
-    dataSources.set(
-      class PluginDataSource {
-        public readonly index = index;
-      } as never,
-      dataSource as never,
-    );
-    expect(dataSources.size).toBe(index + 1);
-  }
-
-  return {
-    getSnapshot: () => ({
-      context: {
-        flowWorkers: Object.fromEntries(
-          flowWorkers.map((worker) => [worker.name, { worker }]),
-        ),
-        sandboxedWorkers: Object.fromEntries(
-          sandboxedWorkers.map((worker) => [worker.name, { worker }]),
-        ),
-        plugins: new Map([[Symbol("plugin"), { dataSources }]]),
-      },
-    }),
-  } as unknown as NonNullable<ShutdownInput["mainRunnerRef"]>;
-};
-
 const runShutdown = async (mainRunnerRef: ShutdownInput["mainRunnerRef"]) =>
   toPromise(createActor(shutdown, { input: { mainRunnerRef } }).start());
 
-it("does nothing when the main runner has not started", async () => {
-  const disconnectSpy = vi
-    .spyOn(keyvInstance, "disconnect")
-    .mockResolvedValue(undefined);
+const it = baseIt
+  .extend(
+    "spyOnKeyvDisconnect",
+    () => () => vi.spyOn(keyvInstance, "disconnect"),
+  )
+  .extend(
+    "createWorker",
+    () =>
+      (name: string, close: CloseFn = async () => Promise.resolve()) => ({
+        name,
+        close: vi.fn<CloseFn>(close),
+      }),
+  )
+  .extend(
+    "createDataSource",
+    () =>
+      (close: CloseFn = async () => Promise.resolve()) => ({
+        close: vi.fn<CloseFn>(close),
+      }),
+  )
+  .extend(
+    "createMainRunnerRef",
+    ({ createWorker, createDataSource }) =>
+      ({
+        flowWorkers = [],
+        sandboxedWorkers = [],
+        pluginDataSources = [],
+      }: {
+        flowWorkers?: ReturnType<typeof createWorker>[];
+        sandboxedWorkers?: ReturnType<typeof createWorker>[];
+        pluginDataSources?: ReturnType<typeof createDataSource>[];
+      }) => {
+        const dataSources = new DataSourceMap();
+
+        for (const [index, dataSource] of pluginDataSources.entries()) {
+          dataSources.set(
+            class PluginDataSource {
+              public readonly index = index;
+            } as never,
+            dataSource as never,
+          );
+          expect(dataSources.size).toBe(index + 1);
+        }
+
+        return {
+          getSnapshot: () => ({
+            context: {
+              flowWorkers: Object.fromEntries(
+                flowWorkers.map((worker) => [worker.name, { worker }]),
+              ),
+              sandboxedWorkers: Object.fromEntries(
+                sandboxedWorkers.map((worker) => [worker.name, { worker }]),
+              ),
+              plugins: new Map([[Symbol("plugin"), { dataSources }]]),
+            },
+          }),
+        } as unknown as NonNullable<ShutdownInput["mainRunnerRef"]>;
+      },
+  );
+
+it("does nothing when the main runner has not started", async ({
+  spyOnKeyvDisconnect,
+}) => {
+  const disconnectSpy = spyOnKeyvDisconnect().mockResolvedValue(undefined);
 
   await runShutdown(undefined);
 
   expect(disconnectSpy).not.toHaveBeenCalled();
 });
 
-it("closes flow and sandboxed workers gracefully, plugin data sources forcefully, then disconnects Redis", async () => {
+it("closes flow and sandboxed workers gracefully, plugin data sources forcefully, then disconnects Redis", async ({
+  spyOnKeyvDisconnect,
+  createWorker,
+  createDataSource,
+  createMainRunnerRef,
+}) => {
   const events: string[] = [];
   const record = (event: string) => async () => {
     events.push(event);
@@ -84,9 +101,7 @@ it("closes flow and sandboxed workers gracefully, plugin data sources forcefully
   const sandboxedWorker = createWorker("sandboxed", record("sandboxed closed"));
   const pluginDataSource = createDataSource(record("plugin closed"));
 
-  vi.spyOn(keyvInstance, "disconnect").mockImplementation(
-    record("redis disconnected"),
-  );
+  spyOnKeyvDisconnect().mockImplementation(record("redis disconnected"));
 
   await runShutdown(
     createMainRunnerRef({
@@ -107,8 +122,12 @@ it("closes flow and sandboxed workers gracefully, plugin data sources forcefully
   ]);
 });
 
-it("force-closes a worker that fails to close gracefully", async () => {
-  vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
+it("force-closes a worker that fails to close gracefully", async ({
+  spyOnKeyvDisconnect,
+  createWorker,
+  createMainRunnerRef,
+}) => {
+  spyOnKeyvDisconnect().mockResolvedValue(undefined);
 
   const worker = createWorker("flow", async (force) =>
     force
@@ -121,10 +140,14 @@ it("force-closes a worker that fails to close gracefully", async () => {
   expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
 });
 
-it("force-closes a worker that does not close within 10 seconds", async () => {
+it("force-closes a worker that does not close within 10 seconds", async ({
+  spyOnKeyvDisconnect,
+  createWorker,
+  createMainRunnerRef,
+}) => {
   expect.hasAssertions();
 
-  vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
+  spyOnKeyvDisconnect().mockResolvedValue(undefined);
 
   const timeout = new AbortController();
   const timeoutSpy = vi
@@ -153,10 +176,15 @@ it("force-closes a worker that does not close within 10 seconds", async () => {
   expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
 });
 
-it("completes the shutdown when workers, data sources or Redis fail to close", async () => {
-  const disconnectSpy = vi
-    .spyOn(keyvInstance, "disconnect")
-    .mockRejectedValue(new Error("Redis is unavailable"));
+it("completes the shutdown when workers, data sources or Redis fail to close", async ({
+  spyOnKeyvDisconnect,
+  createWorker,
+  createDataSource,
+  createMainRunnerRef,
+}) => {
+  const disconnectSpy = spyOnKeyvDisconnect().mockRejectedValue(
+    new Error("Redis is unavailable"),
+  );
 
   const failingClose = async () => Promise.reject(new Error("Close failed"));
 

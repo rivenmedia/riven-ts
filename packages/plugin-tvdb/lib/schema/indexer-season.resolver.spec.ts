@@ -1,19 +1,27 @@
 import { expect, vi } from "vitest";
 
-import { it } from "../__tests__/tvdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tvdb.test-context.ts";
 import { TvdbAPI } from "../datasource/tvdb.datasource.ts";
 import { TvdbIndexerSeasonResolver } from "./indexer-season.resolver.ts";
 
 import type { IndexerEpisode } from "@repo/util-plugin-sdk/dto/types/indexer-episode.type";
 import type { IndexerSeason } from "@repo/util-plugin-sdk/dto/types/indexer-season.type";
 
-const episode = (number: number) =>
-  ({ id: `episode-${number.toString()}`, number }) as IndexerEpisode;
-
-const season = (episodes: IndexerEpisode[]) =>
-  ({ rootId: "81189", number: 1, episodes }) as unknown as IndexerSeason;
+const it = baseIt
+  .extend(
+    "episode",
+    () => (number: number) =>
+      ({ id: `episode-${number.toString()}`, number }) as IndexerEpisode,
+  )
+  .extend(
+    "season",
+    () => (episodes: IndexerEpisode[]) =>
+      ({ rootId: "81189", number: 1, episodes }) as unknown as IndexerSeason,
+  );
 
 it("returns the requested episode from a season that includes its episodes", async ({
+  episode,
+  season,
   dataSourceMap,
 }) => {
   const api = dataSourceMap.get(TvdbAPI);
@@ -31,6 +39,8 @@ it("returns the requested episode from a season that includes its episodes", asy
 });
 
 it("loads the season's episodes when the season does not include them", async ({
+  episode,
+  season,
   dataSourceMap,
 }) => {
   const api = dataSourceMap.get(TvdbAPI);
@@ -46,6 +56,8 @@ it("loads the season's episodes when the season does not include them", async ({
 });
 
 it("returns null when the season does not have the episode", async ({
+  episode,
+  season,
   dataSourceMap,
 }) => {
   const api = dataSourceMap.get(TvdbAPI);
@@ -60,6 +72,7 @@ it("returns null when the season does not have the episode", async ({
 });
 
 it("returns null when TVDB does not have the season", async ({
+  season,
   dataSourceMap,
 }) => {
   const api = dataSourceMap.get(TvdbAPI);

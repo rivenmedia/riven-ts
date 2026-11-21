@@ -1,29 +1,31 @@
 import { startSpan } from "@sentry/node";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 
-import { withLogContext } from "#utilities/logger/log-context.ts";
+import {
+  getLogContext,
+  withLogContext,
+} from "#utilities/logger/log-context.ts";
 
 import { sentryMetaFormat } from "./sentry-meta.format.ts";
 
 import type { SessionID } from "#utilities/logger/session-id.ts";
 import type { TransformableInfo } from "logform";
 
-const logContextFailure = vi.hoisted(() => ({ error: null as Error | null }));
+vi.mock(import("#utilities/logger/log-context.ts"), { spy: true });
 
-vi.mock(import("#utilities/logger/log-context.ts"), async (importOriginal) => {
-  const original = await importOriginal();
+const it = baseIt
+  .extend("spyOnConsoleError", () => () => vi.spyOn(console, "error"))
+  .extend("failLogContext", ({}, { onCleanup }) => {
+    onCleanup(() => {
+      vi.mocked(getLogContext).mockReset();
+    });
 
-  return {
-    ...original,
-    getLogContext: () => {
-      if (logContextFailure.error) {
-        throw logContextFailure.error;
-      }
-
-      return original.getLogContext();
-    },
-  };
-});
+    return (error: Error) => {
+      vi.mocked(getLogContext).mockImplementation(() => {
+        throw error;
+      });
+    };
+  });
 
 it("does not throw without an active log context", () => {
   const result = sentryMetaFormat().transform({
@@ -77,20 +79,20 @@ it("adds the active trace and span IDs", () => {
   });
 });
 
-it("reports and rethrows errors whilst resolving the log context", () => {
-  const consoleError = vi.spyOn(console, "error").mockReturnValue();
+it("reports and rethrows errors whilst resolving the log context", ({
+  failLogContext,
+  spyOnConsoleError,
+}) => {
+  const consoleError = spyOnConsoleError().mockReturnValue();
+  const error = new Error("Log context unavailable");
 
-  logContextFailure.error = new Error("Log context unavailable");
+  failLogContext(error);
 
-  try {
-    expect(() =>
-      sentryMetaFormat().transform({
-        message: "broken log",
-      } as TransformableInfo),
-    ).toThrow(logContextFailure.error);
-  } finally {
-    logContextFailure.error = null;
-  }
+  expect(() =>
+    sentryMetaFormat().transform({
+      message: "broken log",
+    } as TransformableInfo),
+  ).toThrow(error);
 
   expect(consoleError).toHaveBeenCalledExactlyOnceWith(
     'Unexpected error whilst logging "broken log": Log context unavailable',

@@ -15,6 +15,19 @@ import type { ProcessItemRequestFlow } from "./process-item-request.schema.ts";
 import type { UUID } from "node:crypto";
 
 const it = baseIt
+  .extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"))
+  .extend("indexedMovieData", () => (id: UUID, imdbId: string) => ({
+    item: {
+      id,
+      title: "Test Movie",
+      imdbId,
+      contentRating: "g",
+      genres: [],
+      type: "movie",
+      runtime: 40,
+      releaseDate: DateTime.utc().minus({ years: 1 }).toISO(),
+    },
+  }))
   .extend(
     "processJob",
     ({ mockFlowProcessorContext, mockSentryScope }) =>
@@ -53,19 +66,6 @@ const it = baseIt
       },
   );
 
-const indexedMovieData = (id: UUID, imdbId: string) => ({
-  item: {
-    id,
-    title: "Test Movie",
-    imdbId,
-    contentRating: "g",
-    genres: [],
-    type: "movie",
-    runtime: 40,
-    releaseDate: DateTime.utc().minus({ years: 1 }).toISO(),
-  },
-});
-
 it("fails when the item request does not exist", async ({
   createProcessorJob,
   processJob,
@@ -79,6 +79,7 @@ it("fails when the item request does not exist", async ({
 });
 
 it("requests indexing from each subscribed plugin and waits for the results", async ({
+  spyOnAddBulk,
   createProcessorJob,
   processJob,
   factories: { movieItemRequestFactory },
@@ -87,7 +88,7 @@ it("requests indexing from each subscribed plugin and waits for the results", as
     imdbId: "tt0133093",
     state: "requested",
   });
-  const addBulkSpy = vi.spyOn(flow, "addBulk").mockResolvedValue([]);
+  const addBulkSpy = spyOnAddBulk().mockResolvedValue([]);
   const job = await createProcessorJob({
     itemRequestId: itemRequest.id,
     step: "request",
@@ -147,6 +148,7 @@ it("marks the request as failed and retries in a day when no indexer returns a r
 });
 
 it("indexes the item from the indexer results and reports the success", async ({
+  indexedMovieData,
   createProcessorJob,
   processJob,
   mockFlowProcessorContext,
@@ -173,6 +175,7 @@ it("indexes the item from the indexer results and reports the success", async ({
 });
 
 it("reports the error when the item cannot be indexed in its current state", async ({
+  indexedMovieData,
   createProcessorJob,
   processJob,
   mockFlowProcessorContext,

@@ -16,21 +16,6 @@ const BUILT_IN_ISSUE = Object.freeze({
   message: "Built-in profiles can't be changed. Duplicate it to customise.",
 });
 
-const it = baseIt
-  .extend("manager", ({ services }) => new RankingManager(services))
-  .extend("defaultId", async ({ services: { rankingProfileService } }) => {
-    const profile = await rankingProfileService.findBySlug(DEFAULT_PRESET_SLUG);
-
-    if (!profile) {
-      throw new Error("Default preset missing");
-    }
-
-    return profile.id;
-  });
-
-const formValues = (name: string, rankingModel = {}) =>
-  toProfileFormValues({ name, description: null, rankingModel, settings: {} });
-
 async function listProfiles(manager: RankingManager) {
   const profiles = await manager.list();
   const activeId = await manager.getActiveProfileId();
@@ -44,23 +29,45 @@ async function listProfiles(manager: RankingManager) {
   };
 }
 
-/** Creates a custom profile and returns its id. */
-async function createProfile(
-  manager: RankingManager,
-  name: string,
-  rankingModel = {},
-) {
-  await manager.create(formValues(name, rankingModel));
+const it = baseIt
+  .extend(
+    "formValues",
+    () =>
+      (name: string, rankingModel = {}) =>
+        toProfileFormValues({
+          name,
+          description: null,
+          rankingModel,
+          settings: {},
+        }),
+  )
+  .extend("manager", ({ services }) => new RankingManager(services))
+  .extend("defaultId", async ({ services: { rankingProfileService } }) => {
+    const profile = await rankingProfileService.findBySlug(DEFAULT_PRESET_SLUG);
 
-  const { profiles } = await listProfiles(manager);
-  const profile = profiles.find((candidate) => candidate.name === name);
+    if (!profile) {
+      throw new Error("Default preset missing");
+    }
 
-  if (!profile) {
-    throw new Error(`Profile "${name}" was not created`);
-  }
+    return profile.id;
+  })
+  // Creates a custom profile and returns its id
+  .extend(
+    "createProfile",
+    ({ formValues, manager }) =>
+      async (name: string, rankingModel = {}) => {
+        await manager.create(formValues(name, rankingModel));
 
-  return profile.id;
-}
+        const { profiles } = await listProfiles(manager);
+        const profile = profiles.find((candidate) => candidate.name === name);
+
+        if (!profile) {
+          throw new Error(`Profile "${name}" was not created`);
+        }
+
+        return profile.id;
+      },
+  );
 
 it.beforeEach(async ({ services: { rankingProfileService } }) => {
   await rankingProfileService.syncPresets(rankingPresets);
@@ -69,6 +76,7 @@ it.beforeEach(async ({ services: { rankingProfileService } }) => {
 });
 
 it("lists presets first and marks the active profile", async ({
+  formValues,
   manager,
   services: { rankingProfileService },
 }) => {
@@ -101,8 +109,8 @@ it("lists presets first and marks the active profile", async ({
   });
 });
 
-it("marks the selected profile active", async ({ manager }) => {
-  const mine = await createProfile(manager, "Mine");
+it("marks the selected profile active", async ({ createProfile, manager }) => {
+  const mine = await createProfile("Mine");
 
   await expect(manager.select(mine)).resolves.toStrictEqual([]);
   await expect(listProfiles(manager)).resolves.toMatchObject({
@@ -117,7 +125,11 @@ it("serves the profile form JSON schema", ({ manager }) => {
   });
 });
 
-it("refuses to update or delete a built-in", async ({ manager, defaultId }) => {
+it("refuses to update or delete a built-in", async ({
+  formValues,
+  manager,
+  defaultId,
+}) => {
   await expect(
     manager.update(defaultId, formValues("Renamed")),
   ).resolves.toStrictEqual([BUILT_IN_ISSUE]);
@@ -129,8 +141,11 @@ it("refuses to update or delete a built-in", async ({ manager, defaultId }) => {
   });
 });
 
-it("refuses to delete the active profile", async ({ manager }) => {
-  const mine = await createProfile(manager, "Mine");
+it("refuses to delete the active profile", async ({
+  createProfile,
+  manager,
+}) => {
+  const mine = await createProfile("Mine");
 
   await manager.select(mine);
 
@@ -143,8 +158,8 @@ it("refuses to delete the active profile", async ({ manager }) => {
   ]);
 });
 
-it("deletes an inactive custom profile", async ({ manager }) => {
-  const mine = await createProfile(manager, "Mine");
+it("deletes an inactive custom profile", async ({ createProfile, manager }) => {
+  const mine = await createProfile("Mine");
 
   await expect(manager.delete(mine)).resolves.toStrictEqual([]);
   await expect(listProfiles(manager)).resolves.toMatchObject({
@@ -152,7 +167,11 @@ it("deletes an inactive custom profile", async ({ manager }) => {
   });
 });
 
-it("rejects a duplicate name", async ({ manager }) => {
+it("rejects a duplicate name", async ({
+  createProfile,
+  formValues,
+  manager,
+}) => {
   const nameTaken = {
     path: "name",
     message: "A profile with this name already exists.",
@@ -162,9 +181,9 @@ it("rejects a duplicate name", async ({ manager }) => {
     nameTaken,
   ]);
 
-  await createProfile(manager, "One");
+  await createProfile("One");
 
-  const two = await createProfile(manager, "Two");
+  const two = await createProfile("Two");
 
   await expect(manager.update(two, formValues("One"))).resolves.toStrictEqual([
     nameTaken,
@@ -174,7 +193,7 @@ it("rejects a duplicate name", async ({ manager }) => {
   ).resolves.toStrictEqual([]);
 });
 
-it("returns form issues without writing", async ({ manager }) => {
+it("returns form issues without writing", async ({ formValues, manager }) => {
   const issues = await manager.create({ ...formValues("Bad"), name: "" });
 
   expect(issues.map(({ path }) => path)).toStrictEqual(["name"]);
@@ -202,6 +221,7 @@ it("duplicates with unique copy names", async ({ manager, defaultId }) => {
 });
 
 it("stores profiles sparsely", async ({
+  formValues,
   manager,
   services: { rankingProfileService },
 }) => {
@@ -214,7 +234,7 @@ it("stores profiles sparsely", async ({
   expect(blank?.settings).toStrictEqual({});
 });
 
-it("throws NOT_FOUND for an unknown id", async ({ manager }) => {
+it("throws NOT_FOUND for an unknown id", async ({ formValues, manager }) => {
   const id = crypto.randomUUID();
   const notFound = expect.objectContaining({
     constructor: GraphQLError,
@@ -230,10 +250,12 @@ it("throws NOT_FOUND for an unknown id", async ({ manager }) => {
 });
 
 it("invalidates the engine when the active profile changes", async ({
+  createProfile,
+  formValues,
   manager,
   services: { settingsService },
 }) => {
-  const mine = await createProfile(manager, "Mine");
+  const mine = await createProfile("Mine");
 
   await manager.select(mine);
 
@@ -250,9 +272,11 @@ it("invalidates the engine when the active profile changes", async ({
 });
 
 it("does not invalidate when editing an inactive profile", async ({
+  createProfile,
+  formValues,
   manager,
 }) => {
-  const mine = await createProfile(manager, "Mine");
+  const mine = await createProfile("Mine");
 
   await manager.update(mine, formValues("Mine", { av1: 7 }));
   await manager.duplicate(mine);

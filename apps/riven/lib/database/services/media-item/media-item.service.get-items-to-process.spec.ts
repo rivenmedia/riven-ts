@@ -3,8 +3,13 @@ import { ItemRequest, MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { logger } from "#utilities/logger/logger.ts";
+
+const it = baseIt.extend(
+  "spyOnLoggerError",
+  () => () => vi.spyOn(logger, "error"),
+);
 
 it("processes a movie on its own", async ({
   scrapedMovieContext: { scrapedMovie },
@@ -94,12 +99,13 @@ it.for(["failed", "paused"] as const)(
   async (
     state,
     {
+      spyOnLoggerError,
       em,
       scrapedMovieContext: { scrapedMovie },
       services: { mediaItemService },
     },
   ) => {
-    vi.spyOn(logger, "error").mockReturnValue(logger);
+    spyOnLoggerError().mockReturnValue(logger);
 
     await em.nativeUpdate(MediaItem, { id: scrapedMovie.id }, { state });
 
@@ -110,9 +116,10 @@ it.for(["failed", "paused"] as const)(
 );
 
 it("logs and processes nothing for an unknown item", async ({
+  spyOnLoggerError,
   services: { mediaItemService },
 }) => {
-  const errorSpy = vi.spyOn(logger, "error").mockReturnValue(logger);
+  const errorSpy = spyOnLoggerError().mockReturnValue(logger);
 
   await expect(
     mediaItemService.getItemsToProcess(randomUUID()),

@@ -5,14 +5,16 @@ import { waitFor } from "xstate";
 
 import { flow } from "#message-queue/flows/producer.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
+
+const it = baseIt.extend("spyOnAdd", () => () => vi.spyOn(flow, "add"));
 
 it("creates an item request for an externally requested movie and processes it", async ({
+  spyOnAdd,
   em,
   actor,
 }) => {
-  const addSpy = vi.spyOn(flow, "add");
-
+  const addSpy = spyOnAdd();
   actor.start();
 
   await waitFor(actor, (state) => state.matches("Running"));

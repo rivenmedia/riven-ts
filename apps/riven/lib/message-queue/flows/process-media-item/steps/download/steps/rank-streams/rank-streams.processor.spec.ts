@@ -16,14 +16,19 @@ import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
-const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
-  streamFactory.create(6),
-);
+const it = baseIt
+  .extend(
+    "spyOnGetRankingEngine",
+    () => () => vi.spyOn(rankingEngineModule, "getRankingEngine"),
+  )
+  .extend("streams", async ({ factories: { streamFactory } }) =>
+    streamFactory.create(6),
+  );
 
-it.beforeEach(() => {
+it.beforeEach(({ spyOnGetRankingEngine }) => {
   invalidateRankingEngine();
 
-  vi.spyOn(rankingEngineModule, "getRankingEngine").mockResolvedValue(
+  spyOnGetRankingEngine().mockResolvedValue(
     new RTN(
       createRankingModel({
         bluray: 0,

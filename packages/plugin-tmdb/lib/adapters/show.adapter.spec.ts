@@ -1,7 +1,7 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/tmdb.test-context.ts";
+import { it as baseIt } from "../__tests__/tmdb.test-context.ts";
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { createTmdbShow } from "../utilities/create-tmdb-indexer-data.ts";
 import { showAdapter } from "./show.adapter.ts";
@@ -10,34 +10,36 @@ import type { ShowListItem } from "../schemas/show-list-item.schema.ts";
 
 const TMDB_URL = "https://api.themoviedb.org/3";
 
-const createShow = (imdbId?: string | null) =>
-  createTmdbShow({
-    tmdbId: "1396",
-    tvdbId: "81189",
-    ...(imdbId === undefined ? {} : { imdbId }),
-    title: "Breaking Bad",
+const it = baseIt
+  .extend(
+    "createShow",
+    () => (imdbId?: string | null) =>
+      createTmdbShow({
+        tmdbId: "1396",
+        tvdbId: "81189",
+        ...(imdbId === undefined ? {} : { imdbId }),
+        title: "Breaking Bad",
+        overview: "",
+        genres: [],
+        rawRuntime: null,
+        status: "unknown",
+      }),
+  )
+  .extend("showListItem", () => (id: number, name: string): ShowListItem => ({
+    id,
+    name,
     overview: "",
-    genres: [],
-    rawRuntime: null,
-    status: "unknown",
-  });
-
-const showListItem = (id: number, name: string): ShowListItem => ({
-  id,
-  name,
-  overview: "",
-  backdrop_path: "/backdrop.jpg",
-  poster_path: "/poster.jpg",
-  original_language: "en",
-  genre_ids: [],
-});
-
-const pagedResponse = (results: ShowListItem[]) => ({
-  page: 1,
-  results,
-  total_pages: 1,
-  total_results: results.length,
-});
+    backdrop_path: "/backdrop.jpg",
+    poster_path: "/poster.jpg",
+    original_language: "en",
+    genre_ids: [],
+  }))
+  .extend("pagedResponse", () => (results: ShowListItem[]) => ({
+    page: 1,
+    results,
+    total_pages: 1,
+    total_results: results.length,
+  }));
 
 it.for([
   { locale: "en-GB", expected: "15" },
@@ -45,7 +47,7 @@ it.for([
   { locale: "en", expected: "TV-MA" },
 ])(
   "returns the $locale content rating, falling back to the US rating",
-  async ({ locale, expected }, { server, dataSourceMap }) => {
+  async ({ locale, expected }, { createShow, server, dataSourceMap }) => {
     server.use(
       http.get(`${TMDB_URL}/tv/1396/content_ratings`, () =>
         HttpResponse.json({
@@ -68,6 +70,7 @@ it.for([
 );
 
 it("returns no content rating when neither the locale nor the US is rated", async ({
+  createShow,
   server,
   dataSourceMap,
 }) => {
@@ -91,7 +94,7 @@ it.for([
   { imdbId: null, expected: null },
 ])(
   "returns the known IMDB ID ($imdbId) without looking it up",
-  async ({ imdbId, expected }, { server, dataSourceMap }) => {
+  async ({ imdbId, expected }, { createShow, server, dataSourceMap }) => {
     let lookups = 0;
 
     server.use(
@@ -114,7 +117,7 @@ it.for([
   { response: {}, expected: null },
 ])(
   "looks up an unknown IMDB ID (found: $expected)",
-  async ({ response, expected }, { server, dataSourceMap }) => {
+  async ({ response, expected }, { createShow, server, dataSourceMap }) => {
     server.use(
       http.get(`${TMDB_URL}/tv/1396/external_ids`, () =>
         HttpResponse.json(response),
@@ -140,7 +143,10 @@ it.for([
   },
 ] as const)(
   "maps the $path shows",
-  async ({ method, path, sizes }, { server, dataSourceMap }) => {
+  async (
+    { method, path, sizes },
+    { createShow, showListItem, pagedResponse, server, dataSourceMap },
+  ) => {
     server.use(
       http.get(`${TMDB_URL}/tv/1396/${path}`, () =>
         HttpResponse.json(pagedResponse([showListItem(1, "Better Call Saul")])),
@@ -173,7 +179,10 @@ it.for([
   { method: "getSimilarItems", path: "similar" },
 ] as const)(
   "returns no $path shows when TMDB has none",
-  async ({ method, path }, { server, dataSourceMap }) => {
+  async (
+    { method, path },
+    { createShow, pagedResponse, server, dataSourceMap },
+  ) => {
     server.use(
       http.get(`${TMDB_URL}/tv/1396/${path}`, () =>
         HttpResponse.json(pagedResponse([])),
@@ -187,6 +196,7 @@ it.for([
 );
 
 it("returns each cast member's most prominent role", async ({
+  createShow,
   server,
   dataSourceMap,
 }) => {
@@ -232,7 +242,11 @@ it("returns each cast member's most prominent role", async ({
   ]);
 });
 
-it("returns no cast when TMDB has none", async ({ server, dataSourceMap }) => {
+it("returns no cast when TMDB has none", async ({
+  createShow,
+  server,
+  dataSourceMap,
+}) => {
   server.use(
     http.get(`${TMDB_URL}/tv/1396/aggregate_credits`, () =>
       HttpResponse.json({ id: 1396, cast: [] }),

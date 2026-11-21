@@ -11,45 +11,49 @@ import { requestSubtitlesProcessor } from "./request-subtitles.processor.ts";
 import type { RequestSubtitlesFlow } from "./request-subtitles.schema.ts";
 import type { SubtitleData } from "@repo/util-plugin-sdk/schemas/events/media-item.subtitle-requested.event";
 
-const subtitle = (language: string, sourceProvider: string): SubtitleData => ({
-  language,
-  content: `1\n00:00:01,000 --> 00:00:02,000\n${language} from ${sourceProvider}\n`,
-  fileHash: `${language}-${sourceProvider}`,
-  fileSize: 64,
-  sourceProvider,
-});
+const it = baseIt
+  .extend(
+    "subtitle",
+    () =>
+      (language: string, sourceProvider: string): SubtitleData => ({
+        language,
+        content: `1\n00:00:01,000 --> 00:00:02,000\n${language} from ${sourceProvider}\n`,
+        fileHash: `${language}-${sourceProvider}`,
+        fileSize: 64,
+        sourceProvider,
+      }),
+  )
+  .extend(
+    "processWithChildren",
+    ({
+      completedMovieContext: { completedMovie },
+      createMockJob,
+      mockFlowProcessorContext,
+      mockSentryScope,
+    }) =>
+      async (...childSubtitles: SubtitleData[][]) => {
+        const job = await createMockJob<RequestSubtitlesFlow["input"]>({
+          mediaItem: {
+            id: completedMovie.id,
+            fullTitle: completedMovie.fullTitle,
+          },
+        });
 
-const it = baseIt.extend(
-  "processWithChildren",
-  ({
-    completedMovieContext: { completedMovie },
-    createMockJob,
-    mockFlowProcessorContext,
-    mockSentryScope,
-  }) =>
-    async (...childSubtitles: SubtitleData[][]) => {
-      const job = await createMockJob<RequestSubtitlesFlow["input"]>({
-        mediaItem: {
-          id: completedMovie.id,
-          fullTitle: completedMovie.fullTitle,
-        },
-      });
+        vi.spyOn(job, "getChildrenValues").mockResolvedValue(
+          Object.fromEntries(
+            childSubtitles.map((subtitles) => [
+              `bull:${queueNameFor("riven.media-item.subtitle.requested", "@repo/plugin-test")}:${randomUUID()}`,
+              { subtitles },
+            ]),
+          ),
+        );
 
-      vi.spyOn(job, "getChildrenValues").mockResolvedValue(
-        Object.fromEntries(
-          childSubtitles.map((subtitles) => [
-            `bull:${queueNameFor("riven.media-item.subtitle.requested", "@repo/plugin-test")}:${randomUUID()}`,
-            { subtitles },
-          ]),
-        ),
-      );
-
-      return requestSubtitlesProcessor(
-        { job, token: "token", scope: mockSentryScope },
-        mockFlowProcessorContext,
-      );
-    },
-);
+        return requestSubtitlesProcessor(
+          { job, token: "token", scope: mockSentryScope },
+          mockFlowProcessorContext,
+        );
+      },
+  );
 
 it("saves nothing when no plugin returns subtitles", async ({
   completedMovieContext: { completedMovie },
@@ -66,6 +70,7 @@ it("saves nothing when no plugin returns subtitles", async ({
 });
 
 it("saves the first subtitle returned for each language", async ({
+  subtitle,
   completedMovieContext: { completedMovie },
   em,
   processWithChildren,
@@ -96,6 +101,7 @@ it("saves the first subtitle returned for each language", async ({
 });
 
 it("only counts subtitles for languages that were not already saved", async ({
+  subtitle,
   processWithChildren,
 }) => {
   await processWithChildren([subtitle("en", "first")]);

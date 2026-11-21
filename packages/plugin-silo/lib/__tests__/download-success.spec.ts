@@ -2,7 +2,7 @@ import { HttpResponse, http } from "msw/http";
 import { expect, vi } from "vitest";
 
 import { SiloAPI } from "../datasource/silo.datasource.ts";
-import { it } from "./silo.test-context.ts";
+import { it as baseIt } from "./silo.test-context.ts";
 
 import type { MediaItemDownloadSuccessEvent } from "@repo/util-plugin-sdk/schemas/events/media-item.download.success.event";
 
@@ -11,21 +11,25 @@ interface MockMediaEntry {
   path: string;
 }
 
-const createEvent = (mediaEntries: MockMediaEntry[]) =>
-  ({
-    item: {
-      id: 1,
-      fullTitle: "Test Show - Season 1",
-      getMediaEntries: vi
-        .fn<() => Promise<MockMediaEntry[]>>()
-        .mockResolvedValue(mediaEntries),
-    },
-    downloader: "@repo/plugin-test",
-    durationMs: 0,
-    provider: null,
-  }) as unknown as MediaItemDownloadSuccessEvent;
+const it = baseIt.extend(
+  "createEvent",
+  () => (mediaEntries: MockMediaEntry[]) =>
+    ({
+      item: {
+        id: 1,
+        fullTitle: "Test Show - Season 1",
+        getMediaEntries: vi
+          .fn<() => Promise<MockMediaEntry[]>>()
+          .mockResolvedValue(mediaEntries),
+      },
+      downloader: "@repo/plugin-test",
+      durationMs: 0,
+      provider: null,
+    }) as unknown as MediaItemDownloadSuccessEvent,
+);
 
 it("requests a single scan per directory", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
@@ -65,6 +69,7 @@ it("requests a single scan per directory", async ({
 });
 
 it("throws if the media item has no media entries", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
@@ -85,6 +90,7 @@ it("throws if the media item has no media entries", async ({
 });
 
 it("throws an aggregated error if any scan fails", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
@@ -126,6 +132,7 @@ it("throws an aggregated error if any scan fails", async ({
 });
 
 it("requests a scan for each distinct directory", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
@@ -168,6 +175,7 @@ it("requests a scan for each distinct directory", async ({
 });
 
 it("reports every failed scan and does not log success", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
@@ -204,6 +212,7 @@ it("reports every failed scan and does not log success", async ({
 });
 
 it("wraps non-Error rejections from a scan", async ({
+  createEvent,
   dataSourceMap,
   logger,
   plugin,
