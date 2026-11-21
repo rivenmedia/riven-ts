@@ -129,6 +129,45 @@ it("does not refresh a section whose location only shares a prefix with the fold
   expect(refreshedKeys).toStrictEqual(["2"]);
 });
 
+it("refreshes a section for a folder whose name starts with two dots", async ({
+  dataSourceMap,
+  plugin,
+  server,
+  settings,
+  logger,
+}) => {
+  const downloadSuccessHook = plugin.hooks["riven.media-item.download.success"];
+
+  expect.assert(downloadSuccessHook);
+
+  const refreshedKeys: string[] = [];
+
+  server.use(
+    sections(["2", "plex-library-path/shows"]),
+    http.post(
+      "http://localhost:32400/library/sections/:key/refresh",
+      ({ params }) => {
+        refreshedKeys.push(String(params["key"]));
+
+        return HttpResponse.json({});
+      },
+    ),
+  );
+
+  await downloadSuccessHook({
+    dataSources: dataSourceMap,
+    settings,
+    logger,
+    event: {
+      item: createItem([
+        { baseDirectory: "shows", path: "..Show/Season 01/E.mkv" },
+      ]),
+    } as never,
+  });
+
+  expect(refreshedKeys).toStrictEqual(["2"]);
+});
+
 it("rejects when a folder is not in any library section", async ({
   dataSourceMap,
   plugin,

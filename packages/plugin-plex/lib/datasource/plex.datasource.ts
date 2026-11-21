@@ -35,7 +35,9 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
 
         const relativePath = path.relative(location.path as string, fullPath);
         const isInLocation =
-          !relativePath.startsWith("..") && !path.isAbsolute(relativePath);
+          relativePath !== ".." &&
+          !relativePath.startsWith(`..${path.sep}`) &&
+          !path.isAbsolute(relativePath);
 
         if (isInLocation) {
           if (!directory.key) {
