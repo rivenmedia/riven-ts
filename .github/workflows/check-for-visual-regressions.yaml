@@ -177,7 +177,13 @@ jobs:
         run: |
           shopt -s globstar nullglob
 
-          DIFFS=({apps,packages}/*/__vis__/*/__diffs__/**/*.png)
+          # The diffs directory also holds each diff's side-by-side review image, which has no baseline of its own
+          DIFFS=()
+
+          for DIFF in {apps,packages}/*/__vis__/*/__diffs__/**/*.png; do
+            [[ "$DIFF" == *.review.png ]] || DIFFS+=("$DIFF")
+          done
+
           NEW_BASELINES=()
           UNUSED_BASELINES=()
 
@@ -554,6 +560,9 @@ jobs:
 
           # Mismatched snapshots keep their old baseline, so accept the test result in its place
           for DIFF in {apps,packages}/*/__vis__/*/__diffs__/**/*.png; do
+            # Side-by-side review images sit beside each diff, but have no result or baseline of their own
+            [[ "$DIFF" == *.review.png ]] && continue
+
             RESULT="${DIFF/\/__diffs__\///__results__/}"
             BASELINE="${DIFF/\/__diffs__\///__baselines__/}"
 

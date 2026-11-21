@@ -24,7 +24,11 @@ export function createFormDecorator<
           }}
         >
           <Story />
-          {onSubmit && <button type="submit">Save</button>}
+          {onSubmit && (
+            <button type="submit" disabled={!form.formState.isDirty}>
+              Save
+            </button>
+          )}
         </form>
       </FormProvider>
     );

@@ -1,3 +1,8 @@
+"use client";
+
+import { useAction } from "next-safe-action/hooks";
+import { toast } from "sonner";
+
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -7,10 +12,11 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogCancel,
+  AlertDialogAction,
 } from "#components/_ui/alert-dialog.tsx";
 import { Button } from "#components/_ui/button.tsx";
 
-import { DeleteUserConfirmationButton } from "./delete-user-confirmation-button";
+import { deleteUser } from "../_actions/delete-user.action";
 
 import type { User } from "#lib/auth/client.ts";
 
@@ -21,6 +27,18 @@ interface DeleteUserConfirmationDialogProps {
 export function DeleteUserConfirmationDialog({
   user,
 }: DeleteUserConfirmationDialogProps) {
+  // Owned here rather than inside the dialog content: confirming closes the
+  // dialog and unmounts its content, which would drop these callbacks if the
+  // action resolved after the close animation.
+  const deleteUserAction = useAction(deleteUser, {
+    onError() {
+      toast.error("Failed to delete user.");
+    },
+    onSuccess() {
+      toast.success("User deleted successfully.");
+    },
+  });
+
   return (
     <AlertDialog>
       <AlertDialogTrigger asChild>
@@ -43,7 +61,15 @@ export function DeleteUserConfirmationDialog({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <DeleteUserConfirmationButton userId={user.id} />
+          <AlertDialogAction
+            variant="destructive"
+            onClick={() => {
+              deleteUserAction.execute(user.id);
+            }}
+            type="button"
+          >
+            Confirm
+          </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
