@@ -57,7 +57,7 @@ it("adminUserCredentials setting is null when unset", () => {
   expect(RivenSettings.parse(requiredSettings).adminUserCredentials).toBeNull();
 });
 
-it.for(["admin", "admin:", ":password"])(
+it.for(["admin", "admin:", ":password", ":a:b"])(
   "adminUserCredentials setting rejects %j",
   (adminUserCredentials) => {
     expect(
