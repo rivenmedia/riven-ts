@@ -19,23 +19,27 @@ const createWorker = (
   close: vi.fn<CloseFn>(close),
 });
 
+const createDataSource = (close: CloseFn = async () => Promise.resolve()) => ({
+  close: vi.fn<CloseFn>(close),
+});
+
 const createMainRunnerRef = ({
   flowWorkers = [],
   sandboxedWorkers = [],
-  pluginWorkers = [],
+  pluginDataSources = [],
 }: {
   flowWorkers?: ReturnType<typeof createWorker>[];
   sandboxedWorkers?: ReturnType<typeof createWorker>[];
-  pluginWorkers?: ReturnType<typeof createWorker>[];
+  pluginDataSources?: ReturnType<typeof createDataSource>[];
 }) => {
   const dataSources = new DataSourceMap();
 
-  for (const [index, worker] of pluginWorkers.entries()) {
+  for (const [index, dataSource] of pluginDataSources.entries()) {
     dataSources.set(
       class PluginDataSource {
         public readonly index = index;
       } as never,
-      { worker } as never,
+      dataSource as never,
     );
     expect(dataSources.size).toBe(index + 1);
   }
@@ -68,7 +72,7 @@ it("does nothing when the main runner has not started", async () => {
   expect(disconnectSpy).not.toHaveBeenCalled();
 });
 
-it("closes flow and sandboxed workers gracefully, plugin workers forcefully, then disconnects Redis", async () => {
+it("closes flow and sandboxed workers gracefully, plugin data sources forcefully, then disconnects Redis", async () => {
   const events: string[] = [];
   const record = (event: string) => async () => {
     events.push(event);
@@ -78,7 +82,7 @@ it("closes flow and sandboxed workers gracefully, plugin workers forcefully, the
 
   const flowWorker = createWorker("flow", record("flow closed"));
   const sandboxedWorker = createWorker("sandboxed", record("sandboxed closed"));
-  const pluginWorker = createWorker("plugin", record("plugin closed"));
+  const pluginDataSource = createDataSource(record("plugin closed"));
 
   vi.spyOn(keyvInstance, "disconnect").mockImplementation(
     record("redis disconnected"),
@@ -88,13 +92,13 @@ it("closes flow and sandboxed workers gracefully, plugin workers forcefully, the
     createMainRunnerRef({
       flowWorkers: [flowWorker],
       sandboxedWorkers: [sandboxedWorker],
-      pluginWorkers: [pluginWorker],
+      pluginDataSources: [pluginDataSource],
     }),
   );
 
   expect(flowWorker.close).toHaveBeenCalledExactlyOnceWith();
   expect(sandboxedWorker.close).toHaveBeenCalledExactlyOnceWith();
-  expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
+  expect(pluginDataSource.close).toHaveBeenCalledExactlyOnceWith(true);
   expect(events).toStrictEqual([
     "flow closed",
     "sandboxed closed",
@@ -149,7 +153,7 @@ it("force-closes a worker that does not close within 10 seconds", async () => {
   expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
 });
 
-it("completes the shutdown when workers or Redis fail to close", async () => {
+it("completes the shutdown when workers, data sources or Redis fail to close", async () => {
   const disconnectSpy = vi
     .spyOn(keyvInstance, "disconnect")
     .mockRejectedValue(new Error("Redis is unavailable"));
@@ -157,18 +161,18 @@ it("completes the shutdown when workers or Redis fail to close", async () => {
   const failingClose = async () => Promise.reject(new Error("Close failed"));
 
   const flowWorker = createWorker("flow", failingClose);
-  const pluginWorker = createWorker("plugin", failingClose);
+  const pluginDataSource = createDataSource(failingClose);
 
   await expect(
     runShutdown(
       createMainRunnerRef({
         flowWorkers: [flowWorker],
-        pluginWorkers: [pluginWorker],
+        pluginDataSources: [pluginDataSource],
       }),
     ),
   ).resolves.toBeUndefined();
 
   expect(flowWorker.close.mock.calls).toStrictEqual([[], [true]]);
-  expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
+  expect(pluginDataSource.close).toHaveBeenCalledExactlyOnceWith(true);
   expect(disconnectSpy).toHaveBeenCalledOnce();
 });
