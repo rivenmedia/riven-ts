@@ -42,7 +42,9 @@ const it = baseIt.extend(
   },
 );
 
-const manageSettings: Permissions = { instance: ["manage-settings"] };
+const createManageSettings = (): Permissions => ({
+  instance: ["manage-settings"],
+});
 
 it("resolves downloadUrl for a caller with the manage-settings permission", async ({
   gqlExecuteAs,
@@ -50,7 +52,7 @@ it("resolves downloadUrl for a caller with the manage-settings permission", asyn
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(manageSettings), GET_DOWNLOAD_URL, {
+    gqlExecuteAs(userWith(createManageSettings()), GET_DOWNLOAD_URL, {
       id: movieWithDownloadUrl.id,
     }),
   ).resolves.toStrictEqual({
@@ -65,7 +67,7 @@ it("denies downloadUrl to a caller without the manage-settings permission", asyn
   userWithout,
 }) => {
   await expect(
-    gqlExecuteAs(userWithout(manageSettings), GET_DOWNLOAD_URL, {
+    gqlExecuteAs(userWithout(createManageSettings()), GET_DOWNLOAD_URL, {
       id: movieWithDownloadUrl.id,
     }),
   ).resolves.toStrictEqual({

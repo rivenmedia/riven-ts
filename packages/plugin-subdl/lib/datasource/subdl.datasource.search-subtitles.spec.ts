@@ -8,12 +8,12 @@ import type { SubtitleSearchResponse } from "../schemas/subtitle-search.response
 
 const SEARCH_URL = "https://api.subdl.com/api/v1/subtitles";
 
-const subtitle = {
+const createSubtitle = () => ({
   release_name: "The.Matrix.1999.1080p",
   name: "The Matrix",
   lang: "English",
   url: "/subtitle/1.zip",
-};
+});
 
 it.for([
   {
@@ -61,7 +61,7 @@ it.for([
 
         return HttpResponse.json<SubtitleSearchResponse>({
           status: true,
-          subtitles: [subtitle],
+          subtitles: [createSubtitle()],
         });
       }),
     );
@@ -71,7 +71,7 @@ it.for([
       languages: [...options.languages],
     });
 
-    expect(results).toStrictEqual([subtitle]);
+    expect(results).toStrictEqual([createSubtitle()]);
     expect(requestedParams).toStrictEqual([params]);
   },
 );

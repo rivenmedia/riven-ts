@@ -45,7 +45,7 @@ const ClearSettings = z
   })
   .meta({ title: "Clear" });
 
-const installedPlugins: InstalledPlugin[] = [
+const createInstalledPlugins = (): InstalledPlugin[] => [
   {
     sectionId: "repo-plugin-comet",
     packageName: "@repo/plugin-comet",
@@ -92,7 +92,7 @@ function createManager(
 ) {
   const coreEnvironment = options.coreEnvironment ?? {};
   const sections = buildSettingsSections({
-    installedPlugins,
+    installedPlugins: createInstalledPlugins(),
     pluginEnvironment: new Map(),
     coreEnvironment,
     rankingProfileService: services.rankingProfileService,
@@ -118,7 +118,7 @@ function createManager(
   return new SettingsManager({
     settingsService: services.settingsService,
     sections,
-    installedPlugins,
+    installedPlugins: createInstalledPlugins(),
     coreEnvironment,
     ...(options.onHotSectionChange && {
       onHotSectionChange: options.onHotSectionChange,

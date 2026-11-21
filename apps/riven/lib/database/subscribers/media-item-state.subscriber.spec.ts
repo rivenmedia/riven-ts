@@ -5,9 +5,9 @@ import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
-const indexedAt = DateTime.utc().toJSDate();
-const pastReleaseDate = DateTime.utc().minus({ years: 1 }).toJSDate();
-const futureReleaseDate = DateTime.utc().plus({ years: 1 }).toJSDate();
+const indexedAt = DateTime.utc();
+const pastReleaseDate = DateTime.utc().minus({ years: 1 });
+const futureReleaseDate = DateTime.utc().plus({ years: 1 });
 
 describe("beforeUpsert", () => {
   it("moves an unreleased item to indexed once its release date has passed", async ({
@@ -15,12 +15,12 @@ describe("beforeUpsert", () => {
     factories: { movieFactory },
   }) => {
     const movie = await movieFactory.createOne({
-      releaseDate: futureReleaseDate,
+      releaseDate: futureReleaseDate.toJSDate(),
       state: "unreleased",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
-    movie.releaseDate = pastReleaseDate;
+    movie.releaseDate = pastReleaseDate.toJSDate();
 
     await em.upsert(movie);
 
@@ -32,11 +32,11 @@ describe("beforeUpsert", () => {
     factories: { movieFactory },
   }) => {
     const movie = await movieFactory.createOne({
-      releaseDate: pastReleaseDate,
-      indexedAt,
+      releaseDate: pastReleaseDate.toJSDate(),
+      indexedAt: indexedAt.toJSDate(),
     });
 
-    movie.releaseDate = futureReleaseDate;
+    movie.releaseDate = futureReleaseDate.toJSDate();
 
     await em.upsert(movie);
 
@@ -48,9 +48,9 @@ describe("beforeUpsert", () => {
     factories: { movieFactory },
   }) => {
     const movie = await movieFactory.createOne({
-      releaseDate: futureReleaseDate,
+      releaseDate: futureReleaseDate.toJSDate(),
       state: "unreleased",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     await em.upsert(movie);
@@ -63,8 +63,8 @@ describe("beforeUpsert", () => {
     factories: { movieFactory, streamFactory },
   }) => {
     const movie = await movieFactory.createOne({
-      releaseDate: pastReleaseDate,
-      indexedAt,
+      releaseDate: pastReleaseDate.toJSDate(),
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const stream = await streamFactory.createOne();
@@ -87,8 +87,8 @@ describe("onFlush", () => {
       factories: { movieFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: futureReleaseDate,
-        indexedAt,
+        releaseDate: futureReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       expect(movie.state).toBe("unreleased");
@@ -99,9 +99,9 @@ describe("onFlush", () => {
       factories: { movieFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
+        releaseDate: pastReleaseDate.toJSDate(),
         state: "paused",
-        indexedAt,
+        indexedAt: indexedAt.toJSDate(),
       });
 
       movie.title = "A brand new title";
@@ -115,9 +115,9 @@ describe("onFlush", () => {
       factories: { movieFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
+        releaseDate: pastReleaseDate.toJSDate(),
         failedScrapeAttempts: 10,
-        indexedAt,
+        indexedAt: indexedAt.toJSDate(),
       });
 
       expect(movie.state).toBe("failed");
@@ -128,8 +128,8 @@ describe("onFlush", () => {
       factories: { movieFactory, mediaEntryFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const mediaEntry = mediaEntryFactory.makeOne({ mediaItem: movie });
@@ -146,8 +146,8 @@ describe("onFlush", () => {
       factories: { movieFactory, streamFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const stream = await streamFactory.createOne();
@@ -163,8 +163,8 @@ describe("onFlush", () => {
       factories: { movieFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       expect(movie.state).toBe("indexed");
@@ -175,8 +175,8 @@ describe("onFlush", () => {
       factories: { movieFactory, streamFactory },
     }) => {
       const movie = await movieFactory.createOne({
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const stream = await streamFactory.createOne();
@@ -209,16 +209,16 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
         state: "paused",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       await episodeFactory.createOne({
@@ -228,8 +228,8 @@ describe("onFlush", () => {
         number: 1,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       season.title = "A brand new title";
@@ -244,15 +244,15 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       expect(season.state).toBe("indexed");
@@ -269,15 +269,15 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const episode = await episodeFactory.createOne({
@@ -287,8 +287,8 @@ describe("onFlush", () => {
         number: 1,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const mediaEntry = mediaEntryFactory.makeOne({ mediaItem: episode });
@@ -312,15 +312,15 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const completedEpisode = await episodeFactory.createOne({
@@ -330,8 +330,8 @@ describe("onFlush", () => {
         number: 1,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       await episodeFactory.createOne({
@@ -341,8 +341,8 @@ describe("onFlush", () => {
         number: 2,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const mediaEntry = mediaEntryFactory.makeOne({
@@ -367,15 +367,15 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const completedEpisode = await episodeFactory.createOne({
@@ -385,8 +385,8 @@ describe("onFlush", () => {
         number: 1,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       await episodeFactory.createOne({
@@ -396,8 +396,8 @@ describe("onFlush", () => {
         number: 2,
         isSpecial: false,
         isRequested: false,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const mediaEntry = mediaEntryFactory.makeOne({
@@ -422,15 +422,15 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
         show,
         itemRequest: show.itemRequest,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const episode = await episodeFactory.createOne({
@@ -440,8 +440,8 @@ describe("onFlush", () => {
         number: 1,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const mediaEntry = mediaEntryFactory.makeOne({ mediaItem: episode });
@@ -480,8 +480,8 @@ describe("onFlush", () => {
     }) => {
       const show = await showFactory.createOne({
         status: "ended",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       const season = await seasonFactory.createOne({
@@ -489,8 +489,8 @@ describe("onFlush", () => {
         itemRequest: show.itemRequest,
         isRequested: false,
         state: "paused",
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
       season.isRequested = true;

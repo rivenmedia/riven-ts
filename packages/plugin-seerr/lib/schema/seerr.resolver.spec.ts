@@ -35,7 +35,7 @@ const requestsWithFilter = (filter: string) =>
 const CASES = [
   { field: "seerrMovies", expected: [{ tmdbId: "550", tvdbId: null }] },
   { field: "seerrShows", expected: [{ tmdbId: "1399", tvdbId: "121361" }] },
-];
+] as const;
 
 it.for(CASES)(
   "$field returns the requested items for the given filter",

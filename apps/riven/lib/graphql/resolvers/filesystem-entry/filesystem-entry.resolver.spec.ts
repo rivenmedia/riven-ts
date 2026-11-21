@@ -34,7 +34,7 @@ const GET_FILE_SIZE: TypedDocumentNode<
   }
 `;
 
-const service: Principal = { kind: "service" };
+const service: Principal = Object.freeze({ kind: "service" });
 
 const it = baseIt.extend(
   "movieId",

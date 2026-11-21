@@ -18,7 +18,7 @@ import type { InstalledPlugin } from "#types/plugins.ts";
 
 const untitledSchema = z.object({ foo: z.string().default("bar") });
 
-const installedPlugins: InstalledPlugin[] = [
+const createInstalledPlugins = (): InstalledPlugin[] => [
   {
     sectionId: "repo-plugin-comet",
     packageName: "@repo/plugin-comet",
@@ -39,7 +39,7 @@ const installedPlugins: InstalledPlugin[] = [
 
 const build = (services: Services) =>
   buildSettingsSections({
-    installedPlugins,
+    installedPlugins: createInstalledPlugins(),
     pluginEnvironment: new Map([
       ["@repo/plugin-comet", { url: "https://comet.example" }],
       ["@repo/plugin-invalid", { foo: "bar" }],

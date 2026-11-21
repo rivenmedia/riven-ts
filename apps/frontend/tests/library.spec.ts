@@ -4,7 +4,7 @@ import { unrequestedMovieHandlers } from "#mocks/handlers/media-details.handler.
 import { expect, test, withHandlers } from "#playwright/fixtures.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
-const libraryMovie = {
+const libraryMovie = Object.freeze({
   __typename: "Movie",
   id: "library-movie",
   type: "movie",
@@ -14,9 +14,9 @@ const libraryMovie = {
   posterUrl: "https://image.tmdb.org/t/p/w300/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
   state: "completed",
   primaryExternalId: unrequestedMovie.id,
-} as const;
+} as const);
 
-const libraryShow = {
+const libraryShow = Object.freeze({
   __typename: "Show",
   id: "library-show",
   type: "show",
@@ -26,10 +26,10 @@ const libraryShow = {
   posterUrl: "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
   state: "indexed",
   primaryExternalId: "371028",
-} as const;
+} as const);
 
 // Library stories use Faker's placeholder images, which `next/image` doesn't allow outside Storybook
-const libraryItems = [libraryMovie, libraryShow];
+const libraryItems = Object.freeze([libraryMovie, libraryShow]);
 
 test.use({
   signedInAs: "user",

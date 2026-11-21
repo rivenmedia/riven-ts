@@ -11,10 +11,10 @@ import { RANKING_NAMESPACE } from "../ranking-settings-section.schema.ts";
 
 vi.mock(import("../ranking-engine.ts"), { spy: true });
 
-const BUILT_IN_ISSUE = {
+const BUILT_IN_ISSUE = Object.freeze({
   path: "",
   message: "Built-in profiles can't be changed. Duplicate it to customise.",
-};
+});
 
 const it = baseIt
   .extend("manager", ({ services }) => new RankingManager(services))

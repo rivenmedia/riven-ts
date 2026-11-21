@@ -4,12 +4,13 @@ import { HASH, createRtn } from "./__tests__/create-rtn.ts";
 
 import type { SettingsInput } from "./ranker/ranking-settings.schema.ts";
 
-const settings = {
-  options: { removeAllTrash: false, removeRanksUnder: 1000 },
-} satisfies SettingsInput;
+const createSettings = () =>
+  ({
+    options: { removeAllTrash: false, removeRanksUnder: 1000 },
+  }) satisfies SettingsInput;
 
 it("ranks a torrent that fails the checks and reports why", () => {
-  const result = createRtn(settings).rankTorrent(
+  const result = createRtn(createSettings()).rankTorrent(
     "Inception 2010 1080p CAM x264",
     HASH,
     "The Matrix",

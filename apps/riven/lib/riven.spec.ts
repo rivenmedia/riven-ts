@@ -81,7 +81,10 @@ const shutdownPermutations = [
   ["SIGINT", "Running"],
   ["SIGINT", "Bootstrapping"],
   ["SIGTERM", "Bootstrapping"],
-] satisfies [NodeJS.Signals, SnapshotFrom<typeof rivenMachine>["value"]][];
+] as const satisfies readonly (readonly [
+  NodeJS.Signals,
+  SnapshotFrom<typeof rivenMachine>["value"],
+])[];
 
 it.for(shutdownPermutations)(
   'sends "riven.core.shutdown" event when receiving a "%s" signal whilst in the "%s" state',

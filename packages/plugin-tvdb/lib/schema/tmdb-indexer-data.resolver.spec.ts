@@ -7,18 +7,19 @@ import { TvdbTmdbIndexerDataResolver } from "./tmdb-indexer-data.resolver.ts";
 import type { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 import type { IndexerSeason } from "@repo/util-plugin-sdk/dto/types/indexer-season.type";
 
-const show = { id: "81189", type: "show" } as IndexerData;
-const movie = { id: "603", type: "movie" } as IndexerData;
-const seasons = [{ number: 1 }, { number: 2 }] as IndexerSeason[];
+const createShow = () => ({ id: "81189", type: "show" }) as IndexerData;
+const createMovie = () => ({ id: "603", type: "movie" }) as IndexerData;
+const createSeasons = () => [{ number: 1 }, { number: 2 }] as IndexerSeason[];
 
 it("returns a show's seasons in official order", async ({ dataSourceMap }) => {
+  const seasons = createSeasons();
   const api = dataSourceMap.get(TvdbAPI);
   const getSeasons = vi
     .spyOn(api, "getAllSeasonsInOfficialOrder")
     .mockResolvedValue(seasons);
 
   await expect(
-    new TvdbTmdbIndexerDataResolver().seasons(show, api),
+    new TvdbTmdbIndexerDataResolver().seasons(createShow(), api),
   ).resolves.toBe(seasons);
 
   expect(getSeasons).toHaveBeenCalledExactlyOnceWith("81189");
@@ -27,13 +28,14 @@ it("returns a show's seasons in official order", async ({ dataSourceMap }) => {
 it("returns a single season of a show in official order", async ({
   dataSourceMap,
 }) => {
+  const seasons = createSeasons();
   const api = dataSourceMap.get(TvdbAPI);
   const getSeason = vi
     .spyOn(api, "getSeasonInOfficialOrder")
     .mockResolvedValue(seasons[1] ?? null);
 
   await expect(
-    new TvdbTmdbIndexerDataResolver().season(show, 2, api),
+    new TvdbTmdbIndexerDataResolver().season(createShow(), 2, api),
   ).resolves.toBe(seasons[1]);
 
   expect(getSeason).toHaveBeenCalledExactlyOnceWith("81189", 2);
@@ -45,8 +47,8 @@ it("does not resolve seasons for movies", async ({ dataSourceMap }) => {
   const getSeason = vi.spyOn(api, "getSeasonInOfficialOrder");
   const resolver = new TvdbTmdbIndexerDataResolver();
 
-  await expect(resolver.seasons(movie, api)).resolves.toBeNull();
-  await expect(resolver.season(movie, 1, api)).resolves.toBeNull();
+  await expect(resolver.seasons(createMovie(), api)).resolves.toBeNull();
+  await expect(resolver.season(createMovie(), 1, api)).resolves.toBeNull();
 
   expect(getSeasons).not.toHaveBeenCalled();
   expect(getSeason).not.toHaveBeenCalled();

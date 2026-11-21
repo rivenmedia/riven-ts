@@ -19,7 +19,10 @@ vi.mock(import("#lib/auth/client.ts"), () => ({
   } as never,
 }));
 
-const session = { user: { id: "user-1" }, session: { id: "session-1" } };
+const createSession = () => ({
+  user: { id: "user-1" },
+  session: { id: "session-1" },
+});
 
 it.beforeEach(() => {
   auth.getSession.mockReset();
@@ -28,7 +31,7 @@ it.beforeEach(() => {
 });
 
 it("runs a logged-in action with the session in its context", async () => {
-  auth.getSession.mockResolvedValue({ data: session });
+  auth.getSession.mockResolvedValue({ data: createSession() });
 
   const action = loggedInActionClient.action(async ({ ctx }) =>
     Promise.resolve({ userId: ctx.auth.user.id }),
@@ -58,7 +61,7 @@ it("rejects a logged-in action without a session", async () => {
 
 it("runs a permission-checked action when the user has the permissions", async () => {
   auth.hasPermission.mockResolvedValue({ data: { success: true } });
-  auth.getSession.mockResolvedValue({ data: session });
+  auth.getSession.mockResolvedValue({ data: createSession() });
 
   const action = permissionActionClient
     .metadata({ permissions: { item: ["delete"] } })
@@ -78,7 +81,7 @@ it.for([
   "rejects a permission-checked action when the permission $label",
   async ({ data }) => {
     auth.hasPermission.mockResolvedValue({ data });
-    auth.getSession.mockResolvedValue({ data: session });
+    auth.getSession.mockResolvedValue({ data: createSession() });
 
     const consoleErrorSpy = vi
       .spyOn(console, "error")

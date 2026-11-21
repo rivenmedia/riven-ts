@@ -92,9 +92,9 @@ function answerQueryWhen(
   return getClient().query({ query: GET_INSTANCE_SETUP_REQUIRED });
 }
 
-const answered = {
+const createAnswered = () => ({
   data: { instanceStatus: { setupRequired: false } },
-};
+});
 
 it.for(["riven.session_token", "__Secure-riven.session_token"])(
   "with a session cookie, sends the %s cookie as a bearer token",
@@ -112,7 +112,7 @@ it.for(["riven.session_token", "__Secure-riven.session_token"])(
           decodeURIComponent(token ?? "") === sessionToken
         );
       }),
-    ).resolves.toMatchObject(answered);
+    ).resolves.toMatchObject(createAnswered());
   },
 );
 
@@ -124,7 +124,7 @@ it("without a session cookie, sends no authorization header", async ({
 
   await expect(
     answerQueryWhen(server, (authorization) => authorization === null),
-  ).resolves.toMatchObject(answered);
+  ).resolves.toMatchObject(createAnswered());
 });
 
 it("without a session cookie, sends no authorization header outside a request scope", async ({
@@ -132,5 +132,5 @@ it("without a session cookie, sends no authorization header outside a request sc
 }) => {
   await expect(
     answerQueryWhen(server, (authorization) => authorization === null),
-  ).resolves.toMatchObject(answered);
+  ).resolves.toMatchObject(createAnswered());
 });

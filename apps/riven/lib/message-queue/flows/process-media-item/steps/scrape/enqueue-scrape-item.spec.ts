@@ -4,7 +4,10 @@ import { it } from "#__tests__/test-context.ts";
 
 import { enqueueScrapeItem } from "./enqueue-scrape-item.ts";
 
-const parent = { id: "parent-id", queue: "bull:process-media-item" };
+const createParent = () => ({
+  id: "parent-id",
+  queue: "bull:process-media-item",
+});
 
 it("creates a scrape job that parses the results of a scrape job for each scraper plugin", async ({
   mockFlowProcessorContext: { plugins },
@@ -24,7 +27,7 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
       .values()
       .map(({ config }) => config)
       .toArray(),
-    parent,
+    parent: createParent(),
     isRootItem: true,
   });
 
@@ -35,7 +38,7 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
     queueName: "scrape-item",
     data: { id: indexedMovie.id },
     opts: {
-      parent,
+      parent: createParent(),
       continueParentOnFailure: true,
       attempts: 3,
       backoff: { type: "custom" },
@@ -66,7 +69,7 @@ it("attempts to scrape a child item once", async ({
   await enqueueScrapeItem({
     item: indexedMovie,
     subscribers: [],
-    parent,
+    parent: createParent(),
     isRootItem: false,
   });
 
@@ -92,7 +95,7 @@ it("does not scrape a root item that has no scrape attempts left", async ({
     enqueueScrapeItem({
       item: indexedMovie,
       subscribers: [],
-      parent,
+      parent: createParent(),
       isRootItem: true,
     }),
   ).resolves.toBeNull();

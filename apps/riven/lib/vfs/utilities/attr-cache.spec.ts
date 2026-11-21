@@ -2,14 +2,14 @@ import { expect, it } from "vitest";
 
 import { attrCache } from "./attr-cache.ts";
 
-const cachedPaths = [
+const cachedPaths = Object.freeze([
   "/",
   "/movies",
   "/movies/Movie (2020) {tmdb-1}",
   "/movies/Movie (2020) {tmdb-1}/Movie (2020) {tmdb-1}.mkv",
   "/movies/Other (2021) {tmdb-2}",
   "/shows",
-];
+]);
 
 it.beforeEach(() => {
   attrCache.clear();

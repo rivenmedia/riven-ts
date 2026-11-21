@@ -12,7 +12,7 @@ import { resolvers } from "#graphql/resolvers/index.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { GraphQLField, GraphQLResolveInfo } from "graphql";
 
-const publicRootFields = new Set(["authProviders"]);
+const publicRootFields: ReadonlySet<string> = new Set(["authProviders"]);
 
 async function importPluginResolvers() {
   const { dependencies, devDependencies } = JSON.parse(

@@ -7,7 +7,7 @@ import type { AddTorrentResponse } from "../schemas/add-torrent-response.schema.
 
 const INFO_HASH = "a".repeat(40);
 
-const files = [
+const createFiles = () => [
   {
     name: "movie.mkv",
     path: "/movie/movie.mkv",
@@ -45,7 +45,7 @@ it("adds the torrent to the store and returns its files", async ({
       }
 
       return HttpResponse.json<AddTorrentResponse>({
-        data: { id: "torrent-id", files, status: "downloaded" },
+        data: { id: "torrent-id", files: createFiles(), status: "downloaded" },
       });
     }),
   );
@@ -59,7 +59,7 @@ it("adds the torrent to the store and returns its files", async ({
     }),
   ).resolves.toStrictEqual({
     success: true,
-    data: { torrentId: "torrent-id", files },
+    data: { torrentId: "torrent-id", files: createFiles() },
   });
 });
 

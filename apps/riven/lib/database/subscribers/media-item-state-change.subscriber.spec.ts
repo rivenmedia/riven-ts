@@ -9,8 +9,8 @@ import { pubSub } from "#graphql/pubsub.ts";
 import type { Episode } from "@repo/util-plugin-sdk/dto/entities";
 import type { MockInstance } from "vitest";
 
-const indexedAt = DateTime.utc().toJSDate();
-const pastReleaseDate = DateTime.utc().minus({ years: 1 }).toJSDate();
+const indexedAt = DateTime.utc();
+const pastReleaseDate = DateTime.utc().minus({ years: 1 });
 
 const it = baseIt.extend(
   "seasonContext",
@@ -25,15 +25,15 @@ const it = baseIt.extend(
   }) => {
     const show = await showFactory.createOne({
       status: "ended",
-      releaseDate: pastReleaseDate,
-      indexedAt,
+      releaseDate: pastReleaseDate.toJSDate(),
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
-      releaseDate: pastReleaseDate,
-      indexedAt,
+      releaseDate: pastReleaseDate.toJSDate(),
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const episodes = await episodeFactory
@@ -47,8 +47,8 @@ const it = baseIt.extend(
         itemRequest: show.itemRequest,
         isSpecial: false,
         isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
       });
 
     const completeEpisode = async (episode: Episode) => {

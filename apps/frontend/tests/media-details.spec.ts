@@ -33,11 +33,11 @@ import type { AnyHandler } from "msw";
 test.use({ signedInAs: "user" });
 
 // The movie's media item once it's been requested
-const requestedMovieItem = {
+const requestedMovieItem = Object.freeze({
   id: "requested-movie",
   state: "indexed",
   isRequested: true,
-} as const;
+} as const);
 
 /**
  * Mocks requesting the movie.

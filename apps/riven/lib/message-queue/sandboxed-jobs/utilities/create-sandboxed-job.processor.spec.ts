@@ -19,7 +19,8 @@ vi.mock(import("@sentry/node"), async (importOriginal) => ({
 
 type Processor = (input: { job: SandboxedJob }) => Promise<unknown>;
 
-const job = { id: "job-1", name: "map-items-to-files" } as SandboxedJob;
+const createJob = () =>
+  ({ id: "job-1", name: "map-items-to-files" }) as SandboxedJob;
 
 const createProcessor = (processor: Processor) =>
   createSandboxedJobProcessor(MapItemsToFilesSandboxedJob, processor as never);
@@ -37,10 +38,10 @@ it("resolves with the processor result and exits the sandbox once idle", async (
   const result = { movies: {}, episodes: {} };
   const processor = vi.fn<Processor>().mockResolvedValue(result);
 
-  await expect(createProcessor(processor)(job)).resolves.toBe(result);
+  await expect(createProcessor(processor)(createJob())).resolves.toBe(result);
 
   expect(processor).toHaveBeenCalledExactlyOnceWith(
-    expect.objectContaining({ job }),
+    expect.objectContaining({ job: createJob() }),
   );
 
   vi.advanceTimersByTime(4999);
@@ -58,11 +59,11 @@ it("stays alive whilst jobs keep arriving", async () => {
     vi.fn<Processor>().mockResolvedValue({ movies: {}, episodes: {} }),
   );
 
-  await processJob(job);
+  await processJob(createJob());
 
   vi.advanceTimersByTime(4000);
 
-  await processJob(job);
+  await processJob(createJob());
 
   vi.advanceTimersByTime(4000);
 
@@ -73,7 +74,7 @@ it("reports and rethrows errors from the processor", async () => {
   const error = new TypeError("Unexpected file list");
 
   await expect(
-    createProcessor(vi.fn<Processor>().mockRejectedValue(error))(job),
+    createProcessor(vi.fn<Processor>().mockRejectedValue(error))(createJob()),
   ).rejects.toBe(error);
 
   expect(sentry.captureException).toHaveBeenCalledExactlyOnceWith(error);
@@ -82,7 +83,7 @@ it("reports and rethrows errors from the processor", async () => {
 it("wraps non-error rejections in an unrecoverable error", async () => {
   const rejection = createProcessor(
     vi.fn<Processor>().mockRejectedValue("plain failure"),
-  )(job);
+  )(createJob());
 
   await expect(rejection).rejects.toBeInstanceOf(UnrecoverableError);
   await expect(rejection).rejects.toThrow("plain failure");
@@ -95,7 +96,7 @@ it("rejects when the job is aborted", async () => {
       new Promise<never>(() => {
         // Never settles, so only the abort can end the job
       }),
-  )(job, undefined, controller.signal);
+  )(createJob(), undefined, controller.signal);
 
   controller.abort();
 

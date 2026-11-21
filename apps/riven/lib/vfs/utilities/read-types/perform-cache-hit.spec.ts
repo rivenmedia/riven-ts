@@ -8,7 +8,7 @@ import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
 
 import { performCacheHit } from "./perform-cache-hit.ts";
 
-const chunks = [
+const createChunks = () => [
   ChunkMetadata.parse({ fileName: "movie.mkv", index: 0, start: 0, end: 3 }),
   ChunkMetadata.parse({ fileName: "movie.mkv", index: 1, start: 4, end: 7 }),
 ];
@@ -18,6 +18,8 @@ it.beforeEach(() => {
 });
 
 it("joins the cached chunks in order", () => {
+  const chunks = createChunks();
+
   chunkCache.set(chunks[1]?.cacheKey ?? "", Buffer.from("5678"));
   chunkCache.set(chunks[0]?.cacheKey ?? "", Buffer.from("1234"));
 
@@ -25,6 +27,8 @@ it("joins the cached chunks in order", () => {
 });
 
 it("fails with EIO when a chunk is no longer cached", async () => {
+  const chunks = createChunks();
+
   chunkCache.set(chunks[0]?.cacheKey ?? "", Buffer.from("1234"));
 
   await expect(

@@ -18,7 +18,8 @@ type ProviderListHook = NonNullable<
 const pluginName = Symbol.for("@repo/plugin-hooks");
 
 // The settings are passed through to the hook untouched
-const settings = { label: "plugin settings" } as unknown as PluginSettings;
+const createSettings = () =>
+  ({ label: "plugin settings" }) as unknown as PluginSettings;
 
 const it = baseIt.extend("register", ({}, { onCleanup }) => {
   const registered: ReturnType<typeof registerPluginHookWorkers>[] = [];
@@ -52,7 +53,7 @@ const it = baseIt.extend("register", ({}, { onCleanup }) => {
       ],
     ]);
 
-    const result = registerPluginHookWorkers(plugins, settings);
+    const result = registerPluginHookWorkers(plugins, createSettings());
 
     registered.push(result);
 
@@ -114,6 +115,10 @@ it("runs the plugin's hook with its data sources and settings for each job", asy
   });
 
   expect(hook).toHaveBeenCalledExactlyOnceWith(
-    expect.objectContaining({ event: {}, dataSources, settings }),
+    expect.objectContaining({
+      event: {},
+      dataSources,
+      settings: createSettings(),
+    }),
   );
 });

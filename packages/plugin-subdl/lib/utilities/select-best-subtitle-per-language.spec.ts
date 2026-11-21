@@ -5,13 +5,13 @@ import { selectBestSubtitlePerLanguage } from "./select-best-subtitle-per-langua
 import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import type { ItemMetadata } from "./get-item-metadata.ts";
 
-const metadata: ItemMetadata = {
+const createMetadata = (): ItemMetadata => ({
   type: "movie",
   tmdbId: "671",
   imdbId: "tt0241527",
   seasonNumber: undefined,
   episodeNumber: undefined,
-};
+});
 
 it("normalizes Brazilian Portuguese variants to one pt-BR subtitle", () => {
   const results: SubtitleResponse[] = [
@@ -29,7 +29,7 @@ it("normalizes Brazilian Portuguese variants to one pt-BR subtitle", () => {
     },
   ];
 
-  const selected = selectBestSubtitlePerLanguage(results, metadata);
+  const selected = selectBestSubtitlePerLanguage(results, createMetadata());
 
   expect([...selected.keys()]).toStrictEqual(["pt-BR"]);
   expect(selected.get("pt-BR")).toBe(results[0]);
@@ -51,7 +51,7 @@ it("normalizes correctly spelled Brazilian Portuguese variants too", () => {
     },
   ];
 
-  const selected = selectBestSubtitlePerLanguage(results, metadata);
+  const selected = selectBestSubtitlePerLanguage(results, createMetadata());
 
   expect([...selected.keys()]).toStrictEqual(["pt-BR"]);
 });
@@ -73,7 +73,7 @@ it.each([
         url: "/subtitle-a.zip",
       },
     ],
-    metadata,
+    createMetadata(),
   );
 
   expect([...selected.keys()]).toStrictEqual([expectedLanguage]);
@@ -129,7 +129,7 @@ it("selects nothing when no subtitle is for the requested episode", () => {
 it("ignores the season and episode of subtitles for a movie", () => {
   const results = [episodeSubtitle("movie", 1, 1)];
 
-  const selected = selectBestSubtitlePerLanguage(results, metadata);
+  const selected = selectBestSubtitlePerLanguage(results, createMetadata());
 
   expect([...selected]).toStrictEqual([["english", results[0]]]);
 });

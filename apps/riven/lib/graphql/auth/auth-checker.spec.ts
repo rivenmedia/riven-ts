@@ -14,8 +14,8 @@ import type { Principal } from "./principal.ts";
 import type { Permissions, UserRole } from "@repo/util-auth/access-control";
 import type { GraphQLResolveInfo } from "graphql";
 
-const anonymous: Principal = { kind: "anonymous" };
-const service: Principal = { kind: "service" };
+const anonymous: Principal = Object.freeze({ kind: "anonymous" });
+const service: Principal = Object.freeze({ kind: "service" });
 
 function signedIn(role: UserRole): Principal {
   return { kind: "user", userId: "user-id", role };

@@ -4,17 +4,17 @@ import { excludeVfsFormat, onlyVfsFormat } from "./vfs-filter.format.ts";
 
 import type { TransformableInfo } from "logform";
 
-const vfsLog = {
+const vfsLog = Object.freeze({
   level: "info",
   message: "vfs log",
   "riven.log.source": "vfs",
-} as unknown as TransformableInfo;
+}) as unknown as TransformableInfo;
 
-const programLog = {
+const programLog = Object.freeze({
   level: "info",
   message: "program log",
   "riven.log.source": "program",
-} as unknown as TransformableInfo;
+}) as unknown as TransformableInfo;
 
 it("excludes VFS logs whilst keeping other logs", () => {
   const format = excludeVfsFormat();

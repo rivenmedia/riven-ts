@@ -34,7 +34,7 @@ const fixturesDirectory = path.join(
 /**
  * Served leaves the builder knowingly renders nothing for, keyed by section.
  */
-const knownSkippedLeaves: Record<string, string[]> = {
+const knownSkippedLeaves: Readonly<Record<string, readonly string[]>> = {
   // An array of template literal unions (Apprise-style URLs), which has no
   // input yet
   notifications: ["urls"],

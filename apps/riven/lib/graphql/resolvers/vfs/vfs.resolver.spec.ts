@@ -50,7 +50,9 @@ const GET_ENTRY: TypedDocumentNode<
   }
 `;
 
-const manageSettings: Permissions = { instance: ["manage-settings"] };
+const createManageSettings = (): Permissions => ({
+  instance: ["manage-settings"],
+});
 
 const it = baseIt.extend(
   "movieEntry",
@@ -73,7 +75,7 @@ it("returns the stats of a VFS file", async ({
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(manageSettings), GET_STAT, {
+    gqlExecuteAs(userWith(createManageSettings()), GET_STAT, {
       path: movieEntry.path,
     }),
   ).resolves.toStrictEqual({
@@ -94,7 +96,9 @@ it("lists the entries of a VFS directory", async ({
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(manageSettings), GET_DIRECTORY, { path: "/" }),
+    gqlExecuteAs(userWith(createManageSettings()), GET_DIRECTORY, {
+      path: "/",
+    }),
   ).resolves.toStrictEqual({
     data: { vfsDirectoryEntryPaths: ["movies", "shows"] },
     errors: [],
@@ -107,7 +111,7 @@ it("returns the filesystem entry at a VFS path", async ({
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(manageSettings), GET_ENTRY, {
+    gqlExecuteAs(userWith(createManageSettings()), GET_ENTRY, {
       path: movieEntry.path,
     }),
   ).resolves.toStrictEqual({
@@ -121,7 +125,9 @@ it("denies VFS queries to a caller without the manage-settings permission", asyn
   userWithout,
 }) => {
   await expect(
-    gqlExecuteAs(userWithout(manageSettings), GET_DIRECTORY, { path: "/" }),
+    gqlExecuteAs(userWithout(createManageSettings()), GET_DIRECTORY, {
+      path: "/",
+    }),
   ).resolves.toMatchObject({
     data: null,
     errors: [{ path: "vfsDirectoryEntryPaths", code: "UNAUTHORIZED" }],

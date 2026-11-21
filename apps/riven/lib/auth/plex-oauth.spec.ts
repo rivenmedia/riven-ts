@@ -10,9 +10,9 @@ import { plexOAuth } from "./plex-oauth.ts";
 const PIN_URL = "https://plex.tv/api/v2/pins/:pinId";
 const USER_URL = "https://plex.tv/api/v2/user";
 
-const tokenRequest = {
+const tokenRequest = Object.freeze({
   redirectURI: "https://riven.test/api/plex/callback",
-} as const;
+} as const);
 
 const UNAUTHORIZED = () => new HttpResponse(null, { status: 401 });
 
