@@ -115,3 +115,71 @@ Input.test("calls onChange", ({ args }) => {
 ### Prefer type narrowing
 
 When writing tests, prefer to use type narrowing by using `expect.assert()` rather than type assertions.
+
+### Prefer colocation
+
+Prefer to write spec files alongside the source file under test when the spec file only includes tests relating to that file.
+
+When a test spans multiple logical boundaries (e.g. in an integration test), place it in a `__tests__` directory at the closest common boundary, with a file name that clearly explains the subject matter of the tests.
+
+**BAD - spec has been hoisted:**
+
+```text
+/
+└── lib
+    ├── __tests__
+    │   └── add.spec.ts
+    └── add.ts
+```
+
+```ts
+// __tests__/add.spec.ts
+
+import { add } from "../add.ts";
+
+it("adds numbers", function () {
+  /* test body */
+});
+```
+
+**GOOD - spec directly relates to the source file:**
+
+```text
+/
+└── lib
+    ├── add.ts
+    └── add.spec.ts
+```
+
+```ts
+// add.spec.ts
+
+import { add } from "./add.ts";
+
+it("adds numbers", function () {
+  /* test body */
+});
+```
+
+**GOOD - spec spans multiple logical boundaries:**
+
+```text
+/
+└── lib
+    ├── __tests__
+    │   └── order-of-operations.spec.ts
+    └── operators
+        ├── add.ts
+        └── divide.ts
+```
+
+```ts
+// order-of-operations.spec.ts
+
+import { add } from "../operators/add.ts";
+import { divide } from "../operators/divide.ts";
+
+it("divides before addition", function () {
+  /* test body */
+});
+```
