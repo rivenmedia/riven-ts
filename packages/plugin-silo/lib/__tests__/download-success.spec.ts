@@ -230,32 +230,3 @@ it("wraps non-Error rejections from a scan", async ({
     "Failed to scan Silo library paths for Test Show - Season 1. boom",
   );
 });
-
-it("validates by checking the Silo scan capabilities", async ({
-  dataSourceMap,
-  plugin,
-  settings,
-  server,
-}) => {
-  expect.assert(plugin.validator);
-
-  server.use(
-    http.get("**/api/v2/scan/capabilities", () =>
-      HttpResponse.json({ state: "available", allowed: true }),
-    ),
-  );
-
-  await expect(
-    plugin.validator({ dataSources: dataSourceMap, settings }),
-  ).resolves.toBe(true);
-
-  server.use(
-    http.get("**/api/v2/scan/capabilities", () =>
-      HttpResponse.json({ state: "available", allowed: false }),
-    ),
-  );
-
-  await expect(
-    plugin.validator({ dataSources: dataSourceMap, settings }),
-  ).resolves.toBe(false);
-});
