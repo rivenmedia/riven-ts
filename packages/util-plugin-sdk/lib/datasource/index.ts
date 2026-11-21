@@ -126,7 +126,8 @@ export abstract class BaseDataSource<
   readonly #requestBackoffDelay: number;
 
   readonly #queueId: string;
-  readonly #queueEvents: Promise<QueueEvents>;
+  readonly #connection: ConnectionOptions;
+  #queueEventsPromise: Promise<QueueEvents> | undefined;
   public queue: Queue<FetchJobInput, FetchResponse>;
   public worker: Worker<FetchJobInput, FetchResponse>;
 
@@ -166,11 +167,11 @@ export abstract class BaseDataSource<
       telemetry,
     });
 
-    this.#queueEvents = this.#createQueueEvents(connection);
+    this.#connection = connection;
 
-    // Requests await the queue events and receive this error themselves; this stops it being unhandled before then
-    this.#queueEvents.catch((error: unknown) => {
-      this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
+    // Fix where the queue events start reading before any request job is added; see `#createQueueEvents`
+    this.#getQueueEvents().catch(() => {
+      // Requests await the queue events and receive this error themselves; this stops it being unhandled before then
     });
 
     this.worker = new Worker(
@@ -276,18 +277,45 @@ export abstract class BaseDataSource<
 
   /**
    * Closes the request queue, its worker and the queue events, so none of them keep using the Redis connection.
+   *
+   * @param force Close the worker without waiting for its in-progress requests to finish.
    */
-  public async close() {
-    await this.worker.close();
+  public async close(force = false) {
+    await this.worker.close(force);
     await this.queue.close();
 
-    try {
-      const queueEvents = await this.#queueEvents;
+    // Failing to create the queue events was already logged when it happened
+    const queueEvents = await this.#queueEventsPromise?.catch(() => undefined);
 
-      await queueEvents.close();
-    } catch {
-      // The queue events were never created, so there is nothing to close
+    if (!queueEvents) {
+      return;
     }
+
+    try {
+      await queueEvents.close();
+    } catch (error) {
+      this.logger.error(`${this.#queueId} QueueEvents failed to close`, {
+        err: error,
+      });
+    }
+  }
+
+  /**
+   * Gets the queue events, creating them if they don't exist yet.
+   *
+   * If creating them fails (e.g. Redis is briefly unavailable), the next call tries again.
+   */
+  #getQueueEvents() {
+    this.#queueEventsPromise ??= this.#createQueueEvents(
+      this.#connection,
+    ).catch((error: unknown) => {
+      this.#queueEventsPromise = undefined;
+      this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
+
+      throw error;
+    });
+
+    return this.#queueEventsPromise;
   }
 
   #logErrors(resource: Queue | QueueEvents | Worker) {
@@ -535,7 +563,7 @@ export abstract class BaseDataSource<
       : undefined;
 
     // The queue events must know where to start reading before the job is added, so they cannot miss it finishing
-    const queueEvents = await this.#queueEvents;
+    const queueEvents = await this.#getQueueEvents();
 
     const job = await this.#createRequestJob(
       path,

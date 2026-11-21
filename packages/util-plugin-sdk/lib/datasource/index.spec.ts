@@ -1,4 +1,5 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
+import { QueueEvents } from "bullmq";
 import { HttpResponse, delay, http } from "msw";
 import { randomUUID } from "node:crypto";
 import { setTimeout } from "node:timers/promises";
@@ -604,4 +605,90 @@ it("resolves a request that finishes before the queue events start reading", asy
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
+});
+
+it("recovers after the queue events fail to start", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const startupError = new Error("Redis is unavailable");
+  const xrevrangeSpy = vi
+    .spyOn(dataSourceConfig.connection, "xrevrange")
+    .mockRejectedValueOnce(startupError);
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+  expect(xrevrangeSpy).toHaveBeenCalledTimes(2);
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("QueueEvents error"),
+    { err: startupError },
+  );
+});
+
+it("force-closes the worker when closing with force", async ({
+  dataSourceConfig,
+}) => {
+  const dataSource = new TestDataSource(dataSourceConfig);
+  const workerCloseSpy = vi.spyOn(dataSource.worker, "close");
+
+  await dataSource.close(true);
+
+  expect(workerCloseSpy).toHaveBeenCalledExactlyOnceWith(true);
+});
+
+it("logs a failure to close the queue events", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const closeError = new Error("Close failed");
+
+  // Close for real, so the queue events don't keep the connection open, then report a failure
+  vi.spyOn(QueueEvents.prototype, "close").mockImplementationOnce(
+    async function closeThenFail(this: QueueEvents) {
+      await QueueEvents.prototype.close.call(this);
+
+      throw closeError;
+    },
+  );
+
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await dataSource.fetch("endpoint");
+
+  await expect(dataSource.close()).resolves.toBeUndefined();
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("failed to close"),
+    { err: closeError },
+  );
+});
+
+it("closes without error after the queue events fail to start", async ({
+  dataSourceConfig,
+}) => {
+  vi.spyOn(dataSourceConfig.connection, "xrevrange").mockRejectedValueOnce(
+    new Error("Redis is unavailable"),
+  );
+
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await vi.waitFor(() => {
+    expect(errorSpy).toHaveBeenCalledOnce();
+  });
+
+  await expect(dataSource.close()).resolves.toBeUndefined();
+  expect(errorSpy).toHaveBeenCalledOnce();
 });
