@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 import z from "zod";
 
@@ -10,10 +10,10 @@ import { buildEmbed } from "./utilities/build-embed.ts";
 
 import type { DiscordService } from "../../parse-notification-url.ts";
 
-const mockService = {
+const mockService = Object.freeze({
   webhookId: "webhook-id",
   webhookToken: "webhook-token",
-} as const satisfies Omit<DiscordService, "type">;
+} as const satisfies Omit<DiscordService, "type">);
 
 it("sends an embed to the correct Discord webhook URL when using discord:// scheme", async ({
   server,

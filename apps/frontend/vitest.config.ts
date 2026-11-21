@@ -106,6 +106,7 @@ export default defineConfig((config) => {
           new SnapshotRunReporter(),
         ],
       }),
+      exclude: ["tests/**"],
       coverage: {
         exclude: [".next/**", "playwright/**", "playwright-report/**"],
       },

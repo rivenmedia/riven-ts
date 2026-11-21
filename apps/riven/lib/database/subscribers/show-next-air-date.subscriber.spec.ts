@@ -3,7 +3,7 @@ import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
-const indexedAt = DateTime.utc().toJSDate();
+const indexedAt = DateTime.utc();
 
 it("sets nextAirDate to the next unreleased episode's release date", async ({
   em,
@@ -12,14 +12,14 @@ it("sets nextAirDate to the next unreleased episode's release date", async ({
   const show = await showFactory.createOne({
     title: "The Great Show",
     nextAirDate: null,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const season = await seasonFactory.createOne({
     show,
     itemRequest: show.itemRequest,
     number: 1,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const releaseDate = DateTime.utc().plus({ weeks: 1 }).toJSDate();
@@ -31,7 +31,7 @@ it("sets nextAirDate to the next unreleased episode's release date", async ({
     number: 1,
     isSpecial: false,
     releaseDate,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   show.episodes.add(episode);
@@ -48,14 +48,14 @@ it("recalculates nextAirDate when the current value is in the past", async ({
   const show = await showFactory.createOne({
     title: "The Great Show",
     nextAirDate: DateTime.utc().minus({ weeks: 1 }).toJSDate(),
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const season = await seasonFactory.createOne({
     show,
     itemRequest: show.itemRequest,
     number: 1,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const releaseDate = DateTime.utc().plus({ weeks: 2 }).toJSDate();
@@ -67,7 +67,7 @@ it("recalculates nextAirDate when the current value is in the past", async ({
     number: 1,
     isSpecial: false,
     releaseDate,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   show.episodes.add(episode);
@@ -86,14 +86,14 @@ it("does not recalculate nextAirDate when it is already set to a future date", a
   const show = await showFactory.createOne({
     title: "The Great Show",
     nextAirDate: existingNextAirDate,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const season = await seasonFactory.createOne({
     show,
     itemRequest: show.itemRequest,
     number: 1,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const episode = await episodeFactory.createOne({
@@ -103,7 +103,7 @@ it("does not recalculate nextAirDate when it is already set to a future date", a
     number: 1,
     isSpecial: false,
     releaseDate: DateTime.utc().plus({ weeks: 3 }).toJSDate(),
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   show.episodes.add(episode);
@@ -120,14 +120,14 @@ it("sets nextAirDate to null when the show has episodes but none are upcoming", 
   const show = await showFactory.createOne({
     title: "The Great Show",
     nextAirDate: DateTime.utc().minus({ weeks: 1 }).toJSDate(),
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const season = await seasonFactory.createOne({
     show,
     itemRequest: show.itemRequest,
     number: 1,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   const episode = await episodeFactory.createOne({
@@ -137,7 +137,7 @@ it("sets nextAirDate to null when the show has episodes but none are upcoming", 
     number: 1,
     isSpecial: false,
     releaseDate: DateTime.utc().minus({ weeks: 2 }).toJSDate(),
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   show.episodes.add(episode);
@@ -154,7 +154,7 @@ it("does not set nextAirDate when the show has no episodes", async ({
   const show = await showFactory.createOne({
     title: "The Great Show",
     nextAirDate: null,
-    indexedAt,
+    indexedAt: indexedAt.toJSDate(),
   });
 
   await em.upsert(show);

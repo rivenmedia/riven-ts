@@ -1,7 +1,7 @@
 import { admin, manager, user, UserRole } from "@repo/util-auth/access-control";
 
 import { getSessionCookie } from "better-auth/cookies";
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 
 import { PermissionMetadata } from "#lib/server-actions/middlewares/check-permission.middleware.ts";
 

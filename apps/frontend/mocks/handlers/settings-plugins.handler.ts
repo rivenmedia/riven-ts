@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import { SET_PLUGIN_ENABLED } from "#app/(protected)/settings/plugins/_mutations/set-plugin-enabled.mutation.ts";
 import { SETTINGS_PLUGINS } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.ts";

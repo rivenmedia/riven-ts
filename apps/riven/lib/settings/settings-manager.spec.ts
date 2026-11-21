@@ -11,7 +11,7 @@ import { describe, expect, vi } from "vitest";
 import { createLogger } from "winston";
 import z from "zod";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { rankingPresets } from "#ranking/presets/index.ts";
 import { RANKING_NAMESPACE } from "#ranking/ranking-settings-section.schema.ts";
 
@@ -24,28 +24,7 @@ import type { Services } from "#database/database.ts";
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
 
-const FAKE_NAMESPACE = "@repo/plugin-fake";
-
-const FakeSettings = z
-  .object({
-    apiKey: z.string().min(1).meta({ secret: true }),
-    token: z.string().default("d").meta({ secret: true }),
-    nested: z.object({ nestedValue: z.int().default(1) }),
-  })
-  .meta({ title: "Fake" });
-
-const CLEAR_NAMESPACE = "@repo/plugin-clear";
-
-const ClearSettings = z
-  .object({
-    url: z.string().min(1),
-    limit: z.int().optional(),
-    retries: z.int().default(3),
-    interval: z.int().nullable().default(60),
-  })
-  .meta({ title: "Clear" });
-
-const installedPlugins: InstalledPlugin[] = [
+const it = baseIt.extend("installedPlugins", (): InstalledPlugin[] => [
   {
     sectionId: "repo-plugin-comet",
     packageName: "@repo/plugin-comet",
@@ -79,10 +58,32 @@ const installedPlugins: InstalledPlugin[] = [
     enabled: true,
     alwaysEnabled: true,
   },
-];
+]);
+
+const FAKE_NAMESPACE = "@repo/plugin-fake";
+
+const FakeSettings = z
+  .object({
+    apiKey: z.string().min(1).meta({ secret: true }),
+    token: z.string().default("d").meta({ secret: true }),
+    nested: z.object({ nestedValue: z.int().default(1) }),
+  })
+  .meta({ title: "Fake" });
+
+const CLEAR_NAMESPACE = "@repo/plugin-clear";
+
+const ClearSettings = z
+  .object({
+    url: z.string().min(1),
+    limit: z.int().optional(),
+    retries: z.int().default(3),
+    interval: z.int().nullable().default(60),
+  })
+  .meta({ title: "Clear" });
 
 function createManager(
   services: Services,
+  installedPlugins: InstalledPlugin[],
   options: {
     fakeEnvironment?: Record<string, string>;
     clearEnvironment?: Record<string, string>;
@@ -145,8 +146,11 @@ async function selectRankingProfile(services: Services) {
 }
 
 describe("getSection", () => {
-  it("throws NOT_FOUND for an unknown section", async ({ services }) => {
-    const manager = createManager(services);
+  it("throws NOT_FOUND for an unknown section", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(manager.getSection("nope")).rejects.toSatisfy(
       (error: unknown) =>
@@ -156,17 +160,21 @@ describe("getSection", () => {
   });
 
   it("does not treat the plugins settings as a section", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(manager.getSection("plugins")).rejects.toBeInstanceOf(
       GraphQLError,
     );
   });
 
-  it("returns the general section with defaults", async ({ services }) => {
-    const manager = createManager(services);
+  it("returns the general section with defaults", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("general");
 
@@ -178,8 +186,8 @@ describe("getSection", () => {
     expect(view.issues).toStrictEqual([]);
   });
 
-  it("resolves a plugin section", async ({ services }) => {
-    const manager = createManager(services);
+  it("resolves a plugin section", async ({ installedPlugins, services }) => {
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("repo-plugin-comet");
 
@@ -191,6 +199,7 @@ describe("getSection", () => {
   });
 
   it("merges stored, env and default values and omits secrets", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -198,7 +207,7 @@ describe("getSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("fake");
 
@@ -207,9 +216,10 @@ describe("getSection", () => {
   });
 
   it("reports secret states and never exposes secret values", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("fake");
     const { jsonSchema } = view;
@@ -225,6 +235,7 @@ describe("getSection", () => {
   });
 
   it("makes a stored secret optional in the JSON schema", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -232,7 +243,7 @@ describe("getSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("fake");
     const { jsonSchema } = view;
@@ -245,6 +256,7 @@ describe("getSection", () => {
   });
 
   it("does not report an ignored stored secret as custom", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -252,7 +264,7 @@ describe("getSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("fake");
     const { jsonSchema } = view;
@@ -268,9 +280,10 @@ describe("getSection", () => {
   });
 
   it("locks env-set fields and keeps env values private", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       fakeEnvironment: { apiKey: "env-secret-value", nestedValue: "5" },
     });
 
@@ -283,9 +296,10 @@ describe("getSection", () => {
   });
 
   it("only locks core env keys that belong to the section", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       coreEnvironment: { logLevel: "debug", port: "1234" },
     });
 
@@ -296,6 +310,7 @@ describe("getSection", () => {
   });
 
   it("reports stored values that are currently ignored", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -303,7 +318,7 @@ describe("getSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const view = await manager.getSection("fake");
 
@@ -319,6 +334,7 @@ describe("getSection", () => {
 
 describe("updateSection", () => {
   it("deletes a row when the value equals its default", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -326,7 +342,7 @@ describe("updateSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { nested: { nestedValue: 1 } }),
@@ -336,13 +352,16 @@ describe("updateSection", () => {
     ).resolves.toStrictEqual({ apiKey: "secret" });
   });
 
-  it("upserts a value that differs from its default", async ({ services }) => {
+  it("upserts a value that differs from its default", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
       upsert: { apiKey: "secret" },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { nested: { nestedValue: 2 } }),
@@ -353,6 +372,7 @@ describe("updateSection", () => {
   });
 
   it("leaves a stored secret unchanged when submitted empty", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -360,7 +380,7 @@ describe("updateSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { apiKey: "", nested: { nestedValue: 2 } }),
@@ -370,8 +390,8 @@ describe("updateSection", () => {
     ).resolves.toStrictEqual({ apiKey: "secret", nestedValue: 2 });
   });
 
-  it("stores a submitted secret", async ({ services }) => {
-    const manager = createManager(services);
+  it("stores a submitted secret", async ({ installedPlugins, services }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { apiKey: "new-secret" }),
@@ -381,8 +401,11 @@ describe("updateSection", () => {
     ).resolves.toStrictEqual({ apiKey: "new-secret" });
   });
 
-  it("ignores env-locked fields in the payload", async ({ services }) => {
-    const manager = createManager(services, {
+  it("ignores env-locked fields in the payload", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins, {
       fakeEnvironment: { apiKey: "env-secret", nestedValue: "5" },
     });
 
@@ -395,6 +418,7 @@ describe("updateSection", () => {
   });
 
   it("returns issues and writes nothing for an invalid value", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -402,7 +426,7 @@ describe("updateSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { nested: { nestedValue: "nope" } }),
@@ -416,6 +440,7 @@ describe("updateSection", () => {
   });
 
   it("validates core settings and keeps other core keys", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues("riven", {
@@ -423,7 +448,7 @@ describe("updateSection", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("general", {
@@ -450,13 +475,16 @@ describe("updateSection", () => {
 });
 
 describe("updateSection with reset", () => {
-  it("removes a stored override for a reset field", async ({ services }) => {
+  it("removes a stored override for a reset field", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
       upsert: { url: "https://a.test", limit: 5, retries: 7 },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("clear", { url: "https://b.test" }, [
@@ -478,6 +506,7 @@ describe("updateSection with reset", () => {
   });
 
   it("does not write when resetting a field with no stored row", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
@@ -485,7 +514,7 @@ describe("updateSection with reset", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("clear", {}, ["limit"]),
@@ -497,6 +526,7 @@ describe("updateSection with reset", () => {
   });
 
   it("validates reset fields together with the submitted values", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
@@ -504,7 +534,7 @@ describe("updateSection with reset", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("clear", { retries: 4 }, ["url", "limit"]),
@@ -515,13 +545,16 @@ describe("updateSection with reset", () => {
     expect(manager.restartRequired).toBe(false);
   });
 
-  it("returns an issue for an unknown reset path", async ({ services }) => {
+  it("returns an issue for an unknown reset path", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
       upsert: { url: "https://a.test" },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("clear", { retries: 4 }, ["nope"]),
@@ -534,6 +567,7 @@ describe("updateSection with reset", () => {
   });
 
   it("returns an issue for a path that is both submitted and reset", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -541,7 +575,7 @@ describe("updateSection with reset", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("fake", { nested: { nestedValue: 4 } }, [
@@ -556,13 +590,16 @@ describe("updateSection with reset", () => {
     expect(manager.restartRequired).toBe(false);
   });
 
-  it("ignores env-locked reset fields", async ({ services }) => {
+  it("ignores env-locked reset fields", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
       upsert: { url: "https://a.test", limit: 5 },
       delete: [],
     });
 
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       clearEnvironment: { limit: "9" },
     });
 
@@ -576,6 +613,7 @@ describe("updateSection with reset", () => {
   });
 
   it("stores an explicit null for a nullable field and reads it back", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(CLEAR_NAMESPACE, {
@@ -583,7 +621,7 @@ describe("updateSection with reset", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.updateSection("clear", { interval: null }),
@@ -600,13 +638,16 @@ describe("updateSection with reset", () => {
 });
 
 describe("resetFields", () => {
-  it("deletes the row and restores the default state", async ({ services }) => {
+  it("deletes the row and restores the default state", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
       upsert: { apiKey: "secret", token: "custom-token" },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(manager.resetFields("fake", ["token"])).resolves.toStrictEqual(
       [],
@@ -623,13 +664,16 @@ describe("resetFields", () => {
     });
   });
 
-  it("resets a field by its nested path", async ({ services }) => {
+  it("resets a field by its nested path", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
       upsert: { apiKey: "secret", nestedValue: 3 },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.resetFields("fake", ["nested.nestedValue"]),
@@ -640,6 +684,7 @@ describe("resetFields", () => {
   });
 
   it("refuses to reset a required field without a default", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -647,7 +692,7 @@ describe("resetFields", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.resetFields("fake", ["apiKey"]),
@@ -657,8 +702,11 @@ describe("resetFields", () => {
     ).resolves.toStrictEqual({ apiKey: "secret" });
   });
 
-  it("returns an issue for an unknown path", async ({ services }) => {
-    const manager = createManager(services);
+  it("returns an issue for an unknown path", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(manager.resetFields("fake", ["nope"])).resolves.toStrictEqual([
       { path: "nope", message: expect.any(String) },
@@ -668,6 +716,7 @@ describe("resetFields", () => {
 
 describe("restartRequired", () => {
   it("is false initially and true after a reset-only mutation", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues(FAKE_NAMESPACE, {
@@ -675,7 +724,7 @@ describe("restartRequired", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     expect(manager.restartRequired).toBe(false);
 
@@ -687,9 +736,10 @@ describe("restartRequired", () => {
 
 describe("setPluginEnabled", () => {
   it("returns an issue for a required secret when enabling", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-plex", true),
@@ -703,8 +753,11 @@ describe("setPluginEnabled", () => {
     expect(manager.restartRequired).toBe(false);
   });
 
-  it("refuses to change an always-enabled plugin", async ({ services }) => {
-    const manager = createManager(services);
+  it("refuses to change an always-enabled plugin", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-tmdb", false),
@@ -714,9 +767,10 @@ describe("setPluginEnabled", () => {
   });
 
   it("refuses to change plugins when enabledPlugins is set by env", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       coreEnvironment: { enabledPlugins: '["test"]' },
     });
 
@@ -727,8 +781,11 @@ describe("setPluginEnabled", () => {
     ]);
   });
 
-  it("stores the core plugin name when enabling", async ({ services }) => {
-    const manager = createManager(services);
+  it("stores the core plugin name when enabling", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-test", true),
@@ -741,6 +798,7 @@ describe("setPluginEnabled", () => {
   });
 
   it("enables a plugin once its required settings are stored", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues("@repo/plugin-plex", {
@@ -753,7 +811,7 @@ describe("setPluginEnabled", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-plex", true),
@@ -764,13 +822,16 @@ describe("setPluginEnabled", () => {
     ).resolves.toStrictEqual({ enabledPlugins: ["test", "plex"] });
   });
 
-  it("deletes the row when disabling the last plugin", async ({ services }) => {
+  it("deletes the row when disabling the last plugin", async ({
+    installedPlugins,
+    services,
+  }) => {
     await services.settingsService.writeValues("riven", {
       upsert: { enabledPlugins: ["test"] },
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-test", false),
@@ -783,13 +844,13 @@ describe("setPluginEnabled", () => {
 
   it.for([true, false])(
     "writes nothing when the plugin is already in the requested state (enabled: %s)",
-    async (enabled, { services }) => {
+    async (enabled, { services, installedPlugins }) => {
       await services.settingsService.writeValues("riven", {
         upsert: { enabledPlugins: enabled ? ["test"] : [] },
         delete: [],
       });
 
-      const manager = createManager(services);
+      const manager = createManager(services, installedPlugins);
       const writeValues = vi.spyOn(services.settingsService, "writeValues");
 
       await expect(
@@ -801,8 +862,11 @@ describe("setPluginEnabled", () => {
     },
   );
 
-  it("throws NOT_FOUND for an unknown plugin", async ({ services }) => {
-    const manager = createManager(services);
+  it("throws NOT_FOUND for an unknown plugin", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
 
     await expect(
       manager.setPluginEnabled("repo-plugin-nope", true),
@@ -812,6 +876,7 @@ describe("setPluginEnabled", () => {
 
 describe("listPlugins", () => {
   it("lists installed plugins with their current enabled state", async ({
+    installedPlugins,
     services,
   }) => {
     await services.settingsService.writeValues("riven", {
@@ -819,7 +884,7 @@ describe("listPlugins", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await expect(manager.listPlugins()).resolves.toStrictEqual({
       plugins: [
@@ -853,9 +918,10 @@ describe("listPlugins", () => {
   });
 
   it("reports enabledPlugins as locked when set by env", async ({
+    installedPlugins,
     services,
   }) => {
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       coreEnvironment: { enabledPlugins: '["test"]' },
     });
 
@@ -937,11 +1003,12 @@ describe("plugin env settings", () => {
 
 describe("ranking section", () => {
   it("shows the active profile's value as the ranking default", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const section = await manager.getSection("ranking");
 
@@ -954,11 +1021,12 @@ describe("ranking section", () => {
   });
 
   it("serves the active profile's values as the JSON schema defaults", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const { jsonSchema } = await manager.getSection("ranking");
 
@@ -975,6 +1043,7 @@ describe("ranking section", () => {
   });
 
   it("shows a stored override over the active profile's value", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
@@ -983,16 +1052,19 @@ describe("ranking section", () => {
       delete: [],
     });
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     const section = await manager.getSection("ranking");
 
     expect(section.values).toMatchObject({ resolutions: { r2160p: false } });
   });
 
-  it("removes an override equal to the profile value", async ({ services }) => {
+  it("removes an override equal to the profile value", async ({
+    installedPlugins,
+    services,
+  }) => {
     const profile = await selectRankingProfile(services);
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await manager.updateSection("ranking", { resolutions: { r2160p: false } });
 
@@ -1008,11 +1080,12 @@ describe("ranking section", () => {
   });
 
   it("stores an override equal to the schema default but not the profile value", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
-    const manager = createManager(services);
+    const manager = createManager(services, installedPlugins);
 
     await manager.updateSection("ranking", { resolutions: { r2160p: false } });
 
@@ -1022,11 +1095,12 @@ describe("ranking section", () => {
   });
 
   it("keeps env-locked leaves regardless of the active profile", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
-    const manager = createManager(services, {
+    const manager = createManager(services, installedPlugins, {
       coreEnvironment: { r2160p: "false" },
     });
 
@@ -1037,12 +1111,15 @@ describe("ranking section", () => {
   });
 
   it("does not require a restart for hot sections and notifies instead", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
     const onHotSectionChange = vi.fn<(sectionId: string) => void>();
-    const manager = createManager(services, { onHotSectionChange });
+    const manager = createManager(services, installedPlugins, {
+      onHotSectionChange,
+    });
 
     await manager.updateSection("ranking", {
       options: { removeAllTrash: false },
@@ -1058,21 +1135,29 @@ describe("ranking section", () => {
   });
 
   it("does not notify when a hot section write changes nothing", async ({
+    installedPlugins,
     services,
   }) => {
     await selectRankingProfile(services);
 
     const onHotSectionChange = vi.fn<(sectionId: string) => void>();
-    const manager = createManager(services, { onHotSectionChange });
+    const manager = createManager(services, installedPlugins, {
+      onHotSectionChange,
+    });
 
     await manager.updateSection("ranking", { resolutions: { r2160p: true } });
 
     expect(onHotSectionChange).not.toHaveBeenCalled();
   });
 
-  it("still requires a restart for general", async ({ services }) => {
+  it("still requires a restart for general", async ({
+    installedPlugins,
+    services,
+  }) => {
     const onHotSectionChange = vi.fn<(sectionId: string) => void>();
-    const manager = createManager(services, { onHotSectionChange });
+    const manager = createManager(services, installedPlugins, {
+      onHotSectionChange,
+    });
 
     const section = await manager.getSection("general");
 

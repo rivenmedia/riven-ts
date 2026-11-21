@@ -13,18 +13,6 @@ import { syncRankingProfiles } from "../sync-ranking-profiles.actor.ts";
 
 import type { Services } from "#database/database.ts";
 
-const it = baseIt.extend("legacyConfigPath", async ({}, { onCleanup }) => {
-  const dir = await mkdtemp(
-    path.join(tmpdir(), "riven-sync-ranking-profiles-test-"),
-  );
-
-  onCleanup(async () => {
-    await rm(dir, { recursive: true });
-  });
-
-  return path.join(dir, "riven-ranking-config.json");
-});
-
 async function runSync(services: Services, legacyConfigPath: string) {
   await toPromise(
     createActor(syncRankingProfiles, {
@@ -37,6 +25,21 @@ async function runSync(services: Services, legacyConfigPath: string) {
   );
 }
 
+const it = baseIt
+  .extend("spyOnLoggerWarn", () => () => vi.spyOn(logger, "warn"))
+  .extend("spyOnLoggerInfo", () => () => vi.spyOn(logger, "info"))
+  .extend("legacyConfigPath", async ({}, { onCleanup }) => {
+    const dir = await mkdtemp(
+      path.join(tmpdir(), "riven-sync-ranking-profiles-test-"),
+    );
+
+    onCleanup(async () => {
+      await rm(dir, { recursive: true });
+    });
+
+    return path.join(dir, "riven-ranking-config.json");
+  });
+
 it("inserts the built-in presets", async ({ services, legacyConfigPath }) => {
   await runSync(services, legacyConfigPath);
 
@@ -46,6 +49,7 @@ it("inserts the built-in presets", async ({ services, legacyConfigPath }) => {
 });
 
 it("falls back to default when the active preset was removed", async ({
+  spyOnLoggerWarn,
   services,
   legacyConfigPath,
 }) => {
@@ -63,7 +67,7 @@ it("falls back to default when the active preset was removed", async ({
     delete: [],
   });
 
-  const warnSpy = vi.spyOn(logger, "warn");
+  const warnSpy = spyOnLoggerWarn();
 
   await runSync(services, legacyConfigPath);
 
@@ -79,6 +83,7 @@ it("falls back to default when the active preset was removed", async ({
 });
 
 it("keeps the active profile when it still exists", async ({
+  spyOnLoggerWarn,
   services,
   legacyConfigPath,
 }) => {
@@ -90,12 +95,12 @@ it("keeps the active profile when it still exists", async ({
     config: {},
   });
 
+  const warnSpy = spyOnLoggerWarn();
+
   await settingsService.writeValues(RANKING_NAMESPACE, {
     upsert: { activeProfileId: custom.id },
     delete: [],
   });
-
-  const warnSpy = vi.spyOn(logger, "warn");
 
   await runSync(services, legacyConfigPath);
 
@@ -109,6 +114,7 @@ it("keeps the active profile when it still exists", async ({
 });
 
 it("renames a custom profile that uses a built-in profile's name", async ({
+  spyOnLoggerWarn,
   services,
   legacyConfigPath,
 }) => {
@@ -122,13 +128,13 @@ it("renames a custom profile that uses a built-in profile's name", async ({
     config: { rankingModel: { av1: 7 } },
   });
 
+  const warnSpy = spyOnLoggerWarn();
+
   await rankingProfileService.create({
     name: `${presetName} (custom)`,
     description: null,
     config: {},
   });
-
-  const warnSpy = vi.spyOn(logger, "warn");
 
   await runSync(services, legacyConfigPath);
 
@@ -149,6 +155,7 @@ it("renames a custom profile that uses a built-in profile's name", async ({
 });
 
 it("imports the legacy config file and logs where it came from", async ({
+  spyOnLoggerWarn,
   services,
   legacyConfigPath,
 }) => {
@@ -158,7 +165,7 @@ it("imports the legacy config file and logs where it came from", async ({
     "utf8",
   );
 
-  const warnSpy = vi.spyOn(logger, "warn");
+  const warnSpy = spyOnLoggerWarn();
 
   await runSync(services, legacyConfigPath);
 
@@ -177,11 +184,11 @@ it("imports the legacy config file and logs where it came from", async ({
 });
 
 it("logs where it looked when there is no legacy config file", async ({
+  spyOnLoggerInfo,
   services,
   legacyConfigPath,
 }) => {
-  const infoSpy = vi.spyOn(logger, "info");
-
+  const infoSpy = spyOnLoggerInfo();
   await runSync(services, legacyConfigPath);
 
   expect(infoSpy).toHaveBeenCalledWith(
@@ -190,13 +197,15 @@ it("logs where it looked when there is no legacy config file", async ({
 });
 
 it("logs nothing about the legacy config once it has been imported", async ({
+  spyOnLoggerWarn,
+  spyOnLoggerInfo,
   services,
   legacyConfigPath,
 }) => {
   await runSync(services, legacyConfigPath);
 
-  const infoSpy = vi.spyOn(logger, "info");
-  const warnSpy = vi.spyOn(logger, "warn");
+  const infoSpy = spyOnLoggerInfo();
+  const warnSpy = spyOnLoggerWarn();
 
   await runSync(services, legacyConfigPath);
 

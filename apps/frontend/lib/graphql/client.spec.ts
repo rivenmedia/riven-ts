@@ -1,5 +1,5 @@
-import { HttpResponse } from "msw";
 import { graphql } from "msw/graphql";
+import { HttpResponse } from "msw/http";
 import { setupServer } from "msw/node";
 import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
@@ -31,6 +31,9 @@ vi.mock(import("next/headers"), async (importOriginal) => {
 });
 
 const it = baseIt
+  .extend("answered", () => ({
+    data: { instanceStatus: { setupRequired: false } },
+  }))
   .extend("server", { auto: true }, ({}, { onCleanup }) => {
     const server = setupServer();
 
@@ -61,12 +64,22 @@ const backend = graphql.link(
 
 const sessionToken = "Fq1kU3B6.dGhlLXNpZ25hdHVyZQ+/==";
 
-async function sendQueryAndReadAuthorization(server: SetupServer) {
-  const authorization = Promise.withResolvers<string | null>();
-
+/**
+ * Answers the query only when its authorization header passes `isAuthorized`,
+ * the way the backend rejects unauthenticated requests.
+ */
+function answerQueryWhen(
+  server: SetupServer,
+  isAuthorized: (authorization: string | null) => boolean,
+) {
   server.use(
     backend.query(GET_INSTANCE_SETUP_REQUIRED, ({ request }) => {
-      authorization.resolve(request.headers.get("authorization"));
+      if (!isAuthorized(request.headers.get("authorization"))) {
+        return HttpResponse.json(
+          { errors: [{ message: "Unexpected authorization header" }] },
+          { status: 401 },
+        );
+      }
 
       return HttpResponse.json({
         data: {
@@ -79,37 +92,46 @@ async function sendQueryAndReadAuthorization(server: SetupServer) {
     }),
   );
 
-  await getClient().query({ query: GET_INSTANCE_SETUP_REQUIRED });
-
-  return authorization.promise;
+  return getClient().query({ query: GET_INSTANCE_SETUP_REQUIRED });
 }
 
 it.for(["riven.session_token", "__Secure-riven.session_token"])(
   "with a session cookie, sends the %s cookie as a bearer token",
-  async (cookieName, { server, setRequestCookies }) => {
+  async (cookieName, { answered, server, setRequestCookies }) => {
     setRequestCookies(
       `theme=dark; ${cookieName}=${encodeURIComponent(sessionToken)}`,
     );
 
-    const authorization = await sendQueryAndReadAuthorization(server);
-    const [scheme, token] = authorization?.split(" ") ?? [];
+    await expect(
+      answerQueryWhen(server, (authorization) => {
+        const [scheme, token] = authorization?.split(" ") ?? [];
 
-    expect(scheme).toBe("Bearer");
-    expect(decodeURIComponent(token ?? "")).toBe(sessionToken);
+        return (
+          scheme === "Bearer" &&
+          decodeURIComponent(token ?? "") === sessionToken
+        );
+      }),
+    ).resolves.toMatchObject(answered);
   },
 );
 
 it("without a session cookie, sends no authorization header", async ({
+  answered,
   server,
   setRequestCookies,
 }) => {
   setRequestCookies("theme=dark");
 
-  await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
+  await expect(
+    answerQueryWhen(server, (authorization) => authorization === null),
+  ).resolves.toMatchObject(answered);
 });
 
 it("without a session cookie, sends no authorization header outside a request scope", async ({
+  answered,
   server,
 }) => {
-  await expect(sendQueryAndReadAuthorization(server)).resolves.toBeNull();
+  await expect(
+    answerQueryWhen(server, (authorization) => authorization === null),
+  ).resolves.toMatchObject(answered);
 });

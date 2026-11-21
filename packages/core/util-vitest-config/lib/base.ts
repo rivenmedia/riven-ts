@@ -2,6 +2,14 @@ import { fileURLToPath } from "node:url";
 import swc from "unplugin-swc";
 import { configDefaults, defineConfig, mergeConfig } from "vitest/config";
 
+export const testCodePatterns = [
+  "**/{__tests__,__mocks__,mocks,playwright,tests}/**",
+  "**/*.{spec,test}.{ts,tsx}",
+  "**/*.stories.{ts,tsx}",
+  "**/vitest.setup.ts",
+  "**/setup-files/**",
+];
+
 export const baseVitestConfig = defineConfig(() => {
   const isWatch = process.argv.includes("--watch");
   const ignorePatterns = ["**/{__generated__,docker-data,.next,.turbo}/**"];
@@ -15,7 +23,7 @@ export const baseVitestConfig = defineConfig(() => {
         restoreMocks: true,
         coverage: {
           enabled: !isWatch,
-          exclude: [...ignorePatterns, "**/{__tests__,mocks}/**"],
+          exclude: [...ignorePatterns, ...testCodePatterns],
         },
         setupFiles: [
           fileURLToPath(

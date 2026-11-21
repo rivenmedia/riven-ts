@@ -29,12 +29,19 @@ export const waitForChunk = async (
 
   const timeoutSignal = AbortSignal.timeout(config.chunkTimeoutSeconds * 1000);
 
-  while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
+  const assertNoSeekDetected = () => {
     if (context.seekController.signal.aborted) {
       throw new SeekDetectedError(
         `Seek detected; aborting chunk request for chunk ${targetChunk.rangeLabel}`,
       );
     }
+  };
+
+  // Check for a seek before reading, so that stream data is left for the retried read
+  assertNoSeekDetected();
+
+  while ((chunk = reader.read(targetChunk.size) as Buffer | null) === null) {
+    assertNoSeekDetected();
 
     if (reader.readableAborted) {
       throw new FuseError(
@@ -65,12 +72,8 @@ export const waitForChunk = async (
     }
   }
 
-  // Check for seek again after reading as the current stream position will be undefined
-  if (context.seekController.signal.aborted) {
-    throw new SeekDetectedError(
-      `Seek detected; aborting chunk request for chunk ${targetChunk.rangeLabel}`,
-    );
-  }
+  // Check for a seek again in case one was detected whilst waiting for the chunk
+  assertNoSeekDetected();
 
   assert.ok(
     context.currentStreamPosition !== undefined,

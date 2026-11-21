@@ -4,7 +4,17 @@ import { createEmptyActor, toPromise } from "xstate";
 import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenario.ts";
 import * as runtimeSettingsModule from "#utilities/runtime-settings.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
+
+const it = baseIt
+  .extend(
+    "spyOnInitialiseRuntimeSettings",
+    () => () => vi.spyOn(runtimeSettingsModule, "initialiseRuntimeSettings"),
+  )
+  .extend(
+    "spyOnGetRuntimeSettings",
+    () => () => vi.spyOn(runtimeSettingsModule, "getRuntimeSettings"),
+  );
 
 it.override({
   input: {
@@ -15,25 +25,22 @@ it.override({
 });
 
 it("loads the runtime settings before applying the mock scenario", async ({
+  spyOnInitialiseRuntimeSettings,
+  spyOnGetRuntimeSettings,
   actor,
 }) => {
   // The test setup pre-initialises the runtime settings; simulate a real boot,
   // where they are unavailable until bootstrap loads them.
   const realGetRuntimeSettings = runtimeSettingsModule.getRuntimeSettings;
-  const initialiseSpy = vi.spyOn(
-    runtimeSettingsModule,
-    "initialiseRuntimeSettings",
-  );
+  const initialiseSpy = spyOnInitialiseRuntimeSettings();
 
-  vi.spyOn(runtimeSettingsModule, "getRuntimeSettings").mockImplementation(
-    () => {
-      if (initialiseSpy.mock.calls.length === 0) {
-        throw new Error("Runtime settings accessed before they were loaded");
-      }
+  spyOnGetRuntimeSettings().mockImplementation(() => {
+    if (initialiseSpy.mock.calls.length === 0) {
+      throw new Error("Runtime settings accessed before they were loaded");
+    }
 
-      return realGetRuntimeSettings();
-    },
-  );
+    return realGetRuntimeSettings();
+  });
 
   const visitedStates: unknown[] = [];
 

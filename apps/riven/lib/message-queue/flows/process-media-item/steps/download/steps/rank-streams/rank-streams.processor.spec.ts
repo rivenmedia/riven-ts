@@ -1,7 +1,9 @@
+import { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
 import {
   RTN,
   createRankingModel,
   createSettings,
+  parse,
 } from "@repo/util-rank-torrent-name";
 
 import { expect, vi } from "vitest";
@@ -14,14 +16,19 @@ import { rankStreamsProcessor } from "./rank-streams.processor.ts";
 
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
-const it = baseIt.extend("streams", async ({ factories: { streamFactory } }) =>
-  streamFactory.create(6),
-);
+const it = baseIt
+  .extend(
+    "spyOnGetRankingEngine",
+    () => () => vi.spyOn(rankingEngineModule, "getRankingEngine"),
+  )
+  .extend("streams", async ({ factories: { streamFactory } }) =>
+    streamFactory.create(6),
+  );
 
-it.beforeEach(() => {
+it.beforeEach(({ spyOnGetRankingEngine }) => {
   invalidateRankingEngine();
 
-  vi.spyOn(rankingEngineModule, "getRankingEngine").mockResolvedValue(
+  spyOnGetRankingEngine().mockResolvedValue(
     new RTN(
       createRankingModel({
         bluray: 0,
@@ -309,14 +316,78 @@ it("uses one engine snapshot for the whole job", async ({
   expect(rankTorrent).toHaveBeenCalledTimes(3);
 });
 
-it.todo(
-  'includes non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is disabled',
-);
+it.for([
+  {
+    isAnime: true,
+    dubbedAnimeOnly: false,
+    expected: ["dubbed", "non-dubbed"],
+  },
+  { isAnime: true, dubbedAnimeOnly: true, expected: ["dubbed"] },
+  {
+    isAnime: false,
+    dubbedAnimeOnly: true,
+    expected: ["dubbed", "non-dubbed"],
+  },
+])(
+  "ranks $expected torrents (anime: $isAnime, dubbed anime only: $dubbedAnimeOnly)",
+  async (
+    { isAnime, dubbedAnimeOnly, expected },
+    {
+      em,
+      createMockJob,
+      indexedMovieContext: { indexedMovie },
+      mockSentryScope,
+      overrideRuntimeSettings,
+      services,
+      factories: { streamFactory },
+    },
+  ) => {
+    overrideRuntimeSettings({ general: { scraping: { dubbedAnimeOnly } } });
 
-it.todo(
-  'does not include non-dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
-);
+    // A fixed title, as some generated titles (e.g. "The Old Man and the Sea") are rejected by the ranking engine
+    const title = "Example Item";
 
-it.todo(
-  'includes dubbed torrents if the media item is anime and the "dubbed anime only" setting is enabled',
+    await em.nativeUpdate(
+      MediaItem,
+      { id: indexedMovie.id },
+      isAnime
+        ? { title, language: "ja", genres: ["Animation", "Anime"] }
+        : { title, language: "en", genres: ["Action"] },
+    );
+
+    const dubbedStream = await streamFactory.createOne({
+      parsedData: parse("Example.Item.2024.1080p.DUBBED.BluRay.x264-GROUP"),
+    });
+    const nonDubbedStream = await streamFactory.createOne({
+      parsedData: parse("Example.Item.2024.1080p.BluRay.x264-GROUP"),
+    });
+
+    const job = await createMockJob({
+      id: indexedMovie.id,
+      streams: {
+        [dubbedStream.infoHash]: `${title} 1080p`,
+        [nonDubbedStream.infoHash]: `${title} 720p`,
+      },
+    });
+
+    const result = await rankStreamsProcessor(
+      { job, scope: mockSentryScope },
+      {
+        sendEvent: vi.fn<MainRunnerMachineIntake>(),
+        services,
+        plugins: new Map(),
+      },
+    );
+
+    const labels = new Map([
+      [dubbedStream.infoHash, "dubbed"],
+      [nonDubbedStream.infoHash, "non-dubbed"],
+    ]);
+
+    expect(
+      result
+        .map(({ hash }) => labels.get(hash) ?? hash)
+        .toSorted((a, b) => a.localeCompare(b)),
+    ).toStrictEqual(expected);
+  },
 );

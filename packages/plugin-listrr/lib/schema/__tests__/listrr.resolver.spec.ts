@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import assert from "node:assert";
 import { expect } from "vitest";
 

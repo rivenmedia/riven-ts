@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 
 import { PermissionMetadata } from "#lib/server-actions/middlewares/check-permission.middleware.ts";
 
@@ -9,7 +9,10 @@ export const createHasPermissionHandler = (
     const body = PermissionMetadata.safeParse(await request.json());
 
     if (!body.success) {
-      throw new Error("Invalid request body");
+      return HttpResponse.json(
+        { message: "Invalid request body" },
+        { status: 400 },
+      );
     }
 
     const { permissions } = body.data;

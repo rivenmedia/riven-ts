@@ -112,7 +112,8 @@ export abstract class IndexerData extends IndexerBaseItem {
       return null;
     }
 
-    const seasonLabels = ["Spring", "Summer", "Fall", "Winter"];
+    // Meteorological seasons: Dec-Feb is winter, Mar-May spring, Jun-Aug summer and Sep-Nov fall
+    const seasonLabels = ["Winter", "Spring", "Summer", "Fall"];
 
     const month = this.releaseDate.getMonth();
     const seasonIndex = Math.floor((month + 1) / 3) % 4;
@@ -124,7 +125,10 @@ export abstract class IndexerData extends IndexerBaseItem {
       return null;
     }
 
-    return `${seasonLabel} ${year.toString()}`;
+    // December belongs to the next year's winter, so Dec 2023 to Feb 2024 are all "Winter 2024"
+    const seasonYear = month === 11 ? year + 1 : year;
+
+    return `${seasonLabel} ${seasonYear.toString()}`;
   }
 
   @Field(() => Trailer, { nullable: true })

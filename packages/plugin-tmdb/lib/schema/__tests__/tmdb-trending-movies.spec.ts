@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 import assert from "node:assert";
 import { expect } from "vitest";
 
@@ -122,7 +122,8 @@ it("maps trending movies to indexer data", async ({
       posterUrl: "https://image.tmdb.org/t/p/original/poster.jpg",
       backdropUrl: "https://image.tmdb.org/t/p/original/backdrop.jpg",
       language: "en",
-      releaseDate: expect.stringMatching(/^2024-01-01T/u),
+      // TMDB dates are parsed as midnight in the server's time zone
+      releaseDate: new Date(2024, 0, 1).toISOString(),
     },
   ]);
 });

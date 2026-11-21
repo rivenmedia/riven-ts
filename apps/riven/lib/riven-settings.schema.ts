@@ -127,17 +127,24 @@ export const RivenSettings = z.object({
   adminUserCredentials: z
     .templateLiteral([z.string().min(1), z.literal(":"), z.string().min(1)])
     .optional()
-    .transform((val) => {
+    .transform((val, ctx) => {
       if (!val) {
         return null;
       }
 
-      const [username, password] = val.split(":");
+      // Only the first colon separates the username, as passwords may contain colons
+      const separatorIndex = val.indexOf(":");
+      const username = val.slice(0, separatorIndex);
+      const password = val.slice(separatorIndex + 1);
 
       if (!username || !password) {
-        throw new Error(
-          "Invalid admin user credentials format. Expected 'username:password'",
-        );
+        ctx.addIssue({
+          code: "custom",
+          message:
+            "Invalid admin user credentials format. Expected 'username:password'",
+        });
+
+        return z.NEVER;
       }
 
       return { username, password };

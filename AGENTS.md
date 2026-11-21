@@ -14,104 +14,10 @@ For every change to how the UI looks (you create, change, or delete a component,
 
 <!-- END:storybook-skills -->
 
-> **Note:** the block between `BEGIN:storybook-skills` and `END:storybook-skills` is managed by Storybook and overwritten on upgrade. Put project-specific Storybook rules outside it, like the section below.
+> **Note:** the block between `BEGIN:storybook-skills` and `END:storybook-skills` is managed by Storybook and overwritten on upgrade. Put project-specific Storybook rules outside it, like the section below (or in STANDARDS.md).
 
-## Storybook tests
+## Code conventions
 
-### Story reuse
-
-When writing Storybook tests, prefer to re-use existing stories instead of creating new ones, unless none satisfy the needs of the initial test's state.
-
-**BAD - duplicate stories are created with identical inputs:**
-
-```ts
-const Input = meta.story();
-
-Input.test("does something", () => {
-  /* test body */
-});
-
-const InputDirty = meta.story();
-
-InputDirty.test("does something else", () => {
-  /* test body */
-});
-```
-
-**GOOD - tests are grouped where a common story is available:**
-
-```ts
-const Input = meta.story();
-
-Input.test("does something", () => {
-  /* test body */
-});
-
-Input.test("does something else", () => {
-  /* test body */
-});
-```
-
-**GOOD - tests are linked to different initial stories:**
-
-```ts
-const Input = meta.story();
-
-Input.test("is editable", () => {
-  /* test body */
-});
-
-const DisabledInput = meta.story({
-  args: {
-    disabled: true,
-  },
-});
-
-DisabledInput.test("is not editable", () => {
-  /* test body */
-});
-```
-
-### Prefer args targeting
-
-When writing Storybook stories, prefer to assert against args provided to the story under test instead of a variable in a parent scope.
-
-**BAD - test asserts a function outside the story scope:**
-
-```ts
-const onChange = fn();
-
-const Input = meta.story({
-  args: {
-    onChange,
-  },
-});
-
-Input.test("calls onChange", () => {
-  /** trigger an onChange event */
-
-  expect(onChange).toHaveBeenCalled();
-});
-```
-
-**GOOD - test asserts a function directly from the story:**
-
-```ts
-const Input = meta.story({
-  args: {
-    onChange: fn(),
-  },
-});
-
-Input.test("calls onChange", ({ args }) => {
-  /** trigger an onChange event */
-
-  expect(mocked(args.onChange)).toHaveBeenCalled();
-});
-```
-
-## Tests
-
-### Prefer type narrowing
-
-When writing tests, prefer to use type narrowing by using `expect.assert()` rather than type assertions.
+Before writing or reviewing code, read [STANDARDS.md](STANDARDS.md). It covers
+the repo's tooling and the conventions that tooling doesn't enforce: code
+style, tests (including Storybook tests), file naming, Knip, and PR titles.

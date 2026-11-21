@@ -74,3 +74,11 @@ it("does not modify messages without sensitive data", () => {
 
   expect(maskedMessage.message).toBe(message);
 });
+
+it("leaves non-string messages unchanged", () => {
+  const message = { token: "abc" };
+
+  expect(
+    maskFormat().transform({ level: "info", message } as TransformableInfo),
+  ).toMatchObject({ message });
+});

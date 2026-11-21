@@ -1,5 +1,5 @@
 /// <reference types="vite/client" />
-import { bypass } from "msw";
+import { bypass } from "msw/utils/bypass";
 
 import { createRemoteAssetHandlers } from "./remote-assets.shared.ts";
 

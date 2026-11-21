@@ -4,9 +4,14 @@ import { expect, vi } from "vitest";
 import { flow } from "#message-queue/flows/producer.ts";
 import { clearDeduplicationJob } from "#message-queue/utilities/clear-deduplication-job.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
+
+const it = baseIt
+  .extend("spyOnAdd", () => () => vi.spyOn(flow, "add"))
+  .extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
 
 it("enqueues a job to reindex the item after the next episode air date if the item is a show", async ({
+  spyOnAdd,
   em,
   actor,
   overrideRuntimeSettings,
@@ -30,7 +35,7 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 
   expect.assert(indexedEpisode, "No indexed episode found for the seeded show");
 
-  const addSpy = vi.spyOn(flow, "add");
+  const addSpy = spyOnAdd();
 
   actor.send({
     type: "riven.media-item.index.success",
@@ -144,6 +149,7 @@ it("enqueues a job to reindex the item after the next episode air date if the it
 });
 
 it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the item is a show and has no next episode air date", async ({
+  spyOnAdd,
   em,
   actor,
   overrideRuntimeSettings,
@@ -165,7 +171,7 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
 
   await em.flush();
 
-  const addSpy = vi.spyOn(flow, "add");
+  const addSpy = spyOnAdd();
 
   actor.send({
     type: "riven.media-item.index.success",
@@ -205,6 +211,7 @@ it("enqueues a job to reindex the item after unknownAirDateOffsetDays if the ite
 });
 
 it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item is a show and the next air date is in the past", async ({
+  spyOnAdd,
   em,
   actor,
   overrideRuntimeSettings,
@@ -229,7 +236,7 @@ it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item i
 
   await em.flush();
 
-  const addSpy = vi.spyOn(flow, "add");
+  const addSpy = spyOnAdd();
 
   actor.send({
     type: "riven.media-item.index.success",
@@ -269,6 +276,7 @@ it("enqueues a job to reindex the item after scheduleOffsetMinutes if the item i
 });
 
 it("enqueues a job to process the latest released episodes if the item is a show", async ({
+  spyOnAddBulk,
   em,
   actor,
   seeders: { seedOngoingShow },
@@ -283,7 +291,7 @@ it("enqueues a job to process the latest released episodes if the item is a show
 
   expect.assert(indexedEpisode, "No indexed episode found for the seeded show");
 
-  const addBulkSpy = vi.spyOn(flow, "addBulk");
+  const addBulkSpy = spyOnAddBulk();
 
   actor.send({
     type: "riven.media-item.index.success",

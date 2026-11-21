@@ -1,7 +1,7 @@
 import Fuse from "@zkochan/fuse-native";
 import z from "zod";
 
-import { getVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
+import { findVfsOperationContext } from "#vfs/utilities/vfs-operation-context.ts";
 
 export const FuseErrorCode = z.literal([
   Fuse.EPERM,
@@ -138,17 +138,18 @@ export class FuseError extends Error {
   public errorCode: FuseErrorCode;
 
   public constructor(errorCode: FuseErrorCode, message: string) {
-    const context = getVfsOperationContext();
+    // Errors can be raised before an operation context is established (e.g. an unknown file descriptor)
+    const context = findVfsOperationContext();
 
     const fd =
-      context.operationName === "read" || context.operationName === "release"
+      context?.operationName === "read" || context?.operationName === "release"
         ? context.fd
         : undefined;
 
     const tags = Object.entries({
-      "operation-name": context.operationName,
+      "operation-name": context?.operationName,
       fd,
-      path: context.path,
+      path: context?.path,
     })
       .filter((entry): entry is [string, string | number] => entry[1] != null)
       .map(([key, val]) => `[${key}=${val.toString()}]`)

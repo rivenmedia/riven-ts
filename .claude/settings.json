@@ -1,12 +1,56 @@
 {
   "hooks": {
-    "PostToolUse": [
+    "PreToolUse": [
       {
-        "matcher": "Edit|Write",
+        "matcher": "Bash",
         "hooks": [
           {
             "type": "command",
-            "command": "file=$(jq -r '.tool_input.file_path'); \"$CLAUDE_PROJECT_DIR\"/node_modules/.bin/oxlint --fix --no-error-on-unmatched-pattern \"$file\"; \"$CLAUDE_PROJECT_DIR\"/node_modules/.bin/oxfmt --no-error-on-unmatched-pattern \"$file\""
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-changed-files.ts pre-bash"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Edit|MultiEdit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-changed-files.ts post-edit",
+            "timeout": 120
+          }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-changed-files.ts post-bash",
+            "timeout": 120
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-changed-files.ts stop",
+            "timeout": 300
+          }
+        ]
+      }
+    ],
+    "SubagentStop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-changed-files.ts stop",
+            "timeout": 300
           }
         ]
       }

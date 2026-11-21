@@ -3,8 +3,8 @@ import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
 import { roleHasPermissions, UserRole } from "@repo/util-auth/access-control";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { passthrough } from "msw";
 import { graphql } from "msw/graphql";
+import { passthrough } from "msw/utils/passthrough";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
@@ -41,31 +41,6 @@ import type { ExecutionResult } from "graphql";
 import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
-
-/**
- * The test package.json mock makes `test` the only valid core plugin name,
- * so TMDB is included as a fixture with a secret that has a default value.
- */
-const fixtureInstalledPlugins: InstalledPlugin[] = [
-  {
-    sectionId: "repo-plugin-test",
-    packageName: "@repo/plugin-test",
-    name: "test" as CorePluginName,
-    plugin: testPluginConfig,
-    enabled: true,
-    alwaysEnabled: false,
-  },
-  {
-    sectionId: "repo-plugin-tmdb",
-    packageName: "@repo/plugin-tmdb",
-    name: "tmdb",
-    plugin: tmdbPlugin,
-    enabled: true,
-    alwaysEnabled: true,
-  },
-];
-
-const servicePrincipal: Principal = { kind: "service" };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -345,24 +320,47 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (principal: Principal = servicePrincipal): ApolloServerContext => {
+      (principal?: Principal): ApolloServerContext => {
+        /**
+         * The test package.json mock makes `test` the only valid core plugin name,
+         * so TMDB is included as a fixture with a secret that has a default value.
+         */
+        const installedPlugins: InstalledPlugin[] = [
+          {
+            sectionId: "repo-plugin-test",
+            packageName: "@repo/plugin-test",
+            name: "test" as CorePluginName,
+            plugin: testPluginConfig,
+            enabled: true,
+            alwaysEnabled: false,
+          },
+          {
+            sectionId: "repo-plugin-tmdb",
+            packageName: "@repo/plugin-tmdb",
+            name: "tmdb",
+            plugin: tmdbPlugin,
+            enabled: true,
+            alwaysEnabled: true,
+          },
+        ];
+
         const settingsManager = new SettingsManager({
           settingsService: services.settingsService,
           sections: buildSettingsSections({
-            installedPlugins: fixtureInstalledPlugins,
+            installedPlugins,
             pluginEnvironment: new Map(),
             coreEnvironment: {},
             rankingProfileService: services.rankingProfileService,
             settingsService: services.settingsService,
           }),
-          installedPlugins: fixtureInstalledPlugins,
+          installedPlugins,
           coreEnvironment: {},
         });
 
         return {
           [CoreKey]: {
             em: orm.em.fork(),
-            principal,
+            principal: principal ?? { kind: "service" },
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,
@@ -585,7 +583,23 @@ export const it = testBase
         pluginName?: string,
       ) =>
         `bull:${queueNameFor(eventName, pluginName)}:${randomUUID()}` as const,
-  );
+  )
+  .extend("flowAddSpy", async () => {
+    const { flow } = await import("#message-queue/flows/producer.ts");
+
+    // Records the jobs a test adds to the flow producer without adding them to Redis
+    return vi.spyOn(flow, "add").mockResolvedValue({} as never);
+  })
+  .extend("getFirstAddedFlowJob", ({ flowAddSpy }) => () => {
+    const [[flowJob] = []] = flowAddSpy.mock.calls;
+
+    assert.ok(
+      flowJob,
+      "Expected a job to have been added to the flow producer",
+    );
+
+    return flowJob;
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

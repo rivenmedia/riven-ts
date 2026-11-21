@@ -1,7 +1,7 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { http, HttpResponse } from "msw";
-import { expect } from "vitest";
+import { http, HttpResponse } from "msw/http";
+import { expect, vi } from "vitest";
 
 import { PlexSettings } from "../plex-settings.schema.ts";
 import { it } from "./plex.test-context.ts";
@@ -211,4 +211,74 @@ it("paginates items in long watchlists", async ({
     ],
     updateIntervalSeconds: 60,
   });
+});
+
+it("skips duplicate items and items without external IDs", async ({
+  dataSourceMap,
+  plugin,
+  server,
+  settings,
+  logger,
+}) => {
+  const contentServiceRequestedHook =
+    plugin.hooks["riven.content-service.requested"];
+
+  expect.assert(contentServiceRequestedHook);
+
+  const warn = vi.spyOn(logger, "warn");
+
+  server.use(
+    http.get("**/library/sections/watchlist/all", () =>
+      HttpResponse.json<z.input<typeof UserWatchlistResponse>>({
+        MediaContainer: {
+          size: 4,
+          totalSize: 4,
+          Metadata: [
+            {
+              title: "Test Movie",
+              year: 2024,
+              type: "movie",
+              Guid: [{ id: "imdb://tt1234567" }, { id: "tmdb://1234567" }],
+            },
+            {
+              title: "Test Movie (Duplicate)",
+              year: 2024,
+              type: "movie",
+              Guid: [{ id: "tmdb://1234567" }],
+            },
+            {
+              title: "Unmatched Movie",
+              year: 2023,
+              type: "movie",
+              Guid: [],
+            },
+            {
+              title: "Unmatched Show",
+              year: null,
+              type: "show",
+              Guid: [],
+            },
+          ],
+        },
+      }),
+    ),
+  );
+
+  await expect(
+    contentServiceRequestedHook({
+      dataSources: dataSourceMap,
+      settings,
+      event: {},
+      logger,
+    }),
+  ).resolves.toStrictEqual({
+    movies: [{ imdbId: "tt1234567", tmdbId: "1234567" }],
+    shows: [],
+    updateIntervalSeconds: 60,
+  });
+
+  expect(warn.mock.calls).toStrictEqual([
+    ["Unable to extract external IDs from Unmatched Movie (2023)"],
+    ["Unable to extract external IDs from Unmatched Show"],
+  ]);
 });

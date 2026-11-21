@@ -5,6 +5,10 @@ import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/sche
 
 function buildExternalIdKey(
   /**
+   * The media type, which keeps movies and shows apart as their TMDB and TVDB IDs can collide.
+   */
+  type: "movie" | "show",
+  /**
    * The primary external ID for the movie or show. This could be the TMDB ID for movies or the TVDB ID for shows.
    */
   primaryExternalKey: string | null | undefined,
@@ -13,15 +17,15 @@ function buildExternalIdKey(
    */
   imdbKey: string | null | undefined,
 ) {
-  if (!primaryExternalKey && !imdbKey) {
-    return null;
-  }
+  const externalKey = primaryExternalKey ?? imdbKey;
 
-  return primaryExternalKey ?? imdbKey;
+  return externalKey ? `${type}:${externalKey}` : null;
 }
 
 /**
- * Collects the items returned by the content service into a map of unique items, keyed by external ID.
+ * Collects the items returned by the content service into a map of unique items, keyed by media type and external ID.
+ *
+ * Movies and shows are keyed separately, as TMDB and TVDB IDs can collide.
  */
 export function collectRequestedItems(
   childrenData: ContentServiceRequestedResponse[],
@@ -34,7 +38,7 @@ export function collectRequestedItems(
     updateIntervalSeconds ??= childData.updateIntervalSeconds;
 
     for (const movie of childData.movies) {
-      const key = buildExternalIdKey(movie.tmdbId, movie.imdbId);
+      const key = buildExternalIdKey("movie", movie.tmdbId, movie.imdbId);
 
       if (!key) {
         logger.warn(
@@ -48,7 +52,7 @@ export function collectRequestedItems(
     }
 
     for (const show of childData.shows) {
-      const key = buildExternalIdKey(show.tvdbId, show.imdbId);
+      const key = buildExternalIdKey("show", show.tvdbId, show.imdbId);
 
       if (!key) {
         logger.warn(

@@ -1,7 +1,7 @@
 import { MediaEntry } from "@repo/util-plugin-sdk/dto/entities";
 import { StatusCodes } from "@repo/util-plugin-sdk/utilities/status-codes";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { Store } from "../schemas/store.schema.ts";

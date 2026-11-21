@@ -9,74 +9,77 @@ import { pubSub } from "#graphql/pubsub.ts";
 import type { Episode } from "@repo/util-plugin-sdk/dto/entities";
 import type { MockInstance } from "vitest";
 
-const indexedAt = DateTime.utc().toJSDate();
-const pastReleaseDate = DateTime.utc().minus({ years: 1 }).toJSDate();
-
-const it = baseIt.extend(
-  "seasonContext",
-  async ({
-    em,
-    factories: {
-      showFactory,
-      seasonFactory,
-      episodeFactory,
-      mediaEntryFactory,
-    },
-  }) => {
-    const show = await showFactory.createOne({
-      status: "ended",
-      releaseDate: pastReleaseDate,
-      indexedAt,
-    });
-
-    const season = await seasonFactory.createOne({
-      show,
-      itemRequest: show.itemRequest,
-      releaseDate: pastReleaseDate,
-      indexedAt,
-    });
-
-    const episodes = await episodeFactory
-      .each((entity, i) => {
-        entity.absoluteNumber = i + 1;
-        entity.number = i + 1;
-      })
-      .create(3, {
-        season,
-        show,
-        itemRequest: show.itemRequest,
-        isSpecial: false,
-        isRequested: true,
-        releaseDate: pastReleaseDate,
-        indexedAt,
-      });
-
-    const completeEpisode = async (episode: Episode) => {
-      episode.filesystemEntries.add(
-        mediaEntryFactory.makeOne({ mediaItem: episode }),
-      );
-
-      await em.flush();
-    };
-
-    return { season, episodes, completeEpisode };
-  },
-);
+const indexedAt = DateTime.utc();
+const pastReleaseDate = DateTime.utc().minus({ years: 1 });
 
 const getPublishedCalls = (
   publishSpy: MockInstance<typeof pubSub.publish>,
   topic: Parameters<typeof pubSub.publish>[0],
 ) => publishSpy.mock.calls.filter(([calledTopic]) => calledTopic === topic);
 
+const it = baseIt
+  .extend("spyOnPublish", () => () => vi.spyOn(pubSub, "publish"))
+  .extend(
+    "seasonContext",
+    async ({
+      em,
+      factories: {
+        showFactory,
+        seasonFactory,
+        episodeFactory,
+        mediaEntryFactory,
+      },
+    }) => {
+      const show = await showFactory.createOne({
+        status: "ended",
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
+      });
+
+      const season = await seasonFactory.createOne({
+        show,
+        itemRequest: show.itemRequest,
+        releaseDate: pastReleaseDate.toJSDate(),
+        indexedAt: indexedAt.toJSDate(),
+      });
+
+      const episodes = await episodeFactory
+        .each((entity, i) => {
+          entity.absoluteNumber = i + 1;
+          entity.number = i + 1;
+        })
+        .create(3, {
+          season,
+          show,
+          itemRequest: show.itemRequest,
+          isSpecial: false,
+          isRequested: true,
+          releaseDate: pastReleaseDate.toJSDate(),
+          indexedAt: indexedAt.toJSDate(),
+        });
+
+      const completeEpisode = async (episode: Episode) => {
+        episode.filesystemEntries.add(
+          mediaEntryFactory.makeOne({ mediaItem: episode }),
+        );
+
+        await em.flush();
+      };
+
+      return { season, episodes, completeEpisode };
+    },
+  );
+
 describe("media item state changes", () => {
   it("publishes the ID of a media item whose state changes", async ({
+    spyOnPublish,
     em,
     factories: { streamFactory },
     seeders: { seedIndexedMovie },
   }) => {
     const { movie } = await seedIndexedMovie();
 
-    const publishSpy = vi.spyOn(pubSub, "publish");
+    const publishSpy = spyOnPublish();
 
     movie.streams.add(await streamFactory.createOne());
 
@@ -88,12 +91,13 @@ describe("media item state changes", () => {
   });
 
   it("does not publish until the transaction has committed", async ({
+    spyOnPublish,
     em,
     seeders: { seedIndexedMovie },
   }) => {
     const { movie } = await seedIndexedMovie();
 
-    const publishSpy = vi.spyOn(pubSub, "publish");
+    const publishSpy = spyOnPublish();
 
     await em.transactional(async (transactionEm) => {
       const transactionMovie = await transactionEm.findOneOrFail(
@@ -114,12 +118,13 @@ describe("media item state changes", () => {
   });
 
   it("does not publish when the transaction is rolled back", async ({
+    spyOnPublish,
     em,
     seeders: { seedIndexedMovie },
   }) => {
     const { movie } = await seedIndexedMovie();
 
-    const publishSpy = vi.spyOn(pubSub, "publish");
+    const publishSpy = spyOnPublish();
 
     await expect(
       em.transactional(async (transactionEm) => {
@@ -142,6 +147,7 @@ describe("media item state changes", () => {
 
 describe("season updates", () => {
   it("publishes once when both an episode and its season change state in the same flush", async ({
+    spyOnPublish,
     seasonContext: {
       season,
       episodes: [episode],
@@ -150,17 +156,19 @@ describe("season updates", () => {
   }) => {
     expect.assert(episode);
 
-    const publishSpy = vi.spyOn(pubSub, "publish");
+    const publishSpy = spyOnPublish();
 
     await completeEpisode(episode);
 
     expect(season.state).toBe("partially_completed");
+
     expect(getPublishedCalls(publishSpy, "SEASON_UPDATED")).toStrictEqual([
       ["SEASON_UPDATED", season.id, season.id],
     ]);
   });
 
   it("publishes when an episode changes state without changing its season's state", async ({
+    spyOnPublish,
     seasonContext: {
       season,
       episodes: [firstEpisode, secondEpisode],
@@ -174,7 +182,7 @@ describe("season updates", () => {
 
     expect(season.state).toBe("partially_completed");
 
-    const publishSpy = vi.spyOn(pubSub, "publish");
+    const publishSpy = spyOnPublish();
 
     await completeEpisode(secondEpisode);
 

@@ -45,6 +45,10 @@ export default {
     // docs are built, so `@repo/util-wiki-helpers` is deliberately a
     // devDependency, keeping its Next.js/Vite tree out of production installs.
     "**/wiki.config.ts": ["unlisted"],
+    // Wildcard `exports` (e.g. `./helpers/*`) also match specs colocated in
+    // those folders, so `--strict` treats them as production code. Specs never
+    // ship, so their devDependencies (e.g. `vitest`) are fine.
+    "packages/**/*.{spec,test}.{ts,tsx}": ["unlisted"],
   },
   workspaces: {
     ".": {

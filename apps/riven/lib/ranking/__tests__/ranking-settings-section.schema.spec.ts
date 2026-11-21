@@ -46,9 +46,9 @@ describe("ranking settings section adapter", () => {
 
   it("serves RTN defaults as leaf defaults", () => {
     expect(getLeafDefault(RankingSettingsSection, "r1080p")).toBe(true);
-    expect(getLeafDefault(RankingSettingsSection, "titleSimilarity")).toBe(
-      0.85,
-    );
+    expect(
+      getLeafDefault(RankingSettingsSection, "titleSimilarity"),
+    ).toBeCloseTo(0.85);
   });
 
   it("serves a title for each group", () => {

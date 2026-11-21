@@ -148,8 +148,7 @@ export const it = baseIt
 
       onCleanup(async () => {
         for (const instance of instances) {
-          await instance.worker.close();
-          await instance.queue.close();
+          await instance.close();
         }
       });
 

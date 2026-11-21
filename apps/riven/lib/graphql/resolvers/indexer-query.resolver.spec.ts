@@ -7,7 +7,7 @@ import assert from "node:assert";
 import { ObjectType } from "type-graphql";
 import { expect } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import type { ValidPlugin } from "#types/plugins.ts";
 import type {
@@ -21,50 +21,61 @@ class MovieIndexerData {}
 @ObjectType({ implements: [IndexerData, IndexerBaseItem] })
 class ShowIndexerData {}
 
-const createItem = (id: string, type: "movie" | "show"): IndexerDataResult => ({
-  id,
-  title: `Title ${id}`,
-  overview: "",
-  genres: [],
-  type,
-  status: "unknown",
-  isRequestable: true,
-});
+const it = baseIt
+  .extend(
+    "createItem",
+    () =>
+      (id: string, type: "movie" | "show"): IndexerDataResult => ({
+        id,
+        title: `Title ${id}`,
+        overview: "",
+        genres: [],
+        type,
+        status: "unknown",
+        isRequestable: true,
+      }),
+  )
+  .extend(
+    "createPlugin",
+    () =>
+      (
+        name: string,
+        queryHandlers: ValidPlugin["config"]["queryHandlers"],
+      ): [symbol, ValidPlugin] => {
+        const symbol = Symbol(name);
 
-const createPlugin = (
-  name: string,
-  queryHandlers: ValidPlugin["config"]["queryHandlers"],
-): [symbol, ValidPlugin] => {
-  const symbol = Symbol(name);
-
-  return [
-    symbol,
-    {
-      status: "valid",
-      dataSources: new DataSourceMap(),
-      config: {
-        name: symbol,
-        version: "1.0.0",
-        resolvers: [],
-        hooks: {},
-        queryHandlers,
-        settingsSchema: undefined as never,
-        validator: async () => Promise.resolve(true),
+        return [
+          symbol,
+          {
+            status: "valid",
+            dataSources: new DataSourceMap(),
+            config: {
+              name: symbol,
+              version: "1.0.0",
+              resolvers: [],
+              hooks: {},
+              queryHandlers,
+              settingsSchema: undefined as never,
+              validator: async () => Promise.resolve(true),
+            },
+          },
+        ];
       },
-    },
-  ];
-};
-
-const searchHandler = (
-  type: new () => object,
-  mediaType: "movie" | "show",
-  ids: string[],
-): RivenQueryHandler<"search"> => ({
-  type: type as never,
-  mediaTypes: [mediaType],
-  handler: async () =>
-    Promise.resolve(ids.map((id) => createItem(id, mediaType))),
-});
+  )
+  .extend(
+    "searchHandler",
+    ({ createItem }) =>
+      (
+        type: new () => object,
+        mediaType: "movie" | "show",
+        ids: string[],
+      ): RivenQueryHandler<"search"> => ({
+        type: type as never,
+        mediaTypes: [mediaType],
+        handler: async () =>
+          Promise.resolve(ids.map((id) => createItem(id, mediaType))),
+      }),
+  );
 
 const SEARCH = gql`
   query Search($query: String!, $type: TopLevelMediaItemType) {
@@ -86,6 +97,8 @@ const SEARCH = gql`
 `;
 
 it("interleaves results from every plugin with a search handler", async ({
+  createPlugin,
+  searchHandler,
   gqlContext,
   gqlServer,
 }) => {
@@ -130,6 +143,8 @@ it("interleaves results from every plugin with a search handler", async ({
 });
 
 it("only calls plugins that support the requested type", async ({
+  createPlugin,
+  searchHandler,
   gqlContext,
   gqlServer,
 }) => {
@@ -158,6 +173,8 @@ it("only calls plugins that support the requested type", async ({
 });
 
 it("returns partial results when a plugin fails", async ({
+  createPlugin,
+  searchHandler,
   gqlContext,
   gqlServer,
 }) => {

@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getApiListMyPageHandler } from "../../__generated__/handlers/getApiListMyPageHandler.ts";

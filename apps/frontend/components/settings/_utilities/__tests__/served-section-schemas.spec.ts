@@ -34,11 +34,12 @@ const fixturesDirectory = path.join(
 /**
  * Served leaves the builder knowingly renders nothing for, keyed by section.
  */
-const knownSkippedLeaves: Record<string, string[]> = {
-  // An array of template literal unions (Apprise-style URLs), which has no
-  // input yet
-  notifications: ["urls"],
-};
+const knownSkippedLeaves: Readonly<Record<string, readonly string[]>> =
+  Object.freeze({
+    // An array of template literal unions (Apprise-style URLs), which has no
+    // input yet
+    notifications: Object.freeze(["urls"]),
+  });
 
 interface JsonSchemaNode {
   type?: unknown;

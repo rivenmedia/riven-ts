@@ -29,22 +29,25 @@ const GET_DOWNLOAD_URL: TypedDocumentNode<
 
 const downloadUrl = "https://debrid.example.com/download/movie.mkv";
 
-const it = baseIt.extend(
-  "movieWithDownloadUrl",
-  async ({ completedMovieContext: { completedMovie }, em }) => {
-    await em.nativeUpdate(
-      MediaEntry,
-      { mediaItem: completedMovie.id },
-      { downloadUrl },
-    );
+const it = baseIt
+  .extend("manageSettings", (): Permissions => ({
+    instance: ["manage-settings"],
+  }))
+  .extend(
+    "movieWithDownloadUrl",
+    async ({ completedMovieContext: { completedMovie }, em }) => {
+      await em.nativeUpdate(
+        MediaEntry,
+        { mediaItem: completedMovie.id },
+        { downloadUrl },
+      );
 
-    return completedMovie;
-  },
-);
-
-const manageSettings: Permissions = { instance: ["manage-settings"] };
+      return completedMovie;
+    },
+  );
 
 it("resolves downloadUrl for a caller with the manage-settings permission", async ({
+  manageSettings,
   gqlExecuteAs,
   movieWithDownloadUrl,
   userWith,
@@ -60,6 +63,7 @@ it("resolves downloadUrl for a caller with the manage-settings permission", asyn
 });
 
 it("denies downloadUrl to a caller without the manage-settings permission", async ({
+  manageSettings,
   gqlExecuteAs,
   movieWithDownloadUrl,
   userWithout,
