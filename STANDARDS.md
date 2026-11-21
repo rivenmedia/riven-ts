@@ -47,9 +47,12 @@ wrong, change the config, not the code.
   approval for very large functions or files.
 - The `no-unsafe-*` rules are on at the repo root but off inside `apps/**`
   and `packages/**`: strict for repo tooling, pragmatic in application code.
-- Use Luxon's `DateTime` rather than `Date`. `*.entity.ts` files are exempt
-  because MikroORM needs the native `Date` constructor for runtime type
-  reflection.
+- Use Luxon's `DateTime` rather than `Date`. These files are exempt:
+  - `*.entity.ts`: MikroORM needs the native `Date` constructor for runtime
+    type reflection.
+  - GraphQL type files (`*.type.ts`, `*.resolver.ts`): TypeGraphQL needs a
+    `Date` to convert to an ISO string.
+  - Test files (`*.spec.ts`, `*test-context.ts`).
 - Use the project `logger` rather than `console`.
 - Browser checks in `apps/frontend`:
   - For components that can't render on the server, use
