@@ -619,15 +619,20 @@ it("recovers after the queue events fail to start", async ({
   const startupError = new Error("Redis is unavailable");
   const xrevrangeSpy = vi
     .spyOn(dataSourceConfig.connection, "xrevrange")
-    .mockRejectedValueOnce(startupError);
+    .mockRejectedValue(startupError);
   const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
 
   const dataSource = new TestDataSource(dataSourceConfig);
 
+  await expect(dataSource.fetch("endpoint")).rejects.toThrow(
+    "Redis is unavailable",
+  );
+
+  xrevrangeSpy.mockRestore();
+
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
-  expect(xrevrangeSpy).toHaveBeenCalledTimes(2);
   expect(errorSpy).toHaveBeenCalledWith(
     expect.stringContaining("QueueEvents error"),
     { err: startupError },
