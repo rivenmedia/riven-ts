@@ -58,9 +58,8 @@ export default nextConfig;
 
 ```ts
 // src/lib/safe-action.ts
-import { betterAuth } from "@next-safe-action/adapter-better-auth";
 import { createSafeActionClient } from "next-safe-action";
-
+import { betterAuth } from "@next-safe-action/adapter-better-auth";
 import { auth } from "./auth";
 
 // Public action client (no auth required)
@@ -76,9 +75,8 @@ export const authClient = actionClient.use(betterAuth(auth));
 // src/app/actions.ts
 "use server";
 
-import { authClient } from "@/lib/safe-action";
-
 import { z } from "zod";
+import { authClient } from "@/lib/safe-action";
 
 export const updateProfile = authClient
   .inputSchema(z.object({ name: z.string().min(1) }))
@@ -222,7 +220,6 @@ const authClient = actionClient.use(async ({ next }) => {
 
 // GOOD: Use the adapter — handles typing, cookies, and unauthorized() automatically
 import { betterAuth } from "@next-safe-action/adapter-better-auth";
-
 import { auth } from "./auth";
 
 const authClient = actionClient.use(betterAuth(auth));

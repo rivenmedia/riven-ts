@@ -2,6 +2,63 @@ import type { SubtitleResponse } from "../schemas/subtitle-response.schema.ts";
 import type { ItemMetadata } from "./get-item-metadata.ts";
 
 /**
+ * Compare language-name tokens while tolerating a single insertion, deletion,
+ * or substitution. This avoids maintaining a list of provider-specific typos.
+ */
+function isWithinOneEdit(value: string, target: string): boolean {
+  if (Math.abs(value.length - target.length) > 1) {
+    return false;
+  }
+
+  let valueIndex = 0;
+  let targetIndex = 0;
+  let edits = 0;
+
+  while (valueIndex < value.length && targetIndex < target.length) {
+    if (value[valueIndex] === target[targetIndex]) {
+      valueIndex += 1;
+      targetIndex += 1;
+      continue;
+    }
+
+    edits += 1;
+
+    if (edits > 1) {
+      return false;
+    }
+
+    if (value.length >= target.length) {
+      valueIndex += 1;
+    }
+
+    if (value.length <= target.length) {
+      targetIndex += 1;
+    }
+  }
+
+  const hasTrailingCharacter =
+    valueIndex < value.length || targetIndex < target.length;
+
+  return edits + Number(hasTrailingCharacter) <= 1;
+}
+
+function normalizeLanguage(language: string) {
+  const normalized = language.toLowerCase();
+  const words = normalized.trim().split(/[\s_-]+/u);
+
+  // Other languages (including generic Portuguese) are left unchanged.
+  if (
+    words.length === 2 &&
+    words[1] === "portuguese" &&
+    isWithinOneEdit(words[0] ?? "", "brazilian")
+  ) {
+    return "pt-BR";
+  }
+
+  return normalized;
+}
+
+/**
  * Picks the best subtitle per language (first matching result per language)
  */
 export function selectBestSubtitlePerLanguage(
@@ -20,10 +77,10 @@ export function selectBestSubtitlePerLanguage(
       continue;
     }
 
-    const subLangLower = sub.lang.toLowerCase();
+    const language = normalizeLanguage(sub.lang);
 
-    if (!bestPerLanguage.has(subLangLower)) {
-      bestPerLanguage.set(subLangLower, sub);
+    if (!bestPerLanguage.has(language)) {
+      bestPerLanguage.set(language, sub);
     }
   }
 

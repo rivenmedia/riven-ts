@@ -94,7 +94,7 @@ export const Selectable = meta.story({
         isSelected={selected}
         onSelectToggle={() => {
           setSelected((prev) => !prev);
-          args.onSelectToggle?.();
+          args.onSelectToggle();
         }}
       />
     );
@@ -122,12 +122,12 @@ Selectable.test(
     await userEvent.click(checkbox);
 
     await expect(checkbox).toBeChecked();
-    await expect(args.onSelectToggle).toBeCalledTimes(1);
+    await expect(args.onSelectToggle).toHaveBeenCalledTimes(1);
 
     await userEvent.click(checkbox);
 
     await expect(checkbox).not.toBeChecked();
-    await expect(args.onSelectToggle).toBeCalledTimes(2);
+    await expect(args.onSelectToggle).toHaveBeenCalledTimes(2);
   },
 );
 

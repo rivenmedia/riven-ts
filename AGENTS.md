@@ -1,15 +1,117 @@
 # Agents
 
-<!-- https://storybook.js.org/docs/11/ai/mcp/overview/?ref=readme#4-adjust-your-agent-instructions -->
+<!-- BEGIN:storybook-skills -->
+<!-- Storybook updates this section on upgrade. Remove both markers to keep your own edits. -->
 
-When working on UI components, always use the `frontend-storybook` MCP tools to access Storybook's component and documentation knowledge before answering or taking any action.
+## Storybook
 
-- **CRITICAL: Never hallucinate component properties!** Before using ANY property on a component from a design system (including common-sounding ones like `shadow`, etc.), you MUST use the MCP tools to check if the property is actually documented for that component.
-- Query `docs-list` to get a list of documented components
-- Query `docs-show` for that component to see all available properties and examples
-- Only use properties that are explicitly documented or shown in example stories
-- If a property isn't documented, do not assume properties based on naming conventions or common patterns from other libraries. Check back with the user in these cases.
-- Use the `get-storybook-story-instructions` tool to fetch the latest instructions for creating or updating stories. This will ensure you follow current conventions and recommendations.
-- Check your work by running `test-run`.
+For every change to how the UI looks (you create, change, or delete a component, story, style, theme, or design token), follow these steps in order. Each step has a Storybook skill. First invoke the skills of all the steps, before you edit any file. Then follow each skill at its step.
 
-Remember: A story name might not reflect the property name correctly, so always verify properties through documentation or example stories before using them.
+1. `component-docs`: look up the components to reuse, with their props and usage examples, before you edit any file. Also when the user asks about a component's props, API, or usage.
+2. `write-stories`: every component you create or change gets stories.
+3. `test-stories`: run the story tests after every change, the way this skill says, never with a `package.json` test script, and fix what fails. Also when the user asks to run or fix story tests.
+4. `ui-review`: publish a review that shows the user what changed, as your last step. Also when the user asks to see components or stories.
+
+<!-- END:storybook-skills -->
+
+> **Note:** the block between `BEGIN:storybook-skills` and `END:storybook-skills` is managed by Storybook and overwritten on upgrade. Put project-specific Storybook rules outside it, like the section below.
+
+## Storybook tests
+
+### Story reuse
+
+When writing Storybook tests, prefer to re-use existing stories instead of creating new ones, unless none satisfy the needs of the initial test's state.
+
+**BAD - duplicate stories are created with identical inputs:**
+
+```ts
+const Input = meta.story();
+
+Input.test("does something", () => {
+  /* test body */
+});
+
+const InputDirty = meta.story();
+
+InputDirty.test("does something else", () => {
+  /* test body */
+});
+```
+
+**GOOD - tests are grouped where a common story is available:**
+
+```ts
+const Input = meta.story();
+
+Input.test("does something", () => {
+  /* test body */
+});
+
+Input.test("does something else", () => {
+  /* test body */
+});
+```
+
+**GOOD - tests are linked to different initial stories:**
+
+```ts
+const Input = meta.story();
+
+Input.test("is editable", () => {
+  /* test body */
+});
+
+const DisabledInput = meta.story({
+  args: {
+    disabled: true,
+  },
+});
+
+DisabledInput.test("is not editable", () => {
+  /* test body */
+});
+```
+
+### Prefer args targeting
+
+When writing Storybook stories, prefer to assert against args provided to the story under test instead of a variable in a parent scope.
+
+**BAD - test asserts a function outside the story scope:**
+
+```ts
+const onChange = fn();
+
+const Input = meta.story({
+  args: {
+    onChange,
+  },
+});
+
+Input.test("calls onChange", () => {
+  /** trigger an onChange event */
+
+  expect(onChange).toHaveBeenCalled();
+});
+```
+
+**GOOD - test asserts a function directly from the story:**
+
+```ts
+const Input = meta.story({
+  args: {
+    onChange: fn(),
+  },
+});
+
+Input.test("calls onChange", ({ args }) => {
+  /** trigger an onChange event */
+
+  expect(mocked(args.onChange)).toHaveBeenCalled();
+});
+```
+
+## Tests
+
+### Prefer type narrowing
+
+When writing tests, prefer to use type narrowing by using `expect.assert()` rather than type assertions.

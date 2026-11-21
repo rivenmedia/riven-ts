@@ -18,9 +18,8 @@ export const actionClient = createSafeActionClient();
 // src/app/actions.ts
 "use server";
 
-import { actionClient } from "@/lib/safe-action";
-
 import { z } from "zod";
+import { actionClient } from "@/lib/safe-action";
 
 export const greetUser = actionClient
   .inputSchema(z.object({ name: z.string().min(1) }))

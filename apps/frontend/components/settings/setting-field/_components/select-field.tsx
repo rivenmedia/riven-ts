@@ -46,10 +46,7 @@ export function SettingsSelectField({
           {...field}
           defaultValue={defaultValue}
           onValueChange={(value) => {
-            setValue(name, value, {
-              shouldDirty: true,
-              shouldTouch: true,
-            });
+            setValue(name, value, { shouldDirty: true });
           }}
         >
           <SelectTrigger className="max-w-xs">

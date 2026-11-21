@@ -3,6 +3,13 @@ packages:
   - packages/*
   - packages/core/*
 catalogs:
+  storybook:
+    "@storybook/addon-a11y": ^11.0.0-beta.3
+    "@storybook/addon-docs": ^11.0.0-beta.3
+    "@storybook/addon-mcp": ^11.0.0-beta.3
+    "@storybook/addon-vitest": ^11.0.0-beta.3
+    "@storybook/nextjs-vite": ^11.0.0-beta.3
+    storybook: ^11.0.0-beta.3
   typescript7-native:
     typescript: ^7.0.2
   vitest:
@@ -126,11 +133,7 @@ catalog:
   "@repo/util-auth": workspace:^
   "@sentry/node": ^10.53.1
   "@simplewebauthn/server": ^13.3.1
-  "@storybook/addon-a11y": ^10.6.3
-  "@storybook/addon-docs": ^10.6.3
-  "@storybook/addon-mcp": ^10.6.3
-  "@storybook/addon-vitest": ^10.6.3
-  "@storybook/nextjs-vite": ^10.6.3
+
   "@swc-node/register": ^1.11.1
   "@swc/core": ^1.15.40
   "@tailwindcss/postcss": ^4.3.0
@@ -239,8 +242,7 @@ catalog:
   shadcn: ^4.11.0
   shiki: ^4.1.0
   sonner: ^2.0.8
-  storybook: ^10.6.3
-  storybook-addon-vis: ^4.3.2
+  storybook-addon-vis: ^4.8.0
   tailwindcss: ^4.3.0
   triple-beam: ^1.4.1
   turbo: ^2.11.4
