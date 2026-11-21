@@ -45,10 +45,17 @@ export function withVfsOperationContext<T extends () => Promisable<unknown>>(
   return vfsOperationContext.run<unknown>(context, callback) as ReturnType<T>;
 }
 
+/**
+ * Gets the current VFS operation context, if one is active.
+ */
+export function findVfsOperationContext() {
+  return vfsOperationContext.getStore();
+}
+
 export function getVfsOperationContext<
   T extends VfsOperationContext["operationName"],
 >(operationName?: T): Extract<VfsOperationContext, { operationName: T }> {
-  const context = vfsOperationContext.getStore();
+  const context = findVfsOperationContext();
 
   if (!context) {
     throw new Error("No VFS operation context available");

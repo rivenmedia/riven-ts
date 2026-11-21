@@ -13,13 +13,7 @@ import type { EntityManager } from "@mikro-orm/core";
 export async function getEntry(em: EntityManager, pathInfo: PathInfo) {
   switch (pathInfo.pathType) {
     case "subtitle-file": {
-      const entry = await getVfsSubtitleEntry(em, pathInfo);
-
-      if (!entry) {
-        throw new TypeError("Unable to find subtitle file");
-      }
-
-      return entry;
+      return getVfsSubtitleEntry(em, pathInfo);
     }
     case "single-movie": {
       if (!pathInfo.tmdbId) {

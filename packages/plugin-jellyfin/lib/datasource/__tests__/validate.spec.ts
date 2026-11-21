@@ -28,3 +28,21 @@ it("returns true if the request succeeds", async ({
 
   expect(isValid).toBe(true);
 });
+
+it.for([
+  { status: 200, expected: true },
+  { status: 401, expected: false },
+])(
+  "validates the plugin by connecting to Jellyfin (HTTP $status)",
+  async ({ status, expected }, { dataSourceMap, plugin, server, settings }) => {
+    server.use(
+      http.get("**/System/Configuration", () =>
+        HttpResponse.json({}, { status }),
+      ),
+    );
+
+    await expect(
+      plugin.validator({ dataSources: dataSourceMap, settings }),
+    ).resolves.toBe(expected);
+  },
+);

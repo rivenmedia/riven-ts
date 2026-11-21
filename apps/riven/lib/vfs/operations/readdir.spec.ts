@@ -1,8 +1,10 @@
 import { MediaEntry, Movie } from "@repo/util-plugin-sdk/dto/entities";
 
+import Fuse from "@zkochan/fuse-native";
 import { expect, vi } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
+import { FuseError } from "#vfs/errors/fuse-error.ts";
 
 import { readDirSync } from "./readdir.ts";
 
@@ -304,3 +306,29 @@ it.for([
     });
   },
 );
+
+it("returns the FUSE error code when listing a directory fails with a FUSE error", async ({
+  services,
+}) => {
+  vi.spyOn(services.vfsService, "getDirectoryEntryPaths").mockRejectedValue(
+    new FuseError(Fuse.EACCES, "Permission denied"),
+  );
+
+  const callback = vi.fn<ReadDirCallback>();
+
+  readDirSync("/movies", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EACCES);
+  });
+});
+
+it("returns EIO when listing a directory fails unexpectedly", async () => {
+  const callback = vi.fn<ReadDirCallback>();
+
+  readDirSync("/not-a-vfs-directory", callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EIO);
+  });
+});

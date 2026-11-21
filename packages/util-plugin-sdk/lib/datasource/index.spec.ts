@@ -1,6 +1,7 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import { HttpResponse, http } from "msw";
+import { HttpResponse, delay, http } from "msw";
 import { randomUUID } from "node:crypto";
+import { setTimeout } from "node:timers/promises";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
 
@@ -563,4 +564,44 @@ it("rate limits the queue and retries after a 429 response", async ({
     parsedBody: { success: true },
   });
   expect(rateLimitSpy).toHaveBeenCalledExactlyOnceWith(1000);
+});
+
+it("resolves a request that finishes before the queue events start reading", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", async () => {
+      await delay(100);
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const { connection } = dataSourceConfig;
+  const duplicate = connection.duplicate.bind(connection);
+
+  // The queue events read the event stream on their own connection; delay their first read until after the request has finished
+  vi.spyOn(connection, "duplicate").mockImplementation((() => {
+    const client = duplicate();
+    const xread = client.xread.bind(client) as (
+      ...xreadArgs: unknown[]
+    ) => Promise<unknown>;
+
+    vi.spyOn(client, "xread").mockImplementationOnce((async (
+      ...xreadArgs: unknown[]
+    ) => {
+      await setTimeout(500);
+
+      return xread(...xreadArgs);
+    }) as never);
+
+    return client;
+  }) as never);
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
 });
