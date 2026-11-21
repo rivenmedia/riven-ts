@@ -42,31 +42,6 @@ import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
 
-/**
- * The test package.json mock makes `test` the only valid core plugin name,
- * so TMDB is included as a fixture with a secret that has a default value.
- */
-const fixtureInstalledPlugins: InstalledPlugin[] = [
-  {
-    sectionId: "repo-plugin-test",
-    packageName: "@repo/plugin-test",
-    name: "test" as CorePluginName,
-    plugin: testPluginConfig,
-    enabled: true,
-    alwaysEnabled: false,
-  },
-  {
-    sectionId: "repo-plugin-tmdb",
-    packageName: "@repo/plugin-tmdb",
-    name: "tmdb",
-    plugin: tmdbPlugin,
-    enabled: true,
-    alwaysEnabled: true,
-  },
-];
-
-const servicePrincipal: Principal = { kind: "service" };
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
 
@@ -345,24 +320,47 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (principal: Principal = servicePrincipal): ApolloServerContext => {
+      (principal?: Principal): ApolloServerContext => {
+        /**
+         * The test package.json mock makes `test` the only valid core plugin name,
+         * so TMDB is included as a fixture with a secret that has a default value.
+         */
+        const installedPlugins: InstalledPlugin[] = [
+          {
+            sectionId: "repo-plugin-test",
+            packageName: "@repo/plugin-test",
+            name: "test" as CorePluginName,
+            plugin: testPluginConfig,
+            enabled: true,
+            alwaysEnabled: false,
+          },
+          {
+            sectionId: "repo-plugin-tmdb",
+            packageName: "@repo/plugin-tmdb",
+            name: "tmdb",
+            plugin: tmdbPlugin,
+            enabled: true,
+            alwaysEnabled: true,
+          },
+        ];
+
         const settingsManager = new SettingsManager({
           settingsService: services.settingsService,
           sections: buildSettingsSections({
-            installedPlugins: fixtureInstalledPlugins,
+            installedPlugins,
             pluginEnvironment: new Map(),
             coreEnvironment: {},
             rankingProfileService: services.rankingProfileService,
             settingsService: services.settingsService,
           }),
-          installedPlugins: fixtureInstalledPlugins,
+          installedPlugins,
           coreEnvironment: {},
         });
 
         return {
           [CoreKey]: {
             em: orm.em.fork(),
-            principal,
+            principal: principal ?? { kind: "service" },
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,

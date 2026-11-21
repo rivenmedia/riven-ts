@@ -31,6 +31,9 @@ vi.mock(import("next/headers"), async (importOriginal) => {
 });
 
 const it = baseIt
+  .extend("answered", () => ({
+    data: { instanceStatus: { setupRequired: false } },
+  }))
   .extend("server", { auto: true }, ({}, { onCleanup }) => {
     const server = setupServer();
 
@@ -92,13 +95,9 @@ function answerQueryWhen(
   return getClient().query({ query: GET_INSTANCE_SETUP_REQUIRED });
 }
 
-const createAnswered = () => ({
-  data: { instanceStatus: { setupRequired: false } },
-});
-
 it.for(["riven.session_token", "__Secure-riven.session_token"])(
   "with a session cookie, sends the %s cookie as a bearer token",
-  async (cookieName, { server, setRequestCookies }) => {
+  async (cookieName, { answered, server, setRequestCookies }) => {
     setRequestCookies(
       `theme=dark; ${cookieName}=${encodeURIComponent(sessionToken)}`,
     );
@@ -112,11 +111,12 @@ it.for(["riven.session_token", "__Secure-riven.session_token"])(
           decodeURIComponent(token ?? "") === sessionToken
         );
       }),
-    ).resolves.toMatchObject(createAnswered());
+    ).resolves.toMatchObject(answered);
   },
 );
 
 it("without a session cookie, sends no authorization header", async ({
+  answered,
   server,
   setRequestCookies,
 }) => {
@@ -124,13 +124,14 @@ it("without a session cookie, sends no authorization header", async ({
 
   await expect(
     answerQueryWhen(server, (authorization) => authorization === null),
-  ).resolves.toMatchObject(createAnswered());
+  ).resolves.toMatchObject(answered);
 });
 
 it("without a session cookie, sends no authorization header outside a request scope", async ({
+  answered,
   server,
 }) => {
   await expect(
     answerQueryWhen(server, (authorization) => authorization === null),
-  ).resolves.toMatchObject(createAnswered());
+  ).resolves.toMatchObject(answered);
 });

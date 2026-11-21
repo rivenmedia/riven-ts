@@ -1,15 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it as baseIt } from "vitest";
 
 import { toSectionSubmission } from "./to-section-submission.ts";
 
-describe(toSectionSubmission, () => {
-  const clearableFields = [
-    "scraping.maximumFailedAttempts",
-    "scraping.minimumAverageBitrate",
-    "logging.logDirectory",
-  ];
+const it = baseIt.extend("clearableFields", () => [
+  "scraping.maximumFailedAttempts",
+  "scraping.minimumAverageBitrate",
+  "logging.logDirectory",
+]);
 
-  it("resets an emptied field that had a value and leaves it out of the values", () => {
+describe(toSectionSubmission, () => {
+  it("resets an emptied field that had a value and leaves it out of the values", ({
+    clearableFields,
+  }) => {
     expect(
       toSectionSubmission(
         {
@@ -28,7 +30,9 @@ describe(toSectionSubmission, () => {
     });
   });
 
-  it("keeps an emptied nullable field in the values as null", () => {
+  it("keeps an emptied nullable field in the values as null", ({
+    clearableFields,
+  }) => {
     expect(
       toSectionSubmission(
         { scraping: { maximumFailedAttempts: null } },
@@ -41,7 +45,9 @@ describe(toSectionSubmission, () => {
     });
   });
 
-  it("neither saves nor resets a field that had no value", () => {
+  it("neither saves nor resets a field that had no value", ({
+    clearableFields,
+  }) => {
     // `undefined` isn't serialised, so the field isn't saved
     expect(
       toSectionSubmission(
@@ -55,7 +61,9 @@ describe(toSectionSubmission, () => {
     });
   });
 
-  it("never resets a field that can't be cleared, such as a secret", () => {
+  it("never resets a field that can't be cleared, such as a secret", ({
+    clearableFields,
+  }) => {
     expect(
       toSectionSubmission(
         { apiKey: undefined },
@@ -65,7 +73,7 @@ describe(toSectionSubmission, () => {
     ).toStrictEqual({ values: { apiKey: undefined }, reset: [] });
   });
 
-  it("does not change the form's values", () => {
+  it("does not change the form's values", ({ clearableFields }) => {
     const formValues = { logging: { logDirectory: undefined } };
 
     toSectionSubmission(

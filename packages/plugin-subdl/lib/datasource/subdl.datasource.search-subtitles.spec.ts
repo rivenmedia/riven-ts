@@ -1,19 +1,19 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "../__tests__/subdl.test-context.ts";
+import { it as baseIt } from "../__tests__/subdl.test-context.ts";
 import { SubdlAPI } from "./subdl.datasource.ts";
 
 import type { SubtitleSearchResponse } from "../schemas/subtitle-search.response.schema.ts";
 
-const SEARCH_URL = "https://api.subdl.com/api/v1/subtitles";
-
-const createSubtitle = () => ({
+const it = baseIt.extend("subtitle", () => ({
   release_name: "The.Matrix.1999.1080p",
   name: "The Matrix",
   lang: "English",
   url: "/subtitle/1.zip",
-});
+}));
+
+const SEARCH_URL = "https://api.subdl.com/api/v1/subtitles";
 
 it.for([
   {
@@ -52,7 +52,7 @@ it.for([
   },
 ] as const)(
   "searches for $scenario",
-  async ({ options, params }, { server, dataSourceMap }) => {
+  async ({ options, params }, { server, dataSourceMap, subtitle }) => {
     const requestedParams: [string, string][][] = [];
 
     server.use(
@@ -61,7 +61,7 @@ it.for([
 
         return HttpResponse.json<SubtitleSearchResponse>({
           status: true,
-          subtitles: [createSubtitle()],
+          subtitles: [subtitle],
         });
       }),
     );
@@ -71,7 +71,7 @@ it.for([
       languages: [...options.languages],
     });
 
-    expect(results).toStrictEqual([createSubtitle()]);
+    expect(results).toStrictEqual([subtitle]);
     expect(requestedParams).toStrictEqual([params]);
   },
 );

@@ -1,12 +1,17 @@
 import { UnrecoverableError } from "bullmq";
 import { AbortError } from "es-toolkit";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 
 import { MapItemsToFilesSandboxedJob } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/map-items-to-files.schema.ts";
 
 import { createSandboxedJobProcessor } from "./create-sandboxed-job.processor.ts";
 
 import type { SandboxedJob } from "bullmq";
+
+const it = baseIt.extend(
+  "job",
+  () => ({ id: "job-1", name: "map-items-to-files" }) as SandboxedJob,
+);
 
 const sentry = vi.hoisted(() => ({
   captureException: vi.fn<(error: unknown) => string>(),
@@ -19,9 +24,6 @@ vi.mock(import("@sentry/node"), async (importOriginal) => ({
 
 type Processor = (input: { job: SandboxedJob }) => Promise<unknown>;
 
-const createJob = () =>
-  ({ id: "job-1", name: "map-items-to-files" }) as SandboxedJob;
-
 const createProcessor = (processor: Processor) =>
   createSandboxedJobProcessor(MapItemsToFilesSandboxedJob, processor as never);
 
@@ -33,15 +35,17 @@ it.beforeEach(() => {
   };
 });
 
-it("resolves with the processor result and exits the sandbox once idle", async () => {
+it("resolves with the processor result and exits the sandbox once idle", async ({
+  job,
+}) => {
   const exit = vi.spyOn(process, "exit").mockReturnValue(undefined as never);
   const result = { movies: {}, episodes: {} };
   const processor = vi.fn<Processor>().mockResolvedValue(result);
 
-  await expect(createProcessor(processor)(createJob())).resolves.toBe(result);
+  await expect(createProcessor(processor)(job)).resolves.toBe(result);
 
   expect(processor).toHaveBeenCalledExactlyOnceWith(
-    expect.objectContaining({ job: createJob() }),
+    expect.objectContaining({ job }),
   );
 
   vi.advanceTimersByTime(4999);
@@ -53,50 +57,50 @@ it("resolves with the processor result and exits the sandbox once idle", async (
   expect(exit).toHaveBeenCalledExactlyOnceWith(0);
 });
 
-it("stays alive whilst jobs keep arriving", async () => {
+it("stays alive whilst jobs keep arriving", async ({ job }) => {
   const exit = vi.spyOn(process, "exit").mockReturnValue(undefined as never);
   const processJob = createProcessor(
     vi.fn<Processor>().mockResolvedValue({ movies: {}, episodes: {} }),
   );
 
-  await processJob(createJob());
+  await processJob(job);
 
   vi.advanceTimersByTime(4000);
 
-  await processJob(createJob());
+  await processJob(job);
 
   vi.advanceTimersByTime(4000);
 
   expect(exit).not.toHaveBeenCalled();
 });
 
-it("reports and rethrows errors from the processor", async () => {
+it("reports and rethrows errors from the processor", async ({ job }) => {
   const error = new TypeError("Unexpected file list");
 
   await expect(
-    createProcessor(vi.fn<Processor>().mockRejectedValue(error))(createJob()),
+    createProcessor(vi.fn<Processor>().mockRejectedValue(error))(job),
   ).rejects.toBe(error);
 
   expect(sentry.captureException).toHaveBeenCalledExactlyOnceWith(error);
 });
 
-it("wraps non-error rejections in an unrecoverable error", async () => {
+it("wraps non-error rejections in an unrecoverable error", async ({ job }) => {
   const rejection = createProcessor(
     vi.fn<Processor>().mockRejectedValue("plain failure"),
-  )(createJob());
+  )(job);
 
   await expect(rejection).rejects.toBeInstanceOf(UnrecoverableError);
   await expect(rejection).rejects.toThrow("plain failure");
 });
 
-it("rejects when the job is aborted", async () => {
+it("rejects when the job is aborted", async ({ job }) => {
   const controller = new AbortController();
   const rejection = createProcessor(
     async () =>
       new Promise<never>(() => {
         // Never settles, so only the abort can end the job
       }),
-  )(createJob(), undefined, controller.signal);
+  )(job, undefined, controller.signal);
 
   controller.abort();
 

@@ -18,48 +18,50 @@ type ProviderListHook = NonNullable<
 const pluginName = Symbol.for("@repo/plugin-hooks");
 
 // The settings are passed through to the hook untouched
-const createSettings = () =>
-  ({ label: "plugin settings" }) as unknown as PluginSettings;
+const it = baseIt
+  .extend(
+    "settings",
+    () => ({ label: "plugin settings" }) as unknown as PluginSettings,
+  )
+  .extend("register", ({ settings }, { onCleanup }) => {
+    const registered: ReturnType<typeof registerPluginHookWorkers>[] = [];
 
-const it = baseIt.extend("register", ({}, { onCleanup }) => {
-  const registered: ReturnType<typeof registerPluginHookWorkers>[] = [];
+    onCleanup(async () => {
+      for (const { pluginQueues, pluginWorkers } of registered) {
+        for (const workers of pluginWorkers.values()) {
+          for (const worker of workers.values()) {
+            await worker.close();
+          }
+        }
 
-  onCleanup(async () => {
-    for (const { pluginQueues, pluginWorkers } of registered) {
-      for (const workers of pluginWorkers.values()) {
-        for (const worker of workers.values()) {
-          await worker.close();
+        for (const queues of pluginQueues.values()) {
+          for (const queue of queues.values()) {
+            await queue.close();
+          }
         }
       }
+    });
 
-      for (const queues of pluginQueues.values()) {
-        for (const queue of queues.values()) {
-          await queue.close();
-        }
-      }
-    }
+    return (hooks: RivenPlugin["hooks"]) => {
+      const dataSources = new DataSourceMap();
+      const plugins: ValidPluginMap = new Map([
+        [
+          pluginName,
+          {
+            config: { name: pluginName, hooks } as RivenPlugin,
+            dataSources,
+            status: "valid",
+          },
+        ],
+      ]);
+
+      const result = registerPluginHookWorkers(plugins, settings);
+
+      registered.push(result);
+
+      return { ...result, dataSources };
+    };
   });
-
-  return (hooks: RivenPlugin["hooks"]) => {
-    const dataSources = new DataSourceMap();
-    const plugins: ValidPluginMap = new Map([
-      [
-        pluginName,
-        {
-          config: { name: pluginName, hooks } as RivenPlugin,
-          dataSources,
-          status: "valid",
-        },
-      ],
-    ]);
-
-    const result = registerPluginHookWorkers(plugins, createSettings());
-
-    registered.push(result);
-
-    return { ...result, dataSources };
-  };
-});
 
 it("registers a queue and worker for each hook the plugin implements", ({
   register,
@@ -91,6 +93,7 @@ it("registers no workers for a plugin without hooks", ({ register }) => {
 
 it("runs the plugin's hook with its data sources and settings for each job", async ({
   register,
+  settings,
 }) => {
   const hook = vi.fn<ProviderListHook>().mockResolvedValue({
     providers: ["alpha"],
@@ -118,7 +121,7 @@ it("runs the plugin's hook with its data sources and settings for each job", asy
     expect.objectContaining({
       event: {},
       dataSources,
-      settings: createSettings(),
+      settings,
     }),
   );
 });

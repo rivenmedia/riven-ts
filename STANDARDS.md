@@ -67,7 +67,7 @@ wrong, change the config, not the code.
 
 - Write flat test files (no top-level `describe`); when specs span multiple logical domains, split into
   separate files (e.g. `rank-torrent.removing-trash.spec.ts`, `rank-torrent.keeping-trash.spec.ts`) instead of nesting `describe` blocks for organisation.
-- Never share mutable values between tests. Either ensure the value is immutable, or use a factory function to generate it per test.
+- Never share mutable values between tests. Either ensure the value is immutable, or add it to Vitest's context as a factory function to generate it per test.
 
 ### Type narrowing
 

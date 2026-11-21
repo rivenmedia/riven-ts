@@ -1,15 +1,16 @@
 import { expect } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import { enqueueScrapeItem } from "./enqueue-scrape-item.ts";
 
-const createParent = () => ({
+const it = baseIt.extend("parent", () => ({
   id: "parent-id",
   queue: "bull:process-media-item",
-});
+}));
 
 it("creates a scrape job that parses the results of a scrape job for each scraper plugin", async ({
+  parent,
   mockFlowProcessorContext: { plugins },
   overrideRuntimeSettings,
   indexedMovieContext: { indexedMovie },
@@ -27,7 +28,7 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
       .values()
       .map(({ config }) => config)
       .toArray(),
-    parent: createParent(),
+    parent,
     isRootItem: true,
   });
 
@@ -38,7 +39,7 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
     queueName: "scrape-item",
     data: { id: indexedMovie.id },
     opts: {
-      parent: createParent(),
+      parent,
       continueParentOnFailure: true,
       attempts: 3,
       backoff: { type: "custom" },
@@ -63,13 +64,14 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
 });
 
 it("attempts to scrape a child item once", async ({
+  parent,
   indexedMovieContext: { indexedMovie },
   flowAddSpy,
 }) => {
   await enqueueScrapeItem({
     item: indexedMovie,
     subscribers: [],
-    parent: createParent(),
+    parent,
     isRootItem: false,
   });
 
@@ -81,6 +83,7 @@ it("attempts to scrape a child item once", async ({
 });
 
 it("does not scrape a root item that has no scrape attempts left", async ({
+  parent,
   overrideRuntimeSettings,
   indexedMovieContext: { indexedMovie },
   flowAddSpy,
@@ -95,7 +98,7 @@ it("does not scrape a root item that has no scrape attempts left", async ({
     enqueueScrapeItem({
       item: indexedMovie,
       subscribers: [],
-      parent: createParent(),
+      parent,
       isRootItem: true,
     }),
   ).resolves.toBeNull();

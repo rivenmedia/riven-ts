@@ -50,32 +50,33 @@ const GET_ENTRY: TypedDocumentNode<
   }
 `;
 
-const createManageSettings = (): Permissions => ({
-  instance: ["manage-settings"],
-});
+const it = baseIt
+  .extend("manageSettings", (): Permissions => ({
+    instance: ["manage-settings"],
+  }))
+  .extend(
+    "movieEntry",
+    async ({ completedMovieContext: { completedMovie } }) => {
+      const [mediaEntry] = await completedMovie.getMediaEntries();
 
-const it = baseIt.extend(
-  "movieEntry",
-  async ({ completedMovieContext: { completedMovie } }) => {
-    const [mediaEntry] = await completedMovie.getMediaEntries();
+      expect.assert(mediaEntry);
 
-    expect.assert(mediaEntry);
-
-    return {
-      id: mediaEntry.id,
-      fileSize: mediaEntry.fileSize,
-      path: `/${mediaEntry.baseDirectory}/${mediaEntry.path}`,
-    };
-  },
-);
+      return {
+        id: mediaEntry.id,
+        fileSize: mediaEntry.fileSize,
+        path: `/${mediaEntry.baseDirectory}/${mediaEntry.path}`,
+      };
+    },
+  );
 
 it("returns the stats of a VFS file", async ({
+  manageSettings,
   gqlExecuteAs,
   movieEntry,
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(createManageSettings()), GET_STAT, {
+    gqlExecuteAs(userWith(manageSettings), GET_STAT, {
       path: movieEntry.path,
     }),
   ).resolves.toStrictEqual({
@@ -92,11 +93,12 @@ it("returns the stats of a VFS file", async ({
 });
 
 it("lists the entries of a VFS directory", async ({
+  manageSettings,
   gqlExecuteAs,
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(createManageSettings()), GET_DIRECTORY, {
+    gqlExecuteAs(userWith(manageSettings), GET_DIRECTORY, {
       path: "/",
     }),
   ).resolves.toStrictEqual({
@@ -106,12 +108,13 @@ it("lists the entries of a VFS directory", async ({
 });
 
 it("returns the filesystem entry at a VFS path", async ({
+  manageSettings,
   gqlExecuteAs,
   movieEntry,
   userWith,
 }) => {
   await expect(
-    gqlExecuteAs(userWith(createManageSettings()), GET_ENTRY, {
+    gqlExecuteAs(userWith(manageSettings), GET_ENTRY, {
       path: movieEntry.path,
     }),
   ).resolves.toStrictEqual({
@@ -121,11 +124,12 @@ it("returns the filesystem entry at a VFS path", async ({
 });
 
 it("denies VFS queries to a caller without the manage-settings permission", async ({
+  manageSettings,
   gqlExecuteAs,
   userWithout,
 }) => {
   await expect(
-    gqlExecuteAs(userWithout(createManageSettings()), GET_DIRECTORY, {
+    gqlExecuteAs(userWithout(manageSettings), GET_DIRECTORY, {
       path: "/",
     }),
   ).resolves.toMatchObject({

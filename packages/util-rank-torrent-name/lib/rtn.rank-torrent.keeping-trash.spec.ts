@@ -1,16 +1,19 @@
-import { expect, it } from "vitest";
+import { expect, it as baseIt } from "vitest";
 
 import { HASH, createRtn } from "./__tests__/create-rtn.ts";
 
 import type { SettingsInput } from "./ranker/ranking-settings.schema.ts";
 
-const createSettings = () =>
-  ({
-    options: { removeAllTrash: false, removeRanksUnder: 1000 },
-  }) satisfies SettingsInput;
+const it = baseIt.extend(
+  "settings",
+  () =>
+    ({
+      options: { removeAllTrash: false, removeRanksUnder: 1000 },
+    }) satisfies SettingsInput,
+);
 
-it("ranks a torrent that fails the checks and reports why", () => {
-  const result = createRtn(createSettings()).rankTorrent(
+it("ranks a torrent that fails the checks and reports why", ({ settings }) => {
+  const result = createRtn(settings).rankTorrent(
     "Inception 2010 1080p CAM x264",
     HASH,
     "The Matrix",

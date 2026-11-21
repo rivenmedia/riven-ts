@@ -4,12 +4,12 @@ import { expect, vi } from "vitest";
 
 import { getAuthMeHandler } from "../__generated__/handlers/getAuthMeHandler.ts";
 import { getRequestHandler } from "../__generated__/handlers/getRequestHandler.ts";
-import { it } from "../__tests__/seerr.test-context.ts";
+import { it as baseIt } from "../__tests__/seerr.test-context.ts";
 
 import type { RequestResponse } from "../schemas/request-response.schema.ts";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 
-const requests: RequestResponse = {
+const it = baseIt.extend("requests", (): RequestResponse => ({
   pageInfo: { results: 2 },
   results: [
     { id: 1, status: 2, type: "movie", media: { tmdbId: 550 } },
@@ -21,9 +21,9 @@ const requests: RequestResponse = {
       seasons: [{ id: 3, status: 2, seasonNumber: 1 }],
     },
   ],
-};
+}));
 
-const requestsWithFilter = (filter: string) =>
+const requestsWithFilter = (requests: RequestResponse, filter: string) =>
   getRequestHandler(({ request }) => {
     if (new URL(request.url).searchParams.get("filter") !== filter) {
       return HttpResponse.json(null, { status: 400 });
@@ -39,8 +39,8 @@ const CASES = [
 
 it.for(CASES)(
   "$field returns the requested items for the given filter",
-  async ({ field, expected }, { gqlContext, gqlServer, server }) => {
-    server.use(requestsWithFilter("pending"));
+  async ({ field, expected }, { gqlContext, gqlServer, requests, server }) => {
+    server.use(requestsWithFilter(requests, "pending"));
 
     const { body } = await gqlServer.executeOperation(
       {
@@ -61,8 +61,8 @@ it.for(CASES)(
 
 it.for(CASES)(
   "$field filters by approved requests by default",
-  async ({ field, expected }, { gqlContext, gqlServer, server }) => {
-    server.use(requestsWithFilter("approved"));
+  async ({ field, expected }, { gqlContext, gqlServer, requests, server }) => {
+    server.use(requestsWithFilter(requests, "approved"));
 
     const { body } = await gqlServer.executeOperation(
       { query: `query { ${field} { tmdbId tvdbId } }` },

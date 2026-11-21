@@ -1,10 +1,15 @@
 import { DEFAULT_SERVER_ERROR_MESSAGE } from "next-safe-action";
-import { expect, it, vi } from "vitest";
+import { expect, it as baseIt, vi } from "vitest";
 
 import {
   loggedInActionClient,
   permissionActionClient,
 } from "./action-client.ts";
+
+const it = baseIt.extend("session", () => ({
+  user: { id: "user-1" },
+  session: { id: "session-1" },
+}));
 
 const auth = vi.hoisted(() => ({
   getSession: vi.fn<() => Promise<{ data: unknown }>>(),
@@ -19,19 +24,16 @@ vi.mock(import("#lib/auth/client.ts"), () => ({
   } as never,
 }));
 
-const createSession = () => ({
-  user: { id: "user-1" },
-  session: { id: "session-1" },
-});
-
 it.beforeEach(() => {
   auth.getSession.mockReset();
   auth.hasPermission.mockReset();
   vi.restoreAllMocks();
 });
 
-it("runs a logged-in action with the session in its context", async () => {
-  auth.getSession.mockResolvedValue({ data: createSession() });
+it("runs a logged-in action with the session in its context", async ({
+  session,
+}) => {
+  auth.getSession.mockResolvedValue({ data: session });
 
   const action = loggedInActionClient.action(async ({ ctx }) =>
     Promise.resolve({ userId: ctx.auth.user.id }),
@@ -59,9 +61,11 @@ it("rejects a logged-in action without a session", async () => {
   expect(handler).not.toHaveBeenCalled();
 });
 
-it("runs a permission-checked action when the user has the permissions", async () => {
+it("runs a permission-checked action when the user has the permissions", async ({
+  session,
+}) => {
   auth.hasPermission.mockResolvedValue({ data: { success: true } });
-  auth.getSession.mockResolvedValue({ data: createSession() });
+  auth.getSession.mockResolvedValue({ data: session });
 
   const action = permissionActionClient
     .metadata({ permissions: { item: ["delete"] } })
@@ -79,9 +83,9 @@ it.for([
   { label: "cannot be checked", data: null },
 ])(
   "rejects a permission-checked action when the permission $label",
-  async ({ data }) => {
+  async ({ data }, { session }) => {
     auth.hasPermission.mockResolvedValue({ data });
-    auth.getSession.mockResolvedValue({ data: createSession() });
+    auth.getSession.mockResolvedValue({ data: session });
 
     const consoleErrorSpy = vi
       .spyOn(console, "error")

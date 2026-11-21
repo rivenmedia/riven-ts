@@ -1,22 +1,23 @@
 import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
-import { it } from "./stremthru.test-context.ts";
+import { it as baseIt } from "./stremthru.test-context.ts";
 
 import type { AddTorrentResponse } from "../schemas/add-torrent-response.schema.ts";
 
-const INFO_HASH = "a".repeat(40);
-
-const createFiles = () => [
+const it = baseIt.extend("files", () => [
   {
     name: "movie.mkv",
     path: "/movie/movie.mkv",
     size: 1000,
     link: "https://cdn/movie.mkv",
   },
-];
+]);
+
+const INFO_HASH = "a".repeat(40);
 
 it("adds the torrent to the store and returns its files", async ({
+  files,
   server,
   plugin,
   settings,
@@ -45,7 +46,7 @@ it("adds the torrent to the store and returns its files", async ({
       }
 
       return HttpResponse.json<AddTorrentResponse>({
-        data: { id: "torrent-id", files: createFiles(), status: "downloaded" },
+        data: { id: "torrent-id", files, status: "downloaded" },
       });
     }),
   );
@@ -59,7 +60,7 @@ it("adds the torrent to the store and returns its files", async ({
     }),
   ).resolves.toStrictEqual({
     success: true,
-    data: { torrentId: "torrent-id", files: createFiles() },
+    data: { torrentId: "torrent-id", files },
   });
 });
 

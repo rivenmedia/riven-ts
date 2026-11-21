@@ -12,7 +12,7 @@ import { resolvers } from "#graphql/resolvers/index.ts";
 import type { RivenPlugin } from "@repo/util-plugin-sdk";
 import type { GraphQLField, GraphQLResolveInfo } from "graphql";
 
-const publicRootFields: ReadonlySet<string> = new Set(["authProviders"]);
+const publicRootFields: readonly string[] = Object.freeze(["authProviders"]);
 
 async function importPluginResolvers() {
   const { dependencies, devDependencies } = JSON.parse(
@@ -87,7 +87,7 @@ it("denies every root field except the public ones to an anonymous caller", asyn
     Object.fromEntries(
       rootFields.map(({ name }) => [
         name,
-        publicRootFields.has(name) ? "resolved" : "UNAUTHENTICATED",
+        publicRootFields.includes(name) ? "resolved" : "UNAUTHENTICATED",
       ]),
     ),
   );

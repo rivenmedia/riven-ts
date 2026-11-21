@@ -20,129 +20,134 @@ import type { MediaItemDownloadProviderListRequestedResponse } from "@repo/util-
 import type { DebridFile } from "@repo/util-plugin-sdk/schemas/torrents/debrid-file";
 import type { Job } from "bullmq";
 
-const createTorrentFile = () =>
-  ({
-    name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
-    size: 123_456_789,
-    path: "/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
-    link: "https://example.com/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
-  }) satisfies DebridFile;
-
 interface ProviderJobData {
   provider: string | null;
 }
 
-const it = baseIt.extend(
-  "setup",
-  async ({
-    createFlowWorker,
-    createMockJob,
-    createMockJobChildKey,
-    createPluginWorker,
-    mockFlowProcessorContext,
-    scrapedMovieContext: {
-      scrapedMovie,
-      streams: [stream],
-    },
-  }) => {
-    expect.assert(stream);
+const it = baseIt
+  .extend(
+    "torrentFile",
+    () =>
+      ({
+        name: "Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+        size: 123_456_789,
+        path: "/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+        link: "https://example.com/Example.Torrent.2024.1080p.WEBRip.x264-GROUP.mkv",
+      }) satisfies DebridFile,
+  )
+  .extend(
+    "setup",
+    async ({
+      createFlowWorker,
+      createMockJob,
+      createMockJobChildKey,
+      createPluginWorker,
+      mockFlowProcessorContext,
+      scrapedMovieContext: {
+        scrapedMovie,
+        streams: [stream],
+      },
+      torrentFile,
+    }) => {
+      expect.assert(stream);
 
-    createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
+      createFlowWorker(FindValidTorrentFlow, findValidTorrentProcessor);
 
-    const { plugin: testPlugin } = await import("@repo/plugin-test");
+      const { plugin: testPlugin } = await import("@repo/plugin-test");
 
-    mockFlowProcessorContext.plugins.set(testPlugin.name, {
-      config: testPlugin,
-      dataSources: new DataSourceMap(),
-      status: "valid",
-    });
+      mockFlowProcessorContext.plugins.set(testPlugin.name, {
+        config: testPlugin,
+        dataSources: new DataSourceMap(),
+        status: "valid",
+      });
 
-    const validatedFile = {
-      ...createTorrentFile(),
-      matchedMediaItemId: scrapedMovie.id,
-      isCachedFile: false,
-    };
+      const validatedFile = {
+        ...torrentFile,
+        matchedMediaItemId: scrapedMovie.id,
+        isCachedFile: false,
+      };
 
-    const validate = vi
-      .fn<() => Promise<unknown>>()
-      .mockResolvedValue({ success: true, files: [validatedFile] });
+      const validate = vi
+        .fn<() => Promise<unknown>>()
+        .mockResolvedValue({ success: true, files: [validatedFile] });
 
-    createFlowWorker(ValidateTorrentFilesSandboxedJob, validate);
+      createFlowWorker(ValidateTorrentFilesSandboxedJob, validate);
 
-    createFlowWorker(
-      MapItemsToFilesSandboxedJob,
-      vi.fn().mockResolvedValue({
-        movies: { "0": createTorrentFile() },
-        episodes: {},
-      }),
-    );
-
-    const mockProviderList = (
-      response: MediaItemDownloadProviderListRequestedResponse,
-    ) =>
-      createPluginWorker(
-        "riven.media-item.download.provider-list-requested",
-        "@repo/plugin-test",
-        vi.fn().mockResolvedValue(response),
+      createFlowWorker(
+        MapItemsToFilesSandboxedJob,
+        vi.fn().mockResolvedValue({
+          movies: { "0": torrentFile },
+          episodes: {},
+        }),
       );
 
-    const cacheCheck = vi.fn<(job: Job<ProviderJobData>) => Promise<unknown>>(
-      async () => Promise.resolve({}),
-    );
-    const download = vi.fn<(job: Job<ProviderJobData>) => Promise<unknown>>(
-      async () =>
-        Promise.resolve({
-          success: true,
-          data: { torrentId: "mock-torrent-id", files: [createTorrentFile()] },
-        }),
-    );
+      const mockProviderList = (
+        response: MediaItemDownloadProviderListRequestedResponse,
+      ) =>
+        createPluginWorker(
+          "riven.media-item.download.provider-list-requested",
+          "@repo/plugin-test",
+          vi.fn().mockResolvedValue(response),
+        );
 
-    createPluginWorker(
-      "riven.media-item.download.cache-check-requested",
-      "@repo/plugin-test",
-      cacheCheck,
-    );
-    createPluginWorker(
-      "riven.media-item.download.requested",
-      "@repo/plugin-test",
-      download,
-    );
+      const cacheCheck = vi.fn<(job: Job<ProviderJobData>) => Promise<unknown>>(
+        async () => Promise.resolve({}),
+      );
+      const download = vi.fn<(job: Job<ProviderJobData>) => Promise<unknown>>(
+        async () =>
+          Promise.resolve({
+            success: true,
+            data: { torrentId: "mock-torrent-id", files: [torrentFile] },
+          }),
+      );
 
-    const job = await createMockJob({
-      failedInfoHashes: [],
-      id: scrapedMovie.id,
-      itemTitle: scrapedMovie.title,
-    });
+      createPluginWorker(
+        "riven.media-item.download.cache-check-requested",
+        "@repo/plugin-test",
+        cacheCheck,
+      );
+      createPluginWorker(
+        "riven.media-item.download.requested",
+        "@repo/plugin-test",
+        download,
+      );
 
-    vi.spyOn(job, "getChildrenValues").mockResolvedValue({
-      [createMockJobChildKey("download-item.rank-streams")]: [
-        rankTorrent(
-          "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
-          stream.infoHash,
-          "Example Torrent",
-          {},
-          createSettings(),
-          createRankingModel({ webrip: 0, avc: 0 }),
-        ),
-      ],
-    });
+      const job = await createMockJob({
+        failedInfoHashes: [],
+        id: scrapedMovie.id,
+        itemTitle: scrapedMovie.title,
+      });
 
-    const moveToDelayed = vi.spyOn(job, "moveToDelayed").mockResolvedValue();
+      vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+        [createMockJobChildKey("download-item.rank-streams")]: [
+          rankTorrent(
+            "Example.Torrent.2024.1080p.WEBRip.x264-GROUP",
+            stream.infoHash,
+            "Example Torrent",
+            {},
+            createSettings(),
+            createRankingModel({ webrip: 0, avc: 0 }),
+          ),
+        ],
+      });
 
-    return {
-      cacheCheck,
-      download,
-      infoHash: stream.infoHash,
-      job,
-      mockProviderList,
-      moveToDelayed,
-      validate,
-      validatedFile,
-    };
-  },
-);
+      const moveToDelayed = vi.spyOn(job, "moveToDelayed").mockResolvedValue();
+
+      return {
+        cacheCheck,
+        download,
+        infoHash: stream.infoHash,
+        job,
+        mockProviderList,
+        moveToDelayed,
+        validate,
+        validatedFile,
+      };
+    },
+  );
 
 it("downloads from the first provider that has the torrent cached", async ({
+  torrentFile,
   mockFlowProcessorContext,
   mockSentryScope,
   setup: {
@@ -157,9 +162,7 @@ it("downloads from the first provider that has the torrent cached", async ({
   mockProviderList({ providers: ["alpha", "beta"], rateLimitedProviders: {} });
 
   cacheCheck.mockImplementation(async ({ data: { provider } }) =>
-    Promise.resolve(
-      provider === "beta" ? { [infoHash]: [createTorrentFile()] } : {},
-    ),
+    Promise.resolve(provider === "beta" ? { [infoHash]: [torrentFile] } : {}),
   );
 
   const result = await findValidTorrentProcessor(
@@ -268,6 +271,7 @@ it("delays the job until the earliest rate limit lifts when every provider is ra
 });
 
 it("retries the info hash after the rate limit lifts when the remaining providers fail", async ({
+  torrentFile,
   mockFlowProcessorContext,
   mockSentryScope,
   setup: {
@@ -279,7 +283,7 @@ it("retries the info hash after the rate limit lifts when the remaining provider
     moveToDelayed,
   },
 }) => {
-  cacheCheck.mockResolvedValue({ [infoHash]: [createTorrentFile()] });
+  cacheCheck.mockResolvedValue({ [infoHash]: [torrentFile] });
 
   mockProviderList({
     providers: ["beta"],
@@ -304,13 +308,14 @@ it("retries the info hash after the rate limit lifts when the remaining provider
 });
 
 it("blacklists the stream when the provider reports the torrent as dead", async ({
+  torrentFile,
   mockFlowProcessorContext,
   mockSentryScope,
   scrapedMovieContext: { scrapedMovie },
   services: { streamService },
   setup: { cacheCheck, download, infoHash, job, mockProviderList },
 }) => {
-  cacheCheck.mockResolvedValue({ [infoHash]: [createTorrentFile()] });
+  cacheCheck.mockResolvedValue({ [infoHash]: [torrentFile] });
   download.mockResolvedValue({ success: false, statusCode: 404 });
 
   mockProviderList({ providers: ["alpha"], rateLimitedProviders: {} });
@@ -335,13 +340,14 @@ it("blacklists the stream when the provider reports the torrent as dead", async 
 });
 
 it("does not blacklist the stream when the download fails temporarily", async ({
+  torrentFile,
   mockFlowProcessorContext,
   mockSentryScope,
   scrapedMovieContext: { scrapedMovie },
   services: { streamService },
   setup: { cacheCheck, download, infoHash, job, mockProviderList },
 }) => {
-  cacheCheck.mockResolvedValue({ [infoHash]: [createTorrentFile()] });
+  cacheCheck.mockResolvedValue({ [infoHash]: [torrentFile] });
   download.mockResolvedValue({ success: false, statusCode: 503 });
 
   mockProviderList({ providers: ["alpha"], rateLimitedProviders: {} });
@@ -366,11 +372,12 @@ it("does not blacklist the stream when the download fails temporarily", async ({
 });
 
 it("stops trying other providers once the torrent's files fail validation", async ({
+  torrentFile,
   mockFlowProcessorContext,
   mockSentryScope,
   setup: { cacheCheck, download, infoHash, job, mockProviderList, validate },
 }) => {
-  cacheCheck.mockResolvedValue({ [infoHash]: [createTorrentFile()] });
+  cacheCheck.mockResolvedValue({ [infoHash]: [torrentFile] });
   validate.mockResolvedValue({
     success: false,
     reason: "No files matched the requested media item",
@@ -398,6 +405,7 @@ it("stops trying other providers once the torrent's files fail validation", asyn
 });
 
 it("delays retrying until the earliest rate limit across every info hash lifts", async ({
+  torrentFile,
   createMockJobChildKey,
   mockFlowProcessorContext,
   mockSentryScope,
@@ -428,8 +436,8 @@ it("delays retrying until the earliest rate limit across every info hash lifts",
   });
 
   cacheCheck.mockResolvedValue({
-    [firstStream.infoHash]: [createTorrentFile()],
-    [secondStream.infoHash]: [createTorrentFile()],
+    [firstStream.infoHash]: [torrentFile],
+    [secondStream.infoHash]: [torrentFile],
   });
   download.mockResolvedValue({ success: false, statusCode: 503 });
 
