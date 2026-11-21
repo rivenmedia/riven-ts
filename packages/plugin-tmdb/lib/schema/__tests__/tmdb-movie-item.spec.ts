@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { movieDetailsHandler } from "../../__generated__/handlers/movieDetailsHandler.ts";

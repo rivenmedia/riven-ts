@@ -1,6 +1,6 @@
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "./comet.test-context.ts";

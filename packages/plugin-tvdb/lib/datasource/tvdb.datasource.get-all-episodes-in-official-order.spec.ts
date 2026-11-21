@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { postLoginHandler } from "../__generated__/handlers/postLoginHandler.ts";
@@ -17,16 +17,12 @@ it("collects the episodes from every page", async ({
   server,
   dataSourceMap,
 }) => {
-  const requestedPages: (string | null)[] = [];
-
   server.use(
     postLoginHandler(),
     http.get(
       "https://api4.thetvdb.com/v4/series/81189/episodes/official/eng",
       ({ request }) => {
         const page = new URL(request.url).searchParams.get("page");
-
-        requestedPages.push(page);
 
         return HttpResponse.json({
           status: "success",
@@ -48,7 +44,6 @@ it("collects the episodes from every page", async ({
     .get(TvdbAPI)
     .getAllEpisodesInOfficialOrder("81189");
 
-  expect(requestedPages).toStrictEqual([null, "1"]);
   expect(episodes.map(({ id }) => id)).toStrictEqual([1, 2, 3]);
 });
 

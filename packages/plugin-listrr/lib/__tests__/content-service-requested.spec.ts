@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getApiListMoviesIdSortbySortbydirectionPageHandler } from "../__generated__/handlers/getApiListMoviesIdSortbySortbydirectionPageHandler.ts";
@@ -35,11 +35,11 @@ it("returns the items of the configured movie and show lists with the update int
 
   expect.assert(contentServiceRequestedHook);
 
-  const requestedLists: string[] = [];
-
   server.use(
     getApiListMoviesIdSortbySortbydirectionPageHandler(({ params }) => {
-      requestedLists.push(`movies:${String(params["id"])}`);
+      if (params["id"] !== movieList) {
+        return HttpResponse.json(null, { status: 404 });
+      }
 
       return HttpResponse.json({
         pages: 1,
@@ -54,7 +54,9 @@ it("returns the items of the configured movie and show lists with the update int
       });
     }),
     getApiListShowsIdSortbySortbydirectionPageHandler(({ params }) => {
-      requestedLists.push(`shows:${String(params["id"])}`);
+      if (params["id"] !== showList) {
+        return HttpResponse.json(null, { status: 404 });
+      }
 
       return HttpResponse.json({
         pages: 1,
@@ -83,11 +85,6 @@ it("returns the items of the configured movie and show lists with the update int
     shows: [{ imdbId: "tt0903747", tvdbId: "81189", tmdbId: "1396" }],
     updateIntervalSeconds: 600,
   });
-
-  expect(requestedLists).toStrictEqual([
-    `movies:${movieList}`,
-    `shows:${showList}`,
-  ]);
 });
 
 it("validates the plugin without a connection check", async ({

@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import { getAuthMeHandler } from "../__generated__/handlers/getAuthMeHandler.ts";
 import { getSettingsMetadatasHandler } from "../__generated__/handlers/getSettingsMetadatasHandler.ts";

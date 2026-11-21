@@ -1,5 +1,5 @@
-import { HttpResponse } from "msw";
 import { graphql } from "msw/graphql";
+import { HttpResponse } from "msw/http";
 import { setupServer } from "msw/node";
 import { it as baseIt, expect, vi } from "vitest";
 
@@ -60,11 +60,14 @@ it("with BACKEND_API_KEY set, sends the API key as a bearer token", async ({
   server,
   loadQuery,
 }) => {
-  const authorization = Promise.withResolvers<string | null>();
-
   server.use(
     backend.query(GET_INSTANCE_SETUP_REQUIRED, ({ request }) => {
-      authorization.resolve(request.headers.get("authorization"));
+      if (request.headers.get("authorization") !== `Bearer ${apiKey}`) {
+        return HttpResponse.json(
+          { errors: [{ message: "Unexpected authorization header" }] },
+          { status: 401 },
+        );
+      }
 
       return HttpResponse.json({
         data: {
@@ -79,9 +82,11 @@ it("with BACKEND_API_KEY set, sends the API key as a bearer token", async ({
 
   const query = await loadQuery(apiKey);
 
-  await query({ query: GET_INSTANCE_SETUP_REQUIRED });
-
-  await expect(authorization.promise).resolves.toBe(`Bearer ${apiKey}`);
+  await expect(
+    query({ query: GET_INSTANCE_SETUP_REQUIRED }),
+  ).resolves.toMatchObject({
+    data: { instanceStatus: { setupRequired: false } },
+  });
 });
 
 it("without BACKEND_API_KEY, fails the query with an error naming the variables", async ({

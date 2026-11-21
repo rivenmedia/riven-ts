@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect, waitFor } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";

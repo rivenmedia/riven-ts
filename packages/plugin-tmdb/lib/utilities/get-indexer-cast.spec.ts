@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect, vi } from "vitest";
 
 import { findByIdHandler } from "../__generated__/handlers/findByIdHandler.ts";

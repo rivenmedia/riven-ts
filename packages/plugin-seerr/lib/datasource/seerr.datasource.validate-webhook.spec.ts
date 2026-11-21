@@ -1,6 +1,6 @@
 import { FatalValidationError } from "@repo/util-plugin-sdk/errors/fatal-validation-error";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getSettingsNotificationsWebhookHandler } from "../__generated__/handlers/getSettingsNotificationsWebhookHandler.ts";

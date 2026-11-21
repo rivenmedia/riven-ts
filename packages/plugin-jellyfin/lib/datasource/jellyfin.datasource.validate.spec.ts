@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect, vi } from "vitest";
 
 import { it } from "../__tests__/jellyfin.test-context.ts";

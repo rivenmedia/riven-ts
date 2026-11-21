@@ -4,8 +4,8 @@ import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
 import { OperationTypeNode, getOperationAST } from "graphql";
 import { DateTime } from "luxon";
-import { HttpResponse } from "msw";
 import { defineNetwork } from "msw/experimental";
+import { HttpResponse } from "msw/http";
 import { test as nextTest } from "next/experimental/testmode/playwright.js";
 
 import { api } from "#mocks/graphql.ts";
@@ -37,12 +37,13 @@ import type { UserRole } from "@repo/util-auth/access-control";
 import type { Session } from "better-auth";
 import type { UserWithRole } from "better-auth/client/plugins";
 import type { TestCookie, TestHelpers } from "better-auth/plugins";
-import type { AnyHandler, HttpResponseResolver } from "msw";
+import type { AnyHandler } from "msw";
 import type { NetworkApi } from "msw/experimental";
+import type { HttpResponseResolver } from "msw/http";
 import type { SetReturnType } from "type-fest";
 
 export { expect } from "@playwright/test";
-export { HttpResponse, http } from "msw";
+export { HttpResponse, http } from "msw/http";
 
 /**
  * Wraps handlers for `test.use({ handlers })`.

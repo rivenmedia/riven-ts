@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import { GET_LIBRARY_ITEMS } from "#app/(protected)/library/_queries/get-library-items.query.ts";
 import { api } from "#mocks/graphql.ts";

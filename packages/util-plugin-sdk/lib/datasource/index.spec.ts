@@ -1,6 +1,6 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
 import { QueueEvents, Scripts } from "bullmq";
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
@@ -318,32 +318,27 @@ it("sends URL search params bodies as a form", async ({
   server,
   dataSourceConfig,
 }) => {
-  const requests: { body: string; contentType: string | null }[] = [];
-
+  // Echo the request back so the response shows what was sent
   server.use(
-    http.post("**/endpoint", async ({ request }) => {
-      requests.push({
+    http.post("**/endpoint", async ({ request }) =>
+      HttpResponse.json({
         body: await request.text(),
         contentType: request.headers.get("content-type"),
-      });
-
-      return HttpResponse.json({ success: true });
-    }),
+      }),
+    ),
   );
 
   const dataSource = new TestDataSource(dataSourceConfig);
 
-  await dataSource.fetch("endpoint", {
+  const response = await dataSource.fetch("endpoint", {
     method: "POST",
     body: new URLSearchParams({ name: "value", other: "a&b" }),
   });
 
-  expect(requests).toStrictEqual([
-    {
-      body: "name=value&other=a%26b",
-      contentType: "application/x-www-form-urlencoded;charset=UTF-8",
-    },
-  ]);
+  expect(response.parsedBody).toStrictEqual({
+    body: "name=value&other=a%26b",
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+  });
 });
 
 it.for([
@@ -352,21 +347,21 @@ it.for([
 ])(
   "sends $type bodies as JSON",
   async ({ body }, { server, dataSourceConfig }) => {
-    const requests: unknown[] = [];
-
+    // Echo the request body back so the response shows what was sent
     server.use(
-      http.post("**/endpoint", async ({ request }) => {
-        requests.push(await request.json());
-
-        return HttpResponse.json({ success: true });
-      }),
+      http.post("**/endpoint", async ({ request }) =>
+        HttpResponse.json(await request.json()),
+      ),
     );
 
     const dataSource = new TestDataSource(dataSourceConfig);
 
-    await dataSource.fetch("endpoint", { method: "POST", body });
+    const response = await dataSource.fetch("endpoint", {
+      method: "POST",
+      body,
+    });
 
-    expect(requests).toStrictEqual([{ name: "value" }]);
+    expect(response.parsedBody).toStrictEqual({ name: "value" });
   },
 );
 

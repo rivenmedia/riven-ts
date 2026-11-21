@@ -6,7 +6,7 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock-season-reference";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "../__tests__/comet.test-context.ts";
@@ -83,13 +83,24 @@ it.for([
 ])(
   "requests the streams of a $type",
   async ({ createItem, path }, { server, dataSourceMap }) => {
-    const requestedPaths: string[] = [];
+    server.use(
+      http.get(`https://comet.feels.legal${path}`, () =>
+        HttpResponse.json<CometScrapeResponse>({
+          streams: [
+            {
+              name: "Comet",
+              description: "📄 Title",
+              infoHash: HASH_A,
+              behaviorHints: {},
+            },
+          ],
+        }),
+      ),
+    );
 
-    server.use(streamsHandler([], requestedPaths));
-
-    await dataSourceMap.get(CometAPI).scrape({ item: createItem() });
-
-    expect(requestedPaths).toStrictEqual([path]);
+    await expect(
+      dataSourceMap.get(CometAPI).scrape({ item: createItem() }),
+    ).resolves.toStrictEqual({ [HASH_A]: "Title" });
   },
 );
 

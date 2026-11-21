@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "./stremthru.test-context.ts";
@@ -28,19 +28,21 @@ it("adds the torrent to the store and returns its files", async ({
 
   expect.assert(downloadRequestedHook);
 
-  const requests: {
-    body: unknown;
-    store: string | null;
-    auth: string | null;
-  }[] = [];
-
   server.use(
     http.post("**/v0/store/torz", async ({ request }) => {
-      requests.push({
-        body: await request.json(),
-        store: request.headers.get("x-stremthru-store-name"),
-        auth: request.headers.get("x-stremthru-store-authorization"),
-      });
+      const body = (await request.json()) as { link?: unknown } | null;
+
+      if (
+        request.headers.get("x-stremthru-store-name") !== "realdebrid" ||
+        request.headers.get("x-stremthru-store-authorization") !==
+          "Bearer test-realdebrid-api-key"
+      ) {
+        return HttpResponse.json(null, { status: 401 });
+      }
+
+      if (body?.link !== INFO_HASH) {
+        return HttpResponse.json(null, { status: 400 });
+      }
 
       return HttpResponse.json<AddTorrentResponse>({
         data: { id: "torrent-id", files, status: "downloaded" },
@@ -59,13 +61,6 @@ it("adds the torrent to the store and returns its files", async ({
     success: true,
     data: { torrentId: "torrent-id", files },
   });
-  expect(requests).toStrictEqual([
-    {
-      body: { link: INFO_HASH },
-      store: "realdebrid",
-      auth: "Bearer test-realdebrid-api-key",
-    },
-  ]);
 });
 
 it.for(["queued", "downloading", "failed"] as const)(

@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect, vi } from "vitest";
 
 import { StremThruTorzAPI } from "../datasource/stremthru-torz.datasource.ts";

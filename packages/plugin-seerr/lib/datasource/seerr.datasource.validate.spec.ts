@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getAuthMeHandler } from "../__generated__/handlers/getAuthMeHandler.ts";
@@ -43,11 +43,11 @@ it("returns true if the request succeeds", async ({
 });
 
 it("sends the API key with each request", async ({ server, dataSourceMap }) => {
-  const apiKeys: (string | null)[] = [];
-
   server.use(
     getAuthMeHandler(({ request }) => {
-      apiKeys.push(request.headers.get("x-api-key"));
+      if (request.headers.get("x-api-key") !== "seerr-api-key") {
+        return HttpResponse.json(null, { status: 401 });
+      }
 
       return HttpResponse.json(createGetAuthMeQueryResponse());
     }),
@@ -55,9 +55,7 @@ it("sends the API key with each request", async ({ server, dataSourceMap }) => {
     getSettingsNotificationsWebhookHandler({ enabled: false }),
   );
 
-  await dataSourceMap.get(SeerrAPI).validate();
-
-  expect(apiKeys).toStrictEqual(["seerr-api-key"]);
+  await expect(dataSourceMap.get(SeerrAPI).validate()).resolves.toBe(true);
 });
 
 it("returns false if the settings responses are malformed", async ({

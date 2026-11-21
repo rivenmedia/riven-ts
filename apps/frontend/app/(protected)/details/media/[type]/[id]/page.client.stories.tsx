@@ -1,5 +1,5 @@
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { startTransition, useEffect, useState } from "react";
 import { expect, waitFor, within } from "storybook/test";
 

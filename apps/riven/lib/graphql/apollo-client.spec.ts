@@ -1,6 +1,6 @@
 import { gql } from "@apollo/client";
-import { HttpResponse } from "msw";
 import { graphql } from "msw/graphql";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
@@ -25,19 +25,22 @@ const API_KEY_PROBE: TypedDocumentNode<
 
 it("sends the API key as a bearer token", async ({ server }) => {
   const url = new URL("http://riven.test/graphql");
-  const authorization = Promise.withResolvers<string | null>();
-
   server.use(
     graphql.link(url.toString()).query("ApiKeyProbe", ({ request }) => {
-      authorization.resolve(request.headers.get("authorization"));
+      if (
+        request.headers.get("authorization") !== `Bearer ${settings.apiKey}`
+      ) {
+        return HttpResponse.json(
+          { errors: [{ message: "Unexpected authorization header" }] },
+          { status: 401 },
+        );
+      }
 
       return HttpResponse.json({ data: { tmdbIsValid: true } });
     }),
   );
 
-  await initApolloClient(url).query({ query: API_KEY_PROBE });
-
-  await expect(authorization.promise).resolves.toBe(
-    `Bearer ${settings.apiKey}`,
-  );
+  await expect(
+    initApolloClient(url).query({ query: API_KEY_PROBE }),
+  ).resolves.toMatchObject({ data: { tmdbIsValid: true } });
 });

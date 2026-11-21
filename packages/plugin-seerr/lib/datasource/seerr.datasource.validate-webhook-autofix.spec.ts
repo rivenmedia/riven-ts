@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { postSettingsNotificationsWebhookHandler } from "../__generated__/handlers/postSettingsNotificationsWebhookHandler.ts";

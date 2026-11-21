@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
@@ -13,6 +13,13 @@ const USER_URL = "https://plex.tv/api/v2/user";
 const tokenRequest = {
   redirectURI: "https://riven.test/api/plex/callback",
 } as const;
+
+const UNAUTHORIZED = () => new HttpResponse(null, { status: 401 });
+
+const hasHeaders = (request: Request, expected: Record<string, string>) =>
+  Object.entries(expected).every(
+    ([name, value]) => request.headers.get(name) === value,
+  );
 
 const getToken = (options: Parameters<typeof plexOAuth>[0]) => {
   const { getToken: exchange } = plexOAuth(options);
@@ -84,15 +91,24 @@ it.for(["1234:", ":abcd"])(
 it("exchanges an authorised PIN for its auth token using the default Plex headers", async ({
   server,
 }) => {
-  const requests: { pinId: unknown; headers: Record<string, string> }[] = [];
   const pin = { id: 1234, code: "abcd", authToken: "plex-auth-token" };
 
   server.use(
     http.get(PIN_URL, ({ params, request }) => {
-      requests.push({
-        pinId: params["pinId"],
-        headers: Object.fromEntries(request.headers),
-      });
+      if (
+        params["pinId"] !== "1234" ||
+        !hasHeaders(request, {
+          "x-plex-product": "Riven Media",
+          "x-plex-version": "1.0",
+          "x-plex-client-identifier": "client-id",
+          "x-plex-platform": "Web",
+          "x-plex-device": "Browser",
+          "x-plex-token": "abcd",
+          accept: "application/json",
+        })
+      ) {
+        return UNAUTHORIZED();
+      }
 
       return HttpResponse.json(pin);
     }),
@@ -110,29 +126,21 @@ it("exchanges an authorised PIN for its auth token using the default Plex header
     scopes: [],
     raw: pin,
   });
-
-  expect(requests).toStrictEqual([
-    {
-      pinId: "1234",
-      headers: expect.objectContaining({
-        "x-plex-product": "Riven Media",
-        "x-plex-version": "1.0",
-        "x-plex-client-identifier": "client-id",
-        "x-plex-platform": "Web",
-        "x-plex-device": "Browser",
-        "x-plex-token": "abcd",
-        accept: "application/json",
-      }),
-    },
-  ]);
 });
 
 it("sends the configured product details to Plex", async ({ server }) => {
-  const headers: Record<string, string>[] = [];
-
   server.use(
     http.get(PIN_URL, ({ request }) => {
-      headers.push(Object.fromEntries(request.headers));
+      if (
+        !hasHeaders(request, {
+          "x-plex-product": "Custom Product",
+          "x-plex-version": "2.5",
+          "x-plex-platform": "iOS",
+          "x-plex-device": "iPhone",
+        })
+      ) {
+        return UNAUTHORIZED();
+      }
 
       return HttpResponse.json({ authToken: "plex-auth-token" });
     }),
@@ -146,16 +154,9 @@ it("sends the configured product details to Plex", async ({ server }) => {
     device: "iPhone",
   });
 
-  await exchange({ ...tokenRequest, code: "1234:abcd" });
-
-  expect(headers).toStrictEqual([
-    expect.objectContaining({
-      "x-plex-product": "Custom Product",
-      "x-plex-version": "2.5",
-      "x-plex-platform": "iOS",
-      "x-plex-device": "iPhone",
-    }),
-  ]);
+  await expect(
+    exchange({ ...tokenRequest, code: "1234:abcd" }),
+  ).resolves.toMatchObject({ accessToken: "plex-auth-token" });
 });
 
 it("rejects a PIN that the user has not authorised yet", async ({ server }) => {
@@ -199,11 +200,11 @@ it("returns no user info without an access token", async ({ server }) => {
 it("maps the Plex profile to user info using the auth token", async ({
   server,
 }) => {
-  const tokens: (string | null)[] = [];
-
   server.use(
     http.get(USER_URL, ({ request }) => {
-      tokens.push(request.headers.get("X-Plex-Token"));
+      if (!hasHeaders(request, { "x-plex-token": "plex-auth-token" })) {
+        return UNAUTHORIZED();
+      }
 
       return HttpResponse.json({
         id: 42,
@@ -227,8 +228,6 @@ it("maps the Plex profile to user info using the auth token", async ({
     image: "https://plex.tv/users/42/avatar",
     emailVerified: true,
   });
-
-  expect(tokens).toStrictEqual(["plex-auth-token"]);
 });
 
 it("falls back to the Plex username when the profile has no title", async ({

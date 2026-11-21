@@ -3,8 +3,8 @@ import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
 import { roleHasPermissions, UserRole } from "@repo/util-auth/access-control";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { passthrough } from "msw";
 import { graphql } from "msw/graphql";
+import { passthrough } from "msw/utils/passthrough";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";

@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import { GET_RECENTLY_ADDED } from "#app/(protected)/(home)/_components/recently-added/_queries/get-recently-added.query.ts";
 import { GET_TMDB_NOW_PLAYING } from "#app/(protected)/(home)/_components/tmdb-now-playing/_queries/get-tmdb-now-playing.query.ts";

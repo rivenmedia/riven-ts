@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getSettingsNotificationsWebhookHandler } from "../__generated__/handlers/getSettingsNotificationsWebhookHandler.ts";
@@ -24,26 +24,19 @@ it.override(
 );
 
 it("sets both providers to TVDB", async ({ server, dataSourceMap }) => {
-  const updates: unknown[] = [];
-
   server.use(
     authenticated,
     metadataSettings({ anime: "tmdb", tv: "tmdb" }),
-    putSettingsMetadatasHandler(async ({ request }) => {
-      updates.push(await request.json());
-
-      return HttpResponse.json<MetadataSettingsResponse>({
-        anime: "tvdb",
-        tv: "tvdb",
-      });
-    }),
+    // Seerr responds with the settings it applied, which the validator checks
+    putSettingsMetadatasHandler(async ({ request }) =>
+      HttpResponse.json(await request.json()),
+    ),
     getSettingsNotificationsWebhookHandler({ enabled: false }),
   );
 
   const isValid = await dataSourceMap.get(SeerrAPI).validate();
 
   expect(isValid).toBe(true);
-  expect(updates).toStrictEqual([{ tv: "tvdb", anime: "tvdb" }]);
 });
 
 it("does not update providers that are already valid", async ({

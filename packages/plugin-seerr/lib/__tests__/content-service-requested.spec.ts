@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getRequestHandler } from "../__generated__/handlers/getRequestHandler.ts";
@@ -30,11 +30,11 @@ it("returns the requested content using the configured filter and update interva
 
   expect.assert(contentServiceRequestedHook);
 
-  const filters: (string | null)[] = [];
-
   server.use(
     getRequestHandler(({ request }) => {
-      filters.push(new URL(request.url).searchParams.get("filter"));
+      if (new URL(request.url).searchParams.get("filter") !== "processing") {
+        return HttpResponse.json(null, { status: 400 });
+      }
 
       return HttpResponse.json<RequestResponse>({
         pageInfo: { results: 2 },
@@ -59,7 +59,6 @@ it("returns the requested content using the configured filter and update interva
     logger,
   });
 
-  expect(filters).toStrictEqual(["processing"]);
   expect(response).toStrictEqual({
     movies: [{ tmdbId: "550", externalRequestId: "1", requestedBy: undefined }],
     shows: [

@@ -1,7 +1,7 @@
 import { Season } from "@repo/util-plugin-sdk/dto/entities";
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "../__tests__/torrentio.test-context.ts";

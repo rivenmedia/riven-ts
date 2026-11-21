@@ -1,7 +1,7 @@
 import { ItemRequest } from "@repo/util-plugin-sdk/dto/entities";
 import { UnrecoverableError } from "@repo/util-plugin-sdk/errors/unrecoverable-error";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { randomUUID } from "node:crypto";
 import { expect } from "vitest";
 
@@ -191,18 +191,16 @@ it("resolves the TMDB ID from the IMDB ID", async ({
   server,
   logger,
 }) => {
-  const lookups: string[] = [];
-
   item.tmdbId = null;
   item.imdbId = "tt0133093";
 
   server.use(
     findByIdHandler(({ request, params }) => {
-      const url = new URL(request.url);
+      const source = new URL(request.url).searchParams.get("external_source");
 
-      lookups.push(
-        `${String(params["external_id"])}:${String(url.searchParams.get("external_source"))}`,
-      );
+      if (params["external_id"] !== "tt0133093" || source !== "imdb_id") {
+        return HttpResponse.json({ movie_results: [] });
+      }
 
       return HttpResponse.json({ movie_results: [{ id: 603 }] });
     }),
@@ -216,7 +214,6 @@ it("resolves the TMDB ID from the IMDB ID", async ({
     settings,
   });
 
-  expect(lookups).toStrictEqual(["tt0133093:imdb_id"]);
   expect(result?.item).toMatchObject({
     title: "The Matrix",
     imdbId: "tt0133093",

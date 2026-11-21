@@ -1,6 +1,6 @@
 import { createMockMediaItem } from "@repo/util-plugin-testing/create-mock-media-item";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "./plex.test-context.ts";

@@ -265,7 +265,7 @@ export const plugin: RivenPlugin = {
 ```typescript title="lib/datasource/__tests__/validate.spec.ts"
 import { it } from "@repo/util-plugin-testing/plugin-test-context";
 
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { pluginConfig } from "../../my-service-plugin.config.ts";

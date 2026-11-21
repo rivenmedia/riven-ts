@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "../__tests__/mdblist.test-context.ts";
@@ -8,12 +8,6 @@ import type { GetListItemsByName200Schema as ListItemsResponse } from "../__gene
 
 type Movie = NonNullable<ListItemsResponse["movies"]>[number];
 type Show = NonNullable<ListItemsResponse["shows"]>[number];
-
-interface ListRequest {
-  list: string;
-  offset: string | null;
-  apiKey: string | null;
-}
 
 const movie = (id: number, ids: Movie["ids"] = {}): Movie => ({
   id,
@@ -50,31 +44,36 @@ const show = (
   country: null,
 });
 
+const LIST_ITEMS_URL =
+  "https://api.mdblist.com/lists/:username/:listname/items";
+
+const isAuthorized = (request: Request) =>
+  new URL(request.url).searchParams.get("apikey") === "mock-api-key";
+
 const listItemsHandler = (
   lists: Record<string, ListItemsResponse>,
-  requests: ListRequest[] = [],
+  requestedLists: string[] = [],
 ) =>
-  http.get(
-    "https://api.mdblist.com/lists/:username/:listname/items",
-    ({ params, request }) => {
-      const list = `${String(params["username"])}/${String(params["listname"])}`;
-      const { searchParams } = new URL(request.url);
+  http.get(LIST_ITEMS_URL, ({ params, request }) => {
+    const list = `${String(params["username"])}/${String(params["listname"])}`;
 
-      requests.push({
-        list,
-        offset: searchParams.get("offset"),
-        apiKey: searchParams.get("apikey"),
-      });
+    requestedLists.push(list);
 
-      const items = lists[list];
+    if (!isAuthorized(request)) {
+      return HttpResponse.json(null, { status: 401 });
+    }
 
-      if (!items) {
-        return HttpResponse.json(null, { status: 404 });
-      }
+    const items =
+      new URL(request.url).searchParams.get("offset") === "0"
+        ? lists[list]
+        : undefined;
 
-      return HttpResponse.json(items, { headers: { "X-Has-More": "false" } });
-    },
-  );
+    if (!items) {
+      return HttpResponse.json(null, { status: 404 });
+    }
+
+    return HttpResponse.json(items, { headers: { "X-Has-More": "false" } });
+  });
 
 it("returns no items without requesting anything when no lists are given", async ({
   dataSourceMap,
@@ -87,9 +86,9 @@ it("returns no items without requesting anything when no lists are given", async
 it.for(["no-slash", "too/many/slashes", "/missing-user", "missing-list/"])(
   'rejects the invalid list name "%s" before requesting any list',
   async (listName, { server, dataSourceMap }) => {
-    const requests: ListRequest[] = [];
+    const requestedLists: string[] = [];
 
-    server.use(listItemsHandler({}, requests));
+    server.use(listItemsHandler({}, requestedLists));
 
     await expect(
       dataSourceMap
@@ -98,7 +97,7 @@ it.for(["no-slash", "too/many/slashes", "/missing-user", "missing-list/"])(
     ).rejects.toThrow(
       `${listName} is not a valid MDBList name, format has to be "<string>/<string>"`,
     );
-    expect(requests).toStrictEqual([]);
+    expect(requestedLists).toStrictEqual([]);
   },
 );
 
@@ -106,26 +105,21 @@ it("maps the external IDs of movies and shows", async ({
   server,
   dataSourceMap,
 }) => {
-  const requests: ListRequest[] = [];
-
   server.use(
-    listItemsHandler(
-      {
-        "user/list": {
-          movies: [
-            movie(1, {
-              mdblist: "mdb-1",
-              imdb: "tt0137523",
-              tmdb: 550,
-              tvdb: 9876,
-            }),
-            movie(2, { imdb: "tt0133093" }),
-          ],
-          shows: [show(3, { imdbId: "tt0944947", tvdbId: 121_361 }), show(4)],
-        },
+    listItemsHandler({
+      "user/list": {
+        movies: [
+          movie(1, {
+            mdblist: "mdb-1",
+            imdb: "tt0137523",
+            tmdb: 550,
+            tvdb: 9876,
+          }),
+          movie(2, { imdb: "tt0133093" }),
+        ],
+        shows: [show(3, { imdbId: "tt0944947", tvdbId: 121_361 }), show(4)],
       },
-      requests,
-    ),
+    }),
   );
 
   const items = await dataSourceMap
@@ -152,9 +146,6 @@ it("maps the external IDs of movies and shows", async ({
       { imdbId: undefined, tvdbId: undefined },
     ],
   });
-  expect(requests).toStrictEqual([
-    { list: "user/list", offset: "0", apiKey: "mock-api-key" },
-  ]);
 });
 
 it("combines the items of every list without duplicates", async ({
@@ -215,7 +206,6 @@ it("requests the following pages from the offset of the items received so far", 
   server,
   dataSourceMap,
 }) => {
-  const offsets: (string | null)[] = [];
   const pages: Record<string, ListItemsResponse> = {
     "0": {
       movies: [movie(1, { tmdb: 1 }), movie(2, { tmdb: 2 })],
@@ -226,25 +216,24 @@ it("requests the following pages from the offset of the items received so far", 
   };
 
   server.use(
-    http.get(
-      "https://api.mdblist.com/lists/:username/:listname/items",
-      ({ request }) => {
-        const offset = new URL(request.url).searchParams.get("offset");
+    http.get(LIST_ITEMS_URL, ({ request }) => {
+      const offset = new URL(request.url).searchParams.get("offset") ?? "";
+      const page = pages[offset];
 
-        offsets.push(offset);
+      if (!isAuthorized(request) || !page) {
+        return HttpResponse.json(null, { status: 404 });
+      }
 
-        return HttpResponse.json(pages[offset ?? ""], {
-          headers: { "X-Has-More": offset === "4" ? "false" : "true" },
-        });
-      },
-    ),
+      return HttpResponse.json(page, {
+        headers: { "X-Has-More": offset === "4" ? "false" : "true" },
+      });
+    }),
   );
 
   const { movies, shows } = await dataSourceMap
     .get(MdblistAPI)
     .getListItems(new Set(["user/list"]));
 
-  expect(offsets).toStrictEqual(["0", "3", "4"]);
   expect(movies.map(({ tmdbId }) => tmdbId)).toStrictEqual(["1", "2", "3"]);
   expect(shows.map(({ tvdbId }) => tvdbId)).toStrictEqual(["10", "11"]);
 });

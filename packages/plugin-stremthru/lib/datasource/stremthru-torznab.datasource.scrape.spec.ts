@@ -6,7 +6,7 @@ import {
 } from "@repo/util-plugin-sdk/dto/entities";
 import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock-season-reference";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { it } from "../__tests__/stremthru.test-context.ts";

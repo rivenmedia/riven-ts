@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { URL } from "node:url";
 
 import { CompletedMovieSeeder } from "#database/seeders/movies/completed-movie.seeder.ts";

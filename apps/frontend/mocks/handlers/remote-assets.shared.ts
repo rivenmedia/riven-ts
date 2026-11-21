@@ -1,4 +1,4 @@
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 
 /** Hosts whose assets have local copies in `mocks/remote-assets` */
 const FIXTURE_HOSTS = [

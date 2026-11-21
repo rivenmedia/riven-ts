@@ -1,4 +1,4 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect, vi } from "vitest";
 
 import { it } from "../__tests__/tvdb.test-context.ts";
@@ -10,11 +10,11 @@ it("returns the timezone of the show's network", async ({
   dataSourceMap,
   server,
 }) => {
-  const tvdbIds: (string | null)[] = [];
-
   server.use(
     http.get(LOOKUP_URL, ({ request }) => {
-      tvdbIds.push(new URL(request.url).searchParams.get("thetvdb"));
+      if (new URL(request.url).searchParams.get("thetvdb") !== "81189") {
+        return HttpResponse.json(null, { status: 404 });
+      }
 
       return HttpResponse.json({
         id: 169,
@@ -34,8 +34,6 @@ it("returns the timezone of the show's network", async ({
   await expect(
     dataSourceMap.get(TvMazeAPI).getShowTimezone("81189"),
   ).resolves.toBe("America/New_York");
-
-  expect(tvdbIds).toStrictEqual(["81189"]);
 });
 
 it("returns no timezone for a show without a network", async ({

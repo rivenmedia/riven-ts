@@ -1,7 +1,7 @@
 import { UUID } from "@repo/util-plugin-sdk/schemas/utilities/uuid.schema";
 
 import { faker } from "@faker-js/faker";
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import preview from "#.storybook/preview.tsx";
 import { GET_FILTERED_TMDB_TRENDING_SHOWS } from "#app/(protected)/lists/trending/shows/_queries/get-tmdb-trending-shows.query.ts";

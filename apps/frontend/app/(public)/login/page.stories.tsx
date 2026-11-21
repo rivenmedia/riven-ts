@@ -1,5 +1,5 @@
 import { redirect } from "@storybook/nextjs-vite/navigation.mock";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 import { expect, spyOn } from "storybook/test";
 
 import preview from "#.storybook/preview.tsx";

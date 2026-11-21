@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect } from "vitest";
 
 import { getRequestHandler } from "../__generated__/handlers/getRequestHandler.ts";

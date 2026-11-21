@@ -1,6 +1,6 @@
 import { createMockPluginSettings } from "@repo/util-plugin-testing/create-mock-plugin-settings";
 
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import { expect } from "vitest";
 
 import { MdbListSettings } from "../mdblist-settings.schema.ts";
@@ -27,7 +27,6 @@ it("returns the items of the configured lists with the update interval", async (
 
   expect.assert(contentServiceRequestedHook);
 
-  const requestedLists: string[] = [];
   const item = {
     rank: null,
     adult: 0,
@@ -44,21 +43,21 @@ it("returns the items of the configured lists with the update interval", async (
     http.get(
       "https://api.mdblist.com/lists/user/:listname/items",
       ({ params }) => {
-        const listName = String(params["listname"]);
+        if (params["listname"] === "movies") {
+          return HttpResponse.json({
+            movies: [
+              { ...item, id: 1, mediatype: "movie", ids: { tmdb: 550 } },
+            ],
+          });
+        }
 
-        requestedLists.push(listName);
+        if (params["listname"] === "shows") {
+          return HttpResponse.json({
+            shows: [{ ...item, id: 2, mediatype: "show", tvdb_id: 81_189 }],
+          });
+        }
 
-        return HttpResponse.json(
-          listName === "movies"
-            ? {
-                movies: [
-                  { ...item, id: 1, mediatype: "movie", ids: { tmdb: 550 } },
-                ],
-              }
-            : {
-                shows: [{ ...item, id: 2, mediatype: "show", tvdb_id: 81_189 }],
-              },
-        );
+        return HttpResponse.json(null, { status: 404 });
       },
     ),
   );
@@ -70,7 +69,6 @@ it("returns the items of the configured lists with the update interval", async (
     logger,
   });
 
-  expect(requestedLists).toStrictEqual(["movies", "shows"]);
   expect(response).toStrictEqual({
     movies: [
       {

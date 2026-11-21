@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import assert from "node:assert";
 import { expect, vi } from "vitest";
 
@@ -23,6 +23,15 @@ const requests: RequestResponse = {
   ],
 };
 
+const requestsWithFilter = (filter: string) =>
+  getRequestHandler(({ request }) => {
+    if (new URL(request.url).searchParams.get("filter") !== filter) {
+      return HttpResponse.json(null, { status: 400 });
+    }
+
+    return HttpResponse.json<RequestResponse>(requests);
+  });
+
 const CASES = [
   { field: "seerrMovies", expected: [{ tmdbId: "550", tvdbId: null }] },
   { field: "seerrShows", expected: [{ tmdbId: "1399", tvdbId: "121361" }] },
@@ -31,15 +40,7 @@ const CASES = [
 it.for(CASES)(
   "$field returns the requested items for the given filter",
   async ({ field, expected }, { gqlContext, gqlServer, server }) => {
-    const filters: (string | null)[] = [];
-
-    server.use(
-      getRequestHandler(({ request }) => {
-        filters.push(new URL(request.url).searchParams.get("filter"));
-
-        return HttpResponse.json<RequestResponse>(requests);
-      }),
-    );
+    server.use(requestsWithFilter("pending"));
 
     const { body } = await gqlServer.executeOperation(
       {
@@ -55,32 +56,25 @@ it.for(CASES)(
     expect(body.singleResult.data?.[field]).toStrictEqual(
       expected.map((item) => expect.objectContaining(item)),
     );
-    expect(filters).toStrictEqual(["pending"]);
   },
 );
 
 it.for(CASES)(
   "$field filters by approved requests by default",
-  async ({ field }, { gqlContext, gqlServer, server }) => {
-    const filters: (string | null)[] = [];
-
-    server.use(
-      getRequestHandler(({ request }) => {
-        filters.push(new URL(request.url).searchParams.get("filter"));
-
-        return HttpResponse.json<RequestResponse>(requests);
-      }),
-    );
+  async ({ field, expected }, { gqlContext, gqlServer, server }) => {
+    server.use(requestsWithFilter("approved"));
 
     const { body } = await gqlServer.executeOperation(
-      { query: `query { ${field} { tmdbId } }` },
+      { query: `query { ${field} { tmdbId tvdbId } }` },
       { contextValue: gqlContext },
     );
 
     assert.ok(body.kind === "single");
 
     expect(body.singleResult.errors).toBeUndefined();
-    expect(filters).toStrictEqual(["approved"]);
+    expect(body.singleResult.data?.[field]).toStrictEqual(
+      expected.map((item) => expect.objectContaining(item)),
+    );
   },
 );
 
