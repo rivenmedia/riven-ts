@@ -4,7 +4,6 @@ import { WaitingChildrenError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
-import { flow } from "#message-queue/flows/producer.ts";
 
 import { requestContentServiceProcessor } from "./request-content-service.processor.ts";
 
@@ -58,13 +57,13 @@ const it = baseIt
 it("requests content from the content service plugin and waits for it", async ({
   createProcessorJob,
   processJob,
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const job = await createProcessorJob("request");
 
   await expect(processJob(job)).rejects.toBeInstanceOf(WaitingChildrenError);
 
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       queueName: "riven.content-service.requested.plugin[@repo/plugin-test]",
       opts: expect.objectContaining({
@@ -171,8 +170,8 @@ it("reports items that have already been requested without failing", async ({
 it("requests the content service again after its update interval", async ({
   createProcessorJob,
   processJob,
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const job = await createProcessorJob("process", [
     { movies: [], shows: [], updateIntervalSeconds: 300 },
   ]);
@@ -181,7 +180,7 @@ it("requests the content service again after its update interval", async ({
   await processJob(job);
 
   expect(removeDeduplicationKeySpy).toHaveBeenCalledOnce();
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       queueName: "request-content-services",
       data: { step: "request", contentServicePlugin: "@repo/plugin-test" },

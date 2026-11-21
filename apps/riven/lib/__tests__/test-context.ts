@@ -585,7 +585,23 @@ export const it = testBase
         pluginName?: string,
       ) =>
         `bull:${queueNameFor(eventName, pluginName)}:${randomUUID()}` as const,
-  );
+  )
+  .extend("flowAddSpy", async () => {
+    const { flow } = await import("#message-queue/flows/producer.ts");
+
+    // Records the jobs a test adds to the flow producer without adding them to Redis
+    return vi.spyOn(flow, "add").mockResolvedValue({} as never);
+  })
+  .extend("getFirstAddedFlowJob", ({ flowAddSpy }) => () => {
+    const [[flowJob] = []] = flowAddSpy.mock.calls;
+
+    assert.ok(
+      flowJob,
+      "Expected a job to have been added to the flow producer",
+    );
+
+    return flowJob;
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

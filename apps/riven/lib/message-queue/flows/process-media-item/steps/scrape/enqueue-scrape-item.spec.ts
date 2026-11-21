@@ -1,11 +1,8 @@
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { flow } from "#message-queue/flows/producer.ts";
 
 import { enqueueScrapeItem } from "./enqueue-scrape-item.ts";
-
-import type { FlowJob } from "bullmq";
 
 const parent = { id: "parent-id", queue: "bull:process-media-item" };
 
@@ -13,12 +10,11 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
   mockFlowProcessorContext: { plugins },
   overrideRuntimeSettings,
   indexedMovieContext: { indexedMovie },
+  getFirstAddedFlowJob,
 }) => {
   overrideRuntimeSettings({
     general: { scraping: { maximumFailedAttempts: 5 } },
   });
-
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
 
   indexedMovie.failedScrapeAttempts = 2;
 
@@ -32,7 +28,7 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
     isRootItem: true,
   });
 
-  const [[node] = []] = addSpy.mock.calls as [FlowJob][];
+  const node = getFirstAddedFlowJob();
 
   expect(node).toMatchObject({
     name: `Scraping ${indexedMovie.fullTitle}`,
@@ -65,9 +61,8 @@ it("creates a scrape job that parses the results of a scrape job for each scrape
 
 it("attempts to scrape a child item once", async ({
   indexedMovieContext: { indexedMovie },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
-
   await enqueueScrapeItem({
     item: indexedMovie,
     subscribers: [],
@@ -75,7 +70,7 @@ it("attempts to scrape a child item once", async ({
     isRootItem: false,
   });
 
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       opts: expect.objectContaining({ attempts: 1 }),
     }),
@@ -85,12 +80,11 @@ it("attempts to scrape a child item once", async ({
 it("does not scrape a root item that has no scrape attempts left", async ({
   overrideRuntimeSettings,
   indexedMovieContext: { indexedMovie },
+  flowAddSpy,
 }) => {
   overrideRuntimeSettings({
     general: { scraping: { maximumFailedAttempts: 5 } },
   });
-
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
 
   indexedMovie.failedScrapeAttempts = 5;
 
@@ -102,5 +96,5 @@ it("does not scrape a root item that has no scrape attempts left", async ({
       isRootItem: true,
     }),
   ).resolves.toBeNull();
-  expect(addSpy).not.toHaveBeenCalled();
+  expect(flowAddSpy).not.toHaveBeenCalled();
 });

@@ -7,8 +7,6 @@ import { postSettingsNotificationsWebhookHandler } from "../__generated__/handle
 import { webhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 import { it } from "../__tests__/seerr.test-context.ts";
 import {
-  REQUEST_APPROVED,
-  REQUIRED_TYPES,
   authenticated,
   metadataSettings,
   toSavedJsonPayload,
@@ -17,6 +15,7 @@ import {
 } from "../__tests__/validate-fixtures.ts";
 import { SeerrSettings } from "../seerr-settings.schema.ts";
 import { SeerrAPI } from "./seerr.datasource.ts";
+import { WebhookNotificationType } from "./webhook-notification-types.ts";
 
 import type { WebhookSettingsSchema } from "../__generated__/zod/webhookSettingsSchema.ts";
 
@@ -37,13 +36,16 @@ it("enables only the required types and sets the payload, keeping other settings
   server.use(
     authenticated,
     metadataSettings({ anime: "tvdb", tv: "tvdb" }),
-    webhookSettings(REQUEST_APPROVED + 2, { query: "query { me }" }),
+    // oxlint-disable-next-line no-bitwise
+    webhookSettings(WebhookNotificationType.REQUEST_APPROVED | 2, {
+      query: "query { me }",
+    }),
     postSettingsNotificationsWebhookHandler(async ({ request }) => {
       updates.push(webhookSettingsSchema.parse(await request.json()));
 
       return HttpResponse.json({
         enabled: true,
-        types: REQUIRED_TYPES,
+        types: WebhookNotificationType.REQUIRED,
         options: {
           webhookUrl: "https://riven.example/graphql",
           jsonPayload: toSavedJsonPayload(validWebhookPayload),
@@ -61,7 +63,7 @@ it("enables only the required types and sets the payload, keeping other settings
 
   expect(update).toStrictEqual({
     enabled: true,
-    types: REQUIRED_TYPES,
+    types: WebhookNotificationType.REQUIRED,
     options: {
       webhookUrl: "https://riven.example/graphql",
       jsonPayload: expect.any(String),

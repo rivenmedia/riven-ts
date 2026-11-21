@@ -2,7 +2,6 @@ import { WaitingChildrenError } from "bullmq";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
-import { flow } from "#message-queue/flows/producer.ts";
 
 import { postProcessItemProcessor } from "./post-process-media-item.processor.ts";
 
@@ -68,16 +67,15 @@ it("requests subtitles from each subscribed plugin and waits for them", async ({
   createProcessorJob,
   processJob,
   completedMovieContext: { completedMovie },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
-
   const job = await createProcessorJob(completedMovie, "post-process", {
     hasPendingChildren: true,
   });
 
   await expect(processJob(job)).rejects.toBeInstanceOf(WaitingChildrenError);
 
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       name: `Requesting subtitles for ${completedMovie.fullTitle}`,
       data: {
@@ -105,16 +103,15 @@ it("completes without requesting subtitles when no plugin subscribes", async ({
   createProcessorJob,
   processJob,
   completedMovieContext: { completedMovie },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
-
   removeSubtitleSubscribers();
 
   const job = await createProcessorJob(completedMovie, "post-process");
 
   await expect(processJob(job)).resolves.toBeUndefined();
 
-  expect(addSpy).not.toHaveBeenCalled();
+  expect(flowAddSpy).not.toHaveBeenCalled();
   expect(job.data.step).toBe("complete");
 });
 

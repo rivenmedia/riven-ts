@@ -1,19 +1,18 @@
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { flow } from "#message-queue/flows/producer.ts";
 
 import { enqueueProcessItemRequest } from "./enqueue-process-item-request.ts";
 
 it("creates a root job to index the item request", async ({
   factories: { movieItemRequestFactory },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const itemRequest = await movieItemRequestFactory.createOne();
 
   await enqueueProcessItemRequest({ item: itemRequest });
 
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       name: `Indexing [${itemRequest.externalIdsLabel.join(" | ")}]`,
       queueName: "process-item-request",
@@ -27,8 +26,8 @@ it("creates a root job to index the item request", async ({
 
 it("creates a delayed root job to reindex the item request", async ({
   factories: { movieItemRequestFactory },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const itemRequest = await movieItemRequestFactory.createOne();
 
   await enqueueProcessItemRequest(
@@ -39,7 +38,7 @@ it("creates a delayed root job to reindex the item request", async ({
     },
   );
 
-  expect(addSpy).toHaveBeenCalledExactlyOnceWith(
+  expect(flowAddSpy).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       name: `Reindexing [${itemRequest.externalIdsLabel.join(" | ")}]`,
       opts: {

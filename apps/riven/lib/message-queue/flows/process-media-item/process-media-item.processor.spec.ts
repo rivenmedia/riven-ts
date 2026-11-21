@@ -66,8 +66,8 @@ it("enqueues the item for scraping and waits for the scrape to finish", async ({
   createProcessorJob,
   processJob,
   indexedMovieContext: { indexedMovie },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const job = await createProcessorJob(
     indexedMovie,
     { step: "scrape" },
@@ -76,8 +76,8 @@ it("enqueues the item for scraping and waits for the scrape to finish", async ({
 
   await expect(processJob(job)).rejects.toBeInstanceOf(WaitingChildrenError);
 
-  expect(enqueuedQueues(addSpy)).toStrictEqual(["scrape-item"]);
-  expect(addSpy).toHaveBeenCalledWith(
+  expect(enqueuedQueues(flowAddSpy)).toStrictEqual(["scrape-item"]);
+  expect(flowAddSpy).toHaveBeenCalledWith(
     expect.objectContaining({
       data: { id: indexedMovie.id },
       opts: expect.objectContaining({
@@ -94,6 +94,7 @@ it("fails without scraping an item that has exhausted its scrape attempts", asyn
   processJob,
   overrideRuntimeSettings,
   indexedMovieContext: { indexedMovie },
+  flowAddSpy,
 }) => {
   overrideRuntimeSettings({
     general: { scraping: { maximumFailedAttempts: 3 } },
@@ -106,7 +107,6 @@ it("fails without scraping an item that has exhausted its scrape attempts", asyn
     { failedScrapeAttempts: 3 },
   );
 
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const job = await createProcessorJob(
     indexedMovie,
     { step: "scrape" },
@@ -118,15 +118,15 @@ it("fails without scraping an item that has exhausted its scrape attempts", asyn
       `${indexedMovie.fullTitle} has exhausted all scrape attempts and cannot be scraped again`,
     ),
   );
-  expect(addSpy).not.toHaveBeenCalled();
+  expect(flowAddSpy).not.toHaveBeenCalled();
 });
 
 it("enqueues the item for downloading after a successful scrape", async ({
   createProcessorJob,
   processJob,
   scrapedMovieContext: { scrapedMovie },
+  flowAddSpy,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const job = await createProcessorJob(
     scrapedMovie,
     { step: "validate-scrape" },
@@ -135,7 +135,7 @@ it("enqueues the item for downloading after a successful scrape", async ({
 
   await expect(processJob(job)).rejects.toBeInstanceOf(WaitingChildrenError);
 
-  expect(enqueuedQueues(addSpy)).toStrictEqual(["download-item"]);
+  expect(enqueuedQueues(flowAddSpy)).toStrictEqual(["download-item"]);
   expect(job.data.step).toBe("validate-download");
 });
 
@@ -146,9 +146,13 @@ it.for([
   "fails when scraping failed (root item: $isRootItem)",
   async (
     { isRootItem, error },
-    { createProcessorJob, processJob, indexedMovieContext: { indexedMovie } },
+    {
+      createProcessorJob,
+      processJob,
+      indexedMovieContext: { indexedMovie },
+      flowAddSpy,
+    },
   ) => {
-    const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
     const job = await createProcessorJob(
       indexedMovie,
       { step: "validate-scrape", isRootItem },
@@ -158,7 +162,7 @@ it.for([
     await expect(processJob(job)).rejects.toThrow(
       new UnrecoverableError(`${indexedMovie.fullTitle} ${error}`),
     );
-    expect(addSpy).not.toHaveBeenCalled();
+    expect(flowAddSpy).not.toHaveBeenCalled();
   },
 );
 

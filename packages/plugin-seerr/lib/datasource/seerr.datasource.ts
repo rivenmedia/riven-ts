@@ -9,6 +9,7 @@ import { MetadataSettingsResponse } from "../schemas/metadata-settings-response.
 import { RequestResponse } from "../schemas/request-response.schema.ts";
 import { UpdateWebhookSettingsResponse } from "../schemas/update-webhook-settings-response.schema.ts";
 import { WebhookJsonPayload } from "../schemas/webhook-json-payload.schema.ts";
+import { WebhookNotificationType } from "./webhook-notification-types.ts";
 
 import type { GetAuthMeQueryResponse } from "../__generated__/types/GetAuthMe.ts";
 import type { WebhookSettings } from "../__generated__/types/WebhookSettings.ts";
@@ -222,16 +223,14 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
    * @param webhookSettings Webhook settings from the `/settings/notifications/webhook` response
    */
   #validateWebhookSettingsResponse(webhookSettings: WebhookSettingsSchema) {
-    // oxlint-disable-next-line no-bitwise
-    const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
-
     const currentTypes = webhookSettings.types ?? 0;
+    const { REQUIRED: requiredTypes } = WebhookNotificationType;
 
     // oxlint-disable-next-line no-bitwise
-    const hasRequiredTypes = (currentTypes & REQUIRED_TYPES) === REQUIRED_TYPES;
+    const hasRequiredTypes = (currentTypes & requiredTypes) === requiredTypes;
 
     // oxlint-disable-next-line no-bitwise
-    const hasExtraTypes = (currentTypes & ~REQUIRED_TYPES) !== 0;
+    const hasExtraTypes = (currentTypes & ~requiredTypes) !== 0;
     const validatedWebhookBody = json(WebhookJsonPayload).safeParse(
       webhookSettings.options?.jsonPayload,
     );
@@ -247,17 +246,14 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
 
   /**
    * Validates that the Seerr webhook has the required notification types enabled:
-   * - Request Approved (bit 4)
-   * - Request Automatically Approved (bit 128)
+   * - Request Approved
+   * - Request Automatically Approved
    *
-   * These are checked via bitmask (4 | 128 = 132).
+   * These are checked via the `WebhookNotificationType.REQUIRED` bitmask.
    *
    * If the `autofixWebhookBody` plugin setting is enabled, it will attempt to fix the configuration automatically.
    */
   async #validateOrFixWebhookBodySettings() {
-    // oxlint-disable-next-line no-bitwise
-    const REQUIRED_TYPES = 4 | 128; // 132: Request Approved + Request Automatically Approved
-
     const getWebhookSettingsResponse = await this.get<unknown>(
       "settings/notifications/webhook",
     );
@@ -308,7 +304,7 @@ export class SeerrAPI extends BaseDataSource<SeerrSettings> {
       } satisfies WebhookJsonPayload;
 
       const settingsPayload = {
-        types: REQUIRED_TYPES,
+        types: WebhookNotificationType.REQUIRED,
         options: {
           jsonPayload: JSON.stringify(webhookBodyContent, null, 2),
         },

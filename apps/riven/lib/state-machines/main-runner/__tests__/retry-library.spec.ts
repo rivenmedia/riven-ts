@@ -12,9 +12,8 @@ it("enqueues an item processor job for each incomplete item request in the datab
   actor,
   em,
   factories: { showItemRequestFactory, movieItemRequestFactory },
+  flowAddSpy,
 }) => {
-  const flowAddSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
-
   const completeItems = [
     showItemRequestFactory.makeEntity({
       imdbId: "tt1234560",

@@ -6,15 +6,13 @@ import { expect } from "vitest";
 import { getSettingsNotificationsWebhookHandler } from "../__generated__/handlers/getSettingsNotificationsWebhookHandler.ts";
 import { it } from "../__tests__/seerr.test-context.ts";
 import {
-  REQUEST_APPROVED,
-  REQUEST_AUTO_APPROVED,
-  REQUIRED_TYPES,
   authenticated,
   metadataSettings,
   validWebhookPayload,
   webhookSettings,
 } from "../__tests__/validate-fixtures.ts";
 import { SeerrAPI } from "./seerr.datasource.ts";
+import { WebhookNotificationType } from "./webhook-notification-types.ts";
 
 it("skips webhook validation when the webhook is disabled", async ({
   server,
@@ -38,7 +36,7 @@ it("accepts the required notification types with the expected payload", async ({
   server.use(
     authenticated,
     metadataSettings({ anime: "tvdb", tv: "tvdb" }),
-    webhookSettings(REQUIRED_TYPES, validWebhookPayload),
+    webhookSettings(WebhookNotificationType.REQUIRED, validWebhookPayload),
   );
 
   await expect(dataSourceMap.get(SeerrAPI).validate()).resolves.toBe(true);
@@ -46,11 +44,11 @@ it("accepts the required notification types with the expected payload", async ({
 
 it.for([
   {
-    types: REQUEST_AUTO_APPROVED,
+    types: WebhookNotificationType.REQUEST_AUTO_APPROVED,
     issue: '- "Request Approved" notification type is not enabled.',
   },
   {
-    types: REQUEST_APPROVED,
+    types: WebhookNotificationType.REQUEST_APPROVED,
     issue:
       '- "Request Automatically Approved" notification type is not enabled.',
   },

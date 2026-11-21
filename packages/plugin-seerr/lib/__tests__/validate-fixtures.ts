@@ -8,10 +8,6 @@ import { createGetAuthMeQueryResponse } from "../__generated__/mocks/createGetAu
 import type { MetadataSettingsResponse } from "../schemas/metadata-settings-response.schema.ts";
 import type { WebhookJsonPayload } from "../schemas/webhook-json-payload.schema.ts";
 
-export const REQUEST_APPROVED = 4;
-export const REQUEST_AUTO_APPROVED = 128;
-export const REQUIRED_TYPES = REQUEST_APPROVED + REQUEST_AUTO_APPROVED;
-
 export const validWebhookPayload = {
   query:
     "mutation ($input: SeerrHandleWebhookInput!) { seerrHandleWebhook(input: $input) }",

@@ -1,21 +1,18 @@
-import { expect, vi } from "vitest";
+import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
-import { flow } from "#message-queue/flows/producer.ts";
 
 import { enqueueDownloadItem } from "./enqueue-download-item.ts";
 
-import type { FlowJob } from "bullmq";
-
 it("creates a download job that finds a valid torrent from the ranked streams", async ({
   scrapedMovieContext: { scrapedMovie, streams },
+  getFirstAddedFlowJob,
 }) => {
-  const addSpy = vi.spyOn(flow, "add").mockResolvedValue({} as never);
   const parent = { id: "parent-id", queue: "bull:process-media-item" };
 
   await enqueueDownloadItem({ item: scrapedMovie, opts: { parent } });
 
-  const [[node] = []] = addSpy.mock.calls as [FlowJob][];
+  const node = getFirstAddedFlowJob();
 
   expect(node).toMatchObject({
     name: `Downloading ${scrapedMovie.fullTitle}`,
