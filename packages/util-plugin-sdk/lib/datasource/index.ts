@@ -306,14 +306,14 @@ export abstract class BaseDataSource<
    * If creating them fails (e.g. Redis is briefly unavailable), the next call tries again.
    */
   #getQueueEvents() {
-    this.#queueEventsPromise ??= this.#createQueueEvents(
-      this.#connection,
-    ).catch((error: unknown) => {
-      this.#queueEventsPromise = undefined;
-      this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
+    this.#queueEventsPromise ??= this.#createQueueEvents().catch(
+      (error: unknown) => {
+        this.#queueEventsPromise = undefined;
+        this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
 
-      throw error;
-    });
+        throw error;
+      },
+    );
 
     return this.#queueEventsPromise;
   }
@@ -334,7 +334,7 @@ export abstract class BaseDataSource<
    * leaving its request waiting forever. Instead, the queue events start reading from the latest event that exists
    * before any request job is added.
    */
-  async #createQueueEvents(connection: ConnectionOptions) {
+  async #createQueueEvents() {
     const client = await this.queue.client;
     const [latestEvent] = await client.xrevrange(
       this.queue.toKey("events"),
@@ -345,7 +345,7 @@ export abstract class BaseDataSource<
     );
 
     const queueEvents = new QueueEvents(this.#queueId, {
-      connection,
+      connection: this.#connection,
       lastEventId: latestEvent?.[0] ?? "0-0",
     });
 
