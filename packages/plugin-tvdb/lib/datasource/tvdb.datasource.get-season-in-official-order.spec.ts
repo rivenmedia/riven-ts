@@ -1,11 +1,11 @@
 import { HttpResponse, http } from "msw";
 import { expect, vi } from "vitest";
 
-import breakingBadExtendedSeriesFixture from "../../__fixtures__/breaking-bad/extended-series.json" with { type: "json" };
-import breakingBadOfficialOrderFixture from "../../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
-import { postLoginHandler } from "../../__generated__/handlers/postLoginHandler.ts";
-import { it } from "../../__tests__/tvdb.test-context.ts";
-import { TvdbAPI } from "../tvdb.datasource.ts";
+import breakingBadExtendedSeriesFixture from "../__fixtures__/breaking-bad/extended-series.json" with { type: "json" };
+import breakingBadOfficialOrderFixture from "../__fixtures__/breaking-bad/official-order.json" with { type: "json" };
+import { postLoginHandler } from "../__generated__/handlers/postLoginHandler.ts";
+import { it } from "../__tests__/tvdb.test-context.ts";
+import { TvdbAPI } from "./tvdb.datasource.ts";
 
 const seriesId = breakingBadOfficialOrderFixture.data.id.toString();
 
