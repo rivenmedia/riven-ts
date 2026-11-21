@@ -1,7 +1,7 @@
 import { expect, it } from "vitest";
 import { createLogger } from "winston";
 
-import { LoggerSchema } from "../schemas/logger.schema.ts";
+import { LoggerSchema } from "./logger.schema.ts";
 
 it("accepts a logger", () => {
   expect(LoggerSchema.safeParse(createLogger()).success).toBe(true);

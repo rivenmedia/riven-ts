@@ -7,7 +7,7 @@ import {
   Season,
   Show,
 } from "../dto/entities/index.ts";
-import { getStremioScrapeConfig } from "../helpers/get-stremio-scrape-config.ts";
+import { getStremioScrapeConfig } from "./get-stremio-scrape-config.ts";
 
 const IMDB_ID = "tt0944947";
 
