@@ -4,6 +4,7 @@ import {
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock-season-reference";
 
 import { expect, it } from "vitest";
 
@@ -29,9 +30,7 @@ it("returns the IMDB ID, season and episode number of an episode", async () => {
 
   episode.imdbId = null;
   episode.number = 5;
-  episode.season = {
-    loadProperty: async () => Promise.resolve(3),
-  } as unknown as Episode["season"];
+  episode.season = createMockSeasonReference(3);
 
   await expect(getItemMetadata(episode)).resolves.toStrictEqual({
     type: "tv",

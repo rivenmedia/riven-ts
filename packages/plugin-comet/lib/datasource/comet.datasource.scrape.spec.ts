@@ -4,6 +4,7 @@ import {
   Season,
   Show,
 } from "@repo/util-plugin-sdk/dto/entities";
+import { createMockSeasonReference } from "@repo/util-plugin-testing/create-mock-season-reference";
 
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
@@ -43,9 +44,7 @@ const createEpisode = () => {
   const episode = withIds(new Episode(), "tt0944947");
 
   episode.number = 5;
-  episode.season = {
-    loadProperty: async () => Promise.resolve(3),
-  } as unknown as Episode["season"];
+  episode.season = createMockSeasonReference(3);
 
   return episode;
 };

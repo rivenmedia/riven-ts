@@ -5,7 +5,9 @@
   "type": "module",
   "exports": {
     "./create-mock-logger": "./lib/create-mock-logger.ts",
+    "./create-mock-media-item": "./lib/create-mock-media-item.ts",
     "./create-mock-plugin-settings": "./lib/create-mock-plugin-settings.ts",
+    "./create-mock-season-reference": "./lib/create-mock-season-reference.ts",
     "./plugin-test-context": "./lib/plugin-test-context.ts"
   },
   "scripts": {

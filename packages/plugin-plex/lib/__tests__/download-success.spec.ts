@@ -1,19 +1,11 @@
+import { createMockMediaItem } from "@repo/util-plugin-testing/create-mock-media-item";
+
 import { HttpResponse, http } from "msw";
 import { expect } from "vitest";
 
 import { it } from "./plex.test-context.ts";
 
 import type { LibrarySectionsResponse } from "../schemas/library-sections-response.schema.ts";
-import type { MediaItem } from "@repo/util-plugin-sdk/dto/entities";
-
-const createItem = (
-  entries: { baseDirectory: "movies" | "shows"; path: string }[],
-) =>
-  ({
-    id: "00000000-0000-4000-8000-000000000001",
-    fullTitle: "Test Item",
-    getMediaEntries: async () => Promise.resolve(entries),
-  }) as unknown as MediaItem;
 
 const sections = (...locations: [key: string, path: string][]) =>
   http.get("http://localhost:32400/library/sections", () =>
@@ -68,7 +60,7 @@ it("refreshes the library section containing each downloaded folder", async ({
     settings,
     logger,
     event: {
-      item: createItem([
+      item: createMockMediaItem([
         { baseDirectory: "shows", path: "Show/Season 01/Show S01E01.mkv" },
         { baseDirectory: "shows", path: "Show/Season 01/Show S01E02.mkv" },
         { baseDirectory: "shows", path: "Show/Season 02/Show S02E01.mkv" },
@@ -120,7 +112,7 @@ it("does not refresh a section whose location only shares a prefix with the fold
     settings,
     logger,
     event: {
-      item: createItem([
+      item: createMockMediaItem([
         { baseDirectory: "shows", path: "Show/Season 01/Show S01E01.mkv" },
       ]),
     } as never,
@@ -159,7 +151,7 @@ it("refreshes a section for a folder whose name starts with two dots", async ({
     settings,
     logger,
     event: {
-      item: createItem([
+      item: createMockMediaItem([
         { baseDirectory: "shows", path: "..Show/Season 01/E.mkv" },
       ]),
     } as never,
@@ -187,7 +179,7 @@ it("rejects when a folder is not in any library section", async ({
       settings,
       logger,
       event: {
-        item: createItem([
+        item: createMockMediaItem([
           { baseDirectory: "shows", path: "Show/Season 01/E.mkv" },
         ]),
       } as never,
@@ -212,7 +204,7 @@ it("rejects when the item has no media entries", async ({
       dataSources: dataSourceMap,
       settings,
       logger,
-      event: { item: createItem([]) } as never,
+      event: { item: createMockMediaItem([]) } as never,
     }),
   ).rejects.toThrow(
     "No media filesystem entry found for media item ID 00000000-0000-4000-8000-000000000001",
