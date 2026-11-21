@@ -55,8 +55,14 @@ const getBeforeSendTransaction = () => {
 
   expect.assert(beforeSendTransaction);
 
-  return (event: Transaction) =>
-    beforeSendTransaction(event, {}) as Transaction | null;
+  return (event: Transaction) => {
+    const result = beforeSendTransaction(event, {});
+
+    // Riven's hook is synchronous, so it never returns a promise
+    expect.assert(result === null || !("then" in result));
+
+    return result;
+  };
 };
 
 it("does not initialise Sentry unless Spotlight is enabled", async () => {

@@ -38,7 +38,7 @@ function setupRangeInterceptor(
   mockPool
     .intercept({ path: `/files/${fileName}` })
     .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
+      const rangeHeader = new Undici.Headers(headers).get("range");
 
       if (rangeHeader === `bytes=${range.join("-")}`) {
         return {
@@ -329,7 +329,7 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     .get("http://example.com")
     .intercept({ path: `/files/${fileName}` })
     .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
+      const rangeHeader = new Undici.Headers(headers).get("range");
 
       if (rangeHeader === `bytes=104071168-`) {
         return {
@@ -576,7 +576,7 @@ it("restarts the stream from the requested chunk when a body read does not conti
     .get("http://example.com")
     .intercept({ path: `/files/${fileName}` })
     .reply(({ headers }) => {
-      requestedRanges.push((headers as Record<string, string>)["range"] ?? "");
+      requestedRanges.push(new Undici.Headers(headers).get("range") ?? "");
 
       return { statusCode: 206, data: streamData };
     });

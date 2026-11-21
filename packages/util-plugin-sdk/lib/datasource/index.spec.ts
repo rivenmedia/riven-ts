@@ -418,8 +418,8 @@ it("rejects with the response of a request that fails with a fatal status", asyn
     .fetch("endpoint")
     .catch((fetchError: unknown) => fetchError);
 
-  expect(error).toBeInstanceOf(DataSourceHTTPError);
-  expect((error as DataSourceHTTPError).response.status).toBe(404);
+  expect.assert(error instanceof DataSourceHTTPError);
+  expect(error.response.status).toBe(404);
   expect(requestCount).toBe(1);
 });
 
