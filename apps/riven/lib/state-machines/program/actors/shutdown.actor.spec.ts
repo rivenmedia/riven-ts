@@ -1,6 +1,6 @@
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { describe, expect, it, vi } from "vitest";
+import { expect, it, vi } from "vitest";
 import { createActor, toPromise } from "xstate";
 
 import { keyvInstance } from "#utilities/redis-cache.ts";
@@ -58,122 +58,117 @@ const createMainRunnerRef = ({
 const runShutdown = async (mainRunnerRef: ShutdownInput["mainRunnerRef"]) =>
   toPromise(createActor(shutdown, { input: { mainRunnerRef } }).start());
 
-describe("shutdown actor", () => {
-  it("does nothing when the main runner has not started", async () => {
-    const disconnectSpy = vi
-      .spyOn(keyvInstance, "disconnect")
-      .mockResolvedValue(undefined);
+it("does nothing when the main runner has not started", async () => {
+  const disconnectSpy = vi
+    .spyOn(keyvInstance, "disconnect")
+    .mockResolvedValue(undefined);
 
-    await runShutdown(undefined);
+  await runShutdown(undefined);
 
-    expect(disconnectSpy).not.toHaveBeenCalled();
+  expect(disconnectSpy).not.toHaveBeenCalled();
+});
+
+it("closes flow and sandboxed workers gracefully, plugin workers forcefully, then disconnects Redis", async () => {
+  const events: string[] = [];
+  const record = (event: string) => async () => {
+    events.push(event);
+
+    return Promise.resolve();
+  };
+
+  const flowWorker = createWorker("flow", record("flow closed"));
+  const sandboxedWorker = createWorker("sandboxed", record("sandboxed closed"));
+  const pluginWorker = createWorker("plugin", record("plugin closed"));
+
+  vi.spyOn(keyvInstance, "disconnect").mockImplementation(
+    record("redis disconnected"),
+  );
+
+  await runShutdown(
+    createMainRunnerRef({
+      flowWorkers: [flowWorker],
+      sandboxedWorkers: [sandboxedWorker],
+      pluginWorkers: [pluginWorker],
+    }),
+  );
+
+  expect(flowWorker.close).toHaveBeenCalledExactlyOnceWith();
+  expect(sandboxedWorker.close).toHaveBeenCalledExactlyOnceWith();
+  expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
+  expect(events).toStrictEqual([
+    "flow closed",
+    "sandboxed closed",
+    "plugin closed",
+    "redis disconnected",
+  ]);
+});
+
+it("force-closes a worker that fails to close gracefully", async () => {
+  vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
+
+  const worker = createWorker("flow", async (force) =>
+    force
+      ? Promise.resolve()
+      : Promise.reject(new Error("Graceful close failed")),
+  );
+
+  await runShutdown(createMainRunnerRef({ flowWorkers: [worker] }));
+
+  expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
+});
+
+it("force-closes a worker that does not close within 10 seconds", async () => {
+  expect.hasAssertions();
+
+  vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
+
+  const timeout = new AbortController();
+  const timeoutSpy = vi
+    .spyOn(AbortSignal, "timeout")
+    .mockReturnValue(timeout.signal);
+
+  // A graceful close never settles, as if the worker is stuck processing a job
+  const stuck = Promise.withResolvers<undefined>();
+  const worker = createWorker("flow", async (force) =>
+    force ? Promise.resolve() : stuck.promise,
+  );
+
+  const shutdownPromise = runShutdown(
+    createMainRunnerRef({ flowWorkers: [worker] }),
+  );
+
+  await vi.waitFor(() => {
+    expect(worker.close).toHaveBeenCalledExactlyOnceWith();
   });
 
-  it("closes flow and sandboxed workers gracefully, plugin workers forcefully, then disconnects Redis", async () => {
-    const events: string[] = [];
-    const record = (event: string) => async () => {
-      events.push(event);
+  timeout.abort();
 
-      return Promise.resolve();
-    };
+  await shutdownPromise;
 
-    const flowWorker = createWorker("flow", record("flow closed"));
-    const sandboxedWorker = createWorker(
-      "sandboxed",
-      record("sandboxed closed"),
-    );
-    const pluginWorker = createWorker("plugin", record("plugin closed"));
+  expect(timeoutSpy).toHaveBeenCalledWith(10_000);
+  expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
+});
 
-    vi.spyOn(keyvInstance, "disconnect").mockImplementation(
-      record("redis disconnected"),
-    );
+it("completes the shutdown when workers or Redis fail to close", async () => {
+  const disconnectSpy = vi
+    .spyOn(keyvInstance, "disconnect")
+    .mockRejectedValue(new Error("Redis is unavailable"));
 
-    await runShutdown(
+  const failingClose = async () => Promise.reject(new Error("Close failed"));
+
+  const flowWorker = createWorker("flow", failingClose);
+  const pluginWorker = createWorker("plugin", failingClose);
+
+  await expect(
+    runShutdown(
       createMainRunnerRef({
         flowWorkers: [flowWorker],
-        sandboxedWorkers: [sandboxedWorker],
         pluginWorkers: [pluginWorker],
       }),
-    );
+    ),
+  ).resolves.toBeUndefined();
 
-    expect(flowWorker.close).toHaveBeenCalledExactlyOnceWith();
-    expect(sandboxedWorker.close).toHaveBeenCalledExactlyOnceWith();
-    expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
-    expect(events).toStrictEqual([
-      "flow closed",
-      "sandboxed closed",
-      "plugin closed",
-      "redis disconnected",
-    ]);
-  });
-
-  it("force-closes a worker that fails to close gracefully", async () => {
-    vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
-
-    const worker = createWorker("flow", async (force) =>
-      force
-        ? Promise.resolve()
-        : Promise.reject(new Error("Graceful close failed")),
-    );
-
-    await runShutdown(createMainRunnerRef({ flowWorkers: [worker] }));
-
-    expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
-  });
-
-  it("force-closes a worker that does not close within 10 seconds", async () => {
-    expect.hasAssertions();
-
-    vi.spyOn(keyvInstance, "disconnect").mockResolvedValue(undefined);
-
-    const timeout = new AbortController();
-    const timeoutSpy = vi
-      .spyOn(AbortSignal, "timeout")
-      .mockReturnValue(timeout.signal);
-
-    // A graceful close never settles, as if the worker is stuck processing a job
-    const stuck = Promise.withResolvers<undefined>();
-    const worker = createWorker("flow", async (force) =>
-      force ? Promise.resolve() : stuck.promise,
-    );
-
-    const shutdownPromise = runShutdown(
-      createMainRunnerRef({ flowWorkers: [worker] }),
-    );
-
-    await vi.waitFor(() => {
-      expect(worker.close).toHaveBeenCalledExactlyOnceWith();
-    });
-
-    timeout.abort();
-
-    await shutdownPromise;
-
-    expect(timeoutSpy).toHaveBeenCalledWith(10_000);
-    expect(worker.close.mock.calls).toStrictEqual([[], [true]]);
-  });
-
-  it("completes the shutdown when workers or Redis fail to close", async () => {
-    const disconnectSpy = vi
-      .spyOn(keyvInstance, "disconnect")
-      .mockRejectedValue(new Error("Redis is unavailable"));
-
-    const failingClose = async () => Promise.reject(new Error("Close failed"));
-
-    const flowWorker = createWorker("flow", failingClose);
-    const pluginWorker = createWorker("plugin", failingClose);
-
-    await expect(
-      runShutdown(
-        createMainRunnerRef({
-          flowWorkers: [flowWorker],
-          pluginWorkers: [pluginWorker],
-        }),
-      ),
-    ).resolves.toBeUndefined();
-
-    expect(flowWorker.close.mock.calls).toStrictEqual([[], [true]]);
-    expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
-    expect(disconnectSpy).toHaveBeenCalledOnce();
-  });
+  expect(flowWorker.close.mock.calls).toStrictEqual([[], [true]]);
+  expect(pluginWorker.close).toHaveBeenCalledExactlyOnceWith(true);
+  expect(disconnectSpy).toHaveBeenCalledOnce();
 });

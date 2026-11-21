@@ -63,7 +63,7 @@ wrong, change the config, not the code.
 ## Tests
 
 - Flat test files (no top-level `describe`) are preferred; split into
-  separate files instead of nesting `describe` blocks for organisation.
+  separate files (e.g. `rank-torrent.removing-trash.spec.ts`, `rank-torrent.keeping-trash.spec.ts`) instead of nesting `describe` blocks for organisation.
 
 ### Prefer type narrowing
 
