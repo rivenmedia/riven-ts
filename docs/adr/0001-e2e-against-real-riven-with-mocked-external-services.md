@@ -58,7 +58,10 @@ the test.
 - A journey varies Riven's state only through its named scenario, never by
   changing Riven during the test. Data that a page renders through Next.js'
   `"use cache"` must be the same in every scenario, because one Next.js server
-  shares that cache, so it lives in the baseline.
+  shares that cache, so it lives in the baseline. That server also serves the
+  mocked specs, which fill the same cache from the frontend's mock handlers, so
+  those must agree with the baseline for this data, and integrated specs assert
+  only fields derived from the journey fixtures.
 - A reset must also clear Riven's in-memory state (the settings manager,
   `restartRequired`, data-source caches), or state leaks between tests on the
   same worker.

@@ -25,8 +25,9 @@ Chromium.
   Postgres and Redis, and the browser and the Next.js server talk to it
   through a proxy. The Playwright handlers forward the browser's `/graphql` and
   `/api/auth/*` requests to Riven directly, so this suite bypasses the rewrite
-  in `proxy.ts`. The home, media details, library, settings, auth, login and
-  registration journeys are integrated.
+  in `proxy.ts`. Login is integrated, and so are most of the home, media details,
+  library, settings, auth and registration journeys. The mocked list below says
+  what stays mocked.
 - **Mocked** (`*.spec.ts`): keep these for states Riven can't be put into.
   What stays mocked, and why:
   - `home.spec.ts` (the recently added carousel): Riven's `recentlyAdded`
@@ -56,16 +57,20 @@ Chromium.
 3. In the spec, select the scenario with `test.use({ scenario })`. A journey
    varies Riven's state only through its scenario, never by mutating Riven
    during the test.
-4. Sign in with `test.use({ signedInAs: "user" })` (or `"admin"`). It signs in
+4. Sign in with `test.use({ signedInAs: "user" })` (`"manager"` or `"admin"`). It signs in
    through the real Riven after the scenario's reset, and re-adds the cookies
    for the Next.js origin. The default is signed out.
 
 One Next.js server shares the `"use cache"` cache across every scenario and
-both Playwright projects. So data a page renders through `"use cache"` must be
-the same in every scenario: a TMDB or TVDB id must get the same answer
-everywhere. That's why the home and details pages' TMDB and TVDB data lives in
-the baseline (`tmdb-home-handlers.ts`, `tmdb-details-handlers.ts` and
-`tvdb-details-handlers.ts`), not in a journey's scenario.
+every Playwright project, including the mocked one: the mocked specs fill the
+same cache from the handlers in `mocks/handlers/home.handler.ts`. So data a
+page renders through `"use cache"` must agree between the baseline's handlers
+(`tmdb-home-handlers.ts`, `tmdb-details-handlers.ts` and
+`tvdb-details-handlers.ts`) and the mocked handlers: a TMDB or TVDB id must get
+the same answer everywhere. That's why the home and details pages' TMDB and
+TVDB data lives in the baseline, not in a journey's scenario. Integrated specs
+assert only fields derived from `journeyFixtures`, since those are the ones
+both sides share.
 
 ### The contract between the apps
 
@@ -84,7 +89,8 @@ Every request Riven makes to an external service needs a handler in a Riven
 mock scenario. A request without a handler fails the test and the report
 lists it, once per attempt: Riven's global undici retry dispatcher retries a
 failed request 5 times, so one unhandled fetch shows up 6 times and takes about
-15 seconds to fail. Riven records unhandled requests, and the test fixtures report them.
+15 seconds to fail. Riven records unhandled requests, and the test fixtures
+report them.
 A request made while Riven boots fails the worker before its first test.
 After that, the fixtures report them only for the span of one test. Applying a
 test's scenario resets the instance and clears the list, and the check runs at

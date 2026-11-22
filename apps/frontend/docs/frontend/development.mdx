@@ -76,17 +76,20 @@ Run these from `apps/frontend`:
 
 ### End-to-end tests
 
-The end-to-end tests run the real frontend against a mocked backend, so they don't need the backend, a database or Redis. `pnpm e2e:headless` builds the app (through Turborepo, so unchanged builds come from the cache) and tests it with `next start` on port 9100, in every browser. CI does the same, in Chromium only.
+There are two suites, both run with Playwright against a production build (`next start` on port 9100, through Turborepo so unchanged builds come from the cache). CI runs Chromium only.
+
+- **Mocked** (`*.spec.ts`, the `chromium` project): the real frontend against a mocked backend, so it needs no backend, database or Redis. Import `test` from `#playwright/fixtures.ts`. Its fixtures mock the network with [MSW](https://mswjs.io) handlers, the same as the stories, for both the Next.js server's requests and the browser's.
+- **Integrated** (`*.integrated.spec.ts`, the `chromium-integrated` project): the frontend against a real Riven, with only the external services mocked inside Riven. It needs Postgres, Redis and FUSE, and `E2E_POSTGRES_URL` set to a Postgres connection string. Import `test` from `#playwright/integrated-fixtures.ts`.
+
+For when to write which, how to add a journey, and what to run locally, see "E2E suites" in [`apps/frontend/STANDARDS.md`](https://github.com/rivenmedia/riven-ts/blob/main/apps/frontend/STANDARDS.md).
 
 `pnpm e2e` opens Playwright's UI against `next dev` on port 9101 instead, for faster iteration. Both run over plain HTTP: `next dev --experimental-https` intermittently drops WebSocket connections, including the HMR socket Next.js uses to send React's debug info for server renders, which leaves pages stuck mid-render.
 
-Import `test` from `#playwright/fixtures.ts`. Its fixtures mock the network with [MSW](https://mswjs.io) handlers, the same as the stories. The handlers answer both the Next.js server's requests, through Next.js' test mode, and the browser's, including GraphQL subscriptions over WebSockets.
+In the mocked suite:
 
 - Every test starts from a healthy instance that has already been set up. To change that, override the handlers.
 - `test.use({ signedInAs: "admin" })` signs the test in with a role (`"admin"`, `"manager"` or `"user"`). Tests are signed out by default.
 - `test.use({ handlers: withHandlers(...) })` adds handlers for every test in a file. `network.use(...)` adds handlers inside a single test. Handlers you add take precedence over the defaults.
-- `auth.signIn(role)` is a resolver for the sign-in and sign-up endpoints, for tests that go through the login form.
-- `auth.signOut()` is a resolver for the sign-out endpoint, which expires the session cookies.
 - `recordOperation(QUERY)` returns the variables of each request for that GraphQL operation, so tests can check what was sent.
 
 Some things to know when writing tests:
@@ -95,7 +98,6 @@ Some things to know when writing tests:
 - **Subscriptions:** a subscription handler only attaches to a WebSocket when the page connects. Add it before the page loads, with `test.use({ handlers })` or `network.use()` in `beforeEach`, rather than in response to something the test does.
 - **Cached data:** data fetched in `"use cache"` functions (e.g. the home page's carousels) is cached by the production server across tests. Overriding it in one test won't reliably change what that test sees.
 - **Hydration:** server-rendered elements are clickable before React hydrates them, and a click before then is lost. This happens most under `next dev`. Call `waitForHydration(locator)` from `#playwright/wait-for-hydration.ts` before clicking an element that only works once hydrated, such as a switch or a button with an `onClick`.
-- **Stateful mocks:** to test that a change persists, use a store such as `createRankingProfilesStore()` or `createSettingsPluginsStore()`. These keep what the app saves, so a reload shows it.
 - **Hidden duplicates:** the production build keeps hidden copies of streamed content outside `main`. Scope text queries to `page.getByRole("main")` so they don't match both.
 
 ## Building the Docker image
