@@ -35,6 +35,8 @@ export interface RivenInstance {
   url: URL;
   logPath: string;
   control: ReturnType<typeof createE2eControlClient>;
+  /** Reads the last lines of Riven's log */
+  readLogTail: () => Promise<string>;
   stop: () => Promise<void>;
 }
 
@@ -74,7 +76,7 @@ async function ensureDatabase(postgresUrl: string, name: string) {
 }
 
 async function startRedis() {
-  // oxlint-disable-next-line typescript/strict-void-return
+  // oxlint-disable-next-line typescript/strict-void-return -- `promisify` only uses `execFile`'s callback, so ignoring the `ChildProcess` it returns is fine
   const { stdout } = await promisify(execFile)("which", ["redis-server"]);
   const redis = new RedisMemoryServer({
     binary: { systemBinary: stdout.trim() },
@@ -216,6 +218,7 @@ export async function startRivenInstance({
     url,
     logPath,
     control: createE2eControlClient(url, backendApiKey),
+    readLogTail: () => readLogTail(logPath),
     stop,
   };
 }

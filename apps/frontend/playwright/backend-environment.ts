@@ -13,8 +13,9 @@ export const backendApiKey = "e2e-backend-api-key-0123456789abcdef";
 /**
  * The origin the browser's auth client sends its requests to.
  *
- * It's meant to be the `ORIGIN` environment variable, but that never reaches the browser bundle, so the client falls
- * back to the schema's default. The integrated suite re-addresses it to the worker's Riven too.
+ * Workaround for a known frontend production bug: the browser auth client's `baseURL` is `ORIGIN`, which isn't a
+ * `NEXT_PUBLIC_` variable, so it never reaches the browser bundle and the client always falls back to the schema's
+ * default. The integrated suite re-addresses this origin to the worker's Riven too. Remove it once the client uses
+ * the page's own origin.
  */
-// oxlint-disable-next-line sonarjs/no-clear-text-protocols -- never resolves in the tests
 export const browserAuthOrigin = "https://localhost:9000";

@@ -14,7 +14,7 @@ import { startRivenInstance } from "./riven/start-riven-instance.ts";
 import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { RivenInstance } from "./riven/start-riven-instance.ts";
 import type { PlaywrightNetworkSource } from "@msw/playwright";
-import type { MockScenarioName } from "@repo/riven/e2e";
+import type { MockScenarioName, UnhandledRequest } from "@repo/riven/e2e";
 import type { NetworkApi } from "msw/experimental";
 
 export { expect } from "@playwright/test";
@@ -51,6 +51,9 @@ interface WorkerFixtures {
   riven: RivenInstance;
 }
 
+const formatUnhandledRequests = (requests: UnhandledRequest[]) =>
+  requests.map(({ method, url }) => `  ${method} ${url}`).join("\n");
+
 export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
   riven: [
     async ({}, use, workerInfo) => {
@@ -76,6 +79,21 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
         ),
       });
 
+      // The first test's scenario clears these, so a request Riven makes while it boots is only reported here.
+      // Worker fixtures can't attach files, so the error carries the log tail.
+      const bootUnhandledRequests = await riven.control.getUnhandledRequests();
+
+      if (bootUnhandledRequests.length > 0) {
+        // Stopping first flushes the log
+        await riven.stop();
+
+        const logTail = await riven.readLogTail();
+
+        throw new Error(
+          `Riven made requests to external services while it booted that no handler mocked:\n${formatUnhandledRequests(bootUnhandledRequests)}\nLast log lines:\n${logTail}`,
+        );
+      }
+
       await use(riven);
       await riven.stop();
     },
@@ -88,16 +106,26 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
 
       await use(undefined);
 
-      const unhandledRequests = await riven.control.getUnhandledRequests();
+      const attachRivenLog = () =>
+        testInfo.attach("riven.log", {
+          path: riven.logPath,
+          contentType: "text/plain",
+        });
+
+      const unhandledRequests = await riven.control
+        .getUnhandledRequests()
+        .catch(async (error: unknown) => {
+          // The check itself failed, e.g. because Riven crashed during the test
+          await attachRivenLog();
+
+          throw error;
+        });
 
       if (
         testInfo.status !== testInfo.expectedStatus ||
         unhandledRequests.length > 0
       ) {
-        await testInfo.attach("riven.log", {
-          path: riven.logPath,
-          contentType: "text/plain",
-        });
+        await attachRivenLog();
       }
 
       expect(
@@ -125,6 +153,7 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
             rivenUrl: riven.url,
             origin: baseURL ?? "",
             backendUrl,
+            // Works around the browser's auth client always using the default `ORIGIN`; see `browserAuthOrigin`
             extraOrigins: [browserAuthOrigin],
           }),
           ...remoteAssetHandlers,
