@@ -40,6 +40,8 @@ test("stays on the login page after a wrong password", async ({ page }) => {
     password: "wrong-password",
   });
 
+  // The login runs in a server action, so the error toast is what shows the attempt finished and failed
+  await expect(page.getByText("An error occurred during login")).toBeVisible();
   await expect(page).toHaveURL("/login");
 });
 
