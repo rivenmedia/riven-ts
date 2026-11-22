@@ -4,10 +4,22 @@ import { expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 import { User } from "#database/entities/user.entity.ts";
+import { CorePlugins } from "#schemas/core-plugins.schema.ts";
 
 import { e2eBaselineScenario } from "./e2e-baseline.scenario.ts";
 import { tmdbDetailsHandlers } from "./utilities/tmdb-details-handlers.ts";
 import { tvdbDetailsHandlers } from "./utilities/tvdb-details-handlers.ts";
+
+it("enables every core plugin as a stored setting, so the settings pages can toggle them", async ({
+  em,
+  services,
+}) => {
+  await e2eBaselineScenario.seed(em);
+
+  const stored = await services.settingsService.getStoredValues("riven");
+
+  expect(stored["enabledPlugins"]).toStrictEqual(CorePlugins.options);
+});
 
 it("seeds an admin, a manager and a regular user", async ({ em, orm }) => {
   await e2eBaselineScenario.seed(em);

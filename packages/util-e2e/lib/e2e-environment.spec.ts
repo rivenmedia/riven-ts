@@ -9,15 +9,12 @@ const input = {
   vfsMountPath: "/var/lib/riven-e2e-0",
   apiKey: "e2e-api-key-0123456789abcdef0123456789",
   origin: "http://localhost:9000",
-  enabledPlugins: ["comet", "seerr"],
 };
 
-it("enables the plugins it is given", () => {
-  const environment = createE2eEnvironment(input);
-
-  expect(
-    JSON.parse(environment["RIVEN_SETTING__enabledPlugins"] ?? ""),
-  ).toStrictEqual(input.enabledPlugins);
+it("leaves the enabled plugins to the baseline scenario, so the settings can toggle them", () => {
+  expect(createE2eEnvironment(input)).not.toHaveProperty(
+    "RIVEN_SETTING__enabledPlugins",
+  );
 });
 
 /** Every URL in the environment, including those inside JSON-array values such as the notifications `urls` */

@@ -54,28 +54,6 @@ const rivenDirectory = fileURLToPath(
   new URL("../../../riven/", import.meta.url),
 );
 
-const rivenPackageJson = z.object({
-  dependencies: z.record(z.string(), z.string()),
-});
-
-const corePluginPrefix = "@repo/plugin-";
-
-/**
- * The plugins Riven enables: its `@repo/plugin-*` dependencies, without the prefix.
- * This is the rule behind Riven's `CorePlugins`, read from its `package.json` so the frontend needn't depend on Riven.
- */
-async function readEnabledPlugins() {
-  const { dependencies } = rivenPackageJson.parse(
-    JSON.parse(
-      await readFile(path.join(rivenDirectory, "package.json"), "utf8"),
-    ),
-  );
-
-  return Object.keys(dependencies)
-    .filter((dependency) => dependency.startsWith(corePluginPrefix))
-    .map((dependency) => dependency.slice(corePluginPrefix.length));
-}
-
 async function ensureDatabase(postgresUrl: string, name: string) {
   const client = new pg.Client({ connectionString: postgresUrl });
 
@@ -171,7 +149,6 @@ export async function startRivenInstance({
   await ensureDatabase(postgresUrl, databaseName);
 
   const redis = await startRedis();
-  const enabledPlugins = await readEnabledPlugins();
 
   await createMountDirectory(vfsMountPath);
   await mkdir(path.dirname(logPath), { recursive: true });
@@ -190,7 +167,6 @@ export async function startRivenInstance({
           vfsMountPath,
           apiKey: backendApiKey,
           origin,
-          enabledPlugins,
         }),
         ...inheritedEnvironment.parse(process.env),
         // Already set by `createE2eEnvironment`, but Next.js' types require it to be one of its known modes

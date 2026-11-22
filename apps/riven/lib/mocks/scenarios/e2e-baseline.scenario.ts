@@ -7,7 +7,10 @@ import { HttpResponse, http } from "msw/http";
 
 import { initAuth } from "#auth/auth.ts";
 import { database } from "#database/database.ts";
+import { Setting } from "#database/entities/setting.entity.ts";
 import { MockScenario } from "#mocks/utilities/mock-scenario.ts";
+import { CorePlugins } from "#schemas/core-plugins.schema.ts";
+import { CORE_NAMESPACE } from "#settings/core-settings-sections.ts";
 
 import { tmdbDetailsHandlers } from "./utilities/tmdb-details-handlers.ts";
 import { tmdbHomeHandlers } from "./utilities/tmdb-home-handlers.ts";
@@ -153,6 +156,13 @@ class E2eBaselineScenario extends MockScenario {
   ] as const;
 
   public override async seed(em: EntityManager) {
+    // Stored, rather than set by the environment, which would lock the plugins for the settings pages
+    await em.upsert(Setting, {
+      namespace: CORE_NAMESPACE,
+      key: "enabledPlugins",
+      value: CorePlugins.options,
+    });
+
     // Boot applies the scenario before the GraphQL server initialises auth
     const auth = initAuth(database.orm);
 

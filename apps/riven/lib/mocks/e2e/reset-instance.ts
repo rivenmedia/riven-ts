@@ -48,10 +48,6 @@ export async function resetInstance(
     settingsService: services.settingsService,
     legacyConfigPath: settings.rankingConfigPath,
   });
-  await loadRuntimeSettings({
-    settingsService: services.settingsService,
-    environment: coreEnvironment,
-  });
 
   invalidateRankingEngine();
   settingsManager.resetRestartRequired();
@@ -60,4 +56,10 @@ export async function resetInstance(
   unhandledRequests.clear();
 
   await scenario.seed(orm.em.fork());
+
+  // After the seed, which may store settings
+  await loadRuntimeSettings({
+    settingsService: services.settingsService,
+    environment: coreEnvironment,
+  });
 }
