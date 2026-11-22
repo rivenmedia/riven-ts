@@ -2,7 +2,6 @@ import { cn } from "cn";
 
 import { SettingsBooleanField } from "./_components/boolean-field.tsx";
 import { SettingsCustomRankField } from "./_components/custom-rank-field.tsx";
-import { SettingsDictionaryField } from "./_components/dictionary-field.tsx";
 import { SettingsNullableBooleanField } from "./_components/nullable-boolean-field.tsx";
 import { SettingsNumberField } from "./_components/number-field.tsx";
 import { SettingsPasswordField } from "./_components/password-field.tsx";
@@ -34,7 +33,6 @@ const settingFieldComponents = {
   select: SettingsSelectField,
   string_array: SettingsStringArrayField,
   custom_rank: SettingsCustomRankField,
-  dictionary: SettingsDictionaryField,
   tuple: SettingsTupleField,
 } as const satisfies Record<string, React.ComponentType<never>>;
 
@@ -53,7 +51,7 @@ export type SettingFieldProps = (
 
 /**
  * Renders the right input for a schema-driven setting (text, secret, number,
- * boolean, select, array, rank, dictionary, tuple or group).
+ * boolean, select, array, rank, tuple or group).
  */
 export function SettingField({
   type,

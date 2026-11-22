@@ -6,7 +6,6 @@ import {
   ZodEnum,
   ZodNumber,
   ZodObject,
-  ZodRecord,
   ZodTuple,
   ZodDefault,
   ZodOptional,
@@ -357,39 +356,6 @@ export function buildSettingsConfigFromZodSchema(
 
       return entry ? settings.set(...entry) : settings;
     }
-    case "record": {
-      assertSchemaType(schema, ZodRecord);
-
-      const { keyType, valueType } = schema;
-
-      // Only string keys can be typed in, so other records render nothing
-      if (!(keyType instanceof ZodString)) {
-        return settings;
-      }
-
-      const commonConfig = buildCommonConfig(meta, key, context);
-
-      const { title: keyTitle } = keyType.meta() ?? {};
-
-      const itemFields: SettingFieldProps[] = [
-        ...buildSettingsConfigFromZodSchema(
-          valueType,
-          `${commonConfig.name}.value`,
-          required,
-          {},
-          context,
-        ).values(),
-      ];
-
-      return settings.set(commonConfig.name, {
-        type: "dictionary",
-        config: {
-          ...commonConfig,
-          itemFields,
-          ...(keyTitle && { keyLabel: keyTitle }),
-        },
-      });
-    }
     case "tuple": {
       assertSchemaType(schema, ZodTuple);
 
@@ -554,6 +520,7 @@ export function buildSettingsConfigFromZodSchema(
     case "never":
     case "null":
     case "promise":
+    case "record":
     case "set":
     case "symbol":
     case "undefined":
