@@ -21,6 +21,13 @@ export default defineConfig({
       },
     },
     {
+      // The Playwright fixtures' helpers are unit tested with Vitest, rather than run by Playwright
+      files: ["playwright/**/*.spec.ts"],
+      rules: {
+        "playwright/no-standalone-expect": "off",
+      },
+    },
+    {
       files: ["*.tsx"],
       plugins: ["react"],
       rules: {

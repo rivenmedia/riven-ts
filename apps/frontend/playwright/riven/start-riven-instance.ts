@@ -5,7 +5,6 @@ import { createWriteStream } from "node:fs";
 import { mkdir, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
-import { setTimeout as delay } from "node:timers/promises";
 import { fileURLToPath } from "node:url";
 import { promisify } from "node:util";
 import pg from "pg";
@@ -13,6 +12,8 @@ import { RedisMemoryServer } from "redis-memory-server";
 import { z } from "zod";
 
 import { backendApiKey } from "../backend-environment.ts";
+import { assertPortIsFree } from "./assert-port-is-free.ts";
+import { waitUntilReady } from "./wait-until-ready.ts";
 
 import type { ChildProcess } from "node:child_process";
 
@@ -118,31 +119,6 @@ function waitForClose(child: ChildProcess) {
   });
 }
 
-async function waitUntilReady(url: URL, exited: Promise<unknown>) {
-  const deadline = performance.now() + readyTimeoutMs;
-  const exit = new AbortController();
-
-  void exited.then(() => {
-    exit.abort();
-  });
-
-  while (!exit.signal.aborted && performance.now() < deadline) {
-    try {
-      const response = await fetch(new URL("/api/auth/ok", url));
-
-      if (response.ok) {
-        return true;
-      }
-    } catch {
-      // Not listening yet
-    }
-
-    await Promise.race([delay(250), exited]);
-  }
-
-  return false;
-}
-
 /**
  * Starts a built Riven in test mode, with its own database, Redis and mount, keyed by `parallelIndex`.
  *
@@ -167,6 +143,8 @@ export async function startRivenInstance({
   const port = 9200 + parallelIndex;
   const url = new URL(`http://127.0.0.1:${String(port)}`);
 
+  // Before anything else is started, so a stale Riven on the port fails the run, rather than answering for this one
+  await assertPortIsFree(port, url.hostname);
   await ensureDatabase(postgresUrl, databaseName);
 
   const redis = await startRedis();
@@ -220,7 +198,7 @@ export async function startRivenInstance({
     await redis.stop();
   };
 
-  if (!(await waitUntilReady(url, exited))) {
+  if (!(await waitUntilReady({ url, child, timeoutMs: readyTimeoutMs }))) {
     const { exitCode } = child;
 
     await stop();
