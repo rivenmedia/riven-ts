@@ -53,6 +53,15 @@ export function createE2eControlRouter({
       return;
     }
 
+    // Every test-mode instance boots with the same environment, so a reset can't apply a scenario's
+    if (scenario.environmentData) {
+      res.status(400).json({
+        error: `Mock scenario "${scenario.scenarioName}" sets environment data, which test mode can't apply`,
+      });
+
+      return;
+    }
+
     resetInstance(deps, scenario).then(() => {
       res.sendStatus(204);
     }, next);

@@ -22,6 +22,7 @@ import { createE2eControlClient } from "../control-client.ts";
 import { createE2eControlRouter } from "../control-router.ts";
 
 import type { MockScenarioName } from "../scenario-names.ts";
+import type { EntityManager } from "@mikro-orm/core";
 
 // `node.ts` refuses to load outside of a mock scenario, so stand in for its handler facade.
 vi.mock(import("#mocks/node.ts"), () => ({
@@ -31,6 +32,27 @@ vi.mock(import("#mocks/node.ts"), () => ({
     close: () => undefined,
   },
 }));
+
+// Test mode can't apply `dead-stream-link`, as it sets environment data, so
+// `e2e-baseline` stands in for a scenario that seeds its movie and handlers.
+vi.mock(import("#mocks/scenarios/index.ts"), async (importOriginal) => {
+  const { scenarios } = await importOriginal();
+  const { MockScenario } = await import("#mocks/utilities/mock-scenario.ts");
+  const { deadStreamLinkScenario: deadStreamLink } =
+    await import("#mocks/scenarios/dead-stream-link.scenario.ts");
+
+  class TestScenario extends MockScenario {
+    public override scenarioName = "e2e-baseline" as const;
+
+    public override handlers = deadStreamLink.handlers;
+
+    public override async seed(em: EntityManager) {
+      await deadStreamLink.seed(em);
+    }
+  }
+
+  return { scenarios: { ...scenarios, "e2e-baseline": new TestScenario() } };
+});
 
 const apiKey = "e2e-control-router-test-api-key-0123456789";
 
@@ -144,6 +166,18 @@ it("rejects unknown scenarios", async ({ rivenUrl }) => {
   expect(response.status).toBe(400);
 });
 
+it("rejects scenarios that set environment data", async ({ rivenUrl }) => {
+  const response = await postScenario(rivenUrl, "dead-stream-link", {
+    authorization: `Bearer ${apiKey}`,
+  });
+
+  expect(response.status).toBe(400);
+  await expect(response.json()).resolves.toStrictEqual({
+    error:
+      'Mock scenario "dead-stream-link" sets environment data, which test mode can\'t apply',
+  });
+});
+
 it("throws the status and body of a failed control request", async ({
   controlClient,
 }) => {
@@ -167,7 +201,7 @@ it("resets the instance and applies the scenario", async ({
   expect(settingsManager.restartRequired).toBe(true);
 
   await expect(
-    controlClient.applyScenario("dead-stream-link"),
+    controlClient.applyScenario("e2e-baseline"),
   ).resolves.toBeUndefined();
 
   const em = orm.em.fork();
@@ -183,7 +217,7 @@ it("resets the mock handlers to the scenario's", async ({
   controlClient,
   resetHandlersSpy,
 }) => {
-  await controlClient.applyScenario("dead-stream-link");
+  await controlClient.applyScenario("e2e-baseline");
 
   expect(resetHandlersSpy).toHaveBeenCalledExactlyOnceWith(
     ...deadStreamLinkScenario.handlers,
@@ -201,7 +235,7 @@ it("reports and clears unhandled requests", async ({ controlClient }) => {
     { method: "GET", url: "http://x.invalid/" },
   ]);
 
-  await controlClient.applyScenario("dead-stream-link");
+  await controlClient.applyScenario("e2e-baseline");
 
   await expect(controlClient.getUnhandledRequests()).resolves.toStrictEqual([]);
 });
