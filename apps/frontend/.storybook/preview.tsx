@@ -111,7 +111,9 @@ export const preview = definePreview({
       const worker = setupWorker(
         getSessionHandler,
         ...remoteAssetHandlers,
-        http.get("http://localhost:6006/*", passthrough),
+        // Requests to Storybook's own server, whatever its host and port, such as the modules Vite loads lazily
+        // (e.g. `/@id/virtual:next/image`), which MSW doesn't recognise as assets
+        http.get("/*", passthrough),
       );
 
       await worker.start({ onUnhandledFrame: "error", quiet: true });

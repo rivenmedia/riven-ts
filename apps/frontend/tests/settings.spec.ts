@@ -10,13 +10,17 @@ import {
   rankingProfileSchemaHandler,
 } from "#mocks/handlers/ranking-profiles.handler.ts";
 import { createSettingsPluginsStore } from "#mocks/handlers/settings-plugins.handler.ts";
-import { logDirectorySettingsSectionHandler } from "#mocks/handlers/settings-section.handler.ts";
+import {
+  createSettingsSectionStore,
+  logDirectorySettingsSectionHandler,
+} from "#mocks/handlers/settings-section.handler.ts";
 import {
   HttpResponse,
   expect,
   test,
   withHandlers,
 } from "#playwright/fixtures.ts";
+import { saveSettingsAndReload } from "#playwright/save-settings-and-reload.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { Page } from "@playwright/test";
@@ -82,26 +86,19 @@ test("the general settings don't load the plugin list", async ({
 });
 
 test.describe("the general settings", () => {
-  test("saving sends the changed settings", async ({
-    network,
-    page,
-    recordOperation,
-  }) => {
+  test("saving keeps the changed settings", async ({ network, page }) => {
     network.use(
-      api.mutation(UPDATE_SETTINGS_SECTION, () =>
-        HttpResponse.json({
-          data: {
-            updateSettingsSection: {
-              __typename: "SettingsMutationResult",
-              success: true,
-              issues: [],
-            },
+      ...createSettingsSectionStore({
+        properties: {
+          logDirectory: {
+            type: "string",
+            title: "Log Directory",
+            default: "./logs",
           },
-        }),
-      ),
+        },
+        values: { logDirectory: "./logs" },
+      }).handlers,
     );
-
-    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
 
     await page.goto("/settings/general");
 
@@ -109,19 +106,9 @@ test.describe("the general settings", () => {
 
     await waitForHydration(logDirectory);
     await logDirectory.fill("/var/log/riven");
-    await page.getByRole("button", { name: "Save" }).click();
+    await saveSettingsAndReload(page);
 
-    await expect(
-      page.getByText("Settings saved. Restart Riven to apply them."),
-    ).toBeVisible();
-
-    expect(updates).toEqual([
-      {
-        id: "general",
-        values: { logDirectory: "/var/log/riven" },
-        reset: [],
-      },
-    ]);
+    await expect(logDirectory).toHaveValue("/var/log/riven");
   });
 
   test("shows the problems Riven finds with the changes", async ({

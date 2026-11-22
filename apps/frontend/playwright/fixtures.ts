@@ -2,11 +2,12 @@ import { faker } from "@faker-js/faker";
 import { PlaywrightNetworkSource } from "@msw/playwright";
 import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
-import { OperationTypeNode, getOperationAST } from "graphql";
+import { getOperationAST } from "graphql";
 import { DateTime } from "luxon";
 import { defineNetwork } from "msw/experimental";
 import { HttpResponse } from "msw/http";
 import { test as nextTest } from "next/experimental/testmode/playwright.js";
+import { z } from "zod";
 
 import { api } from "#mocks/graphql.ts";
 import { createAuthProvidersHandler } from "#mocks/handlers/auth-providers.handler.ts";
@@ -44,6 +45,12 @@ import type { SetReturnType } from "type-fest";
 
 export { expect } from "@playwright/test";
 export { HttpResponse, http } from "msw/http";
+
+/** The body of a GraphQL request */
+const graphqlRequestBodySchema = z.object({
+  operationName: z.string(),
+  variables: z.record(z.string(), z.unknown()).default({}),
+});
 
 /**
  * Wraps handlers for `test.use({ handlers })`.
@@ -270,25 +277,44 @@ export const test = nextTest.extend<Options & Fixtures>({
     { auto: true },
   ],
   recordOperation: async ({ network }, use) => {
+    // Stops recording once the test ends, so listeners don't pile up across tests
+    const recording = new AbortController();
+
     await use(
       <TVariables extends Record<string, unknown>>(
         document: TypedDocumentNode<unknown, TVariables>,
       ) => {
         const recorded: TVariables[] = [];
-        const createHandler =
-          getOperationAST(document)?.operation === OperationTypeNode.MUTATION
-            ? api.mutation
-            : api.query;
+        const operationName = getOperationAST(document)?.name?.value;
 
-        // Returning nothing falls through to the handler that actually answers the request
-        network.use(
-          createHandler(document, ({ variables }) => {
-            recorded.push(variables);
-          }),
+        // Listens to the network's life-cycle events, rather than adding a handler, so recording a request can't
+        // change how it's handled
+        network.events.on(
+          "request:start",
+          async ({ request }) => {
+            if (request.method !== "POST") {
+              return;
+            }
+
+            // The handler reads the body too, so it's read from a clone
+            const body = graphqlRequestBodySchema.safeParse(
+              await request
+                .clone()
+                .json()
+                .catch(() => null),
+            );
+
+            if (body.success && body.data.operationName === operationName) {
+              recorded.push(body.data.variables as TVariables);
+            }
+          },
+          { signal: recording.signal },
         );
 
         return recorded;
       },
     );
+
+    recording.abort();
   },
 });

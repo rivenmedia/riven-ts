@@ -40,3 +40,5 @@ pruned/
 
 # The MSW skill erroneously includes a .github directory which should be ignored
 .agents/skills/msw/.github
+
+.playwright-mcp/
