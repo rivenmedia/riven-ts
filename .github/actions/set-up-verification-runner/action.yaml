@@ -40,6 +40,8 @@ runs:
         else
           sudo apt-get update
           sudo apt-get install -y fuse libfuse-dev
+          # Riven mounts with allowOther, which FUSE only permits when this is set
+          grep -qx user_allow_other /etc/fuse.conf || echo user_allow_other | sudo tee -a /etc/fuse.conf
         fi
 
     - name: Set up Postgres service

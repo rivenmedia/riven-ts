@@ -79,6 +79,12 @@ jobs:
 
           - name: E2E tests
             command: e2e:headless
+            runner-requirements:
+              - fuse
+              - redis-server
+              - postgres-service
+            env:
+              E2E_POSTGRES_URL: postgres://runner:runner@127.0.0.1:5432/postgres
 
           - name: Validate generators
             command: //#validate-generators
