@@ -29,9 +29,11 @@ Chromium.
 
 Every request Riven makes to an external service needs a handler in a Riven
 mock scenario. A request without a handler fails the test and the report
-lists it. Requests made between tests, after one test's reset and before the
-next test's scenario, are refused but not reported, so a missing handler
-there shows up as a failure in the next test, or not at all.
+lists it. Riven reports unhandled requests only for the span of one test. Applying a
+test's scenario resets the instance and clears the list, and the check runs at
+the end of the test. A request made after one test's check and before the next
+test's reset is refused but never reported, and it doesn't show up in the next
+test either, so a missing handler there can go unnoticed.
 
 ### Running locally
 
