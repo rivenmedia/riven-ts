@@ -12,9 +12,6 @@ interface CreateBackendProxyHandlersInput {
 
   /** The `BACKEND_URL` the Next.js server sends its backend requests to */
   backendUrl: string;
-
-  /** Other origins the browser sends its backend requests to */
-  extraOrigins?: string[];
 }
 
 /** Headers that only describe a single connection, so can't be forwarded to another one */
@@ -51,7 +48,6 @@ export function createBackendProxyHandlers({
   rivenUrl,
   origin,
   backendUrl,
-  extraOrigins = [],
 }: CreateBackendProxyHandlersInput): AnyHandler[] {
   const forward: HttpResponseResolver = async ({ request }) => {
     const { pathname, search } = new URL(request.url);
@@ -75,7 +71,7 @@ export function createBackendProxyHandlers({
     );
   };
 
-  return [origin, backendUrl, ...extraOrigins].flatMap((baseUrl) => [
+  return [origin, backendUrl].flatMap((baseUrl) => [
     http.all(`${baseUrl}/graphql`, forward),
     http.all(`${baseUrl}/api/auth/*`, forward),
   ]);

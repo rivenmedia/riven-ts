@@ -57,15 +57,6 @@ E2E_POSTGRES_URL=postgres://postgres:<password>@127.0.0.1:5432/postgres \
 
 CI provides the same three with `runner-requirements` in `verify.yaml`.
 
-### Known issue: the browser auth origin
-
-The browser's auth client always uses the default `ORIGIN`,
-`https://localhost:9000`, because `privateEnvironment.ORIGIN` is undefined in
-the browser. The mocked suite hides this, as its handlers match any origin.
-The integrated fixtures forward that origin to Riven through
-`browserAuthOrigin`. Remove that once the frontend uses the page's own
-origin.
-
 ## Storybook tests
 
 ### Story reuse
