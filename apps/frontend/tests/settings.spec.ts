@@ -1,5 +1,3 @@
-import { omit } from "es-toolkit";
-
 import { UPDATE_SETTINGS_SECTION } from "#app/(protected)/settings/_components/settings-section/_mutations/update-settings-section.mutation.ts";
 import { SETTINGS_PLUGINS } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.ts";
 import {
@@ -13,8 +11,7 @@ import {
 } from "#mocks/handlers/ranking-profiles.handler.ts";
 import { createSettingsPluginsStore } from "#mocks/handlers/settings-plugins.handler.ts";
 import {
-  everySettingTypeSectionHandler,
-  everySettingTypeSectionValues,
+  createSettingsSectionStore,
   logDirectorySettingsSectionHandler,
 } from "#mocks/handlers/settings-section.handler.ts";
 import {
@@ -87,27 +84,31 @@ test("the general settings don't load the plugin list", async ({
   expect(settingsPluginsRequests).toHaveLength(0);
 });
 
-test.describe("the general settings", () => {
-  test("saving sends the changed settings", async ({
-    network,
-    page,
-    recordOperation,
-  }) => {
-    network.use(
-      api.mutation(UPDATE_SETTINGS_SECTION, () =>
-        HttpResponse.json({
-          data: {
-            updateSettingsSection: {
-              __typename: "SettingsMutationResult",
-              success: true,
-              issues: [],
-            },
-          },
-        }),
-      ),
-    );
+/** Saves the settings, then reloads the page, so it shows what Riven stored */
+async function saveAndReload(page: Page) {
+  await page.getByRole("button", { name: "Save" }).click();
 
-    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
+  await expect(
+    page.getByText("Settings saved. Restart Riven to apply them."),
+  ).toBeVisible();
+
+  await page.reload();
+}
+
+test.describe("the general settings", () => {
+  test("saving keeps the changed settings", async ({ network, page }) => {
+    network.use(
+      ...createSettingsSectionStore({
+        properties: {
+          logDirectory: {
+            type: "string",
+            title: "Log Directory",
+            default: "./logs",
+          },
+        },
+        values: { logDirectory: "./logs" },
+      }).handlers,
+    );
 
     await page.goto("/settings/general");
 
@@ -115,19 +116,9 @@ test.describe("the general settings", () => {
 
     await waitForHydration(logDirectory);
     await logDirectory.fill("/var/log/riven");
-    await page.getByRole("button", { name: "Save" }).click();
+    await saveAndReload(page);
 
-    await expect(
-      page.getByText("Settings saved. Restart Riven to apply them."),
-    ).toBeVisible();
-
-    expect(updates).toEqual([
-      {
-        id: "general",
-        values: { logDirectory: "/var/log/riven" },
-        reset: [],
-      },
-    ]);
+    await expect(logDirectory).toHaveValue("/var/log/riven");
   });
 
   test("shows the problems Riven finds with the changes", async ({
@@ -169,27 +160,53 @@ test.describe("the general settings", () => {
 test.describe("a settings section with every type of setting", () => {
   test.beforeEach(({ network }) => {
     network.use(
-      everySettingTypeSectionHandler,
-      api.mutation(UPDATE_SETTINGS_SECTION, () =>
-        HttpResponse.json({
-          data: {
-            updateSettingsSection: {
-              __typename: "SettingsMutationResult",
-              success: true,
-              issues: [],
-            },
+      ...createSettingsSectionStore({
+        properties: {
+          logDirectory: {
+            type: "string",
+            title: "Log Directory",
+            default: "./logs",
           },
-        }),
-      ),
+          debugLogging: {
+            type: "boolean",
+            title: "Debug logging",
+            default: false,
+          },
+          logLevel: {
+            type: "string",
+            enum: ["info", "debug", "warning"],
+            title: "Log level",
+            default: "info",
+          },
+          excludedWords: {
+            type: "array",
+            items: { type: "string" },
+            title: "Excluded words",
+            default: [],
+          },
+          updateIntervalSeconds: {
+            anyOf: [{ type: "integer", minimum: 0 }, { type: "null" }],
+            title: "Update interval",
+            default: 60,
+          },
+          dubbedOnly: {
+            anyOf: [{ type: "boolean" }, { type: "null" }],
+            title: "Dubbed only",
+            default: null,
+          },
+          apiKey: { type: "string", title: "API key", secret: true },
+        },
+        values: {
+          logDirectory: "/var/log/riven",
+          excludedWords: ["CAM"],
+          updateIntervalSeconds: 60,
+        },
+        secretStates: { apiKey: "unset" },
+      }).handlers,
     );
   });
 
-  test("saving sends each edited setting", async ({
-    page,
-    recordOperation,
-  }) => {
-    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
-
+  test("saving keeps each edited setting", async ({ page }) => {
     await page.goto("/settings/general");
 
     const debugLogging = page.getByRole("switch", { name: "Debug logging" });
@@ -213,60 +230,45 @@ test.describe("a settings section with every type of setting", () => {
     await page.getByRole("combobox", { name: "Dubbed only" }).click();
     await page.getByRole("option", { name: "Yes" }).click();
 
-    await page.getByRole("button", { name: "Save" }).click();
+    await saveAndReload(page);
 
+    await expect(debugLogging).toBeChecked();
+    await expect(page.getByRole("combobox", { name: "Log level" })).toHaveText(
+      "debug",
+    );
+    await expect(page.getByText("HDR", { exact: true })).toBeVisible();
     await expect(
-      page.getByText("Settings saved. Restart Riven to apply them."),
-    ).toBeVisible();
-
-    // A blank secret is sent, which leaves it unchanged
-    expect(updates).toEqual([
-      {
-        id: "general",
-        values: {
-          ...everySettingTypeSectionValues,
-          debugLogging: true,
-          logLevel: "debug",
-          excludedWords: ["CAM", "HDR"],
-          updateIntervalSeconds: 120,
-          dubbedOnly: true,
-          apiKey: "",
-        },
-        reset: [],
-      },
-    ]);
+      page.getByRole("spinbutton", { name: "Update interval" }),
+    ).toHaveValue("120");
+    await expect(
+      page.getByRole("combobox", { name: "Dubbed only" }),
+    ).toHaveText("Yes");
+    // The secret was left blank, so it's still unset
+    await expect(page.getByLabel("API key")).toHaveAttribute(
+      "placeholder",
+      "Not set",
+    );
   });
 
-  test("emptying a setting resets it, or saves null when it's nullable", async ({
+  test("emptying a setting resets it, or clears it when it's nullable", async ({
     page,
-    recordOperation,
   }) => {
-    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
-
     await page.goto("/settings/general");
 
     const logDirectory = page.getByRole("textbox", { name: "Log Directory" });
+    const updateInterval = page.getByRole("spinbutton", {
+      name: "Update interval",
+    });
 
     await waitForHydration(logDirectory);
     await logDirectory.clear();
-    await page.getByRole("spinbutton", { name: "Update interval" }).clear();
-    await page.getByRole("button", { name: "Save" }).click();
+    await updateInterval.clear();
+    await saveAndReload(page);
 
-    await expect(
-      page.getByText("Settings saved. Restart Riven to apply them."),
-    ).toBeVisible();
-
-    expect(updates).toEqual([
-      {
-        id: "general",
-        values: {
-          ...omit(everySettingTypeSectionValues, ["logDirectory"]),
-          updateIntervalSeconds: null,
-          apiKey: "",
-        },
-        reset: ["logDirectory"],
-      },
-    ]);
+    // Reset to its default, rather than left empty
+    await expect(logDirectory).toHaveValue("./logs");
+    // Saved as null, rather than reset to its default
+    await expect(updateInterval).toHaveValue("");
   });
 });
 
