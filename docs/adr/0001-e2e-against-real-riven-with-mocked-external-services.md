@@ -9,9 +9,10 @@ couldn't catch the two disagreeing. We now also run E2E tests against a real
 Riven. All external services are mocked, because they aren't what's under test
 and the tests must never reach them. Each Playwright worker spawns its own
 built Riven, with its own Postgres database, Redis and FUSE mount. Inside Riven,
-in-process MSW handles the external services and errors on any request it
-doesn't handle. Because MSW doesn't intercept `undici.request` (which the VFS
-uses), an undici dispatcher that refuses anything but loopback backs it up.
+in-process MSW handles the external services. It also intercepts
+`undici.request`, which the VFS uses, through its HTTP request interceptor. Any
+request it doesn't handle fails unless it's to loopback, which Riven uses to
+call itself.
 Before each test, a test-only control endpoint resets Riven and applies a named
 mock scenario. One Next.js server is shared by all workers. Each test's traffic
 to Riven is re-addressed to its worker's instance: Playwright does this for the

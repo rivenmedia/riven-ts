@@ -1,7 +1,6 @@
 export interface UnhandledRequest {
   method: string;
   url: string;
-  source: "msw" | "dispatcher";
 }
 
 const requests: UnhandledRequest[] = [];

@@ -308,6 +308,9 @@ catalogs:
     '@msw/playwright':
       specifier: ^0.7.0
       version: 0.7.0
+    '@mswjs/interceptors':
+      specifier: ^0.45.9
+      version: 0.45.9
     '@next-safe-action/adapter-react-hook-form':
       specifier: ^2.0.6
       version: 2.1.0
@@ -1143,6 +1146,9 @@ importers:
       '@mikro-orm/seeder':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
+      '@mswjs/interceptors':
+        specifier: 'catalog:'
+        version: 0.45.9(supports-color@10.2.2)
       '@repo/core-util-graphql-schema':
         specifier: workspace:^
         version: link:../../packages/core/util-graphql-schema
