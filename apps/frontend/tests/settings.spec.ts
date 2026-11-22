@@ -1,3 +1,5 @@
+import { omit } from "es-toolkit";
+
 import { UPDATE_SETTINGS_SECTION } from "#app/(protected)/settings/_components/settings-section/_mutations/update-settings-section.mutation.ts";
 import { SETTINGS_PLUGINS } from "#app/(protected)/settings/plugins/_queries/settings-plugins.query.ts";
 import {
@@ -10,7 +12,11 @@ import {
   rankingProfileSchemaHandler,
 } from "#mocks/handlers/ranking-profiles.handler.ts";
 import { createSettingsPluginsStore } from "#mocks/handlers/settings-plugins.handler.ts";
-import { logDirectorySettingsSectionHandler } from "#mocks/handlers/settings-section.handler.ts";
+import {
+  everySettingTypeSectionHandler,
+  everySettingTypeSectionValues,
+  logDirectorySettingsSectionHandler,
+} from "#mocks/handlers/settings-section.handler.ts";
 import {
   HttpResponse,
   expect,
@@ -157,6 +163,110 @@ test.describe("the general settings", () => {
     await page.getByRole("button", { name: "Save" }).click();
 
     await expect(page.getByText("Directory is not writable")).toBeVisible();
+  });
+});
+
+test.describe("a settings section with every type of setting", () => {
+  test.beforeEach(({ network }) => {
+    network.use(
+      everySettingTypeSectionHandler,
+      api.mutation(UPDATE_SETTINGS_SECTION, () =>
+        HttpResponse.json({
+          data: {
+            updateSettingsSection: {
+              __typename: "SettingsMutationResult",
+              success: true,
+              issues: [],
+            },
+          },
+        }),
+      ),
+    );
+  });
+
+  test("saving sends each edited setting", async ({
+    page,
+    recordOperation,
+  }) => {
+    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
+
+    await page.goto("/settings/general");
+
+    const debugLogging = page.getByRole("switch", { name: "Debug logging" });
+
+    await waitForHydration(debugLogging);
+    await debugLogging.click();
+
+    await page.getByRole("combobox", { name: "Log level" }).click();
+    await page.getByRole("option", { name: "debug" }).click();
+
+    const excludedWords = page.getByRole("combobox", {
+      name: "Excluded words",
+    });
+
+    await excludedWords.click();
+    await excludedWords.fill("HDR");
+    await excludedWords.press("Enter");
+
+    await page.getByRole("spinbutton", { name: "Update interval" }).fill("120");
+
+    await page.getByRole("combobox", { name: "Dubbed only" }).click();
+    await page.getByRole("option", { name: "Yes" }).click();
+
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      page.getByText("Settings saved. Restart Riven to apply them."),
+    ).toBeVisible();
+
+    // A blank secret is sent, which leaves it unchanged
+    expect(updates).toEqual([
+      {
+        id: "general",
+        values: {
+          ...everySettingTypeSectionValues,
+          debugLogging: true,
+          logLevel: "debug",
+          excludedWords: ["CAM", "HDR"],
+          updateIntervalSeconds: 120,
+          dubbedOnly: true,
+          apiKey: "",
+        },
+        reset: [],
+      },
+    ]);
+  });
+
+  test("emptying a setting resets it, or saves null when it's nullable", async ({
+    page,
+    recordOperation,
+  }) => {
+    const updates = recordOperation(UPDATE_SETTINGS_SECTION);
+
+    await page.goto("/settings/general");
+
+    const logDirectory = page.getByRole("textbox", { name: "Log Directory" });
+
+    await waitForHydration(logDirectory);
+    await logDirectory.clear();
+    await page.getByRole("spinbutton", { name: "Update interval" }).clear();
+    await page.getByRole("button", { name: "Save" }).click();
+
+    await expect(
+      page.getByText("Settings saved. Restart Riven to apply them."),
+    ).toBeVisible();
+
+    expect(updates).toEqual([
+      {
+        id: "general",
+        values: {
+          ...omit(everySettingTypeSectionValues, ["logDirectory"]),
+          updateIntervalSeconds: null,
+          apiKey: "",
+        },
+        reset: ["logDirectory"],
+      },
+    ]);
   });
 });
 
