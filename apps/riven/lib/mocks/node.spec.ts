@@ -77,9 +77,9 @@ async function importInTestMode() {
 }
 
 /**
- * Starts a real HTTP server on `host`, so a test can tell whether a request reached it.
+ * Starts a real HTTP server on 127.0.0.1, so a test can tell whether a request reached it.
  */
-async function startServer(host: string) {
+async function startServer() {
   const receivedPaths: string[] = [];
   const server = createServer((req, res) => {
     receivedPaths.push(req.url ?? "");
@@ -91,15 +91,40 @@ async function startServer(host: string) {
     server.close();
   });
 
-  server.listen(0, host);
+  server.listen(0, "127.0.0.1");
   await once(server, "listening");
 
   const address = server.address();
 
   expect.assert(address !== null && typeof address === "object");
 
-  return { url: `http://${host}:${String(address.port)}/`, receivedPaths };
+  const port = String(address.port);
+
+  return {
+    loopbackUrl: `http://127.0.0.1:${port}/`,
+    // The IPv4-mapped IPv6 address reaches the same listener, but isn't one of
+    // test mode's loopback hosts, so it stands in for an external host. Every
+    // platform has 127.0.0.1, unlike other 127.0.0.0/8 addresses (macOS has no
+    // 127.0.0.2).
+    externalUrl: new URL(`http://[::ffff:127.0.0.1]:${port}/`).href,
+    receivedPaths,
+  };
 }
+
+it("reaches a local server through its external URL without mocks", async () => {
+  const listener = await startServer();
+
+  const fetched = await fetch(listener.externalUrl);
+
+  expect(fetched.status).toBe(200);
+
+  const requested = await request(listener.externalUrl);
+
+  expect(requested.statusCode).toBe(200);
+  await requested.body.dump();
+
+  expect(listener.receivedPaths).toStrictEqual(["/", "/"]);
+});
 
 it("mocks handled fetch and undici requests in test mode", async () => {
   await importInTestMode();
@@ -116,41 +141,41 @@ it("mocks handled fetch and undici requests in test mode", async () => {
 
 it("fails and records unhandled external fetch requests in test mode", async () => {
   const { unhandledRequests } = await importInTestMode();
-  const external = await startServer("127.0.0.2");
+  const listener = await startServer();
 
-  await expect(fetch(external.url)).rejects.toThrow(/fetch failed/u);
+  await expect(fetch(listener.externalUrl)).rejects.toThrow(/fetch failed/u);
 
-  expect(external.receivedPaths).toStrictEqual([]);
+  expect(listener.receivedPaths).toStrictEqual([]);
   expect(unhandledRequests.list()).toStrictEqual([
-    { method: "GET", url: external.url },
+    { method: "GET", url: listener.externalUrl },
   ]);
 });
 
 it("fails and records unhandled external undici requests in test mode", async () => {
   const { unhandledRequests } = await importInTestMode();
-  const external = await startServer("127.0.0.2");
+  const listener = await startServer();
 
-  await expect(request(external.url)).rejects.toThrow(/Network error/u);
+  await expect(request(listener.externalUrl)).rejects.toThrow(/Network error/u);
 
-  expect(external.receivedPaths).toStrictEqual([]);
+  expect(listener.receivedPaths).toStrictEqual([]);
   expect(unhandledRequests.list()).toStrictEqual([
-    { method: "GET", url: external.url },
+    { method: "GET", url: listener.externalUrl },
   ]);
 });
 
 it("passes unhandled loopback requests through in test mode", async () => {
   const { unhandledRequests } = await importInTestMode();
-  const loopback = await startServer("127.0.0.1");
+  const listener = await startServer();
 
-  const fetched = await fetch(loopback.url);
+  const fetched = await fetch(listener.loopbackUrl);
 
   expect(fetched.status).toBe(200);
 
-  const requested = await request(loopback.url);
+  const requested = await request(listener.loopbackUrl);
 
   expect(requested.statusCode).toBe(200);
   await requested.body.dump();
 
-  expect(loopback.receivedPaths).toStrictEqual(["/", "/"]);
+  expect(listener.receivedPaths).toStrictEqual(["/", "/"]);
   expect(unhandledRequests.list()).toStrictEqual([]);
 });
