@@ -1,18 +1,17 @@
 import { createE2eControlClient, createE2eEnvironment } from "@repo/util-e2e";
 
-import { execFile, spawn } from "node:child_process";
+import { spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
 import { mkdir, readFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { promisify } from "node:util";
-import pg from "pg";
-import { RedisMemoryServer } from "redis-memory-server";
 import { z } from "zod";
 
 import { backendApiKey } from "../backend-environment.ts";
 import { assertPortIsFree } from "./assert-port-is-free.ts";
+import { ensureDatabase } from "./ensure-database.ts";
+import { startRedis } from "./start-redis.ts";
 import { waitUntilReady } from "./wait-until-ready.ts";
 
 import type { ChildProcess } from "node:child_process";
@@ -54,39 +53,6 @@ const rivenDirectory = fileURLToPath(
   new URL("../../../riven/", import.meta.url),
 );
 
-async function ensureDatabase(postgresUrl: string, name: string) {
-  const client = new pg.Client({ connectionString: postgresUrl });
-
-  await client.connect();
-
-  try {
-    const { rowCount } = await client.query(
-      "SELECT 1 FROM pg_database WHERE datname = $1",
-      [name],
-    );
-
-    if (!rowCount) {
-      // oxlint-disable-next-line sonarjs/sql-queries -- the name is escaped, and identifiers can't be parameters
-      await client.query(`CREATE DATABASE ${client.escapeIdentifier(name)}`);
-    }
-  } finally {
-    await client.end();
-  }
-}
-
-async function startRedis() {
-  // oxlint-disable-next-line typescript/strict-void-return -- `promisify` only uses `execFile`'s callback, so ignoring the `ChildProcess` it returns is fine
-  const { stdout } = await promisify(execFile)("which", ["redis-server"]);
-  const redis = new RedisMemoryServer({
-    binary: { systemBinary: stdout.trim() },
-  });
-
-  return {
-    url: `redis://${await redis.getHost()}:${String(await redis.getPort())}`,
-    stop: () => redis.stop(),
-  };
-}
-
 /**
  * Creates the directory Riven mounts its VFS on.
  *
@@ -120,6 +86,87 @@ function waitForClose(child: ChildProcess) {
   });
 }
 
+interface SpawnRivenInput {
+  url: URL;
+  logPath: string;
+  environment: NodeJS.ProcessEnv;
+}
+
+/**
+ * Spawns the built Riven and waits until it's ready.
+ *
+ * If it isn't ready, it's stopped, and this throws with the last lines of its log.
+ *
+ * @returns A function that stops Riven and flushes its log
+ */
+async function spawnRiven({ url, logPath, environment }: SpawnRivenInput) {
+  await mkdir(path.dirname(logPath), { recursive: true });
+
+  const log = createWriteStream(logPath);
+  const child = spawn(
+    process.execPath,
+    ["--conditions=production", "--enable-source-maps", "dist/lib/index.js"],
+    {
+      cwd: rivenDirectory,
+      env: environment,
+      stdio: ["ignore", "pipe", "pipe"],
+    },
+  );
+
+  // An unhandled `error` event, e.g. from a failed spawn, would crash the worker
+  const childErrors: Error[] = [];
+
+  child.on("error", (error) => {
+    childErrors.push(error);
+  });
+
+  child.stdout.pipe(log, { end: false });
+  child.stderr.pipe(log, { end: false });
+
+  const exited = waitForClose(child);
+
+  const stop = async () => {
+    if (child.exitCode === null && child.signalCode === null) {
+      child.kill("SIGTERM");
+
+      const killTimer = setTimeout(() => {
+        child.kill("SIGKILL");
+      }, stopTimeoutMs);
+
+      await exited;
+      clearTimeout(killTimer);
+    }
+
+    await new Promise((resolve) => {
+      log.end(resolve);
+    });
+  };
+
+  if (!(await waitUntilReady({ url, child, timeoutMs: readyTimeoutMs }))) {
+    const { exitCode } = child;
+    const [childError] = childErrors;
+
+    await stop();
+
+    const tail = await readLogTail(logPath);
+
+    if (childError) {
+      throw new Error(
+        `Riven couldn't be started: ${childError.message}. Last log lines:\n${tail}`,
+        { cause: childError },
+      );
+    }
+
+    throw new Error(
+      exitCode === null
+        ? `Riven wasn't ready within ${String(readyTimeoutMs / 1000)} s. Last log lines:\n${tail}`
+        : `Riven exited with code ${String(exitCode)} before it was ready. Last log lines:\n${tail}`,
+    );
+  }
+
+  return stop;
+}
+
 /**
  * Starts a built Riven in test mode, with its own database, Redis and mount, keyed by `parallelIndex`.
  *
@@ -150,16 +197,13 @@ export async function startRivenInstance({
 
   const redis = await startRedis();
 
-  await createMountDirectory(vfsMountPath);
-  await mkdir(path.dirname(logPath), { recursive: true });
+  try {
+    await createMountDirectory(vfsMountPath);
 
-  const log = createWriteStream(logPath);
-  const child = spawn(
-    process.execPath,
-    ["--conditions=production", "--enable-source-maps", "dist/lib/index.js"],
-    {
-      cwd: rivenDirectory,
-      env: {
+    const stopRiven = await spawnRiven({
+      url,
+      logPath,
+      environment: {
         ...createE2eEnvironment({
           port,
           databaseUrl: databaseUrl.toString(),
@@ -172,52 +216,22 @@ export async function startRivenInstance({
         // Already set by `createE2eEnvironment`, but Next.js' types require it to be one of its known modes
         NODE_ENV: "test",
       },
-      stdio: ["ignore", "pipe", "pipe"],
-    },
-  );
-
-  child.stdout.pipe(log, { end: false });
-  child.stderr.pipe(log, { end: false });
-
-  const exited = waitForClose(child);
-
-  const stop = async () => {
-    if (child.exitCode === null && child.signalCode === null) {
-      child.kill("SIGTERM");
-
-      const killTimer = setTimeout(() => {
-        child.kill("SIGKILL");
-      }, stopTimeoutMs);
-
-      await exited;
-      clearTimeout(killTimer);
-    }
-
-    await new Promise((resolve) => {
-      log.end(resolve);
     });
+
+    return {
+      url,
+      logPath,
+      control: createE2eControlClient(url, backendApiKey),
+      readLogTail: () => readLogTail(logPath),
+      stop: async () => {
+        await stopRiven();
+        await redis.stop();
+      },
+    };
+  } catch (error) {
+    // The caller can't stop a Redis it was never handed
     await redis.stop();
-  };
 
-  if (!(await waitUntilReady({ url, child, timeoutMs: readyTimeoutMs }))) {
-    const { exitCode } = child;
-
-    await stop();
-
-    const tail = await readLogTail(logPath);
-
-    throw new Error(
-      exitCode === null
-        ? `Riven wasn't ready within ${String(readyTimeoutMs / 1000)} s. Last log lines:\n${tail}`
-        : `Riven exited with code ${String(exitCode)} before it was ready. Last log lines:\n${tail}`,
-    );
+    throw error;
   }
-
-  return {
-    url,
-    logPath,
-    control: createE2eControlClient(url, backendApiKey),
-    readLogTail: () => readLogTail(logPath),
-    stop,
-  };
 }
