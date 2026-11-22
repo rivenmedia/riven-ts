@@ -212,12 +212,7 @@ export const startGqlServer = fromPromise<
       app.use(
         "/__e2e__",
         express.json(),
-        createE2eControlRouter({
-          orm,
-          services,
-          settingsManager,
-          apiKey: settings.apiKey,
-        }),
+        createE2eControlRouter({ orm, services, settingsManager }),
       );
     }
 

@@ -17,6 +17,7 @@ import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenar
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
+import { settings } from "#utilities/settings.ts";
 
 import { createE2eControlClient } from "../control-client.ts";
 import { createE2eControlRouter } from "../control-router.ts";
@@ -54,7 +55,7 @@ vi.mock(import("#mocks/scenarios/index.ts"), async (importOriginal) => {
   return { scenarios: { ...scenarios, "e2e-baseline": new TestScenario() } };
 });
 
-const apiKey = "e2e-control-router-test-api-key-0123456789";
+const { apiKey } = settings;
 
 const it = baseIt
   // Keeps the legacy ranking config import away from any file in the working directory.
@@ -97,7 +98,7 @@ const it = baseIt
       app.use(
         "/__e2e__",
         express.json(),
-        createE2eControlRouter({ orm, services, settingsManager, apiKey }),
+        createE2eControlRouter({ orm, services, settingsManager }),
       );
 
       const httpServer = app.listen(0, "127.0.0.1");

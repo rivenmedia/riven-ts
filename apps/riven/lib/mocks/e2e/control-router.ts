@@ -1,7 +1,7 @@
 import { Router } from "express";
-import { createHash, timingSafeEqual } from "node:crypto";
 import z from "zod";
 
+import { isApiKey, readBearerToken } from "#graphql/auth/api-key.ts";
 import { scenarios } from "#mocks/scenarios/index.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 
@@ -12,33 +12,28 @@ import type { ResetInstanceDeps } from "./reset-instance.ts";
 
 const ApplyScenarioBody = z.object({ scenario: z.enum(mockScenarioNames) });
 
-// Comparing digests gives `timingSafeEqual` inputs of equal length,
-// so a wrong key's length cannot short-circuit the comparison.
-function digest(value: string) {
-  return createHash("sha256").update(value).digest();
-}
-
 /**
  * The test-mode control endpoint that E2E tests use to reset Riven between tests.
- * Every route requires `Authorization: Bearer <apiKey>`.
+ * Every route requires `Authorization: Bearer <apiKey>`, checked as the GraphQL API checks it.
  */
-export function createE2eControlRouter({
-  apiKey,
-  ...deps
-}: ResetInstanceDeps & { apiKey: string }): Router {
+export function createE2eControlRouter(deps: ResetInstanceDeps): Router {
   const router = Router();
-  const authorizationDigest = digest(`Bearer ${apiKey}`);
 
   router.use((req, res, next) => {
-    const authorization = req.get("authorization") ?? "";
+    const token = readBearerToken(req.get("authorization"));
 
-    if (!timingSafeEqual(digest(authorization), authorizationDigest)) {
-      res.status(401).json({ error: "Missing or invalid API key" });
+    void (token === undefined ? Promise.resolve(false) : isApiKey(token)).then(
+      (isValid) => {
+        if (!isValid) {
+          res.status(401).json({ error: "Missing or invalid API key" });
 
-      return;
-    }
+          return;
+        }
 
-    next();
+        next();
+      },
+      next,
+    );
   });
 
   router.post("/scenario", (req, res, next) => {
