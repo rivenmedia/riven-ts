@@ -549,8 +549,6 @@ export const SettingGroup = meta.story({
   ],
 });
 
-const onTupleSubmit = fn();
-
 export const Tuple = meta.story({
   args: {
     type: "tuple",
@@ -584,33 +582,28 @@ export const Tuple = meta.story({
     },
   },
   decorators: [
-    createFormDecorator(
-      {
-        defaultValues: { tuple: [2, 6, 24] },
-        progressive: true,
-      },
-      onTupleSubmit,
-    ),
+    createFormDecorator({
+      defaultValues: { tuple: [2, 6, 24] },
+      progressive: true,
+    }),
   ],
-  beforeEach: () => {
-    onTupleSubmit.mockClear();
-  },
 });
 
-Tuple.test(
-  "Editing one item submits the full tuple as numbers",
-  async ({ canvas }) => {
-    const input = canvas.getByRole("spinbutton", {
-      name: /after 5 attempts/iu,
-    });
+// Submitting the full tuple as numbers is tested with the form, in
+// `SchemaSettingsForm`'s `EverySettingType` story
+Tuple.test("Editing one item leaves the others", async ({ canvas }) => {
+  const input = canvas.getByRole("spinbutton", {
+    name: /after 5 attempts/iu,
+  });
 
-    await userEvent.clear(input);
-    await userEvent.type(input, "7");
-    await userEvent.click(canvas.getByRole("button", { name: /save/iu }));
+  await userEvent.clear(input);
+  await userEvent.type(input, "7");
 
-    await expect(onTupleSubmit).toHaveBeenCalledWith(
-      { tuple: [2, 7, 24] },
-      expect.anything(),
-    );
-  },
-);
+  await expect(input).toHaveValue(7);
+  await expect(
+    canvas.getByRole("spinbutton", { name: /after 2 attempts/iu }),
+  ).toHaveValue(2);
+  await expect(
+    canvas.getByRole("spinbutton", { name: /after 10 attempts/iu }),
+  ).toHaveValue(24);
+});

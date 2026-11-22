@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { expect, fn, mocked, userEvent, waitFor, within } from "storybook/test";
 import { z } from "zod";
 
@@ -6,8 +7,6 @@ import { preview } from "#.storybook/preview.tsx";
 import { SchemaSettingsForm } from "./schema-settings-form";
 
 import type { SchemaSettingsFormProps } from "./schema-settings-form";
-
-const onSubmit = fn<SchemaSettingsFormProps["onSubmit"]>();
 
 const meta = preview.meta({
   title: "Settings / SchemaSettingsForm",
@@ -33,10 +32,7 @@ const meta = preview.meta({
     issues: [],
     submitLabel: "Save profile",
     isPending: false,
-    onSubmit,
-  },
-  beforeEach() {
-    onSubmit.mockReset();
+    onSubmit: fn<SchemaSettingsFormProps["onSubmit"]>(),
   },
 });
 
@@ -44,8 +40,8 @@ export const Default = meta.story();
 
 Default.test(
   "Hands over the submission and starts clean once it's saved",
-  async ({ canvas }) => {
-    onSubmit.mockResolvedValue({ saved: true });
+  async ({ args, canvas }) => {
+    mocked(args.onSubmit).mockResolvedValue({ saved: true });
 
     const name = canvas.getByRole("textbox", { name: "Name" });
     const saveButton = canvas.getByRole("button", { name: "Save profile" });
@@ -57,7 +53,7 @@ Default.test(
     await userEvent.click(saveButton);
 
     await waitFor(() =>
-      expect(onSubmit).toHaveBeenCalledWith({
+      expect(args.onSubmit).toHaveBeenCalledWith({
         values: { name: "4K", quality: { av1: { fetch: true, rank: 750 } } },
         reset: [],
       }),
@@ -67,28 +63,31 @@ Default.test(
   },
 );
 
-Default.test("Shows the issues of a refused submission", async ({ canvas }) => {
-  onSubmit.mockResolvedValue({
-    saved: false,
-    issues: [
-      { path: "name", message: "A profile with this name already exists." },
-      { path: "", message: "The profile could not be saved." },
-    ],
-  });
+Default.test(
+  "Shows the issues of a refused submission",
+  async ({ args, canvas }) => {
+    mocked(args.onSubmit).mockResolvedValue({
+      saved: false,
+      issues: [
+        { path: "name", message: "A profile with this name already exists." },
+        { path: "", message: "The profile could not be saved." },
+      ],
+    });
 
-  await userEvent.type(canvas.getByRole("textbox", { name: "Name" }), "2");
-  await userEvent.click(canvas.getByRole("button", { name: "Save profile" }));
+    await userEvent.type(canvas.getByRole("textbox", { name: "Name" }), "2");
+    await userEvent.click(canvas.getByRole("button", { name: "Save profile" }));
 
-  await expect(
-    await canvas.findByText("A profile with this name already exists."),
-  ).toBeInTheDocument();
-  await expect(
-    canvas.getByText("The profile could not be saved."),
-  ).toBeInTheDocument();
-  await expect(
-    canvas.getByRole("button", { name: "Save profile" }),
-  ).toBeEnabled();
-});
+    await expect(
+      await canvas.findByText("A profile with this name already exists."),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByText("The profile could not be saved."),
+    ).toBeInTheDocument();
+    await expect(
+      canvas.getByRole("button", { name: "Save profile" }),
+    ).toBeEnabled();
+  },
+);
 
 export const Pending = meta.story({ args: { isPending: true } });
 
@@ -109,7 +108,7 @@ const everySettingValues = {
   excludedWords: ["CAM"],
   retrySchedule: [2, 6],
   av1: { fetch: true, rank: 500 },
-};
+} as const;
 
 /** A form with a setting of every type that can be rendered. */
 export const EverySettingType = meta.story({
@@ -122,7 +121,10 @@ export const EverySettingType = meta.story({
         enabled: z.boolean().meta({ title: "Enabled" }),
         dubbedOnly: z.boolean().nullable().meta({ title: "Dubbed only" }),
         resolution: z.enum(["2160p", "1080p"]).meta({ title: "Resolution" }),
-        excludedWords: z.array(z.string()).meta({ title: "Excluded words" }),
+        excludedWords: z
+          .array(z.string())
+          .max(2)
+          .meta({ title: "Excluded words" }),
         retrySchedule: z
           .tuple([z.int(), z.int()])
           .meta({ title: "Retry schedule" }),
@@ -134,7 +136,9 @@ export const EverySettingType = meta.story({
     ),
     values: everySettingValues,
     submitLabel: "Save",
-    onSubmit: fn<SchemaSettingsFormProps["onSubmit"]>(),
+  },
+  beforeEach({ args }) {
+    mocked(args.onSubmit).mockResolvedValue({ saved: true });
   },
 });
 
@@ -163,8 +167,6 @@ EverySettingType.test("Starts clean", async ({ canvas }) => {
 EverySettingType.test(
   "Saves an edited text setting",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     const input = canvas.getByRole("textbox", { name: "Instance name" });
 
     await userEvent.clear(input);
@@ -181,8 +183,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves an edited number setting as a number",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     const input = canvas.getByRole("spinbutton", { name: "Port" });
 
     await userEvent.clear(input);
@@ -199,8 +199,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves a toggled boolean setting",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     await userEvent.click(canvas.getByRole("switch", { name: "Enabled" }));
 
     await expectToSave(
@@ -214,8 +212,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves a chosen nullable boolean setting",
   async ({ args, canvas, canvasElement }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     await userEvent.click(
       canvas.getByRole("combobox", { name: "Dubbed only" }),
     );
@@ -236,8 +232,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves a chosen select setting",
   async ({ args, canvas, canvasElement }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     await userEvent.click(canvas.getByRole("combobox", { name: "Resolution" }));
     await userEvent.click(
       await within(canvasElement.ownerDocument.body).findByRole("option", {
@@ -256,8 +250,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves an added string array item",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     const input = canvas.getByRole("combobox", { name: "Excluded words" });
 
     await userEvent.click(input);
@@ -272,10 +264,23 @@ EverySettingType.test(
 );
 
 EverySettingType.test(
+  "Focuses an invalid string array setting instead of saving",
+  async ({ args, canvas }) => {
+    const input = canvas.getByRole("combobox", { name: "Excluded words" });
+
+    await userEvent.click(input);
+    await userEvent.type(input, "HDR{enter}");
+    await userEvent.type(input, "TS{enter}");
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(input).toHaveFocus());
+    await expect(args.onSubmit).not.toHaveBeenCalled();
+  },
+);
+
+EverySettingType.test(
   "Saves an edited tuple item with the others",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     const input = canvas.getByRole("spinbutton", { name: "Retry schedule 2" });
 
     await userEvent.clear(input);
@@ -292,8 +297,6 @@ EverySettingType.test(
 EverySettingType.test(
   "Saves a rank's toggled fetch without its rank",
   async ({ args, canvas }) => {
-    mocked(args.onSubmit).mockResolvedValue({ saved: true });
-
     await userEvent.click(canvas.getByRole("switch", { name: "Fetch" }));
 
     await expect(
@@ -305,5 +308,74 @@ EverySettingType.test(
       args.onSubmit,
       { av1: { fetch: false } },
     );
+  },
+);
+
+/** Re-renders the form with new but equal stored values once it's saved, as revalidating the page does. */
+function RevalidatingSchemaSettingsForm(props: SchemaSettingsFormProps) {
+  const [values, setValues] = useState(props.values);
+
+  return (
+    <SchemaSettingsForm
+      {...props}
+      values={values}
+      onSubmit={async (submission) => {
+        const result = await props.onSubmit(submission);
+
+        // A reset setting whose stored value was its default keeps it
+        setValues(structuredClone(props.values));
+
+        return result;
+      }}
+    />
+  );
+}
+
+export const WithRevalidation = EverySettingType.extend({
+  args: {
+    issues: [{ path: "instanceName", message: "Instance name is taken." }],
+  },
+  render: (args) => <RevalidatingSchemaSettingsForm {...args} />,
+});
+
+WithRevalidation.test(
+  "Shows the stored value of a reset setting once it's saved",
+  async ({ args, canvas }) => {
+    const port = canvas.getByRole("spinbutton", { name: "Port" });
+
+    await userEvent.clear(port);
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() =>
+      expect(args.onSubmit).toHaveBeenCalledWith({
+        values: { ...everySettingValues, port: undefined },
+        reset: ["port"],
+      }),
+    );
+    await waitFor(() => expect(port).toHaveValue(8080));
+    await expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled();
+  },
+);
+
+WithRevalidation.test(
+  "Shows the issues with the stored values again once it's saved",
+  async ({ args, canvas }) => {
+    await expect(
+      canvas.getByText("Instance name is taken."),
+    ).toBeInTheDocument();
+
+    const port = canvas.getByRole("spinbutton", { name: "Port" });
+
+    await userEvent.clear(port);
+    await userEvent.type(port, "9090");
+    await userEvent.click(canvas.getByRole("button", { name: "Save" }));
+
+    await waitFor(() => expect(args.onSubmit).toHaveBeenCalled());
+    await waitFor(() =>
+      expect(canvas.getByRole("button", { name: "Save" })).toBeDisabled(),
+    );
+    await expect(
+      canvas.getByText("Instance name is taken."),
+    ).toBeInTheDocument();
   },
 );

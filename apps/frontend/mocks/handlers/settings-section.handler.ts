@@ -6,32 +6,52 @@ import { api } from "#mocks/graphql.ts";
 
 import type { SecretState } from "#app/_types/__generated__/graphql.ts";
 
+interface ServedSettingsSection {
+  id: string;
+  properties: Record<string, unknown>;
+  values: Record<string, unknown>;
+  secretStates?: { path: string; state: SecretState }[];
+}
+
+/** A "General" settings section of the given settings, as `SETTINGS_SECTION` serves it */
+const toServedSettingsSection = ({
+  id,
+  properties,
+  values,
+  secretStates = [],
+}: ServedSettingsSection) => ({
+  __typename: "SettingsSection" as const,
+  id,
+  title: "General",
+  appliesImmediately: false,
+  jsonSchema: { type: "object", properties },
+  values,
+  lockedFields: [],
+  secretStates: secretStates.map(({ path, state }) => ({
+    __typename: "SecretFieldState" as const,
+    path,
+    state,
+  })),
+  issues: [],
+});
+
 /** Mocks every settings section as a section with a single "Log Directory" setting */
 export const logDirectorySettingsSectionHandler = api.query(
   SETTINGS_SECTION,
   ({ variables }) =>
     HttpResponse.json({
       data: {
-        settingsSection: {
-          __typename: "SettingsSection",
+        settingsSection: toServedSettingsSection({
           id: variables.id,
-          title: "General",
-          appliesImmediately: false,
-          jsonSchema: {
-            type: "object",
-            properties: {
-              logDirectory: {
-                type: "string",
-                title: "Log Directory",
-                default: "./logs",
-              },
+          properties: {
+            logDirectory: {
+              type: "string",
+              title: "Log Directory",
+              default: "./logs",
             },
           },
           values: { logDirectory: "./logs" },
-          lockedFields: [],
-          secretStates: [],
-          issues: [],
-        },
+        }),
       },
     }),
 );
@@ -83,21 +103,15 @@ export const createSettingsSectionStore = ({
       api.query(SETTINGS_SECTION, ({ variables }) =>
         HttpResponse.json({
           data: {
-            settingsSection: {
-              __typename: "SettingsSection",
+            settingsSection: toServedSettingsSection({
               id: variables.id,
-              title: "General",
-              appliesImmediately: false,
-              jsonSchema: { type: "object", properties },
+              properties,
               values: getServedValues(),
-              lockedFields: [],
               secretStates: [...secretStates].map(([path, state]) => ({
-                __typename: "SecretFieldState" as const,
                 path,
                 state,
               })),
-              issues: [],
-            },
+            }),
           },
         }),
       ),

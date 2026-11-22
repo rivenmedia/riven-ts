@@ -2,8 +2,8 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { groupBy } from "es-toolkit";
-import { has, pick, set } from "es-toolkit/compat";
-import { useEffect, useMemo, useState } from "react";
+import { get, has, pick, set } from "es-toolkit/compat";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -12,7 +12,7 @@ import { FieldError } from "#components/_ui/field.tsx";
 
 import { SettingField } from "./_components/setting-field/setting-field.tsx";
 import { useStableValue } from "./_hooks/use-stable-value.ts";
-import { buildSettingsConfigFromZodSchema } from "./_utilities/build-settings-config-from-zod-schema.ts";
+import { buildSettingFields } from "./_utilities/build-setting-fields.ts";
 import { toSectionSubmission } from "./_utilities/to-section-submission.ts";
 
 import type {
@@ -23,7 +23,7 @@ import type {
   SettingFieldProps,
   SettingValues,
 } from "./_components/setting-field/setting-field.tsx";
-import type { BuildSettingsContext } from "./_utilities/build-settings-config-from-zod-schema.ts";
+import type { BuildSettingFieldsContext } from "./_utilities/build-setting-fields.ts";
 import type { SectionSubmission } from "./_utilities/to-section-submission.ts";
 
 export type { SectionSubmission } from "./_utilities/to-section-submission.ts";
@@ -119,7 +119,7 @@ export function SchemaSettingsForm({
   const stableSecretStates = useStableValue(
     (secretStates ?? []).map(({ path, state }) => ({ path, state })),
   );
-  const storedIssues = useStableValue(
+  const stableIssues = useStableValue(
     (issues ?? []).map(({ path, message }) => ({ path, message })),
   );
 
@@ -135,7 +135,7 @@ export function SchemaSettingsForm({
   }, [stableJsonSchema]);
 
   const fields = useMemo(() => {
-    const context: BuildSettingsContext = {
+    const context: BuildSettingFieldsContext = {
       lockedFields: new Set(stableLockedFields),
       secretStates: new Map(
         stableSecretStates.map(({ path, state }) => [path, state]),
@@ -143,12 +143,12 @@ export function SchemaSettingsForm({
       ...(onResetSecret && { onResetSecret }),
     };
 
-    return buildSettingsConfigFromZodSchema(schema, undefined, {}, context)
+    return buildSettingFields(schema, undefined, {}, context)
       .values()
       .toArray();
   }, [schema, stableLockedFields, stableSecretStates, onResetSecret]);
 
-  const [fieldNames, secretFieldNames, clearableFieldNames] = useMemo(() => {
+  const [fieldNames, secretFieldNames, resettableFieldNames] = useMemo(() => {
     const leafFields = getFields(fields);
 
     return [
@@ -182,8 +182,8 @@ export function SchemaSettingsForm({
 
   // Issues that can't be shown against a field are shown for the form
   const storedSectionIssues = useMemo(
-    () => storedIssues.filter(({ path }) => !isFieldPath(path, fieldNames)),
-    [storedIssues, fieldNames],
+    () => stableIssues.filter(({ path }) => !isFieldPath(path, fieldNames)),
+    [stableIssues, fieldNames],
   );
   const [savedSectionIssues, setSavedSectionIssues] = useState<FormIssue[]>([]);
 
@@ -196,13 +196,45 @@ export function SchemaSettingsForm({
     }),
   });
 
-  /** Starts clean from the saved values, with secrets blanked again. */
-  const resetToSavedValues = () => {
-    // A reset field is left empty, which the revalidated stored values
-    // fill in with the value it now has (e.g. its default)
-    form.reset(
-      blankSecrets(structuredClone(form.getValues()), secretFieldNames),
-    );
+  /** Shows the issues with the stored values against their fields. */
+  const showStoredIssues = useCallback(() => {
+    for (const { path, message } of stableIssues) {
+      if (isFieldPath(path, fieldNames)) {
+        form.setError(path, { type: "server", message });
+      }
+    }
+  }, [form, stableIssues, fieldNames]);
+
+  // A save's result arrives after the render it was submitted from, by when
+  // revalidating the page may have brought new stored issues
+  const showLatestStoredIssues = useRef(showStoredIssues);
+
+  useEffect(() => {
+    showLatestStoredIssues.current = showStoredIssues;
+  }, [showStoredIssues]);
+
+  /**
+   * Starts clean from the saved values, with secrets blanked again.
+   *
+   * @param resetFields Dotted paths of the fields the save reset.
+   */
+  const resetToSavedValues = (resetFields: string[]) => {
+    const savedValues = structuredClone(form.getValues());
+    const storedValues = form.formState.defaultValues;
+
+    // A reset field is emptied, so it's filled with its stored value. If the
+    // reset changed it (e.g. to its default), the revalidated stored values
+    // differ and replace it, as it's clean. If not, they're equal to the
+    // current ones, so the form isn't reset with them.
+    for (const name of resetFields) {
+      set(savedValues, name, structuredClone(get(storedValues, name)));
+    }
+
+    form.reset(blankSecrets(savedValues, secretFieldNames));
+
+    // Resetting the form discards its errors, and unchanged stored issues
+    // aren't shown again by revalidating the page
+    showLatestStoredIssues.current();
   };
 
   /** Shows a refused submission's issues, keyed by the form's field paths. */
@@ -227,16 +259,15 @@ export function SchemaSettingsForm({
   const handleSubmit = form.handleSubmit(async (formValues) => {
     setSavedSectionIssues([]);
 
-    const result = await onSubmit(
-      toSectionSubmission(
-        formValues,
-        form.formState.defaultValues ?? {},
-        clearableFieldNames,
-      ),
+    const submission = toSectionSubmission(
+      formValues,
+      form.formState.defaultValues ?? {},
+      resettableFieldNames,
     );
+    const result = await onSubmit(submission);
 
     if (result.saved) {
-      resetToSavedValues();
+      resetToSavedValues(submission.reset);
     } else {
       showSavedIssues(result.issues);
     }
@@ -251,12 +282,8 @@ export function SchemaSettingsForm({
     });
 
     // Issues with the stored values are shown before any submit
-    for (const { path, message } of storedIssues) {
-      if (isFieldPath(path, fieldNames)) {
-        form.setError(path, { type: "server", message });
-      }
-    }
-  }, [form, defaultValues, storedIssues, fieldNames]);
+    showStoredIssues();
+  }, [form, defaultValues, showStoredIssues]);
 
   const { isDirty } = form.formState;
   const sectionIssues = [...storedSectionIssues, ...savedSectionIssues];

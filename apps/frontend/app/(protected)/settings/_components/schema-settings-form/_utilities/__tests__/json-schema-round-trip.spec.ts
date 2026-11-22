@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { buildSettingsConfigFromZodSchema } from "../build-settings-config-from-zod-schema.ts";
+import { buildSettingFields } from "../build-setting-fields.ts";
 
 describe("json schema round-trip", () => {
   it("preserves what the settings config builder needs", () => {
@@ -23,8 +23,8 @@ describe("json schema round-trip", () => {
 
     const rebuilt = z.fromJSONSchema(z.toJSONSchema(schema, { io: "input" }));
 
-    expect(buildSettingsConfigFromZodSchema(rebuilt)).toStrictEqual(
-      buildSettingsConfigFromZodSchema(schema),
+    expect(buildSettingFields(rebuilt)).toStrictEqual(
+      buildSettingFields(schema),
     );
   });
 });

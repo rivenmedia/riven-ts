@@ -3,7 +3,7 @@ import path from "node:path";
 import { describe, expect, it } from "vitest";
 import { z } from "zod";
 
-import { buildSettingsConfigFromZodSchema } from "../build-settings-config-from-zod-schema.ts";
+import { buildSettingFields } from "../build-setting-fields.ts";
 
 import type { SettingFieldProps } from "../../_components/setting-field/setting-field.tsx";
 
@@ -86,7 +86,7 @@ describe("served section schemas", () => {
     "renders every %s leaf or knowingly skips it",
     (name, jsonSchema) => {
       const schema = z.fromJSONSchema(jsonSchema);
-      const fields = buildSettingsConfigFromZodSchema(schema).values();
+      const fields = buildSettingFields(schema).values();
 
       const builtLeaves = getBuiltLeaves(fields);
       const skippedLeaves = knownSkippedLeaves[name] ?? [];

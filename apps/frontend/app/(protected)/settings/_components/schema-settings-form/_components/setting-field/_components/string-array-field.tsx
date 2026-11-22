@@ -40,7 +40,12 @@ export function SettingsStringArrayField({
   const anchor = useComboboxAnchor();
 
   const {
-    field: { value: fieldValue, onChange: handleChange },
+    field: {
+      ref: fieldRef,
+      value: fieldValue,
+      onBlur: handleBlur,
+      onChange: handleChange,
+    },
   } = useController<SettingValues>({ name });
 
   const value = Array.isArray(fieldValue) ? fieldValue.map(String) : [];
@@ -76,7 +81,11 @@ export function SettingsStringArrayField({
                 {values.map((val) => (
                   <ComboboxChip key={val}>{val}</ComboboxChip>
                 ))}
-                <ComboboxChipsInput id={id} />
+                <ComboboxChipsInput
+                  ref={fieldRef}
+                  id={id}
+                  onBlur={handleBlur}
+                />
               </>
             )}
           </ComboboxValue>

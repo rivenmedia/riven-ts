@@ -23,8 +23,9 @@ _Avoid_: form schema, settings config
 
 **Reset**:
 Removing a setting's stored value, so it returns to its default (or becomes
-unset when it has none). Emptying a field resets it, except for secrets and
-locked settings.
+unset when it has none). Emptying a field resets it, except for secrets, locked
+settings and nullable settings (an emptied nullable setting is saved as
+`null`).
 _Avoid_: clear, delete, revert
 
 **Secret**:

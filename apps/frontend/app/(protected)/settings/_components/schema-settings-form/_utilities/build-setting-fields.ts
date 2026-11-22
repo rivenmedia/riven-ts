@@ -32,7 +32,7 @@ function getSchemaMetadata(schema: $ZodType): GlobalMeta {
   return {};
 }
 
-export interface BuildSettingsContext {
+export interface BuildSettingFieldsContext {
   lockedFields?: ReadonlySet<string>;
   secretStates?: ReadonlyMap<string, SecretState>;
   onResetSecret?: (path: string) => void;
@@ -56,7 +56,7 @@ function humaniseKey(key: string) {
 function buildCommonConfig(
   meta: GlobalMeta,
   key?: string,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): CommonSettingFieldProps {
   if (!key) {
     throw new Error("A key must be provided for non-object schemas");
@@ -87,7 +87,7 @@ function buildStringSetting(
   key: string | undefined,
   nullable: boolean,
   meta: GlobalMeta,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(meta, key, context);
 
@@ -128,7 +128,7 @@ function buildBooleanSetting(
   key: string | undefined,
   nullable: boolean,
   meta: GlobalMeta,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(meta, key, context);
 
@@ -144,7 +144,7 @@ function buildEnumSetting(
   schema: ZodEnum,
   key: string | undefined,
   meta: GlobalMeta,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(meta, key, context);
   const { enum: enumValues } = schema;
@@ -169,7 +169,7 @@ function buildArraySetting(
   schema: ZodArray,
   key: string | undefined,
   meta: GlobalMeta,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): SettingEntry | undefined {
   const { element } = schema;
 
@@ -201,7 +201,7 @@ function buildNumberSetting(
   key: string | undefined,
   nullable: boolean,
   meta: GlobalMeta,
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
 ): SettingEntry {
   const commonConfig = buildCommonConfig(meta, key, context);
 
@@ -224,11 +224,11 @@ function buildNumberSetting(
  * @param nullable Whether a `.nullable()` wrapper was unwrapped on the way to this schema, so `null` is a valid value.
  *   A default or optional wrapper doesn't set it.
  */
-export function buildSettingsConfigFromZodSchema(
+export function buildSettingFields(
   schema: $ZodType,
   key?: string,
   wrapperMeta: GlobalMeta = {},
-  context?: BuildSettingsContext,
+  context?: BuildSettingFieldsContext,
   nullable = false,
 ): Map<string, SettingFieldProps> {
   const settings = new Map<string, SettingFieldProps>();
@@ -290,7 +290,7 @@ export function buildSettingsConfigFromZodSchema(
       const itemFields = schema.def.items.flatMap((element, index) => {
         const itemName = `${commonConfig.name}.${index.toString()}`;
 
-        return buildSettingsConfigFromZodSchema(element, itemName, {}, context)
+        return buildSettingFields(element, itemName, {}, context)
           .values()
           .map((itemField) => {
             // An untitled element falls back to its key as the label, so
@@ -329,7 +329,7 @@ export function buildSettingsConfigFromZodSchema(
 
       const nestedSettings = new Map<string, SettingFieldProps>(
         Object.entries(shape).flatMap(([fieldKey, fieldSchema]) =>
-          buildSettingsConfigFromZodSchema(
+          buildSettingFields(
             fieldSchema,
             [key, fieldKey].filter(Boolean).join("."),
             {},
@@ -360,39 +360,21 @@ export function buildSettingsConfigFromZodSchema(
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(
-        innerSchema,
-        key,
-        meta,
-        context,
-        nullable,
-      );
+      return buildSettingFields(innerSchema, key, meta, context, nullable);
     }
     case "optional": {
       assertSchemaType(schema, ZodOptional);
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(
-        innerSchema,
-        key,
-        meta,
-        context,
-        nullable,
-      );
+      return buildSettingFields(innerSchema, key, meta, context, nullable);
     }
     case "nullable": {
       assertSchemaType(schema, ZodNullable);
 
       const innerSchema = schema.unwrap();
 
-      return buildSettingsConfigFromZodSchema(
-        innerSchema,
-        key,
-        meta,
-        context,
-        true,
-      );
+      return buildSettingFields(innerSchema, key, meta, context, true);
     }
     case "union": {
       assertSchemaType(schema, ZodUnion);
@@ -409,13 +391,7 @@ export function buildSettingsConfigFromZodSchema(
         return settings;
       }
 
-      return buildSettingsConfigFromZodSchema(
-        innerSchema,
-        key,
-        meta,
-        context,
-        true,
-      );
+      return buildSettingFields(innerSchema, key, meta, context, true);
     }
     case "any":
     case "bigint":
