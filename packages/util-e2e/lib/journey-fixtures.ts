@@ -44,6 +44,19 @@ const { movie: libraryMovie, show: libraryShow } = library;
 export const journeyFixtures = {
   /** What the library lists, and the details of its movie */
   library,
+  /** What the settings pages list */
+  settings: {
+    /** The custom ranking profile that the ranking tests edit */
+    customProfile: {
+      name: "Mine",
+      description: "My own tweaks.",
+    },
+    /** The ranking profile the tests create */
+    newProfile: {
+      name: "Anime",
+      description: "Prefers dual audio releases.",
+    },
+  },
   /** What the home page shows from TMDB */
   home: {
     nowPlaying: {

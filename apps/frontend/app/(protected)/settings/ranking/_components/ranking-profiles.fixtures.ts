@@ -1,3 +1,5 @@
+import { journeyFixtures } from "@repo/util-e2e";
+
 import { z } from "zod";
 
 import type { RankingProfilesQuery } from "../_queries/ranking-profiles.query.typegen";
@@ -79,18 +81,20 @@ export const defaultProfile = {
   values: defaultProfileValues,
 } as const satisfies RankingProfileFixture;
 
+const { customProfile: customProfileFixture } = journeyFixtures.settings;
+
 export const customProfile = {
   __typename: "RankingProfile",
   id: "profile-mine",
   slug: null,
-  name: "Mine",
-  description: "My own tweaks.",
+  name: customProfileFixture.name,
+  description: customProfileFixture.description,
   builtIn: false,
   isActive: false,
   values: {
     ...defaultProfileValues,
-    name: "Mine",
-    description: "My own tweaks.",
+    name: customProfileFixture.name,
+    description: customProfileFixture.description,
   },
 } as const satisfies RankingProfileFixture;
 
