@@ -5,21 +5,6 @@ const meta = preview.meta({
   title: "Setup / Quality",
   component: SetupQualityStep,
   args: {
-    generalSections: [
-      {
-        description: "General settings for quality",
-        title: "General",
-        fields: [
-          {
-            type: "text" as const,
-            config: {
-              label: "Instance Name",
-              name: "instanceName",
-            },
-          },
-        ],
-      },
-    ],
     profiles: [
       {
         label: "Balanced",
