@@ -49,3 +49,10 @@ it("keeps the legacy ranking config import away from real files", () => {
     "/var/lib/riven-e2e-0.ranking-config.json",
   );
 });
+
+it("only logs to the console, outside the repo's log directory", () => {
+  expect(createE2eEnvironment(input)).toMatchObject({
+    RIVEN_SETTING__enabledLogTransports: JSON.stringify(["console"]),
+    RIVEN_SETTING__logDirectory: "/var/lib/riven-e2e-0.logs",
+  });
+});

@@ -39,6 +39,8 @@ export async function resetInstance(
   scenario: MockScenario,
 ) {
   await orm.schema.clear();
+  // Clearing only truncates the default schema's tables, which leaves Better Auth's users behind
+  await orm.schema.clear({ schema: "auth_db" });
   await flushRedis();
 
   await syncRankingProfiles({

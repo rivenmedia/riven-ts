@@ -72,6 +72,11 @@ export function createE2eEnvironment({
     RIVEN_SETTING__enabledPlugins: JSON.stringify(CorePlugins.options),
     // Points at a file that never exists, so resetting doesn't re-import the repo's ranking config
     RIVEN_SETTING__rankingConfigPath: `${vfsMountPath}.ranking-config.json`,
+    // Logs only go to stdout, which the E2E fixture writes to its own file. That keeps instances out of the repo's log
+    // directory, and stops the file transport's exception handler swallowing errors thrown during boot.
+    RIVEN_SETTING__enabledLogTransports: JSON.stringify(["console"]),
+    // The ECS log files are always written, whichever transports are enabled
+    RIVEN_SETTING__logDirectory: `${vfsMountPath}.logs`,
     RIVEN_FRONTEND_SETTING__origin: origin,
     RIVEN_FRONTEND_SETTING__authSecret: "e2e-auth-secret-0123456789abcdef0123",
     RIVEN_FRONTEND_SETTING__passkeyRpId: "localhost",

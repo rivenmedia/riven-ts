@@ -88,8 +88,6 @@ export async function riven() {
     });
 
     async function shutdown() {
-      process.exitCode ??= 0;
-
       try {
         const { value } = await waitFor(
           actor,
@@ -99,9 +97,7 @@ export async function riven() {
 
         process.exitCode ??= Number(value === "Errored");
       } catch (error) {
-        if (process.exitCode === 0) {
-          process.exitCode = 1;
-        }
+        process.exitCode ??= 1;
 
         logger.error("Error whilst waiting for shutdown", { err: error });
       }

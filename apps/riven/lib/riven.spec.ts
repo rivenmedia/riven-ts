@@ -222,3 +222,33 @@ it("force quits the process if shutdown takes longer than the configured timeout
   expect(process.exitCode).toBe(1);
   expect(exitSpy).toHaveBeenCalledWith();
 });
+
+it("exits with code 1 if bootstrapping fails", async ({
+  mockRivenMachine,
+  createRivenMachineActor,
+}) => {
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
+
+  const rivenMachineActor = createRivenMachineActor(
+    mockRivenMachine.provide({
+      actors: {
+        bootstrapMachine: fromPromise(() =>
+          Promise.reject(new Error("Bootstrap failed")),
+        ) as never,
+      },
+    }),
+  );
+
+  void riven();
+
+  await vi.waitFor(() => {
+    expect(rivenMachineActor.getSnapshot().value).toBe("Errored");
+  });
+
+  await vi.waitFor(() => {
+    expect(exitSpy).toHaveBeenCalledWith();
+  });
+
+  expect(process.exitCode).toBe(1);
+});
