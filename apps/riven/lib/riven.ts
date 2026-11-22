@@ -44,7 +44,7 @@ export async function riven() {
       ? await import("./mocks/node.ts")
       : {};
 
-    if (mockScenario) {
+    if (mockScenario?.environmentData) {
       Object.assign(
         process.env,
         Object.fromEntries(

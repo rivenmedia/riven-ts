@@ -1,10 +1,16 @@
+import { HttpNetworkFrame } from "msw/experimental";
 import { setupServer } from "msw/node";
 import z from "zod";
 
+import { mockScenarioNames } from "./e2e/scenario-names.ts";
 import { scenarios } from "./scenarios/index.ts";
+import { isMockTestMode } from "./utilities/is-mock-test-mode.ts";
+import { unhandledRequests } from "./utilities/unhandled-requests.ts";
+
+import type { MockScenario } from "./utilities/mock-scenario.ts";
 
 const mockScenarioName = z
-  .enum(Object.keys(scenarios) as (keyof typeof scenarios)[])
+  .enum(mockScenarioNames)
   .safeParse(process.env["MOCK_SCENARIO"]);
 
 if (!mockScenarioName.success) {
@@ -13,16 +19,42 @@ if (!mockScenarioName.success) {
   );
 }
 
-if (process.env["NODE_ENV"] !== "development") {
+if (
+  process.env["NODE_ENV"] !== "development" &&
+  process.env["NODE_ENV"] !== "test"
+) {
   throw new Error(
-    "Mock scenarios should only be enabled in development environments.",
+    "Mock scenarios should only be enabled in development or test environments.",
   );
 }
 
-export const mockScenario = scenarios[mockScenarioName.data];
+export const mockScenario: MockScenario =
+  scenarios[mockScenarioName.data as keyof typeof scenarios];
 
-const scenarioHandlers = mockScenario.handlers;
+if (isMockTestMode() && mockScenario.environmentData) {
+  throw new Error(
+    "Mock scenarios can't set environment data in test mode, as every E2E instance boots with the same environment.",
+  );
+}
+
+const scenarioHandlers = mockScenario.handlers ?? [];
 
 export const server = setupServer(...scenarioHandlers);
 
-server.listen({ onUnhandledFrame: "bypass" });
+server.listen({
+  onUnhandledFrame: isMockTestMode()
+    ? ({ frame, defaults }) => {
+        if (frame instanceof HttpNetworkFrame) {
+          const { request } = frame.data;
+
+          unhandledRequests.record({
+            method: request.method,
+            url: request.url,
+            source: "msw",
+          });
+        }
+
+        defaults.error();
+      }
+    : "bypass",
+});
