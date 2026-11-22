@@ -2,7 +2,6 @@ import { mkdtemp, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { expect, vi } from "vitest";
-import { createActor, toPromise } from "xstate";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
 import { DEFAULT_PRESET_SLUG, rankingPresets } from "#ranking/presets/index.ts";
@@ -14,15 +13,11 @@ import { syncRankingProfiles } from "../sync-ranking-profiles.actor.ts";
 import type { Services } from "#database/database.ts";
 
 async function runSync(services: Services, legacyConfigPath: string) {
-  await toPromise(
-    createActor(syncRankingProfiles, {
-      input: {
-        rankingProfileService: services.rankingProfileService,
-        settingsService: services.settingsService,
-        legacyConfigPath,
-      },
-    }).start(),
-  );
+  await syncRankingProfiles({
+    rankingProfileService: services.rankingProfileService,
+    settingsService: services.settingsService,
+    legacyConfigPath,
+  });
 }
 
 const it = baseIt

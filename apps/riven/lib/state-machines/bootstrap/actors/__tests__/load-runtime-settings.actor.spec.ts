@@ -1,5 +1,4 @@
 import { expect, vi } from "vitest";
-import { createActor, toPromise } from "xstate";
 import { ZodError } from "zod";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
@@ -15,11 +14,10 @@ async function runLoader(
   services: Services,
   environment: Record<string, string> = {},
 ) {
-  await toPromise(
-    createActor(loadRuntimeSettings, {
-      input: { settingsService: services.settingsService, environment },
-    }).start(),
-  );
+  await loadRuntimeSettings({
+    settingsService: services.settingsService,
+    environment,
+  });
 }
 
 const it = baseIt.extend(

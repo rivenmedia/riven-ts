@@ -15,10 +15,10 @@ export interface LoadRuntimeSettingsInput {
   environment: Readonly<Record<string, string>>;
 }
 
-export const loadRuntimeSettings = fromPromise<
-  undefined,
-  LoadRuntimeSettingsInput
->(async ({ input: { settingsService, environment } }) => {
+export async function loadRuntimeSettings({
+  settingsService,
+  environment,
+}: LoadRuntimeSettingsInput) {
   const stored = await settingsService.getStoredValues(CORE_NAMESPACE);
 
   const { value: runtimeSettings, ignoredStored } = resolveSettings({
@@ -36,4 +36,13 @@ export const loadRuntimeSettings = fromPromise<
 
   initialiseRuntimeSettings(runtimeSettings);
   configureLogger(runtimeSettings.general.logging);
+}
+
+export const loadRuntimeSettingsActor = fromPromise<
+  undefined,
+  LoadRuntimeSettingsInput
+>(async ({ input }) => {
+  await loadRuntimeSettings(input);
+
+  return undefined;
 });

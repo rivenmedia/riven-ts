@@ -22,6 +22,7 @@ import { authChecker } from "#graphql/auth/auth-checker.ts";
 import { buildContextFunction } from "#graphql/build-context-function.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { resolvers } from "#graphql/resolvers/index.ts";
+import { isMockTestMode } from "#mocks/utilities/is-mock-test-mode.ts";
 import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
 import { RankingManager } from "#ranking/ranking-manager.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
@@ -203,6 +204,22 @@ export const startGqlServer = fromPromise<
     const withRequestContext: RequestHandler = (_req, _res, next) => {
       RequestContext.create(orm.em, next);
     };
+
+    if (isMockTestMode()) {
+      const { createE2eControlRouter } =
+        await import("#mocks/e2e/control-router.ts");
+
+      app.use(
+        "/__e2e__",
+        express.json(),
+        createE2eControlRouter({
+          orm,
+          services,
+          settingsManager,
+          apiKey: settings.apiKey,
+        }),
+      );
+    }
 
     app.all("/api/auth/*splat", withRequestContext, toNodeHandler(auth));
 

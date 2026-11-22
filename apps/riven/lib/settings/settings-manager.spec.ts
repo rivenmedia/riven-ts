@@ -732,6 +732,18 @@ describe("restartRequired", () => {
 
     expect(manager.restartRequired).toBe(true);
   });
+
+  it("is false again after resetRestartRequired", async ({
+    installedPlugins,
+    services,
+  }) => {
+    const manager = createManager(services, installedPlugins);
+
+    await manager.setPluginEnabled("repo-plugin-test", true);
+    manager.resetRestartRequired();
+
+    expect(manager.restartRequired).toBe(false);
+  });
 });
 
 describe("setPluginEnabled", () => {
