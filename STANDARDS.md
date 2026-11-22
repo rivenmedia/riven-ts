@@ -209,6 +209,49 @@ Input.test("calls onChange", ({ args }) => {
 });
 ```
 
+#### Waiting for data before interacting
+
+Before a test interacts with a page or component that loads data, it waits
+for an element that only renders once that data has loaded. Controls in the
+page's shell (buttons, tabs, links) render before the data does, so finding
+them doesn't mean the page is ready.
+
+**BAD - test clicks a control as soon as the shell renders:**
+
+```ts
+Default.test(
+  "shows this week's trending shows",
+  async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      await canvas.findByRole("button", { name: /this week/iu }),
+    );
+
+    await expect(
+      await canvas.findByRole("heading", { name: /arcane/iu }),
+    ).toBeInTheDocument();
+  },
+);
+```
+
+**GOOD - test waits for the initial data before clicking:**
+
+```ts
+Default.test(
+  "shows this week's trending shows",
+  async ({ canvas, userEvent }) => {
+    await canvas.findByRole("heading", { name: /breaking bad/iu });
+
+    await userEvent.click(
+      await canvas.findByRole("button", { name: /this week/iu }),
+    );
+
+    await expect(
+      await canvas.findByRole("heading", { name: /arcane/iu }),
+    ).toBeInTheDocument();
+  },
+);
+```
+
 ## Naming conventions
 
 File names are kebab-case with a suffix that identifies the file's role,
