@@ -36,8 +36,7 @@ if (
   );
 }
 
-export const mockScenario: MockScenario =
-  scenarios[mockScenarioName.data as keyof typeof scenarios];
+export const mockScenario: MockScenario = scenarios[mockScenarioName.data];
 
 if (isMockTestMode() && mockScenario.environmentData) {
   throw new Error(

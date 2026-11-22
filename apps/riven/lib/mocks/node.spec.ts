@@ -40,7 +40,7 @@ it("rejects scenarios that set environment data in test mode", async () => {
  */
 async function importInTestMode() {
   class TestScenario extends MockScenario {
-    public override scenarioName = "e2e-baseline";
+    public override scenarioName = "dead-stream-link" as const;
 
     public override handlers = [
       http.get("http://handled.invalid/", () => HttpResponse.text("ok")),
@@ -56,13 +56,13 @@ async function importInTestMode() {
     const original = await importOriginal();
     const scenarios = {
       ...original.scenarios,
-      "e2e-baseline": new TestScenario(),
+      "dead-stream-link": new TestScenario(),
     };
 
     return { scenarios };
   });
   vi.stubEnv("NODE_ENV", "test");
-  vi.stubEnv("MOCK_SCENARIO", "e2e-baseline");
+  vi.stubEnv("MOCK_SCENARIO", "dead-stream-link");
 
   const { server } = await import("./node.ts");
   const { unhandledRequests } =

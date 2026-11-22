@@ -8,15 +8,9 @@ import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { resetInstance } from "./reset-instance.ts";
 import { mockScenarioNames } from "./scenario-names.ts";
 
-import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 import type { ResetInstanceDeps } from "./reset-instance.ts";
-import type { MockScenarioName } from "./scenario-names.ts";
 
 const ApplyScenarioBody = z.object({ scenario: z.enum(mockScenarioNames) });
-
-// Not every scenario name is registered yet
-const registeredScenarios: Partial<Record<MockScenarioName, MockScenario>> =
-  scenarios;
 
 // Comparing digests gives `timingSafeEqual` inputs of equal length,
 // so a wrong key's length cannot short-circuit the comparison.
@@ -31,7 +25,7 @@ function digest(value: string) {
 export function createE2eControlRouter({
   apiKey,
   ...deps
-}: ResetInstanceDeps & { apiKey: string }) {
+}: ResetInstanceDeps & { apiKey: string }): Router {
   const router = Router();
   const authorizationDigest = digest(`Bearer ${apiKey}`);
 
@@ -49,9 +43,7 @@ export function createE2eControlRouter({
 
   router.post("/scenario", (req, res, next) => {
     const body = ApplyScenarioBody.safeParse(req.body);
-    const scenario = body.success
-      ? registeredScenarios[body.data.scenario]
-      : undefined;
+    const scenario = body.success ? scenarios[body.data.scenario] : undefined;
 
     if (!scenario) {
       res.status(400).json({
