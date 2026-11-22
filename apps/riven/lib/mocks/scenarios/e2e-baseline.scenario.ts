@@ -9,6 +9,7 @@ import { initAuth } from "#auth/auth.ts";
 import { database } from "#database/database.ts";
 import { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 
+import { tmdbDetailsHandlers } from "./utilities/tmdb-details-handlers.ts";
 import { tmdbHomeHandlers } from "./utilities/tmdb-home-handlers.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
@@ -91,6 +92,10 @@ class E2eBaselineScenario extends MockScenario {
     // The home page renders these lists through `"use cache"`, which the one Next.js server shares between tests.
     // Every scenario must serve the same data, or a test sees whichever scenario rendered the home page first.
     ...tmdbHomeHandlers,
+
+    // The details page renders cast, similar items and recommendations through `"use cache"`, which the one Next.js server shares between tests.
+    // A TMDB ID must get the same answer in every scenario, so the baseline answers them all.
+    ...tmdbDetailsHandlers,
 
     // The details TMDB looks up for any item
     http.get("https://api.themoviedb.org/3/genre/:mediaType/list", () =>

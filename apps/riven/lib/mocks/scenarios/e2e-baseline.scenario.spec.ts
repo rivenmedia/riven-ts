@@ -71,3 +71,33 @@ it.for(Object.values(trendingShows))(
     await expect(response.json()).resolves.toMatchObject({ tvdb_id: tvdbId });
   },
 );
+
+const { movie: libraryMovie } = journeyFixtures.library;
+
+it("answers TMDB's details of the library journey's movie", async ({
+  server,
+}) => {
+  server.use(...e2eBaselineScenario.handlers);
+
+  const response = await fetch(
+    `https://api.themoviedb.org/3/movie/${libraryMovie.tmdbId.toString()}`,
+  );
+
+  await expect(response.json()).resolves.toMatchObject({
+    id: libraryMovie.tmdbId,
+    title: libraryMovie.title,
+  });
+});
+
+it.for(["videos", "credits", "recommendations", "similar"])(
+  "answers TMDB's movie %s for the library journey's movie",
+  async (path, { server }) => {
+    server.use(...e2eBaselineScenario.handlers);
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${libraryMovie.tmdbId.toString()}/${path}`,
+    );
+
+    expect(response.ok).toBe(true);
+  },
+);

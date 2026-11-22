@@ -18,6 +18,28 @@ interface JourneyShow {
  * Each journey adds its own entry, so the scenario and the spec share one source.
  */
 export const journeyFixtures = {
+  /** What the library lists, and the details of its movie */
+  library: {
+    movie: {
+      tmdbId: 346_364,
+      title: "It",
+      releaseDate: "2017-09-08",
+      year: 2017,
+      posterUrl:
+        "https://image.tmdb.org/t/p/w300/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
+      state: "completed",
+    },
+    show: {
+      tmdbId: 94_605,
+      tvdbId: 371_028,
+      title: "Arcane",
+      firstAirDate: "2021-11-06",
+      year: 2021,
+      posterUrl:
+        "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+      state: "indexed",
+    },
+  },
   /** What the home page shows from TMDB */
   home: {
     nowPlaying: {
@@ -51,6 +73,10 @@ export const journeyFixtures = {
     },
   },
 } as const satisfies {
+  library: {
+    movie: JourneyMovie & { year: number; posterUrl: string; state: string };
+    show: JourneyShow & { year: number; posterUrl: string; state: string };
+  };
   home: {
     nowPlaying: JourneyMovie;
     trendingMoviesToday: JourneyMovie;

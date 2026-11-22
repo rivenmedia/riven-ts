@@ -1,8 +1,12 @@
+import { journeyFixtures } from "@repo/util-e2e";
+
 import type { GetItemCastQuery } from "./_components/item-cast/_queries/get-item-cast.query.typegen.ts";
 import type { GetItemRecommendationsQuery } from "./_components/item-recommendations/_queries/get-item-recommendations.query.typegen.ts";
 import type { GetSimilarItemsQuery } from "./_components/similar-items/_queries/get-similar-items.query.typegen.ts";
 import type { MediaDetailsPage } from "./page.client.tsx";
 import type { ComponentProps } from "react";
+
+const { movie: libraryMovie } = journeyFixtures.library;
 
 type MediaDetailsData = ComponentProps<typeof MediaDetailsPage>["data"];
 type Cast = NonNullable<GetItemCastQuery["tmdbItem"]["cast"]>;
@@ -14,7 +18,7 @@ type SimilarItems = GetSimilarItemsQuery["tmdbItem"]["similarItems"];
 export const unrequestedMovie: MediaDetailsData = {
   id: "unrequested-movie",
   isRequestable: true,
-  title: "It",
+  title: libraryMovie.title,
   overview:
     "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
   backdropUrl:
@@ -35,7 +39,7 @@ export const unrequestedMovie: MediaDetailsData = {
     key: "abcd1234",
     url: "https://www.youtube.com/watch?v=abcd1234",
   },
-  year: 2017,
+  year: libraryMovie.year,
   runtime: "150 minutes",
   language: "en",
   certification: "R",
