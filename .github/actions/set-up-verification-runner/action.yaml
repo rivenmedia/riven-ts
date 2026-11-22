@@ -49,11 +49,22 @@ runs:
       if: ${{ inputs.set-up-postgres-service == 'true' }}
       run: |
         if [ "${{ runner.os }}" == "macOS" ]; then
-          brew services start postgresql
+          # Homebrew's Postgres is keg-only, and its superuser is the current user (runner)
+          formula="$(brew list --formula | grep -m1 -E '^postgresql(@[0-9]+)?$' || true)"
+          if [ -z "$formula" ]; then
+            formula="postgresql@17"
+            brew install "$formula"
+          fi
+          bin="$(brew --prefix "$formula")/bin"
+          echo "$bin" >> "$GITHUB_PATH"
+          brew services start "$formula"
+
+          until "$bin/pg_isready" -h 127.0.0.1; do sleep 1; done
+          "$bin/psql" -h 127.0.0.1 -d postgres -c "ALTER ROLE runner WITH PASSWORD 'runner';"
         else
           sudo service postgresql start
-        fi
 
-        until pg_isready; do sleep 1; done
-        sudo -u postgres createuser -s -d -r -w runner
-        sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"
+          until pg_isready; do sleep 1; done
+          sudo -u postgres createuser -s -d -r -w runner
+          sudo -u postgres psql -c "ALTER ROLE runner WITH PASSWORD 'runner';"
+        fi
