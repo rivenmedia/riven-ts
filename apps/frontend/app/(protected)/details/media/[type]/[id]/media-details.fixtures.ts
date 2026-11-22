@@ -6,7 +6,8 @@ import type { GetSimilarItemsQuery } from "./_components/similar-items/_queries/
 import type { MediaDetailsPage } from "./page.client.tsx";
 import type { ComponentProps } from "react";
 
-const { movie: libraryMovie } = journeyFixtures.library;
+const { unrequestedMovie: movieFixture, unrequestedShow: showFixture } =
+  journeyFixtures.mediaDetails;
 
 type MediaDetailsData = ComponentProps<typeof MediaDetailsPage>["data"];
 type Cast = NonNullable<GetItemCastQuery["tmdbItem"]["cast"]>;
@@ -18,9 +19,8 @@ type SimilarItems = GetSimilarItemsQuery["tmdbItem"]["similarItems"];
 export const unrequestedMovie: MediaDetailsData = {
   id: "unrequested-movie",
   isRequestable: true,
-  title: libraryMovie.title,
-  overview:
-    "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
+  title: movieFixture.title,
+  overview: movieFixture.overview,
   backdropUrl:
     "https://image.tmdb.org/t/p/original/qVGpxnjrGlHaSTCqTQI6viBDSfp.jpg",
   logo: {
@@ -39,7 +39,7 @@ export const unrequestedMovie: MediaDetailsData = {
     key: "abcd1234",
     url: "https://www.youtube.com/watch?v=abcd1234",
   },
-  year: libraryMovie.year,
+  year: movieFixture.year,
   runtime: "150 minutes",
   language: "en",
   certification: "R",
@@ -113,9 +113,8 @@ export const unrequestedMovie: MediaDetailsData = {
 export const unrequestedShow: MediaDetailsData = {
   id: "unrequested-show",
   isRequestable: true,
-  title: "Arcane",
-  overview:
-    "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
+  title: showFixture.title,
+  overview: showFixture.overview,
   backdropUrl:
     "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
   logo: null,
@@ -128,7 +127,7 @@ export const unrequestedShow: MediaDetailsData = {
     key: "abcd1234",
     url: "https://www.youtube.com/watch?v=abcd1234",
   },
-  year: 2021,
+  year: showFixture.year,
   runtime: "",
   language: "en",
   certification: "R",
@@ -193,7 +192,7 @@ export const movieCast: Cast = [
     __typename: "CastMember",
     character: "Bill Denbrough",
     id: "1",
-    name: "Jaeden Martell",
+    name: movieFixture.cast[0].name,
     profileUrl:
       "https://image.tmdb.org/t/p/w185/oR7ZJsOHMNFzM1HeugV4a4qCMSF.jpg",
   },
@@ -203,7 +202,7 @@ export const movieRecommendations: Recommendations = [
   {
     __typename: "TmdbIndexerData",
     id: "clown-in-a-cornfield",
-    title: "Clown in a Cornfield",
+    title: movieFixture.recommendation.title,
     posterUrl:
       "https://image.tmdb.org/t/p/w300/6ep6gw90TJ8bYvJC6hEDo8SxjoJ.jpg",
     type: "movie",
@@ -216,7 +215,7 @@ export const movieSimilarItems: SimilarItems = [
   {
     __typename: "TmdbIndexerData",
     id: "it-chapter-2",
-    title: "It Chapter 2",
+    title: movieFixture.similar.title,
     posterUrl:
       "https://image.tmdb.org/t/p/w300/zfE0R94v1E8cuKAerbskfD3VfUt.jpg",
     type: "movie",
@@ -229,7 +228,7 @@ export const showCast: Cast = [
   {
     __typename: "CastMember",
     character: "Jinx",
-    name: "Ella Purnell",
+    name: showFixture.cast[0].name,
     id: "cast-1",
     profileUrl:
       "https://artworks.thetvdb.com/banners/v4/actor/599610/photo/673af66279aeb.jpg",
@@ -237,7 +236,7 @@ export const showCast: Cast = [
   {
     __typename: "CastMember",
     character: "Vi",
-    name: "Hailee Steinfeld",
+    name: showFixture.cast[1].name,
     id: "cast-2",
     profileUrl:
       "https://artworks.thetvdb.com/banners/v4/actor/327453/photo/673b757403cbb.jpg",

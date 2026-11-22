@@ -6,6 +6,8 @@ import { it } from "#__tests__/test-context.ts";
 import { User } from "#database/entities/user.entity.ts";
 
 import { e2eBaselineScenario } from "./e2e-baseline.scenario.ts";
+import { tmdbDetailsHandlers } from "./utilities/tmdb-details-handlers.ts";
+import { tvdbDetailsHandlers } from "./utilities/tvdb-details-handlers.ts";
 
 it("seeds an admin, a manager and a regular user", async ({ em, orm }) => {
   await e2eBaselineScenario.seed(em);
@@ -72,30 +74,96 @@ it.for(Object.values(trendingShows))(
   },
 );
 
-const { movie: libraryMovie } = journeyFixtures.library;
+const { unrequestedMovie, unrequestedShow, season, episode } =
+  journeyFixtures.mediaDetails;
 
-it("answers TMDB's details of the library journey's movie", async ({
+// An ID that no fixture uses
+const unknownId = "1";
+
+it("serves the unrequested movie's details", async ({ server }) => {
+  server.use(...e2eBaselineScenario.handlers);
+
+  const response = await fetch(
+    `https://api.themoviedb.org/3/movie/${unrequestedMovie.tmdbId.toString()}`,
+  );
+
+  await expect(response.json()).resolves.toMatchObject({
+    id: unrequestedMovie.tmdbId,
+    title: unrequestedMovie.title,
+    overview: unrequestedMovie.overview,
+  });
+});
+
+it("serves the unrequested show's details from its TVDB ID", async ({
   server,
 }) => {
   server.use(...e2eBaselineScenario.handlers);
 
-  const response = await fetch(
-    `https://api.themoviedb.org/3/movie/${libraryMovie.tmdbId.toString()}`,
+  const found = await fetch(
+    `https://api.themoviedb.org/3/find/${unrequestedShow.tvdbId.toString()}`,
   );
 
-  await expect(response.json()).resolves.toMatchObject({
-    id: libraryMovie.tmdbId,
-    title: libraryMovie.title,
+  await expect(found.json()).resolves.toMatchObject({
+    tv_results: [{ id: unrequestedShow.tmdbId }],
+  });
+
+  const details = await fetch(
+    `https://api.themoviedb.org/3/tv/${unrequestedShow.tmdbId.toString()}`,
+  );
+
+  await expect(details.json()).resolves.toMatchObject({
+    id: unrequestedShow.tmdbId,
+    name: unrequestedShow.title,
+    overview: unrequestedShow.overview,
   });
 });
 
+it("serves the unrequested show's season and episode", async ({ server }) => {
+  server.use(...e2eBaselineScenario.handlers);
+
+  const episodes = await fetch(
+    `https://api4.thetvdb.com/v4/series/${unrequestedShow.tvdbId.toString()}/episodes/official/eng`,
+  );
+
+  await expect(episodes.json()).resolves.toMatchObject({
+    data: { episodes: [{ number: episode.number, name: episode.title }] },
+  });
+
+  const seasons = await fetch(
+    `https://api4.thetvdb.com/v4/series/${unrequestedShow.tvdbId.toString()}/extended`,
+  );
+
+  await expect(seasons.json()).resolves.toMatchObject({
+    data: { seasons: [{ id: season.tvdbId, name: season.title }] },
+  });
+});
+
+it.for([
+  `https://api.themoviedb.org/3/movie/${unknownId}`,
+  `https://api.themoviedb.org/3/movie/${unknownId}/credits`,
+  `https://api.themoviedb.org/3/tv/${unknownId}`,
+  `https://api.themoviedb.org/3/find/${unknownId}`,
+  `https://api4.thetvdb.com/v4/series/${unknownId}/extended`,
+])("leaves %s unhandled, as the fixtures don't cover it", async (url) => {
+  const results = await Promise.all(
+    [...tmdbDetailsHandlers, ...tvdbDetailsHandlers].map((handler) =>
+      handler.run({
+        request: new Request(url),
+        requestId: crypto.randomUUID(),
+      }),
+    ),
+  );
+
+  expect(results.filter((result) => result?.response)).toStrictEqual([]);
+});
+
 it.for(["videos", "credits", "recommendations", "similar"])(
-  "answers TMDB's movie %s for the library journey's movie",
+  "answers TMDB's movie %s for the unrequested movie",
   async (path, { server }) => {
     server.use(...e2eBaselineScenario.handlers);
 
     const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${libraryMovie.tmdbId.toString()}/${path}`,
+      `https://api.themoviedb.org/3/movie/${unrequestedMovie.tmdbId.toString()}/${path}`,
     );
 
     expect(response.ok).toBe(true);

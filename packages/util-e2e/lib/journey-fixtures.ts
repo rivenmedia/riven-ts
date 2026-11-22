@@ -13,33 +13,37 @@ interface JourneyShow {
   firstAirDate: string;
 }
 
+const library = {
+  movie: {
+    tmdbId: 346_364,
+    title: "It",
+    releaseDate: "2017-09-08",
+    year: 2017,
+    posterUrl:
+      "https://image.tmdb.org/t/p/w300/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
+    state: "completed",
+  },
+  show: {
+    tmdbId: 94_605,
+    tvdbId: 371_028,
+    title: "Arcane",
+    firstAirDate: "2021-11-06",
+    year: 2021,
+    posterUrl:
+      "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
+    state: "indexed",
+  },
+} as const;
+
+const { movie: libraryMovie, show: libraryShow } = library;
+
 /**
  * The data a journey's mock scenario serves and its spec asserts on, keyed by journey.
  * Each journey adds its own entry, so the scenario and the spec share one source.
  */
 export const journeyFixtures = {
   /** What the library lists, and the details of its movie */
-  library: {
-    movie: {
-      tmdbId: 346_364,
-      title: "It",
-      releaseDate: "2017-09-08",
-      year: 2017,
-      posterUrl:
-        "https://image.tmdb.org/t/p/w300/9E2y5Q7WlCVNEhP5GiVTjhEhx1o.jpg",
-      state: "completed",
-    },
-    show: {
-      tmdbId: 94_605,
-      tvdbId: 371_028,
-      title: "Arcane",
-      firstAirDate: "2021-11-06",
-      year: 2021,
-      posterUrl:
-        "https://image.tmdb.org/t/p/w300/fqldf2t8ztc9aiwn3k6mlX3tvRT.jpg",
-      state: "indexed",
-    },
-  },
+  library,
   /** What the home page shows from TMDB */
   home: {
     nowPlaying: {
@@ -70,6 +74,44 @@ export const journeyFixtures = {
         title: "Arcane",
         firstAirDate: "2024-11-09",
       },
+    },
+  },
+  /** The details of items that haven't been requested, which come from the library's movie and show */
+  mediaDetails: {
+    unrequestedMovie: {
+      ...libraryMovie,
+      overview:
+        "In a small town in Maine, seven children known as The Losers Club come face to face with life problems, bullies and a monster that takes the shape of a clown called Pennywise.",
+      cast: [
+        {
+          tmdbId: 1_500_001,
+          name: "Jaeden Martell",
+          character: "Bill Denbrough",
+        },
+      ],
+      recommendation: { tmdbId: 1_500_002, title: "Clown in a Cornfield" },
+      similar: { tmdbId: 1_500_003, title: "It Chapter 2" },
+    },
+    unrequestedShow: {
+      ...libraryShow,
+      overview:
+        "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war between magic technologies and clashing convictions.",
+      cast: [
+        { tmdbId: 1_500_101, name: "Ella Purnell", character: "Jinx" },
+        { tmdbId: 1_500_102, name: "Hailee Steinfeld", character: "Vi" },
+      ],
+    },
+    season: {
+      tvdbId: 1_886_658,
+      number: 1,
+      title: "Season 1",
+    },
+    episode: {
+      tvdbId: 8_001_007,
+      number: 7,
+      title: "The Boy Savior",
+      airDate: "2021-11-20",
+      cast: [{ tmdbId: 1_500_102, name: "Hailee Steinfeld", character: "Vi" }],
     },
   },
 } as const satisfies {
