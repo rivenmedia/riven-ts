@@ -5,7 +5,7 @@ import { z } from "zod";
 
 import { api } from "#mocks/graphql.ts";
 
-import { backendUrl } from "./backend-environment.ts";
+import { backendUrl, browserAuthOrigin } from "./backend-environment.ts";
 import { createTestNetwork } from "./create-test-network.ts";
 import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { createBackendProxyHandlers } from "./riven/backend-proxy-handlers.ts";
@@ -125,6 +125,7 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
             rivenUrl: riven.url,
             origin: baseURL ?? "",
             backendUrl,
+            extraOrigins: [browserAuthOrigin],
           }),
           ...remoteAssetHandlers,
           // Subscriptions aren't forwarded to Riven yet, so they connect, but never receive anything
