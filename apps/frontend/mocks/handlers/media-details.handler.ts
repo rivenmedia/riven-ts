@@ -12,9 +12,7 @@ import {
   movieCast,
   movieRecommendations,
   movieSimilarItems,
-  showCast,
   unrequestedMovie,
-  unrequestedShow,
 } from "#app/(protected)/details/media/[type]/[id]/media-details.fixtures.ts";
 import { GET_ITEM_STATE } from "#components/item-state-badge/_queries/get-item-state.query.ts";
 import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subscriptions/on-media-item-state-changed.subscription.ts";
@@ -440,17 +438,3 @@ export const unrequestedMovieHandlers = mockUnrequestedItem(unrequestedMovie, {
   recommendations: movieRecommendations,
   similarItems: movieSimilarItems,
 });
-
-/**
- * The unrequested show, with its cast and seasons.
- *
- * The details are cached by the server, so tests must mock the same details for the same item.
- */
-export const unrequestedShowHandlers = [
-  ...mockUnrequestedItem(unrequestedShow, {
-    cast: showCast,
-    recommendations: [],
-    similarItems: [],
-  }),
-  ...mockItemSeasons(unrequestedShow.id),
-];

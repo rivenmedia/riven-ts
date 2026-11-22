@@ -48,9 +48,7 @@ test.describe("an unrequested show", () => {
       ).toBeVisible();
     }
 
-    await page
-      .getByRole("link", { name: new RegExp(season.title, "iu") })
-      .click();
+    await page.getByRole("link", { name: season.title }).click();
 
     await expect(page).toHaveURL(
       `${showPath}/seasons/${season.number.toString()}`,
@@ -59,9 +57,7 @@ test.describe("an unrequested show", () => {
       page.getByRole("heading", { level: 1, name: season.title }),
     ).toBeVisible();
 
-    await page
-      .getByRole("link", { name: new RegExp(episode.title, "iu") })
-      .click();
+    await page.getByRole("link", { name: episode.title }).click();
 
     await expect(page).toHaveURL(
       `${showPath}/seasons/${season.number.toString()}/episodes/${episode.number.toString()}`,

@@ -31,74 +31,20 @@ export const nowPlaying = [
     releaseDate: DateTime.fromISO(home.nowPlaying.releaseDate).toISO(),
     voteAverage: 7.8,
     language: "en",
-    overview:
-      "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
+    overview: `The overview of ${home.nowPlaying.title}.`,
     genres: [
       { __typename: "Genre", id: "28", name: "Action" },
       { __typename: "Genre", id: "53", name: "Thriller" },
     ],
-    certification: "15",
-    ratings: {
-      __typename: "Ratings",
-      imdb: {
-        __typename: "Rating",
-        logo: "imdb.svg",
-        score: "7.6",
-        url: "https://www.imdb.com/title/tt10366206/",
-      },
-      rottenTomatoes: {
-        __typename: "Rating",
-        logo: "rottentomatoes_certified_fresh.svg",
-        score: "94%",
-        url: "https://www.rottentomatoes.com/m/john_wick_chapter_4",
-      },
-      tmdb: {
-        __typename: "Rating",
-        logo: "tmdb.svg",
-        score: "77%",
-        url: "https://www.themoviedb.org/movie/603692-john-wick-chapter-4",
-      },
-    },
-    logo: {
-      __typename: "ItemImage",
-      aspectRatio: 2 / 3,
-      height: 600,
-      width: 400,
-      url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
-    },
-    seasonLabel: "Spring 2023",
-  },
-  {
-    __typename: "TmdbIndexerData",
-    id: "94605",
-    type: "show",
-    title: "Arcane",
-    backdropUrl:
-      "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-    releaseDate: DateTime.fromObject({ year: 2024, month: 11, day: 9 }).toISO(),
-    voteAverage: 9.1,
-    language: "en",
-    overview:
-      "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-    genres: [
-      { __typename: "Genre", id: "16", name: "Animation" },
-      { __typename: "Genre", id: "10759", name: "Action & Adventure" },
-    ],
-    certification: "12A",
+    certification: null,
     ratings: {
       __typename: "Ratings",
       imdb: null,
       rottenTomatoes: null,
       tmdb: null,
     },
-    logo: {
-      __typename: "ItemImage",
-      aspectRatio: 2 / 3,
-      height: 600,
-      width: 400,
-      url: "https://image.tmdb.org/t/p/original/jXLNOzeEA8AoJy92dJTUUZXTMxK.png",
-    },
-    seasonLabel: "Fall 2024",
+    logo: null,
+    seasonLabel: "Spring 2023",
   },
   {
     __typename: "TmdbIndexerData",
@@ -108,25 +54,21 @@ export const nowPlaying = [
     backdropUrl:
       "https://image.tmdb.org/t/p/original/hD8y787ciNWQ2bn396YrSsOIzdN.jpg",
     releaseDate: DateTime.fromObject({ year: 2026, month: 8, day: 21 }).toISO(),
-    voteAverage: 6.5,
+    voteAverage: 7.8,
     language: "en",
-    overview:
-      "Gemma, a young mother raising her daughter in the house she grew up in, discovers she can travel into The Further, where she possesses an ability to bring what lives there back to the real world.",
-    genres: [{ __typename: "Genre", id: "27", name: "Horror" }],
-    certification: "18",
+    overview: "The overview of Insidious: Out of the Further.",
+    genres: [
+      { __typename: "Genre", id: "28", name: "Action" },
+      { __typename: "Genre", id: "53", name: "Thriller" },
+    ],
+    certification: null,
     ratings: {
       __typename: "Ratings",
       imdb: null,
       rottenTomatoes: null,
       tmdb: null,
     },
-    logo: {
-      __typename: "ItemImage",
-      aspectRatio: 2 / 3,
-      height: 600,
-      width: 400,
-      url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
-    },
+    logo: null,
     seasonLabel: "Summer 2026",
   },
 ] as const satisfies GetTmdbNowPlayingQuery["tmdbNowPlaying"];

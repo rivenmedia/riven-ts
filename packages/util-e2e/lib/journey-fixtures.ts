@@ -81,12 +81,8 @@ export const journeyFixtures = {
         title: "Breaking Bad",
         firstAirDate: "2008-01-20",
       },
-      thisWeek: {
-        tmdbId: 94_605,
-        tvdbId: 371_028,
-        title: "Arcane",
-        firstAirDate: "2024-11-09",
-      },
+      // The library's show, so TMDB answers consistently for it
+      thisWeek: libraryShow,
     },
   },
   /** The details of items that haven't been requested, which come from the library's movie and show */
