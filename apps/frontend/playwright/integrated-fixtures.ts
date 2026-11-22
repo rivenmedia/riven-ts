@@ -14,11 +14,11 @@ import { startRivenInstance } from "./riven/start-riven-instance.ts";
 import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { RivenInstance } from "./riven/start-riven-instance.ts";
 import type { PlaywrightNetworkSource } from "@msw/playwright";
-import type { MockScenarioName, UnhandledRequest } from "@repo/riven/e2e";
+import type { MockScenarioName, UnhandledRequest } from "@repo/util-e2e";
 import type { NetworkApi } from "msw/experimental";
 
 export { expect } from "@playwright/test";
-export { e2eUsers } from "@repo/riven/e2e";
+export { e2eUsers } from "@repo/util-e2e";
 
 const environment = z
   .object({

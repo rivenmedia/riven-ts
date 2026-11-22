@@ -1,4 +1,4 @@
-import { createE2eControlClient, createE2eEnvironment } from "@repo/riven/e2e";
+import { createE2eControlClient, createE2eEnvironment } from "@repo/util-e2e";
 
 import { execFile, spawn } from "node:child_process";
 import { createWriteStream } from "node:fs";
@@ -50,10 +50,31 @@ const readyTimeoutMs = 60_000;
 const stopTimeoutMs = 15_000;
 const logTailLines = 50;
 
-// Resolves to `<riven>/lib/mocks/e2e/index.ts`
 const rivenDirectory = fileURLToPath(
-  new URL("../../../", import.meta.resolve("@repo/riven/e2e")),
+  new URL("../../../riven/", import.meta.url),
 );
+
+const rivenPackageJson = z.object({
+  dependencies: z.record(z.string(), z.string()),
+});
+
+const corePluginPrefix = "@repo/plugin-";
+
+/**
+ * The plugins Riven enables: its `@repo/plugin-*` dependencies, without the prefix.
+ * This is the rule behind Riven's `CorePlugins`, read from its `package.json` so the frontend needn't depend on Riven.
+ */
+async function readEnabledPlugins() {
+  const { dependencies } = rivenPackageJson.parse(
+    JSON.parse(
+      await readFile(path.join(rivenDirectory, "package.json"), "utf8"),
+    ),
+  );
+
+  return Object.keys(dependencies)
+    .filter((dependency) => dependency.startsWith(corePluginPrefix))
+    .map((dependency) => dependency.slice(corePluginPrefix.length));
+}
 
 async function ensureDatabase(postgresUrl: string, name: string) {
   const client = new pg.Client({ connectionString: postgresUrl });
@@ -150,6 +171,7 @@ export async function startRivenInstance({
   await ensureDatabase(postgresUrl, databaseName);
 
   const redis = await startRedis();
+  const enabledPlugins = await readEnabledPlugins();
 
   await createMountDirectory(vfsMountPath);
   await mkdir(path.dirname(logPath), { recursive: true });
@@ -168,6 +190,7 @@ export async function startRivenInstance({
           vfsMountPath,
           apiKey: backendApiKey,
           origin,
+          enabledPlugins,
         }),
         ...inheritedEnvironment.parse(process.env),
         // Already set by `createE2eEnvironment`, but Next.js' types require it to be one of its known modes

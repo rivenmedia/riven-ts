@@ -1,3 +1,6 @@
+import { UserRole } from "@repo/util-auth/access-control";
+import { e2eUsers } from "@repo/util-e2e";
+
 // oxlint-disable sonarjs/no-clear-text-protocols -- `.invalid` hosts never resolve, and MSW answers these requests in-process
 import { RequestContext } from "@mikro-orm/core";
 import { HttpResponse, http } from "msw/http";
@@ -5,8 +8,6 @@ import { HttpResponse, http } from "msw/http";
 import { initAuth } from "#auth/auth.ts";
 import { database } from "#database/database.ts";
 import { MockScenario } from "#mocks/utilities/mock-scenario.ts";
-
-import { e2eUsers } from "../e2e/e2e-users.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
 
@@ -223,13 +224,15 @@ class E2eBaselineScenario extends MockScenario {
     const auth = initAuth(database.orm);
 
     await RequestContext.create(em, async () => {
-      for (const { username, password, email } of Object.values(e2eUsers)) {
+      for (const role of UserRole.options) {
+        const { username, password, email } = e2eUsers[role];
+
         await auth.api.createUser({
           body: {
             name: username,
             email,
             password,
-            role: username === e2eUsers.admin.username ? "admin" : "user",
+            role,
             data: { username },
           },
         });

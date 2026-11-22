@@ -1,5 +1,5 @@
-import type { UnhandledRequest } from "../utilities/unhandled-requests.ts";
 import type { MockScenarioName } from "./scenario-names.ts";
+import type { UnhandledRequest } from "./unhandled-request.ts";
 
 /**
  * Calls a test-mode Riven's `/__e2e__` control endpoint.
