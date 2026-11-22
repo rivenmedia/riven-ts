@@ -5,22 +5,15 @@ import { useAction } from "next-safe-action/hooks";
 import { useMemo } from "react";
 import { toast } from "sonner";
 
+import { SchemaSettingsForm } from "../../_components/schema-settings-form/schema-settings-form";
 import { validationErrorsToIssues } from "../../_components/settings-section/_utilities/validation-errors-to-issues";
-import { SchemaSettingsForm } from "../../_components/settings-section/schema-settings-form";
 import { createRankingProfile } from "../_actions/create-ranking-profile.action";
 import { updateRankingProfile } from "../_actions/update-ranking-profile.action";
 
-import type { SectionSubmission } from "../../_components/settings-section/_utilities/to-section-submission";
 import type {
-  SchemaSettingsFormProps,
   SchemaSettingsSubmitResult,
-} from "../../_components/settings-section/schema-settings-form";
-
-// Stable, as new arrays would rebuild the form's fields and reset it on every
-// render, discarding a refused submission's issues
-const NO_LOCKED_FIELDS: string[] = [];
-const NO_SECRET_STATES: SchemaSettingsFormProps["secretStates"] = [];
-const NO_ISSUES: SchemaSettingsFormProps["issues"] = [];
+  SectionSubmission,
+} from "../../_components/schema-settings-form/schema-settings-form";
 
 export interface RankingProfileFormProps {
   /** The served JSON Schema of the profile form. */
@@ -96,9 +89,6 @@ export function RankingProfileForm({
       title="Profile"
       jsonSchema={jsonSchema}
       values={values}
-      lockedFields={NO_LOCKED_FIELDS}
-      secretStates={NO_SECRET_STATES}
-      issues={NO_ISSUES}
       submitLabel={profileId === undefined ? "Create profile" : "Save profile"}
       onSubmit={handleSubmit}
       isPending={isPending}

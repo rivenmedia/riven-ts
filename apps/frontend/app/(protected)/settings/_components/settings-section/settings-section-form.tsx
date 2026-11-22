@@ -4,14 +4,19 @@ import { useAction } from "next-safe-action/hooks";
 import { useCallback, useMemo } from "react";
 import { toast } from "sonner";
 
+import {
+  SchemaSettingsForm,
+  formatSectionIssue,
+} from "../schema-settings-form/schema-settings-form";
 import { resetSettingsFields } from "./_actions/reset-settings-fields.action";
 import { updateSettingsSection } from "./_actions/update-settings-section.action";
 import { validationErrorsToIssues } from "./_utilities/validation-errors-to-issues";
-import { SchemaSettingsForm, formatSectionIssue } from "./schema-settings-form";
 
 import type { SettingsSection } from "#app/_types/__generated__/graphql.ts";
-import type { SectionSubmission } from "./_utilities/to-section-submission";
-import type { SchemaSettingsSubmitResult } from "./schema-settings-form";
+import type {
+  SchemaSettingsSubmitResult,
+  SectionSubmission,
+} from "../schema-settings-form/schema-settings-form";
 
 export type SettingsSectionFormProps = Omit<SettingsSection, "__typename">;
 
