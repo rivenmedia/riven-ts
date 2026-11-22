@@ -11,11 +11,11 @@ import { Button } from "#components/_ui/button.tsx";
 import { FieldError } from "#components/_ui/field.tsx";
 
 import { SettingField } from "./_components/setting-field/setting-field.tsx";
+import { useStableValue } from "./_hooks/use-stable-value.ts";
 import { buildSettingsConfigFromZodSchema } from "./_utilities/build-settings-config-from-zod-schema.ts";
 import { toSectionSubmission } from "./_utilities/to-section-submission.ts";
 
 import type {
-  SecretState,
   SettingsIssue,
   SettingsSection,
 } from "#app/_types/__generated__/graphql.ts";
@@ -113,30 +113,32 @@ export function SchemaSettingsForm({
 }: SchemaSettingsFormProps) {
   // Props are compared by value, so a caller passing new but equal arrays or
   // values doesn't rebuild the fields and reset the form
-  const jsonSchemaKey = JSON.stringify(jsonSchema);
-  const valuesKey = JSON.stringify(values);
-  const lockedFieldsKey = JSON.stringify(lockedFields ?? []);
-  const secretStatesKey = JSON.stringify(
-    (secretStates ?? []).map(({ path, state }) => [path, state]),
+  const stableJsonSchema = useStableValue(jsonSchema);
+  const stableValues = useStableValue(values);
+  const stableLockedFields = useStableValue(lockedFields ?? []);
+  const stableSecretStates = useStableValue(
+    (secretStates ?? []).map(({ path, state }) => ({ path, state })),
   );
-  const issuesKey = JSON.stringify(
+  const storedIssues = useStableValue(
     (issues ?? []).map(({ path, message }) => ({ path, message })),
   );
 
-  // A served JSON Schema always describes an object of values
-  const schema = useMemo(
-    () =>
-      z.fromJSONSchema(
-        JSON.parse(jsonSchemaKey) as Record<string, unknown>,
-      ) as z.ZodType<SettingValues, SettingValues>,
-    [jsonSchemaKey],
-  );
+  const schema = useMemo(() => {
+    const parsedSchema = z.fromJSONSchema(stableJsonSchema);
+
+    // A served JSON Schema always describes an object of values
+    if (!(parsedSchema instanceof z.ZodObject)) {
+      throw new TypeError("The served settings schema isn't an object schema");
+    }
+
+    return parsedSchema;
+  }, [stableJsonSchema]);
 
   const fields = useMemo(() => {
     const context: BuildSettingsContext = {
-      lockedFields: new Set(JSON.parse(lockedFieldsKey) as string[]),
+      lockedFields: new Set(stableLockedFields),
       secretStates: new Map(
-        JSON.parse(secretStatesKey) as [string, SecretState][],
+        stableSecretStates.map(({ path, state }) => [path, state]),
       ),
       ...(onResetSecret && { onResetSecret }),
     };
@@ -144,7 +146,7 @@ export function SchemaSettingsForm({
     return buildSettingsConfigFromZodSchema(schema, undefined, {}, context)
       .values()
       .toArray();
-  }, [schema, lockedFieldsKey, secretStatesKey, onResetSecret]);
+  }, [schema, stableLockedFields, stableSecretStates, onResetSecret]);
 
   const [fieldNames, secretFieldNames, clearableFieldNames] = useMemo(() => {
     const leafFields = getFields(fields);
@@ -164,10 +166,7 @@ export function SchemaSettingsForm({
   // Only rendered fields are submitted, so values for fields that can't be
   // rendered (e.g. unions) are never sent back
   const defaultValues = useMemo(() => {
-    const renderedValues = pick(
-      JSON.parse(valuesKey) as SettingValues,
-      fieldNames,
-    );
+    const renderedValues = structuredClone(pick(stableValues, fieldNames));
 
     // A field with no value (e.g. an optional number) is seeded as
     // `undefined`, which is also what emptying it gives, so the form doesn't
@@ -179,12 +178,7 @@ export function SchemaSettingsForm({
     }
 
     return blankSecrets(renderedValues, secretFieldNames);
-  }, [valuesKey, fieldNames, secretFieldNames]);
-
-  const storedIssues = useMemo(
-    () => JSON.parse(issuesKey) as FormIssue[],
-    [issuesKey],
-  );
+  }, [stableValues, fieldNames, secretFieldNames]);
 
   // Issues that can't be shown against a field are shown for the form
   const storedSectionIssues = useMemo(
