@@ -42,13 +42,15 @@ the test.
 
 - Riven gets a test mode (`NODE_ENV=test` plus `MOCK_SCENARIO`). The control
   endpoint can wipe the database, so it's only registered in test mode, needs
-  the API key, and Riven refuses to start test mode under
-  `NODE_ENV=production`.
+  the API key, and Riven refuses to load mock scenarios unless `NODE_ENV` is
+  `development` or `test`.
 - Every E2E instance boots with the same environment (all plugins enabled).
-  Scenarios can't change it per test, because settings are frozen at boot. A
-  test that needs a different environment restarts its worker's Riven.
+  Scenarios can't change it per test, because settings are frozen at boot, and
+  the control endpoint rejects a scenario that sets one. A test that needs a
+  different environment would need its worker's Riven restarted, which isn't
+  supported yet.
 - A reset must also clear Riven's in-memory state (the settings manager,
   `restartRequired`, data-source caches), or state leaks between tests on the
   same worker.
-- The CI E2E job needs FUSE and Postgres, and keeps `workers: 1`, so it runs a
-  single Riven instance.
+- The CI E2E job needs FUSE, Postgres and Redis, and keeps `workers: 1`, so it
+  runs a single Riven instance.
