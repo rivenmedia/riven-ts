@@ -1,6 +1,6 @@
 import { redirect } from "@storybook/nextjs-vite/navigation.mock";
 import { HttpResponse } from "msw/http";
-import { expect, fn, userEvent, waitFor } from "storybook/test";
+import { expect, fn, userEvent, waitFor, within } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
 import { api } from "#mocks/graphql.ts";
@@ -161,6 +161,42 @@ Edit.test("Saves the profile's changes", async ({ canvas }) => {
 
   await waitFor(() =>
     expect(redirect).toHaveBeenCalledWith("/settings/ranking"),
+  );
+});
+
+Edit.test("Saves a rank's toggled fetch", async ({ canvas }) => {
+  const rankRow = canvas.getByRole("spinbutton", {
+    name: "Av1 rank",
+  }).parentElement;
+
+  if (!rankRow) {
+    throw new Error("Expected the rank input to be in a row");
+  }
+
+  const saveButton = canvas.getByRole("button", { name: "Save profile" });
+
+  await expect(saveButton).toBeDisabled();
+
+  await userEvent.click(within(rankRow).getByRole("switch", { name: "Fetch" }));
+
+  await expect(saveButton).toBeEnabled();
+
+  await userEvent.click(saveButton);
+
+  await waitFor(() =>
+    expect(updateRankingProfileRequest).toHaveBeenCalledWith({
+      id: customProfile.id,
+      values: {
+        ...customProfile.values,
+        ranks: {
+          ...customProfile.values.ranks,
+          quality: {
+            ...customProfile.values.ranks.quality,
+            av1: { fetch: false },
+          },
+        },
+      },
+    }),
   );
 });
 

@@ -45,7 +45,7 @@ export function SettingsCustomRankField({
               {...fetchField}
               defaultChecked={fetchEnabled}
               onCheckedChange={(checked) => {
-                setValue(`${name}.fetch`, checked);
+                setValue(`${name}.fetch`, checked, { shouldDirty: true });
               }}
             />
           </Label>
