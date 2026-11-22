@@ -9,73 +9,11 @@ import { initAuth } from "#auth/auth.ts";
 import { database } from "#database/database.ts";
 import { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 
+import { tmdbHomeHandlers } from "./utilities/tmdb-home-handlers.ts";
+
 import type { EntityManager } from "@mikro-orm/core";
 
-const tmdbImage = (path: string) => path;
-
-const johnWick = {
-  adult: false,
-  id: 603_692,
-  title: "John Wick: Chapter 4",
-  original_title: "John Wick: Chapter 4",
-  original_language: "en",
-  overview:
-    "With the price on his head ever increasing, John Wick uncovers a path to defeating The High Table.",
-  backdrop_path: tmdbImage("/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg"),
-  poster_path: tmdbImage("/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg"),
-  genre_ids: [28, 53],
-  release_date: "2023-03-24",
-  vote_average: 7.8,
-  vote_count: 1000,
-  popularity: 100,
-  video: false,
-};
-
-const trendingMovie = {
-  day: {
-    ...johnWick,
-    id: 299_534,
-    title: "Avengers: Endgame",
-    original_title: "Avengers: Endgame",
-    poster_path: "/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
-    release_date: "2019-04-24",
-  },
-  week: {
-    ...johnWick,
-    id: 1_368_337,
-    title: "The Odyssey",
-    original_title: "The Odyssey",
-    poster_path: "/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
-    release_date: "2026-07-17",
-  },
-};
-
-const arcane = {
-  id: 94_605,
-  name: "Arcane",
-  overview:
-    "Amid the stark discord of twin cities Piltover and Zaun, two sisters fight on rival sides of a war.",
-  backdrop_path: "/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-  poster_path: "/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
-  original_language: "en",
-  genre_ids: [16, 10_759],
-  first_air_date: "2024-11-09",
-  origin_country: ["US"],
-};
-
-const page = <T>(results: T[]) => ({
-  page: 1,
-  results,
-  total_pages: 1,
-  total_results: results.length,
-});
-
 const emptyPage = { page: 1, items: [], count: 0, pages: 1 };
-
-type TimeWindow = keyof typeof trendingMovie;
-
-const isTimeWindow = (value: unknown): value is TimeWindow =>
-  value === "day" || value === "week";
 
 class E2eBaselineScenario extends MockScenario {
   public override scenarioName = "e2e-baseline" as const;
@@ -150,27 +88,11 @@ class E2eBaselineScenario extends MockScenario {
       HttpResponse.json(emptyPage),
     ),
 
-    // The dashboard's TMDB requests
-    http.get("https://api.themoviedb.org/3/movie/now_playing", () =>
-      HttpResponse.json(page([johnWick])),
-    ),
-    http.get(
-      "https://api.themoviedb.org/3/trending/movie/:timeWindow",
-      ({ params }) =>
-        HttpResponse.json(
-          page([
-            trendingMovie[
-              isTimeWindow(params["timeWindow"]) ? params["timeWindow"] : "day"
-            ],
-          ]),
-        ),
-    ),
-    http.get("https://api.themoviedb.org/3/trending/tv/:timeWindow", () =>
-      HttpResponse.json(page([arcane])),
-    ),
-    http.get("https://api.themoviedb.org/3/tv/:id/external_ids", () =>
-      HttpResponse.json({ imdb_id: "tt11126994", tvdb_id: 371_028 }),
-    ),
+    // The home page renders these lists through `"use cache"`, which the one Next.js server shares between tests.
+    // Every scenario must serve the same data, or a test sees whichever scenario rendered the home page first.
+    ...tmdbHomeHandlers,
+
+    // The details TMDB looks up for any item
     http.get("https://api.themoviedb.org/3/genre/:mediaType/list", () =>
       HttpResponse.json({
         genres: [
@@ -181,41 +103,45 @@ class E2eBaselineScenario extends MockScenario {
         ],
       }),
     ),
-    http.get("https://api.themoviedb.org/3/movie/:id/release_dates", () =>
-      HttpResponse.json({
-        id: johnWick.id,
-        results: [
-          {
-            iso_3166_1: "US",
-            release_dates: [
-              {
-                certification: "R",
-                iso_639_1: "en",
-                type: 3,
-                release_date: "",
-              },
-            ],
-          },
-        ],
-      }),
+    http.get(
+      "https://api.themoviedb.org/3/movie/:id/release_dates",
+      ({ params: { id } }) =>
+        HttpResponse.json({
+          id: Number(id),
+          results: [
+            {
+              iso_3166_1: "US",
+              release_dates: [
+                {
+                  certification: "R",
+                  iso_639_1: "en",
+                  type: 3,
+                  release_date: "",
+                },
+              ],
+            },
+          ],
+        }),
     ),
-    http.get("https://api.themoviedb.org/3/:mediaType/:id/images", () =>
-      HttpResponse.json({
-        id: johnWick.id,
-        backdrops: [],
-        posters: [],
-        logos: [
-          {
-            aspect_ratio: 2 / 3,
-            height: 600,
-            width: 400,
-            iso_639_1: "en",
-            file_path: "/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
-            vote_average: 5,
-            vote_count: 10,
-          },
-        ],
-      }),
+    http.get(
+      "https://api.themoviedb.org/3/:mediaType/:id/images",
+      ({ params: { id } }) =>
+        HttpResponse.json({
+          id: Number(id),
+          backdrops: [],
+          posters: [],
+          logos: [
+            {
+              aspect_ratio: 2 / 3,
+              height: 600,
+              width: 400,
+              iso_639_1: "en",
+              file_path: "/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+              vote_average: 5,
+              vote_count: 10,
+            },
+          ],
+        }),
     ),
   ] as const;
 

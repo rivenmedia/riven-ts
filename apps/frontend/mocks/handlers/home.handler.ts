@@ -1,3 +1,5 @@
+import { journeyFixtures } from "@repo/util-e2e";
+
 import { DateTime } from "luxon";
 import { HttpResponse } from "msw/http";
 
@@ -13,15 +15,20 @@ import type { GetTmdbTrendingMoviesQuery } from "#app/(protected)/(home)/_compon
 import type { GetTmdbTrendingShowsQuery } from "#app/(protected)/(home)/_components/tmdb-trending-shows/_queries/get-tmdb-trending-shows.typegen.ts";
 import type { TmdbTrendingTimeWindow } from "#app/_types/__generated__/graphql.ts";
 
+const { home } = journeyFixtures;
+
+/** The year of a TMDB `YYYY-MM-DD` date */
+const yearOf = (date: string) => DateTime.fromISO(date).year;
+
 export const nowPlaying = [
   {
     __typename: "TmdbIndexerData",
-    id: "603692",
+    id: home.nowPlaying.tmdbId.toString(),
     type: "movie",
-    title: "John Wick: Chapter 4",
+    title: home.nowPlaying.title,
     backdropUrl:
       "https://image.tmdb.org/t/p/original/i3OTGmLNOZIo4SRQLVfLjeWegB6.jpg",
-    releaseDate: DateTime.fromObject({ year: 2023, month: 3, day: 24 }).toISO(),
+    releaseDate: DateTime.fromISO(home.nowPlaying.releaseDate).toISO(),
     voteAverage: 7.8,
     language: "en",
     overview:
@@ -128,23 +135,23 @@ export const trendingMovies = {
   day: [
     {
       __typename: "TmdbIndexerData",
-      id: "299534",
+      id: home.trendingMoviesToday.tmdbId.toString(),
       type: "movie",
-      title: "Avengers: Endgame",
+      title: home.trendingMoviesToday.title,
       posterUrl:
         "https://image.tmdb.org/t/p/original/ulzhLuWrPK07P1YkdWQLZnQh1JL.jpg",
-      year: 2019,
+      year: yearOf(home.trendingMoviesToday.releaseDate),
     },
   ],
   week: [
     {
       __typename: "TmdbIndexerData",
-      id: "1368337",
+      id: home.trendingMoviesThisWeek.tmdbId.toString(),
       type: "movie",
-      title: "The Odyssey",
+      title: home.trendingMoviesThisWeek.title,
       posterUrl:
         "https://image.tmdb.org/t/p/original/5rhTDKUhPYvpdQIijFIs5VoWsON.jpg",
-      year: 2026,
+      year: yearOf(home.trendingMoviesThisWeek.releaseDate),
     },
   ],
 } as const satisfies Record<
@@ -156,23 +163,23 @@ export const trendingShows = {
   day: [
     {
       __typename: "TmdbIndexerData",
-      id: "81189",
+      id: home.trendingShows.today.tvdbId.toString(),
       type: "show",
-      title: "Breaking Bad",
+      title: home.trendingShows.today.title,
       posterUrl: "https://artworks.thetvdb.com/banners/posters/81189-10.jpg",
-      year: 2008,
+      year: yearOf(home.trendingShows.today.firstAirDate),
       isRequestable: true,
     },
   ],
   week: [
     {
       __typename: "TmdbIndexerData",
-      id: "371028",
+      id: home.trendingShows.thisWeek.tvdbId.toString(),
       type: "show",
-      title: "Arcane",
+      title: home.trendingShows.thisWeek.title,
       posterUrl:
         "https://artworks.thetvdb.com/banners/v4/series/371028/posters/617f6a8c59e8f.jpg",
-      year: 2024,
+      year: yearOf(home.trendingShows.thisWeek.firstAirDate),
       isRequestable: true,
     },
   ],

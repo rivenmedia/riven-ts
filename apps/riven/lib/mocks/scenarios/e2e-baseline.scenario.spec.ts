@@ -1,4 +1,4 @@
-import { e2eUsers } from "@repo/util-e2e";
+import { e2eUsers, journeyFixtures } from "@repo/util-e2e";
 
 import { expect } from "vitest";
 
@@ -29,3 +29,45 @@ it("can seed an empty database more than once", async ({ em, orm }) => {
 
   await expect(orm.em.fork().count(User)).resolves.toBe(3);
 });
+
+const {
+  nowPlaying,
+  trendingMoviesToday,
+  trendingMoviesThisWeek,
+  trendingShows,
+} = journeyFixtures.home;
+
+it.for([
+  { path: "movie/now_playing", item: nowPlaying },
+  { path: "trending/movie/day", item: trendingMoviesToday },
+  { path: "trending/movie/week", item: trendingMoviesThisWeek },
+  { path: "trending/tv/day", item: trendingShows.today },
+  { path: "trending/tv/week", item: trendingShows.thisWeek },
+])(
+  "answers TMDB's $path with the home journey's $item.title",
+  async ({ path, item }, { server }) => {
+    server.use(...e2eBaselineScenario.handlers);
+
+    const response = await fetch(`https://api.themoviedb.org/3/${path}`);
+    const { results } = (await response.json()) as {
+      results: { id: number; title?: string; name?: string }[];
+    };
+
+    expect(
+      results.map(({ id, title, name }) => ({ id, title: title ?? name })),
+    ).toContainEqual({ id: item.tmdbId, title: item.title });
+  },
+);
+
+it.for(Object.values(trendingShows))(
+  "answers the TVDB ID of $title, which makes it requestable",
+  async ({ tmdbId, tvdbId }, { server }) => {
+    server.use(...e2eBaselineScenario.handlers);
+
+    const response = await fetch(
+      `https://api.themoviedb.org/3/tv/${tmdbId.toString()}/external_ids`,
+    );
+
+    await expect(response.json()).resolves.toMatchObject({ tvdb_id: tvdbId });
+  },
+);
