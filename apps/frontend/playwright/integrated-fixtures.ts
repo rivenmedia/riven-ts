@@ -213,7 +213,14 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
             backendUrl,
           }),
           ...remoteAssetHandlers,
-          createWebSocketBridge(riven.url),
+          createWebSocketBridge(riven.url, async () => {
+            // The browser sends the frontend's cookies with its upgrade request, which Riven authenticates by
+            const cookies = await context.cookies(baseURL);
+
+            return cookies
+              .map(({ name, value }) => `${name}=${value}`)
+              .join("; ");
+          }),
         ],
       });
 

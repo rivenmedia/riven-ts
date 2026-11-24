@@ -3,12 +3,12 @@ import { WebSocketInterceptor } from "@mswjs/interceptors/WebSocket";
 import { defineNetwork, InterceptorSource } from "msw/experimental";
 import { once } from "node:events";
 import { IncomingMessage } from "node:http";
-import { it as baseIt, expect, onTestFinished } from "vitest";
+import { it as baseIt, expect, onTestFinished, vi } from "vitest";
 import { WebSocket as UpstreamSocket, WebSocketServer } from "ws";
 
 import { createWebSocketBridge } from "./websocket-bridge.ts";
 
-import type { AddressInfo } from "node:net";
+import type { Mock } from "vitest";
 import type { RawData } from "ws";
 
 /** The frontend's origin, which the browser opens its subscriptions to */
@@ -31,12 +31,17 @@ interface Upstream {
 }
 
 const it = baseIt.extend<{
+  /** Returns the browser's cookies for the bridge to send upstream, which are none unless a test says otherwise */
+  getCookieHeader: Mock<() => Promise<string>>;
   /** A WebSocket server that stands in for Riven, and answers each message with a reply that names it */
   upstream: Upstream;
   /** Opens a WebSocket to the frontend's `/graphql`, as the browser does for its subscriptions */
   openClient: () => WebSocket;
 }>({
-  upstream: async ({}, use) => {
+  getCookieHeader: async ({}, use) => {
+    await use(vi.fn<() => Promise<string>>().mockResolvedValue(""));
+  },
+  upstream: async ({ getCookieHeader }, use) => {
     const server = new WebSocketServer({ host: "127.0.0.1", port: 0 });
 
     await once(server, "listening");
@@ -56,14 +61,21 @@ const it = baseIt.extend<{
       });
     });
 
-    const { port } = server.address() as AddressInfo;
+    const address = server.address();
+
+    expect.assert(address && typeof address === "object");
+
+    const { port } = address;
 
     const network = defineNetwork({
       sources: [
         new InterceptorSource({ interceptors: [new WebSocketInterceptor()] }),
       ],
       handlers: [
-        createWebSocketBridge(new URL(`http://127.0.0.1:${String(port)}`)),
+        createWebSocketBridge(
+          new URL(`http://127.0.0.1:${String(port)}`),
+          getCookieHeader,
+        ),
       ],
       context: { baseUrl: frontendOrigin, quiet: true },
       onUnhandledFrame: "error",
@@ -161,4 +173,61 @@ it("closes the client when the upstream closes", async ({
   await expect(clientClosed).resolves.toMatchObject([
     { code: 4400, reason: "Invalid message" },
   ]);
+});
+
+it("forwards a close code of 1001 to the client", async ({
+  upstream,
+  openClient,
+}) => {
+  const client = openClient();
+  const clientClosed = once(client, "close");
+  const { socket } = await upstream.nextConnection();
+
+  socket.close(1001, "Going away");
+
+  await expect(clientClosed).resolves.toMatchObject([{ code: 1001 }]);
+});
+
+it("closes the client with 4499 when the upstream drops without a close code", async ({
+  upstream,
+  openClient,
+}) => {
+  const client = openClient();
+  const clientClosed = once(client, "close");
+  const { socket } = await upstream.nextConnection();
+
+  // The upstream sees 1006, which can't be sent. A 1000 would make graphql-ws reconnect at once, with no backoff.
+  socket.terminate();
+
+  await expect(clientClosed).resolves.toMatchObject([{ code: 4499 }]);
+});
+
+it("closes the client with 4499 when the browser's cookies can't be read", async ({
+  getCookieHeader,
+  openClient,
+}) => {
+  getCookieHeader.mockRejectedValueOnce(new Error("Context closed"));
+
+  const clientClosed = once(openClient(), "close");
+
+  await expect(clientClosed).resolves.toMatchObject([{ code: 4499 }]);
+});
+
+it("sends the cookies the browser has as each client connects to the upstream", async ({
+  getCookieHeader,
+  upstream,
+  openClient,
+}) => {
+  getCookieHeader.mockResolvedValueOnce("session=signed-out");
+  openClient();
+
+  const signedOut = await upstream.nextConnection();
+
+  getCookieHeader.mockResolvedValueOnce("session=signed-in");
+  openClient();
+
+  const signedIn = await upstream.nextConnection();
+
+  expect(signedOut.request.headers.cookie).toBe("session=signed-out");
+  expect(signedIn.request.headers.cookie).toBe("session=signed-in");
 });
