@@ -80,6 +80,7 @@ export default defineConfig({
   use: {
     baseURL,
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
   // CI only installs Chromium. Run every browser locally with `pnpm e2e:headless`.
   projects: withIntegratedTwins(

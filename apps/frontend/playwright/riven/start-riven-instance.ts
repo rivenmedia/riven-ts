@@ -215,6 +215,7 @@ export async function startRivenInstance({
         ...inheritedEnvironment.parse(process.env),
         // Already set by `createE2eEnvironment`, but Next.js' types require it to be one of its known modes
         NODE_ENV: "test",
+        RIVEN_SETTING__logLevel: "silly", // Set the log level to the most verbose level to capture all logs for debugging
       },
     });
 

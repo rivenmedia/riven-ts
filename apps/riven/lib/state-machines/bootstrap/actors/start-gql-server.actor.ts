@@ -229,7 +229,8 @@ export const startGqlServer = fromPromise<
     );
 
     const url = new URL(
-      `http://${settings.host}:${settings.port.toString()}/${graphqlPath}`,
+      graphqlPath,
+      `http://${settings.host}:${settings.port.toString()}`,
     );
 
     await new Promise<void>((resolve) => {
