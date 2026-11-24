@@ -37,6 +37,35 @@ Formatting is fully automated — run `pnpm format:fix` (or rely on the
 pre-commit hook) rather than hand-formatting. If formatter output looks
 wrong, change the config, not the code.
 
+## Scaffolding
+
+Create new packages, plugins and frontend components with the repo's turbo
+generators, never by hand. They set up the shared configs, `package.json`
+scripts and exports that the rest of the tooling expects.
+
+```bash
+pnpm turbo gen package             # a `feature` or `util` package in packages/
+pnpm turbo gen plugin              # a Riven plugin
+pnpm turbo gen frontend-component  # a frontend component, with its stories
+```
+
+The generators prompt interactively. Agents and scripts have no TTY to answer
+them, so pass every answer in prompt order with `--args`:
+
+```bash
+# packages/util-my-package: <name> <feature|util> <confirm>
+pnpm turbo gen package --args my-package util true
+# packages/plugin-my-plugin: <name> <confirm>
+pnpm turbo gen plugin --args my-plugin true
+```
+
+For other generators, the prompts and their order are in each generator's
+`prompts` array.
+
+The generators live in [`turbo/generators`](turbo/generators), and
+`pnpm validate-generators` tests them. If a generator's output is wrong for
+every new package, fix the generator rather than the generated files.
+
 ## Code
 
 - Use **inferred return types**. The explicit return type rules are

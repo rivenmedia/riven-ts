@@ -4,6 +4,7 @@ import { fromPromise } from "xstate";
 
 import { createDatabaseConfig } from "#database/config.ts";
 import { initORM } from "#database/database.ts";
+import { isMockTestMode } from "#mocks/utilities/is-mock-test-mode.ts";
 import { logger } from "#utilities/logger/logger.ts";
 import { settings } from "#utilities/settings.ts";
 
@@ -53,7 +54,8 @@ export const initialiseDatabaseConnection =
 
       const { database, services } = await initORM(databaseConfig);
 
-      if (process.env["NODE_ENV"] === "production") {
+      // Test mode runs the production build against a fresh database, so it needs the schema too
+      if (process.env["NODE_ENV"] === "production" || isMockTestMode()) {
         const requiresMigration = await database.orm.migrator.checkSchema();
 
         if (requiresMigration) {

@@ -77,8 +77,22 @@ jobs:
           - name: Build
             command: build
 
-          - name: E2E tests
+          # Separate E2E jobs per-platform, as Riven's FUSE mount and networking differ on macOS
+          - name: E2E tests (linux-x64)
             command: e2e:headless
+            runner-requirements: &e2e-runner-requirements
+              - fuse
+              - redis-server
+              - postgres-service
+            env: &e2e-env
+              E2E_POSTGRES_URL: postgres://runner:runner@127.0.0.1:5432/postgres
+            runner: ubuntu-latest
+
+          - name: E2E tests (macos-arm64)
+            command: e2e:headless
+            runner-requirements: *e2e-runner-requirements
+            env: *e2e-env
+            runner: macos-latest
 
           - name: Validate generators
             command: //#validate-generators

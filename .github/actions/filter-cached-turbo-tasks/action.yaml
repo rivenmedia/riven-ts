@@ -36,7 +36,9 @@ runs:
           exit 1
         fi
 
-        mapfile -t TASK_LIST < <(jq -r '.[]' <<< "$TASKS")
+        # macOS runners ship bash 3.2, which lacks mapfile
+        TASK_LIST=()
+        while IFS= read -r TASK; do TASK_LIST+=("$TASK"); done < <(jq -r '.[]' <<< "$TASKS")
 
         for TASK in "${TASK_LIST[@]}"; do
           case "$TASK" in

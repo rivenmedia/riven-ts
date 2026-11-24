@@ -41,7 +41,8 @@ env:
 jobs:
   get-required-tasks:
     name: Check if required
-    runs-on: ubuntu-latest
+    # Run on the task's runner, so the RUNNER_OS/RUNNER_ARCH in the hash match the cache entry the task writes
+    runs-on: ${{ inputs.runner }}
     outputs:
       required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
     steps:

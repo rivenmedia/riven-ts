@@ -13,6 +13,59 @@ applies.
   `typeof window` to `"undefined"`, so browser-only branches silently never
   run under test.
 
+## E2E suites
+
+Every spec under `tests/` runs in one of two suites. Playwright
+registers each project twice: `chromium` runs the mocked specs and
+`chromium-integrated` runs the `*.integrated.spec.ts` specs. CI runs only
+Chromium.
+
+- **Integrated** (`*.integrated.spec.ts`): write these for journeys through
+  real Riven, such as signing in. Each worker boots its own Riven with a real
+  Postgres and Redis, and the browser and the Next.js server talk to it
+  through a proxy. The Playwright handlers forward the browser's `/graphql` and
+  `/api/auth/*` requests to Riven directly, so this suite bypasses the rewrite
+  in `proxy.ts`.
+- **Mocked** (`*.spec.ts`): keep these for states Riven can't be put into,
+  such as a failing backend or every setting type.
+
+Every request Riven makes to an external service needs a handler in a Riven
+mock scenario. A request without a handler fails the test and the report
+lists it. Riven records unhandled requests, and the test fixtures report them.
+A request made while Riven boots fails the worker before its first test.
+After that, the fixtures report them only for the span of one test. Applying a
+test's scenario resets the instance and clears the list, and the check runs at
+the end of the test. A request made after one test's check and before the next
+test's reset is refused but never reported, and it doesn't show up in the next
+test either, so a missing handler there can go unnoticed.
+
+### Running locally
+
+You need:
+
+- Postgres, via `docker compose --profile services up riven-db`
+- `redis-server` on `PATH`
+- FUSE, with `user_allow_other` set in `/etc/fuse.conf`
+
+Then run the tests from `apps/frontend`, with the connection string of that
+Postgres:
+
+```sh
+E2E_POSTGRES_URL=postgres://postgres:<password>@127.0.0.1:5432/postgres \
+  pnpm e2e:headless --project=chromium-integrated
+```
+
+CI provides the same three with `runner-requirements` in `verify.yaml`.
+
+### Known issue: the browser auth origin
+
+The browser's auth client always uses the default `ORIGIN`,
+`https://localhost:9000`, because `privateEnvironment.ORIGIN` is undefined in
+the browser. The mocked suite hides this, as its handlers match any origin.
+The integrated fixtures forward that origin to Riven through
+`browserAuthOrigin`. Remove that once the frontend uses the page's own
+origin.
+
 ## Storybook tests
 
 ### Story reuse

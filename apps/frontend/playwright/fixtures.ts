@@ -1,10 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { PlaywrightNetworkSource } from "@msw/playwright";
 import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
 import { getOperationAST } from "graphql";
 import { DateTime } from "luxon";
-import { defineNetwork } from "msw/experimental";
 import { HttpResponse } from "msw/http";
 import { test as nextTest } from "next/experimental/testmode/playwright.js";
 import { z } from "zod";
@@ -29,11 +27,13 @@ import {
   hasPermissionHandler,
   passkeysUnavailableHandler,
 } from "./auth-handlers.ts";
-import { NextFetchSource, isNextFetchFrame } from "./next-fetch-source.ts";
+import { createTestNetwork } from "./create-test-network.ts";
 import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { serialiseCookie } from "./serialise-cookie.ts";
 
+import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { PlaywrightNetworkSource } from "@msw/playwright";
 import type { UserRole } from "@repo/util-auth/access-control";
 import type { Session } from "better-auth";
 import type { UserWithRole } from "better-auth/client/plugins";
@@ -194,37 +194,16 @@ export const test = nextTest.extend<Options & Fixtures>({
       use,
       testInfo,
     ) => {
-      // Next.js' fixture only adds the test's headers in a route, which a redirected request doesn't go through.
-      // Without them, the server can't attribute that request's fetches to the test, so they'd reach the real backend.
-      await context.setExtraHTTPHeaders({
-        "Next-Test-Proxy-Port": String(_nextWorker.proxyPort),
-        "Next-Test-Data": testInfo.testId,
-      });
-
-      const nextFetchSource = new NextFetchSource(next);
-
-      const network = defineNetwork({
-        sources: [
-          new PlaywrightNetworkSource({ context, skipAssetRequests: true }),
-          nextFetchSource,
-        ],
+      const { network, dispose } = await createTestNetwork({
+        next,
+        nextWorker: _nextWorker,
+        context,
+        testId: testInfo.testId,
         handlers: [...handlers, ...baselineHandlers],
-        context: { quiet: true },
-        onUnhandledFrame: ({ frame, defaults }) => {
-          // The page's own requests (navigations, RSC payloads, etc.) are expected to reach the Next.js server
-          if (isNextFetchFrame(frame)) {
-            defaults.warn();
-          }
-        },
       });
 
-      await network.enable();
       await use(network);
-
-      // Close the pages, then let the server finish their requests, so they aren't cut off (and logged as errors)
-      await Promise.all(context.pages().map((page) => page.close()));
-      await nextFetchSource.waitForIdle();
-      await network.disable();
+      await dispose();
     },
     { auto: true },
   ],

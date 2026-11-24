@@ -2,7 +2,7 @@ import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
 import { describe, expect, vi } from "vitest";
-import { createActor, createEmptyActor, fromPromise, toPromise } from "xstate";
+import { createEmptyActor, fromPromise, toPromise } from "xstate";
 
 import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenario.ts";
 import { DEFAULT_PRESET_SLUG } from "#ranking/presets/index.ts";
@@ -94,14 +94,10 @@ describe("when a mock scenario is applied", () => {
       const dir = await mkdtemp(path.join(tmpdir(), "riven-bootstrap-sync-"));
 
       try {
-        await toPromise(
-          createActor(realSyncRankingProfiles, {
-            input: {
-              ...input,
-              legacyConfigPath: path.join(dir, "missing.json"),
-            },
-          }).start(),
-        );
+        await realSyncRankingProfiles({
+          ...input,
+          legacyConfigPath: path.join(dir, "missing.json"),
+        });
       } finally {
         await rm(dir, { recursive: true });
       }

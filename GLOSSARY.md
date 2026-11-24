@@ -3,6 +3,15 @@
 Riven automates finding, downloading and serving media. This glossary fixes the
 language used across the backend, the plugins and the frontend.
 
+## Services
+
+**External service**:
+Any service Riven talks to that runs outside Riven itself and isn't its own
+database or cache. This covers public APIs (such as TMDB, TVDB, Torrentio and
+StremThru) as well as services the user hosts themselves (such as Plex,
+Jellyfin and Seerr).
+_Avoid_: third party, upstream, provider
+
 ## Settings
 
 **Setting**:
