@@ -32,9 +32,6 @@ Chromium.
   What stays mocked, and why:
   - `home.spec.ts` (the recently added carousel): Riven's `recentlyAdded`
     resolver is a stub that returns `[]`.
-  - `media-details.spec.ts` (requesting the movie shows its state as it
-    changes): it needs the full request pipeline mocked in Riven, which is
-    phase 3.
   - `settings.spec.ts` ("the general settings don't load the plugin list"): it
     asserts that the page never sends a request, which needs the mocked
     network to record the operations.
@@ -56,10 +53,21 @@ Chromium.
    `journeyFixtures` in `@repo/util-e2e`, so the two share one source.
 3. In the spec, select the scenario with `test.use({ scenario })`. A journey
    varies Riven's state only through its scenario, never by mutating Riven
-   during the test.
+   during the test, except through a gate (below).
 4. Sign in with `test.use({ signedInAs: "user" })` (`"manager"` or `"admin"`). It signs in
    through the real Riven after the scenario's reset, and re-adds the cookies
    for the Next.js origin. The default is signed out.
+
+To see an intermediate state, hold it with a gate. The scenario's handler waits
+on a gate key, which is listed in `journeyFixtures` (as `movieRequest.scrapeGateKey`
+is), and the test releases the gate with `riven.control.releaseGate(key)` when
+it's ready for the pipeline to move on. A gate is the one sanctioned way to
+control Riven during a test. Every reset pauses the queues and clears the gates,
+which abandons the responses they hold and leaves them closed until the next
+scenario is applied. A reset waits for every running job, though, so a gated
+journey must run its pipeline to a settled state before the test ends: a job
+that's still running, rather than waiting on a gate, can make the next reset
+time out.
 
 One Next.js server shares the `"use cache"` cache across every scenario and
 every Playwright project, including the mocked one: the mocked specs fill the

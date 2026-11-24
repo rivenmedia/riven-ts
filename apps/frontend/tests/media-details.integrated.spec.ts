@@ -1,9 +1,11 @@
 import { journeyFixtures } from "@repo/util-e2e";
 
 import { expect, test } from "#playwright/integrated-fixtures.ts";
+import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 const { unrequestedMovie, unrequestedShow, season, episode } =
   journeyFixtures.mediaDetails;
+const { movieRequest } = journeyFixtures;
 
 test.use({ signedInAs: "user" });
 
@@ -70,5 +72,34 @@ test.describe("an unrequested show", () => {
         .getByRole("main")
         .getByRole("heading", { name: episode.cast[0].name }),
     ).toBeVisible();
+  });
+});
+
+test.describe("requesting a movie", () => {
+  test.use({ scenario: "e2e-movie-request" });
+
+  test("requesting the movie shows its state as it changes", async ({
+    page,
+    riven,
+  }) => {
+    await page.goto(`/details/media/movie/${movieRequest.tmdbId.toString()}`);
+
+    const requestButton = page.getByRole("button", { name: "Request" });
+
+    await waitForHydration(requestButton);
+    await requestButton.click();
+    await page
+      .getByRole("alertdialog")
+      .getByRole("button", { name: "Request" })
+      .click();
+
+    await expect(page.getByText(/request successful/iu)).toBeVisible();
+
+    // The scenario holds the download, so the movie stays scraped until the gate is released
+    await expect(page.getByRole("status", { name: "Scraped" })).toBeVisible();
+
+    await riven.control.releaseGate(movieRequest.gateKey);
+
+    await expect(page.getByRole("status", { name: "Completed" })).toBeVisible();
   });
 });
