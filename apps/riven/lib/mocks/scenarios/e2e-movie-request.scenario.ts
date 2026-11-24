@@ -23,6 +23,12 @@ const torrentFiles = [
   },
 ];
 
+// Once the store has downloaded the torrent, each file has a link to it, which Riven needs to keep the file
+const downloadedTorrentFiles = torrentFiles.map((file) => ({
+  ...file,
+  link: `${stremThru}/e2e/files/${movieRequest.infohash}/${file.name}`,
+}));
+
 // Riven files movies under `movies` in the library, which the media servers find under their `/mount` default
 const moviesLibraryPath = "/mount/movies";
 
@@ -105,7 +111,7 @@ export const e2eMovieRequestScenario = defineE2eScenario({
         data: {
           id: `e2e-${movieRequest.infohash}`,
           status: "downloaded",
-          files: torrentFiles,
+          files: downloadedTorrentFiles,
         },
       });
     }),

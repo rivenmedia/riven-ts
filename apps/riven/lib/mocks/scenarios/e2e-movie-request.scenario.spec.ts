@@ -11,6 +11,7 @@ import { setTimeout } from "node:timers/promises";
 import { expect, onTestFinished, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
+import { MatchedFile } from "#message-queue/flows/process-media-item/steps/download/steps/find-valid-torrent/find-valid-torrent.schema.ts";
 import { mapItemsToFiles } from "#message-queue/sandboxed-jobs/jobs/map-items-to-files/utilities/map-items-to-files.ts";
 import { gates } from "#mocks/utilities/gates.ts";
 import {
@@ -247,6 +248,27 @@ it("holds the StremThru add-magnet response until the gate is released", async (
       files: [expect.objectContaining({ name: movieRequest.fileName })],
     },
   });
+});
+
+it("downloads files with the link Riven needs to keep them", async ({
+  addMagnet,
+}) => {
+  gates.release(movieRequest.gateKey);
+
+  const response = await addMagnet();
+  const { data } = (await response.json()) as { data: { files: DebridFile[] } };
+
+  // A downloaded file isn't from the cache check, so Riven only keeps it with its download link
+  expect(
+    data.files.map(
+      (file) =>
+        MatchedFile.safeParse({
+          ...file,
+          matchedMediaItemId: randomUUID(),
+          isCachedFile: false,
+        }).success,
+    ),
+  ).toStrictEqual([true]);
 });
 
 it("fails the held add-magnet request once the gates are cleared, without a status Riven retries or blacklists", async ({
