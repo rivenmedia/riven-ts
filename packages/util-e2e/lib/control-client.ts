@@ -37,5 +37,9 @@ export function createE2eControlClient(rivenUrl: URL, apiKey: string) {
 
       return requests;
     },
+    /** Releases a gate the scenario holds a mocked response behind, so the response is sent */
+    async releaseGate(key: string) {
+      await request("POST", `gates/${encodeURIComponent(key)}/release`);
+    },
   };
 }

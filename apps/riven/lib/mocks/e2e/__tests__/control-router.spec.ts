@@ -15,6 +15,7 @@ import { expect, onTestFinished, vi } from "vitest";
 import { it as baseIt } from "#__tests__/test-context.ts";
 import { server as mockServer } from "#mocks/node.ts";
 import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenario.ts";
+import { gates } from "#mocks/utilities/gates.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
@@ -239,4 +240,36 @@ it("reports and clears unhandled requests", async ({ controlClient }) => {
   await controlClient.applyScenario("e2e-baseline");
 
   await expect(controlClient.getUnhandledRequests()).resolves.toStrictEqual([]);
+});
+
+it("POST /gates/:key/release releases the gate and requires the API key", async ({
+  controlClient,
+  rivenUrl,
+}) => {
+  onTestFinished(() => {
+    gates.clear();
+    gates.reopen();
+  });
+
+  const key = "e2e.control-router";
+  let wasReleased: boolean | null = null;
+
+  gates.open(key);
+
+  const released = gates.wait(key).then((value) => {
+    wasReleased = value;
+  });
+
+  const unauthorised = await fetch(
+    new URL(`/__e2e__/gates/${key}/release`, rivenUrl),
+    { method: "POST" },
+  );
+
+  expect(unauthorised.status).toBe(401);
+  expect(wasReleased).toBeNull();
+
+  await expect(controlClient.releaseGate(key)).resolves.toBeUndefined();
+  await released;
+
+  expect(wasReleased).toBe(true);
 });

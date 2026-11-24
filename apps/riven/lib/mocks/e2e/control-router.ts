@@ -5,6 +5,7 @@ import z from "zod";
 
 import { isApiKey, readBearerToken } from "#graphql/auth/api-key.ts";
 import { scenarios } from "#mocks/scenarios/index.ts";
+import { gates } from "#mocks/utilities/gates.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 
 import { resetInstance } from "./reset-instance.ts";
@@ -61,6 +62,13 @@ export function createE2eControlRouter(deps: ResetInstanceDeps): Router {
     resetInstance(deps, scenario).then(() => {
       res.sendStatus(204);
     }, next);
+  });
+
+  // A gate may be released before the response it holds reaches it, which then isn't held
+  router.post("/gates/:key/release", (req, res) => {
+    gates.release(req.params.key);
+
+    res.sendStatus(204);
   });
 
   router.get("/unhandled-requests", (_req, res) => {

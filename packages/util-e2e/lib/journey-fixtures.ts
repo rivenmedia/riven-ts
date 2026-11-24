@@ -123,6 +123,18 @@ export const journeyFixtures = {
       cast: [{ tmdbId: 1_500_102, name: "Hailee Steinfeld", character: "Vi" }],
     },
   },
+  /** The movie a user requests, which Riven scrapes, downloads and completes */
+  movieRequest: {
+    tmdbId: 157_336,
+    imdbId: "tt0816692",
+    title: "Interstellar",
+    releaseDate: "2014-11-05",
+    /** The one torrent the scrapers find, whose title is the file name without its extension */
+    infohash: "5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e",
+    fileName: "Interstellar.2014.1080p.BluRay.x264-RIVEN.mkv",
+    /** Holds StremThru's answer to adding the torrent, so the movie stays scraped until the test releases it */
+    gateKey: "movie-request.add-magnet",
+  },
 } as const satisfies {
   library: {
     movie: JourneyMovie & { year: number; posterUrl: string; state: string };
@@ -133,5 +145,11 @@ export const journeyFixtures = {
     trendingMoviesToday: JourneyMovie;
     trendingMoviesThisWeek: JourneyMovie;
     trendingShows: Record<"today" | "thisWeek", JourneyShow>;
+  };
+  movieRequest: JourneyMovie & {
+    imdbId: string;
+    infohash: string;
+    fileName: string;
+    gateKey: string;
   };
 } & Record<string, unknown>;

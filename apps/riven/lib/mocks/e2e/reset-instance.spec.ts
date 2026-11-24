@@ -3,15 +3,17 @@ import { plugin as testPlugin } from "@repo/plugin-test";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import path from "node:path";
+import { setImmediate } from "node:timers/promises";
 import { expect, vi } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
 import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 import { e2eBaselineScenario } from "#mocks/scenarios/e2e-baseline.scenario.ts";
+import { gates } from "#mocks/utilities/gates.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
 
-import { quiesceQueues, resetInstance } from "./reset-instance.ts";
+import { resetInstance } from "./reset-instance.ts";
 
 import type { CorePluginName } from "#schemas/core-plugins.schema.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
@@ -136,40 +138,126 @@ it("waits for an active job to finish before clearing the database", async ({
   );
 });
 
-it("pauses every registered queue before it waits", async ({
+it("pauses every registered queue, then clears the gates, before it waits", async ({
+  orm,
+  services,
+  settingsManager,
   registerQueue,
 }) => {
   const first = registerQueue("e2e-reset-first", () => Promise.resolve(0));
   const second = registerQueue("e2e-reset-second", () => Promise.resolve(0));
+  const clearGates = vi.spyOn(gates, "clear");
 
-  await quiesceQueues();
+  await resetInstance({ orm, services, settingsManager }, e2eBaselineScenario);
 
   const lastPause = Math.max(
     ...[first, second].map(
-      ({ pause }) => pause.mock.invocationCallOrder[0] ?? 0,
+      ({ pause }) => pause.mock.invocationCallOrder[0] ?? Infinity,
     ),
   );
   const firstPoll = Math.min(
     ...[first, second].map(
       ({ getActiveCount }) =>
-        getActiveCount.mock.invocationCallOrder[0] ?? Infinity,
+        getActiveCount.mock.invocationCallOrder[0] ?? -Infinity,
     ),
   );
 
   expect(first.pause).toHaveBeenCalledOnce();
   expect(second.pause).toHaveBeenCalledOnce();
-  expect(lastPause).toBeLessThan(firstPoll);
+  expect(clearGates).toHaveBeenCalledOnce();
+  expect(lastPause).toBeLessThan(clearGates.mock.invocationCallOrder[0] ?? 0);
+  expect(clearGates.mock.invocationCallOrder[0]).toBeLessThan(firstPoll);
 });
 
-it("fails the reset when a job is still active after the timeout", async ({
+it("reopens the gates once the scenario is applied, so its handlers can hold responses", async ({
   orm,
+  services,
+  settingsManager,
+}) => {
+  const reopenGates = vi.spyOn(gates, "reopen");
+  const clearGates = vi.spyOn(gates, "clear");
+  const applyScenario = vi.spyOn(e2eBaselineScenario, "seed");
+
+  await resetInstance({ orm, services, settingsManager }, e2eBaselineScenario);
+
+  expect(reopenGates).toHaveBeenCalledOnce();
+  expect(clearGates.mock.invocationCallOrder[0]).toBeLessThan(
+    reopenGates.mock.invocationCallOrder[0] ?? 0,
+  );
+  expect(applyScenario.mock.invocationCallOrder[0]).toBeLessThan(
+    reopenGates.mock.invocationCallOrder[0] ?? 0,
+  );
+
+  gates.open("e2e-reset-after");
+
+  await expect(
+    Promise.race([gates.wait("e2e-reset-after"), setImmediate("pending")]),
+  ).resolves.toBe("pending");
+});
+
+it("releases a job held on a gate, so the reset still completes", async ({
+  orm,
+  services,
+  settingsManager,
+  registerQueue,
+}) => {
+  let isHeld = true;
+
+  gates.open("e2e-reset-held");
+
+  const heldJob = gates.wait("e2e-reset-held").then(() => {
+    isHeld = false;
+  });
+
+  registerQueue("e2e-reset-held", () => Promise.resolve(isHeld ? 1 : 0));
+
+  await expect(
+    resetInstance({ orm, services, settingsManager }, e2eBaselineScenario, {
+      quiesceTimeoutMs: 1000,
+    }),
+  ).resolves.toBeUndefined();
+  await expect(heldJob).resolves.toBeUndefined();
+});
+
+it("releases a job that reaches a gate after the reset has started waiting", async ({
+  orm,
+  services,
+  settingsManager,
+  registerQueue,
+}) => {
+  let isHeld = true;
+  let lateJob: Promise<void> | undefined = undefined;
+
+  // The job's request reaches its gate during the first poll, after the reset first clears the gates
+  registerQueue("e2e-reset-late", () => {
+    lateJob ??= gates.wait("e2e-reset-late").then(() => {
+      isHeld = false;
+    });
+
+    return Promise.resolve(isHeld ? 1 : 0);
+  });
+
+  await expect(
+    resetInstance({ orm, services, settingsManager }, e2eBaselineScenario, {
+      quiesceTimeoutMs: 500,
+    }),
+  ).resolves.toBeUndefined();
+  await expect(lateJob).resolves.toBeUndefined();
+});
+
+it("fails the reset, without clearing anything, when a job is still active after the timeout", async ({
+  orm,
+  services,
+  settingsManager,
   registerQueue,
 }) => {
   registerQueue("e2e-reset-stuck", () => Promise.resolve(1));
   const clear = vi.spyOn(orm.schema, "clear");
 
-  await expect(quiesceQueues(50)).rejects.toThrow(
-    /still active.*e2e-reset-stuck/u,
-  );
+  await expect(
+    resetInstance({ orm, services, settingsManager }, e2eBaselineScenario, {
+      quiesceTimeoutMs: 50,
+    }),
+  ).rejects.toThrow(/still active.*e2e-reset-stuck/u);
   expect(clear).not.toHaveBeenCalled();
 });
