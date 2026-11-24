@@ -5,13 +5,12 @@ import { test as nextTest } from "next/experimental/testmode/playwright.js";
 import path from "node:path";
 import { z } from "zod";
 
-import { api } from "#mocks/graphql.ts";
-
 import { backendUrl } from "./backend-environment.ts";
 import { createTestNetwork } from "./create-test-network.ts";
 import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { createBackendProxyHandlers } from "./riven/backend-proxy-handlers.ts";
 import { startRivenInstance } from "./riven/start-riven-instance.ts";
+import { createWebSocketBridge } from "./riven/websocket-bridge.ts";
 
 import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { RivenInstance } from "./riven/start-riven-instance.ts";
@@ -214,10 +213,7 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
             backendUrl,
           }),
           ...remoteAssetHandlers,
-          // Subscriptions aren't forwarded to Riven yet, so they connect, but never receive anything
-          api.subscription(/.*/u, () => {
-            // Nothing changes
-          }),
+          createWebSocketBridge(riven.url),
         ],
       });
 

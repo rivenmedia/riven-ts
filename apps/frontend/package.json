@@ -85,6 +85,7 @@
     "@graphql-codegen/typescript": "catalog:",
     "@graphql-codegen/typescript-operations": "catalog:",
     "@msw/playwright": "catalog:",
+    "@mswjs/interceptors": "catalog:",
     "@playwright/test": "catalog:",
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
@@ -103,6 +104,7 @@
     "@types/pg": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@types/ws": "catalog:",
     "@typescript/native": "catalog:",
     "@vitejs/plugin-react": "catalog:",
     "@vitest/browser-playwright": "catalog:vitest",
@@ -122,7 +124,8 @@
     "typescript": "catalog:",
     "vaul": "catalog:",
     "vite": "catalog:",
-    "vitest": "catalog:vitest"
+    "vitest": "catalog:vitest",
+    "ws": "catalog:"
   },
   "msw": {
     "workerDirectory": "public"
