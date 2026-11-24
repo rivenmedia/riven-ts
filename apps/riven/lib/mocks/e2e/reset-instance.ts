@@ -1,5 +1,8 @@
 import { RedisConnection } from "bullmq";
+import { DateTime } from "luxon";
+import { setTimeout } from "node:timers/promises";
 
+import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 import { server } from "#mocks/node.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
@@ -30,6 +33,48 @@ async function flushRedis() {
   }
 }
 
+const QUIESCE_POLL_INTERVAL_MS = 25;
+const QUIESCE_TIMEOUT_MS = 10_000;
+
+/**
+ * Pauses every queue Riven created, then waits for their running jobs to
+ * finish so that none can write into the instance once it has been reset.
+ * Resuming is left to the Redis flush, which removes the pause flag.
+ *
+ * @public Exported for its spec; only `resetInstance` calls it.
+ */
+export async function quiesceQueues(timeoutMs = QUIESCE_TIMEOUT_MS) {
+  const queues = [...queueRegistry];
+
+  await Promise.all(queues.map(([, queue]) => queue.pause()));
+
+  const deadline = DateTime.now().plus({ milliseconds: timeoutMs });
+
+  for (;;) {
+    const counts = await Promise.all(
+      queues.map(async ([name, queue]) => ({
+        name,
+        count: await queue.getActiveCount(),
+      })),
+    );
+    const active = counts
+      .filter(({ count }) => count > 0)
+      .map(({ name }) => name);
+
+    if (active.length === 0) {
+      return;
+    }
+
+    if (DateTime.now() >= deadline) {
+      throw new Error(
+        `Jobs were still active after ${timeoutMs.toString()}ms in: ${active.join(", ")}`,
+      );
+    }
+
+    await setTimeout(QUIESCE_POLL_INTERVAL_MS);
+  }
+}
+
 /**
  * Returns a test-mode instance to its boot state, then applies `scenario`:
  * the database, Redis, runtime settings and mock handlers are all reset.
@@ -38,6 +83,8 @@ export async function resetInstance(
   { orm, services, settingsManager }: ResetInstanceDeps,
   scenario: MockScenario,
 ) {
+  await quiesceQueues();
+
   await orm.schema.clear();
   // Clearing only truncates the default schema's tables, which leaves Better Auth's users behind
   await orm.schema.clear({ schema: "auth_db" });
