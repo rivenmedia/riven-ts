@@ -27,6 +27,11 @@ const { movieRequest } = journeyFixtures;
 
 const stremThruTorz = "http://stremthru.e2e.invalid/v0/store/torz";
 
+// Plex refreshes the movie's directory in its library
+const plexRefreshQuery = new URLSearchParams({
+  path: path.join("/mount/movies", movieRequest.title),
+});
+
 const it = baseIt
   .extend("scenarioHandlers", { auto: true }, ({ server }, { onCleanup }) => {
     server.use(...(e2eMovieRequestScenario.handlers ?? []));
@@ -276,7 +281,7 @@ it.for([
   },
   {
     name: "Plex's section refresh",
-    url: "http://plex.e2e.invalid/library/sections/1/refresh?path=%2Fmount%2Fmovies%2FInterstellar",
+    url: `http://plex.e2e.invalid/library/sections/1/refresh?${plexRefreshQuery.toString()}`,
   },
   { name: "Silo's scan", url: "http://silo.e2e.invalid/api/v2/scan" },
   {
