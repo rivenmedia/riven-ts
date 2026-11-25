@@ -82,7 +82,7 @@ export async function resetInstance(
   { quiesceTimeoutMs = QUIESCE_TIMEOUT_MS }: ResetInstanceOptions = {},
 ) {
   // Stops every queue Riven created from starting jobs, so none can write into the instance once it's been reset.
-  // Resuming is left to the Redis flush, which removes the pause flag.
+  // A successful reset leaves resuming to the Redis flush, which removes the pause flag.
   const queues = [...queueRegistry];
 
   await Promise.all(queues.map(([, queue]) => queue.pause()));
@@ -90,7 +90,15 @@ export async function resetInstance(
   // Abandons any response held on a gate, so the job waiting on it can finish, now that no job can start after it
   gates.clear();
 
-  await waitForIdleQueues(queues, quiesceTimeoutMs);
+  try {
+    await waitForIdleQueues(queues, quiesceTimeoutMs);
+  } catch (error) {
+    // Nothing is flushed, so resume the queues: a parent job waiting on a child it can no longer start would stay
+    // active, and fail every later reset on this instance
+    await Promise.allSettled(queues.map(([, queue]) => queue.resume()));
+
+    throw error;
+  }
 
   await orm.schema.clear();
   // Clearing only truncates the default schema's tables, which leaves Better Auth's users behind

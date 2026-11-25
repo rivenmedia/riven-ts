@@ -66,6 +66,7 @@ const it = baseIt
     return (name: string, getActiveCount: () => Promise<number>) => {
       const queue = {
         pause: vi.fn<() => Promise<void>>(() => Promise.resolve()),
+        resume: vi.fn<() => Promise<void>>(() => Promise.resolve()),
         getActiveCount: vi.fn<() => Promise<number>>(getActiveCount),
       };
 
@@ -260,4 +261,22 @@ it("fails the reset, without clearing anything, when a job is still active after
     }),
   ).rejects.toThrow(/still active.*e2e-reset-stuck/u);
   expect(clear).not.toHaveBeenCalled();
+});
+
+it("resumes every queue when the reset fails, so the jobs left running can finish before the next reset", async ({
+  orm,
+  services,
+  settingsManager,
+  registerQueue,
+}) => {
+  const stuck = registerQueue("e2e-reset-stuck", () => Promise.resolve(1));
+  const idle = registerQueue("e2e-reset-idle", () => Promise.resolve(0));
+
+  await expect(
+    resetInstance({ orm, services, settingsManager }, e2eBaselineScenario, {
+      quiesceTimeoutMs: 50,
+    }),
+  ).rejects.toThrow(/still active/u);
+  expect(stuck.resume).toHaveBeenCalledOnce();
+  expect(idle.resume).toHaveBeenCalledOnce();
 });
