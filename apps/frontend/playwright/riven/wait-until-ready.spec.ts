@@ -5,19 +5,14 @@ import { it as baseIt, expect } from "vitest";
 
 import { waitUntilReady } from "./wait-until-ready.ts";
 
-import type { ChildProcess } from "node:child_process";
+const it = baseIt.extend("runningChild", ({}, { onCleanup }) => {
+  const child = spawn(process.execPath, ["-e", "setTimeout(() => {}, 10_000)"]);
 
-const it = baseIt.extend<{ runningChild: ChildProcess }>({
-  runningChild: async ({}, use) => {
-    const child = spawn(process.execPath, [
-      "-e",
-      "setTimeout(() => {}, 10_000)",
-    ]);
-
-    await use(child);
-
+  onCleanup(() => {
     child.kill();
-  },
+  });
+
+  return child;
 });
 
 it("is ready once Riven reports it has started whilst the process runs", async ({
