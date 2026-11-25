@@ -14,11 +14,22 @@ import type { ResetInstanceDeps } from "./reset-instance.ts";
 
 const ApplyScenarioBody = z.object({ scenario: z.enum(mockScenarioNames) });
 
+export interface E2eControlRouterDeps extends ResetInstanceDeps {
+  /**
+   * Whether Riven has finished starting, so it handles the events a request sends.
+   * The GraphQL server answers before then, while the rest of Riven, such as the VFS, is still starting.
+   */
+  isStarted: () => boolean;
+}
+
 /**
  * The test-mode control endpoint that E2E tests use to reset Riven between tests.
  * Every route requires `Authorization: Bearer <apiKey>`, checked as the GraphQL API checks it.
  */
-export function createE2eControlRouter(deps: ResetInstanceDeps): Router {
+export function createE2eControlRouter({
+  isStarted,
+  ...deps
+}: E2eControlRouterDeps): Router {
   const router = Router();
 
   router.use((req, res, next) => {
@@ -36,6 +47,10 @@ export function createE2eControlRouter(deps: ResetInstanceDeps): Router {
       },
       next,
     );
+  });
+
+  router.get("/started", (_req, res) => {
+    res.json({ started: isStarted() });
   });
 
   router.post("/scenario", (req, res, next) => {

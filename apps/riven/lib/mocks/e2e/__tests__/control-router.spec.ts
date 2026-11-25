@@ -87,10 +87,19 @@ const it = baseIt
         coreEnvironment: {},
       }),
   )
+  /** Whether the stand-in Riven has finished starting, which a test can change */
+  .extend("startup", () => ({ isStarted: false }))
   .extend(
     "rivenUrl",
     async (
-      { emptyWorkingDirectory: _, orm, server, services, settingsManager },
+      {
+        emptyWorkingDirectory: _,
+        orm,
+        server,
+        services,
+        settingsManager,
+        startup,
+      },
       { onCleanup },
     ) => {
       const app = express();
@@ -99,7 +108,12 @@ const it = baseIt
       app.use(
         "/__e2e__",
         express.json(),
-        createE2eControlRouter({ orm, services, settingsManager }),
+        createE2eControlRouter({
+          orm,
+          services,
+          settingsManager,
+          isStarted: () => startup.isStarted,
+        }),
       );
 
       const httpServer = app.listen(0, "127.0.0.1");
@@ -186,6 +200,17 @@ it("throws the status and body of a failed control request", async ({
   await expect(
     controlClient.applyScenario("nope" as MockScenarioName),
   ).rejects.toThrow(/400.*nope/u);
+});
+
+it("reports whether Riven has finished starting", async ({
+  controlClient,
+  startup,
+}) => {
+  await expect(controlClient.isStarted()).resolves.toBe(false);
+
+  startup.isStarted = true;
+
+  await expect(controlClient.isStarted()).resolves.toBe(true);
 });
 
 it("resets the instance and applies the scenario", async ({
