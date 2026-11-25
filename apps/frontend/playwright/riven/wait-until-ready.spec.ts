@@ -8,21 +8,21 @@ import { waitUntilReady } from "./wait-until-ready.ts";
 
 import type { AddressInfo } from "node:net";
 
-const it = baseIt.extend<{ healthyServerUrl: URL }>({
-  healthyServerUrl: async ({}, use) => {
-    const server = createServer((_request, response) => {
-      response.end("OK");
-    });
+const it = baseIt.extend("healthyServerUrl", async ({}, { onCleanup }) => {
+  const server = createServer((_request, response) => {
+    response.end("OK");
+  });
 
-    server.listen(0, "127.0.0.1");
-    await once(server, "listening");
+  server.listen(0, "127.0.0.1");
+  await once(server, "listening");
 
-    const { port } = server.address() as AddressInfo;
+  const { port } = server.address() as AddressInfo;
 
-    await use(new URL(`http://127.0.0.1:${String(port)}`));
-
+  onCleanup(() => {
     server.close();
-  },
+  });
+
+  return new URL(`http://127.0.0.1:${String(port)}`);
 });
 
 it("is ready when the server answers whilst the process runs", async ({

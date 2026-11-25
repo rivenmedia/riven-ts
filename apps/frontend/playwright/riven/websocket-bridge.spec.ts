@@ -4,44 +4,25 @@ import { defineNetwork, InterceptorSource } from "msw/experimental";
 import { once } from "node:events";
 import { IncomingMessage } from "node:http";
 import { it as baseIt, expect, onTestFinished, vi } from "vitest";
-import { WebSocket as UpstreamSocket, WebSocketServer } from "ws";
+import { WebSocketServer, WebSocket as UpstreamSocket } from "ws";
 
 import { createWebSocketBridge } from "./websocket-bridge.ts";
 
-import type { Mock } from "vitest";
 import type { RawData } from "ws";
 
 /** The frontend's origin, which the browser opens its subscriptions to */
 const frontendOrigin = "http://frontend.test";
-
-interface UpstreamConnection {
-  socket: UpstreamSocket;
-  request: IncomingMessage;
-  messages: string[];
-}
 
 const toText = (data: RawData) =>
   Array.isArray(data)
     ? Buffer.concat(data).toString()
     : new TextDecoder().decode(data);
 
-interface Upstream {
-  /** Resolves with the next connection the upstream accepts, so must be called before it connects */
-  nextConnection: () => Promise<UpstreamConnection>;
-}
-
-const it = baseIt.extend<{
-  /** Returns the browser's cookies for the bridge to send upstream, which are none unless a test says otherwise */
-  getCookieHeader: Mock<() => Promise<string>>;
-  /** A WebSocket server that stands in for Riven, and answers each message with a reply that names it */
-  upstream: Upstream;
-  /** Opens a WebSocket to the frontend's `/graphql`, as the browser does for its subscriptions */
-  openClient: () => WebSocket;
-}>({
-  getCookieHeader: async ({}, use) => {
-    await use(vi.fn<() => Promise<string>>().mockResolvedValue(""));
-  },
-  upstream: async ({ getCookieHeader }, use) => {
+const it = baseIt
+  .extend("getCookieHeader", ({}) =>
+    vi.fn<() => Promise<string>>().mockResolvedValue(""),
+  )
+  .extend("upstream", async ({ getCookieHeader }, { onCleanup }) => {
     const server = new WebSocketServer({ host: "127.0.0.1", port: 0 });
 
     await once(server, "listening");
@@ -83,7 +64,17 @@ const it = baseIt.extend<{
 
     network.enable();
 
-    await use({
+    onCleanup(() => {
+      network.disable();
+
+      for (const client of server.clients) {
+        client.terminate();
+      }
+
+      server.close();
+    });
+
+    return {
       nextConnection: async () => {
         const [socket, request] = await once(server, "connection");
 
@@ -96,31 +87,20 @@ const it = baseIt.extend<{
 
         return { socket, request, messages };
       },
+    };
+  })
+  .extend("openClient", ({ upstream: _ }) => () => {
+    const client = new WebSocket(
+      new URL("/graphql", frontendOrigin.replace(/^http/u, "ws")),
+      "graphql-transport-ws",
+    );
+
+    onTestFinished(() => {
+      client.close();
     });
 
-    network.disable();
-
-    for (const client of server.clients) {
-      client.terminate();
-    }
-
-    server.close();
-  },
-  openClient: async ({ upstream: _ }, use) => {
-    await use(() => {
-      const client = new WebSocket(
-        new URL("/graphql", frontendOrigin.replace(/^http/u, "ws")),
-        "graphql-transport-ws",
-      );
-
-      onTestFinished(() => {
-        client.close();
-      });
-
-      return client;
-    });
-  },
-});
+    return client;
+  });
 
 it("forwards client frames to the upstream and upstream frames back", async ({
   upstream,
