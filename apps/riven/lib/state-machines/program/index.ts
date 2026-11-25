@@ -23,8 +23,7 @@ export interface RivenMachineContext {
   mockScenario: MockScenario | undefined;
   plugins?: ValidPluginMap;
   server?: ApolloServer<ApolloServerContext>;
-  /** Unset until the VFS mounts, and when an E2E Riven skips mounting it */
-  vfs?: Fuse | undefined;
+  vfs?: Fuse;
 }
 
 export interface RivenMachineInput {

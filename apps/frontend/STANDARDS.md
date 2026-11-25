@@ -112,10 +112,7 @@ You need:
 
 - Postgres, via `docker compose --profile services up riven-db`
 - `redis-server` on `PATH`
-- FUSE, with `user_allow_other` set in `/etc/fuse.conf`. On macOS, Riven
-  skips mounting its VFS (`skipVfsMount` in `createE2eEnvironment`), as
-  GitHub's hosted runners can't load macFUSE's kernel extension. No journey
-  reads files through the mount.
+- FUSE, with `user_allow_other` set in `/etc/fuse.conf`
 
 Then run the tests from `apps/frontend`, with the connection string of that
 Postgres:

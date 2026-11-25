@@ -219,8 +219,6 @@ export async function startRivenInstance({
           vfsMountPath,
           apiKey: backendApiKey,
           origin,
-          // GitHub's hosted macOS runners can't load macFUSE's kernel extension, so a mount there never completes
-          skipVfsMount: process.platform === "darwin",
         }),
         ...inheritedEnvironment.parse(process.env),
         // Already set by `createE2eEnvironment`, but Next.js' types require it to be one of its known modes

@@ -2,7 +2,6 @@ import chalk from "chalk";
 import assert from "node:assert";
 import { assign, setup } from "xstate";
 
-import { shouldSkipVfsMount } from "#mocks/utilities/should-skip-vfs-mount.ts";
 import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 import { withLogAction } from "#state-machines/utilities/with-log-action.ts";
 import { coreEnvironment, settings } from "#utilities/settings.ts";
@@ -67,8 +66,7 @@ export interface BootstrapMachineOutput {
   pluginQueues: PluginQueueMap;
   pluginWorkers: PluginWorkerMap;
   publishableEvents: Set<RivenEvent["type"]>;
-  /** Unset when an E2E Riven skips mounting its VFS */
-  vfs: Fuse | undefined;
+  vfs: Fuse;
 }
 
 export const bootstrapMachine = setup({
@@ -137,7 +135,6 @@ export const bootstrapMachine = setup({
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>
       invalidPlugins.size > 0,
     hasMockScenario: ({ context: { mockScenario } }) => Boolean(mockScenario),
-    shouldSkipVfsMount: () => shouldSkipVfsMount(),
     requiresAdminUserCreation: ({ context: { requiresAdminUserCreation } }) =>
       requiresAdminUserCreation,
   },
@@ -178,7 +175,7 @@ export const bootstrapMachine = setup({
         );
       }
 
-      if (!vfs && !shouldSkipVfsMount()) {
+      if (!vfs) {
         throw new Error("Bootstrap machine completed without a VFS instance");
       }
 
@@ -616,7 +613,7 @@ export const bootstrapMachine = setup({
         },
       },
       "Bootstrapping VFS": {
-        initial: "Checking mount",
+        initial: "Starting",
         onDone: [
           {
             target: "Create admin user",
@@ -627,12 +624,6 @@ export const bootstrapMachine = setup({
           },
         ],
         states: {
-          "Checking mount": {
-            always: [
-              { target: "Skipped", guard: "shouldSkipVfsMount" },
-              { target: "Starting" },
-            ],
-          },
           Starting: {
             entry: {
               type: "log",
@@ -671,17 +662,6 @@ export const bootstrapMachine = setup({
               type: "log",
               params: {
                 message: "VFS bootstrap complete.",
-              },
-            },
-            type: "final",
-          },
-          Skipped: {
-            entry: {
-              type: "log",
-              params: {
-                message:
-                  "Skipping the VFS mount, as E2E_SKIP_VFS_MOUNT is set in test mode.",
-                level: "warn",
               },
             },
             type: "final",

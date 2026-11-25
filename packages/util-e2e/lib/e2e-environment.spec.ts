@@ -70,13 +70,3 @@ it("only logs to the console, outside the repo's log directory", () => {
     RIVEN_SETTING__logDirectory: "/var/lib/riven-e2e-0.logs",
   });
 });
-
-it("mounts the VFS by default", () => {
-  expect(createE2eEnvironment(input)).not.toHaveProperty("E2E_SKIP_VFS_MOUNT");
-});
-
-it("skips the VFS mount when asked", () => {
-  expect(createE2eEnvironment({ ...input, skipVfsMount: true })).toMatchObject({
-    E2E_SKIP_VFS_MOUNT: "true",
-  });
-});
