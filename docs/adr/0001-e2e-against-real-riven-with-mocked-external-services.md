@@ -56,7 +56,9 @@ the test.
   scenario names, the journeys' fixture data, the control client and the
   environment builder. It must stay side-effect free.
 - A journey varies Riven's state only through its named scenario, never by
-  changing Riven during the test. Data that a page renders through Next.js'
+  changing Riven during the test. The one exception is a gate: a scenario's
+  handler can hold a response until the test releases it, which lets the test
+  see an intermediate state. Data that a page renders through Next.js'
   `"use cache"` must be the same in every scenario, because one Next.js server
   shares that cache, so it lives in the baseline. That server also serves the
   mocked specs, which fill the same cache from the frontend's mock handlers, so
