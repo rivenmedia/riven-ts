@@ -170,6 +170,10 @@ test.describe("a requested movie", () => {
     page,
     riven,
   }) => {
+    const requestSubscriptions = trackSubscriptions(
+      network,
+      "OnItemRequestChanged",
+    );
     const stateSubscriptions = trackSubscriptions(
       network,
       "OnMediaItemStateChanged",
@@ -181,6 +185,14 @@ test.describe("a requested movie", () => {
     const requestButton = page.getByRole("button", { name: "Request" });
 
     await waitForHydration(requestButton);
+
+    // The page refreshes to show the badge once Riven indexes the movie, which it learns of from this subscription
+    await expect
+      .poll(() => requestSubscriptions.size, {
+        message: "Wait for the page to subscribe to the movie's request",
+      })
+      .toBeGreaterThan(0);
+
     await requestButton.click();
     await page
       .getByRole("alertdialog")
