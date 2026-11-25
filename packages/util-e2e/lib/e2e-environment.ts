@@ -5,6 +5,12 @@ export interface E2eEnvironmentInput {
   vfsMountPath: string;
   apiKey: string;
   origin: string;
+  /**
+   * Skips mounting the VFS, for machines that can't mount FUSE, such as GitHub's hosted macOS runners.
+   *
+   * @default false
+   */
+  skipVfsMount?: boolean;
 }
 
 const pluginHost = (plugin: string) => `http://${plugin}.e2e.invalid`;
@@ -55,6 +61,7 @@ export function createE2eEnvironment({
   vfsMountPath,
   apiKey,
   origin,
+  skipVfsMount = false,
 }: E2eEnvironmentInput) {
   const environment: Record<string, string> = {
     NODE_ENV: "test",
@@ -79,6 +86,10 @@ export function createE2eEnvironment({
     RIVEN_FRONTEND_SETTING__passkeyRpId: "localhost",
     RIVEN_FRONTEND_SETTING__disablePlex: "true",
   };
+
+  if (skipVfsMount) {
+    environment["E2E_SKIP_VFS_MOUNT"] = "true";
+  }
 
   for (const [plugin, settings] of Object.entries(pluginSettings)) {
     for (const [setting, value] of Object.entries(settings)) {
