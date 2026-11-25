@@ -2,7 +2,13 @@ import { HttpResponse, http } from "msw/http";
 // oxlint-disable sonarjs/no-clear-text-protocols -- MSW intercepts these in-process, or they go to a local server
 import { once } from "node:events";
 import { createServer } from "node:http";
-import { request } from "undici";
+import {
+  Agent,
+  getGlobalDispatcher,
+  interceptors,
+  request,
+  setGlobalDispatcher,
+} from "undici";
 import { expect, it, onTestFinished, vi } from "vitest";
 
 import { MockScenario } from "./utilities/mock-scenario.ts";
@@ -147,6 +153,30 @@ it("fails and records unhandled external fetch requests in test mode", async () 
 
   expect(listener.receivedPaths).toStrictEqual([]);
   expect(unhandledRequests.list()).toStrictEqual([
+    { method: "GET", url: listener.externalUrl },
+  ]);
+});
+
+it("records each attempt when the caller retries an unhandled request in test mode", async () => {
+  const { unhandledRequests } = await importInTestMode();
+  const listener = await startServer();
+  const previousDispatcher = getGlobalDispatcher();
+
+  onTestFinished(() => {
+    setGlobalDispatcher(previousDispatcher);
+  });
+
+  // Riven's VFS sets a retrying global dispatcher, which `fetch` uses too. Each retry is a separate request.
+  setGlobalDispatcher(
+    new Agent().compose(interceptors.retry({ maxRetries: 2, minTimeout: 1 })),
+  );
+
+  await expect(fetch(listener.externalUrl)).rejects.toThrow(/fetch failed/u);
+
+  expect(listener.receivedPaths).toStrictEqual([]);
+  expect(unhandledRequests.list()).toStrictEqual([
+    { method: "GET", url: listener.externalUrl },
+    { method: "GET", url: listener.externalUrl },
     { method: "GET", url: listener.externalUrl },
   ]);
 });

@@ -1,5 +1,3 @@
-import { CorePlugins } from "#schemas/core-plugins.schema.ts";
-
 export interface E2eEnvironmentInput {
   port: number;
   databaseUrl: string;
@@ -47,7 +45,7 @@ const pluginSettings = {
 } as const satisfies Record<string, Record<string, string>>;
 
 /**
- * The environment every E2E Riven boots with: the baseline scenario, every core plugin enabled,
+ * The environment every E2E Riven boots with: the baseline scenario, which enables the plugins as stored settings,
  * and every external service pointed at an `.invalid` host, so a leaked request fails DNS resolution.
  */
 export function createE2eEnvironment({
@@ -69,7 +67,6 @@ export function createE2eEnvironment({
     RIVEN_SETTING__apiKey: apiKey,
     RIVEN_SETTING__unsafeWipeUsersOnStartup: "true",
     RIVEN_SETTING__shutdownTimeoutSeconds: "10",
-    RIVEN_SETTING__enabledPlugins: JSON.stringify(CorePlugins.options),
     // Points at a file that never exists, so resetting doesn't re-import the repo's ranking config
     RIVEN_SETTING__rankingConfigPath: `${vfsMountPath}.ranking-config.json`,
     // Logs only go to stdout, which the E2E fixture writes to its own file. That keeps instances out of the repo's log

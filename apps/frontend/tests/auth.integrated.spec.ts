@@ -1,14 +1,10 @@
-import { logDirectorySettingsSectionHandler } from "#mocks/handlers/settings-section.handler.ts";
-import { expect, http, test, withHandlers } from "#playwright/fixtures.ts";
+import { expect, test } from "#playwright/integrated-fixtures.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 import type { UserRole } from "@repo/util-auth/access-control";
 
-// A protected page that renders without mocking its data, as unmocked requests elsewhere open Next.js' error overlay
+// A protected page that renders without loading any data, so these tests don't depend on the scenario's media
 const pageWithoutData = "/explore";
-
-// The settings page loads its section even when the user isn't allowed to see it
-test.use({ handlers: withHandlers(logDirectorySettingsSectionHandler) });
 
 test.describe("when signed out", () => {
   for (const path of ["/", "/library", "/settings"] as const) {
@@ -33,12 +29,8 @@ test.describe("when signed in", () => {
   });
 
   test("logging out returns to the login page and ends the session", async ({
-    auth,
-    network,
     page,
   }) => {
-    network.use(http.post("**/api/auth/sign-out", auth.signOut()));
-
     await page.goto(pageWithoutData);
 
     const logoutButton = page.getByRole("button", { name: "Logout" });

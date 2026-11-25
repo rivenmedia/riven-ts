@@ -1,4 +1,5 @@
 // oxlint-disable sonarjs/no-clear-text-protocols -- the control router listens on loopback, and `.invalid` URLs never resolve
+import { createE2eControlClient } from "@repo/util-e2e";
 import { Movie } from "@repo/util-plugin-sdk/dto/entities";
 
 import express from "express";
@@ -19,11 +20,10 @@ import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { settings } from "#utilities/settings.ts";
 
-import { createE2eControlClient } from "../control-client.ts";
 import { createE2eControlRouter } from "../control-router.ts";
 
-import type { MockScenarioName } from "../scenario-names.ts";
 import type { EntityManager } from "@mikro-orm/core";
+import type { MockScenarioName } from "@repo/util-e2e";
 
 // `node.ts` refuses to load outside of a mock scenario, so stand in for its handler facade.
 vi.mock(import("#mocks/node.ts"), () => ({

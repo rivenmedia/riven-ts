@@ -1,7 +1,4 @@
-export interface UnhandledRequest {
-  method: string;
-  url: string;
-}
+import type { UnhandledRequest } from "@repo/util-e2e";
 
 const requests: UnhandledRequest[] = [];
 

@@ -1014,9 +1014,9 @@ importers:
       '@repo/core-util-vitest-config':
         specifier: workspace:^
         version: link:../../packages/core/util-vitest-config
-      '@repo/riven':
+      '@repo/util-e2e':
         specifier: workspace:^
-        version: link:../riven
+        version: link:../../packages/util-e2e
       '@repo/util-wiki-helpers':
         specifier: workspace:^
         version: link:../../packages/util-docs-generation
@@ -1215,6 +1215,9 @@ importers:
       '@repo/util-auth':
         specifier: 'catalog:'
         version: link:../../packages/util-auth
+      '@repo/util-e2e':
+        specifier: workspace:^
+        version: link:../../packages/util-e2e
       '@repo/util-plugin-sdk':
         specifier: workspace:^
         version: link:../../packages/util-plugin-sdk
@@ -2743,6 +2746,34 @@ importers:
       '@typescript/native':
         specifier: 'catalog:'
         version: typescript@7.0.2
+      oxlint:
+        specifier: 'catalog:'
+        version: 1.74.0(oxlint-tsgolint@0.25.0)
+      typescript:
+        specifier: 'catalog:'
+        version: '@typescript/typescript6@6.0.2'
+      vitest:
+        specifier: catalog:vitest
+        version: 4.1.12(@opentelemetry/api@1.9.1)(@types/node@24.12.4)(@vitest/browser-playwright@4.1.12)(@vitest/browser@4.1.12)(@vitest/coverage-v8@4.1.12)(jsdom@29.1.1(@noble/hashes@2.3.0))(msw@2.13.2(@types/node@24.12.4)(@typescript/typescript6@6.0.2))(vite@8.3.5(@types/node@24.12.4)(esbuild@0.28.2)(jiti@2.7.0)(yaml@2.9.1))
+
+  packages/util-e2e:
+    dependencies:
+      '@repo/util-auth':
+        specifier: workspace:^
+        version: link:../util-auth
+    devDependencies:
+      '@repo/core-util-oxlint-config':
+        specifier: workspace:^
+        version: link:../core/util-oxlint-config
+      '@repo/core-util-typescript-config':
+        specifier: workspace:^
+        version: link:../core/util-typescript-config
+      '@repo/core-util-vitest-config':
+        specifier: workspace:^
+        version: link:../core/util-vitest-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.12.4
       oxlint:
         specifier: 'catalog:'
         version: 1.74.0(oxlint-tsgolint@0.25.0)

@@ -1,7 +1,5 @@
 import { expect, it } from "vitest";
 
-import { CorePlugins } from "#schemas/core-plugins.schema.ts";
-
 import { createE2eEnvironment } from "./e2e-environment.ts";
 
 const input = {
@@ -13,21 +11,37 @@ const input = {
   origin: "http://localhost:9000",
 };
 
-it("enables every core plugin", () => {
-  const environment = createE2eEnvironment(input);
-
-  expect(
-    JSON.parse(environment["RIVEN_SETTING__enabledPlugins"] ?? ""),
-  ).toStrictEqual(CorePlugins.options);
+it("leaves the enabled plugins to the baseline scenario, so the settings can toggle them", () => {
+  expect(createE2eEnvironment(input)).not.toHaveProperty(
+    "RIVEN_SETTING__enabledPlugins",
+  );
 });
+
+/** Every URL in the environment, including those inside JSON-array values such as the notifications `urls` */
+function collectUrls(value: string): string[] {
+  if (URL.canParse(value)) {
+    return [value];
+  }
+
+  try {
+    const parsed: unknown = JSON.parse(value);
+
+    return Array.isArray(parsed)
+      ? parsed.filter((item) => typeof item === "string").flatMap(collectUrls)
+      : [];
+  } catch {
+    return [];
+  }
+}
 
 it("only points external services at .invalid hosts", () => {
   const allowed = new Set([input.databaseUrl, input.redisUrl, input.origin]);
-  const hostnames = Object.values(createE2eEnvironment(input))
-    .filter((value) => URL.canParse(value) && !allowed.has(value))
-    .map((value) => new URL(value).hostname);
+  const urls = Object.values(createE2eEnvironment(input))
+    .flatMap(collectUrls)
+    .filter((url) => !allowed.has(url));
+  const hostnames = urls.map((url) => new URL(url).hostname);
 
-  expect(hostnames.length).toBeGreaterThan(0);
+  expect(urls).toContain("json://notifications.e2e.invalid/hook");
   expect(
     hostnames.filter((hostname) => !hostname.endsWith(".invalid")),
   ).toStrictEqual([]);

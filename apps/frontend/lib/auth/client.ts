@@ -13,7 +13,11 @@ import { privateEnvironment } from "#environment/private-environment.schema.ts";
 import { nextCookiesClientPlugin } from "./plugins/next-cookies.ts";
 
 export const authClient = createAuthClient({
-  baseURL: privateEnvironment.ORIGIN,
+  // `ORIGIN` isn't public, so the browser can't read it and must use the origin it was served from
+  baseURL:
+    "window" in globalThis
+      ? globalThis.location.origin
+      : privateEnvironment.ORIGIN,
   plugins: [
     usernameClient(),
     adminClient({

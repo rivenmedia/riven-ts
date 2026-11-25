@@ -89,7 +89,7 @@
     "@repo/core-util-oxlint-config": "workspace:^",
     "@repo/core-util-typescript-config": "workspace:^",
     "@repo/core-util-vitest-config": "workspace:^",
-    "@repo/riven": "workspace:^",
+    "@repo/util-e2e": "workspace:^",
     "@repo/util-wiki-helpers": "workspace:^",
     "@storybook/addon-a11y": "catalog:storybook",
     "@storybook/addon-docs": "catalog:storybook",

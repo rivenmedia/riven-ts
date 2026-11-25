@@ -1,12 +1,11 @@
-import { expect, http, test } from "#playwright/fixtures.ts";
+import { expect, test } from "#playwright/integrated-fixtures.ts";
 import { waitForHydration } from "#playwright/wait-for-hydration.ts";
 
 test("navigates to the dashboard after registration", async ({
-  auth,
-  network,
   page,
-}) => {
-  network.use(http.post("**/api/auth/sign-up/email", auth.signIn("user")));
+}, testInfo) => {
+  // Unique to the test and attempt, and short enough for Better Auth's 30-character limit on usernames
+  const username = `e2e_${testInfo.testId.split("-").at(-1) ?? ""}_${String(testInfo.retry)}`;
 
   await page.goto("/login");
 
@@ -15,10 +14,10 @@ test("navigates to the dashboard after registration", async ({
   await waitForHydration(registerTab);
   await registerTab.click();
 
-  await page.getByRole("textbox", { name: /username/iu }).fill("username");
+  await page.getByRole("textbox", { name: /username/iu }).fill(username);
   await page
     .getByRole("textbox", { name: /email/iu })
-    .fill("email@example.com");
+    .fill(`${username}@riven.invalid`);
   await page.getByRole("textbox", { name: /^password$/iu }).fill("password");
   await page
     .getByRole("textbox", { name: /confirm password/iu })

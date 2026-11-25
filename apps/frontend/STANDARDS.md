@@ -25,13 +25,72 @@ Chromium.
   Postgres and Redis, and the browser and the Next.js server talk to it
   through a proxy. The Playwright handlers forward the browser's `/graphql` and
   `/api/auth/*` requests to Riven directly, so this suite bypasses the rewrite
-  in `proxy.ts`.
-- **Mocked** (`*.spec.ts`): keep these for states Riven can't be put into,
-  such as a failing backend or every setting type.
+  in `proxy.ts`. Login is integrated, and so are most of the home, media details,
+  library, settings, auth and registration journeys. The mocked list below says
+  what stays mocked.
+- **Mocked** (`*.spec.ts`): keep these for states Riven can't be put into.
+  What stays mocked, and why:
+  - `home.spec.ts` (the recently added carousel): Riven's `recentlyAdded`
+    resolver is a stub that returns `[]`.
+  - `media-details.spec.ts` (requesting the movie shows its state as it
+    changes): it needs the full request pipeline mocked in Riven, which is
+    phase 3.
+  - `settings.spec.ts` ("the general settings don't load the plugin list"): it
+    asserts that the page never sends a request, which needs the mocked
+    network to record the operations.
+  - `settings.every-setting-type.spec.ts`: it serves a settings schema made up
+    for the test, with a setting of every type.
+  - `login.spec.ts`: it needs an instance that still requires setup, but the
+    integrated Riven always has its seeded users.
+
+### Adding a journey
+
+1. Most journeys run on the baseline scenario (`e2e-baseline`), so they need
+   nothing more. Give a journey its own scenario only to seed data or to answer
+   requests that are specific to it. Define it with `defineE2eScenario` in
+   `apps/riven/lib/mocks/scenarios/`: it seeds the baseline first and lists
+   its handlers before the baseline's. Register it in `scenarios/index.ts`, and
+   add its name to `mockScenarioNames` in `@repo/util-e2e`. `e2e-library` and
+   `e2e-settings` are examples.
+2. Put the data that the scenario serves and the spec asserts on in
+   `journeyFixtures` in `@repo/util-e2e`, so the two share one source.
+3. In the spec, select the scenario with `test.use({ scenario })`. A journey
+   varies Riven's state only through its scenario, never by mutating Riven
+   during the test.
+4. Sign in with `test.use({ signedInAs: "user" })` (`"manager"` or `"admin"`). It signs in
+   through the real Riven after the scenario's reset, and re-adds the cookies
+   for the Next.js origin. The default is signed out.
+
+One Next.js server shares the `"use cache"` cache across every scenario and
+every Playwright project, including the mocked one: the mocked specs fill the
+same cache from the handlers in `mocks/handlers/home.handler.ts`. So data a
+page renders through `"use cache"` must agree between the baseline's handlers
+(`tmdb-home-handlers.ts`, `tmdb-details-handlers.ts` and
+`tvdb-details-handlers.ts`) and the mocked handlers: a TMDB or TVDB id must get
+the same answer everywhere. That's why the home and details pages' TMDB and
+TVDB data lives in the baseline, not in a journey's scenario. Integrated specs
+assert only fields derived from `journeyFixtures`, since those are the ones
+both sides share.
+
+### The contract between the apps
+
+`@repo/util-e2e` is the contract between the frontend and Riven. It holds the
+seeded users, the scenario names, `journeyFixtures`, the control client and the
+environment builder. It must stay side-effect free, as both apps import it.
+
+Riven's environment is the same for every scenario, because Riven locks any
+setting that comes from an environment variable. So the plugins aren't enabled
+through `enabledPlugins` in the environment. The baseline stores every core
+plugin as enabled, and Riven restores that at boot and on every reset.
+`logDirectory` and `enabledLogTransports` are still set in the environment, so
+they're locked.
 
 Every request Riven makes to an external service needs a handler in a Riven
 mock scenario. A request without a handler fails the test and the report
-lists it. Riven records unhandled requests, and the test fixtures report them.
+lists it, once per attempt: Riven's global undici retry dispatcher retries a
+failed request 5 times, so one unhandled fetch shows up 6 times and takes about
+15 seconds to fail. Riven records unhandled requests, and the test fixtures
+report them.
 A request made while Riven boots fails the worker before its first test.
 After that, the fixtures report them only for the span of one test. Applying a
 test's scenario resets the instance and clears the list, and the check runs at
@@ -57,14 +116,8 @@ E2E_POSTGRES_URL=postgres://postgres:<password>@127.0.0.1:5432/postgres \
 
 CI provides the same three with `runner-requirements` in `verify.yaml`.
 
-### Known issue: the browser auth origin
-
-The browser's auth client always uses the default `ORIGIN`,
-`https://localhost:9000`, because `privateEnvironment.ORIGIN` is undefined in
-the browser. The mocked suite hides this, as its handlers match any origin.
-The integrated fixtures forward that origin to Riven through
-`browserAuthOrigin`. Remove that once the frontend uses the page's own
-origin.
+CI runs `workers: 1`. Locally, each `-integrated` project is capped at 4
+workers, rather than 4 in total.
 
 ## Storybook tests
 

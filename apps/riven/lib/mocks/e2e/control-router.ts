@@ -1,3 +1,5 @@
+import { mockScenarioNames } from "@repo/util-e2e";
+
 import { Router } from "express";
 import z from "zod";
 
@@ -6,7 +8,6 @@ import { scenarios } from "#mocks/scenarios/index.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 
 import { resetInstance } from "./reset-instance.ts";
-import { mockScenarioNames } from "./scenario-names.ts";
 
 import type { ResetInstanceDeps } from "./reset-instance.ts";
 

@@ -44,11 +44,24 @@ the test.
   endpoint can wipe the database, so it's only registered in test mode, needs
   the API key, and Riven refuses to load mock scenarios unless `NODE_ENV` is
   `development` or `test`.
-- Every E2E instance boots with the same environment (all plugins enabled).
-  Scenarios can't change it per test, because settings are frozen at boot, and
-  the control endpoint rejects a scenario that sets one. A test that needs a
+- Every E2E instance boots with the same environment. Riven locks any setting
+  that comes from an environment variable, so the environment doesn't set
+  `enabledPlugins`: the baseline scenario stores every core plugin as enabled,
+  and Riven restores that at boot and on every reset. Scenarios can't change
+  the environment per test, because settings are frozen at boot, and the
+  control endpoint rejects a scenario that sets one. A test that needs a
   different environment would need its worker's Riven restarted, which isn't
   supported yet.
+- `@repo/util-e2e` is the contract between the two apps: the seeded users, the
+  scenario names, the journeys' fixture data, the control client and the
+  environment builder. It must stay side-effect free.
+- A journey varies Riven's state only through its named scenario, never by
+  changing Riven during the test. Data that a page renders through Next.js'
+  `"use cache"` must be the same in every scenario, because one Next.js server
+  shares that cache, so it lives in the baseline. That server also serves the
+  mocked specs, which fill the same cache from the frontend's mock handlers, so
+  those must agree with the baseline for this data, and integrated specs assert
+  only fields derived from the journey fixtures.
 - A reset must also clear Riven's in-memory state (the settings manager,
   `restartRequired`, data-source caches), or state leaks between tests on the
   same worker.

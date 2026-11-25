@@ -1,3 +1,5 @@
+import { e2eUsers } from "@repo/util-e2e";
+
 import { expect } from "@playwright/test";
 import { test as nextTest } from "next/experimental/testmode/playwright.js";
 import path from "node:path";
@@ -5,7 +7,7 @@ import { z } from "zod";
 
 import { api } from "#mocks/graphql.ts";
 
-import { backendUrl, browserAuthOrigin } from "./backend-environment.ts";
+import { backendUrl } from "./backend-environment.ts";
 import { createTestNetwork } from "./create-test-network.ts";
 import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { createBackendProxyHandlers } from "./riven/backend-proxy-handlers.ts";
@@ -14,11 +16,12 @@ import { startRivenInstance } from "./riven/start-riven-instance.ts";
 import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { RivenInstance } from "./riven/start-riven-instance.ts";
 import type { PlaywrightNetworkSource } from "@msw/playwright";
-import type { MockScenarioName, UnhandledRequest } from "@repo/riven/e2e";
+import type { UserRole } from "@repo/util-auth/access-control";
+import type { MockScenarioName, UnhandledRequest } from "@repo/util-e2e";
 import type { NetworkApi } from "msw/experimental";
 
 export { expect } from "@playwright/test";
-export { e2eUsers } from "@repo/riven/e2e";
+export { e2eUsers } from "@repo/util-e2e";
 
 const environment = z
   .object({
@@ -34,6 +37,13 @@ interface Options {
    * @default "e2e-baseline"
    */
   scenario: MockScenarioName;
+
+  /**
+   * The role of the seeded user who is signed in to Riven when the test starts, or `null` when signed out.
+   *
+   * @default null
+   */
+  signedInAs: UserRole | null;
 }
 
 interface Fixtures {
@@ -44,12 +54,24 @@ interface Fixtures {
   network: NetworkApi<[PlaywrightNetworkSource, NextFetchSource]>;
 
   _scenario: undefined;
+  _signIn: undefined;
 }
 
 interface WorkerFixtures {
   /** The worker's Riven, which runs in test mode with every external service mocked */
   riven: RivenInstance;
 }
+
+/** The name and value of a `Set-Cookie` header, without its attributes */
+const parseSetCookie = (header: string) => {
+  const [pair = ""] = header.split(";");
+  const separatorIndex = pair.indexOf("=");
+
+  return {
+    name: pair.slice(0, separatorIndex).trim(),
+    value: pair.slice(separatorIndex + 1).trim(),
+  };
+};
 
 const formatUnhandledRequests = (requests: UnhandledRequest[]) =>
   requests.map(({ method, url }) => `  ${method} ${url}`).join("\n");
@@ -135,6 +157,43 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
     },
     { auto: true },
   ],
+  signedInAs: [null, { option: true }],
+  _signIn: [
+    // Signs in after `_scenario`'s reset, which would otherwise wipe the session
+    async ({ riven, context, baseURL, signedInAs, _scenario: _ }, use) => {
+      if (signedInAs) {
+        const { username, password } = e2eUsers[signedInAs];
+        const response = await fetch(
+          new URL("/api/auth/sign-in/username", riven.url),
+          {
+            method: "POST",
+            headers: { "content-type": "application/json" },
+            body: JSON.stringify({ username, password }),
+          },
+        );
+
+        if (!response.ok) {
+          throw new Error(
+            `Signing in as ${signedInAs} failed with ${String(response.status)}: ${await response.text()}`,
+          );
+        }
+
+        const { hostname } = new URL(baseURL ?? "");
+
+        // Riven sets the cookies for its own origin, but the browser sends them to the Next.js server's
+        await context.addCookies(
+          response.headers.getSetCookie().map((header) => {
+            const { name, value } = parseSetCookie(header);
+
+            return { name, value, domain: hostname, path: "/", secure: false };
+          }),
+        );
+      }
+
+      await use(undefined);
+    },
+    { auto: true },
+  ],
   network: [
     // `next` registers its own routes, so it must be set up first for the network's routes to take precedence.
     // It depends on `_scenario`, so the test's requests have finished by the time its unhandled requests are checked.
@@ -153,8 +212,6 @@ export const test = nextTest.extend<Options & Fixtures, WorkerFixtures>({
             rivenUrl: riven.url,
             origin: baseURL ?? "",
             backendUrl,
-            // Works around the browser's auth client always using the default `ORIGIN`; see `browserAuthOrigin`
-            extraOrigins: [browserAuthOrigin],
           }),
           ...remoteAssetHandlers,
           // Subscriptions aren't forwarded to Riven yet, so they connect, but never receive anything

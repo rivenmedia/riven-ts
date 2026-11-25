@@ -1,3 +1,5 @@
+import { mockScenarioNames } from "@repo/util-e2e";
+
 import { ClientRequestInterceptor } from "@mswjs/interceptors/ClientRequest";
 import { FetchInterceptor } from "@mswjs/interceptors/fetch";
 import { HttpRequestInterceptor } from "@mswjs/interceptors/http";
@@ -10,7 +12,6 @@ import {
 } from "msw/experimental";
 import z from "zod";
 
-import { mockScenarioNames } from "./e2e/scenario-names.ts";
 import { scenarios } from "./scenarios/index.ts";
 import { isMockTestMode } from "./utilities/is-mock-test-mode.ts";
 import { unhandledRequests } from "./utilities/unhandled-requests.ts";

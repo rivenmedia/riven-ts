@@ -1,3 +1,5 @@
+import type { UserRole } from "@repo/util-auth/access-control";
+
 interface E2eUser {
   username: string;
   password: string;
@@ -19,4 +21,9 @@ export const e2eUsers = {
     password: "e2e-user-password",
     email: "e2e-user@riven.invalid",
   },
-} as const satisfies Record<"admin" | "user", E2eUser>;
+  manager: {
+    username: "e2e_manager",
+    password: "e2e-manager-password",
+    email: "e2e-manager@riven.invalid",
+  },
+} as const satisfies Record<UserRole, E2eUser>;

@@ -61,6 +61,8 @@ const withIntegratedTwins = (projects: Project[]) =>
       ...project,
       name: `${project.name ?? ""}-integrated`,
       testMatch: integratedSpecs,
+      // Each worker boots its own Riven, so they're capped to keep the machine responsive. CI's total of 1 is lower.
+      workers: 4,
     },
   ]);
 
@@ -72,12 +74,13 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
-  // Each worker boots its own Riven, so locally they're capped to keep the machine responsive
-  workers: isCI ? 1 : 4,
+  // Locally, Playwright's default, which the integrated projects cap for themselves
+  ...(isCI && { workers: 1 }),
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : "html",
   use: {
     baseURL,
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
   // CI only installs Chromium. Run every browser locally with `pnpm e2e:headless`.
   projects: withIntegratedTwins(

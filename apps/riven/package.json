@@ -26,10 +26,6 @@
       "production": "./workers/validate-torrent-files/validate-torrent-files.processor.js",
       "default": "./lib/message-queue/sandboxed-jobs/jobs/validate-torrent-files/validate-torrent-files.processor.ts"
     },
-    "./e2e": {
-      "production": "./lib/mocks/e2e/index.js",
-      "default": "./lib/mocks/e2e/index.ts"
-    },
     "./database-metadata-cache": "./temp/metadata.json",
     "./wiki.config": "./wiki.config.ts"
   },
@@ -85,6 +81,7 @@
     "@repo/plugin-tvdb": "workspace:^",
     "@repo/riven-tui": "workspace:^",
     "@repo/util-auth": "catalog:",
+    "@repo/util-e2e": "workspace:^",
     "@repo/util-plugin-sdk": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "@sentry/node": "catalog:",
