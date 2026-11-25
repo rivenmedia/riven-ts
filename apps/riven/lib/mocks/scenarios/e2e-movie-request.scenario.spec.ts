@@ -37,7 +37,7 @@ const it = baseIt
   .extend("scenarioHandlers", { auto: true }, ({ server }, { onCleanup }) => {
     server.use(...(e2eMovieRequestScenario.handlers ?? []));
 
-    // Releases any add-magnet request a test leaves held
+    // Releases any Torrentio or add-magnet request a test leaves held
     onCleanup(() => {
       gates.clear();
       gates.reopen();
@@ -52,15 +52,20 @@ const it = baseIt
         body: JSON.stringify({ link: movieRequest.infohash }),
       }),
   )
-  .extend("torrentioStreams", async () => {
+  .extend("requestTorrentioStreams", () => async () => {
     // The URL Riven's Torrentio plugin requests, with its default filter
     const { filter } = torrentioPlugin.settingsSchema.parse({});
 
     expect.assert(typeof filter === "string");
 
-    const response = await fetch(
+    return fetch(
       `https://torrentio.strem.fun/${filter}/stream/movie/${movieRequest.imdbId}.json`,
     );
+  })
+  .extend("torrentioStreams", async ({ requestTorrentioStreams }) => {
+    gates.release(movieRequest.scrapeGateKey);
+
+    const response = await requestTorrentioStreams();
     const { streams } = (await response.json()) as {
       streams: { infoHash: string; title: string }[];
     };
@@ -128,6 +133,44 @@ it("answers Torrentio with one torrent carrying the fixture infohash", ({
   expect(torrentioStreams.map(({ infoHash }) => infoHash)).toStrictEqual([
     movieRequest.infohash,
   ]);
+});
+
+it("holds the Torrentio response until the gate is released", async ({
+  requestTorrentioStreams,
+}) => {
+  const wait = vi.spyOn(gates, "wait");
+  const response = requestTorrentioStreams();
+
+  await vi.waitFor(() => {
+    expect(wait).toHaveBeenCalledWith(movieRequest.scrapeGateKey);
+  });
+  await expect(settledValue(response)).resolves.toBe(held);
+
+  gates.release(movieRequest.scrapeGateKey);
+
+  const streams = await response;
+
+  await expect(streams.json()).resolves.toMatchObject({
+    streams: [expect.objectContaining({ infoHash: movieRequest.infohash })],
+  });
+});
+
+it("answers the held Torrentio request with no streams once the gates are cleared, so the scrape ends without a retry", async ({
+  requestTorrentioStreams,
+}) => {
+  const wait = vi.spyOn(gates, "wait");
+  const response = requestTorrentioStreams();
+
+  await vi.waitFor(() => {
+    expect(wait).toHaveBeenCalledWith(movieRequest.scrapeGateKey);
+  });
+
+  gates.clear();
+
+  const streams = await response;
+
+  expect(streams.ok).toBe(true);
+  await expect(streams.json()).resolves.toStrictEqual({ streams: [] });
 });
 
 it("names the torrent so that Riven's scrape parsing keeps it for the movie", ({
@@ -233,11 +276,11 @@ it("holds the StremThru add-magnet response until the gate is released", async (
   const response = addMagnet();
 
   await vi.waitFor(() => {
-    expect(wait).toHaveBeenCalledWith(movieRequest.gateKey);
+    expect(wait).toHaveBeenCalledWith(movieRequest.downloadGateKey);
   });
   await expect(settledValue(response)).resolves.toBe(held);
 
-  gates.release(movieRequest.gateKey);
+  gates.release(movieRequest.downloadGateKey);
 
   const added = await response;
 
@@ -253,7 +296,7 @@ it("holds the StremThru add-magnet response until the gate is released", async (
 it("downloads files with the link Riven needs to keep them", async ({
   addMagnet,
 }) => {
-  gates.release(movieRequest.gateKey);
+  gates.release(movieRequest.downloadGateKey);
 
   const response = await addMagnet();
   const { data } = (await response.json()) as { data: { files: DebridFile[] } };
@@ -278,7 +321,7 @@ it("fails the held add-magnet request once the gates are cleared, without a stat
   const response = addMagnet();
 
   await vi.waitFor(() => {
-    expect(wait).toHaveBeenCalledWith(movieRequest.gateKey);
+    expect(wait).toHaveBeenCalledWith(movieRequest.downloadGateKey);
   });
 
   gates.clear();

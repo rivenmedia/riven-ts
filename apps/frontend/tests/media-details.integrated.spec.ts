@@ -95,10 +95,12 @@ test.describe("requesting a movie", () => {
 
     await expect(page.getByText(/request successful/iu)).toBeVisible();
 
+    await riven.control.releaseGate(movieRequest.scrapeGateKey);
+
     // The scenario holds the download, so the movie stays scraped until the gate is released
     await expect(page.getByRole("status", { name: "Scraped" })).toBeVisible();
 
-    await riven.control.releaseGate(movieRequest.gateKey);
+    await riven.control.releaseGate(movieRequest.downloadGateKey);
 
     await expect(page.getByRole("status", { name: "Completed" })).toBeVisible();
   });

@@ -49,7 +49,7 @@ const it = baseIt
   .extend("scenarioHandlers", { auto: true }, ({ server }, { onCleanup }) => {
     server.use(...(e2eMovieRequestScenario.handlers ?? []));
 
-    // Releases any add-magnet request a test leaves held
+    // Releases any Torrentio or add-magnet request a test leaves held
     onCleanup(() => {
       gates.clear();
       gates.reopen();
@@ -187,11 +187,37 @@ it.for([
 
     expect.assert(hook);
 
+    gates.release(movieRequest.scrapeGateKey);
+
     await expect(
       hook({ ...createHookContext(plugin), event: { item: movie } }),
     ).resolves.toStrictEqual({ id: movie.id, results: torrents });
   },
 );
+
+it("ends the Torrentio scrape at once, finding nothing, when the gates are cleared", async ({
+  createHookContext,
+  movie,
+}) => {
+  const hook = torrentioPlugin.hooks["riven.media-item.scrape.requested"];
+
+  expect.assert(hook);
+
+  const wait = vi.spyOn(gates, "wait");
+  const scrape = hook({
+    ...createHookContext(torrentioPlugin),
+    event: { item: movie },
+  });
+
+  await vi.waitFor(() => {
+    expect(wait).toHaveBeenCalledWith(movieRequest.scrapeGateKey);
+  });
+
+  gates.clear();
+
+  // Faster than the data source's 10 s retry backoff
+  await expect(scrape).resolves.toStrictEqual({ id: movie.id, results: {} });
+}, 5000);
 
 it("finds the torrent's files in StremThru's cache", async ({
   createHookContext,
@@ -220,10 +246,10 @@ it("downloads the torrent from StremThru once the gate is released", async ({
   const download = requestDownload();
 
   await vi.waitFor(() => {
-    expect(wait).toHaveBeenCalledWith(movieRequest.gateKey);
+    expect(wait).toHaveBeenCalledWith(movieRequest.downloadGateKey);
   });
 
-  gates.release(movieRequest.gateKey);
+  gates.release(movieRequest.downloadGateKey);
 
   await expect(download).resolves.toMatchObject({
     success: true,
@@ -240,7 +266,7 @@ it("ends the StremThru download at once when the gates are cleared, as a status 
   const download = requestDownload();
 
   await vi.waitFor(() => {
-    expect(wait).toHaveBeenCalledWith(movieRequest.gateKey);
+    expect(wait).toHaveBeenCalledWith(movieRequest.downloadGateKey);
   });
 
   gates.clear();

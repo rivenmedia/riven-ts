@@ -37,27 +37,37 @@ const noContent = () => new HttpResponse(null, { status: 204 });
 /**
  * A user requests a movie, which Riven indexes from TMDB (in the baseline), scrapes, downloads from StremThru and completes.
  *
- * StremThru's answer to adding the torrent waits for the test to release `movieRequest.gateKey`,
- * so the test can see the movie while it's scraped but not downloaded.
+ * Two answers wait for the test to release their gate, so it can see the movie in each state:
+ * Torrentio's waits for `movieRequest.scrapeGateKey`, so the movie stays indexed but not scraped,
+ * and StremThru's answer to adding the torrent waits for `movieRequest.downloadGateKey`, so it stays scraped but not downloaded.
  */
 export const e2eMovieRequestScenario = defineE2eScenario({
   scenarioName: "e2e-movie-request",
   handlers: [
     // Scrape: Torrentio finds the torrent, and the other scrapers find nothing
-    http.get("https://torrentio.strem.fun/*", ({ request }) =>
-      new URL(request.url).pathname.endsWith(
-        `/stream/movie/${movieRequest.imdbId}.json`,
-      )
-        ? HttpResponse.json({
-            streams: [
-              {
-                title: `${torrentName}\n👤 120 💾 4 GB ⚙️ E2E`,
-                infoHash: movieRequest.infohash,
-              },
-            ],
-          })
-        : undefined,
-    ),
+    http.get("https://torrentio.strem.fun/*", async ({ request }) => {
+      if (
+        !new URL(request.url).pathname.endsWith(
+          `/stream/movie/${movieRequest.imdbId}.json`,
+        )
+      ) {
+        return undefined;
+      }
+
+      if (!(await gates.wait(movieRequest.scrapeGateKey))) {
+        // The instance is being reset. Finding nothing ends the scrape without a retry.
+        return HttpResponse.json({ streams: [] });
+      }
+
+      return HttpResponse.json({
+        streams: [
+          {
+            title: `${torrentName}\n👤 120 💾 4 GB ⚙️ E2E`,
+            infoHash: movieRequest.infohash,
+          },
+        ],
+      });
+    }),
     http.get(
       `http://comet.e2e.invalid/stream/movie/${movieRequest.imdbId}.json`,
       () => HttpResponse.json({ streams: [] }),
@@ -97,9 +107,7 @@ export const e2eMovieRequestScenario = defineE2eScenario({
         return undefined;
       }
 
-      gates.open(movieRequest.gateKey);
-
-      if (!(await gates.wait(movieRequest.gateKey))) {
+      if (!(await gates.wait(movieRequest.downloadGateKey))) {
         // The instance is being reset. Riven neither retries nor blacklists a 409, so the download ends without queueing more work.
         return HttpResponse.json(
           { error: { message: "The E2E instance was reset" } },

@@ -132,8 +132,10 @@ export const journeyFixtures = {
     /** The one torrent the scrapers find, whose title is the file name without its extension */
     infohash: "5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e5e2e",
     fileName: "Interstellar.2014.1080p.BluRay.x264-RIVEN.mkv",
+    /** Holds Torrentio's answer to the scrape, so the movie stays indexed until the test releases it */
+    scrapeGateKey: "movie-request.torrentio-streams",
     /** Holds StremThru's answer to adding the torrent, so the movie stays scraped until the test releases it */
-    gateKey: "movie-request.add-magnet",
+    downloadGateKey: "movie-request.add-magnet",
   },
 } as const satisfies {
   library: {
@@ -150,6 +152,7 @@ export const journeyFixtures = {
     imdbId: string;
     infohash: string;
     fileName: string;
-    gateKey: string;
+    scrapeGateKey: string;
+    downloadGateKey: string;
   };
 } & Record<string, unknown>;
