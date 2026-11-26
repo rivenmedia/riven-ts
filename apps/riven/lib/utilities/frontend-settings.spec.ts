@@ -64,3 +64,29 @@ it("rejects trusted proxies that aren't IP addresses or CIDR ranges", async () =
     /trustedProxies/u,
   );
 });
+
+it("parses the additional trusted origins from a JSON array", async () => {
+  vi.resetModules();
+  vi.stubEnv(
+    "RIVEN_FRONTEND_SETTING__additionalTrustedOrigins",
+    '["https://riven.example.com", "http://*.example.net:9000"]',
+  );
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings.additionalTrustedOrigins).toStrictEqual([
+    "https://riven.example.com",
+    "http://*.example.net:9000",
+  ]);
+});
+
+it("trusts only the origin by default", async () => {
+  vi.resetModules();
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings).toMatchObject({
+    origin: "https://localhost:9000",
+    additionalTrustedOrigins: [],
+  });
+});

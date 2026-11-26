@@ -27,8 +27,9 @@ The dev server runs over HTTPS with a self-signed certificate, generated into
 first time you open it.
 
 The defaults for `ORIGIN` (`https://localhost:9000`) and `BACKEND_URL`
-(`http://localhost:3000`) already match this setup, and Riven trusts
-`https://localhost:9000` out of the box, so no extra configuration is needed.
+(`http://localhost:3000`) already match this setup, as does the default for
+Riven's `RIVEN_FRONTEND_SETTING__origin` (`https://localhost:9000`), so no
+extra configuration is needed.
 Set `RIVEN_SETTING__adminUserCredentials` in `apps/riven/.env.riven` to get an
 account to sign in with.
 

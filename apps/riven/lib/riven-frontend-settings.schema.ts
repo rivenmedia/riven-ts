@@ -25,9 +25,18 @@ export const RivenFrontendSettings = z.object({
     ),
   origin: z
     .url()
-    .default("http://localhost:9000")
+    .default("https://localhost:9000")
     .describe(
       "The URL the frontend is served from. Must match the frontend's `ORIGIN`.",
+    ),
+  additionalTrustedOrigins: json(z.array(z.string().min(1)))
+    .default([])
+    .describe(
+      dedent`
+        A JSON array of other URLs the frontend is opened at, such as its LAN address when \`origin\` is a domain. Wildcards are allowed, e.g. \`["http://192.168.1.*:9000"]\`.
+
+        **Note**: Signing in with Plex and passkeys only work at \`origin\`.
+      `,
     ),
   trustedProxies: json(z.array(trustedProxy))
     .default([])
