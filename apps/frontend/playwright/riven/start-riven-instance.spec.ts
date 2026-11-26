@@ -15,25 +15,22 @@ vi.mock(import("./start-redis.ts"), () => ({
   startRedis: vi.fn<typeof startRedis>(),
 }));
 
-const it = baseIt.extend<{
-  /** A directory for the test's files, which is also the OS temporary directory, where Riven's mount is made */
-  directory: string;
-  /** The `stop` of the Redis that `startRedis` starts */
-  stopRedis: () => Promise<boolean>;
-}>({
-  directory: async ({}, use) => {
+const it = baseIt
+  .extend("directory", async ({}, { onCleanup }) => {
     const directory = await mkdtemp(
       path.join(os.tmpdir(), "start-riven-instance-"),
     );
 
     vi.stubEnv("TMPDIR", directory);
 
-    await use(directory);
+    onCleanup(async () => {
+      vi.unstubAllEnvs();
+      await rm(directory, { recursive: true });
+    });
 
-    vi.unstubAllEnvs();
-    await rm(directory, { recursive: true });
-  },
-  stopRedis: async ({}, use) => {
+    return directory;
+  })
+  .extend("stopRedis", () => {
     const stopRedis = vi.fn<() => Promise<boolean>>().mockResolvedValue(true);
 
     vi.mocked(startRedis).mockResolvedValue({
@@ -41,9 +38,8 @@ const it = baseIt.extend<{
       stop: stopRedis,
     });
 
-    await use(stopRedis);
-  },
-});
+    return stopRedis;
+  });
 
 // Clear of the ports that the E2E workers use, from 9200
 const parallelIndex = 700;
