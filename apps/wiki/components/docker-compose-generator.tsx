@@ -237,7 +237,7 @@ function buildTSCompose(cfg: TSConfig): {
   env: string;
   systemd: string;
 } {
-  const compose: DockerCompose = {
+  const compose = {
     volumes: {
       postgres_data: null,
       redis_data: null,
@@ -253,6 +253,13 @@ function buildTSCompose(cfg: TSConfig): {
         devices: ["/dev/fuse"],
         env_file: ".env",
         ports: ["3000:3000"],
+        healthcheck: {
+          test: "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/auth/ok || exit 1",
+          start_period: "20s",
+          timeout: "3s",
+          interval: "15s",
+          retries: 3,
+        },
         volumes: [
           `${cfg.logsPath}:/app/logs`,
           `${cfg.dataPath}:/app/data`,
@@ -265,7 +272,7 @@ function buildTSCompose(cfg: TSConfig): {
       },
       postgres: {
         image: "postgres:17-alpine",
-        container_name: "riven-postgres",
+        container_name: "riven-db",
         restart: "unless-stopped",
         environment: {
           POSTGRES_USER: cfg.dbUser || "riven",
@@ -333,7 +340,7 @@ function buildTSCompose(cfg: TSConfig): {
         },
       }),
     },
-  };
+  } as const satisfies DockerCompose;
 
   // Media server
   if (cfg.mediaServer !== "none") {
@@ -347,8 +354,8 @@ function buildTSCompose(cfg: TSConfig): {
   // .env file
   const envLines: string[] = [
     "# Core Settings",
-    `RIVEN_SETTING__databaseUrl="postgres+psycopg2://${cfg.dbUser || "riven"}:${cfg.dbPassword || "changeme"}@postgres:5432/${cfg.dbName || "riven"}"`,
-    `RIVEN_SETTING__redisUrl="redis://redis:6379"`,
+    `RIVEN_SETTING__databaseUrl="postgres+psycopg2://${cfg.dbUser || "riven"}:${cfg.dbPassword || "changeme"}@${compose.services.postgres.container_name}:5432/${cfg.dbName || "riven"}"`,
+    `RIVEN_SETTING__redisUrl="redis://${compose.services.redis.container_name}:6379"`,
     `RIVEN_SETTING__vfsMountPath="/mount"`,
     // Defaults to localhost, which is unreachable from outside the container.
     `RIVEN_SETTING__host="0.0.0.0"`,
