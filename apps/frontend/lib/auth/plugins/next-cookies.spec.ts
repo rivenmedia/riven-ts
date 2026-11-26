@@ -13,6 +13,13 @@ const nextHeaders = vi.hoisted(() => ({
   cookiesError: null as Error | null,
 }));
 
+vi.mock(import("#environment/private-environment.schema.ts"), () => ({
+  privateEnvironment: {
+    ORIGIN: "https://frontend.example.com",
+    BACKEND_URL: "http://localhost:8080",
+  },
+}));
+
 vi.mock(import("next/headers"), () => ({
   cookies: async () => {
     if (nextHeaders.cookiesError) {
@@ -68,12 +75,12 @@ it("forwards the incoming request headers and cookies to Better Auth", async () 
   });
 });
 
-it("uses the auth server's origin when the incoming request has none", async () => {
+it("uses the frontend's origin when the incoming request has none", async () => {
   const headers = new Headers();
 
   await onRequest("http://localhost:8080/api/auth/get-session", headers);
 
-  expect(headers.get("origin")).toBe("http://localhost:8080");
+  expect(headers.get("origin")).toBe("https://frontend.example.com");
 });
 
 it("stores each cookie that Better Auth sets", async () => {

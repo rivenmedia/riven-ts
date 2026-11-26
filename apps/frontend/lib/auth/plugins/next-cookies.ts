@@ -1,5 +1,6 @@
 import { parseSetCookieHeader, toCookieOptions } from "better-auth/cookies";
 
+import { privateEnvironment } from "#environment/private-environment.schema.ts";
 import { isUnavailableCookieStoreError } from "#lib/utils/is-unavailable-cookie-store-error.ts";
 
 import type { BetterAuthClientPlugin } from "better-auth";
@@ -58,9 +59,10 @@ export const nextCookiesClientPlugin = {
             }
 
             // Top-level navigations (e.g. a hard refresh) carry no Origin or Referer, which
-            // Better Auth's CSRF check rejects for cookie-authenticated POSTs
+            // Better Auth's CSRF check rejects for cookie-authenticated POSTs. The request
+            // goes straight to Riven, so its own URL isn't an origin Riven trusts
             if (!ctx.headers.has("origin")) {
-              ctx.headers.set("origin", new URL(ctx.url).origin);
+              ctx.headers.set("origin", privateEnvironment.ORIGIN);
             }
 
             ctx.headers.set("cookie", cookieStore.toString());

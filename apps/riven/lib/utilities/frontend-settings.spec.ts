@@ -28,3 +28,65 @@ it("freezes the frontend settings", async () => {
 
   expect(Object.isFrozen(frontendSettings)).toBe(true);
 });
+
+// Private ranges, as the proxies on a Docker network would use
+// oxlint-disable sonarjs/no-hardcoded-ip
+it("parses the trusted proxies from a JSON array", async () => {
+  vi.resetModules();
+  vi.stubEnv(
+    "RIVEN_FRONTEND_SETTING__trustedProxies",
+    '["172.16.0.0/12", "10.0.0.1", "fd00::/8"]',
+  );
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings.trustedProxies).toStrictEqual([
+    "172.16.0.0/12",
+    "10.0.0.1",
+    "fd00::/8",
+  ]);
+});
+// oxlint-enable sonarjs/no-hardcoded-ip
+
+it("trusts no proxies by default", async () => {
+  vi.resetModules();
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings.trustedProxies).toStrictEqual([]);
+});
+
+it("rejects trusted proxies that aren't IP addresses or CIDR ranges", async () => {
+  vi.resetModules();
+  vi.stubEnv("RIVEN_FRONTEND_SETTING__trustedProxies", '["riven-frontend"]');
+
+  await expect(import("./frontend-settings.ts")).rejects.toThrow(
+    /trustedProxies/u,
+  );
+});
+
+it("parses the additional trusted origins from a JSON array", async () => {
+  vi.resetModules();
+  vi.stubEnv(
+    "RIVEN_FRONTEND_SETTING__additionalTrustedOrigins",
+    '["https://riven.example.com", "http://*.example.net:9000"]',
+  );
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings.additionalTrustedOrigins).toStrictEqual([
+    "https://riven.example.com",
+    "http://*.example.net:9000",
+  ]);
+});
+
+it("trusts only the origin by default", async () => {
+  vi.resetModules();
+
+  const { frontendSettings } = await import("./frontend-settings.ts");
+
+  expect(frontendSettings).toMatchObject({
+    origin: "https://localhost:9000",
+    additionalTrustedOrigins: [],
+  });
+});

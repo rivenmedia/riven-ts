@@ -121,12 +121,14 @@ export const authConfig = {
   },
   socialProviders: {},
   trustedOrigins: [
-    "https://localhost:9000",
-    "https://192.168.1.*:9000",
     frontendSettings.origin,
+    ...frontendSettings.additionalTrustedOrigins,
   ],
   advanced: {
     cookiePrefix: "riven",
+    ipAddress: {
+      trustedProxies: [...frontendSettings.trustedProxies],
+    },
     database: {
       generateId: false as const,
     },
