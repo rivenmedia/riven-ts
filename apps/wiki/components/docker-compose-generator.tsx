@@ -253,6 +253,13 @@ function buildTSCompose(cfg: TSConfig): {
         devices: ["/dev/fuse"],
         env_file: ".env",
         ports: ["3000:3000"],
+        healthcheck: {
+          test: "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/auth/ok || exit 1",
+          start_period: "20s",
+          timeout: "3s",
+          interval: "15s",
+          retries: 3,
+        },
         volumes: [
           `${cfg.logsPath}:/app/logs`,
           `${cfg.dataPath}:/app/data`,
