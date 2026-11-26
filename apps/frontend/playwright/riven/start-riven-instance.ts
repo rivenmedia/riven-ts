@@ -142,7 +142,15 @@ async function spawnRiven({ url, logPath, environment }: SpawnRivenInput) {
     });
   };
 
-  if (!(await waitUntilReady({ url, child, timeoutMs: readyTimeoutMs }))) {
+  const control = createE2eControlClient(url, backendApiKey);
+
+  if (
+    !(await waitUntilReady({
+      isStarted: () => control.isStarted(),
+      child,
+      timeoutMs: readyTimeoutMs,
+    }))
+  ) {
     const { exitCode } = child;
     const [childError] = childErrors;
 

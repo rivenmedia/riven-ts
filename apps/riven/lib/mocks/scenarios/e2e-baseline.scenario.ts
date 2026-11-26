@@ -14,6 +14,7 @@ import { CORE_NAMESPACE } from "#settings/core-settings-sections.ts";
 
 import { tmdbDetailsHandlers } from "./utilities/tmdb-details-handlers.ts";
 import { tmdbHomeHandlers } from "./utilities/tmdb-home-handlers.ts";
+import { tmdbMovieRequestHandlers } from "./utilities/tmdb-movie-request-handlers.ts";
 import { tvdbDetailsHandlers } from "./utilities/tvdb-details-handlers.ts";
 
 import type { EntityManager } from "@mikro-orm/core";
@@ -100,6 +101,7 @@ class E2eBaselineScenario extends MockScenario {
     // The details page renders cast, similar items and recommendations through `"use cache"`, which the one Next.js server shares between tests.
     // A TMDB ID must get the same answer in every scenario, so the baseline answers them all.
     ...tmdbDetailsHandlers,
+    ...tmdbMovieRequestHandlers,
     ...tvdbDetailsHandlers,
 
     // The details TMDB looks up for any item

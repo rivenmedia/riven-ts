@@ -15,6 +15,7 @@ import { expect, onTestFinished, vi } from "vitest";
 import { it as baseIt } from "#__tests__/test-context.ts";
 import { server as mockServer } from "#mocks/node.ts";
 import { deadStreamLinkScenario } from "#mocks/scenarios/dead-stream-link.scenario.ts";
+import { gates } from "#mocks/utilities/gates.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
 import { buildSettingsSections } from "#settings/settings-sections.ts";
@@ -86,10 +87,19 @@ const it = baseIt
         coreEnvironment: {},
       }),
   )
+  /** Whether the stand-in Riven has finished starting, which a test can change */
+  .extend("startup", () => ({ isStarted: false }))
   .extend(
     "rivenUrl",
     async (
-      { emptyWorkingDirectory: _, orm, server, services, settingsManager },
+      {
+        emptyWorkingDirectory: _,
+        orm,
+        server,
+        services,
+        settingsManager,
+        startup,
+      },
       { onCleanup },
     ) => {
       const app = express();
@@ -98,7 +108,12 @@ const it = baseIt
       app.use(
         "/__e2e__",
         express.json(),
-        createE2eControlRouter({ orm, services, settingsManager }),
+        createE2eControlRouter({
+          orm,
+          services,
+          settingsManager,
+          isStarted: () => startup.isStarted,
+        }),
       );
 
       const httpServer = app.listen(0, "127.0.0.1");
@@ -187,6 +202,17 @@ it("throws the status and body of a failed control request", async ({
   ).rejects.toThrow(/400.*nope/u);
 });
 
+it("reports whether Riven has finished starting", async ({
+  controlClient,
+  startup,
+}) => {
+  await expect(controlClient.isStarted()).resolves.toBe(false);
+
+  startup.isStarted = true;
+
+  await expect(controlClient.isStarted()).resolves.toBe(true);
+});
+
 it("resets the instance and applies the scenario", async ({
   controlClient,
   factories,
@@ -239,4 +265,36 @@ it("reports and clears unhandled requests", async ({ controlClient }) => {
   await controlClient.applyScenario("e2e-baseline");
 
   await expect(controlClient.getUnhandledRequests()).resolves.toStrictEqual([]);
+});
+
+it("POST /gates/:key/release releases the gate and requires the API key", async ({
+  controlClient,
+  rivenUrl,
+}) => {
+  onTestFinished(() => {
+    gates.clear();
+    gates.reopen();
+  });
+
+  const key = "e2e.control-router";
+  let wasReleased: boolean | null = null;
+
+  gates.open(key);
+
+  const released = gates.wait(key).then((value) => {
+    wasReleased = value;
+  });
+
+  const unauthorised = await fetch(
+    new URL(`/__e2e__/gates/${key}/release`, rivenUrl),
+    { method: "POST" },
+  );
+
+  expect(unauthorised.status).toBe(401);
+  expect(wasReleased).toBeNull();
+
+  await expect(controlClient.releaseGate(key)).resolves.toBeUndefined();
+  await released;
+
+  expect(wasReleased).toBe(true);
 });

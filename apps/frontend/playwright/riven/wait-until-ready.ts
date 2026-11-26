@@ -3,8 +3,8 @@ import { setTimeout as delay } from "node:timers/promises";
 import type { ChildProcess } from "node:child_process";
 
 interface WaitUntilReadyInput {
-  /** The URL the spawned Riven listens on */
-  url: URL;
+  /** Asks the spawned Riven whether it has finished starting. It rejects whilst Riven isn't listening yet. */
+  isStarted: () => Promise<boolean>;
 
   /** The spawned Riven */
   child: ChildProcess;
@@ -15,14 +15,15 @@ interface WaitUntilReadyInput {
 const pollIntervalMs = 250;
 
 /**
- * Polls Riven's auth health check until it answers, while the spawned process is still running.
+ * Polls Riven until it has finished starting, while the spawned process is still running.
  *
+ * Riven's API answers before the rest of it, such as the VFS, has started, and the events a request sends go unhandled until then.
  * Only an answer while `child` is alive counts, so a stale process on the same port can't pass for it.
  *
  * @returns Whether Riven became ready, rather than exiting or timing out
  */
 export async function waitUntilReady({
-  url,
+  isStarted,
   child,
   timeoutMs,
 }: WaitUntilReadyInput) {
@@ -31,9 +32,7 @@ export async function waitUntilReady({
 
   while (isAlive() && performance.now() < deadline) {
     try {
-      const response = await fetch(new URL("/api/auth/ok", url));
-
-      if (response.ok && isAlive()) {
+      if ((await isStarted()) && isAlive()) {
         return true;
       }
     } catch {

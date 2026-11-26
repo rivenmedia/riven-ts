@@ -26,6 +26,13 @@ export function createE2eControlClient(rivenUrl: URL, apiKey: string) {
   }
 
   return {
+    /** Whether Riven has finished starting. Its API answers before then, but the events a request sends go unhandled. */
+    async isStarted() {
+      const response = await request("GET", "started");
+      const { started } = (await response.json()) as { started: boolean };
+
+      return started;
+    },
     async applyScenario(name: MockScenarioName) {
       await request("POST", "scenario", { scenario: name });
     },
@@ -36,6 +43,10 @@ export function createE2eControlClient(rivenUrl: URL, apiKey: string) {
       };
 
       return requests;
+    },
+    /** Releases a gate the scenario holds a mocked response behind, so the response is sent */
+    async releaseGate(key: string) {
+      await request("POST", `gates/${encodeURIComponent(key)}/release`);
     },
   };
 }

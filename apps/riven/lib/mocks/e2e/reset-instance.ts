@@ -4,6 +4,7 @@ import { setTimeout } from "node:timers/promises";
 
 import { queueRegistry } from "#message-queue/utilities/queue-registry.ts";
 import { server } from "#mocks/node.ts";
+import { gates } from "#mocks/utilities/gates.ts";
 import { unhandledRequests } from "#mocks/utilities/unhandled-requests.ts";
 import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
 import { loadRuntimeSettings } from "#state-machines/bootstrap/actors/load-runtime-settings.actor.ts";
@@ -14,6 +15,7 @@ import type { Services } from "#database/database.ts";
 import type { MockScenario } from "#mocks/utilities/mock-scenario.ts";
 import type { SettingsManager } from "#settings/settings-manager.ts";
 import type { MikroORM } from "@mikro-orm/core";
+import type { Queue } from "bullmq";
 
 export interface ResetInstanceDeps {
   orm: MikroORM;
@@ -36,18 +38,8 @@ async function flushRedis() {
 const QUIESCE_POLL_INTERVAL_MS = 25;
 const QUIESCE_TIMEOUT_MS = 10_000;
 
-/**
- * Pauses every queue Riven created, then waits for their running jobs to
- * finish so that none can write into the instance once it has been reset.
- * Resuming is left to the Redis flush, which removes the pause flag.
- *
- * @public Exported for its spec; only `resetInstance` calls it.
- */
-export async function quiesceQueues(timeoutMs = QUIESCE_TIMEOUT_MS) {
-  const queues = [...queueRegistry];
-
-  await Promise.all(queues.map(([, queue]) => queue.pause()));
-
+/** Waits for the running jobs of `queues` to finish, failing once `timeoutMs` has passed */
+async function waitForIdleQueues(queues: [string, Queue][], timeoutMs: number) {
   const deadline = DateTime.now().plus({ milliseconds: timeoutMs });
 
   for (;;) {
@@ -75,6 +67,11 @@ export async function quiesceQueues(timeoutMs = QUIESCE_TIMEOUT_MS) {
   }
 }
 
+interface ResetInstanceOptions {
+  /** How long running jobs have to finish before the reset fails */
+  quiesceTimeoutMs?: number;
+}
+
 /**
  * Returns a test-mode instance to its boot state, then applies `scenario`:
  * the database, Redis, runtime settings and mock handlers are all reset.
@@ -82,8 +79,26 @@ export async function quiesceQueues(timeoutMs = QUIESCE_TIMEOUT_MS) {
 export async function resetInstance(
   { orm, services, settingsManager }: ResetInstanceDeps,
   scenario: MockScenario,
+  { quiesceTimeoutMs = QUIESCE_TIMEOUT_MS }: ResetInstanceOptions = {},
 ) {
-  await quiesceQueues();
+  // Stops every queue Riven created from starting jobs, so none can write into the instance once it's been reset.
+  // A successful reset leaves resuming to the Redis flush, which removes the pause flag.
+  const queues = [...queueRegistry];
+
+  await Promise.all(queues.map(([, queue]) => queue.pause()));
+
+  // Abandons any response held on a gate, so the job waiting on it can finish, now that no job can start after it
+  gates.clear();
+
+  try {
+    await waitForIdleQueues(queues, quiesceTimeoutMs);
+  } catch (error) {
+    // Nothing is flushed, so resume the queues: a parent job waiting on a child it can no longer start would stay
+    // active, and fail every later reset on this instance
+    await Promise.allSettled(queues.map(([, queue]) => queue.resume()));
+
+    throw error;
+  }
 
   await orm.schema.clear();
   // Clearing only truncates the default schema's tables, which leaves Better Auth's users behind
@@ -103,6 +118,9 @@ export async function resetInstance(
   unhandledRequests.clear();
 
   await scenario.seed(orm.em.fork());
+
+  // The new scenario's handlers can hold responses again
+  gates.reopen();
 
   // After the seed, which may store settings
   await loadRuntimeSettings({

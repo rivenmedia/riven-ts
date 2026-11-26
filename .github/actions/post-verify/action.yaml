@@ -29,6 +29,16 @@ runs:
         retention-days: 1
         if-no-files-found: error
 
+    # The HTML report holds each failed test's attachments, such as its trace, video and Riven log
+    - name: Upload E2E report
+      if: ${{ inputs.task == 'e2e:headless' && inputs.success == 'false' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: e2e-report-${{ runner.os }}-${{ runner.arch }}
+        path: apps/frontend/playwright-report
+        retention-days: 7
+        if-no-files-found: warn
+
     - name: Upload visual regression report
       if: ${{ inputs.task == 'test:component' }}
       uses: ./.github/actions/upload-visual-regression-report
