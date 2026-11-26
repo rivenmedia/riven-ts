@@ -17,7 +17,7 @@ export const authClient = createAuthClient({
   baseURL:
     "window" in globalThis
       ? globalThis.location.origin
-      : privateEnvironment.ORIGIN,
+      : privateEnvironment.BACKEND_URL,
   plugins: [
     usernameClient(),
     adminClient({

@@ -127,6 +127,9 @@ export const authConfig = {
   ],
   advanced: {
     cookiePrefix: "riven",
+    ipAddress: {
+      trustedProxies: [...frontendSettings.trustedProxies],
+    },
     database: {
       generateId: false as const,
     },

@@ -102,6 +102,11 @@ To serve the frontend from a domain, point your proxy at port `9000` and set
 both `ORIGIN` and `RIVEN_FRONTEND_SETTING__origin` to the public URL, e.g.
 `https://riven.example.com`.
 
+Also set `RIVEN_FRONTEND_SETTING__trustedProxies` to the range your proxy and
+the frontend reach Riven from, e.g. `'["172.16.0.0/12"]'` for Docker's default
+networks. Without it, Riven can't read each client's IP from
+`X-Forwarded-For`, and rate limiting puts every client in one shared bucket.
+
 ```nginx title="Nginx"
 server {
     server_name riven.example.com;
@@ -121,10 +126,10 @@ server {
 The `Upgrade` headers matter: live updates use a WebSocket on `/graphql`,
 which the frontend forwards to Riven.
 
-<Callout type="warn">
-  The frontend makes some auth requests to its own `ORIGIN` from inside the
-  container. If `ORIGIN` is a domain, make sure the container can resolve and
-  reach it.
+<Callout type="info">
+  The proxy only needs to reach the frontend. The frontend talks to Riven over
+  `BACKEND_URL` from inside its container, so Riven doesn't need to be exposed
+  through the proxy.
 </Callout>
 
 ## Troubleshooting
