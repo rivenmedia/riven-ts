@@ -43,7 +43,13 @@ export const nowPlaying = [
       rottenTomatoes: null,
       tmdb: null,
     },
-    logo: null,
+    logo: {
+      __typename: "ItemImage",
+      aspectRatio: 2 / 3,
+      height: 600,
+      width: 400,
+      url: "https://image.tmdb.org/t/p/original/24dIhRKjLnYRanA2Mo0ycZfObUp.png",
+    },
     seasonLabel: "Spring 2023",
   },
   {
@@ -68,7 +74,13 @@ export const nowPlaying = [
       rottenTomatoes: null,
       tmdb: null,
     },
-    logo: null,
+    logo: {
+      __typename: "ItemImage",
+      aspectRatio: 2 / 3,
+      height: 600,
+      width: 400,
+      url: "https://image.tmdb.org/t/p/original/iGjbP4jYzzbINDtd9kScypQOlmw.png",
+    },
     seasonLabel: "Summer 2026",
   },
 ] as const satisfies GetTmdbNowPlayingQuery["tmdbNowPlaying"];
