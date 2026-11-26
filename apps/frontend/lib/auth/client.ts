@@ -13,7 +13,9 @@ import { privateEnvironment } from "#environment/private-environment.schema.ts";
 import { nextCookiesClientPlugin } from "./plugins/next-cookies.ts";
 
 export const authClient = createAuthClient({
-  // `ORIGIN` isn't public, so the browser can't read it and must use the origin it was served from
+  // Both reach the same Better Auth endpoints on Riven. The browser goes through the frontend, which `proxy.ts`
+  // forwards, as Riven's cookies are set for the frontend's origin and `BACKEND_URL` may not be reachable from it.
+  // The server calls Riven directly, as its own public `ORIGIN` may not resolve from inside its container.
   baseURL:
     "window" in globalThis
       ? globalThis.location.origin
