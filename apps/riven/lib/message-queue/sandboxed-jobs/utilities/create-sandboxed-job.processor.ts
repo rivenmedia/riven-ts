@@ -7,8 +7,11 @@ import assert from "node:assert";
 import { threadId } from "node:worker_threads";
 
 import { initApolloClient } from "#graphql/apollo-client.ts";
+import { isMockTestMode } from "#mocks/utilities/is-mock-test-mode.ts";
 import { withLogContext } from "#utilities/logger/log-context.ts";
 import { settings } from "#utilities/settings.ts";
+
+import { installLoopbackOnlyDispatcher } from "./loopback-only-dispatcher.ts";
 
 import type {
   SandboxedJobDefinition,
@@ -16,6 +19,10 @@ import type {
 } from "#message-queue/sandboxed-jobs/index.ts";
 import type { SandboxedJob } from "bullmq";
 import type { z, ZodLiteral, ZodObject, ZodType } from "zod";
+
+if (isMockTestMode()) {
+  installLoopbackOnlyDispatcher();
+}
 
 const timeoutDuration = 5000;
 
