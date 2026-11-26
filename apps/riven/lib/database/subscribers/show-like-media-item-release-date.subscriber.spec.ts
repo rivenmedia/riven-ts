@@ -3,19 +3,21 @@ import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
-const indexedAt = DateTime.utc().toJSDate();
+const indexedAt = DateTime.utc();
 
 describe("episode year", () => {
   it("computes the episode year from its release date when no year is set", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ indexedAt });
+    const show = await showFactory.createOne({
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 2,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const releaseDate = DateTime.utc(2015, 6, 1);
@@ -27,7 +29,7 @@ describe("episode year", () => {
       number: 3,
       isSpecial: false,
       releaseDate: releaseDate.toJSDate(),
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(episode.year).toBe(releaseDate.year);
@@ -36,14 +38,17 @@ describe("episode year", () => {
   it("does not compute a year or cascade release dates when the episode has no release date", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ releaseDate: null, indexedAt });
+    const show = await showFactory.createOne({
+      releaseDate: null,
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 1,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const episode = await episodeFactory.createOne({
@@ -53,7 +58,7 @@ describe("episode year", () => {
       number: 1,
       isSpecial: false,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(episode.year).toBeNull();
@@ -66,14 +71,16 @@ describe("season release date cascade", () => {
   it("sets the season release date and year from the first episode when the season has none", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ indexedAt });
+    const show = await showFactory.createOne({
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 2,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const releaseDate = DateTime.utc(2015, 6, 1);
@@ -85,7 +92,7 @@ describe("season release date cascade", () => {
       number: 1,
       isSpecial: false,
       releaseDate: releaseDate.toJSDate(),
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(season.releaseDate).toStrictEqual(releaseDate.toJSDate());
@@ -95,14 +102,16 @@ describe("season release date cascade", () => {
   it("does not update the season when the episode is not the first episode", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ indexedAt });
+    const show = await showFactory.createOne({
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 2,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     await episodeFactory.createOne({
@@ -112,7 +121,7 @@ describe("season release date cascade", () => {
       number: 2,
       isSpecial: false,
       releaseDate: DateTime.utc(2015, 6, 1).toJSDate(),
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(season.releaseDate).toBeNull();
@@ -123,14 +132,17 @@ describe("show release date cascade", () => {
   it("sets the show release date and year from the first episode of the first season when the show has none", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ releaseDate: null, indexedAt });
+    const show = await showFactory.createOne({
+      releaseDate: null,
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 1,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const releaseDate = DateTime.utc(2015, 6, 1);
@@ -142,7 +154,7 @@ describe("show release date cascade", () => {
       number: 1,
       isSpecial: false,
       releaseDate: releaseDate.toJSDate(),
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(show.releaseDate).toStrictEqual(releaseDate.toJSDate());
@@ -152,14 +164,17 @@ describe("show release date cascade", () => {
   it("does not update the show when the season is not the first season", async ({
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ releaseDate: null, indexedAt });
+    const show = await showFactory.createOne({
+      releaseDate: null,
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 2,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     await episodeFactory.createOne({
@@ -169,7 +184,7 @@ describe("show release date cascade", () => {
       number: 1,
       isSpecial: false,
       releaseDate: DateTime.utc(2015, 6, 1).toJSDate(),
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(show.releaseDate).toBeNull();
@@ -181,14 +196,17 @@ describe("collection updates", () => {
     em,
     factories: { showFactory, seasonFactory, episodeFactory },
   }) => {
-    const show = await showFactory.createOne({ releaseDate: null, indexedAt });
+    const show = await showFactory.createOne({
+      releaseDate: null,
+      indexedAt: indexedAt.toJSDate(),
+    });
 
     const originSeason = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 2,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const destinationSeason = await seasonFactory.createOne({
@@ -196,7 +214,7 @@ describe("collection updates", () => {
       itemRequest: show.itemRequest,
       number: 1,
       releaseDate: null,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const releaseDate = DateTime.utc(2015, 6, 1).toJSDate();
@@ -208,7 +226,7 @@ describe("collection updates", () => {
       number: 1,
       isSpecial: false,
       releaseDate,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     destinationSeason.episodes.add(episode);

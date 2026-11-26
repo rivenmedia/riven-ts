@@ -12,7 +12,7 @@ Requires React 19+ (Next.js 15+) — the hook throws a clear runtime error other
 
 One idea: **a confirmed base, folded with every in-flight change.**
 
-```text
+```
 optimisticState = updateFn(updateFn(confirmed, change1), change2)
 ```
 
@@ -87,10 +87,9 @@ export function layoutReducer(groups: Group[], change: LayoutChange): Group[] {
 // src/app/actions.ts
 "use server";
 
-import { layoutReducer } from "@/features/layout/reducer";
-import { actionClient } from "@/lib/safe-action";
-
 import { revalidatePath } from "next/cache";
+import { actionClient } from "@/lib/safe-action";
+import { layoutReducer } from "@/features/layout/reducer";
 
 export const saveLayout = actionClient
   .inputSchema(layoutChangeSchema)
@@ -113,11 +112,9 @@ export const saveLayout = actionClient
 // src/app/channel-nav.tsx
 "use client";
 
-import { layoutReducer } from "@/features/layout/reducer";
-
 import { useOptimisticStateAction } from "next-safe-action/hooks";
-
 import { saveLayout } from "./actions";
+import { layoutReducer } from "@/features/layout/reducer";
 
 export function ChannelNav({ groups }: { groups: Group[] }) {
   const { optimisticState, execute, isPending } = useOptimisticStateAction(
@@ -148,9 +145,8 @@ When several components need the same in-flight changes, keep the confirmed data
 // src/providers/calendar-events-provider.tsx
 "use client";
 
-import { saveEventChange } from "@/app/actions";
-
 import { useOptimisticStateAction } from "next-safe-action/hooks";
+import { saveEventChange } from "@/app/actions";
 
 // Hoisted so the identity is stable — an inline [] would be a new value every render.
 const NO_PENDING: EventChange[] = [];

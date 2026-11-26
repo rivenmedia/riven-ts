@@ -8,16 +8,13 @@ const meta = preview.meta({
     providers: {
       credential: {
         enabled: true,
-        disableSignup: false,
       },
       plex: {
         enabled: true,
-        disableSignup: false,
         name: "Plex",
       },
       authentik: {
         enabled: true,
-        disableSignup: false,
         name: "Authentik",
       },
     },

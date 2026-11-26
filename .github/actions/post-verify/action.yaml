@@ -13,8 +13,11 @@ inputs:
 runs:
   using: composite
   steps:
+    # The baseline is generated on linux-x64, so only that platform's coverage is comparable.
+    # Coverage from other platforms differs (e.g. macOS file paths), and duplicate artifacts make
+    # the report pick one at random.
     - name: Merge coverage reports
-      if: ${{ inputs.task == 'test' && inputs.success == 'true' }}
+      if: ${{ inputs.task == 'test' && inputs.success == 'true' && github.event_name == 'pull_request' && runner.os == 'Linux' && runner.arch == 'X64' }}
       uses: ./.github/actions/generate-coverage-report
 
     - name: Upload Knip report
@@ -25,6 +28,16 @@ runs:
         path: knip-report.json
         retention-days: 1
         if-no-files-found: error
+
+    # The HTML report holds each failed test's attachments, such as its trace, video and Riven log
+    - name: Upload E2E report
+      if: ${{ inputs.task == 'e2e:headless' && inputs.success == 'false' }}
+      uses: actions/upload-artifact@v7
+      with:
+        name: e2e-report-${{ runner.os }}-${{ runner.arch }}
+        path: apps/frontend/playwright-report
+        retention-days: 7
+        if-no-files-found: warn
 
     - name: Upload visual regression report
       if: ${{ inputs.task == 'test:component' }}

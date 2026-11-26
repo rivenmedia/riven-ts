@@ -11,7 +11,7 @@
     "build": "next build",
     "codegen:nextjs-types": "next typegen",
     "dev": "next dev --turbopack",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "postinstall": "fumadocs-mdx",
     "start": "next start"
@@ -37,6 +37,7 @@
     "@repo/plugin-notifications": "workspace:^",
     "@repo/plugin-plex": "workspace:^",
     "@repo/plugin-seerr": "workspace:^",
+    "@repo/plugin-silo": "workspace:^",
     "@repo/plugin-stremthru": "workspace:^",
     "@repo/plugin-subdl": "workspace:^",
     "@repo/plugin-tmdb": "workspace:^",

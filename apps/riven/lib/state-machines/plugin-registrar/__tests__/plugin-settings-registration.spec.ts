@@ -5,58 +5,13 @@ import { PluginSettings } from "@repo/util-plugin-sdk/utilities/plugin-settings"
 import { expect, vi } from "vitest";
 import { createActor, createEmptyActor, fromPromise, toPromise } from "xstate";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { pluginRegistrarMachine } from "#state-machines/plugin-registrar/index.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import type { SettingsService } from "#database/services/settings/settings.service.ts";
 import type { ParsedPlugins } from "#state-machines/plugin-registrar/actors/collect-plugins-for-registration.actor.ts";
 import type { InstalledPlugin } from "#types/plugins.ts";
-
-function createParsedPlugins(
-  storedPluginSettings: ParsedPlugins["storedPluginSettings"],
-): ParsedPlugins {
-  const installedPlugins: InstalledPlugin[] = [
-    {
-      sectionId: "repo-plugin-comet",
-      packageName: "@repo/plugin-comet",
-      name: "comet",
-      plugin: cometPlugin,
-      enabled: true,
-      alwaysEnabled: false,
-    },
-    {
-      sectionId: "repo-plugin-plex",
-      packageName: "@repo/plugin-plex",
-      name: "plex",
-      plugin: plexPlugin,
-      enabled: true,
-      alwaysEnabled: false,
-    },
-  ];
-
-  return {
-    validPlugins: [cometPlugin, plexPlugin],
-    invalidPlugins: new Map(),
-    unresolvablePlugins: [],
-    installedPlugins,
-    pluginConfigPrefixMap: new Map([
-      [cometPlugin.name, "REPO_PLUGIN_COMET"],
-      [plexPlugin.name, "REPO_PLUGIN_PLEX"],
-    ]),
-    pluginEnvironment: new Map([
-      ["@repo/plugin-comet", {}],
-      ["@repo/plugin-plex", {}],
-    ]),
-    pluginSettings: new PluginSettings(
-      {},
-      ["REPO_PLUGIN_COMET", "REPO_PLUGIN_PLEX"],
-      logger,
-      false,
-    ),
-    storedPluginSettings,
-  };
-}
 
 function startRegistrar(
   parsedPlugins: ParsedPlugins,
@@ -77,11 +32,64 @@ function startRegistrar(
   return actor;
 }
 
+const it = baseIt
+  .extend("spyOnLoggerWarn", () => () => vi.spyOn(logger, "warn"))
+  .extend("spyOnLoggerError", () => () => vi.spyOn(logger, "error"))
+  .extend(
+    "createParsedPlugins",
+    () =>
+      function createParsedPlugins(
+        storedPluginSettings: ParsedPlugins["storedPluginSettings"],
+      ): ParsedPlugins {
+        const installedPlugins: InstalledPlugin[] = [
+          {
+            sectionId: "repo-plugin-comet",
+            packageName: "@repo/plugin-comet",
+            name: "comet",
+            plugin: cometPlugin,
+            enabled: true,
+            alwaysEnabled: false,
+          },
+          {
+            sectionId: "repo-plugin-plex",
+            packageName: "@repo/plugin-plex",
+            name: "plex",
+            plugin: plexPlugin,
+            enabled: true,
+            alwaysEnabled: false,
+          },
+        ];
+
+        return {
+          validPlugins: [cometPlugin, plexPlugin],
+          invalidPlugins: new Map(),
+          unresolvablePlugins: [],
+          installedPlugins,
+          pluginConfigPrefixMap: new Map([
+            [cometPlugin.name, "REPO_PLUGIN_COMET"],
+            [plexPlugin.name, "REPO_PLUGIN_PLEX"],
+          ]),
+          pluginEnvironment: new Map([
+            ["@repo/plugin-comet", {}],
+            ["@repo/plugin-plex", {}],
+          ]),
+          pluginSettings: new PluginSettings(
+            {},
+            ["REPO_PLUGIN_COMET", "REPO_PLUGIN_PLEX"],
+            logger,
+            false,
+          ),
+          storedPluginSettings,
+        };
+      },
+  );
+
 it("ignores invalid stored plugin settings and registers the plugin with the default value", async ({
+  spyOnLoggerWarn,
+  createParsedPlugins,
   services,
 }) => {
-  const warnSpy = vi.spyOn(logger, "warn");
-
+  const warnSpy = spyOnLoggerWarn();
   const actor = startRegistrar(
     createParsedPlugins(
       new Map([["@repo/plugin-comet", { url: "not a url" }]]),
@@ -104,10 +112,11 @@ it("ignores invalid stored plugin settings and registers the plugin with the def
 });
 
 it("skips a plugin whose required settings are missing and continues registering the others", async ({
+  spyOnLoggerError,
+  createParsedPlugins,
   services,
 }) => {
-  const errorSpy = vi.spyOn(logger, "error");
-
+  const errorSpy = spyOnLoggerError();
   const actor = startRegistrar(
     createParsedPlugins(new Map()),
     services.settingsService,
@@ -124,6 +133,7 @@ it("skips a plugin whose required settings are missing and continues registering
 });
 
 it("outputs the installed plugins and their environment", async ({
+  createParsedPlugins,
   services,
 }) => {
   const parsedPlugins = createParsedPlugins(new Map());

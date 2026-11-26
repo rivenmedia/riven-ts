@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 
 import { GET_MEDIA_ITEM_ACTIONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_queries/get-media-item-actions.query.ts";
 import { ON_ITEM_REQUEST_CHANGED } from "#app/(protected)/details/media/[type]/[id]/_components/item-action-toolbar/_subscriptions/on-item-request-changed.subscription.ts";
@@ -8,14 +8,6 @@ import { GET_ITEM_SEASON_STATES } from "#app/(protected)/details/media/[type]/[i
 import { GET_ITEM_SEASONS } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_queries/get-item-seasons.query.ts";
 import { ON_SEASON_UPDATED } from "#app/(protected)/details/media/[type]/[id]/_components/item-seasons/_subscriptions/on-season-updated.subscription.ts";
 import { GET_SIMILAR_ITEMS } from "#app/(protected)/details/media/[type]/[id]/_components/similar-items/_queries/get-similar-items.query.ts";
-import {
-  movieCast,
-  movieRecommendations,
-  movieSimilarItems,
-  showCast,
-  unrequestedMovie,
-  unrequestedShow,
-} from "#app/(protected)/details/media/[type]/[id]/media-details.fixtures.ts";
 import { GET_ITEM_STATE } from "#components/item-state-badge/_queries/get-item-state.query.ts";
 import { ON_MEDIA_ITEM_STATE_CHANGED } from "#components/item-state-badge/_subscriptions/on-media-item-state-changed.subscription.ts";
 import { api } from "#mocks/graphql.ts";
@@ -73,7 +65,7 @@ export type RequestedMediaItem = Pick<
  *
  * @returns The mocked handlers, and a function that changes the item's state and notifies its subscribers
  */
-export const mockItemState = (
+const mockItemState = (
   __typename: Capitalize<TopLevelMediaItemType>,
   { id, isRequested, state: initialState }: RequestedMediaItem,
 ) => {
@@ -142,17 +134,13 @@ export const mockItemState = (
 export const mockRequestedMovie = ({
   availableActions,
   mediaItem,
-  itemState = mockItemState("Movie", mediaItem),
 }: {
   availableActions: MediaItemAction[];
   mediaItem: RequestedMediaItem;
-  /**
-   * The item's state, if it's already mocked (e.g. so its subscription is in place before the page connects)
-   */
-  itemState?: ReturnType<typeof mockItemState>;
 }) => {
   const itemRequestId = crypto.randomUUID();
   const { id: primaryMediaItemId } = mediaItem;
+  const itemState = mockItemState("Movie", mediaItem);
 
   return {
     itemRequestId,
@@ -405,52 +393,3 @@ export const mockSimilarItems = (
       },
     }),
   );
-
-/**
- * Mocks an item that hasn't been requested, along with the details shown alongside it.
- */
-const mockUnrequestedItem = (
-  data: MediaDetailsData,
-  {
-    cast,
-    recommendations,
-    similarItems,
-  }: {
-    cast: GetItemCastQuery["tmdbItem"]["cast"];
-    recommendations: GetItemRecommendationsQuery["tmdbItem"]["recommendations"];
-    similarItems: GetSimilarItemsQuery["tmdbItem"]["similarItems"];
-  },
-) => [
-  mockMediaItemQuery(data, null),
-  mockItemCast(data, cast),
-  mockItemRecommendations(data, recommendations),
-  mockSimilarItems(data, similarItems),
-  api.query(GET_MEDIA_ITEM_ACTIONS, () =>
-    HttpResponse.json({ data: { itemRequestByExternalIds: null } }),
-  ),
-];
-
-/**
- * The unrequested movie, with its cast, recommendations and similar items.
- *
- * The details are cached by the server, so tests must mock the same details for the same item.
- */
-export const unrequestedMovieHandlers = mockUnrequestedItem(unrequestedMovie, {
-  cast: movieCast,
-  recommendations: movieRecommendations,
-  similarItems: movieSimilarItems,
-});
-
-/**
- * The unrequested show, with its cast and seasons.
- *
- * The details are cached by the server, so tests must mock the same details for the same item.
- */
-export const unrequestedShowHandlers = [
-  ...mockUnrequestedItem(unrequestedShow, {
-    cast: showCast,
-    recommendations: [],
-    similarItems: [],
-  }),
-  ...mockItemSeasons(unrequestedShow.id),
-];

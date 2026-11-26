@@ -106,6 +106,7 @@ export default defineConfig((config) => {
           new SnapshotRunReporter(),
         ],
       }),
+      exclude: ["tests/**"],
       coverage: {
         exclude: [".next/**", "playwright/**", "playwright-report/**"],
       },
@@ -133,6 +134,13 @@ export default defineConfig((config) => {
             name: "storybook",
             browser: {
               enabled: true,
+              api: {
+                // Storybook 11's Vitest addon disables file writes unless they're explicitly allowed,
+                // but the visual regression plugin needs them to write snapshots and diffs.
+                allowWrite: true,
+                // Do not set `browser.api.host` to a network address whilst `allowWrite` is enabled.
+                host: "localhost",
+              },
               commands: { setBrowserViewport },
               provider: playwright({
                 launchOptions: {

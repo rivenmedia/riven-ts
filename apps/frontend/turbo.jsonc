@@ -6,9 +6,12 @@
       "outputs": [".next/**", "!.next/cache/**", "!.next/dev/**"],
       "passThroughEnv": ["ENABLE_TEST_PROXY"]
     },
+    "e2e": {
+      "env": ["CI", "E2E_POSTGRES_URL"]
+    },
     "e2e:headless": {
-      "dependsOn": ["build"],
-      "env": ["CI"],
+      "dependsOn": ["build", "@repo/riven#build"],
+      "env": ["CI", "E2E_POSTGRES_URL"],
       "outputs": ["playwright-report/**", "test-results/**"]
     },
     "dev": {
@@ -26,16 +29,11 @@
       ]
     },
     "codegen:gql": {
-      "dependsOn": ["@repo/riven#codegen:gql-schema"],
       "outputs": [
         "./app/_types/__generated__/graphql.ts",
-        "./app/**/*.typegen.ts"
+        "./app/**/*.typegen.ts",
+        "./components/**/*.typegen.ts"
       ]
-    },
-    "codegen:gql:watch": {
-      "dependsOn": ["@repo/riven#codegen:gql-schema"],
-      "cache": false,
-      "persistent": true
     },
     "msw:init": {
       "cache": false
@@ -56,8 +54,7 @@
         "$TURBO_EXTENDS$",
         // Ignore unrelated NextJS files
         "!{proxy,instrumentation,instrumentation-client}.ts",
-        // Ignore E2E code
-        "!playwright/**",
+        // Ignore the E2E specs. `playwright/` stays in, as the unit project runs its `*.spec.ts` files.
         "!tests/**",
         // Ignore unrelated config files
         "!**/*.config.ts",

@@ -1,14 +1,18 @@
+import { journeyFixtures } from "@repo/util-e2e";
+
 import type { CastMember } from "#app/_types/__generated__/graphql.ts";
 import type { GetSeasonQuery } from "./_queries/get-season.query.typegen.ts";
 
 type Show = GetSeasonQuery["tmdbItem"];
 type Season = NonNullable<Show["season"]>;
 
+const { unrequestedShow } = journeyFixtures.mediaDetails;
+
 export const show = {
   __typename: "TmdbIndexerData",
-  id: "371028",
+  id: unrequestedShow.tvdbId.toString(),
   type: "show",
-  title: "Arcane",
+  title: unrequestedShow.title,
   backdropUrl:
     "https://image.tmdb.org/t/p/original/sYXLeu5usz6yEz0k00FYvtEdodD.jpg",
   logo: null,

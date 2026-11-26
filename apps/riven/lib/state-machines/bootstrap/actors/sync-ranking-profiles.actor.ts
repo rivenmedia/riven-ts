@@ -66,10 +66,7 @@ async function findActiveProfile({
     : null;
 }
 
-export const syncRankingProfiles = fromPromise<
-  undefined,
-  SyncRankingProfilesInput
->(async ({ input }) => {
+export async function syncRankingProfiles(input: SyncRankingProfilesInput) {
   const { rankingProfileService, settingsService, legacyConfigPath } = input;
 
   await renameCustomProfilesUsingPresetNames(rankingProfileService);
@@ -108,4 +105,13 @@ export const syncRankingProfiles = fromPromise<
       `No legacy ranking config found at "${resolvedPath}"; using ranking profiles from the database.`,
     );
   }
+}
+
+export const syncRankingProfilesActor = fromPromise<
+  undefined,
+  SyncRankingProfilesInput
+>(async ({ input }) => {
+  await syncRankingProfiles(input);
+
+  return undefined;
 });

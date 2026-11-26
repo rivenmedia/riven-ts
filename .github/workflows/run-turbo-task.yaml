@@ -41,7 +41,8 @@ env:
 jobs:
   get-required-tasks:
     name: Check if required
-    runs-on: ubuntu-latest
+    # Run on the task's runner, so the RUNNER_OS/RUNNER_ARCH in the hash match the cache entry the task writes
+    runs-on: ${{ inputs.runner }}
     outputs:
       required-tasks: ${{ steps.get-required-tasks.outputs.required-tasks || '[]' }}
     steps:
@@ -60,14 +61,14 @@ jobs:
       - name: Get turbo version
         id: get-turbo-version
         run: |
-          echo "result=$(pnpm ls turbo -w --json | jq -r '.[0].devDependencies.turbo.version')" >> $GITHUB_OUTPUT
+          echo "result=$(pnpm ls turbo -w --json | jq -r '.[0].devDependencies.turbo.version')" >> "$GITHUB_OUTPUT"
 
       # Set environment variables for the turbo task, as these may be included in the cache key
       - name: Set environment variables
         if: inputs.env != '"{}"'
         run:
           echo '${{ inputs.env }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
-          $GITHUB_ENV
+          "$GITHUB_ENV"
 
       - name: Get required tasks
         id: get-required-tasks
@@ -101,7 +102,7 @@ jobs:
         if: inputs.env != '"{}"'
         run:
           echo '${{ inputs.env }}' | jq -r 'to_entries[] | "\(.key)=\(.value)"' >>
-          $GITHUB_ENV
+          "$GITHUB_ENV"
 
       - name: Set up verification runner
         if: inputs.runner-requirements != '[]'
@@ -145,6 +146,9 @@ jobs:
         with:
           task: ${{ inputs.task }}
           success: ${{ steps.run-task.outcome == 'success' }}
+        env:
+          TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+          TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
 
       - uses: charpeni/turborepo-summary-action@v1
         if: ${{ !cancelled() }}

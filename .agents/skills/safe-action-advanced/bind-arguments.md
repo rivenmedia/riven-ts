@@ -10,9 +10,8 @@ Bind arguments let you pass extra validated arguments to an action using `.bind(
 // src/app/actions.ts
 "use server";
 
-import { authActionClient } from "@/lib/safe-action";
-
 import { z } from "zod";
+import { authActionClient } from "@/lib/safe-action";
 
 export const updatePost = authActionClient
   .bindArgsSchemas([
@@ -40,9 +39,8 @@ Call `.bind(null, ...args)` to create a bound version of the action:
 ```tsx
 "use client";
 
-import { updatePost } from "@/app/actions";
-
 import { useAction } from "next-safe-action/hooks";
+import { updatePost } from "@/app/actions";
 
 export function EditPostForm({ postId }: { postId: string }) {
   // Bind the postId as the first argument

@@ -15,41 +15,53 @@ import type { BitrateCase } from "./helpers/bitrate-test-cases.ts";
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-const it = baseIt.extend(
-  "mockBitrateSettings",
-  ({ overrideRuntimeSettings }) =>
-    ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
-      overrideRuntimeSettings({
-        general: {
-          scraping: {
-            minimumAverageBitrateMovies: minimum,
-            maximumAverageBitrateMovies: maximum,
-          },
-        },
-      });
-    },
-);
-
-it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
-
 const runtime = 120;
 
-function buildMovieFile(title: string, bitrate: number) {
-  const name = `${title}.${bitrate.toString()}kbps.2024.1080p.WEB-DL.mkv`;
+const it = baseIt
+  .extend("spyOnLoggerDebug", () => () => vi.spyOn(logger, "debug"))
+  .extend(
+    "buildMovieFile",
+    () =>
+      function buildMovieFile(title: string, bitrate: number) {
+        const name = `${title}.${bitrate.toString()}kbps.2024.1080p.WEB-DL.mkv`;
 
-  return {
-    name,
-    path: `/${name}`,
-    size: fileSizeForBitrate(bitrate, runtime),
-    link: "http://example.com/file.mkv",
-  };
-}
+        return {
+          name,
+          path: `/${name}`,
+          size: fileSizeForBitrate(bitrate, runtime),
+          link: "http://example.com/file.mkv",
+        };
+      },
+  )
+  .extend(
+    "mockBitrateSettings",
+    ({ overrideRuntimeSettings }) =>
+      ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
+        overrideRuntimeSettings({
+          general: {
+            scraping: {
+              minimumAverageBitrateMovies: minimum,
+              maximumAverageBitrateMovies: maximum,
+            },
+          },
+        });
+      },
+  );
+
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it.for(rejectedBitrateCases)(
   "rejects a file $label",
   async (
     { minimum, maximum, bitrate, reason },
-    { em, indexedMovieContext: { indexedMovie }, mockBitrateSettings, stream },
+    {
+      spyOnLoggerDebug,
+      buildMovieFile,
+      em,
+      indexedMovieContext: { indexedMovie },
+      mockBitrateSettings,
+      stream,
+    },
   ) => {
     indexedMovie.runtime = runtime;
 
@@ -57,7 +69,7 @@ it.for(rejectedBitrateCases)(
 
     mockBitrateSettings({ minimum, maximum });
 
-    const debugSpy = vi.spyOn(logger, "debug");
+    const debugSpy = spyOnLoggerDebug();
 
     const mappedFiles = {
       movies: { 0: buildMovieFile(indexedMovie.title, bitrate) },
@@ -85,7 +97,13 @@ it.for(acceptedBitrateCases)(
   "accepts a file $label",
   async (
     { minimum, maximum, bitrate },
-    { em, indexedMovieContext: { indexedMovie }, mockBitrateSettings, stream },
+    {
+      buildMovieFile,
+      em,
+      indexedMovieContext: { indexedMovie },
+      mockBitrateSettings,
+      stream,
+    },
   ) => {
     indexedMovie.runtime = runtime;
 
@@ -112,6 +130,7 @@ it.for(acceptedBitrateCases)(
 );
 
 it("falls back to a smaller file when the largest file exceeds the maximum", async ({
+  buildMovieFile,
   em,
   indexedMovieContext: { indexedMovie },
   mockBitrateSettings,
@@ -137,6 +156,7 @@ it("falls back to a smaller file when the largest file exceeds the maximum", asy
 });
 
 it("skips the bitrate check if the movie has no runtime", async ({
+  buildMovieFile,
   em,
   indexedMovieContext: { indexedMovie },
   mockBitrateSettings,

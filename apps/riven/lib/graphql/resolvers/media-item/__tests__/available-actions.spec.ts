@@ -6,11 +6,14 @@ import { expect } from "vitest";
 
 import { it as baseIt } from "#__tests__/test-context.ts";
 
+import type { Principal } from "#graphql/auth/principal.ts";
 import type {
   MediaItemResolverSpecGetAvailableActionsQuery,
   MediaItemResolverSpecGetAvailableActionsQueryVariables,
 } from "./available-actions.spec.typegen.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { UserRole } from "@repo/util-auth/access-control";
+import type { MediaItemAction } from "@repo/util-plugin-sdk/dto/enums/media-item-action.enum";
 import type { UUID } from "node:crypto";
 
 const GET_MEDIA_ITEM_AVAILABLE_ACTIONS: TypedDocumentNode<
@@ -29,14 +32,16 @@ const GET_MEDIA_ITEM_AVAILABLE_ACTIONS: TypedDocumentNode<
 const it = baseIt
   .extend(
     "getAvailableActions",
-    ({ gqlContext, gqlServer }) =>
-      async (id: UUID) => {
+    ({ createGqlContext, gqlContext, gqlServer }) =>
+      async (id: UUID, principal?: Principal) => {
         const { body } = await gqlServer.executeOperation<
           MediaItemResolverSpecGetAvailableActionsQuery,
           MediaItemResolverSpecGetAvailableActionsQueryVariables
         >(
           { query: GET_MEDIA_ITEM_AVAILABLE_ACTIONS, variables: { id } },
-          { contextValue: gqlContext },
+          {
+            contextValue: principal ? createGqlContext(principal) : gqlContext,
+          },
         );
 
         expect.assert(body.kind === "single");
@@ -251,3 +256,21 @@ it('does not include "request_more" when every season of a show has been request
     "request_more",
   );
 });
+
+it.for([
+  { role: "user", expected: ["request_more"] },
+  { role: "manager", expected: ["reset", "request_more", "delete"] },
+  { role: "admin", expected: ["reset", "request_more", "delete"] },
+] as const satisfies { role: UserRole; expected: MediaItemAction[] }[])(
+  "returns only the actions the $role role permits",
+  async (
+    { role, expected },
+    { seeders: { seedPartiallyRequestedShow }, getAvailableActions },
+  ) => {
+    const { show } = await seedPartiallyRequestedShow();
+
+    await expect(
+      getAvailableActions(show.id, { kind: "user", userId: "user-1", role }),
+    ).resolves.toStrictEqual(expected);
+  },
+);

@@ -5,7 +5,7 @@ import { NotFoundError } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { ProcessMediaItemFlow } from "#message-queue/flows/process-media-item/process-media-item.schema.ts";
 import { flow } from "#message-queue/flows/producer.ts";
 import { runSingleJob } from "#message-queue/utilities/run-single-job.ts";
@@ -16,6 +16,8 @@ import { RequestStreamLinkFlow } from "./request-stream-link.schema.ts";
 
 import type { MediaItemStreamLinkRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/media-item.stream-link-requested.event";
 import type { Processor } from "bullmq";
+
+const it = baseIt.extend("spyOnAddBulk", () => () => vi.spyOn(flow, "addBulk"));
 
 it.beforeEach(({ createFlowWorker }) => {
   createFlowWorker(RequestStreamLinkFlow, requestStreamLinkProcessor);
@@ -631,6 +633,7 @@ it("adds a job to reprocess the movie if the item is a movie and its torrent is 
 });
 
 it("adds a job to reprocess the lowest common denominator in the item's hierarchy if the item is show-like and its torrent is dead", async ({
+  spyOnAddBulk,
   completedShowContext: { completedShow },
   createPluginWorker,
   createFlowWorker,
@@ -640,8 +643,8 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
   expect.assert(mediaEntry);
 
   const mockProcessMediaItemProcessor = vi.fn<Processor>();
-  const flowAddSpy = vi.spyOn(flow, "addBulk");
 
+  const flowAddSpy = spyOnAddBulk();
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
 
   createPluginWorker(
@@ -677,4 +680,119 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
       queueName: "process-media-item",
     }),
   ]);
+});
+
+it("replaces an expired permalink with a newly requested link", async ({
+  em,
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+  services: { mediaEntryService },
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  mediaEntry.streamPermalink = "https://example.com/expired-permalink";
+
+  await em.persist(mediaEntry).flush();
+
+  const streamLinkRequested = vi
+    .fn<() => Promise<MediaItemStreamLinkRequestedResponse>>()
+    .mockResolvedValue({
+      success: true,
+      data: { link: "https://example.com/refreshed-link", isPermalink: true },
+    });
+  const checkedLinks: string[] = [];
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    streamLinkRequested,
+  );
+
+  createPluginWorker(
+    "riven.media-item.stream-link.health-check.requested",
+    mediaEntry.plugin,
+    async ({ data }: { data: { link: string } }) => {
+      checkedLinks.push(data.link);
+
+      return Promise.resolve(
+        data.link === "https://example.com/expired-permalink"
+          ? { state: "expired", statusCode: StatusCodes.BAD_REQUEST }
+          : { state: "healthy", statusCode: StatusCodes.OK },
+      );
+    },
+  );
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await runSingleJob(job);
+
+  expect(checkedLinks).toStrictEqual([
+    "https://example.com/expired-permalink",
+    "https://example.com/refreshed-link",
+  ]);
+  expect(streamLinkRequested).toHaveBeenCalledOnce();
+
+  const { streamPermalink } = await mediaEntryService.getMediaEntryById(
+    mediaEntry.id,
+    { fields: ["streamPermalink"] },
+  );
+
+  expect(streamPermalink).toBe("https://example.com/refreshed-link");
+});
+
+it("surfaces the child failure reason when the stream link job throws", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    vi
+      .fn<() => Promise<never>>()
+      .mockRejectedValue(new Error("simulated debrid outage")),
+  );
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await expect(runSingleJob(job)).rejects.toThrow(
+    `Stream link plugin job failed for ${mediaEntry.path}: simulated debrid outage`,
+  );
+});
+
+it("fails when the stream link job returns an invalid response", async ({
+  completedMovieContext: { completedMovie },
+  createPluginWorker,
+}) => {
+  const [mediaEntry] = await completedMovie.getMediaEntries();
+
+  expect.assert(mediaEntry);
+
+  createPluginWorker(
+    "riven.media-item.stream-link.requested",
+    mediaEntry.plugin,
+    vi
+      .fn<() => Promise<unknown>>()
+      .mockResolvedValue({ success: true, data: { link: "not a url" } }),
+  );
+
+  const { job } = await enqueueRequestStreamLink({
+    mediaEntryId: mediaEntry.id,
+    mediaItemTitle: mediaEntry.mediaItem.unwrap().fullTitle,
+  });
+
+  await expect(runSingleJob(job)).rejects.toThrow(
+    `Failed to get response from plugin job for ${mediaEntry.path}:`,
+  );
 });

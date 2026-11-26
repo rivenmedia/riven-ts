@@ -16,52 +16,64 @@ import type { Episode } from "@repo/util-plugin-sdk/dto/entities";
 
 type MappedFiles = MapItemsToFilesSandboxedJob["output"];
 
-const it = baseIt.extend(
-  "mockBitrateSettings",
-  ({ overrideRuntimeSettings }) =>
-    ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
-      overrideRuntimeSettings({
-        general: {
-          scraping: {
-            minimumAverageBitrateEpisodes: minimum,
-            maximumAverageBitrateEpisodes: maximum,
-          },
-        },
-      });
-    },
-);
-
-it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
-
 const runtime = 30;
 
-async function buildEpisodeFiles(
-  episodes: Episode[],
-  getBitrate: (episode: Episode) => number,
-) {
-  const files: MappedFiles["episodes"] = {};
+const it = baseIt
+  .extend("spyOnLoggerDebug", () => () => vi.spyOn(logger, "debug"))
+  .extend(
+    "buildEpisodeFiles",
+    () =>
+      async function buildEpisodeFiles(
+        episodes: Episode[],
+        getBitrate: (episode: Episode) => number,
+      ) {
+        const files: MappedFiles["episodes"] = {};
 
-  for (const episode of episodes) {
-    const show = await episode.getShow();
-    const seasonNumber = await episode.season.loadProperty("number");
-    const name = `${show.title}.S${seasonNumber.toString().padStart(2, "0")}E${episode.number.toString().padStart(2, "0")}.1080p.WEB-DL.mkv`;
+        for (const episode of episodes) {
+          const show = await episode.getShow();
+          const seasonNumber = await episode.season.loadProperty("number");
+          const name = `${show.title}.S${seasonNumber.toString().padStart(2, "0")}E${episode.number.toString().padStart(2, "0")}.1080p.WEB-DL.mkv`;
 
-    files[`abs:${episode.absoluteNumber.toString()}`] = {
-      name,
-      path: `/${name}`,
-      size: fileSizeForBitrate(getBitrate(episode), runtime),
-      link: "http://example.com/file.mkv",
-    };
-  }
+          files[`abs:${episode.absoluteNumber.toString()}`] = {
+            name,
+            path: `/${name}`,
+            size: fileSizeForBitrate(getBitrate(episode), runtime),
+            link: "http://example.com/file.mkv",
+          };
+        }
 
-  return files;
-}
+        return files;
+      },
+  )
+  .extend(
+    "mockBitrateSettings",
+    ({ overrideRuntimeSettings }) =>
+      ({ minimum, maximum }: Pick<BitrateCase, "minimum" | "maximum">) => {
+        overrideRuntimeSettings({
+          general: {
+            scraping: {
+              minimumAverageBitrateEpisodes: minimum,
+              maximumAverageBitrateEpisodes: maximum,
+            },
+          },
+        });
+      },
+  );
+
+it.beforeAll(({ gqlServer: _gqlServer }) => undefined);
 
 it.for(rejectedBitrateCases)(
   "rejects a file $label",
   async (
     { minimum, maximum, bitrate, reason },
-    { em, episode, mockBitrateSettings, stream },
+    {
+      spyOnLoggerDebug,
+      buildEpisodeFiles,
+      em,
+      episode,
+      mockBitrateSettings,
+      stream,
+    },
   ) => {
     episode.runtime = runtime;
 
@@ -69,7 +81,7 @@ it.for(rejectedBitrateCases)(
 
     mockBitrateSettings({ minimum, maximum });
 
-    const debugSpy = vi.spyOn(logger, "debug");
+    const debugSpy = spyOnLoggerDebug();
 
     const mappedFiles = {
       movies: {},
@@ -92,7 +104,7 @@ it.for(acceptedBitrateCases)(
   "accepts a file $label",
   async (
     { minimum, maximum, bitrate },
-    { em, episode, mockBitrateSettings, stream },
+    { buildEpisodeFiles, em, episode, mockBitrateSettings, stream },
   ) => {
     episode.runtime = runtime;
 
@@ -114,6 +126,7 @@ it.for(acceptedBitrateCases)(
 );
 
 it("skips the bitrate check if the episode has no runtime", async ({
+  buildEpisodeFiles,
   em,
   episode,
   mockBitrateSettings,
@@ -140,6 +153,7 @@ it.for(["show", "season"] as const)(
   async (
     type,
     {
+      buildEpisodeFiles,
       em,
       indexedShowContext: {
         indexedShow,

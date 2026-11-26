@@ -19,7 +19,6 @@ export function SetupQualityStepContainer() {
 
   return (
     <SetupQualityStep
-      generalSections={[]}
       profiles={data.rankingProfiles.map(
         ({ id, name, description, isActive }) => ({
           id,

@@ -2,12 +2,13 @@ import { PluginDataSource } from "@repo/util-plugin-sdk";
 import { CastMember } from "@repo/util-plugin-sdk/dto/types/cast-member.type";
 import { IndexerEpisode } from "@repo/util-plugin-sdk/dto/types/indexer-episode.type";
 
-import { Arg, FieldResolver, Resolver, Root } from "type-graphql";
+import { Arg, FieldResolver, Resolver, Root, Authorized } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
 import { getEpisodeCast } from "../utilities/get-indexer-cast.ts";
 
+@Authorized()
 @Resolver(() => IndexerEpisode)
 export class TmdbIndexerEpisodeResolver {
   @FieldResolver(() => [CastMember], {

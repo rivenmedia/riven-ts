@@ -60,6 +60,8 @@ services:
       ORIGIN: http://192.168.1.10:9000
       # Where the frontend reaches Riven, over the Compose network
       BACKEND_URL: http://riven:3000
+      # The same value as RIVEN_SETTING__apiKey on Riven
+      BACKEND_API_KEY: <your RIVEN_SETTING__apiKey>
     ports:
       - 9000:9000
     depends_on:

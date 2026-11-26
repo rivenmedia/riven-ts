@@ -6,7 +6,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import { ApolloServerPluginLandingPageLocalDefault } from "@apollo/server/plugin/landingPage/default";
 import { expressMiddleware } from "@as-integrations/express5";
 import { RequestContext } from "@mikro-orm/core";
-import { toNodeHandler } from "better-auth/node";
+import { fromNodeHeaders, toNodeHandler } from "better-auth/node";
 import cors from "cors";
 import express from "express";
 import { useServer } from "graphql-ws/use/ws";
@@ -18,9 +18,11 @@ import { fromPromise } from "xstate";
 import { initAuth } from "#auth/auth.ts";
 import { services } from "#database/database.ts";
 import { initApolloClient } from "#graphql/apollo-client.ts";
+import { authChecker } from "#graphql/auth/auth-checker.ts";
 import { buildContextFunction } from "#graphql/build-context-function.ts";
 import { pubSub } from "#graphql/pubsub.ts";
 import { resolvers } from "#graphql/resolvers/index.ts";
+import { isMockTestMode } from "#mocks/utilities/is-mock-test-mode.ts";
 import { invalidateRankingEngine } from "#ranking/ranking-engine.ts";
 import { RankingManager } from "#ranking/ranking-manager.ts";
 import { SettingsManager } from "#settings/settings-manager.ts";
@@ -39,6 +41,8 @@ import type { MikroORM } from "@mikro-orm/core";
 import type { GraphQLContext } from "@repo/util-plugin-sdk/types/graphql-context";
 import type { RequestHandler } from "express";
 import type { ActorRefFromLogic } from "xstate";
+
+const authErrorCodes = new Set<unknown>(["UNAUTHENTICATED", "UNAUTHORIZED"]);
 
 export interface StartGQLServerInput {
   orm: MikroORM;
@@ -91,6 +95,7 @@ export const startGqlServer = fromPromise<
     const schema = await buildSchema({
       resolvers: [...resolvers, ...pluginResolvers],
       pubSub,
+      authChecker,
     });
 
     const sendEvent: MainRunnerMachineIntake = (event) => {
@@ -139,7 +144,16 @@ export const startGqlServer = fromPromise<
     const serverCleanup = useServer(
       {
         schema,
-        context,
+        context: async ({ extra: { request }, connectionParams }) => {
+          const headers = fromNodeHeaders(request.headers);
+          const authorization = connectionParams?.["authorization"];
+
+          if (typeof authorization === "string") {
+            headers.set("authorization", authorization);
+          }
+
+          return RequestContext.create(orm.em, async () => context(headers));
+        },
       },
       wsServer,
     );
@@ -174,7 +188,11 @@ export const startGqlServer = fromPromise<
         ApolloServerPluginCacheControl(),
       ],
       formatError(formattedError, error) {
-        logger.error("GraphQL Error:", { err: error });
+        const level = authErrorCodes.has(formattedError.extensions?.["code"])
+          ? "debug"
+          : "error";
+
+        logger.log(level, "GraphQL Error:", { err: error });
 
         return formattedError;
       },
@@ -187,6 +205,22 @@ export const startGqlServer = fromPromise<
       RequestContext.create(orm.em, next);
     };
 
+    if (isMockTestMode()) {
+      const { createE2eControlRouter } =
+        await import("#mocks/e2e/control-router.ts");
+
+      app.use(
+        "/__e2e__",
+        express.json(),
+        createE2eControlRouter({
+          orm,
+          services,
+          settingsManager,
+          isStarted: () => mainRunnerRef.getSnapshot().matches("Running"),
+        }),
+      );
+    }
+
     app.all("/api/auth/*splat", withRequestContext, toNodeHandler(auth));
 
     app.use(
@@ -194,11 +228,14 @@ export const startGqlServer = fromPromise<
       cors(),
       express.json(),
       withRequestContext,
-      expressMiddleware(server, { context }),
+      expressMiddleware(server, {
+        context: async ({ req }) => context(fromNodeHeaders(req.headers)),
+      }),
     );
 
     const url = new URL(
-      `http://${settings.host}:${settings.port.toString()}/${graphqlPath}`,
+      graphqlPath,
+      `http://${settings.host}:${settings.port.toString()}`,
     );
 
     await new Promise<void>((resolve) => {
@@ -210,6 +247,12 @@ export const startGqlServer = fromPromise<
         resolve,
       );
     });
+
+    const address = httpServer.address();
+
+    if (address !== null && typeof address === "object") {
+      url.port = address.port.toString();
+    }
 
     initApolloClient(url);
 

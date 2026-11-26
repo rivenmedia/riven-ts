@@ -1,12 +1,11 @@
 import { faker } from "@faker-js/faker";
-import { PlaywrightNetworkSource } from "@msw/playwright";
 import { betterAuth } from "better-auth";
 import { testUtils } from "better-auth/plugins";
-import { OperationTypeNode, getOperationAST } from "graphql";
+import { getOperationAST } from "graphql";
 import { DateTime } from "luxon";
-import { HttpResponse } from "msw";
-import { defineNetwork } from "msw/experimental";
+import { HttpResponse } from "msw/http";
 import { test as nextTest } from "next/experimental/testmode/playwright.js";
+import { z } from "zod";
 
 import { api } from "#mocks/graphql.ts";
 import { createAuthProvidersHandler } from "#mocks/handlers/auth-providers.handler.ts";
@@ -28,21 +27,30 @@ import {
   hasPermissionHandler,
   passkeysUnavailableHandler,
 } from "./auth-handlers.ts";
-import { NextFetchSource, isNextFetchFrame } from "./next-fetch-source.ts";
+import { createTestNetwork } from "./create-test-network.ts";
 import { remoteAssetHandlers } from "./remote-asset-handlers.ts";
 import { serialiseCookie } from "./serialise-cookie.ts";
 
+import type { NextFetchSource } from "./next-fetch-source.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { PlaywrightNetworkSource } from "@msw/playwright";
 import type { UserRole } from "@repo/util-auth/access-control";
 import type { Session } from "better-auth";
 import type { UserWithRole } from "better-auth/client/plugins";
 import type { TestCookie, TestHelpers } from "better-auth/plugins";
-import type { AnyHandler, HttpResponseResolver } from "msw";
+import type { AnyHandler } from "msw";
 import type { NetworkApi } from "msw/experimental";
+import type { HttpResponseResolver } from "msw/http";
 import type { SetReturnType } from "type-fest";
 
 export { expect } from "@playwright/test";
-export { HttpResponse, http } from "msw";
+export { HttpResponse, http } from "msw/http";
+
+/** The body of a GraphQL request */
+const graphqlRequestBodySchema = z.object({
+  operationName: z.string(),
+  variables: z.record(z.string(), z.unknown()).default({}),
+});
 
 /**
  * Wraps handlers for `test.use({ handlers })`.
@@ -91,9 +99,6 @@ interface Fixtures {
 
     /** A resolver for a sign-in or sign-up endpoint that signs the user in with the given role */
     signIn: (role: UserRole) => HttpResponseResolver;
-
-    /** A resolver for the sign-out endpoint that expires the session cookies */
-    signOut: () => HttpResponseResolver;
   };
 
   /**
@@ -186,37 +191,16 @@ export const test = nextTest.extend<Options & Fixtures>({
       use,
       testInfo,
     ) => {
-      // Next.js' fixture only adds the test's headers in a route, which a redirected request doesn't go through.
-      // Without them, the server can't attribute that request's fetches to the test, so they'd reach the real backend.
-      await context.setExtraHTTPHeaders({
-        "Next-Test-Proxy-Port": String(_nextWorker.proxyPort),
-        "Next-Test-Data": testInfo.testId,
-      });
-
-      const nextFetchSource = new NextFetchSource(next);
-
-      const network = defineNetwork({
-        sources: [
-          new PlaywrightNetworkSource({ context, skipAssetRequests: true }),
-          nextFetchSource,
-        ],
+      const { network, dispose } = await createTestNetwork({
+        next,
+        nextWorker: _nextWorker,
+        context,
+        testId: testInfo.testId,
         handlers: [...handlers, ...baselineHandlers],
-        context: { quiet: true },
-        onUnhandledFrame: ({ frame, defaults }) => {
-          // The page's own requests (navigations, RSC payloads, etc.) are expected to reach the Next.js server
-          if (isNextFetchFrame(frame)) {
-            defaults.warn();
-          }
-        },
       });
 
-      await network.enable();
       await use(network);
-
-      // Close the pages, then let the server finish their requests, so they aren't cut off (and logged as errors)
-      await Promise.all(context.pages().map((page) => page.close()));
-      await nextFetchSource.waitForIdle();
-      await network.disable();
+      await dispose();
     },
     { auto: true },
   ],
@@ -243,15 +227,6 @@ export const test = nextTest.extend<Options & Fixtures>({
           { headers },
         );
       },
-      signOut: () => async () => {
-        const headers = new Headers();
-
-        for (const { name, path } of await getCookies("user")) {
-          headers.append("set-cookie", `${name}=; Path=${path}; Max-Age=0`);
-        }
-
-        return HttpResponse.json({ success: true }, { headers });
-      },
     });
   },
   _signIn: [
@@ -269,25 +244,44 @@ export const test = nextTest.extend<Options & Fixtures>({
     { auto: true },
   ],
   recordOperation: async ({ network }, use) => {
+    // Stops recording once the test ends, so listeners don't pile up across tests
+    const recording = new AbortController();
+
     await use(
       <TVariables extends Record<string, unknown>>(
         document: TypedDocumentNode<unknown, TVariables>,
       ) => {
         const recorded: TVariables[] = [];
-        const createHandler =
-          getOperationAST(document)?.operation === OperationTypeNode.MUTATION
-            ? api.mutation
-            : api.query;
+        const operationName = getOperationAST(document)?.name?.value;
 
-        // Returning nothing falls through to the handler that actually answers the request
-        network.use(
-          createHandler(document, ({ variables }) => {
-            recorded.push(variables);
-          }),
+        // Listens to the network's life-cycle events, rather than adding a handler, so recording a request can't
+        // change how it's handled
+        network.events.on(
+          "request:start",
+          async ({ request }) => {
+            if (request.method !== "POST") {
+              return;
+            }
+
+            // The handler reads the body too, so it's read from a clone
+            const body = graphqlRequestBodySchema.safeParse(
+              await request
+                .clone()
+                .json()
+                .catch(() => null),
+            );
+
+            if (body.success && body.data.operationName === operationName) {
+              recorded.push(body.data.variables as TVariables);
+            }
+          },
+          { signal: recording.signal },
         );
 
         return recorded;
       },
     );
+
+    recording.abort();
   },
 });

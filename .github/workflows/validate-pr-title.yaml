@@ -23,4 +23,6 @@ jobs:
         uses: ./.github/actions/set-up-project-environment
 
       - name: Validate PR title
-        run: echo "${{ github.event.pull_request.title }}" | pnpm commitlint
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+        run: echo "$PR_TITLE" | pnpm commitlint

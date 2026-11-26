@@ -1,5 +1,6 @@
 import { KeyvAdapter } from "@apollo/utils.keyvadapter";
-import { HttpResponse, http } from "msw";
+import { QueueEvents, Scripts } from "bullmq";
+import { HttpResponse, http } from "msw/http";
 import { randomUUID } from "node:crypto";
 import { expect, vi } from "vitest";
 import { createLogger } from "winston";
@@ -19,6 +20,10 @@ class TestDataSource extends BaseDataSource<Record<string, unknown>> {
 }
 
 const it = baseIt
+  .extend(
+    "spyOnQueueEventsClose",
+    () => () => vi.spyOn(QueueEvents.prototype, "close"),
+  )
   .extend("keyvCache", async ({ redisClient: { url } }, { onCleanup }) => {
     const { default: KeyvRedis, Keyv } = await import("@keyv/redis");
 
@@ -311,4 +316,411 @@ it("performs a single cache lookup for concurrent GET requests to a cached URL",
   for (const response of responses) {
     expect(response.parsedBody).toStrictEqual({ value: "cached-value" });
   }
+});
+
+it("sends URL search params bodies as a form", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  // Echo the request back so the response shows what was sent
+  server.use(
+    http.post("**/endpoint", async ({ request }) =>
+      HttpResponse.json({
+        body: await request.text(),
+        contentType: request.headers.get("content-type"),
+      }),
+    ),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  const response = await dataSource.fetch("endpoint", {
+    method: "POST",
+    body: new URLSearchParams({ name: "value", other: "a&b" }),
+  });
+
+  expect(response.parsedBody).toStrictEqual({
+    body: "name=value&other=a%26b",
+    contentType: "application/x-www-form-urlencoded;charset=UTF-8",
+  });
+});
+
+it.for([
+  { type: "object", body: { name: "value" } },
+  { type: "JSON string", body: JSON.stringify({ name: "value" }) },
+])(
+  "sends $type bodies as JSON",
+  async ({ body }, { server, dataSourceConfig }) => {
+    // Echo the request body back so the response shows what was sent
+    server.use(
+      http.post("**/endpoint", async ({ request }) =>
+        HttpResponse.json(await request.json()),
+      ),
+    );
+
+    const dataSource = new TestDataSource(dataSourceConfig);
+
+    const response = await dataSource.fetch("endpoint", {
+      method: "POST",
+      body,
+    });
+
+    expect(response.parsedBody).toStrictEqual({ name: "value" });
+  },
+);
+
+it("rejects string bodies that are not JSON without sending them", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.post("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(
+    dataSource.fetch("endpoint", { method: "POST", body: "name=value" }),
+  ).rejects.toThrow(
+    "Unable to determine the request body type: invalid JSON string.",
+  );
+  expect(requestCount).toBe(0);
+});
+
+it("rejects with the response of a request that fails with a fatal status", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.get("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json(null, { status: 404, statusText: "Not Found" });
+    }),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestBackoffDelay: 0,
+  });
+
+  const error = await dataSource
+    .fetch("endpoint")
+    .catch((fetchError: unknown) => fetchError);
+
+  expect.assert(error instanceof DataSourceHTTPError);
+  expect(error.response.status).toBe(404);
+  expect(requestCount).toBe(1);
+});
+
+it("retries a request that fails with a non-fatal status", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json(null, { status: 503 }), {
+      once: true,
+    }),
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestBackoffDelay: 0,
+  });
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+});
+
+it("rejects a request that fails with a non-fatal status on every attempt", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  let requestCount = 0;
+
+  server.use(
+    http.get("**/endpoint", () => {
+      requestCount += 1;
+
+      return HttpResponse.json(null, { status: 503 });
+    }),
+  );
+
+  const dataSource = new TestDataSource({
+    ...dataSourceConfig,
+    requestAttempts: 2,
+    requestBackoffDelay: 0,
+  });
+
+  await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+    DataSourceHTTPError,
+  );
+  expect(requestCount).toBe(2);
+});
+
+class RateLimitRecordingDataSource extends TestDataSource {
+  public readonly waits: number[] = [];
+
+  protected override didEncounterRateLimit(
+    _request: unknown,
+    _response: unknown,
+    waitMs: number,
+  ) {
+    this.waits.push(waitMs);
+  }
+}
+
+it.for([
+  { retryAfter: "2", waitMs: 2000 },
+  { retryAfter: "0", waitMs: 10_000 },
+  { retryAfter: "soon", waitMs: 10_000 },
+  { retryAfter: null, waitMs: 10_000 },
+])(
+  'waits $waitMs ms after a 429 response with a Retry-After of "$retryAfter"',
+  async ({ retryAfter, waitMs }, { server, dataSourceConfig }) => {
+    server.use(
+      http.get("**/endpoint", () =>
+        HttpResponse.json(null, {
+          status: 429,
+          headers: retryAfter === null ? {} : { "Retry-After": retryAfter },
+        }),
+      ),
+    );
+
+    const dataSource = new RateLimitRecordingDataSource({
+      ...dataSourceConfig,
+      requestAttempts: 1,
+    });
+
+    await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+      DataSourceHTTPError,
+    );
+    expect(dataSource.waits).toStrictEqual([waitMs]);
+  },
+);
+
+it("waits until the date given by a Retry-After header", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  const retryAt = new Date(Date.now() + 60_000);
+
+  server.use(
+    http.get("**/endpoint", () =>
+      HttpResponse.json(null, {
+        status: 429,
+        headers: { "Retry-After": retryAt.toUTCString() },
+      }),
+    ),
+  );
+
+  const dataSource = new RateLimitRecordingDataSource({
+    ...dataSourceConfig,
+    requestAttempts: 1,
+  });
+
+  await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
+    DataSourceHTTPError,
+  );
+
+  const [waitMs] = dataSource.waits;
+
+  expect(waitMs).toBeGreaterThan(55_000);
+  expect(waitMs).toBeLessThanOrEqual(60_000);
+});
+
+it("rate limits the queue and retries after a 429 response", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get(
+      "**/endpoint",
+      () =>
+        HttpResponse.json(null, {
+          status: 429,
+          headers: { "Retry-After": "1" },
+        }),
+      { once: true },
+    ),
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+  const rateLimitSpy = vi.spyOn(dataSource.queue, "rateLimit");
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+  expect(rateLimitSpy).toHaveBeenCalledExactlyOnceWith(1000);
+});
+
+it("resolves a request that finishes before the queue events start reading", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  const finishChecked = Promise.withResolvers<undefined>();
+
+  server.use(
+    http.get("**/endpoint", async () => {
+      await finishChecked.promise;
+
+      return HttpResponse.json({ success: true });
+    }),
+  );
+
+  const jobCompleted = Promise.withResolvers<undefined>();
+  const { connection } = dataSourceConfig;
+  const duplicate = connection.duplicate.bind(connection);
+
+  // BullMQ internals: `QueueEvents` reads the event stream with `xread` on a connection it gets from `connection.duplicate()`.
+  // Holding its first read until the job has completed guarantees the job finishes before the queue events start reading.
+  // `Job.waitUntilFinished` also checks whether the job has already finished, with `Scripts.prototype.isFinished`.
+  // Holding the response until that check has run guarantees it finds the job unfinished, so only the queue events can resolve the request.
+  // The check runs for real: calling the spy again from inside its one-off implementation reaches the original.
+  const isFinishedSpy = vi
+    .spyOn(Scripts.prototype, "isFinished")
+    .mockImplementationOnce(async function checkThenRelease(
+      this: Scripts,
+      ...isFinishedArgs: Parameters<Scripts["isFinished"]>
+    ) {
+      const result = await Scripts.prototype.isFinished.apply(
+        this,
+        isFinishedArgs,
+      );
+
+      finishChecked.resolve(undefined);
+
+      return result;
+    });
+
+  vi.spyOn(connection, "duplicate").mockImplementation((() => {
+    const client = duplicate();
+    const xread = client.xread.bind(client) as (
+      ...xreadArgs: unknown[]
+    ) => Promise<unknown>;
+
+    vi.spyOn(client, "xread").mockImplementationOnce((async (
+      ...xreadArgs: unknown[]
+    ) => {
+      await jobCompleted.promise;
+
+      return xread(...xreadArgs);
+    }) as never);
+
+    return client;
+  }) as never);
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  dataSource.worker.once("completed", () => {
+    jobCompleted.resolve(undefined);
+  });
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+  expect(isFinishedSpy).toHaveBeenCalledWith(expect.any(String), true);
+});
+
+it("recovers after the queue events fail to start", async ({
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const startupError = new Error("Redis is unavailable");
+  const xrevrangeSpy = vi
+    .spyOn(dataSourceConfig.connection, "xrevrange")
+    .mockRejectedValue(startupError);
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await expect(dataSource.fetch("endpoint")).rejects.toThrow(
+    "Redis is unavailable",
+  );
+
+  xrevrangeSpy.mockRestore();
+
+  await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
+    parsedBody: { success: true },
+  });
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("QueueEvents error"),
+    { err: startupError },
+  );
+});
+
+it("force-closes the worker when closing with force", async ({
+  dataSourceConfig,
+}) => {
+  const dataSource = new TestDataSource(dataSourceConfig);
+  const workerCloseSpy = vi.spyOn(dataSource.worker, "close");
+
+  await dataSource.close(true);
+
+  expect(workerCloseSpy).toHaveBeenCalledExactlyOnceWith(true);
+});
+
+it("logs a failure to close the queue events", async ({
+  spyOnQueueEventsClose,
+  server,
+  dataSourceConfig,
+}) => {
+  server.use(
+    http.get("**/endpoint", () => HttpResponse.json({ success: true })),
+  );
+
+  const closeError = new Error("Close failed");
+
+  // Close for real, so the queue events don't keep the connection open, then report a failure
+  spyOnQueueEventsClose().mockImplementationOnce(async function closeThenFail(
+    this: QueueEvents,
+  ) {
+    await QueueEvents.prototype.close.call(this);
+
+    throw closeError;
+  });
+
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await dataSource.fetch("endpoint");
+
+  await expect(dataSource.close()).resolves.toBeUndefined();
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringContaining("failed to close"),
+    { err: closeError },
+  );
+});
+
+it("closes without error after the queue events fail to start", async ({
+  dataSourceConfig,
+}) => {
+  vi.spyOn(dataSourceConfig.connection, "xrevrange").mockRejectedValueOnce(
+    new Error("Redis is unavailable"),
+  );
+
+  const errorSpy = vi.spyOn(dataSourceConfig.logger, "error");
+  const dataSource = new TestDataSource(dataSourceConfig);
+
+  await vi.waitFor(() => {
+    expect(errorSpy).toHaveBeenCalledOnce();
+  });
+
+  await expect(dataSource.close()).resolves.toBeUndefined();
+  expect(errorSpy).toHaveBeenCalledOnce();
 });

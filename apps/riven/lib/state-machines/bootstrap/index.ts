@@ -11,9 +11,9 @@ import { clearPreviousInstanceState } from "./actors/clear-previous-instance-sta
 import { createAdminUser } from "./actors/create-admin-user.actor.ts";
 import { initialiseDatabaseConnection } from "./actors/initialise-database-connection.actor.ts";
 import { initialiseVfs } from "./actors/initialise-vfs.actor.ts";
-import { loadRuntimeSettings } from "./actors/load-runtime-settings.actor.ts";
+import { loadRuntimeSettingsActor } from "./actors/load-runtime-settings.actor.ts";
 import { startGqlServer } from "./actors/start-gql-server.actor.ts";
-import { syncRankingProfiles } from "./actors/sync-ranking-profiles.actor.ts";
+import { syncRankingProfilesActor } from "./actors/sync-ranking-profiles.actor.ts";
 
 import type { Services } from "#database/database.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
@@ -126,10 +126,10 @@ export const bootstrapMachine = setup({
     createAdminUser,
     initialiseDatabaseConnection,
     initialiseVfs,
-    loadRuntimeSettings,
+    loadRuntimeSettings: loadRuntimeSettingsActor,
     pluginRegistrarMachine,
     startGqlServer,
-    syncRankingProfiles,
+    syncRankingProfiles: syncRankingProfilesActor,
   },
   guards: {
     hasInvalidPlugins: ({ context: { invalidPlugins } }) =>

@@ -184,7 +184,8 @@ export class MediaItemService extends BaseService {
         ...(state ? { state: { $in: state } } : {}),
         ...(search && { fullTitle: { $ilike: `%${search}%` } }),
       },
-      orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }],
+      // Cursors need a unique sort key, otherwise items sharing a title and state are skipped across a page boundary
+      orderBy: [{ fullTitle: "ASC" }, { state: "ASC" }, { id: "ASC" }],
       ...(before ? { before, last: itemsPerPage } : {}),
       ...(after ? { after, first: itemsPerPage } : {}),
       ...(before == null && after == null ? { first: itemsPerPage } : {}),

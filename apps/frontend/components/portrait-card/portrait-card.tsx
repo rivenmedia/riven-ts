@@ -4,7 +4,7 @@ import Image from "next/image";
 
 import { Checkbox } from "#components/_ui/checkbox.tsx";
 
-interface PortraitCardProps extends Pick<
+export interface PortraitCardProps extends Pick<
   React.HTMLAttributes<HTMLDivElement>,
   "className"
 > {

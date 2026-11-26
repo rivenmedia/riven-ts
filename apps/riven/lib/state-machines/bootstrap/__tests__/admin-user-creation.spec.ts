@@ -4,15 +4,22 @@ import { toPromise } from "xstate";
 import { initialiseDatabaseConnection } from "#state-machines/bootstrap/actors/initialise-database-connection.actor.ts";
 import * as settingsModule from "#utilities/settings.ts";
 
-import { it } from "./helpers/test-context.ts";
+import { it as baseIt } from "./helpers/test-context.ts";
 
-// Use the real database connection actor, as it determines whether an admin user needs to be created.
-// The ORM is already initialised against the in-memory test database, so this reuses that connection.
+const it = baseIt
+  // Use the real database connection actor, as it determines whether an admin user needs to be created.
+  // The ORM is already initialised against the in-memory test database, so this reuses that connection.
+  .extend(
+    "spyOnSettingsGetter",
+    () => () => vi.spyOn(settingsModule, "settings", "get"),
+  );
+
 it.override({
   initialiseDatabaseConnectionActorLogic: initialiseDatabaseConnection,
 });
 
 it("creates an admin user if admin user credentials are provided and no existing admin user exists", async ({
+  spyOnSettingsGetter,
   actor,
   services,
 }) => {
@@ -21,7 +28,7 @@ it("creates an admin user if admin user credentials are provided and no existing
     password: "test-password",
   };
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+  spyOnSettingsGetter().mockReturnValue({
     ...settingsModule.settings,
     adminUserCredentials,
   });
@@ -42,10 +49,11 @@ it("creates an admin user if admin user credentials are provided and no existing
 });
 
 it("does not create an admin user if admin user credentials are not provided", async ({
+  spyOnSettingsGetter,
   actor,
   services,
 }) => {
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+  spyOnSettingsGetter().mockReturnValue({
     ...settingsModule.settings,
     adminUserCredentials: null,
   });

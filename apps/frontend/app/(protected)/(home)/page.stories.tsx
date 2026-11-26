@@ -32,6 +32,13 @@ Default.test(
   'Loads the correct items when the Trending Movies "This week" button is clicked',
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending movies", async () => {
+      // Clicking while the initial queries are in flight suspends the new slot inside React's `act` scope, which stalls every pending query
+      await canvas.findByRole(
+        "heading",
+        { name: /avengers/iu },
+        { timeout: 5000 },
+      );
+
       const trendingMoviesActions = await canvas.findByRole("region", {
         name: /trending movies actions/iu,
       });
@@ -46,9 +53,11 @@ Default.test(
       await userEvent.click(thisWeekButton);
     });
 
-    const weeklyTrendingMovie = await canvas.findByRole("heading", {
-      name: /the odyssey/iu,
-    });
+    const weeklyTrendingMovie = await canvas.findByRole(
+      "heading",
+      { name: /the odyssey/iu },
+      { timeout: 5000 },
+    );
 
     await expect(weeklyTrendingMovie).toBeInTheDocument();
   },
@@ -77,6 +86,13 @@ Default.test(
   'Loads the correct items when the Trending Shows "This week" button is clicked',
   async ({ canvas, userEvent, step }) => {
     await step("View weekly trending shows", async () => {
+      // Clicking while the initial queries are in flight suspends the new slot inside React's `act` scope, which stalls every pending query
+      await canvas.findByRole(
+        "heading",
+        { name: /breaking bad/iu },
+        { timeout: 5000 },
+      );
+
       const trendingShowsActions = await canvas.findByRole("region", {
         name: /trending tv shows actions/iu,
       });
@@ -91,9 +107,11 @@ Default.test(
       await userEvent.click(thisWeekButton);
     });
 
-    const weeklyTrendingShow = await canvas.findByRole("heading", {
-      name: /arcane/iu,
-    });
+    const weeklyTrendingShow = await canvas.findByRole(
+      "heading",
+      { name: /arcane/iu },
+      { timeout: 5000 },
+    );
 
     await expect(weeklyTrendingShow).toBeInTheDocument();
   },

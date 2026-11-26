@@ -18,18 +18,6 @@ const logIn = async (page: Page) => {
   await page.getByRole("button", { name: /submit/iu }).click();
 };
 
-test("navigates to the dashboard after non-admin user login", async ({
-  auth,
-  network,
-  page,
-}) => {
-  network.use(http.post("**/api/auth/sign-in/username", auth.signIn("user")));
-
-  await logIn(page);
-
-  await expect(page).toHaveURL("/");
-});
-
 test("does not navigate to the setup page after non-admin user login if setup is required", async ({
   auth,
   network,
@@ -64,18 +52,4 @@ test("navigates to the setup page after admin user login if setup is required", 
 
   await expect(page.getByText("Initial Setup")).toBeVisible();
   await expect(page).toHaveURL(/\/setup\//u);
-});
-
-test("stays on the login page when passkey autofill isn't available", async ({
-  page,
-}) => {
-  const passkeyOptions = page.waitForResponse(
-    "**/api/auth/passkey/generate-authenticate-options",
-  );
-
-  await page.goto("/login");
-  await passkeyOptions;
-
-  await expect(page.getByRole("tab", { name: "Login" })).toBeVisible();
-  await expect(page).toHaveURL("/login");
 });

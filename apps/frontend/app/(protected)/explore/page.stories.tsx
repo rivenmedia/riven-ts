@@ -1,5 +1,5 @@
 import { faker } from "@faker-js/faker";
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { expect, fn, userEvent, waitFor } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";

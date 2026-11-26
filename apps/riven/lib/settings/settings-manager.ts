@@ -180,6 +180,11 @@ export class SettingsManager {
     return this.#restartRequired;
   }
 
+  /** Clears `restartRequired`, e.g. after the instance's settings are reset to their boot state. */
+  public resetRestartRequired() {
+    this.#restartRequired = false;
+  }
+
   public async getSection(id: string): Promise<SettingsSection> {
     const { definition, leaves, stored, env } = await this.#loadSection(id);
     const { schema } = definition;

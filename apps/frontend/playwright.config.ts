@@ -1,6 +1,8 @@
 import { defineConfig, devices } from "@playwright/test";
 import z from "zod";
 
+import { backendApiKey, backendUrl } from "./playwright/backend-environment.ts";
+
 import type { Project } from "@playwright/test";
 
 const environment = z
@@ -48,6 +50,22 @@ const webkit: Project = {
   use: devices["Desktop Safari"],
 };
 
+/** Specs that run against a real Riven per worker, rather than a mocked backend */
+const integratedSpecs = /\.integrated\.spec\.ts$/u;
+
+/** Gives each browser project an `-integrated` twin, which only runs the integrated specs */
+const withIntegratedTwins = (projects: Project[]) =>
+  projects.flatMap((project) => [
+    { ...project, testIgnore: integratedSpecs },
+    {
+      ...project,
+      name: `${project.name ?? ""}-integrated`,
+      testMatch: integratedSpecs,
+      // Each worker boots its own Riven, so they're capped to keep the machine responsive. CI's total of 1 is lower.
+      workers: 4,
+    },
+  ]);
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -56,14 +74,18 @@ export default defineConfig({
   fullyParallel: true,
   forbidOnly: isCI,
   retries: isCI ? 2 : 0,
+  // Locally, Playwright's default, which the integrated projects cap for themselves
   ...(isCI && { workers: 1 }),
   reporter: isCI ? [["github"], ["html", { open: "never" }]] : "html",
   use: {
     baseURL,
     trace: "on-first-retry",
+    video: "retain-on-failure",
   },
   // CI only installs Chromium. Run every browser locally with `pnpm e2e:headless`.
-  projects: isCI ? [chromium] : [chromium, firefox, webkit],
+  projects: withIntegratedTwins(
+    isCI ? [chromium] : [chromium, firefox, webkit],
+  ),
   webServer: {
     command: isDevServer
       ? `pnpm exec next dev --port ${String(devServerPort)}`
@@ -75,6 +97,10 @@ export default defineConfig({
       // The tests mock the network themselves, and the development mocks would intercept Next.js' requests to the test proxy
       ENABLE_MOCKS: "false",
       ORIGIN: baseURL,
+      // A backend that never resolves, so a request that isn't mocked or re-addressed to a worker's Riven fails
+      BACKEND_URL: backendUrl,
+      // Shared `"use cache"` queries authenticate with the API key, and fail without one
+      BACKEND_API_KEY: backendApiKey,
     },
     // Allow time to build the app locally
     timeout: isDevServer || isCI ? 60_000 : 300_000,

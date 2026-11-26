@@ -1,22 +1,48 @@
 import { Movie, Show } from "@repo/util-plugin-sdk/dto/entities";
 
+import { UnrecoverableError } from "bullmq";
 import { Settings } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
 import { downloadItemProcessor } from "./download-item.processor.ts";
 
 import type { MainRunnerMachineIntake } from "#state-machines/main-runner/index.ts";
 
+const it = baseIt
+  .extend("spyOnSettingsNow", () => () => vi.spyOn(Settings, "now"))
+  .extend(
+    "createFindValidTorrentResult",
+    () => (infoHash: string, matchedMediaItemId: string) => ({
+      result: {
+        torrentId: "1234",
+        infoHash,
+        provider: null,
+        files: [
+          {
+            name: "Test Movie 2024 1080p.mkv",
+            path: "/Test Movie 2024 1080p.mkv",
+            size: 1024,
+            link: "http://example.com/download",
+            matchedMediaItemId,
+            isCachedFile: false,
+          },
+        ],
+      },
+      plugin: "@repo/plugin-test",
+    }),
+  );
+
 it('sends a "riven.media-item.download.success" event with the updated item and duration from request to download if the download result is valid', async ({
+  spyOnSettingsNow,
   scrapedMovieContext: { scrapedMovie },
   createMockJob,
   mockSentryScope,
   services,
   createMockJobChildKey,
 }) => {
-  vi.spyOn(Settings, "now").mockReturnValue(10_000);
+  spyOnSettingsNow().mockReturnValue(10_000);
 
   const [{ infoHash: streamInfoHash } = {}] = await scrapedMovie.streams.load();
 
@@ -165,4 +191,77 @@ it('sends a "riven.media-item.download.error" event if no valid torrent is found
     item: expect.any(Movie),
     error: expect.any(Error),
   });
+});
+
+it("sends the download error event and fails permanently when the results cannot be persisted", async ({
+  createFindValidTorrentResult,
+  completedMovieContext: {
+    completedMovie,
+    streams: [stream],
+  },
+  createMockJob,
+  createMockJobChildKey,
+  mockSentryScope,
+  services,
+}) => {
+  expect.assert(stream);
+
+  const job = await createMockJob({ id: completedMovie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.find-valid-torrent")]:
+      createFindValidTorrentResult(stream.infoHash, completedMovie.id),
+  });
+
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
+
+  await expect(
+    downloadItemProcessor(
+      { job, scope: mockSentryScope },
+      { sendEvent, services, plugins: new Map() },
+    ),
+  ).rejects.toThrow(
+    new UnrecoverableError(
+      `Failed to persist download results for ${completedMovie.fullTitle}: `,
+    ).message,
+  );
+
+  expect(sendEvent).toHaveBeenCalledExactlyOnceWith(
+    expect.objectContaining({
+      type: "riven.media-item.download.error.incorrect-state",
+      item: expect.objectContaining({ id: completedMovie.id }),
+    }),
+  );
+});
+
+it("rethrows unexpected errors whilst persisting the results", async ({
+  createFindValidTorrentResult,
+  scrapedMovieContext: { scrapedMovie },
+  createMockJob,
+  createMockJobChildKey,
+  mockSentryScope,
+  services,
+}) => {
+  const job = await createMockJob({ id: scrapedMovie.id });
+
+  vi.spyOn(job, "getChildrenValues").mockResolvedValue({
+    [createMockJobChildKey("download-item.find-valid-torrent")]:
+      createFindValidTorrentResult(
+        "0000000000000000000000000000000000000000",
+        scrapedMovie.id,
+      ),
+  });
+
+  const sendEvent = vi.fn<MainRunnerMachineIntake>();
+  const rejection = downloadItemProcessor(
+    { job, scope: mockSentryScope },
+    { sendEvent, services, plugins: new Map() },
+  );
+
+  await expect(rejection).rejects.toThrow(
+    `No media item found with ID ${scrapedMovie.id} and stream info hash 0000000000000000000000000000000000000000`,
+  );
+  await expect(rejection).rejects.not.toBeInstanceOf(UnrecoverableError);
+
+  expect(sendEvent).not.toHaveBeenCalled();
 });

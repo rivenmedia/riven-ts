@@ -3,7 +3,7 @@ import { describe, expect } from "vitest";
 
 import { it } from "#__tests__/test-context.ts";
 
-const indexedAt = DateTime.utc().toJSDate();
+const indexedAt = DateTime.utc();
 
 describe("on create", () => {
   it("sets the full title for a movie", async ({
@@ -11,7 +11,7 @@ describe("on create", () => {
   }) => {
     const movie = await movieFactory.createOne({
       title: "The Great Movie",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(movie.fullTitle).toBe("The Great Movie");
@@ -22,7 +22,7 @@ describe("on create", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(show.fullTitle).toBe("The Great Show");
@@ -33,14 +33,14 @@ describe("on create", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 3,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(season.fullTitle).toBe("The Great Show - S03");
@@ -51,14 +51,14 @@ describe("on create", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 3,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const episode = await episodeFactory.createOne({
@@ -67,7 +67,7 @@ describe("on create", () => {
       itemRequest: show.itemRequest,
       number: 5,
       title: "The Great Episode",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     expect(episode.fullTitle).toBe(
@@ -83,7 +83,7 @@ describe("on update", () => {
   }) => {
     const movie = await movieFactory.createOne({
       title: "The Great Movie",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     movie.title = "The Greater Movie";
@@ -99,7 +99,7 @@ describe("on update", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     show.title = "The Greater Show";
@@ -115,14 +115,14 @@ describe("on update", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 3,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     season.number = 4;
@@ -138,14 +138,14 @@ describe("on update", () => {
   }) => {
     const show = await showFactory.createOne({
       title: "The Great Show",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const season = await seasonFactory.createOne({
       show,
       itemRequest: show.itemRequest,
       number: 3,
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     const episode = await episodeFactory.createOne({
@@ -154,7 +154,7 @@ describe("on update", () => {
       itemRequest: show.itemRequest,
       number: 5,
       title: "The Great Episode",
-      indexedAt,
+      indexedAt: indexedAt.toJSDate(),
     });
 
     episode.number = 6;

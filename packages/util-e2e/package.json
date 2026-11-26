@@ -1,0 +1,34 @@
+{
+  "name": "@repo/util-e2e",
+  "version": "0.0.0",
+  "private": true,
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "production": "./dist/index.js",
+      "default": "./lib/index.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --project tsconfig.lib.json",
+    "lint": "oxlint",
+    "lint:fix": "pnpm lint --fix",
+    "test": "vitest run --passWithNoTests",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@repo/util-auth": "workspace:^"
+  },
+  "devDependencies": {
+    "@repo/core-util-oxlint-config": "workspace:^",
+    "@repo/core-util-typescript-config": "workspace:^",
+    "@repo/core-util-vitest-config": "workspace:^",
+    "@types/node": "catalog:",
+    "oxlint": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:vitest"
+  }
+}

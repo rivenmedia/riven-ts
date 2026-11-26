@@ -35,7 +35,15 @@ export class PlexAPI extends BaseDataSource<PlexSettings> {
 
     for (const directory of sections.MediaContainer?.Directory ?? []) {
       for (const location of directory.Location ?? []) {
-        if (fullPath.startsWith(location.path as string)) {
+        const fullPath = path.join(this.settings.plexLibraryPath, sectionPath);
+
+        const relativePath = path.relative(location.path as string, fullPath);
+        const isInLocation =
+          relativePath !== ".." &&
+          !relativePath.startsWith(`..${path.sep}`) &&
+          !path.isAbsolute(relativePath);
+
+        if (isInLocation) {
           if (!directory.key) {
             throw new PlexAPIError(
               `Directory key is missing for path: ${fullPath}`,

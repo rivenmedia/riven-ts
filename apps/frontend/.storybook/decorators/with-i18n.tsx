@@ -4,12 +4,13 @@ import { I18nextProvider } from "react-i18next";
 import { i18n } from "#.storybook/i18n.ts";
 import { configureLocale } from "#lib/utils/configure-luxon.ts";
 
+import type { Locale } from "#.storybook/preview.tsx";
 import type { Decorator } from "@storybook/nextjs-vite";
 
 export const WithI18n: Decorator = (Story, { globals }) => {
   const [, setActiveLocale] = useState(globals.locale);
 
-  i18n.on("languageChanged", (locale) => {
+  i18n.on("languageChanged", (locale: Locale) => {
     // Persist locale to state to force re-render after a change.
     // This ensures Luxon instances receive the new Settings.defaultLocale.
     setActiveLocale(() => {

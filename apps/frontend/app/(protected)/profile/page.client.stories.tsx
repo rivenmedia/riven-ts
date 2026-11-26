@@ -1,5 +1,5 @@
 import { DateTime } from "luxon";
-import { http, HttpResponse } from "msw";
+import { http, HttpResponse } from "msw/http";
 
 import { preview } from "#.storybook/preview.tsx";
 import { ProfilePage } from "#app/(protected)/profile/page.client.tsx";

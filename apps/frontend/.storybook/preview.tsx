@@ -6,9 +6,10 @@ import addonDocs from "@storybook/addon-docs";
 import addonVitest from "@storybook/addon-vitest";
 import { definePreview } from "@storybook/nextjs-vite";
 import { headers } from "@storybook/nextjs-vite/headers.mock";
-import { http, passthrough } from "msw";
 import mswAddon from "msw-storybook-addon";
 import { setupWorker } from "msw/browser";
+import { http } from "msw/http";
+import { passthrough } from "msw/utils/passthrough";
 import { Suspense, useLayoutEffect } from "react";
 import { toast } from "sonner";
 import addonVis from "storybook-addon-vis";
@@ -35,6 +36,7 @@ import type { SnapshotParameters } from "./test-utils/visual-testing.ts";
 
 // Storybook resolves mock paths with Node's require.resolve from its own package, so subpath imports don't work here
 sb.mock(import("../lib/graphql/client.ts"));
+sb.mock(import("../lib/graphql/service-client.ts"));
 sb.mock(import("../lib/enabled-features.ts"));
 
 sb.mock(import("next/cache"));
@@ -80,14 +82,22 @@ Object.assign(expect, {
   },
 });
 
+const locales = [
+  { value: "en-GB", title: "English (GB)" },
+  { value: "en-US", title: "English (US)" },
+  { value: "fr-FR", title: "Français" },
+  { value: "fa-IR", title: "فارسی" },
+] as const;
+
+export type Locale = (typeof locales)[number]["value"];
+
 declare module "storybook/internal/csf" {
-  interface StoryContext {
-    parameters: {
-      i18n: typeof i18n;
-    };
-    globals: {
-      locale: string;
-    };
+  interface Parameters {
+    i18n?: typeof i18n;
+  }
+
+  interface Globals {
+    locale: Locale;
   }
 }
 
@@ -101,7 +111,9 @@ export const preview = definePreview({
       const worker = setupWorker(
         getSessionHandler,
         ...remoteAssetHandlers,
-        http.get("http://localhost:6006/*", passthrough),
+        // Requests to Storybook's own server, whatever its host and port, such as the modules Vite loads lazily
+        // (e.g. `/@id/virtual:next/image`), which MSW doesn't recognise as assets
+        http.get("/*", passthrough),
       );
 
       await worker.start({ onUnhandledFrame: "error", quiet: true });
@@ -136,27 +148,19 @@ export const preview = definePreview({
     backgrounds: {
       disable: true,
     },
-    options: {
-      storySort: {
-        method: "alphabetical",
-      },
-    },
   },
   globalTypes: {
     locale: {
       name: "Locale",
       description: "Internationalization locale",
-      defaultValue: "en-GB",
       toolbar: {
         icon: "globe",
-        items: [
-          { value: "en-GB", title: "English (GB)" },
-          { value: "en-US", title: "English (US)" },
-          { value: "fr-FR", title: "Français" },
-          { value: "fa-IR", title: "فارسی" },
-        ],
+        items: [...locales],
       },
     },
+  },
+  initialGlobals: {
+    locale: "en-GB",
   },
   decorators: [
     WithReducedMotionCheck,

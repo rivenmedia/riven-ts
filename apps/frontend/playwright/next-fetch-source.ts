@@ -1,5 +1,5 @@
-import { HttpResponse } from "msw";
 import { HttpNetworkFrame, NetworkSource } from "msw/experimental";
+import { HttpResponse } from "msw/http";
 
 import type {
   FetchHandlerResult,

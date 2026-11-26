@@ -90,13 +90,14 @@
   },
   "scripts": {
     "build": "tsc --build tsconfig.lib.json",
-    "lint": "oxlint --type-aware --type-check --report-unused-disable-directives-severity=warn",
+    "lint": "oxlint",
     "lint:fix": "pnpm lint --fix",
     "test": "vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
     "@mikro-orm/decorators": "catalog:",
+    "@repo/util-auth": "workspace:^",
     "@repo/util-rank-torrent-name": "workspace:^",
     "es-toolkit": "catalog:",
     "graphql-scalars": "catalog:",

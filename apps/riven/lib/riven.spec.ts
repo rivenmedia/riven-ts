@@ -19,6 +19,12 @@ import type { BootstrapMachineOutput } from "./state-machines/bootstrap/index.ts
 import type { AnyActor, SnapshotFrom } from "xstate";
 
 const it = baseIt
+  .extend("spyOnProcessExit", () => () => vi.spyOn(process, "exit"))
+  .extend("spyOnProcessOn", () => () => vi.spyOn(process, "on"))
+  .extend(
+    "spyOnSettingsGetter",
+    () => () => vi.spyOn(settingsModule, "settings", "get"),
+  )
   .extend("mockRivenMachine", () =>
     rivenMachine.provide({
       actors: {
@@ -67,9 +73,9 @@ const it = baseIt
     };
   });
 
-it.beforeEach(() => {
+it.beforeEach(({ spyOnProcessExit }) => {
   // oxlint-disable-next-line vitest/prefer-mock-return-shorthand - we need to genuinely overwrite the implementation here to avoid actually calling the real process.exit()
-  vi.spyOn(process, "exit").mockImplementation(() => undefined as never);
+  spyOnProcessExit().mockImplementation(() => undefined as never);
 });
 
 it.afterEach(() => {
@@ -81,7 +87,10 @@ const shutdownPermutations = [
   ["SIGINT", "Running"],
   ["SIGINT", "Bootstrapping"],
   ["SIGTERM", "Bootstrapping"],
-] satisfies [NodeJS.Signals, SnapshotFrom<typeof rivenMachine>["value"]][];
+] as const satisfies readonly (readonly [
+  NodeJS.Signals,
+  SnapshotFrom<typeof rivenMachine>["value"],
+])[];
 
 it.for(shutdownPermutations)(
   'sends "riven.core.shutdown" event when receiving a "%s" signal whilst in the "%s" state',
@@ -103,13 +112,14 @@ it.for(shutdownPermutations)(
 );
 
 it("exits with code 1 on uncaught exceptions", async ({
+  spyOnProcessOn,
   createRivenMachineActor,
 }) => {
   vi.useFakeTimers();
 
   // oxlint-disable-next-line typescript/unbound-method
   const exitSpy = vi.mocked(process.exit);
-  const onSpy = vi.spyOn(process, "on");
+  const processOnSpy = spyOnProcessOn();
 
   const rivenMachineActor = createRivenMachineActor();
 
@@ -123,7 +133,7 @@ it("exits with code 1 on uncaught exceptions", async ({
   // "uncaughtException" on `process` itself: Wallaby & Vitest also listen for that event
   // to detect genuinely uncaught errors, so emitting it manually gets misattributed as a
   // real crash instead of exercising the handler under test.
-  const [, uncaughtExceptionHandler] = onSpy.mock.calls.find(
+  const [, uncaughtExceptionHandler] = processOnSpy.mock.calls.find(
     ([event]) => event === "uncaughtException",
   ) as [string, NodeJS.UncaughtExceptionListener];
 
@@ -173,12 +183,13 @@ it("does not force quit the process if shutdown succeeds within the configured t
 });
 
 it("force quits the process if shutdown takes longer than the configured timeout", async ({
+  spyOnSettingsGetter,
   mockRivenMachine,
   createRivenMachineActor,
 }) => {
   vi.useFakeTimers();
 
-  vi.spyOn(settingsModule, "settings", "get").mockReturnValue({
+  spyOnSettingsGetter().mockReturnValue({
     shutdownTimeoutSeconds: 1,
   } as never);
 
@@ -210,4 +221,34 @@ it("force quits the process if shutdown takes longer than the configured timeout
 
   expect(process.exitCode).toBe(1);
   expect(exitSpy).toHaveBeenCalledWith();
+});
+
+it("exits with code 1 if bootstrapping fails", async ({
+  mockRivenMachine,
+  createRivenMachineActor,
+}) => {
+  // oxlint-disable-next-line typescript/unbound-method
+  const exitSpy = vi.mocked(process.exit);
+
+  const rivenMachineActor = createRivenMachineActor(
+    mockRivenMachine.provide({
+      actors: {
+        bootstrapMachine: fromPromise(() =>
+          Promise.reject(new Error("Bootstrap failed")),
+        ) as never,
+      },
+    }),
+  );
+
+  void riven();
+
+  await vi.waitFor(() => {
+    expect(rivenMachineActor.getSnapshot().value).toBe("Errored");
+  });
+
+  await vi.waitFor(() => {
+    expect(exitSpy).toHaveBeenCalledWith();
+  });
+
+  expect(process.exitCode).toBe(1);
 });

@@ -1,9 +1,10 @@
 import { plugin as testPluginConfig } from "@repo/plugin-test";
 import { plugin as tmdbPlugin } from "@repo/plugin-tmdb";
+import { roleHasPermissions, UserRole } from "@repo/util-auth/access-control";
 import { DataSourceMap } from "@repo/util-plugin-sdk";
 
-import { passthrough } from "msw";
 import { graphql } from "msw/graphql";
+import { passthrough } from "msw/utils/passthrough";
 import assert from "node:assert";
 import { randomUUID } from "node:crypto";
 import { createRequire } from "node:module";
@@ -19,6 +20,7 @@ import { buildSettingsSections } from "#settings/settings-sections.ts";
 import { logger } from "#utilities/logger/logger.ts";
 
 import type { Services } from "#database/database.ts";
+import type { Principal } from "#graphql/auth/principal.ts";
 import type { ApolloServerContext } from "#graphql/context.ts";
 import type { Flow } from "#message-queue/flows/index.ts";
 import type { SandboxedJobDefinition } from "#message-queue/sandboxed-jobs/index.ts";
@@ -31,6 +33,7 @@ import type {
   ValidPluginMap,
 } from "#types/plugins.ts";
 import type { TypedDocumentNode } from "@apollo/client";
+import type { Permissions } from "@repo/util-auth/access-control";
 import type { RivenEvent } from "@repo/util-plugin-sdk/events";
 import type { JobsOptions, Processor, Queue, Worker } from "bullmq";
 import type * as GraphQL from "graphql";
@@ -38,29 +41,6 @@ import type { ExecutionResult } from "graphql";
 import type { PartialDeep } from "type-fest";
 import type { Mock } from "vitest";
 import type { ZodObject } from "zod";
-
-/**
- * The test package.json mock makes `test` the only valid core plugin name,
- * so TMDB is included as a fixture with a secret that has a default value.
- */
-const fixtureInstalledPlugins: InstalledPlugin[] = [
-  {
-    sectionId: "repo-plugin-test",
-    packageName: "@repo/plugin-test",
-    name: "test" as CorePluginName,
-    plugin: testPluginConfig,
-    enabled: true,
-    alwaysEnabled: false,
-  },
-  {
-    sectionId: "repo-plugin-tmdb",
-    packageName: "@repo/plugin-tmdb",
-    name: "tmdb",
-    plugin: tmdbPlugin,
-    enabled: true,
-    alwaysEnabled: true,
-  },
-];
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AnyFunction = (...args: any[]) => any;
@@ -340,23 +320,47 @@ export const it = testBase
     "createGqlContext",
     { scope: "file" },
     ({ services, orm }) =>
-      (): ApolloServerContext => {
+      (principal?: Principal): ApolloServerContext => {
+        /**
+         * The test package.json mock makes `test` the only valid core plugin name,
+         * so TMDB is included as a fixture with a secret that has a default value.
+         */
+        const installedPlugins: InstalledPlugin[] = [
+          {
+            sectionId: "repo-plugin-test",
+            packageName: "@repo/plugin-test",
+            name: "test" as CorePluginName,
+            plugin: testPluginConfig,
+            enabled: true,
+            alwaysEnabled: false,
+          },
+          {
+            sectionId: "repo-plugin-tmdb",
+            packageName: "@repo/plugin-tmdb",
+            name: "tmdb",
+            plugin: tmdbPlugin,
+            enabled: true,
+            alwaysEnabled: true,
+          },
+        ];
+
         const settingsManager = new SettingsManager({
           settingsService: services.settingsService,
           sections: buildSettingsSections({
-            installedPlugins: fixtureInstalledPlugins,
+            installedPlugins,
             pluginEnvironment: new Map(),
             coreEnvironment: {},
             rankingProfileService: services.rankingProfileService,
             settingsService: services.settingsService,
           }),
-          installedPlugins: fixtureInstalledPlugins,
+          installedPlugins,
           coreEnvironment: {},
         });
 
         return {
           [CoreKey]: {
             em: orm.em.fork(),
+            principal: principal ?? { kind: "service" },
             services,
             sendEvent: vi.fn<MainRunnerMachineIntake>(),
             settingsManager,
@@ -403,10 +407,61 @@ export const it = testBase
   )
   .extend("gqlSchema", { scope: "file" }, async () => {
     const { buildSchema } = await import("@repo/core-util-graphql-schema");
+    const { authChecker } = await import("#graphql/auth/auth-checker.ts");
     const { resolvers } = await import("#graphql/resolvers/index.ts");
 
-    return buildSchema({ resolvers, pubSub });
+    return buildSchema({ resolvers, pubSub, authChecker });
   })
+  .extend("userWith", () => (permissions: Permissions): Principal => {
+    const role = UserRole.options.find((name) =>
+      roleHasPermissions(name, permissions),
+    );
+
+    assert.ok(role, `No role grants ${JSON.stringify(permissions)}`);
+
+    return { kind: "user", userId: "user-id", role };
+  })
+  .extend("userWithout", () => (permissions: Permissions): Principal => {
+    const role = UserRole.options.find(
+      (name) => !roleHasPermissions(name, permissions),
+    );
+
+    assert.ok(role, `Every role grants ${JSON.stringify(permissions)}`);
+
+    return { kind: "user", userId: "user-id", role };
+  })
+  .extend(
+    "gqlExecuteAs",
+    ({ gqlSchema, createGqlContext }) =>
+      async <TResult, TVariables extends Record<string, unknown>>(
+        principal: Principal,
+        document: TypedDocumentNode<TResult, TVariables>,
+        variables: TVariables,
+      ) => {
+        // Unlike `gqlServer`, this enforces the real auth checker.
+        // See `gqlSubscribe` for why the CJS build of `graphql` is required.
+        const { execute } = createRequire(import.meta.url)(
+          "graphql",
+        ) as typeof GraphQL;
+
+        const { data = null, errors = [] } = await execute({
+          schema: gqlSchema,
+          document,
+          variableValues: variables,
+          contextValue: createGqlContext(principal),
+        });
+
+        return {
+          // Results are built from null-prototype objects,
+          // which are cloned into plain objects for strict equality checks.
+          data: structuredClone(data) as TResult | null,
+          errors: errors.map(({ path = [], extensions }) => ({
+            path: path.join("."),
+            code: extensions["code"],
+          })),
+        };
+      },
+  )
   .extend(
     "gqlSubscribe",
     ({ gqlSchema, gqlContext }, { onCleanup }) =>
@@ -528,7 +583,23 @@ export const it = testBase
         pluginName?: string,
       ) =>
         `bull:${queueNameFor(eventName, pluginName)}:${randomUUID()}` as const,
-  );
+  )
+  .extend("flowAddSpy", async () => {
+    const { flow } = await import("#message-queue/flows/producer.ts");
+
+    // Records the jobs a test adds to the flow producer without adding them to Redis
+    return vi.spyOn(flow, "add").mockResolvedValue({} as never);
+  })
+  .extend("getFirstAddedFlowJob", ({ flowAddSpy }) => () => {
+    const [[flowJob] = []] = flowAddSpy.mock.calls;
+
+    assert.ok(
+      flowJob,
+      "Expected a job to have been added to the flow producer",
+    );
+
+    return flowJob;
+  });
 
 it.afterEach(async ({ mockSentryScope, apolloClient }) => {
   mockSentryScope.clear();

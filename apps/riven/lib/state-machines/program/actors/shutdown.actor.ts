@@ -102,16 +102,21 @@ export const shutdown = fromPromise<undefined, ShutdownInput>(
     logger.debug("Sandboxed workers closed");
 
     await Promise.all(
-      plugins
-        .values()
-        .flatMap(({ dataSources }) =>
-          dataSources
-            .values()
-            .map(async ({ worker }) => forceCloseWorker(worker)),
-        ),
+      plugins.values().flatMap(({ dataSources }) =>
+        dataSources.values().map(async (dataSource) => {
+          try {
+            await dataSource.close(true);
+          } catch (error) {
+            logger.error(
+              `Error closing data source ${dataSource.serviceName}`,
+              { err: error },
+            );
+          }
+        }),
+      ),
     );
 
-    logger.debug("Plugin workers closed");
+    logger.debug("Plugin data sources closed");
 
     // Close the Redis instance
     try {

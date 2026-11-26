@@ -1,4 +1,4 @@
-import { HttpResponse } from "msw";
+import { HttpResponse } from "msw/http";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 

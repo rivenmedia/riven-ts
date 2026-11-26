@@ -73,13 +73,12 @@ Then use the appropriate client per action:
 ```ts
 "use server";
 
+import { z } from "zod";
 import {
   actionClient,
   authActionClient,
   adminActionClient,
 } from "@/lib/safe-action";
-
-import { z } from "zod";
 
 // Public action — no auth needed
 export const getPublicData = actionClient.action(async () => {

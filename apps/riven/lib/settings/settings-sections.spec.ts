@@ -3,7 +3,7 @@ import { plugin as cometPlugin } from "@repo/plugin-comet";
 import { describe, expect } from "vitest";
 import z from "zod";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { rankingPresets } from "#ranking/presets/index.ts";
 import {
   RANKING_NAMESPACE,
@@ -18,7 +18,7 @@ import type { InstalledPlugin } from "#types/plugins.ts";
 
 const untitledSchema = z.object({ foo: z.string().default("bar") });
 
-const installedPlugins: InstalledPlugin[] = [
+const it = baseIt.extend("installedPlugins", (): InstalledPlugin[] => [
   {
     sectionId: "repo-plugin-comet",
     packageName: "@repo/plugin-comet",
@@ -35,9 +35,9 @@ const installedPlugins: InstalledPlugin[] = [
     enabled: false,
     alwaysEnabled: false,
   },
-];
+]);
 
-const build = (services: Services) =>
+const build = (services: Services, installedPlugins: InstalledPlugin[]) =>
   buildSettingsSections({
     installedPlugins,
     pluginEnvironment: new Map([
@@ -51,9 +51,10 @@ const build = (services: Services) =>
 
 describe(buildSettingsSections, () => {
   it("builds the general and ranking sections and one section per installed plugin", ({
+    installedPlugins,
     services,
   }) => {
-    const sections = build(services);
+    const sections = build(services, installedPlugins);
 
     expect([...sections.keys()]).toStrictEqual([
       "general",
@@ -63,8 +64,11 @@ describe(buildSettingsSections, () => {
     ]);
   });
 
-  it("builds the general section in the core namespace", ({ services }) => {
-    const sections = build(services);
+  it("builds the general section in the core namespace", ({
+    installedPlugins,
+    services,
+  }) => {
+    const sections = build(services, installedPlugins);
 
     expect(sections.get("general")).toStrictEqual({
       id: "general",
@@ -76,9 +80,10 @@ describe(buildSettingsSections, () => {
   });
 
   it("uses the plugin package name as the namespace and the schema title", ({
+    installedPlugins,
     services,
   }) => {
-    const sections = build(services);
+    const sections = build(services, installedPlugins);
 
     expect(sections.get("repo-plugin-comet")).toStrictEqual({
       id: "repo-plugin-comet",
@@ -90,9 +95,10 @@ describe(buildSettingsSections, () => {
   });
 
   it("falls back to the package name when the schema has no title", ({
+    installedPlugins,
     services,
   }) => {
-    const sections = build(services);
+    const sections = build(services, installedPlugins);
 
     expect(sections.get("repo-plugin-listrr")).toMatchObject({
       title: "@repo/plugin-listrr",
@@ -101,9 +107,10 @@ describe(buildSettingsSections, () => {
   });
 
   it("builds a hot ranking section with the core environment", ({
+    installedPlugins,
     services,
   }) => {
-    const sections = build(services);
+    const sections = build(services, installedPlugins);
 
     expect(sections.get("ranking")).toStrictEqual({
       id: "ranking",
@@ -117,6 +124,7 @@ describe(buildSettingsSections, () => {
   });
 
   it("resolves the ranking defaults from the active profile over the schema defaults", async ({
+    installedPlugins,
     services,
   }) => {
     await services.rankingProfileService.syncPresets(rankingPresets);
@@ -138,7 +146,9 @@ describe(buildSettingsSections, () => {
       delete: [],
     });
 
-    const defaults = await build(services).get("ranking")?.resolveDefaults?.();
+    const defaults = await build(services, installedPlugins)
+      .get("ranking")
+      ?.resolveDefaults?.();
 
     expect(defaults).toMatchObject({
       excludedPatterns: ["CAM"],

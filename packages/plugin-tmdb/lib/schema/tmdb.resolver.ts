@@ -3,7 +3,7 @@ import { IndexerDataStatus } from "@repo/util-plugin-sdk/dto/enums/indexer-data-
 import { TopLevelMediaItemType } from "@repo/util-plugin-sdk/dto/enums/top-level-media-item-type.enum";
 import { Duration } from "@repo/util-plugin-sdk/helpers/dates";
 
-import { Arg, ID, Int, Query, Resolver } from "type-graphql";
+import { Arg, Authorized, ID, Int, Query, Resolver } from "type-graphql";
 
 import { TmdbAPI } from "../datasource/tmdb.datasource.ts";
 import { pluginConfig } from "../tmdb-plugin.config.ts";
@@ -21,6 +21,7 @@ import { TmdbIndexerData } from "./types/tmdb-indexer-data.type.ts";
 import type { ProductionCompany } from "@repo/util-plugin-sdk/dto/types/production-company.type";
 import type { SpokenLanguage } from "@repo/util-plugin-sdk/dto/types/spoken-language.type";
 
+@Authorized()
 @Resolver()
 export class TmdbResolver {
   @Query(() => Boolean)

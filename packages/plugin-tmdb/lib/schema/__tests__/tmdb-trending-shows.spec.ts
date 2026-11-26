@@ -1,12 +1,12 @@
-import { HttpResponse, http } from "msw";
+import { HttpResponse, http } from "msw/http";
 import assert from "node:assert";
 import { expect } from "vitest";
 
-import { it } from "../../__tests__/tmdb.test-context.ts";
+import { it as baseIt } from "../../__tests__/tmdb.test-context.ts";
 
 import type { IndexerData } from "@repo/util-plugin-sdk/dto/types/indexer-data.type";
 
-const createShow = (id: number, name: string) => ({
+const it = baseIt.extend("createShow", () => (id: number, name: string) => ({
   id,
   name,
   overview: `${name} overview`,
@@ -16,7 +16,7 @@ const createShow = (id: number, name: string) => ({
   genre_ids: [18],
   first_air_date: "2024-01-01",
   origin_country: ["US"],
-});
+}));
 
 const trendingShowsQuery = `
   query TmdbTrendingShows($timeWindow: TMDBTrendingTimeWindow!) {
@@ -33,7 +33,7 @@ const trendingShowsQuery = `
 
 it.for(["day", "week"] as const)(
   'requests trending shows for the "%s" time window',
-  async (timeWindow, { gqlContext, gqlServer, server }) => {
+  async (timeWindow, { createShow, gqlContext, gqlServer, server }) => {
     server.use(
       http.get("**/trending/tv/:timeWindow", ({ params }) => {
         if (params["timeWindow"] !== timeWindow) {
@@ -78,6 +78,7 @@ it.for(["day", "week"] as const)(
 );
 
 it("surfaces shows without a TVDB ID as unrequestable", async ({
+  createShow,
   gqlContext,
   gqlServer,
   server,
@@ -136,6 +137,7 @@ it("surfaces shows without a TVDB ID as unrequestable", async ({
 });
 
 it("deduplicates shows with the same ID", async ({
+  createShow,
   gqlContext,
   gqlServer,
   server,

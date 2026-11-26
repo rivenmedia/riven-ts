@@ -37,3 +37,8 @@ out/
 
 # Docker deploy output (may be created when testing Docker builds locally)
 pruned/
+
+# The MSW skill erroneously includes a .github directory which should be ignored
+.agents/skills/msw/.github
+
+.playwright-mcp/

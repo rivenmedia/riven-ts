@@ -12,7 +12,8 @@ export const eslintPluginEslintPluginSonarjsConfig = defineConfig({
       jsPlugins: [
         {
           name: "sonarjs",
-          specifier: import.meta.resolve("eslint-plugin-sonarjs"),
+          specifier: import.meta
+            .resolve("../custom-plugins/sonarjs-fresh-cache.ts"),
         },
       ],
       rules: sonarjsConfigs.recommended.rules as DummyRuleMap,

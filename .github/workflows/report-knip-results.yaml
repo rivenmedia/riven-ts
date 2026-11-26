@@ -9,6 +9,7 @@ on:
 
 jobs:
   report:
+    name: Report Knip results
     runs-on: ubuntu-latest
     permissions:
       actions: read

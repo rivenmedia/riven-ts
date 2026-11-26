@@ -1,7 +1,7 @@
 import { CacheControl } from "@repo/core-util-graphql-helpers/caching/cache-control.directive";
 import { PluginDataSource } from "@repo/util-plugin-sdk";
 
-import { Args, Query, Resolver } from "type-graphql";
+import { Args, Authorized, Query, Resolver } from "type-graphql";
 
 import { MdblistAPI } from "../datasource/mdblist.datasource.ts";
 import { pluginConfig } from "../mdblist-plugin.config.ts";
@@ -10,6 +10,7 @@ import { MdblistContentServiceResponse } from "./types/mdblist-response.type.ts"
 
 import type { ContentServiceRequestedResponse } from "@repo/util-plugin-sdk/schemas/events/content-service-requested.event";
 
+@Authorized()
 @Resolver()
 export class MdblistResolver {
   @Query(() => Boolean)

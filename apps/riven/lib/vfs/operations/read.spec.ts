@@ -1,8 +1,10 @@
+import Fuse from "@zkochan/fuse-native";
 import { Buffer } from "node:buffer";
 import { randomBytes } from "node:crypto";
+import Undici from "undici";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 import { config } from "#vfs/config.ts";
 import { chunkCache } from "#vfs/utilities/chunk-cache.ts";
 import { calculateFileChunks } from "#vfs/utilities/chunks/calculate-file-chunks.ts";
@@ -22,38 +24,42 @@ import type { MockAgent } from "undici";
 
 const fileName = "movie.mkv";
 
-function setupRangeInterceptor(
-  agent: MockAgent,
-  range: readonly [number, number | undefined],
-) {
-  const mockPool = agent.get("http://example.com");
+const it = baseIt.extend(
+  "setupRangeInterceptor",
+  () =>
+    function setupRangeInterceptor(
+      agent: MockAgent,
+      range: readonly [number, number | undefined],
+    ) {
+      const mockPool = agent.get("http://example.com");
 
-  const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
-  const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
+      const size = range[1] === undefined ? undefined : range[1] - range[0] + 1;
+      const responseBuffer = Buffer.alloc(size ?? config.chunkSize);
 
-  responseBuffer.set(randomBytes(responseBuffer.byteLength));
+      responseBuffer.set(randomBytes(responseBuffer.byteLength));
 
-  mockPool
-    .intercept({ path: `/files/${fileName}` })
-    .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
+      mockPool
+        .intercept({ path: `/files/${fileName}` })
+        .reply(({ headers }) => {
+          const rangeHeader = new Undici.Headers(headers).get("range");
 
-      if (rangeHeader === `bytes=${range.join("-")}`) {
-        return {
-          statusCode: 206,
-          data: responseBuffer,
-        };
-      }
+          if (rangeHeader === `bytes=${range.join("-")}`) {
+            return {
+              statusCode: 206,
+              data: responseBuffer,
+            };
+          }
 
-      return {
-        statusCode: 416,
-        data: "",
-      };
-    })
-    .times(2);
+          return {
+            statusCode: 416,
+            data: "",
+          };
+        })
+        .times(2);
 
-  return responseBuffer;
-}
+      return responseBuffer;
+    },
+);
 
 it.beforeEach(() => {
   fdToFileHandleMeta.clear();
@@ -82,6 +88,7 @@ it.beforeEach(() => {
 });
 
 it("fetches the header chunk if the requested range is entirely within the header chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -112,6 +119,7 @@ it("fetches the header chunk if the requested range is entirely within the heade
 });
 
 it("fetches the footer chunk if the requested range is entirely within the footer chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -150,6 +158,7 @@ it("fetches the footer chunk if the requested range is entirely within the foote
 });
 
 it("correctly calculates offsets when copying chunk data into the buffer", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -189,6 +198,7 @@ it("correctly calculates offsets when copying chunk data into the buffer", async
 });
 
 it("offsets the first chunk by the size of the header chunk", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -225,6 +235,7 @@ it("offsets the first chunk by the size of the header chunk", async ({
 });
 
 it("reads data across multiple chunks, utilising the chunk cache where possible", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -274,6 +285,7 @@ it("reads data across multiple chunks, utilising the chunk cache where possible"
 });
 
 it("performs a one-off scan when receiving a read outside the scan tolerance limit during playback", async ({
+  setupRangeInterceptor,
   mockAgent,
 }) => {
   const { readSync } = await import("./read.ts");
@@ -327,7 +339,7 @@ it("saves a copy of each chunk to the cache when reading during playback within 
     .get("http://example.com")
     .intercept({ path: `/files/${fileName}` })
     .reply(({ headers }) => {
-      const rangeHeader = (headers as Record<string, string>)["range"];
+      const rangeHeader = new Undici.Headers(headers).get("range");
 
       if (rangeHeader === `bytes=104071168-`) {
         return {
@@ -406,4 +418,206 @@ it("saves a copy of each chunk to the cache when reading during playback within 
   expect(secondCachedChunk.equals(secondChunkResponseBuffer)).toBe(true);
 
   expect(firstCachedChunk.equals(secondCachedChunk)).toBe(false);
+});
+
+it("serves reads from the chunk cache without requesting the stream", async ({
+  mockAgent,
+}) => {
+  const { readSync } = await import("./read.ts");
+
+  const fileChunkCalculations =
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
+
+  const { headerChunk } = fileChunkCalculations;
+  const cachedHeader = randomBytes(headerChunk.size);
+
+  chunkCache.set(headerChunk.cacheKey, cachedHeader);
+
+  const length = 64;
+  const offset = 128;
+  const buffer = Buffer.alloc(length);
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, 0, buffer, length, offset, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(length);
+  });
+
+  expect(buffer.equals(cachedHeader.subarray(offset, offset + length))).toBe(
+    true,
+  );
+
+  mockAgent.assertNoPendingInterceptors();
+  expect(fdToPreviousReadPositionMap.get(0)).toBe(offset);
+});
+
+it("serves subtitle reads from the in-memory subtitle content", async () => {
+  const { readSync } = await import("./read.ts");
+  const content = Buffer.from("1\n00:00:01,000 --> 00:00:02,000\nHello\n");
+
+  fdToFileHandleMeta.set(1, {
+    type: "subtitle",
+    fileSize: content.length,
+    filePath: "/movies/movie.en.srt",
+    fileBaseName: "movie.en.srt",
+    contentBuffer: content,
+  });
+
+  const buffer = Buffer.alloc(8);
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync("/movies/movie.en.srt", 1, buffer, 8, 2, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(8);
+  });
+
+  expect(buffer.equals(content.subarray(2, 10))).toBe(true);
+});
+
+it("returns only the remaining subtitle bytes for a read past the end of the content", async () => {
+  const { readSync } = await import("./read.ts");
+  const content = Buffer.from("subtitle");
+
+  fdToFileHandleMeta.set(1, {
+    type: "subtitle",
+    fileSize: content.length,
+    filePath: "/movies/movie.en.srt",
+    fileBaseName: "movie.en.srt",
+    contentBuffer: content,
+  });
+
+  const buffer = Buffer.alloc(16);
+  const partialCallback = vi.fn<Parameters<typeof readSync>[5]>();
+  const eofCallback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync("/movies/movie.en.srt", 1, buffer, 16, 5, partialCallback);
+  readSync("/movies/movie.en.srt", 1, Buffer.alloc(16), 16, 8, eofCallback);
+
+  await vi.waitFor(() => {
+    expect(partialCallback).toHaveBeenCalledWith(3);
+    expect(eofCallback).toHaveBeenCalledWith(0);
+  });
+
+  expect(buffer.subarray(0, 3).toString()).toBe("tle");
+});
+
+it("fails with EBADF when reading an unknown file descriptor", async () => {
+  const { readSync } = await import("./read.ts");
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, 99, Buffer.alloc(64), 64, 0, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
+  });
+});
+
+it("fails with EBADF when the file has no chunk calculations", async () => {
+  const { readSync } = await import("./read.ts");
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  fileNameToFileChunkCalculationsMap.clear();
+
+  readSync(fileName, 0, Buffer.alloc(64), 64, 0, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EBADF);
+  });
+});
+
+it("returns no bytes when the stream request is aborted", async ({
+  mockAgent,
+}) => {
+  const { readSync } = await import("./read.ts");
+
+  const fileChunkCalculations =
+    fileNameToFileChunkCalculationsMap.get(fileName);
+
+  expect.assert(fileChunkCalculations);
+
+  mockAgent
+    .get("http://example.com")
+    .intercept({ path: `/files/${fileName}` })
+    .replyWithError(new Undici.errors.RequestAbortedError());
+
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, 0, Buffer.alloc(64), 64, 0, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(0);
+  });
+});
+
+it("fails with EIO when reading from beyond the end of the file", async () => {
+  const { readSync } = await import("./read.ts");
+  const fileHandle = fdToFileHandleMeta.get(0);
+
+  expect.assert(fileHandle);
+
+  const callback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, 0, Buffer.alloc(64), 64, fileHandle.fileSize, callback);
+
+  await vi.waitFor(() => {
+    expect(callback).toHaveBeenCalledWith(Fuse.EIO);
+  });
+});
+
+it("restarts the stream from the requested chunk when a body read does not continue from the current stream position", async ({
+  mockAgent,
+}) => {
+  const { readSync } = await import("./read.ts");
+  const fd = 0;
+  const length = 131_072;
+  const position = 104_988_672;
+  const chunkAlignedStart = 104_071_168;
+  const streamData = randomBytes(config.chunkSize * 2);
+  const requestedRanges: string[] = [];
+
+  fdToPreviousReadPositionMap.set(fd, config.chunkSize * 100);
+  fdToCurrentStreamPositionMap.set(fd, config.chunkSize * 50);
+
+  mockAgent
+    .get("http://example.com")
+    .intercept({ path: `/files/${fileName}` })
+    .reply(({ headers }) => {
+      requestedRanges.push(new Undici.Headers(headers).get("range") ?? "");
+
+      return { statusCode: 206, data: streamData };
+    });
+
+  const seekCallback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, fd, Buffer.alloc(length), length, position, seekCallback);
+
+  // The seek fails the read so the mount retries it against the restarted stream
+  await vi.waitFor(() => {
+    expect(seekCallback).toHaveBeenCalledWith(Fuse.EIO);
+  });
+
+  expect(requestedRanges).toStrictEqual([
+    `bytes=${chunkAlignedStart.toString()}-`,
+  ]);
+  expect(fdToCurrentStreamPositionMap.get(fd)).toBe(chunkAlignedStart);
+
+  const buffer = Buffer.alloc(length);
+  const retryCallback = vi.fn<Parameters<typeof readSync>[5]>();
+
+  readSync(fileName, fd, buffer, length, position, retryCallback);
+
+  await vi.waitFor(() => {
+    expect(retryCallback).toHaveBeenCalledWith(length);
+  });
+
+  const offset = position - chunkAlignedStart;
+
+  expect(buffer.equals(streamData.subarray(offset, offset + length))).toBe(
+    true,
+  );
+  expect(requestedRanges).toHaveLength(1);
 });

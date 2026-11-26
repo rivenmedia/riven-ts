@@ -44,7 +44,7 @@ export async function riven() {
       ? await import("./mocks/node.ts")
       : {};
 
-    if (mockScenario) {
+    if (mockScenario?.environmentData) {
       Object.assign(
         process.env,
         Object.fromEntries(
@@ -64,6 +64,7 @@ export async function riven() {
       await import("./state-machines/program/index.ts");
     const { logger } = await import("./utilities/logger/logger.ts");
     const { settings } = await import("./utilities/settings.ts");
+    const { isGeneratedApiKey } = await import("./utilities/api-key.ts");
 
     const shutdownTimeoutMs = Duration.fromObject({
       seconds: settings.shutdownTimeoutSeconds,
@@ -75,14 +76,18 @@ export async function riven() {
       );
     }
 
+    if (isGeneratedApiKey(settings.apiKey)) {
+      logger.warn(
+        "RIVEN_SETTING__apiKey is not set, so Riven generated an API key for this run. External callers such as Seerr and the TUI cannot authenticate until a key is set.",
+      );
+    }
+
     const actor = createRivenMachine({
       sessionId,
       mockScenario,
     });
 
     async function shutdown() {
-      process.exitCode ??= 0;
-
       try {
         const { value } = await waitFor(
           actor,
@@ -92,9 +97,7 @@ export async function riven() {
 
         process.exitCode ??= Number(value === "Errored");
       } catch (error) {
-        if (process.exitCode === 0) {
-          process.exitCode = 1;
-        }
+        process.exitCode ??= 1;
 
         logger.error("Error whilst waiting for shutdown", { err: error });
       }

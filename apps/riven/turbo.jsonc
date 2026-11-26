@@ -27,19 +27,19 @@
         "codegen:api-schemas",
         "transit:source-files"
       ],
-      "inputs": ["lib/**/*.ts", "scripts/generate-gql-schema.ts"],
-      "outputs": ["schema.graphql"]
-    },
-    "codegen:gql": {
-      "dependsOn": [
-        "$TURBO_EXTENDS$",
-        "codegen:gql-schema",
-        "transit:source-files"
-      ],
       "inputs": [
         "lib/**/*.ts",
         "!lib/**/__generated__/**/*",
-        "schema.graphql",
+        "!lib/**/*.typegen.ts",
+        "scripts/generate-gql-schema.ts"
+      ],
+      "outputs": ["schema.graphql"]
+    },
+    "codegen:gql": {
+      "inputs": [
+        "lib/**/*.ts",
+        "!lib/**/__generated__/**/*",
+        "!lib/**/*.typegen.ts",
         "graphql.config.ts"
       ],
       "outputs": ["lib/types/__generated__/graphql.ts", "lib/**/*.typegen.ts"]

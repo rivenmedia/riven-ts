@@ -1,8 +1,6 @@
 name: Verify
 
-description: |
-  This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
-
+# This workflow runs various verification tasks (linting, type checking, tests, etc.) on pull requests.
 run-name: "Verify: ${{ github.event.pull_request.title }} (#${{
   github.event.pull_request.number }})"
 
@@ -79,8 +77,16 @@ jobs:
           - name: Build
             command: build
 
-          - name: E2E tests
+          # Linux only: GitHub's hosted macOS runners can't load macFUSE's kernel extension, so Riven can't mount its VFS there
+          - name: E2E tests (linux-x64)
             command: e2e:headless
+            runner-requirements:
+              - fuse
+              - redis-server
+              - postgres-service
+            env:
+              E2E_POSTGRES_URL: postgres://runner:runner@127.0.0.1:5432/postgres
+            runner: ubuntu-latest
 
           - name: Validate generators
             command: //#validate-generators

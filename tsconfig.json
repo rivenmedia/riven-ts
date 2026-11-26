@@ -12,6 +12,10 @@
     "commitlint.config.ts",
     "vitest.config.ts"
   ],
-  "include": ["turbo/**/*.ts", ".github/scripts/**/*.ts"],
+  "include": [
+    "turbo/**/*.ts",
+    ".github/scripts/**/*.ts",
+    ".claude/hooks/**/*.ts"
+  ],
   "exclude": []
 }

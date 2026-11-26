@@ -4,12 +4,6 @@ import { FormProvider, useForm } from "react-hook-form";
 import { z } from "zod";
 
 import { selectRankingProfile } from "#app/(protected)/settings/ranking/_actions/select-ranking-profile.action.ts";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "#components/_ui/accordion.tsx";
 import { Button } from "#components/_ui/button.tsx";
 import {
   Field,
@@ -19,9 +13,6 @@ import {
   FieldTitle,
 } from "#components/_ui/field.tsx";
 import { RadioGroup, RadioGroupItem } from "#components/_ui/radio-group.tsx";
-import { SettingField } from "#components/settings/setting-field/setting-field.tsx";
-
-import type { SettingFieldProps } from "#components/settings/setting-field/setting-field.tsx";
 
 interface Profile {
   id: string;
@@ -30,15 +21,8 @@ interface Profile {
   enabled: boolean;
 }
 
-interface GeneralSection {
-  title: string;
-  description: string;
-  fields: SettingFieldProps[];
-}
-
 export interface SetupQualityStepProps {
   profiles: Profile[];
-  generalSections: GeneralSection[];
 }
 
 const QualityFormSchema = z.object({
@@ -46,12 +30,9 @@ const QualityFormSchema = z.object({
 });
 
 /**
- * Setup step for choosing a quality/ranking profile and its general options.
+ * Setup step for choosing a quality/ranking profile.
  */
-export function SetupQualityStep({
-  profiles,
-  generalSections,
-}: SetupQualityStepProps) {
+export function SetupQualityStep({ profiles }: SetupQualityStepProps) {
   const defaultSelectedProfile =
     profiles.find((profile) => profile.enabled)?.id ?? "";
 
@@ -102,33 +83,6 @@ export function SetupQualityStep({
             </RadioGroup>
           </div>
 
-          <Accordion type="multiple" className="space-y-4">
-            {generalSections.map((section) => (
-              <AccordionItem
-                key={section.title}
-                value={section.title}
-                className="rounded-2xl border px-5"
-              >
-                <AccordionTrigger className="py-5 text-left no-underline hover:no-underline">
-                  <span>
-                    <span className="block text-lg font-semibold">
-                      {section.title}
-                    </span>
-                    <span className="text-muted-foreground mt-1 block text-sm">
-                      {section.description}
-                    </span>
-                  </span>
-                </AccordionTrigger>
-                <AccordionContent className="pb-5">
-                  <div className="grid gap-4 lg:grid-cols-2">
-                    {section.fields.map((field) => (
-                      <SettingField key={field.config.name} {...field} />
-                    ))}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ))}
-          </Accordion>
           <div className="flex justify-end">
             <Button type="submit">Save preferences</Button>
           </div>

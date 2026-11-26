@@ -1,12 +1,19 @@
-import { Episode, Season, Show } from "@repo/util-plugin-sdk/dto/entities";
+import {
+  Episode,
+  ItemRequest,
+  Season,
+  Show,
+} from "@repo/util-plugin-sdk/dto/entities";
+import { MediaItemIndexError } from "@repo/util-plugin-sdk/schemas/events/media-item.index.error.event";
 import { MediaItemIndexErrorIncorrectState } from "@repo/util-plugin-sdk/schemas/events/media-item.index.incorrect-state.event";
 
 import { wrap } from "@mikro-orm/core";
 import { DateTime } from "luxon";
 import { expect, vi } from "vitest";
 
-import { it } from "#__tests__/test-context.ts";
+import { it as baseIt } from "#__tests__/test-context.ts";
 
+import type { ShowIndexData } from "./persist-show-indexer-data.ts";
 import type { EntityManager } from "@mikro-orm/core";
 import type { UUID } from "node:crypto";
 
@@ -56,6 +63,45 @@ async function assertChildItemCounts(
     }),
   ).resolves.toBe(episodeCount);
 }
+
+const it = baseIt
+  .extend("indexedSeason", () => (number: number) => ({
+    number,
+    title: null,
+    episodes: [
+      {
+        absoluteNumber: number,
+        contentRating: "tv-14" as const,
+        number: 1,
+        airedAt: DateTime.utc(2020, 1, number + 1).toISO(),
+        title: `Episode 1 of season ${number.toString()}`,
+        runtime: 30,
+      },
+    ],
+  }))
+  .extend(
+    "indexedShow",
+    ({ indexedSeason }) =>
+      (
+        id: UUID,
+        overrides: Partial<Pick<ShowIndexData, "imdbId" | "seasons">> = {},
+      ): ShowIndexData => ({
+        id,
+        title: "Test Show",
+        imdbId: null,
+        contentRating: "tv-14",
+        genres: [],
+        type: "show",
+        network: "Test Network",
+        status: "ended",
+        seasons: {
+          0: indexedSeason(0),
+          1: indexedSeason(1),
+          2: indexedSeason(2),
+        },
+        ...overrides,
+      }),
+  );
 
 it("returns the show if processed successfully", async ({
   em,
@@ -613,4 +659,160 @@ it("updates the show and its children with the latest data if it has already bee
     seasonCount: 1,
     episodeCount: 3,
   });
+});
+
+const getRequestedSeasons = async (em: EntityManager, showId: UUID) => {
+  const seasons = await em
+    .fork()
+    .find(Season, { show: showId }, { orderBy: { number: "asc" } });
+
+  return Object.fromEntries(
+    seasons.map(({ number, isRequested }) => [number, isRequested]),
+  );
+};
+
+it("requests every season except specials when no seasons were requested", async ({
+  indexedShow,
+  em,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    seasons: null,
+  });
+
+  const { item } = await indexerService.indexItem(indexedShow(itemRequest.id));
+
+  await expect(getRequestedSeasons(em, item.id)).resolves.toStrictEqual({
+    0: false,
+    1: true,
+    2: true,
+  });
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ isPartialRequest: false, seasons: null });
+});
+
+it("only requests the requested seasons of a partial request", async ({
+  indexedShow,
+  em,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    seasons: [2],
+  });
+
+  const { item } = await indexerService.indexItem(indexedShow(itemRequest.id));
+
+  await expect(getRequestedSeasons(em, item.id)).resolves.toStrictEqual({
+    0: false,
+    1: false,
+    2: true,
+  });
+
+  const episodes = await em
+    .fork()
+    .find(Episode, { season: { show: item.id } }, { populate: ["season"] });
+
+  expect(
+    Object.fromEntries(
+      episodes.map(({ season, isRequested }) => [
+        season.getEntity().number,
+        isRequested,
+      ]),
+    ),
+  ).toStrictEqual({ 0: false, 1: false, 2: true });
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ isPartialRequest: true, seasons: [2] });
+});
+
+it("treats a request for every regular season as a full request", async ({
+  indexedShow,
+  em,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    seasons: [1, 2],
+  });
+
+  await indexerService.indexItem(indexedShow(itemRequest.id));
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ isPartialRequest: false, seasons: null });
+});
+
+it("rejects a show request without a TVDB ID", async ({
+  indexedShow,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    tvdbId: null,
+    imdbId: "tt1234567",
+  });
+
+  await expect(
+    indexerService.indexItem(indexedShow(itemRequest.id)),
+  ).rejects.toThrow("Item request is missing tvdbId");
+});
+
+it("fills in the item request's missing IMDB ID and passes it to the show's children", async ({
+  indexedShow,
+  em,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    imdbId: null,
+  });
+
+  const { item } = await indexerService.indexItem(
+    indexedShow(itemRequest.id, { imdbId: "tt7654321" }),
+  );
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ imdbId: "tt7654321" });
+
+  const seasons = await em.fork().find(Season, { show: item.id });
+  const episodes = await em.fork().find(Episode, { season: { show: item.id } });
+
+  expect(new Set(seasons.map(({ imdbId }) => imdbId))).toStrictEqual(
+    new Set(["tt7654321"]),
+  );
+  expect(new Set(episodes.map(({ imdbId }) => imdbId))).toStrictEqual(
+    new Set(["tt7654321"]),
+  );
+});
+
+it("rejects indexed show data that fails validation", async ({
+  indexedShow,
+  em,
+  factories: { showItemRequestFactory },
+  services: { indexerService },
+}) => {
+  const itemRequest = await showItemRequestFactory.createOne({
+    state: "requested",
+    imdbId: null,
+  });
+
+  await expect(
+    indexerService.indexItem(
+      indexedShow(itemRequest.id, { imdbId: "not-an-imdb-id" }),
+    ),
+  ).rejects.toThrow(MediaItemIndexError);
+
+  await expect(
+    em.fork().findOneOrFail(ItemRequest, itemRequest.id),
+  ).resolves.toMatchObject({ imdbId: null });
 });
