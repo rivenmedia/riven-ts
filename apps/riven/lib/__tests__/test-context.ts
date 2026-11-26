@@ -111,6 +111,8 @@ export const it = testBase
       await import("#database/factories/episode.factory.ts");
     const { MediaEntryFactory } =
       await import("#database/factories/media-entry.factory.ts");
+    const { SubtitleEntryFactory } =
+      await import("#database/factories/subtitle-entry.factory.ts");
     const { MovieItemRequestFactory } =
       await import("#database/factories/movie-item-request.factory.ts");
     const { MovieFactory } =
@@ -134,6 +136,7 @@ export const it = testBase
       episodeFactory: new EpisodeFactory(em),
       streamFactory: new StreamFactory(em),
       mediaEntryFactory: new MediaEntryFactory(em),
+      subtitleEntryFactory: new SubtitleEntryFactory(em),
       rankingProfileFactory: new RankingProfileFactory(em),
     };
   })
