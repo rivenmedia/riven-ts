@@ -83,6 +83,10 @@ import {
   MediaItemIndexSuccessEventHandler,
 } from "./media-item.index.success.event.ts";
 import {
+  MediaItemRemovedEvent,
+  MediaItemRemovedEventHandler,
+} from "./media-item.removed.event.ts";
+import {
   MediaItemScrapeRequestedEvent,
   MediaItemScrapeRequestedEventHandler,
 } from "./media-item.scrape-requested.event.ts";
@@ -143,6 +147,7 @@ export const RivenEvent = z.discriminatedUnion("type", [
   MediaItemDownloadPartialSuccessEvent,
   MediaItemDownloadProviderListRequestedEvent,
   MediaItemDownloadSuccessEvent,
+  MediaItemRemovedEvent,
   MediaItemStreamLinkRequestedEvent,
   MediaItemStreamLinkHealthCheckRequestedEvent,
   MediaItemSubtitleRequestedEvent,
@@ -210,6 +215,9 @@ export const RivenEventHandler = {
   "riven.media-item.download.provider-list-requested":
     MediaItemDownloadProviderListRequestedEventHandler,
   "riven.media-item.download.success": MediaItemDownloadSuccessEventHandler,
+
+  // Item removal
+  "riven.media-item.removed": MediaItemRemovedEventHandler,
 
   // Item streaming
   "riven.media-item.stream-link.requested":
