@@ -1,3 +1,4 @@
+// @vitest-environment jsdom
 // @vitest-environment-options {"url": "http://example.test/"}
 import { expect, it, vi } from "vitest";
 
