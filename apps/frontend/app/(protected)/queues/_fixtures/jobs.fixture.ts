@@ -240,6 +240,27 @@ function getAttemptsMade(state: JobState, index: number) {
   }
 }
 
+/**
+ * The ID of a generated job in the parent queue that exists: a
+ * waiting-children job when the queue has any, otherwise a completed one.
+ */
+function getGeneratedParentId(parentQueueName: string, index: number) {
+  const parentQueue = queueSummaries.find(
+    (queue) => queue.name === parentQueueName,
+  );
+  const state: JobState =
+    (parentQueue?.counts["waiting-children"] ?? 0) > 0
+      ? "waiting-children"
+      : "completed";
+  const count = Math.max(parentQueue?.counts[state] ?? 1, 1);
+
+  return String(
+    getQueueIdSeed(parentQueueName) -
+      (index % count) * STATE_COUNT -
+      stateIndex(state),
+  );
+}
+
 const getNonMediaJobName = (queue: QueueSummary) =>
   queue.kind === "plugin"
     ? `${queue.plugin.displayName} content request`
@@ -294,7 +315,7 @@ export function generateJobSummary(
     ...(parentQueueName
       ? {
           parent: {
-            id: String(getQueueIdSeed(parentQueueName) - index * STATE_COUNT),
+            id: getGeneratedParentId(parentQueueName, index),
             queueName: parentQueueName,
           },
         }
@@ -530,6 +551,122 @@ const job48213Flow: FlowNode = {
   ],
 };
 
+const supportJob = (
+  queueName: string,
+  id: string,
+  state: JobState,
+  media: MediaFixture,
+  createdAt: string,
+  parent?: { id: string; queueName: string },
+): JobSummary => ({
+  id,
+  name: media.name,
+  queueName,
+  state,
+  mediaItem: toMediaItem(media),
+  attemptsMade: state === "waiting-children" ? 0 : 1,
+  maxAttempts: MAX_ATTEMPTS,
+  createdAt,
+  processedAt: shiftIso(createdAt, 1),
+  ...(state === "completed" ? { finishedAt: shiftIso(createdAt, 60) } : {}),
+  ...(state === "waiting-children"
+    ? { children: { completed: 1, total: 2 } }
+    : {}),
+  ...(parent ? { parent } : {}),
+});
+
+const scrapeParentIds = [
+  ["48190", mediaFixtures.severance, "2026-11-26T13:49:50.000Z"],
+  ["48184", mediaFixtures.duneTwo, "2026-11-26T13:47:10.000Z"],
+  ["48151", mediaFixtures.lastOfUs, "2026-11-26T13:31:38.000Z"],
+  ["48139", mediaFixtures.fallout, "2026-11-26T13:12:03.000Z"],
+  ["48088", mediaFixtures.silo, "2026-11-26T12:44:34.000Z"],
+  ["47975", mediaFixtures.paddington, "2026-11-26T11:58:17.000Z"],
+  ["47941", mediaFixtures.slowHorsesE2, "2026-11-26T10:21:51.000Z"],
+  ["47902", mediaFixtures.arcaneE5, "2026-11-25T22:09:25.000Z"],
+  ["47790", mediaFixtures.andorE1, "2026-11-25T18:36:00.000Z"],
+] as const;
+
+/**
+ * Jobs that other fixtures point at (parents and flow nodes). They are found
+ * by ID but never listed, so the queue counts stay as written.
+ */
+export const handWrittenLinkedJobs: readonly JobSummary[] = [
+  supportJob(
+    "process-item-request",
+    "48177",
+    "completed",
+    mediaFixtures.severance,
+    "2026-11-26T13:49:40.000Z",
+  ),
+  ...scrapeParentIds.map(([id, media, createdAt]) =>
+    supportJob(
+      "process-media-item",
+      id,
+      "waiting-children",
+      media,
+      createdAt,
+      id === "48190"
+        ? { id: "48177", queueName: "process-item-request" }
+        : undefined,
+    ),
+  ),
+  supportJob(
+    "process-item-request",
+    "48960",
+    "completed",
+    mediaFixtures.duneTwo,
+    "2026-11-26T13:22:30.000Z",
+  ),
+  supportJob(
+    "process-item-request",
+    "48850",
+    "completed",
+    mediaFixtures.shogun,
+    "2026-11-26T12:05:20.000Z",
+  ),
+  supportJob(
+    "process-item-request",
+    "48490",
+    "completed",
+    mediaFixtures.slowHorses,
+    "2026-11-25T23:12:00.000Z",
+  ),
+  {
+    ...supportJob(
+      "riven.media-item.scrape.requested.plugin[torrentio]",
+      "48214",
+      "failed",
+      mediaFixtures.severance,
+      "2026-11-26T13:49:52.000Z",
+      { id: "48213", queueName: "scrape-item" },
+    ),
+    attemptsMade: 3,
+    finishedAt: "2026-11-26T13:50:21.000Z",
+    failedReason: "request timed out after 30 s",
+  },
+  supportJob(
+    "riven.media-item.scrape.requested.plugin[comet]",
+    "48215",
+    "completed",
+    mediaFixtures.severance,
+    "2026-11-26T13:49:52.000Z",
+    { id: "48213", queueName: "scrape-item" },
+  ),
+  supportJob(
+    "parse-scrape-results",
+    "48216",
+    "completed",
+    mediaFixtures.severance,
+    "2026-11-26T13:50:22.000Z",
+    { id: "48213", queueName: "scrape-item" },
+  ),
+];
+
+const isFlowNode = (node: FlowNode, queueName: string, id: string): boolean =>
+  (node.id === id && node.queueName === queueName) ||
+  node.children.some((child) => isFlowNode(child, queueName, id));
+
 const job48213Detail = (summary: JobSummary): JobDetail => ({
   ...summary,
   stacktrace: [
@@ -557,12 +694,7 @@ const job48213Detail = (summary: JobSummary): JobDetail => ({
   flow: job48213Flow,
 });
 
-/** Builds a detail for any summary the stub data source can return. */
-export function buildJobDetail(summary: JobSummary): JobDetail {
-  if (summary.queueName === "scrape-item" && summary.id === "48213") {
-    return job48213Detail(summary);
-  }
-
+function buildGenericJobDetail(summary: JobSummary): JobDetail {
   const title = summary.mediaItem?.subtitle
     ? `${summary.mediaItem.title} (${summary.mediaItem.subtitle})`
     : (summary.mediaItem?.title ?? summary.name);
@@ -597,4 +729,17 @@ export function buildJobDetail(summary: JobSummary): JobDetail {
       children: [],
     },
   };
+}
+
+/** Builds a detail for any summary the stub data source can return. */
+export function buildJobDetail(summary: JobSummary): JobDetail {
+  if (summary.queueName === "scrape-item" && summary.id === "48213") {
+    return job48213Detail(summary);
+  }
+
+  if (isFlowNode(job48213Flow, summary.queueName, summary.id)) {
+    return { ...buildGenericJobDetail(summary), flow: job48213Flow };
+  }
+
+  return buildGenericJobDetail(summary);
 }

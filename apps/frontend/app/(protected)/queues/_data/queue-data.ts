@@ -5,6 +5,7 @@ import {
   generateJobSummary,
   getQueueIdSeed,
   handWrittenFailedJobs,
+  handWrittenLinkedJobs,
 } from "../_fixtures/jobs.fixture.ts";
 import { queueSummaries } from "../_fixtures/queues.fixture.ts";
 import { JOB_STATES } from "../_utilities/job-states.ts";
@@ -79,6 +80,14 @@ function findJobSummary(queue: QueueSummary, jobId: string) {
 
   if (handWritten) {
     return handWritten;
+  }
+
+  const linked = handWrittenLinkedJobs.find(
+    (job) => job.queueName === queue.name && job.id === jobId,
+  );
+
+  if (linked) {
+    return linked;
   }
 
   if (!/^\d+$/u.test(jobId)) {

@@ -29,7 +29,9 @@ it("groups thousands in counts", () => {
 
 it.for([
   [200, "0.2 s"],
+  [1000, "1.0 s"],
   [32_400, "32.4 s"],
+  [59_950, "1 min 0 s"],
   [252_000, "4 min 12 s"],
   [7_500_000, "2 h 5 min"],
 ] as const)("formats %d ms as %s", ([milliseconds, expected]) => {

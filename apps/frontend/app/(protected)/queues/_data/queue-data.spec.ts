@@ -11,6 +11,8 @@ import {
   getQueues,
 } from "./queue-data.ts";
 
+import type { FlowNode } from "../_types/job-queue.ts";
+
 it("has 32 queues with unique names", () => {
   const names = getQueues().map((queue) => queue.name);
 
@@ -192,4 +194,43 @@ it("reports a connected live status", () => {
     maxReconnectAttempts: 3,
     lastUpdatedAt: FIXTURE_NOW,
   });
+});
+
+it("resolves every parent link on page 1 of every queue and state", () => {
+  const unresolved: string[] = [];
+
+  for (const queue of getQueues()) {
+    for (const state of JOB_STATES) {
+      for (const job of getJobs(queue.name, state, 1).jobs) {
+        const { parent } = job;
+
+        if (parent && !getJob(parent.queueName, parent.id)) {
+          unresolved.push(`${queue.name} ${state} ${job.id} -> ${parent.id}`);
+        }
+      }
+    }
+  }
+
+  expect(unresolved).toStrictEqual([]);
+});
+
+it("resolves every node in job 48213's flow", () => {
+  const unresolved: string[] = [];
+
+  const visit = (node: FlowNode) => {
+    if (getJob(node.queueName, node.id)?.state !== node.state) {
+      unresolved.push(node.id);
+    }
+
+    for (const child of node.children) {
+      visit(child);
+    }
+  };
+
+  const flow = getJob("scrape-item", "48213")?.flow;
+
+  expect.assert(flow);
+  visit(flow);
+
+  expect(unresolved).toStrictEqual([]);
 });

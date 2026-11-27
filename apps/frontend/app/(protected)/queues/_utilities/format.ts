@@ -4,10 +4,12 @@ export function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(locale).format(value);
 }
 
-/** 0.2 s, 32.4 s, 4 min 12 s, 2 h 5 min. */
+/** 0.2 s, 32.4 s, 4 min 12 s, 2 h 5 min. Always one decimal under a minute. */
 export function formatDuration(milliseconds: number) {
-  if (milliseconds < 60_000) {
-    return `${(Math.round(milliseconds / 100) / 10).toString()} s`;
+  const tenths = Math.round(milliseconds / 100);
+
+  if (tenths < 600) {
+    return `${(tenths / 10).toFixed(1)} s`;
   }
 
   const totalSeconds = Math.round(milliseconds / 1000);
