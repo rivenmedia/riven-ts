@@ -15,9 +15,7 @@ export function JobFailure({ reason, stacktrace }: JobFailureProps) {
       <h2 id="job-failure-heading" className="text-base font-semibold">
         Failure
       </h2>
-      {reason ? (
-        <p className="text-sm text-red-700 dark:text-red-300">{reason}</p>
-      ) : null}
+      {reason ? <p className="text-sm text-red-400">{reason}</p> : null}
       {stacktrace.length > 0 ? (
         <CodeBlock label="Stack trace">{stacktrace.join("\n")}</CodeBlock>
       ) : null}

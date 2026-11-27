@@ -3,8 +3,12 @@ import { notFound } from "next/navigation";
 
 import { resolveLocale } from "#lib/utils/resolve-locale.ts";
 
-import { getJobs, getLiveStatus, getQueue } from "../_data/queue-data.ts";
-import { FIXTURE_NOW } from "../_fixtures/jobs.fixture.ts";
+import {
+  getJobs,
+  getLiveStatus,
+  getNow,
+  getQueue,
+} from "../_data/queue-data.ts";
 import { parseJobStateParam } from "../_utilities/job-states.ts";
 import {
   decodeRouteParam,
@@ -38,7 +42,7 @@ export default async function QueueRoute({
       state={state}
       jobPage={jobPage}
       liveStatus={getLiveStatus()}
-      now={FIXTURE_NOW}
+      now={getNow()}
       locale={resolveLocale(headersList.get("accept-language"))}
     />
   );

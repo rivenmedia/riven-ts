@@ -2,7 +2,7 @@
 
 import { RotateCcw, Trash } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { toast } from "sonner";
 
 import { SelectionActionBar } from "#components/selection-action-bar/selection-action-bar.tsx";
@@ -66,6 +66,7 @@ export function QueuePage({
     ids: initialSelectedIds ? new Set(initialSelectedIds) : NO_SELECTION,
   });
   const [isRemoveOpen, setIsRemoveOpen] = useState(false);
+  const jobsRegionRef = useRef<HTMLElement>(null);
   const selectedIds = selection.scope === scope ? selection.ids : NO_SELECTION;
   const displayName = getQueueDisplayName(queue.name);
   const isActionable = isLive(liveStatus);
@@ -77,15 +78,24 @@ export function QueuePage({
   const clearSelection = () => {
     setSelection({ scope, ids: NO_SELECTION });
   };
+  // The action bar unmounts once the selection clears, so focus moves to the jobs.
+  const clearSelectionAndRestoreFocus = () => {
+    clearSelection();
+    setIsRemoveOpen(false);
+    // After the dialog's own focus restore, which would land on the removed button.
+    requestAnimationFrame(() => {
+      jobsRegionRef.current?.focus();
+    });
+  };
   const handleRetry = () => {
     toast.success(`Retried ${jobCountLabel(actionableIds.length)}`, {
       description: "They're back in Waiting.",
     });
-    clearSelection();
+    clearSelectionAndRestoreFocus();
   };
   const handleRemove = () => {
     toast.success(`Removed ${jobCountLabel(actionableIds.length)}`);
-    clearSelection();
+    clearSelectionAndRestoreFocus();
   };
   const handlePause = () => {
     toast.success(`Paused ${displayName}`);
@@ -160,33 +170,40 @@ export function QueuePage({
         />
       ) : null}
       <ThroughputPlaceholder variant="queue" />
-      <LiveDataRegion status={liveStatus} locale={locale}>
-        <div className="flex flex-col gap-4">
-          <JobStateTabs
-            queueName={queue.name}
-            counts={queue.counts}
-            currentState={state}
-            locale={locale}
-          />
-          <GoToJobForm queueName={queue.name} />
-          <JobsTable
-            jobs={jobPage.jobs}
-            state={state}
-            now={now}
-            locale={locale}
-            selectedIds={selectedIds}
-            onSelectedIdsChange={(ids) => {
-              setSelection({ scope, ids });
-            }}
-          />
-          <JobPagination
-            queueName={queue.name}
-            state={state}
-            jobPage={jobPage}
-            locale={locale}
-          />
-        </div>
-      </LiveDataRegion>
+      <section
+        ref={jobsRegionRef}
+        aria-label="Jobs"
+        tabIndex={-1}
+        className="outline-none"
+      >
+        <LiveDataRegion status={liveStatus} locale={locale}>
+          <div className="flex flex-col gap-4">
+            <JobStateTabs
+              queueName={queue.name}
+              counts={queue.counts}
+              currentState={state}
+              locale={locale}
+            />
+            <GoToJobForm queueName={queue.name} />
+            <JobsTable
+              jobs={jobPage.jobs}
+              state={state}
+              now={now}
+              locale={locale}
+              selectedIds={selectedIds}
+              onSelectedIdsChange={(ids) => {
+                setSelection({ scope, ids });
+              }}
+            />
+            <JobPagination
+              queueName={queue.name}
+              state={state}
+              jobPage={jobPage}
+              locale={locale}
+            />
+          </div>
+        </LiveDataRegion>
+      </section>
       {actionableIds.length > 0 && isSelectableState(state) ? (
         <>
           <SelectionActionBar

@@ -1,6 +1,6 @@
 import { cn } from "cn";
 
-import { formatClockTime } from "../../_utilities/format.ts";
+import { LocalTime } from "../local-time/local-time.tsx";
 
 import type { LiveStatus } from "../../_types/job-queue.ts";
 import type { ReactNode } from "react";
@@ -29,20 +29,18 @@ export function LiveDataRegion({
 
   return (
     <div>
-      <div
-        className={cn(!live && "opacity-45")}
-        aria-busy={live ? undefined : true}
-      >
-        {children}
-      </div>
+      <div className={cn(!live && "opacity-45")}>{children}</div>
       {live ? null : (
-        <p className="text-muted-foreground mt-2 text-sm">
+        <output className="text-muted-foreground mt-2 block text-sm">
           Showing data from{" "}
-          <time dateTime={status.lastUpdatedAt} suppressHydrationWarning>
-            {formatClockTime(status.lastUpdatedAt, locale)}
-          </time>
+          <LocalTime
+            iso={status.lastUpdatedAt}
+            locale={locale}
+            format="clock"
+            fallback="the last update"
+          />
           . Actions are off until Riven reconnects.
-        </p>
+        </output>
       )}
     </div>
   );

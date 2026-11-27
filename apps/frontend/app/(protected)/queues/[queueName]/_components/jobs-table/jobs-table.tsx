@@ -1,7 +1,6 @@
 "use client";
 
 import { ExternalLinkIcon } from "lucide-react";
-import { DateTime } from "luxon";
 import Link from "next/link";
 
 import { Checkbox } from "#components/_ui/checkbox.tsx";
@@ -15,10 +14,7 @@ import {
 } from "#components/_ui/table.tsx";
 import { EmptyState } from "#components/empty-state/empty-state.tsx";
 
-import {
-  formatDuration,
-  formatRelativeTime,
-} from "../../../_utilities/format.ts";
+import { formatRelativeTime, formatSpan } from "../../../_utilities/format.ts";
 import { jobHref } from "../../../_utilities/queue-routes.ts";
 import { emptyStateCopy } from "../../_utilities/empty-state-copy.ts";
 import {
@@ -51,11 +47,7 @@ const NO_VALUE = "—";
 
 /** The formatted time from one ISO time to another, if both are known. */
 const span = (from: string | undefined, to: string | undefined) =>
-  from && to
-    ? formatDuration(
-        DateTime.fromISO(to).diff(DateTime.fromISO(from)).toMillis(),
-      )
-    : NO_VALUE;
+  from && to ? formatSpan(from, to) : NO_VALUE;
 
 function RelativeTime({
   iso,
@@ -183,7 +175,7 @@ export function JobsTable({
             {hasSelectColumn ? (
               <TableHead className="w-10">
                 <Checkbox
-                  aria-label={`Select all ${selectableIds.length.toString()} top-level jobs on this page`}
+                  aria-label={`Select all ${selectableIds.length.toString()} top-level ${selectableIds.length === 1 ? "job" : "jobs"} on this page`}
                   checked={
                     selectedCount === 0
                       ? false
@@ -242,9 +234,12 @@ export function JobsTable({
                     In flow under{" "}
                     <Link
                       href={jobHref(job.parent.queueName, job.parent.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
                       className="hover:underline"
                     >
                       {`${job.parent.queueName} #${job.parent.id}`}
+                      <span className="sr-only"> (opens in a new tab)</span>
                     </Link>
                   </div>
                 ) : null}

@@ -14,7 +14,11 @@ if (!job) {
 
 const meta = preview.meta({
   component: FlowTree,
-  args: { root: job.flow, currentJobId: "48213" },
+  args: {
+    root: job.flow,
+    currentJobId: "48213",
+    currentQueueName: "scrape-item",
+  },
 });
 
 export const Default = meta.story();
@@ -71,6 +75,7 @@ export const SingleJob = meta.story({
   args: {
     root: { id: "1", queueName: "scrape-item", state: "waiting", children: [] },
     currentJobId: "1",
+    currentQueueName: "scrape-item",
   },
 });
 
@@ -78,3 +83,60 @@ SingleJob.test("has nothing to collapse", async ({ canvas }) => {
   await expect(canvas.getAllByRole("link")).toHaveLength(1);
   await expect(canvas.queryByRole("button")).toBeNull();
 });
+
+export const SharedIds = meta.story({
+  args: {
+    root: {
+      id: "7",
+      queueName: "process-item-request",
+      state: "completed",
+      children: [
+        {
+          id: "7",
+          queueName: "scrape-item",
+          state: "completed",
+          children: [
+            {
+              id: "9",
+              queueName: "parse-scrape-results",
+              state: "completed",
+              children: [],
+            },
+          ],
+        },
+      ],
+    },
+    currentJobId: "7",
+    currentQueueName: "scrape-item",
+  },
+});
+
+SharedIds.test(
+  "marks only the node in the current queue when ids match",
+  async ({ canvas }) => {
+    await expect(
+      canvas.getByRole("link", { name: "scrape-item #7" }),
+    ).toHaveAttribute("aria-current", "page");
+    await expect(
+      canvas.getByRole("link", { name: "process-item-request #7" }),
+    ).not.toHaveAttribute("aria-current");
+    await expect(canvas.getAllByText(/· this job/u)).toHaveLength(1);
+  },
+);
+
+SharedIds.test(
+  "collapses only the node in its own queue",
+  async ({ canvas, userEvent }) => {
+    await userEvent.click(
+      canvas.getByRole("button", { name: "Collapse scrape-item #7" }),
+    );
+
+    await expect(
+      canvas.getByRole("link", { name: "scrape-item #7" }),
+    ).toBeInTheDocument();
+    await expect(canvas.queryByText("parse-scrape-results")).toBeNull();
+    await expect(
+      canvas.getByRole("button", { name: "Collapse process-item-request #7" }),
+    ).toHaveAttribute("aria-expanded", "true");
+  },
+);

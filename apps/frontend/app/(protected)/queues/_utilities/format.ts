@@ -24,6 +24,15 @@ export function formatDuration(milliseconds: number) {
   return `${minutes.toString()} min ${seconds.toString()} s`;
 }
 
+/** The duration from one ISO time to another. Never negative: an overdue time reads as 0.0 s. */
+export function formatSpan(from: string, to: string) {
+  const milliseconds = DateTime.fromISO(to)
+    .diff(DateTime.fromISO(from))
+    .toMillis();
+
+  return formatDuration(Math.max(0, milliseconds));
+}
+
 export function formatRelativeTime(iso: string, now: string, locale: string) {
   return DateTime.fromISO(iso).toRelative({
     base: DateTime.fromISO(now),

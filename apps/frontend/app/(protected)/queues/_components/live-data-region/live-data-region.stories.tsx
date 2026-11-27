@@ -41,6 +41,8 @@ export const Disconnected = meta.story({
 Disconnected.test("explains that the data is stale", async ({ canvas }) => {
   const caption = canvas.getByText(/^Showing data from/u);
 
+  await expect(canvas.getByRole("status")).toBe(caption);
+  await canvas.findByText(/^\d{2}:\d{2}$/u);
   await expect(caption.textContent).toMatch(
     /^Showing data from \d{2}:\d{2}\. Actions are off until Riven reconnects\.$/u,
   );

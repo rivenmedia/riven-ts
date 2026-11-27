@@ -178,6 +178,23 @@ Disconnected.test("turns actions off", async ({ canvas }) => {
   }
 });
 
+export const ChildJobPreselected = meta.story({
+  args: { initialSelectedIds: ["48998", "49012", "48702"] },
+});
+
+ChildJobPreselected.test(
+  "counts and acts on top-level jobs only",
+  async ({ canvas, canvasElement, userEvent }) => {
+    await expect(
+      canvas.getByText("Selected").previousElementSibling,
+    ).toHaveTextContent("2");
+
+    await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
+
+    await expectToast(canvasElement, "Retried 2 jobs");
+  },
+);
+
 export const Mobile = meta.story({
   parameters: { viewport: { options: INITIAL_VIEWPORTS } },
   globals: { viewport: { value: "mobile1", isRotated: false } },
@@ -198,6 +215,9 @@ Failed.test(
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
 
     await expectToast(canvasElement, "Retried 2 jobs");
+    await waitFor(async () => {
+      await expect(canvas.getByRole("region", { name: "Jobs" })).toHaveFocus();
+    });
   },
 );
 
@@ -224,6 +244,9 @@ Failed.test(
     await userEvent.click(body.getByRole("button", { name: "Remove 2 jobs" }));
 
     await expectToast(canvasElement, "Removed 2 jobs");
+    await waitFor(async () => {
+      await expect(canvas.getByRole("region", { name: "Jobs" })).toHaveFocus();
+    });
     await expect(
       canvas.queryByRole("button", { name: "Clear selection" }),
     ).not.toBeInTheDocument();

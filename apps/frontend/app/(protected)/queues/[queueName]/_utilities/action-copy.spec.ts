@@ -61,6 +61,15 @@ describe(cleanConfirmCopy, () => {
   });
 });
 
+describe(cleanConfirmCopy, () => {
+  it("uses the singular for one job", () => {
+    expect(cleanConfirmCopy("failed", 1, "Scrape item")).toMatchObject({
+      title: "Clean 1 failed job?",
+      confirmLabel: "Clean 1 job",
+    });
+  });
+});
+
 describe(pauseConfirmCopy, () => {
   it("warns that flows stall", () => {
     expect(pauseConfirmCopy("Scrape item")).toStrictEqual({

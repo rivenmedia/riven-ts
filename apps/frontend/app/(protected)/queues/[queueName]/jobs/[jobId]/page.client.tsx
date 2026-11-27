@@ -14,6 +14,7 @@ import {
 } from "../../../_components/live-data-region/live-data-region.tsx";
 import { getQueueDisplayName } from "../../../_utilities/queue-display-name.ts";
 import { jobHref, queueHref } from "../../../_utilities/queue-routes.ts";
+import { jobCountLabel } from "../../_utilities/action-copy.ts";
 import { isTopLevelJob } from "../../_utilities/job-columns.ts";
 import { FlowTree } from "./_components/flow-tree/flow-tree.tsx";
 import { JobDataTabs } from "./_components/job-data-tabs/job-data-tabs.tsx";
@@ -39,7 +40,9 @@ export interface JobPageProps {
 }
 
 const handleRetry = () => {
-  toast.success("Retried 1 job", { description: "They're back in Waiting." });
+  toast.success(`Retried ${jobCountLabel(1)}`, {
+    description: "They're back in Waiting.",
+  });
 };
 
 const copyLink = async () => {
@@ -172,7 +175,11 @@ export function JobPage({ job, queue, liveStatus, now, locale }: JobPageProps) {
               <h2 id="job-flow-heading" className="text-base font-semibold">
                 Flow
               </h2>
-              <FlowTree root={job.flow} currentJobId={job.id} />
+              <FlowTree
+                root={job.flow}
+                currentJobId={job.id}
+                currentQueueName={job.queueName}
+              />
             </section>
           </div>
         </div>

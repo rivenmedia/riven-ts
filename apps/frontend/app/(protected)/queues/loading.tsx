@@ -1,10 +1,17 @@
 import { Skeleton } from "#components/_ui/skeleton.tsx";
 
 const tileKeys = ["active", "waiting", "scheduled", "failed"];
-const rowKeys = Array.from(
-  { length: 10 },
-  (_, index) => `row-${index.toString()}`,
-);
+const sections = [
+  { key: "flows", rows: 3 },
+  { key: "sandboxed", rows: 2 },
+  { key: "plugins", rows: 4 },
+].map(({ key, rows }) => ({
+  key,
+  rowKeys: Array.from(
+    { length: rows },
+    (_, index) => `${key}-${index.toString()}`,
+  ),
+}));
 
 export default function QueuesLoading() {
   return (
@@ -18,9 +25,15 @@ export default function QueuesLoading() {
           <Skeleton key={key} className="h-20" />
         ))}
       </div>
-      <div className="flex flex-col gap-2">
-        {rowKeys.map((key) => (
-          <Skeleton key={key} className="h-12" />
+      <Skeleton className="h-32" />
+      <div className="flex flex-col gap-4">
+        {sections.map((section) => (
+          <div key={section.key} className="flex flex-col gap-2">
+            <Skeleton className="h-6 w-48" />
+            {section.rowKeys.map((key) => (
+              <Skeleton key={key} className="h-12" />
+            ))}
+          </div>
         ))}
       </div>
     </div>

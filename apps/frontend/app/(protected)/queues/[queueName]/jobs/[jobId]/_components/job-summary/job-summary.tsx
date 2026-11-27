@@ -1,10 +1,7 @@
-import { DateTime } from "luxon";
 import Link from "next/link";
 
-import {
-  formatDateTime,
-  formatDuration,
-} from "../../../../../_utilities/format.ts";
+import { LocalTime } from "../../../../../_components/local-time/local-time.tsx";
+import { formatSpan } from "../../../../../_utilities/format.ts";
 import { jobHref, queueHref } from "../../../../../_utilities/queue-routes.ts";
 
 import type { JobDetail } from "../../../../../_types/job-queue.ts";
@@ -36,9 +33,13 @@ function Row({
 
 function Time({ iso, locale }: { iso: string | undefined; locale: string }) {
   return iso ? (
-    <time dateTime={iso} suppressHydrationWarning className="font-mono">
-      {formatDateTime(iso, locale)}
-    </time>
+    <LocalTime
+      iso={iso}
+      locale={locale}
+      format="date-time"
+      fallback="—"
+      className="font-mono"
+    />
   ) : (
     <span className="text-muted-foreground">Not yet</span>
   );
@@ -51,9 +52,7 @@ function getDuration(job: JobDetail, now: string) {
 
   const end = job.finishedAt ?? now;
 
-  return formatDuration(
-    DateTime.fromISO(end).diff(DateTime.fromISO(job.processedAt)).toMillis(),
-  );
+  return formatSpan(job.processedAt, end);
 }
 
 /** A job's name, attempts, timings and links. */

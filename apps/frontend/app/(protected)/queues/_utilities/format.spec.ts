@@ -8,6 +8,7 @@ import {
   formatDateTime,
   formatDuration,
   formatRelativeTime,
+  formatSpan,
 } from "./format.ts";
 
 /** Luxon's default zone, not `process.env.TZ`, because Intl caches the zone. */
@@ -60,4 +61,16 @@ it("formats a clock time", () => {
   withUtcZone(() => {
     expect(formatClockTime("2026-11-26T13:52:30.000Z", "en-GB")).toBe("13:52");
   });
+});
+
+it("formats the span between two times", () => {
+  expect(
+    formatSpan("2026-11-26T13:50:00.000Z", "2026-11-26T13:50:32.400Z"),
+  ).toBe("32.4 s");
+});
+
+it("clamps a negative span to zero", () => {
+  expect(
+    formatSpan("2026-11-26T13:50:05.000Z", "2026-11-26T13:50:00.000Z"),
+  ).toBe("0.0 s");
 });

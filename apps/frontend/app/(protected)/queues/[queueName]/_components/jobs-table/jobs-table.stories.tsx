@@ -131,8 +131,10 @@ Failed.test("selects only top-level jobs", async ({ canvas }) => {
 
 Failed.test("names the flow a child job belongs to", async ({ canvas }) => {
   const parent = canvas.getByRole("link", {
-    name: "process-item-request #48960",
+    name: "process-item-request #48960 (opens in a new tab)",
   });
+
+  await expect(parent).toHaveAttribute("target", "_blank");
 
   await expect(parent.parentElement).toHaveTextContent(
     "In flow under process-item-request #48960",

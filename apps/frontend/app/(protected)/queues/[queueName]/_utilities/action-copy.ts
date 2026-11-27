@@ -42,9 +42,9 @@ export function cleanConfirmCopy(
   queueLabel: string,
 ): ConfirmCopy {
   return {
-    title: `Clean ${count.toString()} ${state} jobs?`,
+    title: `Clean ${count.toString()} ${state} ${count === 1 ? "job" : "jobs"}?`,
     description: `This deletes every ${state} job in ${queueLabel}. You can't undo this.`,
-    confirmLabel: `Clean ${count.toString()} jobs`,
+    confirmLabel: `Clean ${jobCountLabel(count)}`,
   };
 }
 

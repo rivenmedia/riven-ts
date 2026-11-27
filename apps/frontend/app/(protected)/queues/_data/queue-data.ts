@@ -124,6 +124,11 @@ export function getJob(
   return summary ? buildJobDetail(summary) : undefined;
 }
 
+/** ISO 8601. The page's "now", which relative times are measured from. */
+export function getNow() {
+  return FIXTURE_NOW;
+}
+
 export function getLiveStatus(): LiveStatus {
   return {
     connectionStatus: "connected",

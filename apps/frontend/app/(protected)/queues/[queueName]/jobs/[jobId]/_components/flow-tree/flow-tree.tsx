@@ -13,23 +13,33 @@ import type { FlowNode } from "../../../../../_types/job-queue.ts";
 export interface FlowTreeProps {
   root: FlowNode;
   currentJobId: string;
+  currentQueueName: string;
 }
 
 interface FlowTreeNodeProps {
   node: FlowNode;
   currentJobId: string;
+  currentQueueName: string;
   collapsedIds: ReadonlySet<string>;
   onToggle: (id: string) => void;
+}
+
+/** Job ids are only unique within a queue. */
+function flowNodeKey(node: FlowNode) {
+  return `${node.queueName}:${node.id}`;
 }
 
 function FlowTreeNode({
   node,
   currentJobId,
+  currentQueueName,
   collapsedIds,
   onToggle,
 }: FlowTreeNodeProps) {
-  const isCurrent = node.id === currentJobId;
-  const isExpanded = !collapsedIds.has(node.id);
+  const nodeKey = flowNodeKey(node);
+  const isCurrent =
+    node.id === currentJobId && node.queueName === currentQueueName;
+  const isExpanded = !collapsedIds.has(nodeKey);
   const label = `${node.queueName} #${node.id}`;
 
   return (
@@ -37,7 +47,7 @@ function FlowTreeNode({
       <div
         className={
           isCurrent
-            ? "bg-destructive/10 ring-destructive/35 flex items-start gap-2 rounded-lg px-2 py-1.5 ring-1"
+            ? "bg-primary/10 ring-primary/40 flex items-start gap-2 rounded-lg px-2 py-1.5 ring-1"
             : "flex items-start gap-2 px-2 py-1.5"
         }
       >
@@ -48,7 +58,7 @@ function FlowTreeNode({
             aria-label={`${isExpanded ? "Collapse" : "Expand"} ${label}`}
             className="text-muted-foreground hover:bg-muted hover:text-foreground inline-flex size-5.5 shrink-0 items-center justify-center rounded-md"
             onClick={() => {
-              onToggle(node.id);
+              onToggle(nodeKey);
             }}
           >
             <ChevronRight
@@ -84,9 +94,10 @@ function FlowTreeNode({
         <ul className="ml-4 flex flex-col gap-0.5">
           {node.children.map((child) => (
             <FlowTreeNode
-              key={`${child.queueName}-${child.id}`}
+              key={flowNodeKey(child)}
               node={child}
               currentJobId={currentJobId}
+              currentQueueName={currentQueueName}
               collapsedIds={collapsedIds}
               onToggle={onToggle}
             />
@@ -98,7 +109,11 @@ function FlowTreeNode({
 }
 
 /** The job's whole flow as a nested list, from the root job. */
-export function FlowTree({ root, currentJobId }: FlowTreeProps) {
+export function FlowTree({
+  root,
+  currentJobId,
+  currentQueueName,
+}: FlowTreeProps) {
   const [collapsedIds, setCollapsedIds] = useState<ReadonlySet<string>>(
     new Set(),
   );
@@ -120,6 +135,7 @@ export function FlowTree({ root, currentJobId }: FlowTreeProps) {
       <FlowTreeNode
         node={root}
         currentJobId={currentJobId}
+        currentQueueName={currentQueueName}
         collapsedIds={collapsedIds}
         onToggle={handleToggle}
       />
