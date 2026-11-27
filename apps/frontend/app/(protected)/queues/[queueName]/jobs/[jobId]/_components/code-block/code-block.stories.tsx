@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { CodeBlock } from "./code-block.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / CodeBlock",
   component: CodeBlock,
   args: {
     label: "Stack trace",
@@ -16,7 +17,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "can be focused to scroll by keyboard",
+  "Can be focused to scroll by keyboard",
   async ({ canvas, userEvent }) => {
     const block = canvas.getByRole("region", { name: "Stack trace" });
 

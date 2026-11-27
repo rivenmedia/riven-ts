@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { JobDataTabs } from "./job-data-tabs.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobDataTabs",
   component: JobDataTabs,
   args: {
     data: { step: "scrape", isRootItem: false },
@@ -14,7 +15,7 @@ const meta = preview.meta({
 
 export const Failed = meta.story();
 
-Failed.test("shows the input data first", async ({ canvas }) => {
+Failed.test("Shows the input data first", async ({ canvas }) => {
   await expect(canvas.getByRole("tab", { name: "Input data" })).toHaveAttribute(
     "aria-selected",
     "true",
@@ -23,7 +24,7 @@ Failed.test("shows the input data first", async ({ canvas }) => {
 });
 
 Failed.test(
-  "says a failed job has no return value",
+  "Says a failed job has no return value",
   async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole("tab", { name: "Return value" }));
 
@@ -36,7 +37,7 @@ Failed.test(
 export const Active = meta.story({ args: { state: "active" } });
 
 Active.test(
-  "says an unfinished job has no return value",
+  "Says an unfinished job has no return value",
   async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole("tab", { name: "Return value" }));
 
@@ -49,7 +50,7 @@ export const CompletedJob = meta.story({
 });
 
 CompletedJob.test(
-  "shows the return value as JSON",
+  "Shows the return value as JSON",
   async ({ canvas, userEvent }) => {
     await userEvent.click(canvas.getByRole("tab", { name: "Return value" }));
 

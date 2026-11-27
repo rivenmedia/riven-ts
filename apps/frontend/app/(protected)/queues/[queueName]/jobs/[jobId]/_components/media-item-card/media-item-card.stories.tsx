@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { MediaItemCard } from "./media-item-card.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / MediaItemCard",
   component: MediaItemCard,
   args: {
     mediaItem: {
@@ -17,7 +18,7 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("links to the media item", async ({ canvas }) => {
+Default.test("Links to the media item", async ({ canvas }) => {
   await expect(canvas.getByText("Severance")).toBeVisible();
   await expect(canvas.getByText("Season 2, episode 7")).toBeVisible();
   await expect(canvas.getByRole("link", { name: "Open item" })).toHaveAttribute(

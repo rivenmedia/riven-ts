@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import QueuesError from "./error.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Overview Error",
   component: QueuesError,
   args: { reset: fn() },
 });
@@ -12,7 +13,7 @@ const meta = preview.meta({
 export const ErrorState = meta.story({ name: "Error" });
 
 ErrorState.test(
-  "explains the failure and retries",
+  "Explains the failure and retries",
   async ({ canvas, userEvent, args }) => {
     await expect(
       canvas.getByRole("heading", { name: "Couldn't load queues" }),

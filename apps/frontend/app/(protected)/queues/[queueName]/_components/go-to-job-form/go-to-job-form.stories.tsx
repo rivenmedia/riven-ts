@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { GoToJobForm } from "./go-to-job-form.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / GoToJobForm",
   component: GoToJobForm,
   args: { queueName: "scrape-item" },
 });
@@ -12,7 +13,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "disables Open until there is an ID",
+  "Disables Open until there is an ID",
   async ({ canvas, userEvent }) => {
     await expect(canvas.getByRole("button", { name: "Open" })).toBeDisabled();
 
@@ -22,7 +23,7 @@ Default.test(
   },
 );
 
-Default.test("opens the job in a new tab", async ({ canvas, userEvent }) => {
+Default.test("Opens the job in a new tab", async ({ canvas, userEvent }) => {
   const open = spyOn(globalThis, "open").mockReturnValue(null);
 
   await userEvent.type(canvas.getByLabelText("Go to job"), " 48213 ");

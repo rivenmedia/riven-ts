@@ -46,7 +46,7 @@ export const Indeterminate = meta.story({
   args: { id: "indeterminate-terms", checked: "indeterminate" },
 });
 
-Indeterminate.test("is announced as mixed", async ({ canvas }) => {
+Indeterminate.test("Is announced as mixed", async ({ canvas }) => {
   await expect(canvas.getByRole("checkbox")).toHaveAttribute(
     "aria-checked",
     "mixed",

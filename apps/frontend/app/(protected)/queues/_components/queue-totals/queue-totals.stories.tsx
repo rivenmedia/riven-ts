@@ -8,13 +8,14 @@ import { QueueTotals } from "./queue-totals.tsx";
 import type { QueueSummary } from "../../_types/job-queue.ts";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / QueueTotals",
   component: QueueTotals,
   args: { queues: getQueues(), locale: "en-GB" },
 });
 
 export const Default = meta.story();
 
-Default.test("shows the four totals in order", async ({ canvas }) => {
+Default.test("Shows the four totals in order", async ({ canvas }) => {
   const titles = ["Active", "Waiting", "Scheduled", "Failed"];
 
   for (const title of titles) {
@@ -32,7 +33,7 @@ Default.test("shows the four totals in order", async ({ canvas }) => {
   ]);
 });
 
-Default.test("shows failed jobs in the warning tone", async ({ canvas }) => {
+Default.test("Shows failed jobs in the warning tone", async ({ canvas }) => {
   const failedValue = canvas.getByText("Failed").nextElementSibling;
 
   await expect(failedValue).toHaveClass("text-amber-300");
@@ -47,7 +48,7 @@ export const NoFailures = meta.story({
   args: { queues: getQueues().map(withoutFailures) },
 });
 
-NoFailures.test("keeps failed in the default tone", async ({ canvas }) => {
+NoFailures.test("Keeps failed in the default tone", async ({ canvas }) => {
   const failedValue = canvas.getByText("Failed").nextElementSibling;
 
   await expect(failedValue).not.toHaveClass("text-amber-300");

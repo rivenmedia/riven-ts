@@ -7,6 +7,7 @@ import { getLiveStatus, getQueues } from "./_data/queue-data.ts";
 import { QueuesOverviewPage } from "./page.client.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Overview",
   component: QueuesOverviewPage,
   args: {
     queues: getQueues(),
@@ -18,7 +19,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "pauses and resumes live updates",
+  "Pauses and resumes live updates",
   async ({ canvas, userEvent }) => {
     await expect(
       canvas.getByRole("heading", { name: "Queues", level: 1 }),
@@ -44,7 +45,7 @@ export const Disconnected = meta.story({
   },
 });
 
-Disconnected.test("shows that the data is stale", async ({ canvas }) => {
+Disconnected.test("Shows that the data is stale", async ({ canvas }) => {
   await expect(canvas.getByText(/^Showing data from/u)).toBeVisible();
 });
 

@@ -5,12 +5,13 @@ import { preview } from "#.storybook/preview.tsx";
 import { ThroughputPlaceholder } from "./throughput-placeholder.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / ThroughputPlaceholder",
   component: ThroughputPlaceholder,
 });
 
 export const Overview = meta.story({ args: { variant: "overview" } });
 
-Overview.test("explains that the chart is parked", async ({ canvas }) => {
+Overview.test("Explains that the chart is parked", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Throughput" }),
   ).toBeInTheDocument();
@@ -27,7 +28,7 @@ Overview.test("explains that the chart is parked", async ({ canvas }) => {
 
 export const Queue = meta.story({ args: { variant: "queue" } });
 
-Queue.test("explains that the chart is parked", async ({ canvas }) => {
+Queue.test("Explains that the chart is parked", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Throughput for this queue" }),
   ).toBeInTheDocument();

@@ -6,6 +6,7 @@ import { removeConfirmCopy } from "../../_utilities/action-copy.ts";
 import { ConfirmActionDialog } from "./confirm-action-dialog.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / ConfirmActionDialog",
   component: ConfirmActionDialog,
   args: {
     open: true,
@@ -18,7 +19,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "confirms with the action's label",
+  "Confirms with the action's label",
   async ({ canvasElement, userEvent, args }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -40,7 +41,7 @@ Default.test(
 );
 
 Default.test(
-  "cancels without confirming",
+  "Cancels without confirming",
   async ({ canvasElement, userEvent, args }) => {
     const body = within(canvasElement.ownerDocument.body);
 

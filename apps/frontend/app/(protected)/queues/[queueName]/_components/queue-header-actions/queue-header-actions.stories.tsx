@@ -16,6 +16,7 @@ const fixtureQueue = (name: string) => {
 };
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / QueueHeaderActions",
   component: QueueHeaderActions,
   args: {
     queue: fixtureQueue("process-media-item"),
@@ -29,7 +30,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "pauses after confirming",
+  "Pauses after confirming",
   async ({ canvas, canvasElement, userEvent, args }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -52,7 +53,7 @@ Default.test(
 );
 
 Default.test(
-  "cleans completed jobs after confirming",
+  "Cleans completed jobs after confirming",
   async ({ canvas, canvasElement, userEvent, args }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -69,7 +70,7 @@ Default.test(
 );
 
 Default.test(
-  "does not clean when cancelled",
+  "Does not clean when cancelled",
   async ({ canvas, canvasElement, userEvent, args }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -87,7 +88,7 @@ export const Paused = meta.story({
   args: { queue: fixtureQueue("request-subtitles") },
 });
 
-Paused.test("resumes without asking", async ({ canvas, userEvent, args }) => {
+Paused.test("Resumes without asking", async ({ canvas, userEvent, args }) => {
   await userEvent.click(canvas.getByRole("button", { name: "Resume queue" }));
 
   await expect(args.onResume).toHaveBeenCalledTimes(1);
@@ -96,7 +97,7 @@ Paused.test("resumes without asking", async ({ canvas, userEvent, args }) => {
 
 export const Disabled = meta.story({ args: { disabled: true } });
 
-Disabled.test("turns every action off", async ({ canvas }) => {
+Disabled.test("Turns every action off", async ({ canvas }) => {
   await expect(
     canvas.getByRole("button", { name: "Pause queue" }),
   ).toBeDisabled();

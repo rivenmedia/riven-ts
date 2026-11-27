@@ -129,6 +129,13 @@ workers, rather than 4 in total.
 
 ## Storybook tests
 
+### Story titles
+
+Every story file sets an explicit `title` inside a group, never at the root
+level. Use `Pages / <Page>` for pages, `Pages / <Page> / Components / <Name>`
+for components private to a page, `Components / <Name>` for shared components
+and `ui/<Name>` for primitives.
+
 ### Story reuse
 
 When writing Storybook tests, re-use existing stories instead of

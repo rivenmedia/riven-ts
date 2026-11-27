@@ -6,6 +6,7 @@ import { FIXTURE_NOW } from "../../_fixtures/jobs.fixture.ts";
 import { LiveControls } from "./live-controls.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / LiveControls",
   component: LiveControls,
   args: {
     status: {
@@ -22,7 +23,7 @@ const meta = preview.meta({
 export const Connected = meta.story();
 
 Connected.test(
-  "pauses updates when the button is clicked",
+  "Pauses updates when the button is clicked",
   async ({ canvas, userEvent, args }) => {
     const button = canvas.getByRole("button", { name: "Pause updates" });
 
@@ -36,7 +37,7 @@ Connected.test(
 export const UpdatesPaused = meta.story({ args: { isUpdatesPaused: true } });
 
 UpdatesPaused.test(
-  "offers to resume updates",
+  "Offers to resume updates",
   async ({ canvas, userEvent, args }) => {
     const button = canvas.getByRole("button", { name: "Resume updates" });
 

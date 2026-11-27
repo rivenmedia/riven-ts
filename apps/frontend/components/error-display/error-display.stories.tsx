@@ -4,6 +4,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { ErrorDisplay } from "#components/error-display/error-display.tsx";
 
 const meta = preview.meta({
+  title: "Components / ErrorDisplay",
   component: ErrorDisplay,
   args: {
     errorMessage:
@@ -22,7 +23,7 @@ export const CustomTitle = meta.story({
   args: { title: "Couldn't load queues" },
 });
 
-CustomTitle.test("shows the custom title", async ({ canvas }) => {
+CustomTitle.test("Shows the custom title", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Couldn't load queues" }),
   ).toBeInTheDocument();

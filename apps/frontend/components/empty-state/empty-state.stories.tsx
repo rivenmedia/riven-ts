@@ -4,6 +4,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { EmptyState } from "#components/empty-state/empty-state.tsx";
 
 const meta = preview.meta({
+  title: "Components / EmptyState",
   component: EmptyState,
 });
 
@@ -26,7 +27,7 @@ export const WithDescription = meta.story({
   },
 });
 
-WithDescription.test("shows the description", async ({ canvas }) => {
+WithDescription.test("Shows the description", async ({ canvas }) => {
   await expect(
     canvas.getByText("Jobs land here once they've used up their retries."),
   ).toBeVisible();

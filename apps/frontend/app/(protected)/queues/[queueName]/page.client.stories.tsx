@@ -42,6 +42,7 @@ const expectToast = async (root: HTMLElement, text: string) => {
 };
 
 const meta = preview.meta({
+  title: "Pages / Queues / Queue",
   component: QueuePage,
   args: {
     ...props("process-media-item", "failed"),
@@ -53,7 +54,7 @@ const meta = preview.meta({
 
 export const Failed = meta.story();
 
-Failed.test("shows the queue and its failed jobs", async ({ canvas }) => {
+Failed.test("Shows the queue and its failed jobs", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Process media item", level: 1 }),
   ).toBeVisible();
@@ -68,7 +69,7 @@ Failed.test("shows the queue and its failed jobs", async ({ canvas }) => {
   await expect(canvas.getByText("Showing 1–7 of 7")).toBeVisible();
 });
 
-Failed.test("selects jobs", async ({ canvas, userEvent }) => {
+Failed.test("Selects jobs", async ({ canvas, userEvent }) => {
   await userEvent.click(
     canvas.getByRole("checkbox", { name: "Select job 49012" }),
   );
@@ -87,7 +88,7 @@ export const ChildJobsFailed = meta.story({
   args: props("scrape-item", "failed"),
 });
 
-ChildJobsFailed.test("has nothing to select", async ({ canvas }) => {
+ChildJobsFailed.test("Has nothing to select", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Scrape item", level: 1 }),
   ).toBeVisible();
@@ -98,7 +99,7 @@ export const PluginQueue = meta.story({
   args: props("riven.media-item.scrape.requested.plugin[torrentio]", "waiting"),
 });
 
-PluginQueue.test("uses the plugin queue's display name", async ({ canvas }) => {
+PluginQueue.test("Uses the plugin queue's display name", async ({ canvas }) => {
   await expect(
     canvas.getByRole("heading", { name: "Scrape requested", level: 1 }),
   ).toBeVisible();
@@ -108,7 +109,7 @@ export const PausedQueue = meta.story({
   args: props("request-subtitles", "paused"),
 });
 
-PausedQueue.test("says the queue is paused", async ({ canvas }) => {
+PausedQueue.test("Says the queue is paused", async ({ canvas }) => {
   await expect(canvas.getByText("Request subtitles is paused")).toBeVisible();
   await expect(
     canvas.getAllByRole("button", { name: "Resume queue" }),
@@ -116,7 +117,7 @@ PausedQueue.test("says the queue is paused", async ({ canvas }) => {
 });
 
 PausedQueue.test(
-  "resumes without asking",
+  "Resumes without asking",
   async ({ canvas, canvasElement, userEvent }) => {
     const [headerButton] = canvas.getAllByRole("button", {
       name: "Resume queue",
@@ -131,7 +132,7 @@ PausedQueue.test(
 );
 
 PausedQueue.test(
-  "resumes from the banner",
+  "Resumes from the banner",
   async ({ canvas, canvasElement, userEvent }) => {
     const banner = canvas.getByText("Request subtitles is paused").parentElement
       ?.parentElement;
@@ -152,7 +153,7 @@ export const DisconnectedPaused = meta.story({
   },
 });
 
-DisconnectedPaused.test("turns resume off", async ({ canvas }) => {
+DisconnectedPaused.test("Turns resume off", async ({ canvas }) => {
   await expect(canvas.getByText(/^Showing data from/u)).toBeVisible();
 
   for (const button of canvas.getAllByRole("button", {
@@ -170,7 +171,7 @@ export const Disconnected = meta.story({
   },
 });
 
-Disconnected.test("turns actions off", async ({ canvas }) => {
+Disconnected.test("Turns actions off", async ({ canvas }) => {
   await expect(canvas.getByText(/^Showing data from/u)).toBeVisible();
 
   for (const name of ["Retry", "Remove", "Pause queue", "Clean"]) {
@@ -183,7 +184,7 @@ export const ChildJobPreselected = meta.story({
 });
 
 ChildJobPreselected.test(
-  "counts and acts on top-level jobs only",
+  "Counts and acts on top-level jobs only",
   async ({ canvas, canvasElement, userEvent }) => {
     await expect(
       canvas.getByText("Selected").previousElementSibling,
@@ -201,7 +202,7 @@ export const Mobile = meta.story({
 });
 
 Failed.test(
-  "retries the selected jobs",
+  "Retries the selected jobs",
   async ({ canvas, canvasElement, userEvent }) => {
     for (const id of ["49012", "48702"]) {
       await userEvent.click(
@@ -222,7 +223,7 @@ Failed.test(
 );
 
 Failed.test(
-  "removes the selected jobs after confirming",
+  "Removes the selected jobs after confirming",
   async ({ canvas, canvasElement, userEvent }) => {
     const body = within(
       canvas.getByRole("heading", { level: 1 }).ownerDocument.body,
@@ -254,7 +255,7 @@ Failed.test(
 );
 
 Failed.test(
-  "selecting all skips child jobs",
+  "Selecting all skips child jobs",
   async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(
       canvas.getByRole("checkbox", {
@@ -273,7 +274,7 @@ Failed.test(
 );
 
 Failed.test(
-  "cleans failed jobs after confirming",
+  "Cleans failed jobs after confirming",
   async ({ canvas, canvasElement, userEvent }) => {
     const body = within(
       canvas.getByRole("heading", { level: 1 }).ownerDocument.body,
@@ -297,7 +298,7 @@ Failed.test(
 );
 
 Failed.test(
-  "pauses the queue after confirming",
+  "Pauses the queue after confirming",
   async ({ canvas, canvasElement, userEvent }) => {
     const body = within(
       canvas.getByRole("heading", { level: 1 }).ownerDocument.body,
@@ -323,7 +324,7 @@ export const Waiting = meta.story({
   args: props("process-item-request", "waiting"),
 });
 
-Waiting.test("offers Remove but not Retry", async ({ canvas, userEvent }) => {
+Waiting.test("Offers Remove but not Retry", async ({ canvas, userEvent }) => {
   const [firstJob] = canvas.getAllByRole("checkbox", { name: /^Select job /u });
 
   expect.assert(firstJob);
@@ -364,7 +365,7 @@ export const SelectionReset = meta.story({
 });
 
 SelectionReset.test(
-  "clears the selection when the tab changes",
+  "Clears the selection when the tab changes",
   async ({ canvas, userEvent }) => {
     await userEvent.click(
       canvas.getByRole("checkbox", { name: "Select job 49012" }),

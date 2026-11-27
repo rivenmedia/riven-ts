@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { LiveDataRegion } from "./live-data-region.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / LiveDataRegion",
   component: LiveDataRegion,
   args: {
     locale: "en-GB",
@@ -20,7 +21,7 @@ const meta = preview.meta({
 
 export const Connected = meta.story();
 
-Connected.test("shows no caption", async ({ canvas }) => {
+Connected.test("Shows no caption", async ({ canvas }) => {
   await expect(canvas.getByText("14 jobs waiting")).toBeInTheDocument();
   await expect(
     canvas.queryByText(/Showing data from/u),
@@ -38,7 +39,7 @@ export const Disconnected = meta.story({
   },
 });
 
-Disconnected.test("explains that the data is stale", async ({ canvas }) => {
+Disconnected.test("Explains that the data is stale", async ({ canvas }) => {
   const caption = canvas.getByText(/^Showing data from/u);
 
   await expect(canvas.getByRole("status")).toBe(caption);

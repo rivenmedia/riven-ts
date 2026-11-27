@@ -9,6 +9,7 @@ import { JobStateTabs } from "./job-state-tabs.tsx";
 const counts = getQueue("scrape-item")?.counts ?? emptyJobCounts();
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobStateTabs",
   component: JobStateTabs,
   args: {
     queueName: "scrape-item",
@@ -21,7 +22,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "lists the states in order with their counts",
+  "Lists the states in order with their counts",
   async ({ canvas }) => {
     const links = canvas.getAllByRole("link");
 
@@ -39,7 +40,7 @@ Default.test(
   },
 );
 
-Default.test("marks the current state", async ({ canvas }) => {
+Default.test("Marks the current state", async ({ canvas }) => {
   const failed = canvas.getByRole("link", { name: "Failed 9" });
 
   await expect(failed).toHaveAttribute("aria-current", "page");

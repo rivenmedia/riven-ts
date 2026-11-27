@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { JobHeaderActions } from "./job-header-actions.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobHeaderActions",
   component: JobHeaderActions,
   args: {
     jobId: "49012",
@@ -20,14 +21,14 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("retries without asking", async ({ canvas, userEvent, args }) => {
+Default.test("Retries without asking", async ({ canvas, userEvent, args }) => {
   await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
 
   await expect(args.onRetry).toHaveBeenCalledTimes(1);
 });
 
 Default.test(
-  "removes only after confirming",
+  "Removes only after confirming",
   async ({ canvas, canvasElement, userEvent, args }) => {
     await userEvent.click(canvas.getByRole("button", { name: "Remove" }));
 
@@ -50,7 +51,7 @@ export const CopyOnly = meta.story({
   args: { canRetry: false, canRemove: false },
 });
 
-CopyOnly.test("offers only Copy link", async ({ canvas }) => {
+CopyOnly.test("Offers only Copy link", async ({ canvas }) => {
   await expect(canvas.getByRole("button", { name: "Copy link" })).toBeEnabled();
   await expect(canvas.queryByRole("button", { name: "Retry" })).toBeNull();
   await expect(canvas.queryByRole("button", { name: "Remove" })).toBeNull();
@@ -58,7 +59,7 @@ CopyOnly.test("offers only Copy link", async ({ canvas }) => {
 
 export const Disabled = meta.story({ args: { disabled: true } });
 
-Disabled.test("turns every action off", async ({ canvas }) => {
+Disabled.test("Turns every action off", async ({ canvas }) => {
   for (const name of ["Retry", "Remove", "Copy link"]) {
     await expect(canvas.getByRole("button", { name })).toBeDisabled();
   }

@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { JobStateBadge } from "./job-state-badge.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobStateBadge",
   component: JobStateBadge,
   args: { state: "waiting" },
 });
@@ -21,7 +22,7 @@ export const Active = meta.story({ args: { state: "active" } });
 
 export const Delayed = meta.story({ args: { state: "delayed" } });
 
-Delayed.test("labels the delayed state as Scheduled", async ({ canvas }) => {
+Delayed.test("Labels the delayed state as Scheduled", async ({ canvas }) => {
   await expect(canvas.getByText("Scheduled")).toBeInTheDocument();
   await expect(canvas.queryByText(/delayed/iu)).not.toBeInTheDocument();
 });

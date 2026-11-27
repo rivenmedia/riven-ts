@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { JobFailure } from "./job-failure.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobFailure",
   component: JobFailure,
   args: {
     reason: "No streams passed ranking (0 of 41)",
@@ -17,7 +18,7 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("shows the reason and stack trace", async ({ canvas }) => {
+Default.test("Shows the reason and stack trace", async ({ canvas }) => {
   await expect(canvas.getByRole("region", { name: "Failure" })).toBeVisible();
   await expect(
     canvas.getByText("No streams passed ranking (0 of 41)", {
@@ -29,6 +30,6 @@ Default.test("shows the reason and stack trace", async ({ canvas }) => {
 
 export const NoStackTrace = meta.story({ args: { stacktrace: [] } });
 
-NoStackTrace.test("omits the stack trace", async ({ canvas }) => {
+NoStackTrace.test("Omits the stack trace", async ({ canvas }) => {
   await expect(canvas.queryByText(/scrape-item\.processor\.ts/u)).toBeNull();
 });

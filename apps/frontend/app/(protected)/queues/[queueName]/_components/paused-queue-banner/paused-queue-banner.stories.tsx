@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { PausedQueueBanner } from "./paused-queue-banner.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / PausedQueueBanner",
   component: PausedQueueBanner,
   args: {
     queueLabel: "Request subtitles",
@@ -16,7 +17,7 @@ const meta = preview.meta({
 export const Default = meta.story();
 
 Default.test(
-  "explains the pause and resumes",
+  "Explains the pause and resumes",
   async ({ canvas, userEvent, args }) => {
     await expect(canvas.getByText("Request subtitles is paused")).toBeVisible();
     await expect(
@@ -31,7 +32,7 @@ Default.test(
 
 export const Disabled = meta.story({ args: { disabled: true } });
 
-Disabled.test("turns the action off", async ({ canvas }) => {
+Disabled.test("Turns the action off", async ({ canvas }) => {
   await expect(
     canvas.getByRole("button", { name: "Resume queue" }),
   ).toBeDisabled();

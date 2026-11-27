@@ -13,6 +13,7 @@ if (!job) {
 }
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / FlowTree",
   component: FlowTree,
   args: {
     root: job.flow,
@@ -23,7 +24,7 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("links every node to its job", async ({ canvas }) => {
+Default.test("Links every node to its job", async ({ canvas }) => {
   const links = canvas.getAllByRole("link");
 
   await expect(links).toHaveLength(6);
@@ -35,7 +36,7 @@ Default.test("links every node to its job", async ({ canvas }) => {
   ).toHaveAttribute("href", jobHref("process-item-request", "48177"));
 });
 
-Default.test("marks the current node", async ({ canvas }) => {
+Default.test("Marks the current node", async ({ canvas }) => {
   await expect(
     canvas.getByRole("link", { name: "scrape-item #48213" }),
   ).toHaveAttribute("aria-current", "page");
@@ -45,13 +46,13 @@ Default.test("marks the current node", async ({ canvas }) => {
   ).not.toHaveAttribute("aria-current");
 });
 
-Default.test("notes a failure the parent ignored", async ({ canvas }) => {
+Default.test("Notes a failure the parent ignored", async ({ canvas }) => {
   await expect(
     canvas.getByText(/· parent ignored this failure/u),
   ).toBeVisible();
 });
 
-Default.test("collapses and expands a node", async ({ canvas, userEvent }) => {
+Default.test("Collapses and expands a node", async ({ canvas, userEvent }) => {
   const toggle = canvas.getByRole("button", {
     name: "Collapse scrape-item #48213",
   });
@@ -79,7 +80,7 @@ export const SingleJob = meta.story({
   },
 });
 
-SingleJob.test("has nothing to collapse", async ({ canvas }) => {
+SingleJob.test("Has nothing to collapse", async ({ canvas }) => {
   await expect(canvas.getAllByRole("link")).toHaveLength(1);
   await expect(canvas.queryByRole("button")).toBeNull();
 });
@@ -112,7 +113,7 @@ export const SharedIds = meta.story({
 });
 
 SharedIds.test(
-  "marks only the node in the current queue when ids match",
+  "Marks only the node in the current queue when ids match",
   async ({ canvas }) => {
     await expect(
       canvas.getByRole("link", { name: "scrape-item #7" }),
@@ -125,7 +126,7 @@ SharedIds.test(
 );
 
 SharedIds.test(
-  "collapses only the node in its own queue",
+  "Collapses only the node in its own queue",
   async ({ canvas, userEvent }) => {
     await userEvent.click(
       canvas.getByRole("button", { name: "Collapse scrape-item #7" }),

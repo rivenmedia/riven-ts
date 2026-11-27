@@ -15,13 +15,14 @@ if (!failed || !active) {
 }
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobSummary",
   component: JobSummary,
   args: { job: failed, now: FIXTURE_NOW, locale: "en-GB" },
 });
 
 export const Failed = meta.story();
 
-Failed.test("lists the job's details", async ({ canvas }) => {
+Failed.test("Lists the job's details", async ({ canvas }) => {
   await expect(canvas.getByText("Severance S02E07")).toBeVisible();
   await expect(canvas.getByText("3 of 3")).toBeVisible();
   await expect(canvas.getByText("32.4 s")).toBeVisible();
@@ -33,7 +34,7 @@ Failed.test("lists the job's details", async ({ canvas }) => {
 
 export const Active = meta.story({ args: { job: active } });
 
-Active.test("shows progress and no finish time", async ({ canvas }) => {
+Active.test("Shows progress and no finish time", async ({ canvas }) => {
   await expect(canvas.getByText("Progress")).toBeVisible();
   await expect(canvas.getByText("Not yet")).toBeVisible();
 });

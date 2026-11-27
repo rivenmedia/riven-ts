@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { LocalTime } from "./local-time.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / LocalTime",
   component: LocalTime,
   args: {
     iso: "2026-11-26T13:49:51.000Z",
@@ -16,7 +17,7 @@ const meta = preview.meta({
 
 export const DateTime = meta.story();
 
-DateTime.test("shows the date and time in the browser", async ({ canvas }) => {
+DateTime.test("Shows the date and time in the browser", async ({ canvas }) => {
   const time = await canvas.findByText(/^\d{1,2} \w{3}, \d{2}:\d{2}:\d{2}$/u);
 
   await expect(time).toHaveAttribute("datetime", "2026-11-26T13:49:51.000Z");
@@ -24,7 +25,7 @@ DateTime.test("shows the date and time in the browser", async ({ canvas }) => {
 
 export const Clock = meta.story({ args: { format: "clock" } });
 
-Clock.test("shows only the clock time", async ({ canvas }) => {
+Clock.test("Shows only the clock time", async ({ canvas }) => {
   const time = await canvas.findByText(/^\d{2}:\d{2}$/u);
 
   await expect(time).toHaveAttribute("datetime", "2026-11-26T13:49:51.000Z");

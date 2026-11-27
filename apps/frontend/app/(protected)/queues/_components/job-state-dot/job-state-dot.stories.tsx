@@ -4,6 +4,7 @@ import { JOB_STATES } from "../../_utilities/job-states.ts";
 import { JobStateDot } from "./job-state-dot.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobStateDot",
   component: JobStateDot,
   args: { state: "active" },
 });

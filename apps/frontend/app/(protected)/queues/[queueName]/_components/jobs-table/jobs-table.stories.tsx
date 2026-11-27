@@ -13,6 +13,7 @@ const processMediaItemJobs = (state: JobState) =>
   getJobs("process-media-item", state, 1).jobs;
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobsTable",
   component: JobsTable,
   args: {
     jobs: processMediaItemJobs("waiting"),
@@ -35,7 +36,7 @@ const columnHeaders = (canvas: {
 export const Waiting = meta.story();
 
 Waiting.test(
-  "shows when each job was created and how long it waited",
+  "Shows when each job was created and how long it waited",
   async ({ canvas }) => {
     await expect(columnHeaders(canvas)).toEqual([
       "Job",
@@ -58,7 +59,7 @@ export const WaitingChildren = meta.story({
   },
 });
 
-WaitingChildren.test("reads the child progress", async ({ canvas }) => {
+WaitingChildren.test("Reads the child progress", async ({ canvas }) => {
   await expect(canvas.getAllByText(/ of \d+ done$/u).length).toBeGreaterThan(0);
 });
 
@@ -66,7 +67,7 @@ export const Active = meta.story({
   args: { jobs: processMediaItemJobs("active"), state: "active" },
 });
 
-Active.test("has no checkboxes", async ({ canvas }) => {
+Active.test("Has no checkboxes", async ({ canvas }) => {
   await expect(canvas.queryAllByRole("checkbox")).toHaveLength(0);
   await expect(canvas.getAllByText(/^\d+%$/u).length).toBeGreaterThan(0);
 });
@@ -76,7 +77,7 @@ export const Delayed = meta.story({
 });
 
 Delayed.test(
-  "labels the reasons without saying delayed",
+  "Labels the reasons without saying delayed",
   async ({ canvas }) => {
     await expect(
       canvas.getAllByText(/^(Retry backoff|Scheduled)$/u).length,
@@ -89,7 +90,7 @@ export const Failed = meta.story({
   args: { jobs: processMediaItemJobs("failed"), state: "failed" },
 });
 
-Failed.test("shows the failure columns", async ({ canvas }) => {
+Failed.test("Shows the failure columns", async ({ canvas }) => {
   await expect(columnHeaders(canvas)).toEqual([
     "Job",
     "Media item",
@@ -100,7 +101,7 @@ Failed.test("shows the failure columns", async ({ canvas }) => {
   ]);
 });
 
-Failed.test("opens jobs in a new tab", async ({ canvas }) => {
+Failed.test("Opens jobs in a new tab", async ({ canvas }) => {
   const link = canvas.getByRole("link", {
     name: "Job 49012 (opens in a new tab)",
   });
@@ -112,7 +113,7 @@ Failed.test("opens jobs in a new tab", async ({ canvas }) => {
   );
 });
 
-Failed.test("selects only top-level jobs", async ({ canvas }) => {
+Failed.test("Selects only top-level jobs", async ({ canvas }) => {
   const labels = canvas
     .getAllByRole("checkbox")
     .map((box) => box.getAttribute("aria-label"));
@@ -129,7 +130,7 @@ Failed.test("selects only top-level jobs", async ({ canvas }) => {
   ).not.toBeInTheDocument();
 });
 
-Failed.test("names the flow a child job belongs to", async ({ canvas }) => {
+Failed.test("Names the flow a child job belongs to", async ({ canvas }) => {
   const parent = canvas.getByRole("link", {
     name: "process-item-request #48960 (opens in a new tab)",
   });
@@ -160,7 +161,7 @@ export const ChildJobsOnly = meta.story({
   args: { jobs: getJobs("scrape-item", "failed", 1).jobs, state: "failed" },
 });
 
-ChildJobsOnly.test("has no checkboxes at all", async ({ canvas }) => {
+ChildJobsOnly.test("Has no checkboxes at all", async ({ canvas }) => {
   await expect(canvas.queryAllByRole("checkbox")).toHaveLength(0);
 });
 
@@ -168,7 +169,7 @@ export const Empty = meta.story({
   args: { jobs: [], state: "waiting-children" },
 });
 
-Empty.test("explains that there are no jobs", async ({ canvas }) => {
+Empty.test("Explains that there are no jobs", async ({ canvas }) => {
   await expect(canvas.getByText("No jobs are awaiting children")).toBeVisible();
 });
 
@@ -181,7 +182,7 @@ export const SelectedSome = meta.story({
 });
 
 SelectedSome.test(
-  "selects and clears from the header",
+  "Selects and clears from the header",
   async ({ canvas, userEvent, args }) => {
     const header = canvas.getByRole("checkbox", {
       name: "Select all 4 top-level jobs on this page",
@@ -201,7 +202,7 @@ SelectedSome.test(
 );
 
 SelectedSome.test(
-  "adds a row to the selection",
+  "Adds a row to the selection",
   async ({ canvas, userEvent, args }) => {
     await userEvent.click(
       canvas.getByRole("checkbox", { name: "Select job 48702" }),
@@ -222,7 +223,7 @@ export const AllSelected = meta.story({
 });
 
 AllSelected.test(
-  "clears the selection from the header",
+  "Clears the selection from the header",
   async ({ canvas, userEvent, args }) => {
     await userEvent.click(
       canvas.getByRole("checkbox", {

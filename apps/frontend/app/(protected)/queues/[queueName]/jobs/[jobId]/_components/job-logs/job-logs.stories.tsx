@@ -5,6 +5,7 @@ import { preview } from "#.storybook/preview.tsx";
 import { JobLogs } from "./job-logs.tsx";
 
 const meta = preview.meta({
+  title: "Pages / Queues / Components / JobLogs",
   component: JobLogs,
   args: {
     lines: [
@@ -16,14 +17,14 @@ const meta = preview.meta({
 
 export const Default = meta.story();
 
-Default.test("counts and shows the lines", async ({ canvas }) => {
+Default.test("Counts and shows the lines", async ({ canvas }) => {
   await expect(canvas.getByText("2 lines")).toBeVisible();
   await expect(canvas.getByText(/Scraping Severance S02E07/u)).toBeVisible();
 });
 
 export const Empty = meta.story({ args: { lines: [] } });
 
-Empty.test("says nothing was logged", async ({ canvas }) => {
+Empty.test("Says nothing was logged", async ({ canvas }) => {
   await expect(canvas.getByText("0 lines")).toBeVisible();
   await expect(
     canvas.getByText("This job hasn't logged anything."),

@@ -48,6 +48,7 @@ const expectToast = async (root: HTMLElement, text: string) => {
 };
 
 const meta = preview.meta({
+  title: "Pages / Queues / Job",
   component: JobPage,
   args: {
     ...props("scrape-item", "48213"),
@@ -60,7 +61,7 @@ const meta = preview.meta({
 
 export const ChildJob = meta.story();
 
-ChildJob.test("shows the job and its state", async ({ canvas }) => {
+ChildJob.test("Shows the job and its state", async ({ canvas }) => {
   const heading = canvas.getByRole("heading", { name: "Job #48213", level: 1 });
 
   expect.assert(heading.parentElement);
@@ -72,7 +73,7 @@ ChildJob.test("shows the job and its state", async ({ canvas }) => {
 });
 
 ChildJob.test(
-  "names the media item and queue in the subtitle",
+  "Names the media item and queue in the subtitle",
   async ({ canvas }) => {
     await expect(
       canvas.getByText("Severance", { selector: "p" }),
@@ -80,7 +81,7 @@ ChildJob.test(
   },
 );
 
-ChildJob.test("summarises the job", async ({ canvas }) => {
+ChildJob.test("Summarises the job", async ({ canvas }) => {
   const summary = within(canvas.getByRole("region", { name: "Summary" }));
 
   await expect(summary.getByText("Severance S02E07")).toBeVisible();
@@ -92,7 +93,7 @@ ChildJob.test("summarises the job", async ({ canvas }) => {
   await expect(summary.queryByText("Progress")).toBeNull();
 });
 
-ChildJob.test("sends actions to the top-level job", async ({ canvas }) => {
+ChildJob.test("Sends actions to the top-level job", async ({ canvas }) => {
   await expect(
     canvas.getByText("Part of a flow. Act on its top-level job instead."),
   ).toBeVisible();
@@ -105,7 +106,7 @@ ChildJob.test("sends actions to the top-level job", async ({ canvas }) => {
   await expect(canvas.queryByRole("button", { name: "Remove" })).toBeNull();
 });
 
-ChildJob.test("shows the failure, logs and flow", async ({ canvas }) => {
+ChildJob.test("Shows the failure, logs and flow", async ({ canvas }) => {
   await expect(
     canvas.getAllByText("No streams passed ranking (0 of 41)").length,
   ).toBeGreaterThan(0);
@@ -115,7 +116,7 @@ ChildJob.test("shows the failure, logs and flow", async ({ canvas }) => {
 });
 
 ChildJob.test(
-  "copies the link",
+  "Copies the link",
   async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(canvas.getByRole("button", { name: "Copy link" }));
 
@@ -124,7 +125,7 @@ ChildJob.test(
 );
 
 ChildJob.test(
-  "says when the link can't be copied",
+  "Says when the link can't be copied",
   async ({ canvas, canvasElement, userEvent }) => {
     const writeText = spyOn(navigator.clipboard, "writeText").mockRejectedValue(
       new Error("denied"),
@@ -142,7 +143,7 @@ export const TopLevelFailedJob = meta.story({
   args: props("process-media-item", "49012"),
 });
 
-TopLevelFailedJob.test("offers Retry and Remove", async ({ canvas }) => {
+TopLevelFailedJob.test("Offers Retry and Remove", async ({ canvas }) => {
   await expect(canvas.getByRole("button", { name: "Retry" })).toBeEnabled();
   await expect(canvas.getByRole("button", { name: "Remove" })).toBeEnabled();
   await expect(canvas.queryByRole("note")).toBeNull();
@@ -150,7 +151,7 @@ TopLevelFailedJob.test("offers Retry and Remove", async ({ canvas }) => {
 });
 
 TopLevelFailedJob.test(
-  "retries without asking",
+  "Retries without asking",
   async ({ canvas, canvasElement, userEvent }) => {
     await userEvent.click(canvas.getByRole("button", { name: "Retry" }));
 
@@ -160,7 +161,7 @@ TopLevelFailedJob.test(
 );
 
 TopLevelFailedJob.test(
-  "removes the job after confirming, then leaves the page",
+  "Removes the job after confirming, then leaves the page",
   async ({ canvas, canvasElement, userEvent }) => {
     const body = within(canvasElement.ownerDocument.body);
 
@@ -185,7 +186,7 @@ export const ActiveJob = meta.story({
   args: props("process-item-request", activeJobId),
 });
 
-ActiveJob.test("has no actions and no failure", async ({ canvas }) => {
+ActiveJob.test("Has no actions and no failure", async ({ canvas }) => {
   await expect(canvas.queryByRole("button", { name: "Retry" })).toBeNull();
   await expect(canvas.queryByRole("button", { name: "Remove" })).toBeNull();
   await expect(canvas.queryByRole("region", { name: "Failure" })).toBeNull();
@@ -200,7 +201,7 @@ export const Disconnected = meta.story({
   args: { ...props("process-media-item", "49012"), liveStatus: disconnected },
 });
 
-Disconnected.test("turns actions off", async ({ canvas }) => {
+Disconnected.test("Turns actions off", async ({ canvas }) => {
   await expect(canvas.getByText(/^Showing data from/u)).toBeVisible();
 
   for (const name of ["Retry", "Remove", "Copy link"]) {
