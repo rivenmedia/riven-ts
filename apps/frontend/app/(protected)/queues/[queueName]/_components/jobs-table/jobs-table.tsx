@@ -207,6 +207,7 @@ export function JobsTable({
         <TableBody>
           {jobs.map((job) => (
             <TableRow
+              className="group"
               key={job.id}
               data-state={selectedIds.has(job.id) ? "selected" : undefined}
             >
@@ -237,7 +238,7 @@ export function JobsTable({
                   <ExternalLinkIcon className="size-3" aria-hidden="true" />
                 </Link>
                 {job.parent ? (
-                  <div className="text-muted-foreground text-xs">
+                  <div className="text-muted-foreground group-data-[state=selected]:text-foreground/80 text-xs">
                     In flow under{" "}
                     <Link
                       href={jobHref(job.parent.queueName, job.parent.id)}
@@ -258,7 +259,7 @@ export function JobsTable({
                       {job.mediaItem.title}
                     </Link>
                     {job.mediaItem.subtitle ? (
-                      <div className="text-muted-foreground text-xs">
+                      <div className="text-muted-foreground group-data-[state=selected]:text-foreground/80 text-xs">
                         {job.mediaItem.subtitle}
                       </div>
                     ) : null}

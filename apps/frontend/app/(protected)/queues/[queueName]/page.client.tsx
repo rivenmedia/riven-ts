@@ -84,6 +84,7 @@ export function QueuePage({
         <PausedQueueBanner
           queueLabel={displayName}
           disabled={!isLive(liveStatus)}
+          // TODO(task 7): wire onResume
           onResume={() => undefined}
         />
       ) : null}
