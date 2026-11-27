@@ -1,4 +1,4 @@
-import type { ConnectionStatus } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
+import type { ConnectionStatus } from "#components/connection-status-indicator/connection-status-indicator.tsx";
 
 export function getConnectionStatusText(
   connectionStatus: ConnectionStatus,

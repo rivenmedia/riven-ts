@@ -1,10 +1,9 @@
 import { fn } from "storybook/test";
 
 import { preview } from "#.storybook/preview.tsx";
-import { ErrorDisplay } from "#components/logs-viewer/error-display/error-display.tsx";
+import { ErrorDisplay } from "#components/error-display/error-display.tsx";
 
 const meta = preview.meta({
-  title: "Logs Viewer / ErrorDisplay",
   component: ErrorDisplay,
   args: {
     errorMessage:

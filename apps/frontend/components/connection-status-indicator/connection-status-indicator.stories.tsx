@@ -1,8 +1,7 @@
 import { preview } from "#.storybook/preview.tsx";
-import { ConnectionStatusIndicator } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
+import { ConnectionStatusIndicator } from "#components/connection-status-indicator/connection-status-indicator.tsx";
 
 const meta = preview.meta({
-  title: "Logs Viewer / ConnectionStatusIndicator",
   component: ConnectionStatusIndicator,
   args: {
     reconnectAttempts: 0,

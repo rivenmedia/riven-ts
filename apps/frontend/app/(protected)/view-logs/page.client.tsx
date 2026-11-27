@@ -10,17 +10,17 @@ import {
   TabsList,
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
-import { getConnectionStatusText } from "#components/logs-viewer/_utilities/get-connection-status-text.ts";
-import { ConnectionStatusIndicator } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
-import { EmptyState } from "#components/logs-viewer/empty-state/empty-state.tsx";
-import { ErrorDisplay } from "#components/logs-viewer/error-display/error-display.tsx";
+import { ConnectionStatusIndicator } from "#components/connection-status-indicator/connection-status-indicator.tsx";
+import { getConnectionStatusText } from "#components/connection-status-indicator/get-connection-status-text.ts";
+import { EmptyState } from "#components/empty-state/empty-state.tsx";
+import { ErrorDisplay } from "#components/error-display/error-display.tsx";
 import { LiveLogLine } from "#components/logs-viewer/live-log-line/live-log-line.tsx";
 import { LoadingSpinner } from "#components/logs-viewer/loading-spinner/loading-spinner.tsx";
 import { LogEntryRow } from "#components/logs-viewer/log-entry-row/log-entry-row.tsx";
 import { LogTabButton } from "#components/logs-viewer/log-tab-button/log-tab-button.tsx";
 import { PageShell } from "#components/page-shell/page-shell.tsx";
 
-import type { ConnectionStatus } from "#components/logs-viewer/connection-status-indicator/connection-status-indicator.tsx";
+import type { ConnectionStatus } from "#components/connection-status-indicator/connection-status-indicator.tsx";
 import type { LogEntryRowProps } from "#components/logs-viewer/log-entry-row/log-entry-row.tsx";
 
 /** Logs route with live-stream and historical log tabs. */
