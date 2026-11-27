@@ -26,7 +26,6 @@ export function PluginGroupRows({ group, locale }: PluginGroupRowsProps) {
           <button
             type="button"
             aria-expanded={isExpanded}
-            aria-label={`${isExpanded ? "Collapse" : "Expand"} ${displayName}`}
             className="hover:text-foreground flex items-center gap-2 font-medium"
             onClick={() => {
               setIsExpanded((current) => !current);
@@ -39,6 +38,9 @@ export function PluginGroupRows({ group, locale }: PluginGroupRowsProps) {
                 isExpanded && "rotate-90",
               )}
             />
+            <span className="sr-only">
+              {isExpanded ? "Collapse" : "Expand"}
+            </span>
             <span>{displayName}</span>
             <span className="text-muted-foreground text-xs font-normal">
               {queueCount === 1 ? "1 queue" : `${queueCount.toString()} queues`}

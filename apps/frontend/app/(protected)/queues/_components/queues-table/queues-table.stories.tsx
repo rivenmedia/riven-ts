@@ -28,7 +28,7 @@ Default.test("lists the three sections with counts", async ({ canvas }) => {
 Default.test(
   "collapses plugin groups until they are expanded",
   async ({ canvas, userEvent }) => {
-    const toggle = canvas.getByRole("button", { name: "Expand StremThru" });
+    const toggle = canvas.getByRole("button", { name: /^Expand StremThru\b/u });
 
     await expect(toggle).toHaveAttribute("aria-expanded", "false");
     await expect(canvas.queryAllByText(/^riven\..*stremthru/u)).toHaveLength(0);
@@ -36,7 +36,7 @@ Default.test(
     await userEvent.click(toggle);
 
     await expect(
-      canvas.getByRole("button", { name: "Collapse StremThru" }),
+      canvas.getByRole("button", { name: /^Collapse StremThru\b/u }),
     ).toHaveAttribute("aria-expanded", "true");
     await expect(canvas.getAllByText(/^riven\..*\[stremthru\]$/u)).toHaveLength(
       6,
@@ -48,7 +48,7 @@ Default.test(
   "links a plugin queue to its queue page",
   async ({ canvas, userEvent }) => {
     await userEvent.click(
-      canvas.getByRole("button", { name: "Expand Torrentio" }),
+      canvas.getByRole("button", { name: /^Expand Torrentio\b/u }),
     );
 
     const link = canvas.getByRole("link", { name: "Scrape requested" });

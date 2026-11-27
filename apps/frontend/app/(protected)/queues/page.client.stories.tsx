@@ -7,7 +7,6 @@ import { getLiveStatus, getQueues } from "./_data/queue-data.ts";
 import { QueuesOverviewPage } from "./page.client.tsx";
 
 const meta = preview.meta({
-  title: "Pages / Queues",
   component: QueuesOverviewPage,
   args: {
     queues: getQueues(),

@@ -15,6 +15,9 @@ ErrorState.test(
   "explains the failure and retries",
   async ({ canvas, userEvent, args }) => {
     await expect(
+      canvas.getByRole("heading", { name: "Couldn't load queues" }),
+    ).toBeInTheDocument();
+    await expect(
       canvas.getByText(
         "Couldn't load the queues. Check that Riven and Redis are running, then try again.",
       ),

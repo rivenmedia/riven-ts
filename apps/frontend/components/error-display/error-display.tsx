@@ -2,22 +2,21 @@ export interface ErrorDisplayProps {
   errorMessage: string;
   retryAction: () => void;
   buttonText?: string;
+  title?: string;
 }
 
 /**
- * Error panel shown when logs fail to load, with the error message and a retry
- * button.
+ * Error panel with a title, the error message and a retry button.
  */
 export function ErrorDisplay({
   errorMessage,
   retryAction,
   buttonText = "Try Again",
+  title = "Error Loading Logs",
 }: ErrorDisplayProps) {
   return (
     <div className="bg-destructive/10 border-destructive/20 rounded-lg border p-6">
-      <h3 className="text-destructive mb-3 text-lg font-semibold">
-        Error Loading Logs
-      </h3>
+      <h3 className="text-destructive mb-3 text-lg font-semibold">{title}</h3>
       <pre className="text-destructive/80 bg-destructive/5 mb-4 overflow-x-auto rounded border p-3 font-mono text-sm">
         {errorMessage}
       </pre>
