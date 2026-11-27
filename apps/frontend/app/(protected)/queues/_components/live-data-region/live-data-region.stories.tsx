@@ -39,9 +39,13 @@ export const Disconnected = meta.story({
 });
 
 Disconnected.test("explains that the data is stale", async ({ canvas }) => {
-  await expect(
-    canvas.getByText(
-      /^Showing data from \d{2}:\d{2}\. Actions are off until Riven reconnects\.$/u,
-    ),
-  ).toBeInTheDocument();
+  const caption = canvas.getByText(/^Showing data from/u);
+
+  await expect(caption.textContent).toMatch(
+    /^Showing data from \d{2}:\d{2}\. Actions are off until Riven reconnects\.$/u,
+  );
+  await expect(caption.querySelector("time")).toHaveAttribute(
+    "datetime",
+    "2026-11-26T13:52:00.000Z",
+  );
 });

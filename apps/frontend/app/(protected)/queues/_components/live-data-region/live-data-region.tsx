@@ -37,7 +37,11 @@ export function LiveDataRegion({
       </div>
       {live ? null : (
         <p className="text-muted-foreground mt-2 text-sm">
-          {`Showing data from ${formatClockTime(status.lastUpdatedAt, locale)}. Actions are off until Riven reconnects.`}
+          Showing data from{" "}
+          <time dateTime={status.lastUpdatedAt} suppressHydrationWarning>
+            {formatClockTime(status.lastUpdatedAt, locale)}
+          </time>
+          . Actions are off until Riven reconnects.
         </p>
       )}
     </div>
