@@ -26,26 +26,28 @@ The dev server runs over HTTPS with a self-signed certificate, generated into
 `apps/frontend/certificates/` on first run. Accept the browser warning the
 first time you open it.
 
-The defaults for `ORIGIN` (`https://localhost:9000`) and `BACKEND_URL`
-(`http://localhost:3000`) already match this setup, and Riven trusts
-`https://localhost:9000` out of the box, so no extra configuration is needed.
+The default for `BACKEND_URL` (`http://localhost:3000`) already matches this
+setup, and Riven trusts the frontend's origin out of the box, so no extra
+configuration is needed.
 Set `RIVEN_SETTING__adminUserCredentials` in `apps/riven/.env.riven` to get an
 account to sign in with.
 
 ## Environment variables
 
 Next.js loads `apps/frontend/.env.development` (and `.env.local`) in dev. As
-well as `ORIGIN` and `BACKEND_URL` from
-[Configuration](/docs/frontend/configuration#frontend-container), these are
-available:
+well as `PORT` from [Configuration](/docs/frontend/configuration#frontend),
+these are available. The Docker image sets `BACKEND_URL` and `BACKEND_API_KEY`
+itself.
 
-| Variable                  | Description                                                        | Default |
-| ------------------------- | ------------------------------------------------------------------ | ------- |
-| `ENABLE_MOCKS`            | Starts an [MSW](https://mswjs.io) server for server-side requests. | `false` |
-| `NEXT_PUBLIC_LOG_LEVEL`   | Log verbosity, as a number.                                        | `3`     |
-| `NEXT_PUBLIC_LOG_DATE`    | Include timestamps in logs.                                        | `true`  |
-| `NEXT_PUBLIC_LOG_COLORS`  | Colour log output.                                                 | `true`  |
-| `NEXT_PUBLIC_LOG_COMPACT` | Use compact log output.                                            | `false` |
+| Variable                  | Description                                                                                                                         | Default                 |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `BACKEND_URL`             | Where the frontend reaches Riven's API.                                                                                             | `http://localhost:3000` |
+| `BACKEND_API_KEY`         | Riven's API key, `RIVEN_SETTING__apiKey`. Sent for data that every user shares, such as TMDB trending lists, which fail without it. | None                    |
+| `ENABLE_MOCKS`            | Starts an [MSW](https://mswjs.io) server for server-side requests.                                                                  | `false`                 |
+| `NEXT_PUBLIC_LOG_LEVEL`   | Log verbosity, as a number.                                                                                                         | `3`                     |
+| `NEXT_PUBLIC_LOG_DATE`    | Include timestamps in logs.                                                                                                         | `true`                  |
+| `NEXT_PUBLIC_LOG_COLORS`  | Colour log output.                                                                                                                  | `true`                  |
+| `NEXT_PUBLIC_LOG_COMPACT` | Use compact log output.                                                                                                             | `false`                 |
 
 <Callout type="info">
   `NEXT_PUBLIC_` variables are baked in at build time, so they can't be changed
@@ -102,11 +104,11 @@ Some things to know when writing tests:
 
 ## Building the Docker image
 
-The image is built from the monorepo root:
+The image runs both Riven and the frontend, and is built from the monorepo
+root:
 
 ```bash
-docker build -f apps/frontend/Dockerfile -t riven-frontend .
+docker build -t riven .
 ```
 
-Then run it with `ORIGIN` and `BACKEND_URL` set, as in
-[Getting Started](/docs/frontend/getting-started).
+Then run it as in [Getting Started](/docs/getting-started).

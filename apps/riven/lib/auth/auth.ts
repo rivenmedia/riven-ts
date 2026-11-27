@@ -22,6 +22,7 @@ import { getRuntimeSettings } from "#utilities/runtime-settings.ts";
 import { settings } from "#utilities/settings.ts";
 
 import { generateSecret } from "./generate-secret.ts";
+import { getRequestOrigins } from "./get-request-origins.ts";
 import { getGenericOAuthProviders } from "./oauth-utils.ts";
 import { defaultPlexOptions, plexOAuth } from "./plex-oauth.ts";
 
@@ -120,10 +121,11 @@ export const authConfig = {
     disableSignUp: !frontendSettings.enableEmailPasswordSignup,
   },
   socialProviders: {},
-  trustedOrigins: [
+  trustedOrigins: (request) => [
     "https://localhost:9000",
     "https://192.168.1.*:9000",
     frontendSettings.origin,
+    ...getRequestOrigins(request),
   ],
   advanced: {
     cookiePrefix: "riven",

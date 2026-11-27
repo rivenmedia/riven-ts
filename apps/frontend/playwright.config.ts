@@ -96,7 +96,6 @@ export default defineConfig({
       ENABLE_TEST_PROXY: "true",
       // The tests mock the network themselves, and the development mocks would intercept Next.js' requests to the test proxy
       ENABLE_MOCKS: "false",
-      ORIGIN: baseURL,
       // A backend that never resolves, so a request that isn't mocked or re-addressed to a worker's Riven fails
       BACKEND_URL: backendUrl,
       // Shared `"use cache"` queries authenticate with the API key, and fail without one

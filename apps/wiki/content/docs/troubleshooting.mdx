@@ -104,13 +104,14 @@ docker compose up -d
 
 ### Connection refused on port 3000
 
-**Symptom**: The container is healthy and the port is published, but requests to
-`http://<host>:3000` are refused. Anything that calls into Riven — the Seerr
-webhook, a reverse proxy — fails.
+**Symptom**: The container is healthy, but requests to `http://<host>:3000` are
+refused. Anything that calls Riven's API port directly, such as the Seerr
+webhook, fails.
 
-**Fix**: `host` defaults to `localhost`, so the API binds to loopback
-_inside_ the container and publishing the port has no effect. Bind it to all
-interfaces:
+**Fix**: Riven's API binds to loopback _inside_ the container by default, as
+the frontend on port `9000` reaches it there and forwards `/graphql` to it.
+Either call `http://<host>:9000/graphql` instead, or bind the API to all
+interfaces, and publish port `3000`:
 
 ```bash
 RIVEN_SETTING__host="0.0.0.0"
