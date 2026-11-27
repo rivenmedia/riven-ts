@@ -366,7 +366,7 @@ const scrapeItemFailed: readonly JobSummary[] = [
     media: mediaFixtures.severance,
     failedReason: "No streams passed ranking (0 of 41)",
     createdAt: "2026-11-26T13:49:51.000Z",
-    durationSeconds: 32,
+    durationSeconds: 32.4,
     parent: processMediaItemParent("48190"),
   },
   {
