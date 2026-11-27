@@ -2,6 +2,7 @@ import {
   CalendarDays,
   FileClock,
   Home,
+  Layers,
   LayoutDashboard,
   Library,
   Search,
@@ -57,6 +58,12 @@ export default async function ProtectedLayout({ children }: LayoutProps<"/">) {
             icon: <FileClock />,
             label: "Logs",
             hidden: !isFeatureEnabled("logsPage"),
+          },
+          {
+            href: "/queues",
+            icon: <Layers />,
+            label: "Queues",
+            hidden: !isFeatureEnabled("queuesPage"),
           },
         ] as const)
       : []),

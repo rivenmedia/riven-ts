@@ -4,6 +4,7 @@ const enabledFeatures = {
   settingsPage: true,
   dangerZone: false,
   logsPage: false,
+  queuesPage: false,
   notificationCentre: false,
   selectableLibraryItems: false,
 } as const satisfies Record<string, boolean>;
