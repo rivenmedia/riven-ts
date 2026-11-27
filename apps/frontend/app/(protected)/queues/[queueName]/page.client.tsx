@@ -1,7 +1,11 @@
 "use client";
 
+import { RotateCcw, Trash } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
+
+import { SelectionActionBar } from "#components/selection-action-bar/selection-action-bar.tsx";
 
 import { LiveControls } from "../_components/live-controls/live-controls.tsx";
 import {
@@ -10,12 +14,20 @@ import {
 } from "../_components/live-data-region/live-data-region.tsx";
 import { ThroughputPlaceholder } from "../_components/throughput-placeholder/throughput-placeholder.tsx";
 import { getQueueDisplayName } from "../_utilities/queue-display-name.ts";
+import { ConfirmActionDialog } from "./_components/confirm-action-dialog/confirm-action-dialog.tsx";
 import { GoToJobForm } from "./_components/go-to-job-form/go-to-job-form.tsx";
 import { JobPagination } from "./_components/job-pagination/job-pagination.tsx";
 import { JobStateTabs } from "./_components/job-state-tabs/job-state-tabs.tsx";
 import { JobsTable } from "./_components/jobs-table/jobs-table.tsx";
 import { PausedQueueBanner } from "./_components/paused-queue-banner/paused-queue-banner.tsx";
+import { QueueHeaderActions } from "./_components/queue-header-actions/queue-header-actions.tsx";
+import { jobCountLabel, removeConfirmCopy } from "./_utilities/action-copy.ts";
+import {
+  isSelectableJob,
+  isSelectableState,
+} from "./_utilities/job-columns.ts";
 
+import type { SelectionAction } from "#components/selection-action-bar/selection-action-bar.tsx";
 import type { JobPage, LiveStatus, QueueSummary } from "../_types/job-queue.ts";
 import type { JobState } from "../_utilities/job-states.ts";
 
@@ -27,6 +39,8 @@ export interface QueuePageProps {
   /** ISO 8601. Relative times and durations are measured from this. */
   now: string;
   locale: string;
+  /** Pre-selects jobs. For stories only. */
+  initialSelectedIds?: readonly string[];
 }
 
 const NO_SELECTION: ReadonlySet<string> = new Set();
@@ -39,16 +53,65 @@ export function QueuePage({
   liveStatus,
   now,
   locale,
+  initialSelectedIds,
 }: QueuePageProps) {
   const [isUpdatesPaused, setIsUpdatesPaused] = useState(false);
   // The selection belongs to one page of one state, so it resets on navigation.
   const scope = `${queue.name}|${state}|${jobPage.page.toString()}`;
-  const [selection, setSelection] = useState({
+  const [selection, setSelection] = useState<{
+    scope: string;
+    ids: ReadonlySet<string>;
+  }>({
     scope,
-    ids: NO_SELECTION,
+    ids: initialSelectedIds ? new Set(initialSelectedIds) : NO_SELECTION,
   });
+  const [isRemoveOpen, setIsRemoveOpen] = useState(false);
   const selectedIds = selection.scope === scope ? selection.ids : NO_SELECTION;
   const displayName = getQueueDisplayName(queue.name);
+  const isActionable = isLive(liveStatus);
+  // Only visible, top-level jobs can reach an action, never a stale ID.
+  const actionableIds = jobPage.jobs
+    .filter((job) => isSelectableJob(job) && selectedIds.has(job.id))
+    .map((job) => job.id);
+
+  const clearSelection = () => {
+    setSelection({ scope, ids: NO_SELECTION });
+  };
+  const handleRetry = () => {
+    toast.success(`Retried ${jobCountLabel(actionableIds.length)}`, {
+      description: "They're back in Waiting.",
+    });
+    clearSelection();
+  };
+  const handleRemove = () => {
+    toast.success(`Removed ${jobCountLabel(actionableIds.length)}`);
+    clearSelection();
+  };
+  const handlePause = () => {
+    toast.success(`Paused ${displayName}`);
+  };
+  const handleResume = () => {
+    toast.success(`Resumed ${displayName}`);
+  };
+  const removeAction: SelectionAction = {
+    label: "Remove",
+    icon: Trash,
+    variant: "destructive",
+    handleClick: () => {
+      setIsRemoveOpen(true);
+    },
+  };
+  const retryAction: SelectionAction = {
+    label: "Retry",
+    icon: RotateCcw,
+    handleClick: handleRetry,
+  };
+  const handleClean = (cleanState: "completed" | "failed") => {
+    const count = queue.counts[cleanState];
+    const noun = count === 1 ? "job" : "jobs";
+
+    toast.success(`Cleaned ${count.toString()} ${cleanState} ${noun}`);
+  };
 
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
@@ -73,19 +136,27 @@ export function QueuePage({
               {`${queue.name} · ${queue.kind}`}
             </p>
           </div>
-          <LiveControls
-            status={liveStatus}
-            isUpdatesPaused={isUpdatesPaused}
-            onUpdatesPausedChange={setIsUpdatesPaused}
-          />
+          <div className="flex flex-wrap items-center gap-3">
+            <LiveControls
+              status={liveStatus}
+              isUpdatesPaused={isUpdatesPaused}
+              onUpdatesPausedChange={setIsUpdatesPaused}
+            />
+            <QueueHeaderActions
+              queue={queue}
+              disabled={!isActionable}
+              onPause={handlePause}
+              onResume={handleResume}
+              onClean={handleClean}
+            />
+          </div>
         </div>
       </header>
       {queue.isPaused ? (
         <PausedQueueBanner
           queueLabel={displayName}
-          disabled={!isLive(liveStatus)}
-          // TODO(task 7): wire onResume
-          onResume={() => undefined}
+          disabled={!isActionable}
+          onResume={handleResume}
         />
       ) : null}
       <ThroughputPlaceholder variant="queue" />
@@ -116,6 +187,24 @@ export function QueuePage({
           />
         </div>
       </LiveDataRegion>
+      {actionableIds.length > 0 && isSelectableState(state) ? (
+        <>
+          <SelectionActionBar
+            count={actionableIds.length}
+            disabled={!isActionable}
+            onClear={clearSelection}
+            actions={
+              state === "failed" ? [retryAction, removeAction] : [removeAction]
+            }
+          />
+          <ConfirmActionDialog
+            open={isRemoveOpen}
+            onOpenChange={setIsRemoveOpen}
+            copy={removeConfirmCopy(actionableIds, displayName)}
+            onConfirm={handleRemove}
+          />
+        </>
+      ) : null}
     </div>
   );
 }
