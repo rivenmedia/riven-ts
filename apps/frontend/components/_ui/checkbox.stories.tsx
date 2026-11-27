@@ -39,6 +39,20 @@ export const Disabled = meta.story({
   },
 });
 
+/**
+ * Set `checked` to `"indeterminate"` when only some of a group is selected.
+ */
+export const Indeterminate = meta.story({
+  args: { id: "indeterminate-terms", checked: "indeterminate" },
+});
+
+Indeterminate.test("is announced as mixed", async ({ canvas }) => {
+  await expect(canvas.getByRole("checkbox")).toHaveAttribute(
+    "aria-checked",
+    "mixed",
+  );
+});
+
 Default.test(
   "When the checkbox is clicked, it toggles between checked and unchecked",
   async ({ canvasElement }) => {
