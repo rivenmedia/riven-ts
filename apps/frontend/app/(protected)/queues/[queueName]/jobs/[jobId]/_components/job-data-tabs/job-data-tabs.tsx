@@ -7,6 +7,8 @@ import {
   TabsTrigger,
 } from "#components/_ui/tabs.tsx";
 
+import { CodeBlock } from "../code-block/code-block.tsx";
+
 import type { JobState } from "../../../../../_utilities/job-states.ts";
 
 export interface JobDataTabsProps {
@@ -24,9 +26,9 @@ export function JobDataTabs({ data, returnValue, state }: JobDataTabsProps) {
         <TabsTrigger value="return">Return value</TabsTrigger>
       </TabsList>
       <TabsContent value="input">
-        <pre className="bg-background overflow-x-auto rounded-lg border p-3 font-mono text-xs leading-relaxed">
+        <CodeBlock label="Input data">
           {JSON.stringify(data, null, 2)}
-        </pre>
+        </CodeBlock>
       </TabsContent>
       <TabsContent value="return">
         {returnValue === undefined ? (
@@ -36,9 +38,9 @@ export function JobDataTabs({ data, returnValue, state }: JobDataTabsProps) {
               : "No return value."}
           </p>
         ) : (
-          <pre className="bg-background overflow-x-auto rounded-lg border p-3 font-mono text-xs leading-relaxed">
+          <CodeBlock label="Return value">
             {JSON.stringify(returnValue, null, 2)}
-          </pre>
+          </CodeBlock>
         )}
       </TabsContent>
     </Tabs>

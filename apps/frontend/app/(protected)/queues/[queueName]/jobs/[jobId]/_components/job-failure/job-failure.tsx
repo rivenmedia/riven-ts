@@ -1,3 +1,5 @@
+import { CodeBlock } from "../code-block/code-block.tsx";
+
 export interface JobFailureProps {
   reason?: string | undefined;
   stacktrace: readonly string[];
@@ -17,9 +19,7 @@ export function JobFailure({ reason, stacktrace }: JobFailureProps) {
         <p className="text-sm text-red-700 dark:text-red-300">{reason}</p>
       ) : null}
       {stacktrace.length > 0 ? (
-        <pre className="bg-background overflow-x-auto rounded-lg border p-3 font-mono text-xs leading-relaxed">
-          {stacktrace.join("\n")}
-        </pre>
+        <CodeBlock label="Stack trace">{stacktrace.join("\n")}</CodeBlock>
       ) : null}
     </section>
   );

@@ -63,6 +63,7 @@ export function JobPage({ job, queue, liveStatus, now, locale }: JobPageProps) {
     toast.success("Removed 1 job");
     router.push(queueHref(queue.name));
   };
+
   return (
     <div className="flex flex-col gap-6 p-4 md:p-8">
       <header className="flex flex-col gap-3">
@@ -94,7 +95,8 @@ export function JobPage({ job, queue, liveStatus, now, locale }: JobPageProps) {
               <JobStateBadge state={job.state} />
             </div>
             <p className="text-sm">
-              {job.name} <span className="text-muted-foreground">in</span>{" "}
+              {job.mediaItem?.title ?? job.name}{" "}
+              <span className="text-muted-foreground">in</span>{" "}
               <span className="font-mono text-xs">{queue.name}</span>
             </p>
           </div>

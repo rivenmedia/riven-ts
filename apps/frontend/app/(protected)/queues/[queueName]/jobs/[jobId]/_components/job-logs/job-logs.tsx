@@ -1,3 +1,5 @@
+import { CodeBlock } from "../code-block/code-block.tsx";
+
 export interface JobLogsProps {
   lines: readonly string[];
 }
@@ -18,9 +20,7 @@ export function JobLogs({ lines }: JobLogsProps) {
         </span>
       </div>
       {lines.length > 0 ? (
-        <pre className="bg-background overflow-x-auto rounded-lg border p-3 font-mono text-xs leading-relaxed">
-          {lines.join("\n")}
-        </pre>
+        <CodeBlock label="Log lines">{lines.join("\n")}</CodeBlock>
       ) : (
         <p className="text-muted-foreground text-sm">
           This job hasn&apos;t logged anything.

@@ -1,5 +1,5 @@
 import { getRouter } from "@storybook/nextjs-vite/navigation.mock";
-import { expect, waitFor, within } from "storybook/test";
+import { expect, spyOn, waitFor, within } from "storybook/test";
 import { INITIAL_VIEWPORTS } from "storybook/viewport";
 
 import { preview } from "#.storybook/preview.tsx";
@@ -71,6 +71,15 @@ ChildJob.test("shows the job and its state", async ({ canvas }) => {
   ).toHaveAttribute("href", "/queues/scrape-item");
 });
 
+ChildJob.test(
+  "names the media item and queue in the subtitle",
+  async ({ canvas }) => {
+    await expect(
+      canvas.getByText("Severance", { selector: "p" }),
+    ).toHaveTextContent("Severance in scrape-item");
+  },
+);
+
 ChildJob.test("summarises the job", async ({ canvas }) => {
   const summary = within(canvas.getByRole("region", { name: "Summary" }));
 
@@ -111,6 +120,21 @@ ChildJob.test(
     await userEvent.click(canvas.getByRole("button", { name: "Copy link" }));
 
     await expectToast(canvasElement, "Link copied");
+  },
+);
+
+ChildJob.test(
+  "says when the link can't be copied",
+  async ({ canvas, canvasElement, userEvent }) => {
+    const writeText = spyOn(navigator.clipboard, "writeText").mockRejectedValue(
+      new Error("denied"),
+    );
+
+    await userEvent.click(canvas.getByRole("button", { name: "Copy link" }));
+
+    await expectToast(canvasElement, "Couldn't copy the link");
+
+    writeText.mockRestore();
   },
 );
 
