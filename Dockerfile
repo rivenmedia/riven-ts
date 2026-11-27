@@ -91,11 +91,13 @@ FROM base AS third-party-deps
     COPY --from=prepare ${HOME}/out/json/ ./
     COPY --from=prepare ${HOME}/.pnpmfile.mjs ./
 
+    # Riven's deploy doesn't use the frontend's patches (e.g. `@msw/playwright`), which pnpm
+    # rejects unless they're allowed to go unused.
     # Workspace packages are removed here and added from `production-deploy`
     # instead, where they have been built.
     # `.modules.yaml` is only read by pnpm and records a `prunedAt` timestamp.
     RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} \
-        pnpm --filter @repo/riven --prod deploy pruned && \
+        pnpm --filter @repo/riven --prod --config.allow-unused-patches=true deploy pruned && \
         rm -rf pruned/node_modules/.modules.yaml pruned/node_modules/.pnpm/@repo+*
 
 FROM base AS builder
@@ -145,7 +147,7 @@ FROM builder AS production-deploy
     # Only the built workspace packages are taken from this deploy; third-party
     # dependencies come from `third-party-deps`. Both deploys use the same
     # lockfile, so the `.pnpm` directory names match.
-    RUN pnpm --filter @repo/riven --prod deploy pruned && \
+    RUN pnpm --filter @repo/riven --prod --config.allow-unused-patches=true deploy pruned && \
         mkdir -p workspace-packages/.pnpm && \
         mv pruned/node_modules/.pnpm/@repo+* workspace-packages/.pnpm/
 
