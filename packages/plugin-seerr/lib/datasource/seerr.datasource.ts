@@ -26,6 +26,7 @@ class SeerrAPIError extends Error {
 
 export class SeerrAPI extends BaseDataSource<SeerrSettings> {
   public override baseURL = new URL("/api/v1/", this.settings.url).toString();
+
   public override serviceName = "Seerr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {

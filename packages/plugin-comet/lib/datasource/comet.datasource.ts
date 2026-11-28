@@ -25,6 +25,7 @@ class CometAPIError extends Error {
 
 export class CometAPI extends BaseDataSource<CometSettings> {
   public override baseURL = this.settings.url;
+
   public override serviceName = "Comet";
 
   public override async validate() {

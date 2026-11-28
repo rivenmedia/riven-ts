@@ -16,6 +16,7 @@ class MdblistAPIError extends Error {
 
 export class MdblistAPI extends BaseDataSource<MdbListSettings> {
   public override baseURL = "https://api.mdblist.com/";
+
   public override serviceName = "MDBList";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {
@@ -24,6 +25,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
   };
 
   readonly #seenMovieIds = new Set<number>();
+
   readonly #seenShowIds = new Set<number>();
 
   protected override willSendRequest(

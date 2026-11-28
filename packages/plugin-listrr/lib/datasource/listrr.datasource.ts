@@ -17,6 +17,7 @@ type PagedResponseSchema<T> = z.ZodType<{
 
 export class ListrrAPI extends BaseDataSource<ListrrSettings> {
   public override baseURL = "https://listrr.pro/api/";
+
   public override serviceName = "Listrr";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {

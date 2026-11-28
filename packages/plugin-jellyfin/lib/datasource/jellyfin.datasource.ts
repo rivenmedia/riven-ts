@@ -11,6 +11,7 @@ class JellyfinAPIError extends Error {
 
 export class JellyfinAPI extends BaseDataSource<JellyfinSettings> {
   public override baseURL = this.settings.jellyfinServerUrl;
+
   public override serviceName = "Jellyfin";
 
   protected override willSendRequest(

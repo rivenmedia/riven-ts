@@ -46,6 +46,7 @@ export class Season extends ShowLikeMediaItem {
   public override type: Opt<"season"> = "season" as const;
 
   declare public tvdbId: Opt<string>;
+
   declare public contentRating: Opt<never>;
 
   public async getShow() {

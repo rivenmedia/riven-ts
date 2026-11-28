@@ -4,9 +4,13 @@ import { tsFiles, jsFiles } from "../../internal/file-types.ts";
 
 import type { Arrayable } from "type-fest";
 
-const callableSelector = {
-  selector: "ExpressionStatement:has(> CallExpression)",
-};
+function createSelector(selector: string) {
+  return { selector };
+}
+
+const callableSelector = createSelector(
+  "ExpressionStatement:has(> CallExpression)",
+);
 
 const variableDeclaration = ["const", "let", "var"];
 
@@ -54,6 +58,7 @@ export const eslintPluginStylisticEslintPluginConfig = defineConfig({
           { blankLine: "never", prev: ["case", "default"], next: "*" },
           { blankLine: "always", prev: "directive", next: "*" },
         ],
+        "@stylistic/lines-between-class-members": "error",
       },
     },
   ],

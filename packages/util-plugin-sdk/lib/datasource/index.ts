@@ -101,6 +101,7 @@ export abstract class BaseDataSource<
   public abstract override readonly baseURL: string;
 
   public readonly serviceName: string;
+
   public readonly settings: DataSourceSettings;
 
   public override readonly logger: Logger;
@@ -123,15 +124,21 @@ export abstract class BaseDataSource<
   protected readonly concurrency: number = 200;
 
   readonly #requestAttempts: number;
+
   readonly #requestBackoffDelay: number;
 
   readonly #queueId: string;
+
   readonly #connection: ConnectionOptions;
+
   #queueEventsPromise: Promise<QueueEvents> | undefined;
+
   public queue: Queue<FetchJobInput, FetchResponse>;
+
   public worker: Worker<FetchJobInput, FetchResponse>;
 
   readonly #keyv: KeyvAdapter;
+
   readonly #keyvPrefix = "httpcache:";
 
   /**
