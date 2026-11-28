@@ -2,7 +2,17 @@ import { defineConfig } from "oxlint";
 
 import { tsFiles, jsFiles } from "../../internal/file-types.ts";
 
-function paddedLineAround(statementType: string | string[]) {
+import type { Arrayable } from "type-fest";
+
+const callableSelector = {
+  selector: "ExpressionStatement:has(> CallExpression)",
+};
+
+const variableDeclaration = ["const", "let", "var"];
+
+function paddedLineAround(
+  statementType: Arrayable<string | { selector: string }>,
+) {
   return [
     { blankLine: "always", prev: statementType, next: "*" },
     { blankLine: "always", prev: "*", next: statementType },
@@ -28,14 +38,18 @@ export const eslintPluginStylisticEslintPluginConfig = defineConfig({
             "interface",
             "type",
             "export",
-            "const",
-            "let",
-            "var",
+            ...variableDeclaration,
+            callableSelector,
           ]),
           {
             blankLine: "any",
-            prev: ["const", "let", "var"],
-            next: ["const", "let", "var"],
+            prev: variableDeclaration,
+            next: variableDeclaration,
+          },
+          {
+            blankLine: "any",
+            prev: callableSelector,
+            next: callableSelector,
           },
           { blankLine: "never", prev: ["case", "default"], next: "*" },
           { blankLine: "always", prev: "directive", next: "*" },
