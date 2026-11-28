@@ -4,6 +4,7 @@ import type { CastMember } from "#app/_types/__generated__/graphql.ts";
 import type { GetSeasonQuery } from "./_queries/get-season.query.typegen.ts";
 
 type Show = GetSeasonQuery["tmdbItem"];
+
 type Season = NonNullable<Show["season"]>;
 
 const { unrequestedShow } = journeyFixtures.mediaDetails;

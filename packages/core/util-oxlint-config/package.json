@@ -13,6 +13,7 @@
   "dependencies": {
     "@eslint/json": "catalog:",
     "@repo/core-util-typescript-config": "workspace:^",
+    "@stylistic/eslint-plugin": "catalog:",
     "eslint-plugin-playwright": "catalog:",
     "eslint-plugin-sonarjs": "catalog:",
     "eslint-plugin-storybook": "catalog:",

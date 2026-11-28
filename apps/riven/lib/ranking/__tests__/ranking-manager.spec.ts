@@ -197,6 +197,7 @@ it("returns form issues without writing", async ({ formValues, manager }) => {
   const issues = await manager.create({ ...formValues("Bad"), name: "" });
 
   expect(issues.map(({ path }) => path)).toStrictEqual(["name"]);
+
   await expect(listProfiles(manager)).resolves.toMatchObject({
     names: ["Default"],
   });
@@ -260,6 +261,7 @@ it("invalidates the engine when the active profile changes", async ({
   await manager.select(mine);
 
   expect(invalidateRankingEngine).toHaveBeenCalledOnce();
+
   await expect(
     settingsService.getStoredValues(RANKING_NAMESPACE),
   ).resolves.toMatchObject({ activeProfileId: mine });

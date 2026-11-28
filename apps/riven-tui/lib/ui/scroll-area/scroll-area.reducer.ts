@@ -24,14 +24,12 @@ export const scrollAreaReducer = (
         innerHeight: action.innerHeight,
       };
     }
-
     case "SET_HEIGHT": {
       return {
         ...state,
         height: action.height,
       };
     }
-
     case "SCROLL_DOWN": {
       return {
         ...state,
@@ -43,14 +41,12 @@ export const scrollAreaReducer = (
         ),
       };
     }
-
     case "SCROLL_UP": {
       return {
         ...state,
         scrollTop: Math.max(0, state.scrollTop - 1),
       };
     }
-
     case "PAGE_DOWN": {
       return {
         ...state,
@@ -62,21 +58,18 @@ export const scrollAreaReducer = (
         ),
       };
     }
-
     case "PAGE_UP": {
       return {
         ...state,
         scrollTop: Math.max(0, state.scrollTop - state.height),
       };
     }
-
     case "RESET_SCROLL_POSITION": {
       return {
         ...state,
         scrollTop: 0,
       };
     }
-
     default: {
       return state;
     }

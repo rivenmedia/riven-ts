@@ -161,10 +161,15 @@ function resolveResetPaths(leaves: LeafPathMap, paths: string[]) {
  */
 export class SettingsManager {
   readonly #settingsService: SettingsService;
+
   readonly #sections: ReadonlyMap<string, SettingsSectionDefinition>;
+
   readonly #installedPlugins: InstalledPlugin[];
+
   readonly #coreEnvironment: Readonly<Record<string, string>>;
+
   readonly #onHotSectionChange: ((sectionId: string) => void) | undefined;
+
   #restartRequired = false;
 
   public constructor(deps: SettingsManagerDeps) {

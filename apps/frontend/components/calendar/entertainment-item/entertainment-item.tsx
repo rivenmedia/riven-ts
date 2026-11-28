@@ -54,6 +54,7 @@ export function EntertainmentItem({ item, compact }: EntertainmentItemProps) {
     if (item.type === "movie") {
       return <Film className={cls} />;
     }
+
     return <Tv className={cls} />;
   }
 

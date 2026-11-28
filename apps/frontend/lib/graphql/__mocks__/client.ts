@@ -30,5 +30,6 @@ export const getClient = () => client;
  */
 export const resetClient = () => {
   client.stop();
+
   client = createClient();
 };

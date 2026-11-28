@@ -40,5 +40,6 @@ it("validates the plugin with the TVDB data source", async ({
   await expect(
     plugin.validator({ dataSources: dataSourceMap, settings }),
   ).resolves.toBe(false);
+
   expect(validateSpy).toHaveBeenCalledExactlyOnceWith();
 });

@@ -191,6 +191,7 @@ export const preview = definePreview({
 
     // Clear the Apollo Client caches to prevent stale data between stories
     resetApolloClientSingletons();
+
     await resetMockGraphqlClient();
 
     toast.dismiss();

@@ -22,6 +22,7 @@ it("does not reject unknown languages by default", ({
 }) => {
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   expect(result.failedChecks).not.toContain("unknown_language");
 });
 

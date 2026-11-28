@@ -31,6 +31,7 @@ class StremThruTorzAPIError extends Error {
 
 export class StremThruTorzAPI extends BaseDataSource<StremThruSettings> {
   public override baseURL = this.settings.stremThruUrl;
+
   public override serviceName = "StremThru [Torz]";
 
   protected override concurrency = 1; // Lower the concurrency to prevent queue build-ups, as this API aggressively rate-limits itself

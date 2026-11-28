@@ -73,11 +73,13 @@ export function PasskeyFormProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     if (abortControllerRef.current.signal.aborted) {
       abortControllerRef.current = new AbortController();
+
       reloadPasskeys();
     }
 
     return () => {
       abortControllerRef.current.abort();
+
       passkeyLoaderRef.current = null;
     };
   }, [reloadPasskeys]);

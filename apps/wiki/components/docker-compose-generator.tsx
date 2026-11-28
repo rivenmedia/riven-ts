@@ -6,6 +6,7 @@ import { codeToHtml } from "shiki";
 import { stringify } from "yaml";
 
 type MediaServer = "none" | "plex" | "jellyfin";
+
 type RivenVersion = "ts" | "v1";
 
 interface TSConfig {
@@ -147,10 +148,13 @@ function generateSecret(
 ): string {
   const bytes = format === "base64" ? length : Math.ceil(length / 2);
   const array = new Uint8Array(bytes);
+
   crypto.getRandomValues(array);
+
   if (format === "base64") {
     return btoa(String.fromCodePoint(...array));
   }
+
   return Array.from(array, (byte) => byte.toString(16).padStart(2, "0"))
     .join("")
     .slice(0, length);
@@ -611,6 +615,7 @@ function CodePreview({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
+
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
@@ -621,8 +626,10 @@ function CodePreview({
     const blob = new Blob([code], { type: "text/plain" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
+
     a.href = url;
     a.download = filename;
+
     document.body.append(a);
 
     a.click();

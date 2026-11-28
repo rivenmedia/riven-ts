@@ -72,6 +72,7 @@ it("falls back to default when the active preset was removed", async ({
     excludedPatterns: ["cam"],
     legacyConfigImported: true,
   });
+
   expect(warnSpy).toHaveBeenCalledWith(
     'Ranking profile "retired" no longer exists; using the default profile.',
   );
@@ -105,6 +106,7 @@ it("keeps the active profile when it still exists", async ({
     activeProfileId: custom.id,
     legacyConfigImported: true,
   });
+
   expect(warnSpy).not.toHaveBeenCalled();
 });
 
@@ -144,6 +146,7 @@ it("renames a custom profile that uses a built-in profile's name", async ({
   await expect(
     rankingProfileService.findBySlug(DEFAULT_PRESET_SLUG),
   ).resolves.toMatchObject({ name: presetName, builtIn: true });
+
   expect(warnSpy).toHaveBeenCalledWith(
     `Renamed ranking profile "${presetName}" to "${presetName} (custom 2)" because a built-in profile now uses that name.`,
   );
@@ -173,6 +176,7 @@ it("imports the legacy config file and logs where it came from", async ({
     activeProfileId: defaultProfile?.id,
     legacyConfigImported: true,
   });
+
   expect(warnSpy).toHaveBeenCalledWith(
     `Imported ranking config from "${legacyConfigPath}". The file is no longer read and can be deleted.`,
   );
@@ -184,6 +188,7 @@ it("logs where it looked when there is no legacy config file", async ({
   legacyConfigPath,
 }) => {
   const infoSpy = spyOnLoggerInfo();
+
   await runSync(services, legacyConfigPath);
 
   expect(infoSpy).toHaveBeenCalledWith(

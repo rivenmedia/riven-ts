@@ -35,6 +35,7 @@ interface TvdbToken {
 
 export class TvdbAPI extends BaseDataSource<TvdbSettings> {
   public override baseURL = "https://api4.thetvdb.com/v4/";
+
   public override serviceName = "Tvdb";
 
   #token: TvdbToken | null = null;

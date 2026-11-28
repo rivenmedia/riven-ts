@@ -120,6 +120,7 @@ export class RankingProfileService extends BaseService {
       .filter((slug) => slug !== null);
 
     this.em.remove(stale);
+
     await this.em.flush();
 
     return { removedSlugs };

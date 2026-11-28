@@ -225,6 +225,7 @@ it.for([
         settings,
       }),
     ).resolves.toStrictEqual({ subtitles: [] });
+
     expect(searchCount).toBe(0);
   },
 );

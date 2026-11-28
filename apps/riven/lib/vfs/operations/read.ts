@@ -111,7 +111,6 @@ async function read() {
 
       break;
     }
-
     // Note: if the read type is footer_read, the footer cache chunk
     // has likely expired and the player is nearing EOF.
     // In this case, we will re-download the entire footer and serve the rest from cache.
@@ -134,7 +133,6 @@ async function read() {
 
       break;
     }
-
     case "general-scan": {
       const scannedChunk = await fetchDiscreteByteRange(
         fileHandleMetadata,
@@ -146,7 +144,6 @@ async function read() {
 
       break;
     }
-
     case "body-read": {
       const data = await performBodyRead(chunks);
 
@@ -159,7 +156,6 @@ async function read() {
 
       break;
     }
-
     case "cache-hit": {
       const data = performCacheHit(chunks);
 

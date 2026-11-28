@@ -390,6 +390,7 @@ it("rejects string bodies that are not JSON without sending them", async ({
   ).rejects.toThrow(
     "Unable to determine the request body type: invalid JSON string.",
   );
+
   expect(requestCount).toBe(0);
 });
 
@@ -465,6 +466,7 @@ it("rejects a request that fails with a non-fatal status on every attempt", asyn
   await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
     DataSourceHTTPError,
   );
+
   expect(requestCount).toBe(2);
 });
 
@@ -505,6 +507,7 @@ it.for([
     await expect(dataSource.fetch("endpoint")).rejects.toBeInstanceOf(
       DataSourceHTTPError,
     );
+
     expect(dataSource.waits).toStrictEqual([waitMs]);
   },
 );
@@ -562,6 +565,7 @@ it("rate limits the queue and retries after a 429 response", async ({
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
+
   expect(rateLimitSpy).toHaveBeenCalledExactlyOnceWith(1000);
 });
 
@@ -630,6 +634,7 @@ it("resolves a request that finishes before the queue events start reading", asy
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
+
   expect(isFinishedSpy).toHaveBeenCalledWith(expect.any(String), true);
 });
 
@@ -658,6 +663,7 @@ it("recovers after the queue events fail to start", async ({
   await expect(dataSource.fetch("endpoint")).resolves.toMatchObject({
     parsedBody: { success: true },
   });
+
   expect(errorSpy).toHaveBeenCalledWith(
     expect.stringContaining("QueueEvents error"),
     { err: startupError },
@@ -701,6 +707,7 @@ it("logs a failure to close the queue events", async ({
   await dataSource.fetch("endpoint");
 
   await expect(dataSource.close()).resolves.toBeUndefined();
+
   expect(errorSpy).toHaveBeenCalledWith(
     expect.stringContaining("failed to close"),
     { err: closeError },
@@ -722,5 +729,6 @@ it("closes without error after the queue events fail to start", async ({
   });
 
   await expect(dataSource.close()).resolves.toBeUndefined();
+
   expect(errorSpy).toHaveBeenCalledOnce();
 });

@@ -25,6 +25,7 @@ const API_KEY_PROBE: TypedDocumentNode<
 
 it("sends the API key as a bearer token", async ({ server }) => {
   const url = new URL("http://riven.test/graphql");
+
   server.use(
     graphql.link(url.toString()).query("ApiKeyProbe", ({ request }) => {
       if (

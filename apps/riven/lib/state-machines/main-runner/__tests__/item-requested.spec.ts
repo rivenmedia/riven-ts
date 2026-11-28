@@ -15,6 +15,7 @@ it("creates an item request for an externally requested movie and processes it",
   actor,
 }) => {
   const addSpy = spyOnAdd();
+
   actor.start();
 
   await waitFor(actor, (state) => state.matches("Running"));
@@ -82,6 +83,7 @@ it("does not request a show that has already been requested", async ({
   await expect(
     em.fork().count(ItemRequest, { tvdbId: itemRequest.tvdbId }),
   ).resolves.toBe(1);
+
   expect(sendSpy).not.toHaveBeenCalledWith(
     expect.objectContaining({ type: "riven.item-request.create.success" }),
   );

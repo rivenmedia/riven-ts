@@ -188,6 +188,7 @@ it("rejects scenarios that set environment data", async ({ rivenUrl }) => {
   });
 
   expect(response.status).toBe(400);
+
   await expect(response.json()).resolves.toStrictEqual({
     error:
       'Mock scenario "dead-stream-link" sets environment data, which test mode can\'t apply',
@@ -237,6 +238,7 @@ it("resets the instance and applies the scenario", async ({
   await expect(
     em.findOne(Movie, { title: "Dead Stream Movie" }),
   ).resolves.not.toBeNull();
+
   expect(settingsManager.restartRequired).toBe(false);
 });
 

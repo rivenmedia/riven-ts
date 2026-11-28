@@ -97,6 +97,7 @@ it.for(["queued", "downloading", "failed"] as const)(
     ).rejects.toThrow(
       `Failed to get instant availability for ${INFO_HASH} from realdebrid: ${INFO_HASH} was in the ${status} state on realdebrid; the torrent will not be downloaded.`,
     );
+
     expect(removedTorrents).toStrictEqual(["torrent-id"]);
   },
 );
@@ -220,5 +221,6 @@ it("rejects stores without an API key without sending a request", async ({
       settings,
     }),
   ).rejects.toThrow("Missing API key for torbox");
+
   expect(requestCount).toBe(0);
 });

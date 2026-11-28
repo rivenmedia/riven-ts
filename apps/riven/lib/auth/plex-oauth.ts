@@ -287,6 +287,7 @@ export function plexOAuth(
     // The code parameter is expected to be in format "pinId:pinCode"
     getToken: async ({ code }) => {
       const parts = code.split(":");
+
       if (parts.length < 2) {
         throw new Error("Invalid PIN code format, expected pinId:pinCode");
       }

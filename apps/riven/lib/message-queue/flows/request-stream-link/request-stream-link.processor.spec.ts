@@ -645,6 +645,7 @@ it("adds a job to reprocess the lowest common denominator in the item's hierarch
   const mockProcessMediaItemProcessor = vi.fn<Processor>();
 
   const flowAddSpy = spyOnAddBulk();
+
   createFlowWorker(ProcessMediaItemFlow, mockProcessMediaItemProcessor);
 
   createPluginWorker(

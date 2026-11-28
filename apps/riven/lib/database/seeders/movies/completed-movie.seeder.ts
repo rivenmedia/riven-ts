@@ -31,6 +31,7 @@ export class CompletedMovieSeeder extends BaseSeeder<CompletedMovieSeederContext
     context.movie.activeStream = ref(context.streams[0]);
 
     context.mediaEntries ??= [{ mediaItem: context.movie }];
+
     context.movie.filesystemEntries.set(
       context.mediaEntries.map((entry) =>
         new MediaEntryFactory(em).makeEntity({

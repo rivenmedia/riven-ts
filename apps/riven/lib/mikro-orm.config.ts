@@ -25,7 +25,6 @@ export default async function createMikroOrmConfig(contextName: string) {
         debug: true,
       });
     }
-
     case "default": {
       if (!process.env["CI"]) {
         try {

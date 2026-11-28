@@ -33,6 +33,7 @@ it("allows a request to a loopback server", async ({ installDispatcher }) => {
   });
 
   server.listen(0, "127.0.0.1");
+
   await once(server, "listening");
 
   try {

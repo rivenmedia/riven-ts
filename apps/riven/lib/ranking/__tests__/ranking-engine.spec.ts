@@ -53,6 +53,7 @@ it("falls back to the default preset when the active profile is missing", async 
     upsert: { activeProfileId: crypto.randomUUID() },
     delete: [],
   });
+
   invalidateRankingEngine();
 
   expect(rankOf(await getRankingEngine(deps))).toBe(before);
@@ -63,6 +64,7 @@ it("applies global ranking settings over the profile", async ({ deps }) => {
     upsert: { r2160p: true, r1080p: false },
     delete: [],
   });
+
   invalidateRankingEngine();
 
   const rtn = await getRankingEngine(deps);
@@ -85,6 +87,7 @@ it("uses the active profile's settings when no global overrides are stored", asy
     upsert: { activeProfileId: profile.id },
     delete: [],
   });
+
   invalidateRankingEngine();
 
   const rtn = await getRankingEngine(deps);

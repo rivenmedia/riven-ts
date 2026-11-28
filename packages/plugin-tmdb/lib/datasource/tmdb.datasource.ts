@@ -53,6 +53,7 @@ const externalIdCacheOptions = {
 
 export class TmdbAPI extends BaseDataSource<TmdbSettings> {
   public override baseURL = "https://api.themoviedb.org/3/";
+
   public override serviceName = "Tmdb";
 
   protected override rateLimiterOptions?: RateLimiterOptions = {

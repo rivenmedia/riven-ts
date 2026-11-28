@@ -29,4 +29,5 @@ function createPage(page: number) {
 }
 
 export const firstPage = createPage(1);
+
 export const pages = [firstPage, createPage(2), createPage(3)];

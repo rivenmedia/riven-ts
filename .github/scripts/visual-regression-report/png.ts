@@ -168,6 +168,7 @@ export const decodePng = async (contents: Buffer) => {
 
   for (let pixel = 0; pixel < width * height; pixel++) {
     rgba.set(raw.subarray(pixel * channels, pixel * channels + 3), pixel * 4);
+
     rgba[pixel * 4 + 3] =
       channels === 4 ? (raw[pixel * channels + 3] ?? 0) : 255;
   }
