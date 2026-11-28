@@ -18,6 +18,7 @@ export interface IndexedShowSeederContext {
 
 export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
   readonly #episodesPerSeason = 10;
+
   readonly #seasonCount = 6;
 
   public async run(
@@ -55,6 +56,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       });
 
       context.seasons ??= [];
+
       context.seasons.push(season);
 
       for (
@@ -78,6 +80,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       }
 
       context.episodes ??= [];
+
       context.episodes.push(...season.episodes);
     }
 

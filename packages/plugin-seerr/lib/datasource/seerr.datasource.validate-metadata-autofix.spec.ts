@@ -57,6 +57,7 @@ it("does not update providers that are already valid", async ({
   );
 
   await expect(dataSourceMap.get(SeerrAPI).validate()).resolves.toBe(true);
+
   expect(updateCount).toBe(0);
 });
 

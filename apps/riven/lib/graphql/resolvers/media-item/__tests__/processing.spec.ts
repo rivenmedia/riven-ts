@@ -74,6 +74,7 @@ it("resetMediaItem removes the item's streams and files and enqueues it for proc
 
   expect(movie.activeStream).toBeNull();
   expect(movie.streams).toHaveLength(0);
+
   await expect(
     fork.count(MediaEntry, { mediaItem: completedMovie.id }),
   ).resolves.toBe(0);

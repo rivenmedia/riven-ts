@@ -23,6 +23,7 @@ it("creates a request for the given seasons of a new show", async ({
   });
 
   expect(result.requestType).toBe("create");
+
   await expect(
     em.fork().findOneOrFail(ItemRequest, { tvdbId: "121361" }),
   ).resolves.toMatchObject({
@@ -103,6 +104,7 @@ it("adds newly requested seasons to an existing request and marks them as reques
     [5, true],
     [6, false],
   ]);
+
   await expect(
     fork.count(Episode, {
       season: { show: show.id, number: { $in: [4, 5] } },

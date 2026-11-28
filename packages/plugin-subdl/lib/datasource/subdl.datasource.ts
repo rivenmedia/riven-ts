@@ -25,6 +25,7 @@ export interface SubtitleSearchOptions {
 
 export class SubdlAPI extends BaseDataSource<SubdlSettings> {
   public override baseURL = "https://api.subdl.com/api/v1/";
+
   public override serviceName = "SubDL";
 
   protected override readonly rateLimiterOptions: RateLimiterOptions = {

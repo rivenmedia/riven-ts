@@ -170,6 +170,7 @@ it("answers the held Torrentio request with no streams once the gates are cleare
   const streams = await response;
 
   expect(streams.ok).toBe(true);
+
   await expect(streams.json()).resolves.toStrictEqual({ streams: [] });
 });
 

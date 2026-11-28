@@ -22,6 +22,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
       ([entry]) => {
         if (entry?.isIntersecting && !animated.current) {
           animated.current = true;
+
           const duration = 1500;
           const start = performance.now();
 
@@ -30,6 +31,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
             const elapsed = now - start;
             const progress = Math.min(elapsed / duration, 1);
             const eased = 1 - (1 - progress) ** 3;
+
             setCount(Math.floor(eased * targetCount));
 
             if (progress < 1) {
@@ -44,6 +46,7 @@ export function StarCounter({ targetCount }: { targetCount: number }) {
     );
 
     observer.observe(el);
+
     return () => {
       observer.disconnect();
     };

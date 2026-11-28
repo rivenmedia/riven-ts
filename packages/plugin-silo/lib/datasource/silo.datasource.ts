@@ -22,6 +22,7 @@ const scanErrorReasons: Partial<Record<number, string>> = {
 
 export class SiloAPI extends BaseDataSource<SiloSettings> {
   public override baseURL = this.settings.siloServerUrl;
+
   public override serviceName = "Silo";
 
   protected override willSendRequest(

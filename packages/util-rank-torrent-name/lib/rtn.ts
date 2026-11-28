@@ -16,7 +16,9 @@ import type { RankedResult } from "./types.ts";
 
 export class RTN {
   readonly #settings: Settings;
+
   readonly #rankingModel: RankingModel;
+
   readonly #enabledResolutions: Set<Resolution>;
 
   public constructor(rankingModel: RankingModel, settings: SettingsInput = {}) {

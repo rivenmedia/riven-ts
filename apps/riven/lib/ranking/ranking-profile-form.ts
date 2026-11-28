@@ -20,6 +20,7 @@ import type { SettingsIssue } from "#graphql/resolvers/settings/types/settings-i
 import type { RankingModel } from "@repo/util-rank-torrent-name";
 
 type RankCategory = z.infer<typeof RankingModelSchemaMetadata>["category"];
+
 type RankKey = keyof RankingModel;
 
 const CATEGORY_TITLES = {
@@ -103,6 +104,7 @@ const RankingProfileForm = z.strictObject({
 });
 
 type RankingProfileFormInput = z.input<typeof RankingProfileForm>;
+
 type RankFieldValue = z.input<typeof RankField>;
 
 /** The JSON Schema of the profile form, in the same dialect as settings sections. */

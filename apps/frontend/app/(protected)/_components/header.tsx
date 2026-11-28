@@ -129,6 +129,7 @@ export function Header({ modifierKey }: HeaderProps) {
                   {...field}
                   ref={(el) => {
                     field.ref(el);
+
                     inputRef.current = el;
                   }}
                   placeholder="Search movies, shows, people..."

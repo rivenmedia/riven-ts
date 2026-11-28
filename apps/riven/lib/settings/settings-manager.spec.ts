@@ -436,6 +436,7 @@ describe("updateSection", () => {
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
     ).resolves.toStrictEqual({ apiKey: "secret" });
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -522,6 +523,7 @@ describe("updateSection with reset", () => {
     await expect(
       services.settingsService.getStoredValues(CLEAR_NAMESPACE),
     ).resolves.toStrictEqual({ url: "https://a.test" });
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -542,6 +544,7 @@ describe("updateSection with reset", () => {
     await expect(
       services.settingsService.getStoredValues(CLEAR_NAMESPACE),
     ).resolves.toStrictEqual({ url: "https://a.test", limit: 5 });
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -587,6 +590,7 @@ describe("updateSection with reset", () => {
     await expect(
       services.settingsService.getStoredValues(FAKE_NAMESPACE),
     ).resolves.toStrictEqual({ apiKey: "secret", nestedValue: 3 });
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -609,6 +613,7 @@ describe("updateSection with reset", () => {
     await expect(
       services.settingsService.getStoredValues(CLEAR_NAMESPACE),
     ).resolves.toStrictEqual({ url: "https://a.test", limit: 5 });
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -740,6 +745,7 @@ describe("restartRequired", () => {
     const manager = createManager(services, installedPlugins);
 
     await manager.setPluginEnabled("repo-plugin-test", true);
+
     manager.resetRestartRequired();
 
     expect(manager.restartRequired).toBe(false);
@@ -762,6 +768,7 @@ describe("setPluginEnabled", () => {
     await expect(
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({});
+
     expect(manager.restartRequired).toBe(false);
   });
 
@@ -806,6 +813,7 @@ describe("setPluginEnabled", () => {
     await expect(
       services.settingsService.getStoredValues("riven"),
     ).resolves.toStrictEqual({ enabledPlugins: ["test"] });
+
     expect(manager.restartRequired).toBe(true);
   });
 

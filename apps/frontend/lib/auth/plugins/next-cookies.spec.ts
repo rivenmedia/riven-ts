@@ -45,6 +45,7 @@ const onSuccess = async (setCookie: string | null) =>
 it.beforeEach(() => {
   nextHeaders.cookieStore.set.mockReset();
   nextHeaders.requestHeaders.clear();
+
   nextHeaders.cookiesError = null;
 });
 

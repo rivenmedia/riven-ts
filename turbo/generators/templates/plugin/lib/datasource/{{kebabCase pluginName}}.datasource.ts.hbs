@@ -8,6 +8,7 @@ class {{pascalCase pluginName}}APIError extends Error {
 
 export class {{pascalCase pluginName}}API extends BaseDataSource<{{pascalCase pluginName}}Settings> {
   public override baseURL = "https://{{kebabCase pluginName}}.com/api/";
+
   public override serviceName = "{{pascalCase pluginName}}";
 
   public override async validate() {

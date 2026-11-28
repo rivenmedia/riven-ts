@@ -100,6 +100,7 @@ it.for([
       season: createSeason,
       episode: createEpisode,
     }[type];
+
     server.use(
       http.get(`https://comet.feels.legal${path}`, () =>
         HttpResponse.json<CometScrapeResponse>({

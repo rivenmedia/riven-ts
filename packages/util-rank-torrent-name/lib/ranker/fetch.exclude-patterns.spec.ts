@@ -9,6 +9,7 @@ it("rejects when exclude pattern matches", ({ rankingModel }) => {
   const settings = createSettings({ exclude: ["CAM"] });
   const data = parse("Movie.2024.CAM-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   expect(result.fetch).toBe(false);
 });
 
@@ -16,5 +17,6 @@ it("accepts when exclude pattern does not match", ({ rankingModel }) => {
   const settings = createSettings({ exclude: ["CAM"] });
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   expect(result.fetch).toBe(true);
 });

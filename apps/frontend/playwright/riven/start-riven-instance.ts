@@ -134,6 +134,7 @@ async function spawnRiven({ url, logPath, environment }: SpawnRivenInput) {
       }, stopTimeoutMs);
 
       await exited;
+
       clearTimeout(killTimer);
     }
 

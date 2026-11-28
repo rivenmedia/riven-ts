@@ -20,6 +20,7 @@ import type { UUID } from "node:crypto";
 import type { Promisable } from "type-fest";
 
 type NextStatesMap = Map<UUID, MediaItemState>;
+
 type TrackedItemsMap = Map<
   MediaItem,
   ChangeSet<Partial<MediaItem>> | undefined

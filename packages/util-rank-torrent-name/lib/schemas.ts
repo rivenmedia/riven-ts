@@ -109,5 +109,6 @@ export const ResolutionRank = (() => {
 
     result[res] = Resolution.options.length - index;
   }
+
   return result;
 })();

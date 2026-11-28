@@ -262,12 +262,14 @@ const comparison = (
 
     if (mode === "swipe") {
       top.style.clipPath = `inset(0 0 0 ${String(position)}%)`;
+
       stack.style.setProperty("--swipe-position", `${String(position)}%`);
       // The labels meet above the divider, so each spans the part of the image it is shown in
       baselineLabel.setShare(position, false);
       resultLabel.setShare(100 - position, false);
     } else {
       top.style.opacity = String(position / 100);
+
       baselineLabel.setShare(100 - position, true);
       resultLabel.setShare(position, true);
     }
@@ -295,13 +297,16 @@ const comparison = (
     const position = (event.clientX - bounds.left) / bounds.width;
 
     event.preventDefault();
+
     slider.valueAsNumber = Math.round(Math.min(Math.max(position, 0), 1) * 100);
+
     update();
   };
 
   for (const [i, button] of showButtons.entries()) {
     button.addEventListener("click", () => {
       slider.valueAsNumber = positions[showOptions[i] ?? "both"];
+
       update();
     });
   }
@@ -577,7 +582,9 @@ const setViewed = (snapshot: Snapshot, viewed: boolean, manifest: Manifest) => {
 
   writeViewed(manifest);
   setCollapsed(snapshot, viewed);
+
   card?.classList.toggle("viewed", viewed);
+
   query(`#nav li[data-id="${CSS.escape(snapshot.id)}"]`).classList.toggle(
     "viewed",
     viewed,
@@ -616,6 +623,7 @@ const setPressed = (attribute: string, value: string) => {
 
 const setMode = (mode: Mode, snapshots: Snapshot[]) => {
   state.mode = mode;
+
   writePreference("mode", mode);
   setPressed("mode", mode);
 
@@ -629,6 +637,7 @@ const setMode = (mode: Mode, snapshots: Snapshot[]) => {
 
 const setTheme = (theme: (typeof THEMES)[number]) => {
   state.theme = theme;
+
   writePreference("theme", theme);
   setPressed("theme", theme);
 
@@ -748,6 +757,7 @@ const main = async () => {
 
   filter.addEventListener("input", () => {
     state.query = filter.value.trim().toLowerCase();
+
     applyFilters(snapshots);
   });
 
@@ -768,6 +778,7 @@ const main = async () => {
       setCollapsed(collapsible, !state.collapsed.has(collapsible.id));
     } else if (button?.id === "hide-viewed") {
       state.hideViewed = !state.hideViewed;
+
       writePreference("hide-viewed", String(state.hideViewed));
       button.setAttribute("aria-pressed", String(state.hideViewed));
       applyFilters(snapshots);
@@ -777,6 +788,7 @@ const main = async () => {
       setTheme(theme);
     } else if (status) {
       state.status = status;
+
       setPressed("status", status);
       applyFilters(snapshots);
     }

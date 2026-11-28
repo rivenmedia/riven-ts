@@ -13,6 +13,7 @@ import type { MediaItemScrapeRequestedEvent } from "@repo/util-plugin-sdk/schema
 
 export class StremThruTorznabAPI extends BaseDataSource<StremThruSettings> {
   public override baseURL = this.settings.stremThruUrl;
+
   public override serviceName = "StremThru [Torznab]";
 
   protected override rateLimiterOptions: RateLimiterOptions = {

@@ -58,6 +58,7 @@ describe("getLevRatio with aliases", () => {
       us: ["The Way of the Househusband", "The Way of the House Husband"],
       cn: ["极道主夫"],
     };
+
     expect(
       getLevRatio(
         "The Way of the Househusband",
@@ -74,6 +75,7 @@ describe("getLevRatio with aliases", () => {
       us: ["The Way of the Househusband"],
       cn: ["极道主夫"],
     };
+
     expect(
       getLevRatio("The Way of the Househusband", "极道主夫", 0.85, aliases),
     ).toBe(1);

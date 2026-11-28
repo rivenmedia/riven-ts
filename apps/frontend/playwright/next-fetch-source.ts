@@ -89,6 +89,7 @@ export class NextFetchSource extends NetworkSource<NextFetchFrame> {
         this.#inFlight -= 1;
         this.#lastActivity = performance.now();
       });
+
       const frame = new NextFetchFrame(request, resolve);
 
       await this.queue(frame);

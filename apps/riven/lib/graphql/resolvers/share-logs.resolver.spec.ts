@@ -22,6 +22,7 @@ const it = baseIt.extend(
 
     onCleanup(async () => {
       vi.mocked(getEcsSymlinkPath).mockReset();
+
       await rm(directory, { recursive: true });
     });
 

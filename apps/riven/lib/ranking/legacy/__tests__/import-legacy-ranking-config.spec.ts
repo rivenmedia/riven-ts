@@ -228,6 +228,7 @@ describe("when a custom profile is already named Imported", () => {
     const imported = profiles.find(({ name }) => name === "Imported 2");
 
     expect(imported).toMatchObject({ rankingModel: { av1: 1 } });
+
     await expect(
       rankingProfileService.findById(existing.id),
     ).resolves.toMatchObject({ name: "Imported", rankingModel: {} });

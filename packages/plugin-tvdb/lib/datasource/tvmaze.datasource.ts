@@ -8,6 +8,7 @@ import type { TimezoneName } from "countries-and-timezones";
 
 export class TvMazeAPI extends BaseDataSource<TvdbSettings> {
   public override baseURL = "https://api.tvmaze.com";
+
   public override serviceName = "Tvdb - TvMaze";
 
   protected override rateLimiterOptions: RateLimiterOptions = {

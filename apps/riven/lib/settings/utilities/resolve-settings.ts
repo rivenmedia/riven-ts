@@ -130,6 +130,7 @@ function parseSettings<T extends z.ZodObject>({
     for (const issue of ignored) {
       // oxlint-disable-next-line typescript/no-dynamic-delete
       delete merged[issue.leaf];
+
       ignoredStored.push(issue);
     }
   }

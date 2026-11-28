@@ -10,9 +10,12 @@ const { unrequestedMovie: movieFixture, unrequestedShow: showFixture } =
   journeyFixtures.mediaDetails;
 
 type MediaDetailsData = ComponentProps<typeof MediaDetailsPage>["data"];
+
 type Cast = NonNullable<GetItemCastQuery["tmdbItem"]["cast"]>;
+
 type Recommendations =
   GetItemRecommendationsQuery["tmdbItem"]["recommendations"];
+
 type SimilarItems = GetSimilarItemsQuery["tmdbItem"]["similarItems"];
 
 /** A movie that hasn't been requested */
