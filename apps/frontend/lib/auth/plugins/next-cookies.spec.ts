@@ -69,7 +69,29 @@ it("forwards the incoming request headers and cookies to Better Auth", async () 
   });
 });
 
-it("uses the auth server's origin when the incoming request has none", async () => {
+it("uses the origin the browser addressed when the incoming request has none", async () => {
+  nextHeaders.requestHeaders.set("host", "localhost:9000");
+  nextHeaders.requestHeaders.set("x-forwarded-host", "riven.example.com");
+  nextHeaders.requestHeaders.set("x-forwarded-proto", "https");
+
+  const headers = new Headers();
+
+  await onRequest("http://127.0.0.1:3000/api/auth/get-session", headers);
+
+  expect(headers.get("origin")).toBe("https://riven.example.com");
+});
+
+it("uses the incoming request's host when it wasn't forwarded", async () => {
+  nextHeaders.requestHeaders.set("host", "localhost:9000");
+
+  const headers = new Headers();
+
+  await onRequest("http://127.0.0.1:3000/api/auth/get-session", headers);
+
+  expect(headers.get("origin")).toBe("http://localhost:9000");
+});
+
+it("uses the auth server's origin when the incoming request has no host", async () => {
   const headers = new Headers();
 
   await onRequest("http://localhost:8080/api/auth/get-session", headers);

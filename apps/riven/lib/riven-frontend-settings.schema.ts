@@ -16,7 +16,11 @@ export const RivenFrontendSettings = z.object({
     .url()
     .default("http://localhost:9000")
     .describe(
-      "The URL the frontend is served from. Must match the frontend's `ORIGIN`.",
+      dedent`
+        The URL the frontend is served from, e.g. \`https://riven.example.com\`. Passkeys and signing in with Plex use it, so set it if you use either.
+
+        **Note**: Signing in with a username and password trusts the address the browser used, so doesn't need it.
+      `,
     ),
   passkeyRpId: z
     .string()

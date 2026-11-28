@@ -20,14 +20,6 @@ services:
       - all
       - core
 
-  riven-frontend:
-    extends:
-      file: ./apps/frontend/docker-compose.yaml
-      service: riven-frontend
-    profiles:
-      - all
-      - core
-
   riven-db:
     extends:
       file: ./apps/riven/docker-compose.yaml

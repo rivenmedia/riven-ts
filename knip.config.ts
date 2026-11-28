@@ -49,6 +49,10 @@ export default {
     // those folders, so `--strict` treats them as production code. Specs never
     // ship, so their devDependencies (e.g. `vitest`) are fine.
     "packages/**/*.{spec,test}.{ts,tsx}": ["unlisted"],
+    // `@mikro-orm/reflection` is only imported outside production, where the
+    // entity metadata is read from its generated cache instead. It's a
+    // devDependency, keeping `ts-morph` and its TypeScript out of the image.
+    "apps/riven/lib/database/config.ts": ["unlisted"],
   },
   workspaces: {
     ".": {
@@ -80,10 +84,7 @@ export default {
         "!**/Migration*.ts",
         "!**/{factories,seeders}!",
       ],
-      ignoreDependencies: [
-        /@repo\/plugin(?<pluginName>.*)/u,
-        "@repo/riven-tui",
-      ],
+      ignoreDependencies: [/@repo\/plugin(?<pluginName>.*)/u],
       ignoreFiles: ["**/*.d.ts"],
     },
     "apps/riven-tui": {

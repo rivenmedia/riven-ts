@@ -4,6 +4,23 @@ import { isUnavailableCookieStoreError } from "#lib/utils/is-unavailable-cookie-
 
 import type { BetterAuthClientPlugin } from "better-auth";
 
+/** The first value of a header that proxies may have appended to */
+const firstValue = (value: string | null) => value?.split(",")[0]?.trim();
+
+/** Returns the origin the browser addressed the incoming request to */
+function getAddressedOrigin(headers: Pick<Headers, "get">) {
+  const host =
+    firstValue(headers.get("x-forwarded-host")) ?? headers.get("host");
+
+  if (!host) {
+    return null;
+  }
+
+  const protocol = firstValue(headers.get("x-forwarded-proto")) ?? "http";
+
+  return `${protocol}://${host}`;
+}
+
 async function setResponseCookies(
   parsedCookies: ReturnType<typeof parseSetCookieHeader>,
 ) {
@@ -58,9 +75,13 @@ export const nextCookiesClientPlugin = {
             }
 
             // Top-level navigations (e.g. a hard refresh) carry no Origin or Referer, which
-            // Better Auth's CSRF check rejects for cookie-authenticated POSTs
+            // Better Auth's CSRF check rejects for cookie-authenticated POSTs.
+            // Riven trusts the origin the browser addressed, as forwarded in the headers above.
             if (!ctx.headers.has("origin")) {
-              ctx.headers.set("origin", new URL(ctx.url).origin);
+              ctx.headers.set(
+                "origin",
+                getAddressedOrigin(headersStore) ?? new URL(ctx.url).origin,
+              );
             }
 
             ctx.headers.set("cookie", cookieStore.toString());

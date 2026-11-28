@@ -13,11 +13,12 @@ import { privateEnvironment } from "#environment/private-environment.schema.ts";
 import { nextCookiesClientPlugin } from "./plugins/next-cookies.ts";
 
 export const authClient = createAuthClient({
-  // `ORIGIN` isn't public, so the browser can't read it and must use the origin it was served from
+  // The browser uses the origin it was served from, which forwards auth requests to Riven.
+  // The server calls Riven directly, as its public URL may not be reachable from inside its own container.
   baseURL:
     "window" in globalThis
       ? globalThis.location.origin
-      : privateEnvironment.ORIGIN,
+      : privateEnvironment.BACKEND_URL,
   plugins: [
     usernameClient(),
     adminClient({

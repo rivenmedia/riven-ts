@@ -1170,9 +1170,6 @@ importers:
       '@mikro-orm/postgresql':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
-      '@mikro-orm/reflection':
-        specifier: 'catalog:'
-        version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
       '@mikro-orm/seeder':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
@@ -1221,9 +1218,6 @@ importers:
       '@repo/plugin-tvdb':
         specifier: workspace:^
         version: link:../../packages/plugin-tvdb
-      '@repo/riven-tui':
-        specifier: workspace:^
-        version: link:../riven-tui
       '@repo/util-auth':
         specifier: 'catalog:'
         version: link:../../packages/util-auth
@@ -1357,6 +1351,9 @@ importers:
       '@mikro-orm/cli':
         specifier: 'catalog:'
         version: 7.1.0(dataloader@2.2.3)
+      '@mikro-orm/reflection':
+        specifier: 'catalog:'
+        version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
       '@mikro-orm/sqlite':
         specifier: 'catalog:'
         version: 7.1.0(@mikro-orm/core@7.1.0(dataloader@2.2.3))
@@ -1378,6 +1375,9 @@ importers:
       '@repo/plugin-test':
         specifier: workspace:^
         version: link:../../packages/plugin-test
+      '@repo/riven-tui':
+        specifier: workspace:^
+        version: link:../riven-tui
       '@repo/util-wiki-helpers':
         specifier: workspace:^
         version: link:../../packages/util-docs-generation

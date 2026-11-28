@@ -40,9 +40,10 @@ jellyfin:
 
 ## Reverse Proxy
 
-Riven serves GraphQL on port 3000. Make sure
-`RIVEN_SETTING__host="0.0.0.0"` is set, or the proxy will get connection
-refused.
+Point your proxy at port `9000`. That's the frontend, which runs in the same
+container as Riven and forwards the GraphQL API (`/graphql`) and the auth API
+(`/api/auth`) to it over the container's loopback, so the proxy only needs the
+one port.
 
 ```yaml title="Traefik"
 labels:
@@ -51,7 +52,7 @@ labels:
   - traefik.http.routers.riven.entrypoints=websecure
   - traefik.http.routers.riven.tls=true
   - traefik.http.routers.riven.tls.certresolver=leresolver
-  - traefik.http.services.riven.loadbalancer.server.port=3000
+  - traefik.http.services.riven.loadbalancer.server.port=9000
 ```
 
 ```nginx title="Nginx"
@@ -59,7 +60,10 @@ server {
     server_name riven.example.com;
 
     location / {
-        proxy_pass http://localhost:3000;
+        proxy_pass http://localhost:9000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -68,9 +72,17 @@ server {
 }
 ```
 
-<Callout type="warn">
-  The GraphQL API currently has no authentication. Do not expose it to the
-  internet without putting auth in front of it.
+The proxy must pass the browser's `Host` header through (Traefik and Caddy do
+by default; Nginx needs `proxy_set_header Host $host`). Riven trusts sign-in
+requests from the host the browser used, so the public URL doesn't need to be
+configured for signing in. Passkeys and Plex sign-in still do - see the
+[frontend's reverse proxy notes](/docs/frontend/getting-started#reverse-proxy).
+
+<Callout>
+  Riven's own API port (`3000`) only listens inside the container unless
+  `RIVEN_SETTING__host` is `0.0.0.0`. Bind it only if other containers, such as
+  Seerr, call it directly. There's no need to publish it: port `9000` serves the
+  same API.
 </Callout>
 
 ## Pinning a Version

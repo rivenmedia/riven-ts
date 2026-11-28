@@ -256,14 +256,8 @@ function buildTSCompose(cfg: TSConfig): {
         security_opt: ["apparmor:unconfined"],
         devices: ["/dev/fuse"],
         env_file: ".env",
-        ports: ["3000:3000"],
-        healthcheck: {
-          test: "wget --no-verbose --tries=1 --spider http://127.0.0.1:3000/api/auth/ok || exit 1",
-          start_period: "20s",
-          timeout: "3s",
-          interval: "15s",
-          retries: 3,
-        },
+        // The frontend, which also forwards the API. The image has its own healthcheck.
+        ports: ["9000:9000"],
         volumes: [
           `${cfg.logsPath}:/app/logs`,
           `${cfg.dataPath}:/app/data`,
@@ -361,7 +355,7 @@ function buildTSCompose(cfg: TSConfig): {
     `RIVEN_SETTING__databaseUrl="postgres+psycopg2://${cfg.dbUser || "riven"}:${cfg.dbPassword || "changeme"}@${compose.services.postgres.container_name}:5432/${cfg.dbName || "riven"}"`,
     `RIVEN_SETTING__redisUrl="redis://${compose.services.redis.container_name}:6379"`,
     `RIVEN_SETTING__vfsMountPath="/mount"`,
-    // Defaults to localhost, which is unreachable from outside the container.
+    // The frontend reaches the API over loopback, but other containers, such as Seerr, use port 3000 directly.
     `RIVEN_SETTING__host="0.0.0.0"`,
     `RIVEN_SETTING__logLevel="info"`,
     `RIVEN_SETTING__enabledLogTransports=["console"]`,
@@ -374,7 +368,7 @@ function buildTSCompose(cfg: TSConfig): {
 
   if (cfg.apiKey) {
     envLines.push(
-      "# API key for the frontend, the Seerr webhook and the TUI",
+      "# API key for the Seerr webhook and the TUI",
       `RIVEN_SETTING__apiKey="${cfg.apiKey}"`,
       "",
     );

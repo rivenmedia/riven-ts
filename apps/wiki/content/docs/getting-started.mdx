@@ -90,7 +90,7 @@ services:
       - /dev/fuse
     env_file: .env
     ports:
-      - 3000:3000
+      - 9000:9000
     volumes:
       - ./logs:/app/logs
       - ./data:/app/data
@@ -159,8 +159,8 @@ RIVEN_SETTING__redisUrl="redis://redis:6379"
 # Must match the container-side path of the VFS volume above
 RIVEN_SETTING__vfsMountPath="/mount"
 
-# Bind the GraphQL API to all interfaces so it is reachable outside the
-# container. It defaults to localhost, which is only useful for local runs.
+# Bind the GraphQL API to all interfaces, so other containers such as Seerr can
+# reach it on port 3000. The frontend doesn't need this.
 RIVEN_SETTING__host="0.0.0.0"
 
 RIVEN_SETTING__logLevel="info"
@@ -196,12 +196,12 @@ docker compose up -d
 docker compose logs -f riven
 ```
 
-Riven bootstraps, connects to PostgreSQL and Redis, registers its plugins,
-mounts the VFS, and serves the GraphQL API on port 3000. Confirm it is
-reachable:
+Riven bootstraps, connects to PostgreSQL and Redis, registers its plugins and
+mounts the VFS. The same container runs the [frontend](/docs/frontend) on port
+9000, which also forwards the GraphQL API. Confirm it is reachable:
 
 ```bash
-curl -X POST http://localhost:3000 \
+curl -X POST http://localhost:9000/graphql \
   -H 'content-type: application/json' \
   -d '{"query":"{ __typename }"}'
 ```
