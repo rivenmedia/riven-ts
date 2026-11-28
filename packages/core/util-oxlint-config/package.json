@@ -20,6 +20,7 @@
     "globals": "catalog:"
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin": "catalog:",
     "@types/node": "catalog:",
     "@typescript/native": "catalog:",
     "oxlint": "catalog:",

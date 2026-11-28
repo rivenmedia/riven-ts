@@ -5,6 +5,7 @@ import { banDateConstructor } from "./best-practices/ban-date-constructor.ts";
 import { noUnusedVariables } from "./best-practices/no-unused-variables.ts";
 import { preferMikroOrmCore } from "./best-practices/prefer-mikro-orm-core.ts";
 import { eslintPluginEslintJsonConfig } from "./eslint-plugins/@eslint/json.ts";
+import { eslintPluginStylisticEslintPluginConfig } from "./eslint-plugins/@stylistic/eslint-plugin.ts";
 import { eslintPluginEslintPluginPlaywrightConfig } from "./eslint-plugins/eslint-plugin-playwright.ts";
 import { eslintPluginEslintPluginSonarjsConfig } from "./eslint-plugins/eslint-plugin-sonarjs.ts";
 import { eslintPluginEslintPluginStorybookConfig } from "./eslint-plugins/eslint-plugin-storybook.ts";
@@ -35,6 +36,7 @@ export const baseOxlintConfig = defineConfig({
     eslintPluginEslintPluginPlaywrightConfig,
     eslintPluginEslintPluginStorybookConfig,
     eslintPluginEslintPluginSonarjsConfig,
+    eslintPluginStylisticEslintPluginConfig,
     oxlintPluginVitestConfig,
     oxlintPluginImportConfig,
     oxlintPluginEslintConfig,
