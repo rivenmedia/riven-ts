@@ -51,6 +51,7 @@ it.for<{ type: string; createEvent: (item: Show) => MainRunnerMachineEvent }>([
       em.persist(episode);
 
       episode.activeStream = ref(activeStream);
+
       episode.filesystemEntries.set([
         new MediaEntryFactory(em).makeEntity({
           mediaItem: episode,

@@ -108,6 +108,7 @@ it.for([
     await expect(
       showAdapter.getImdbId(dataSourceMap.get(TmdbAPI), createShow(imdbId)),
     ).resolves.toBe(expected);
+
     expect(lookups).toBe(0);
   },
 );

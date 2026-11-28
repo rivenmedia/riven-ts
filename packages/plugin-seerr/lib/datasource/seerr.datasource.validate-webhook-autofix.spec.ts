@@ -55,6 +55,7 @@ it("enables only the required types and sets the payload, keeping other settings
   );
 
   await expect(dataSourceMap.get(SeerrAPI).validate()).resolves.toBe(true);
+
   expect(updates).toHaveLength(1);
 
   const [update] = updates;

@@ -44,6 +44,7 @@ const it = baseIt.extend(
 
       onCleanup(async () => {
         vi.unstubAllEnvs();
+
         await apolloServer.stop();
       });
 
@@ -71,5 +72,6 @@ it("mounts the E2E control router in test mode", async ({ startServer }) => {
   });
 
   expect(response.status).toBe(200);
+
   await expect(response.json()).resolves.toStrictEqual({ requests: [] });
 });

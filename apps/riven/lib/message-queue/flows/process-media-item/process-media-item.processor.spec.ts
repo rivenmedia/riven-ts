@@ -119,6 +119,7 @@ it("fails without scraping an item that has exhausted its scrape attempts", asyn
       `${indexedMovie.fullTitle} has exhausted all scrape attempts and cannot be scraped again`,
     ),
   );
+
   expect(flowAddSpy).not.toHaveBeenCalled();
 });
 
@@ -163,6 +164,7 @@ it.for([
     await expect(processJob(job)).rejects.toThrow(
       new UnrecoverableError(`${indexedMovie.fullTitle} ${error}`),
     );
+
     expect(flowAddSpy).not.toHaveBeenCalled();
   },
 );

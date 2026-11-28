@@ -140,6 +140,7 @@ it("marks the request as failed and retries in a day when no indexer returns a r
   expect(moveToDelayedSpy).toHaveBeenCalledExactlyOnceWith(
     DateTime.utc().plus({ days: 1 }).toMillis(),
   );
+
   await expect(
     em.fork().findOneOrFail(ItemRequest, itemRequest.id),
   ).resolves.toMatchObject({ state: "failed" });

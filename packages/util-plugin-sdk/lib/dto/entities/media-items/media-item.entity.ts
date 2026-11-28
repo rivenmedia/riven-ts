@@ -213,6 +213,7 @@ export abstract class MediaItem {
     this.failedScrapeAttempts = 0;
     this.scrapedTimes = 0;
     this.scrapedAt = null;
+
     this.streams.removeAll();
     this.filesystemEntries.removeAll();
 

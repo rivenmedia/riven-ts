@@ -126,6 +126,7 @@ describe("when a mock scenario is applied", () => {
     expect(syncIndex).toBeLessThan(
       visitedStates.indexOf("Bootstrapping plugins"),
     );
+
     await expect(
       services.rankingProfileService.findBySlug(DEFAULT_PRESET_SLUG),
     ).resolves.toMatchObject({ builtIn: true });

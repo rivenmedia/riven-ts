@@ -309,6 +309,7 @@ export abstract class BaseDataSource<
     this.#queueEventsPromise ??= this.#createQueueEvents().catch(
       (error: unknown) => {
         this.#queueEventsPromise = undefined;
+
         this.logger.error(`${this.#queueId} QueueEvents error`, { err: error });
 
         throw error;

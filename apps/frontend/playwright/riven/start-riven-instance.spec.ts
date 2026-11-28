@@ -25,6 +25,7 @@ const it = baseIt
 
     onCleanup(async () => {
       vi.unstubAllEnvs();
+
       await rm(directory, { recursive: true });
     });
 
@@ -72,6 +73,7 @@ it("rejects with the log tail when Riven can't be spawned", async ({
   const { execPath } = process;
 
   process.execPath = path.join(directory, "missing-node");
+
   onTestFinished(() => {
     process.execPath = execPath;
   });

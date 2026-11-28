@@ -41,5 +41,6 @@ it("validates the plugin with the Jellyfin data source", async ({
   await expect(
     plugin.validator({ dataSources: dataSourceMap, settings }),
   ).resolves.toBe(false);
+
   expect(validateSpy).toHaveBeenCalledExactlyOnceWith();
 });

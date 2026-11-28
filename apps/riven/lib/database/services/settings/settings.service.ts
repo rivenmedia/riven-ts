@@ -30,6 +30,7 @@ export class SettingsService extends BaseService {
       const values = result.get(row.namespace) ?? {};
 
       values[row.key] = row.value;
+
       result.set(row.namespace, values);
     }
 

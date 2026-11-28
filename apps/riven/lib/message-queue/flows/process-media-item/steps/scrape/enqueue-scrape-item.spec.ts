@@ -102,5 +102,6 @@ it("does not scrape a root item that has no scrape attempts left", async ({
       isRootItem: true,
     }),
   ).resolves.toBeNull();
+
   expect(flowAddSpy).not.toHaveBeenCalled();
 });

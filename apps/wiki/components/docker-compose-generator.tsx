@@ -615,6 +615,7 @@ function CodePreview({
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(code);
+
     setCopied(true);
     setTimeout(() => {
       setCopied(false);
@@ -628,6 +629,7 @@ function CodePreview({
 
     a.href = url;
     a.download = filename;
+
     document.body.append(a);
 
     a.click();

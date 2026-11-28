@@ -107,6 +107,7 @@ it.for(["no-slash", "too/many/slashes", "/missing-user", "missing-list/"])(
     ).rejects.toThrow(
       `${listName} is not a valid MDBList name, format has to be "<string>/<string>"`,
     );
+
     expect(requestedLists).toStrictEqual([]);
   },
 );

@@ -102,6 +102,7 @@ it("requests each unique item returned by the content service once", async ({
   const fork = em.fork();
 
   await expect(fork.count(ItemRequest)).resolves.toBe(3);
+
   expect(sendEvent).toHaveBeenCalledTimes(3);
   expect(sendEvent).toHaveBeenCalledWith({
     type: "riven.item-request.create.success",
@@ -160,6 +161,7 @@ it("reports items that have already been requested without failing", async ({
     newItems: 0,
     updatedItems: 0,
   });
+
   expect(sendEvent).toHaveBeenCalledExactlyOnceWith(
     expect.objectContaining({
       type: "riven.item-request.create.error.conflict",

@@ -93,11 +93,13 @@ it("clears previously valid stores when revalidating", async ({
   const api = dataSourceMap.get(StremThruTorzAPI);
 
   await expect(api.validate()).resolves.toBe(true);
+
   expect(api.validStores).toStrictEqual(new Set(["premiumize", "realdebrid"]));
 
   subscriptionStatus = "expired";
 
   await expect(api.validate()).resolves.toBe(false);
+
   expect(api.validStores).toStrictEqual(new Set());
 });
 
@@ -121,6 +123,7 @@ it("accepts stores with a trial subscription", async ({
   const api = dataSourceMap.get(StremThruTorzAPI);
 
   await expect(api.validate()).resolves.toBe(true);
+
   expect(api.validStores).toStrictEqual(new Set(["premiumize", "realdebrid"]));
 });
 
@@ -146,5 +149,6 @@ it("rejects stores that return an unexpected response", async ({
   const api = dataSourceMap.get(StremThruTorzAPI);
 
   await expect(api.validate()).resolves.toBe(true);
+
   expect(api.validStores).toStrictEqual(new Set(["premiumize"]));
 });

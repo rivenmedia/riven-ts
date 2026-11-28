@@ -393,6 +393,7 @@ const releaseAnimationPause = () => {
 
   pauseStyle.id = PAUSE_STYLE_ID;
   pauseStyle.textContent = PAUSE_STYLE;
+
   document.head.append(pauseStyle);
 };
 
@@ -423,8 +424,11 @@ const repaintBackdropFilters = async () => {
     "*, *::before, *::after { backdrop-filter: none !important; }";
 
   document.head.append(style);
+
   await waitForNextFrame();
+
   style.remove();
+
   await waitForNextFrame();
 };
 
@@ -449,8 +453,10 @@ export const prepareAutoSnapshot: Extract<
   }
 
   await finishRunningAnimations();
+
   releaseAnimationPause();
   cancelInfiniteAnimations();
+
   await repaintBackdropFilters();
 
   // Fonts use `display: swap`, so the fallback font may still be showing
@@ -488,6 +494,7 @@ export const prepareAutoSnapshot: Extract<
 
   // Spinners may have mounted since the animations were paused
   cancelInfiniteAnimations();
+
   await waitForNextFrame();
 
   return true;
@@ -500,6 +507,7 @@ export const resetAutoSnapshot = () => {
 
   // Requests from the previous story may never finish, e.g. if it unmounted mid-request
   pendingRequestIds.clear();
+
   nativeValidation.lastInvalidAt = Number.NEGATIVE_INFINITY;
 
   // Otherwise elements that unmount once their exit animation ends (e.g. a closing accordion item) would never unmount

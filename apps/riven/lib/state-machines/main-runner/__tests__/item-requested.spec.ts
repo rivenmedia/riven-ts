@@ -83,6 +83,7 @@ it("does not request a show that has already been requested", async ({
   await expect(
     em.fork().count(ItemRequest, { tvdbId: itemRequest.tvdbId }),
   ).resolves.toBe(1);
+
   expect(sendSpy).not.toHaveBeenCalledWith(
     expect.objectContaining({ type: "riven.item-request.create.success" }),
   );

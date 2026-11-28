@@ -105,7 +105,9 @@ it("enables a plugin that a test disabled, without requiring a restart", async (
   await expect(
     settingsManager.setPluginEnabled("repo-plugin-test", false),
   ).resolves.toStrictEqual([]);
+
   expect(settingsManager.restartRequired).toBe(true);
+
   await expect(settingsManager.listPlugins()).resolves.toMatchObject({
     plugins: [{ id: "repo-plugin-test", enabled: false }],
   });
@@ -113,6 +115,7 @@ it("enables a plugin that a test disabled, without requiring a restart", async (
   await resetInstance(deps, e2eBaselineScenario);
 
   expect(settingsManager.restartRequired).toBe(false);
+
   await expect(settingsManager.listPlugins()).resolves.toMatchObject({
     plugins: [{ id: "repo-plugin-test", enabled: true }],
     enabledPluginsLocked: false,
@@ -261,6 +264,7 @@ it("fails the reset, without clearing anything, when a job is still active after
       quiesceTimeoutMs: 50,
     }),
   ).rejects.toThrow(/still active.*e2e-reset-stuck/u);
+
   expect(clear).not.toHaveBeenCalled();
 });
 
@@ -278,6 +282,7 @@ it("resumes every queue when the reset fails, so the jobs left running can finis
       quiesceTimeoutMs: 50,
     }),
   ).rejects.toThrow(/still active/u);
+
   expect(stuck.resume).toHaveBeenCalledOnce();
   expect(idle.resume).toHaveBeenCalledOnce();
 });

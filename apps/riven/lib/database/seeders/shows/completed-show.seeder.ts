@@ -40,6 +40,7 @@ export class CompletedShowSeeder extends BaseSeeder<CompletedShowSeederContext> 
       em.persist(episode);
 
       episode.activeStream = ref(activeStream);
+
       episode.filesystemEntries.set([
         new MediaEntryFactory(em).makeEntity({
           mediaItem: episode,

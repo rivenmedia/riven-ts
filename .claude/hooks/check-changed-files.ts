@@ -424,6 +424,7 @@ async function main() {
       // Give up rather than trap the agent in a loop it can't fix.
       if (blocks > MAX_STOP_BLOCKS) {
         await rm(blocksFile, { force: true });
+
         process.stdout.write(
           JSON.stringify({
             systemMessage: `Lint/format errors remain in changed files after ${String(MAX_STOP_BLOCKS)} attempts to fix them. Run \`turbo lint\` to see them.`,

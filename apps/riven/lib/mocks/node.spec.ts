@@ -98,6 +98,7 @@ async function startServer() {
   });
 
   server.listen(0, "127.0.0.1");
+
   await once(server, "listening");
 
   const address = server.address();
@@ -127,6 +128,7 @@ it("reaches a local server through its external URL without mocks", async () => 
   const requested = await request(listener.externalUrl);
 
   expect(requested.statusCode).toBe(200);
+
   await requested.body.dump();
 
   expect(listener.receivedPaths).toStrictEqual(["/", "/"]);
@@ -142,6 +144,7 @@ it("mocks handled fetch and undici requests in test mode", async () => {
   const requested = await request("http://handled.invalid/");
 
   expect(requested.statusCode).toBe(200);
+
   await expect(requested.body.text()).resolves.toBe("ok");
 });
 
@@ -204,6 +207,7 @@ it("passes unhandled loopback requests through in test mode", async () => {
   const requested = await request(listener.loopbackUrl);
 
   expect(requested.statusCode).toBe(200);
+
   await requested.body.dump();
 
   expect(listener.receivedPaths).toStrictEqual(["/", "/"]);

@@ -167,6 +167,7 @@ it("returns the known IMDB ID without looking it up", async ({
       createMovie("tt0133093"),
     ),
   ).resolves.toBe("tt0133093");
+
   expect(lookups).toBe(0);
 });
 

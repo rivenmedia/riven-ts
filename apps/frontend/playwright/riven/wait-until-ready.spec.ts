@@ -27,6 +27,7 @@ it("is ready once Riven reports it has started whilst the process runs", async (
       timeoutMs: 5000,
     }),
   ).resolves.toBe(true);
+
   expect(answers).toStrictEqual([]);
 });
 

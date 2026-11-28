@@ -55,6 +55,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       });
 
       context.seasons ??= [];
+
       context.seasons.push(season);
 
       for (
@@ -78,6 +79,7 @@ export class IndexedShowSeeder extends BaseSeeder<IndexedShowSeederContext> {
       }
 
       context.episodes ??= [];
+
       context.episodes.push(...season.episodes);
     }
 
