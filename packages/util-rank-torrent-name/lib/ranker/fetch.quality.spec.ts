@@ -16,6 +16,7 @@ it("rejects REMUX by default (fetch: false)", ({ settings, rankingModel }) => {
 it("accepts REMUX when ranking model allows fetch", ({ settings }) => {
   const data = parse("Movie.2024.1080p.BluRay.REMUX.AVC-GROUP");
   const result = checkFetch(data, settings, createRankingModel({ remux: 0 }));
+
   // Should not fail on remux
   expect(result.failedChecks).not.toContain("remux");
 });

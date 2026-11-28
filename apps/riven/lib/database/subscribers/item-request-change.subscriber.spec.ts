@@ -108,6 +108,7 @@ describe("afterTransactionCommit", () => {
     factories: { movieItemRequestFactory },
   }) => {
     const publishSpy = spyOnPublish();
+
     await em.transactional(async (transactionEm) => {
       transactionEm.persist(
         movieItemRequestFactory.makeEntity({ tmdbId: "789" }),
@@ -131,6 +132,7 @@ describe("afterTransactionCommit", () => {
     factories: { movieItemRequestFactory },
   }) => {
     const publishSpy = spyOnPublish();
+
     await expect(
       em.transactional(async (transactionEm) => {
         transactionEm.persist(

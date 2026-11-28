@@ -15,6 +15,7 @@ it("creates an item request for an externally requested movie and processes it",
   actor,
 }) => {
   const addSpy = spyOnAdd();
+
   actor.start();
 
   await waitFor(actor, (state) => state.matches("Running"));

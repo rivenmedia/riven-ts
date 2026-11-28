@@ -8,11 +8,9 @@ export function getContentRating(
     case "Movie": {
       return item.movieContentRating;
     }
-
     case "Show": {
       return item.showContentRating;
     }
-
     case "Episode":
     case "Season": {
       return null;

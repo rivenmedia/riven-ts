@@ -253,6 +253,7 @@ it("fails the reset, without clearing anything, when a job is still active after
   registerQueue,
 }) => {
   registerQueue("e2e-reset-stuck", () => Promise.resolve(1));
+
   const clear = vi.spyOn(orm.schema, "clear");
 
   await expect(

@@ -7,6 +7,7 @@ import { MdblistAPI } from "./mdblist.datasource.ts";
 import type { GetListItemsByName200Schema as ListItemsResponse } from "../__generated__/zod/getListItemsByNameSchema.ts";
 
 type Movie = NonNullable<ListItemsResponse["movies"]>[number];
+
 type Show = NonNullable<ListItemsResponse["shows"]>[number];
 
 const LIST_ITEMS_URL =

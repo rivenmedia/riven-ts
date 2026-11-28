@@ -21,15 +21,19 @@ export type RegisteredPlugin = {
       error: unknown;
     }
 );
+
 export type RegisteredPluginMap = Map<symbol, RegisteredPlugin>;
 
 export type PendingPlugin = Extract<RegisteredPlugin, { status: "registered" }>;
+
 export type PendingPluginMap = Map<symbol, PendingPlugin>;
 
 export type ValidPlugin = Extract<RegisteredPlugin, { status: "valid" }>;
+
 export type ValidPluginMap = Map<symbol, ValidPlugin>;
 
 export type InvalidPlugin = Extract<RegisteredPlugin, { status: "invalid" }>;
+
 export type InvalidPluginMap = Map<symbol, InvalidPlugin>;
 
 /**

@@ -45,7 +45,6 @@ export function parseNotificationUrl(raw: string): NotificationService {
           webhookToken,
         };
       }
-
       case "json":
       case "jsons": {
         const httpScheme = scheme === "jsons" ? "https" : "http";

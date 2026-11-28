@@ -184,6 +184,7 @@ it("logs where it looked when there is no legacy config file", async ({
   legacyConfigPath,
 }) => {
   const infoSpy = spyOnLoggerInfo();
+
   await runSync(services, legacyConfigPath);
 
   expect(infoSpy).toHaveBeenCalledWith(

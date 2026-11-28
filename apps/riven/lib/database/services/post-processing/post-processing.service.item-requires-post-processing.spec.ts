@@ -10,6 +10,7 @@ import type { RivenPlugin } from "@repo/util-plugin-sdk";
 type DownloadHook = NonNullable<
   RivenPlugin["hooks"]["riven.media-item.download.requested"]
 >;
+
 type SubtitleHook = NonNullable<
   RivenPlugin["hooks"]["riven.media-item.subtitle.requested"]
 >;

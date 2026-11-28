@@ -79,6 +79,7 @@ export class MdblistAPI extends BaseDataSource<MdbListSettings> {
     for (const id of movieIdsMap.keys()) {
       this.#seenMovieIds.add(id);
     }
+
     for (const id of showIdsMap.keys()) {
       this.#seenShowIds.add(id);
     }

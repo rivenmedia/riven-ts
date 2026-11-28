@@ -25,11 +25,9 @@ export function getChildren(
     case "Show": {
       return item.seasons.map(({ __typename, ...season }) => season);
     }
-
     case "Season": {
       return item.episodes.map(({ __typename, ...episode }) => episode);
     }
-
     case "Episode":
     case "Movie": {
       return [];

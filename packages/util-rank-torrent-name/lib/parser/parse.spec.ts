@@ -21,6 +21,7 @@ describe(parse, () => {
 
   it("should parse a TV show with season and episode", () => {
     const data = parse("The Walking Dead S05E03 720p HDTV x264-ASAP[ettv]");
+
     expect(data.title).toBe("The Walking Dead");
     expect(data.seasons).toStrictEqual([5]);
     expect(data.episodes).toStrictEqual([3]);
@@ -40,6 +41,7 @@ describe(parse, () => {
 
   it("should detect WEB-DL quality", () => {
     const data = parse("Movie.2024.1080p.WEB-DL.DD5.1.H264-GROUP");
+
     expect(data.quality).toBe("WEB-DL");
   });
 
@@ -52,26 +54,31 @@ describe(parse, () => {
 
   it("should set default resolution to unknown", () => {
     const data = parse("Movie 2024-GROUP");
+
     expect(data.resolution).toBe("unknown");
   });
 
   it("should detect REMUX", () => {
     const data = parse("Movie.2023.1080p.BluRay.REMUX.AVC.DTS-HD.MA.5.1-GROUP");
+
     expect(data.remux).toBe(true);
   });
 
   it("should handle dubbed content", () => {
     const data = parse("Movie.2024.DUBBED.720p.WEB-DL-GROUP");
+
     expect(data.dubbed).toBe(true);
   });
 
   it("should detect proper/repack", () => {
     const data = parse("Movie.2024.720p.BluRay.PROPER-GROUP");
+
     expect(data.proper).toBe(true);
   });
 
   it("should handle converted content", () => {
     const data = parse("Movie.2024.CONVERT.720p.WEB-DL-GROUP");
+
     expect(data.converted).toBe(true);
   });
 });

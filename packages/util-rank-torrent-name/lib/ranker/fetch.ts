@@ -183,6 +183,7 @@ function fetchResolution(
   if (!data.resolution || data.resolution === "unknown") {
     if (!settings.resolutions.unknown) {
       failed.add("resolution_unknown");
+
       return true;
     }
 

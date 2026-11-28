@@ -9,6 +9,7 @@ it("passes when required pattern matches", ({ rankingModel }) => {
   const settings = createSettings({ require: ["1080p"] });
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   expect(result.fetch).toBe(true);
 });
 
@@ -21,6 +22,7 @@ it("handles case-sensitive patterns with slashes", ({ rankingModel }) => {
   });
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   // Case-sensitive "/1080P/" won't match "1080p", so require doesn't short-circuit.
   // With r1080p disabled, the torrent should be rejected.
   expect(result.fetch).toBe(false);
@@ -30,5 +32,6 @@ it("handles case-insensitive patterns without slashes", ({ rankingModel }) => {
   const settings = createSettings({ require: ["1080P"] });
   const data = parse("Movie.2024.1080p.BluRay.x264-GROUP");
   const result = checkFetch(data, settings, rankingModel);
+
   expect(result.fetch).toBe(true);
 });
