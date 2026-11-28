@@ -6,6 +6,9 @@
 
 ARG HOME=/app
 ARG NODE_VERSION=24.22.1
+# Shared by the build and runtime stages, as the native modules built in the
+# former need the same glibc in the latter
+ARG DEBIAN_RELEASE=bookworm
 ARG TURBO_VERSION=2.11.4
 ARG PNPM_VERSION=12.22.0
 ARG PNPM_HOME=${HOME}/.local/share/pnpm
@@ -16,7 +19,7 @@ ARG PUID=1000
 ARG PGID=1000
 ARG CI=true
 
-FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-slim AS core-os
+FROM --platform=$BUILDPLATFORM node:${NODE_VERSION}-${DEBIAN_RELEASE}-slim AS core-os
 
     LABEL stage="core-os"
 
@@ -67,7 +70,10 @@ FROM base AS prepare
 
     COPY . .
 
-    RUN turbo prune @repo/riven @repo/frontend --docker
+    # `out-riven` holds only Riven's manifests and lockfile entries, so that
+    # `third-party-deps` isn't invalidated by changes to the frontend's dependencies
+    RUN turbo prune @repo/riven @repo/frontend --docker && \
+        turbo prune @repo/riven --docker --out-dir out-riven
 
     # `permissions.*.skills` makes pnpm fetch full registry metadata, which is unavailable offline; skills aren't needed in the image
     RUN sed -i '/^permissions:/,/^[^ ]/{/^permissions:/d;/^ /d}' out/pnpm-workspace.yaml out/full/pnpm-workspace.yaml
@@ -84,21 +90,29 @@ FROM base AS third-party-deps
 
     WORKDIR ${HOME}
 
-    # Installs Riven's dependencies from the lockfile and package manifests only,
-    # so source changes (including to workspace packages) never invalidate this
-    # stage. Its output becomes the runtime image's `node_modules` layer, which
-    # can then be reused.
-    COPY --from=prepare ${HOME}/out/json/ ./
+    # Installs Riven's dependencies from its own manifests and lockfile entries
+    # only, so source changes (including to workspace packages) and the
+    # frontend's dependencies never invalidate this stage. Its output becomes the
+    # runtime image's `node_modules` layer, which can then be reused.
+    COPY --from=prepare ${HOME}/out-riven/json/ ./
     COPY --from=prepare ${HOME}/.pnpmfile.mjs ./
 
-    # Riven's deploy doesn't use the frontend's patches (e.g. `@msw/playwright`), which pnpm
-    # rejects unless they're allowed to go unused.
-    # Workspace packages are removed here and added from `production-deploy`
-    # instead, where they have been built.
-    # `.modules.yaml` is only read by pnpm and records a `prunedAt` timestamp.
+    # - Riven's deploy doesn't use the frontend's patches (e.g. `@msw/playwright`), which pnpm
+    #   rejects unless they're allowed to go unused.
+    # - Workspace packages are removed here and added from `production-deploy`
+    #   instead, where they have been built.
+    # - `.modules.yaml` and `.pnpm/lock.yaml` are only read by pnpm, and the former records a
+    #   `prunedAt` timestamp.
+    # - Source maps, type declarations and docs aren't used at runtime, and are around half
+    #   of the dependencies' size. Licenses are kept. Without the source maps, stack frames
+    #   inside dependencies are left unmapped; Riven's own source maps are kept.
     RUN --mount=type=cache,id=pnpm,target=${PNPM_STORE} \
         pnpm --filter @repo/riven --prod --config.allow-unused-patches=true deploy pruned && \
-        rm -rf pruned/node_modules/.modules.yaml pruned/node_modules/.pnpm/@repo+*
+        rm -rf pruned/node_modules/.modules.yaml pruned/node_modules/.pnpm/lock.yaml pruned/node_modules/.pnpm/@repo+* && \
+        find pruned/node_modules -type f \( \
+            -name '*.map' -o -name '*.d.ts' -o -name '*.d.mts' -o -name '*.d.cts' -o \
+            \( -iname '*.md' ! -iname 'license*' \) \
+        \) -delete
 
 FROM base AS builder
 
@@ -138,6 +152,7 @@ FROM builder AS production-deploy
     LABEL builder="true"
 
     ARG HOME
+    ARG FRONTEND_DIR
 
     WORKDIR ${HOME}
 
@@ -145,16 +160,25 @@ FROM builder AS production-deploy
     ENV CI=${CI}
 
     # Only the built workspace packages are taken from this deploy; third-party
-    # dependencies come from `third-party-deps`. Both deploys use the same
-    # lockfile, so the `.pnpm` directory names match.
+    # dependencies come from `third-party-deps`. Both deploys resolve from the same
+    # lockfile entries, so the `.pnpm` directory names match.
+    #
+    # The frontend's standalone `node_modules` is moved to its own layer, as it
+    # only changes with the frontend's dependencies.
     RUN pnpm --filter @repo/riven --prod --config.allow-unused-patches=true deploy pruned && \
-        mkdir -p workspace-packages/.pnpm && \
-        mv pruned/node_modules/.pnpm/@repo+* workspace-packages/.pnpm/
+        mkdir -p workspace-packages/.pnpm frontend-dependencies && \
+        mv pruned/node_modules/.pnpm/@repo+* workspace-packages/.pnpm/ && \
+        find workspace-packages -type f \( -name '*.d.ts' -o -name '*.d.mts' -o -name '*.d.cts' \) -delete && \
+        mv ${FRONTEND_DIR}/.next/standalone/node_modules frontend-dependencies/
+
+# Only the `node` binary is taken from this image. The rest of it (npm, corepack,
+# yarn and Node's headers) isn't used at runtime.
+FROM node:${NODE_VERSION}-${DEBIAN_RELEASE}-slim AS node-runtime
 
 # The runner is Debian-based rather than Alpine: the frontend's image resizing
 # (`sharp`) fails silently on Alpine, falling back to the largest image in the
 # srcset, and the native modules are built against glibc in the stages above.
-FROM node:${NODE_VERSION}-slim AS runner
+FROM debian:${DEBIAN_RELEASE}-slim AS runner
 
     LABEL name="Riven TS" \
           description="Riven(TS) Media Server, with its frontend" \
@@ -186,9 +210,9 @@ FROM node:${NODE_VERSION}-slim AS runner
     RUN sed -i 's/^#\s*user_allow_other/user_allow_other/' /etc/fuse.conf && \
         grep -q '^user_allow_other' /etc/fuse.conf || echo 'user_allow_other' >> /etc/fuse.conf
 
-    # Replace the image's `node` user with one matching the desired UID/GID
-    RUN userdel --remove node && \
-        groupadd --gid ${PGID} ${USERGROUP} && \
+    COPY --from=node-runtime /usr/local/bin/node /usr/local/bin/node
+
+    RUN groupadd --gid ${PGID} ${USERGROUP} && \
         useradd --uid ${PUID} --gid ${USERGROUP} --home-dir ${HOME} --create-home --shell /usr/sbin/nologin ${USERNAME}
 
     WORKDIR ${HOME}
@@ -196,12 +220,21 @@ FROM node:${NODE_VERSION}-slim AS runner
     USER ${PUID}:${PGID}
 
     # Riven runs from `HOME`, so its relative paths (such as `logs`) resolve to
-    # `/app/logs` as before. Its layers are ordered from least to most
-    # frequently changed, so a code change only replaces the small layers at the end:
-    #   1. third-party dependencies (change with the lockfile)
+    # `/app/logs` as before.
+    #
+    # The layers are ordered from least to most frequently changed. A layer is
+    # only reused while every layer before it is, so a code change only replaces
+    # the small layers at the end:
+    #   1. third-party dependencies of Riven, then the frontend (change with their dependencies)
     #   2. workspace packages (change with `packages/*`)
-    #   3. the app itself
+    #   3. the apps themselves
+    #
+    # The frontend's standalone output has its own `node_modules`, so it gets its
+    # own directory rather than overwriting Riven's. It mirrors the monorepo's
+    # structure, as `outputFileTracingRoot` expects. It's owned by the runtime
+    # user, as Next.js writes its image cache to `.next/cache`.
     COPY --from=third-party-deps ${HOME}/pruned/node_modules ./node_modules
+    COPY --from=production-deploy --chown=${PUID}:${PGID} ${HOME}/frontend-dependencies/ ./frontend/
     COPY --from=production-deploy ${HOME}/workspace-packages/ ./node_modules/
     COPY --from=production-deploy ${HOME}/pruned/package.json ./
     COPY --from=production-deploy ${HOME}/pruned/dist ./dist
@@ -210,11 +243,7 @@ FROM node:${NODE_VERSION}-slim AS runner
     RUN broken="$(find -L node_modules -type l)" && \
         if [ -n "$broken" ]; then echo "Broken symlinks:"; echo "$broken"; exit 1; fi
 
-    # The frontend's standalone output has its own `node_modules`, so it gets its
-    # own directory rather than overwriting Riven's. It mirrors the monorepo's
-    # structure, as `outputFileTracingRoot` expects. It's owned by the runtime
-    # user, as Next.js writes its image cache to `.next/cache`.
-    COPY --from=builder --chown=${PUID}:${PGID} ${HOME}/${FRONTEND_DIR}/.next/standalone ./frontend/
+    COPY --from=production-deploy --chown=${PUID}:${PGID} ${HOME}/${FRONTEND_DIR}/.next/standalone ./frontend/
     COPY --from=builder --chown=${PUID}:${PGID} ${HOME}/${FRONTEND_DIR}/public ./frontend/${FRONTEND_DIR}/public
     COPY --from=builder --chown=${PUID}:${PGID} ${HOME}/${FRONTEND_DIR}/.next/static ./frontend/${FRONTEND_DIR}/.next/static
 

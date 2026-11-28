@@ -15,16 +15,17 @@ remote.
 - A terminal that supports full-screen apps (most modern terminal emulators
   do).
 
-## Running from the Riven container
+## Connecting to the Riven container
 
-Riven's Docker image bundles the TUI alongside the main application, so you
-can run it directly inside a running container without any extra setup:
+Riven's Docker image doesn't include the TUI. Run it from source instead, and
+point it at the container's port `9000`, which forwards the GraphQL API to
+Riven:
 
 ```bash
-docker exec -it <riven-container> npm run tui
+RIVEN_TUI_SETTING__graphqlUrl="http://<riven-host>:9000/graphql" \
+  RIVEN_TUI_SETTING__apiKey="<your RIVEN_SETTING__apiKey>" \
+  pnpm --filter @repo/riven-tui dev
 ```
-
-This connects to the Riven instance running in that same container.
 
 ## Running from source
 

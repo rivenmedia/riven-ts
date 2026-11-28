@@ -33,16 +33,9 @@ RIVEN_TUI_SETTING__apiKey="<your RIVEN_SETTING__apiKey>"
 RIVEN_TUI_SETTING__enableDebug="false"
 ```
 
-When running inside the Riven Docker container (see
-[Getting Started](/docs/tui/getting-started)), set the variables directly in the
-`docker exec` invocation or the container's environment, since the TUI shares
-the container with the Riven process it's inspecting:
-
-```bash
-docker exec -it -e RIVEN_TUI_SETTING__graphqlUrl="http://localhost:3000/graphql" \
-  -e RIVEN_TUI_SETTING__apiKey="<your RIVEN_SETTING__apiKey>" \
-  <riven-container> node tui/dist/cli.js
-```
+To connect to the Riven Docker container, set `RIVEN_TUI_SETTING__graphqlUrl`
+to the container's port `9000`, such as `http://<riven-host>:9000/graphql`.
+The frontend listens on that port and forwards the GraphQL API to Riven.
 
 <Callout type="info">
   Because the TUI talks to Riven purely over HTTP,
